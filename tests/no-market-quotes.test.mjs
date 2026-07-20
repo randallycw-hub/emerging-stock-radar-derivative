@@ -54,6 +54,9 @@ test("formal project has no prohibited quote provider or market-price feature", 
   }
   assert.deepEqual(violations, []);
   await assert.rejects(readFile(path.join(root, "lib", `${provider.toLowerCase()}.ts`)));
+  await assert.rejects(readFile(path.join(root, "lib", "adapters", `${provider.toLowerCase()}.ts`)));
+  await assert.rejects(readFile(path.join(root, "lib", "adapters", "market.ts")));
+  await assert.rejects(readFile(path.join(root, "lib", "adapters", "quote.ts")));
   await assert.rejects(readFile(path.join(root, "app", "api", provider.toLowerCase(), "route.ts")));
   await assert.rejects(readFile(path.join(root, "app", "api", "market", "route.ts")));
   const dashboard = await readFile(path.join(root, "app", "Dashboard.tsx"), "utf8");

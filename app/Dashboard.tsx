@@ -19,9 +19,6 @@ type RadarRow = {
   exitDays: number | string;
   listingDate: string;
   auctionNext: string;
-  provisionalPrice: string;
-  actualPrice: string;
-  pricingStatus: string;
   reason: string;
   note: string;
 };
@@ -36,9 +33,6 @@ type StageItem = {
   boardDate?: string;
   approvalDate?: string;
   listingDate?: string;
-  provisionalPrice?: number | string;
-  actualPrice?: number | string;
-  pricingStatus?: string;
 };
 
 type TrackerPayload = {
@@ -308,7 +302,7 @@ function RadarView({
         <div className="table-title"><div><span>PUBLIC EVENT TABLE</span><h2>公司進度明細</h2></div><small>來源：TWSE、TPEx 官方公開資料 · 更新：{tracker.generatedAt || "等待資料"}</small></div>
         <div className="table-wrap">
           <table className="data-table progress-table">
-            <thead><tr><th>階段</th><th>代號／公司</th><th>市場</th><th>目前進度</th><th>主要事件</th><th>事件日期</th><th>承銷定價狀態</th><th>分類依據</th></tr></thead>
+            <thead><tr><th>階段</th><th>代號／公司</th><th>市場</th><th>目前進度</th><th>主要事件</th><th>事件日期</th><th>分類依據</th></tr></thead>
             <tbody>
               {rows.map(row => (
                 <tr key={`${row.market}-${row.code}`}>
@@ -318,7 +312,6 @@ function RadarView({
                   <td>{row.status}</td>
                   <td>{row.mainExit || row.auctionNext || "尚無排定事件"}</td>
                   <td>{row.exitDate || row.listingDate || "待公告"}<span className="subtext">{formatEventDays(row.exitDays)}</span></td>
-                  <td><span className={`pricing-chip ${pricingClass(row.pricingStatus)}`}>{row.pricingStatus || "待公告"}</span><span className="subtext">{pricingDetail(row)}</span></td>
                   <td className="reason-cell">{row.reason || row.note || "依公開日期分類"}</td>
                 </tr>
               ))}
@@ -403,21 +396,13 @@ function CompanyDrawer({ profile, loading, onClose }: { profile: CompanyProfile 
 }
 
 function signalClass(signal: string) {
-  return /已定價|近期事件|已掛牌/.test(signal)
+  return /已開標|近期事件|已掛牌/.test(signal)
     ? "exit"
-    : /契約後|時程接近|定價待確認/.test(signal)
+    : /契約後|時程接近/.test(signal)
       ? "warning"
       : /審議進程/.test(signal)
         ? "hold"
         : "observe";
-}
-
-function pricingClass(value: string) {
-  return value === "已定價" ? "confirmed" : /暫定|待定價/.test(value) ? "pending" : "unknown";
-}
-
-function pricingDetail(row: RadarRow) {
-  return row.actualPrice ? `實際承銷價 ${row.actualPrice}` : row.provisionalPrice ? `暫定承銷價 ${row.provisionalPrice}` : "尚未公告";
 }
 
 function formatEventDays(value: number | string) {
