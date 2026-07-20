@@ -1,5 +1,3 @@
-import COMPANY_BASIC_SNAPSHOT from "./company-basic-snapshot.json";
-
 export const INDUSTRIES: Record<string, string> = {
   "02": "食品工業", "03": "塑膠工業", "04": "紡織纖維", "05": "電機機械",
   "06": "電器電纜", "08": "玻璃陶瓷", "10": "鋼鐵工業", "11": "橡膠工業",
@@ -22,9 +20,15 @@ export async function getBasicRows(): Promise<RawBasic[]> {
     redirect: "error",
     signal: AbortSignal.timeout(6000),
   }).catch(() => null);
-  const value = response?.ok
-    ? await response.json() as RawBasic[]
-    : COMPANY_BASIC_SNAPSHOT as RawBasic[];
+  let value: RawBasic[];
+  if (response?.ok) {
+    value = await response.json() as RawBasic[];
+  } else if (process.env.NODE_ENV !== "production" && process.env.ENABLE_DEV_SOURCE_FIXTURES === "1") {
+    const fixtureModule = await import("./company-basic-snapshot.json", { with: { type: "json" } });
+    value = fixtureModule.default as RawBasic[];
+  } else {
+    throw new Error("source_unavailable");
+  }
   basicCache = { at: Date.now(), value };
   return value;
 }

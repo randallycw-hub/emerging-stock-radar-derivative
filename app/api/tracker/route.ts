@@ -11,7 +11,10 @@ export async function GET(request: Request) {
     const force = new URL(request.url).searchParams.get("refresh") === "1";
     const payload = await getTrackerData(force);
     return NextResponse.json(payload, { headers: publicApiHeaders("public, max-age=30, stale-while-revalidate=60") });
-  } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 502, headers: publicApiHeaders() });
+  } catch {
+    return NextResponse.json(
+      { status: "source_unavailable", error: "官方上市櫃進度資料目前無法取得" },
+      { status: 503, headers: publicApiHeaders() },
+    );
   }
 }

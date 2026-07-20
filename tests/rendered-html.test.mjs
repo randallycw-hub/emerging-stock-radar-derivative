@@ -42,20 +42,20 @@ test("keeps only the agreed public read-only APIs", async () => {
   }
 });
 
-test("uses official announcement data without market quote enrichment", async () => {
+test("uses only approved endpoints and keeps development fixtures out of production fallbacks", async () => {
   const [tracker, company, applicants, companyBasics] = await Promise.all([
     file("lib/tracker.mjs"),
     file("lib/company.ts"),
     file("lib/tpex-applicant-snapshot.json"),
     file("lib/company-basic-snapshot.json"),
   ]);
-  assert.match(tracker, /twse\.com\.tw\/rwd\/zh\/company\/applylisting/);
   assert.match(tracker, /tpex\.org\.tw\/openapi\/v1\/tpex_esb_applicant_companies/);
-  assert.match(tracker, /announcement\/auction/);
-  assert.match(tracker, /announcement\/publicForm/);
+  assert.doesNotMatch(tracker, /twse\.com\.tw\/rwd|tpex\.org\.tw\/www|announcement\/auction|announcement\/publicForm/);
+  assert.doesNotMatch(tracker, /^import\s+.+tpex-applicant-snapshot\.json/m);
   assert.match(tracker, /TPExListingScreeningCommitteeDate/);
   assert.doesNotMatch(tracker, /currentPrice|lastWeekClose|weeklyChange|chartUrl/);
   assert.match(company, /mopsfin_t187ap03_R/);
+  assert.doesNotMatch(company, /^import\s+.+company-basic-snapshot\.json/m);
   assert.ok(JSON.parse(applicants).length >= 800);
   assert.equal(JSON.parse(companyBasics).length, 355);
 });
