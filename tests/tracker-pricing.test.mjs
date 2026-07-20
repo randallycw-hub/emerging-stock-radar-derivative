@@ -56,3 +56,22 @@ test("only marks the strategy as priced after the actual offer price exists", ()
   assert.equal(item.actualPrice, 177);
   assert.equal(__trackerTest.strategyStage(item, new Date(2026, 6, 17)), "D.定價完成");
 });
+
+test("published tracker rows contain announcement events but no market quote fields", () => {
+  const publicMap = __trackerTest.buildPublicOfferingMap([publicOfferingRow("177")]);
+  const item = __trackerTest.newApplicant(
+    "上市",
+    applicantRow,
+    new Map([["7689", auction]]),
+    publicMap,
+    new Date(2026, 6, 17)
+  );
+  const [row] = __trackerTest.buildRadar([item], new Date(2026, 6, 17));
+
+  assert.equal(row.actualPrice, "177");
+  assert.equal("currentPrice" in row, false);
+  assert.equal("lastWeekClose" in row, false);
+  assert.equal("weeklyChange" in row, false);
+  assert.equal("premium" in row, false);
+  assert.equal("chartUrl" in row, false);
+});

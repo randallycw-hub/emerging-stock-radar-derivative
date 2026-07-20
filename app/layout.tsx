@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const SITE_URL = process.env.SITE_URL ?? "http://localhost:3000";
-const SITE_TITLE = "興櫃雷達｜獨立衍生版";
-const SITE_DESCRIPTION =
-  "獨立整理臺灣興櫃市場報價、公開排行、IPO 時程、事件進度與公司資訊。";
+const SITE_TITLE = "興債觀測網";
+const SITE_DESCRIPTION = "興櫃公司、可轉債與上市櫃進度資訊";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -13,13 +12,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [{ url: "/og.png", width: 1536, height: 1024 }],
+    siteName: SITE_TITLE,
+    locale: "zh_TW",
+    type: "website",
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/og.png"],
   },
   robots: { index: true, follow: true },
 };

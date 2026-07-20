@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Dashboard from "../Dashboard";
 
 export const metadata: Metadata = {
-  title: "興櫃市場與即時排行",
-  description: "彙整興櫃股票即時報價、週漲跌幅、成交量、成交金額與流動性狀態。",
+  title: "資料來源建置狀態",
+  description: "興債觀測網的官方資料來源建置狀態；目前不提供市場行情。",
   alternates: { canonical: "/market" },
 };
 

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 // The tracker module is shared with the existing local web implementation.
-// @ts-expect-error The source is plain ESM and intentionally has no declaration file.
 import { getTrackerData } from "@/lib/tracker.mjs";
 import { publicApiHeaders, publicApiOptions } from "../_cors";
 

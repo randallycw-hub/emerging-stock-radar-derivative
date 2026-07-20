@@ -1,6 +1,7 @@
 {
   "name": "emerging-stock-radar-derivative",
   "version": "0.1.0",
+  "description": "興債觀測網｜興櫃公司、可轉債與上市櫃進度資訊",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -11,11 +12,10 @@
     "start": "vinext start",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "snapshot:companies": "node scripts/update-company-basic-snapshot.mjs",
-    "db:generate": "drizzle-kit generate"
+    "typecheck": "tsc --noEmit",
+    "snapshot:companies": "node scripts/update-company-basic-snapshot.mjs"
   },
   "dependencies": {
-    "drizzle-orm": "0.45.2",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6"
@@ -28,7 +28,6 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
-    "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "react-server-dom-webpack": "19.2.6",

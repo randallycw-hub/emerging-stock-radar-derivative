@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { conceptTags, getBasicRows, INDUSTRIES } from "@/lib/market";
-import { readProfile, saveProfile } from "@/db/market";
+import { conceptTags, getBasicRows, INDUSTRIES } from "@/lib/company";
 import { publicApiHeaders, publicApiOptions } from "../_cors";
 
 export const runtime = "edge";
@@ -26,24 +25,17 @@ export async function GET(request: Request) {
     const basics = await getBasicRows();
     const basic = basics.find(x => String(x.SecuritiesCompanyCode) === code);
     if (!basic) return NextResponse.json({ error: "找不到公司資料" }, { status: 404, headers: publicApiHeaders() });
-    const cached = await readProfile(code).catch(() => null) as Record<string, unknown> | null;
-    let checkedAt = String(cached?.checked_at || "");
-    const cacheFresh = Boolean(checkedAt && cached?.main_business && Date.now() - new Date(checkedAt).getTime() < 7 * 86400000);
-    let mainBusiness = String(cached?.main_business || "");
-    let concepts: string[] = parseConcepts(cached?.concepts);
+    let checkedAt = "";
+    let mainBusiness = "";
+    let concepts: string[] = [];
     const sourceUrl = `https://ic.tpex.org.tw/company_basic.php?stk_code=${code}`;
     const basicName = String(basic.CompanyAbbreviation || basic.CompanyName || "");
-    const [officialDetail, news] = await Promise.all([
-      summaryOnly ? Promise.resolve(null) : fetchCompanyDetail(code).catch(() => null),
-      summaryOnly ? Promise.resolve([]) : fetchNews(code).catch(() => [])
-    ]);
+    const officialDetail = summaryOnly ? null : await fetchCompanyDetail(code).catch(() => null);
     const officialIndustry = INDUSTRIES[String(basic.SecuritiesIndustryCode || "")] || officialDetail?.industry || "待確認";
     if (officialDetail?.mainBusiness) mainBusiness = officialDetail.mainBusiness;
-    if (!summaryOnly && (!cacheFresh || officialDetail?.mainBusiness)) {
+    if (!summaryOnly && officialDetail?.mainBusiness) {
       checkedAt = new Date().toISOString();
       concepts = conceptTags(officialIndustry, mainBusiness);
-      const profile = { code, mainBusiness, concepts, sourceUrl, checkedAt: new Date().toISOString() };
-      await saveProfile(profile).catch(() => undefined);
     }
     concepts = conceptTags(officialIndustry, mainBusiness);
     const name = basicName || officialDetail?.fullName || "";
@@ -55,8 +47,7 @@ export async function GET(request: Request) {
       chairman: basic.Chairman || officialDetail?.chairman || "",
       capital: Number(basic["Paidin.Capital.NTDollars"] || officialDetail?.capital || 0),
       listedDate: normalizeRocDate(String(basic.DateOfListing || "")),
-      sourceUrl, checkedAt: checkedAt || new Date().toISOString(), news,
-      chartUrl: `https://tw.stock.yahoo.com/quote/${code}.TWO/technical-analysis`
+      sourceUrl, checkedAt: checkedAt || new Date().toISOString()
     }, { headers: publicApiHeaders(summaryOnly ? "public, max-age=21600, stale-while-revalidate=86400" : "public, max-age=1800, stale-while-revalidate=21600") });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 502, headers: publicApiHeaders() });
@@ -85,60 +76,6 @@ async function fetchCompanyDetail(code: string): Promise<OfficialDetail> {
   return value;
 }
 
-async function fetchNews(code: string) {
-  return normalizeNews(await fetchYahooNews(code));
-}
-
-type NewsItem = {
-  title: string;
-  url: string;
-  date: string;
-  publishedAt: number;
-  source: string;
-};
-
-function normalizeNews(items: NewsItem[]) {
-  const seen = new Set<string>();
-  return items.filter(item => {
-    if (!item.title || !item.url || !Number.isFinite(item.publishedAt)) return false;
-    const key = item.title.replace(/\s+-\s+[^-]{1,50}$/, "").replace(/\s+/g, " ").trim();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  }).sort((a, b) => b.publishedAt - a.publishedAt).slice(0, 5).map(item => ({
-    title: item.title, url: item.url, date: item.date, source: item.source
-  }));
-}
-
-async function fetchYahooNews(code: string): Promise<NewsItem[]> {
-  const response = await fetch(`https://tw.stock.yahoo.com/rss?s=${code}`, {
-    headers: {
-      Accept: "application/rss+xml,application/xml,text/xml",
-      "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.6"
-    },
-    cache: "no-store",
-    redirect: "follow",
-    signal: AbortSignal.timeout(6000)
-  }).catch(() => null);
-  if (!response?.ok) return [];
-
-  const xml = await response.text();
-  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(match => {
-    const block = match[1];
-    const publishedAt = new Date(extractXml(block, "pubDate"));
-    return {
-      title: decodeHtml(extractXml(block, "title").replace(/<!\[CDATA\[|\]\]>/g, "")),
-      url: decodeHtml(extractXml(block, "link")),
-      date: Number.isFinite(publishedAt.getTime()) ? publishedAt.toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" }) : "",
-      publishedAt: publishedAt.getTime(),
-      source: "公開新聞"
-    };
-  });
-}
-
-function extractXml(text: string, tag: string) { return text.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i"))?.[1]?.trim() || ""; }
-function decodeHtml(text: string) { return text.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&quot;/g, '"'); }
-function parseConcepts(value: unknown): string[] { try { return Array.isArray(value) ? value : JSON.parse(String(value || "[]")); } catch { return []; } }
 function cleanText(value: unknown) { return String(value || "").replace(/\s+/g, " ").trim(); }
 function normalizeWebsite(value: string) {
   const candidate = cleanText(value).split(/[\s;,，；]+/).find(Boolean)?.replace(/[)）.。]+$/, "") || "";
