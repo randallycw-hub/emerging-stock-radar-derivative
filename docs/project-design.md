@@ -155,18 +155,22 @@ interface MonthlyRevenue {
 
 interface EndOfDayMarketData {
   companyId: string;
+  companyName: string;
   marketDate: string;
+  sourceTime: string;
+  previousDailyAveragePrice?: string;
   dailyAveragePrice: string;
   dailyHighPrice?: string;
   dailyLowPrice?: string;
-  lastTradePrice?: string;
   transactionVolume?: string;
+  listingApplicationDate?: string;
+  listingApplicationStatus?: string;
   attribution: SourceAttribution;
 }
 
 interface BondIssue {
   id: string;
-  bondCode: string;
+  bondCode?: string;
   issuerCompanyId: string;
   bondKind: "CONVERTIBLE" | "EXCHANGEABLE";
   shortName: string;
@@ -278,6 +282,18 @@ interface ManualPlannedIssue {
 - 不是最新交易日的資料不得稱為今日價格。
 - 十二個月趨勢、連續年增及所有自動事件均標示本站整理／計算依據與時間。
 - 個別可轉債盤後行情沒有 APPROVED 來源，第一版顯示：「盤後價格資料來源確認中，目前僅提供官方發行條件與事件資訊。」
+
+## 2026-07-20 人工來源審查
+
+已符合端點、資料集、OGL 1.0、欄位、機關及顯名條件的來源為：
+
+- `tpex-bond-issue`
+- `tpex-emerging-eod`
+- `tpex-company-revenue`
+- `tpex-company-basic`
+- `tpex-listing-applications`
+
+批准只涵蓋 [Source Registry](./data-source-registry.md) 的欄位白名單。`twse-listing-applications` 因實際 JSON 鍵值錯位維持 `PENDING`；網站不得猜測映射。批准來源仍須等各自 Phase 的測試、schema 與 adapter 獨立完成後才能發布，本次審查不建立 adapter。
 
 ## 資料異常
 
