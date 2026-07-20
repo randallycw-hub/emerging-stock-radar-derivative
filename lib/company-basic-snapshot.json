@@ -1,0 +1,3552 @@
+[
+  {
+    "SecuritiesCompanyCode": "1260",
+    "CompanyName": "富味鄉食品股份有限公司",
+    "CompanyAbbreviation": "富味鄉",
+    "SecuritiesIndustryCode": "02",
+    "Chairman": "陳昶宏",
+    "Paidin.Capital.NTDollars": "1020981820",
+    "DateOfListing": "20121126",
+    "WebAddress": "www.flavor.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "1269",
+    "CompanyName": "乾杯股份有限公司",
+    "CompanyAbbreviation": "乾杯",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "平出莊司",
+    "Paidin.Capital.NTDollars": "209022610",
+    "DateOfListing": "20160829",
+    "WebAddress": "www.kanpai.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "1271",
+    "CompanyName": "晨暉生物科技股份有限公司",
+    "CompanyAbbreviation": "晨暉生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "盛保熙",
+    "Paidin.Capital.NTDollars": "770890660",
+    "DateOfListing": "20210118",
+    "WebAddress": "www.sunway.cc"
+  },
+  {
+    "SecuritiesCompanyCode": "1293",
+    "CompanyName": "利統股份有限公司",
+    "CompanyAbbreviation": "利統",
+    "SecuritiesIndustryCode": "02",
+    "Chairman": "張天鴻",
+    "Paidin.Capital.NTDollars": "170941120",
+    "DateOfListing": "20211029",
+    "WebAddress": "http://www.lytone.com"
+  },
+  {
+    "SecuritiesCompanyCode": "1343",
+    "CompanyName": "旭東環保科技股份有限公司",
+    "CompanyAbbreviation": "旭東環保",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "董基旭",
+    "Paidin.Capital.NTDollars": "405138740",
+    "DateOfListing": "20210325",
+    "WebAddress": "https://www.srise.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "1480",
+    "CompanyName": "東盟開發實業股份有限公司",
+    "CompanyAbbreviation": "東盟開發",
+    "SecuritiesIndustryCode": "10",
+    "Chairman": "劉子敬",
+    "Paidin.Capital.NTDollars": "4160852170",
+    "DateOfListing": "20231027",
+    "WebAddress": "www.tungmung.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "1594",
+    "CompanyName": "日高工程實業股份有限公司",
+    "CompanyAbbreviation": "日高",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "陳鴻文",
+    "Paidin.Capital.NTDollars": "332200000",
+    "DateOfListing": "20101013",
+    "WebAddress": "http://www.jukao.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "2071",
+    "CompanyName": "震南鐵線股份有限公司",
+    "CompanyAbbreviation": "震南鐵",
+    "SecuritiesIndustryCode": "10",
+    "Chairman": "黃錦榮",
+    "Paidin.Capital.NTDollars": "690460000",
+    "DateOfListing": "20190923",
+    "WebAddress": "https://www.chen-nan.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "2237",
+    "CompanyName": "華德動能科技股份有限公司",
+    "CompanyAbbreviation": "華德動能",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "蔡裕慶",
+    "Paidin.Capital.NTDollars": "1217729010",
+    "DateOfListing": "20141223",
+    "WebAddress": "www.racev.com"
+  },
+  {
+    "SecuritiesCompanyCode": "2245",
+    "CompanyName": "詠勝昌股份有限公司",
+    "CompanyAbbreviation": "詠勝昌*",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "吳書杰",
+    "Paidin.Capital.NTDollars": "162000000",
+    "DateOfListing": "20161215",
+    "WebAddress": "www.nwwmfg.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "2249",
+    "CompanyName": "湧盛電機股份有限公司",
+    "CompanyAbbreviation": "湧盛",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "林麗玉",
+    "Paidin.Capital.NTDollars": "255379000",
+    "DateOfListing": "20191219",
+    "WebAddress": "https://www.young-shine.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "2252",
+    "CompanyName": "為昇科科技股份有限公司",
+    "CompanyAbbreviation": "為昇科",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "黃淑媛",
+    "Paidin.Capital.NTDollars": "1066175000",
+    "DateOfListing": "20210823",
+    "WebAddress": "https://www.cubtek.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "2255",
+    "CompanyName": "凱銳光電股份有限公司",
+    "CompanyAbbreviation": "凱銳光電",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "林傳凱",
+    "Paidin.Capital.NTDollars": "609325000",
+    "DateOfListing": "20211130",
+    "WebAddress": "https://www.jet-opto.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "2256",
+    "CompanyName": "歐特明電子股份有限公司",
+    "CompanyAbbreviation": "歐特明",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "吳錫慶",
+    "Paidin.Capital.NTDollars": "390240000",
+    "DateOfListing": "20211208",
+    "WebAddress": "https://www.otobrite.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "2644",
+    "CompanyName": "中信造船股份有限公司",
+    "CompanyAbbreviation": "中信造船",
+    "SecuritiesIndustryCode": "15",
+    "Chairman": "韓碧祥",
+    "Paidin.Capital.NTDollars": "829516960",
+    "DateOfListing": "20221011",
+    "WebAddress": "https://www.jongshyn.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "2733",
+    "CompanyName": "維格餅家股份有限公司",
+    "CompanyAbbreviation": "維格餅家",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "余佩佩",
+    "Paidin.Capital.NTDollars": "245984000",
+    "DateOfListing": "20121224",
+    "WebAddress": "https://www.vigorkobo.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "2741",
+    "CompanyName": "人杰老四川餐飲管理顧問(股)公司",
+    "CompanyAbbreviation": "老四川",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "陳淑萍",
+    "Paidin.Capital.NTDollars": "225882810",
+    "DateOfListing": "20141028",
+    "WebAddress": "http://www.oldsichuan.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "2758",
+    "CompanyName": "路易莎職人咖啡股份有限公司",
+    "CompanyAbbreviation": "路易莎咖啡",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "驊穎有限公司",
+    "Paidin.Capital.NTDollars": "204861210",
+    "DateOfListing": "20210917",
+    "WebAddress": "https://www.louisacoffee.co/"
+  },
+  {
+    "SecuritiesCompanyCode": "2760",
+    "CompanyName": "巨宇翔股份有限公司",
+    "CompanyAbbreviation": "巨宇翔",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "許維翔",
+    "Paidin.Capital.NTDollars": "130000000",
+    "DateOfListing": "20221226",
+    "WebAddress": "https://www.dingtea.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "2761",
+    "CompanyName": "橘焱胡同國際股份有限公司",
+    "CompanyAbbreviation": "橘焱胡同",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "吳念忠",
+    "Paidin.Capital.NTDollars": "173366260",
+    "DateOfListing": "20220413",
+    "WebAddress": "https://gyen.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "2938",
+    "CompanyName": "床的世界股份有限公司",
+    "CompanyAbbreviation": "床的世界",
+    "SecuritiesIndustryCode": "38",
+    "Chairman": "陳三傑",
+    "Paidin.Capital.NTDollars": "201400000",
+    "DateOfListing": "20161005",
+    "WebAddress": "www.beddingworld.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "2940",
+    "CompanyName": "歐都納股份有限公司",
+    "CompanyAbbreviation": "歐都納",
+    "SecuritiesIndustryCode": "37",
+    "Chairman": "程鯤",
+    "Paidin.Capital.NTDollars": "251842690",
+    "DateOfListing": "20250505",
+    "WebAddress": "http://www.atunas.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "2942",
+    "CompanyName": "京站實業股份有限公司",
+    "CompanyAbbreviation": "京站",
+    "SecuritiesIndustryCode": "38",
+    "Chairman": "林怡均",
+    "Paidin.Capital.NTDollars": "600000000",
+    "DateOfListing": "20180331",
+    "WebAddress": "http://www.qsquare.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "3097",
+    "CompanyName": "拍檔科技股份有限公司",
+    "CompanyAbbreviation": "拍檔",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "陳其宏",
+    "Paidin.Capital.NTDollars": "750856050",
+    "DateOfListing": "20020802",
+    "WebAddress": "partnertechcorp.com"
+  },
+  {
+    "SecuritiesCompanyCode": "3117",
+    "CompanyName": "年程科技股份有限公司",
+    "CompanyAbbreviation": "年程",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "薛維進",
+    "Paidin.Capital.NTDollars": "228000000",
+    "DateOfListing": "20120831",
+    "WebAddress": "www.tecstar.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "3184",
+    "CompanyName": "微邦科技股份有限公司",
+    "CompanyAbbreviation": "微邦",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "李欣",
+    "Paidin.Capital.NTDollars": "630744770",
+    "DateOfListing": "20130418",
+    "WebAddress": "https://microbasetech.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "3473",
+    "CompanyName": "智通聯網科技股份有限公司",
+    "CompanyAbbreviation": "智通聯網",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "李怡德",
+    "Paidin.Capital.NTDollars": "225114750",
+    "DateOfListing": "20250811",
+    "WebAddress": "www.fiberlogic.com"
+  },
+  {
+    "SecuritiesCompanyCode": "3585",
+    "CompanyName": "聯致科技股份有限公司",
+    "CompanyAbbreviation": "聯致",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "李長明",
+    "Paidin.Capital.NTDollars": "1116786240",
+    "DateOfListing": "20071025",
+    "WebAddress": "http://www.amcorp.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "3595",
+    "CompanyName": "山太士股份有限公司",
+    "CompanyAbbreviation": "山太士",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "吳學宗",
+    "Paidin.Capital.NTDollars": "339132820",
+    "DateOfListing": "20071116",
+    "WebAddress": "http://www.amctape.com"
+  },
+  {
+    "SecuritiesCompanyCode": "3603",
+    "CompanyName": "建祥國際股份有限公司",
+    "CompanyAbbreviation": "建祥國際",
+    "SecuritiesIndustryCode": "29",
+    "Chairman": "陳銘銓",
+    "Paidin.Capital.NTDollars": "248442640",
+    "DateOfListing": "20080109",
+    "WebAddress": "http://www.uc-gn.com"
+  },
+  {
+    "SecuritiesCompanyCode": "3633",
+    "CompanyName": "云光科技股份有限公司",
+    "CompanyAbbreviation": "云光",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "許家滂",
+    "Paidin.Capital.NTDollars": "340236430",
+    "DateOfListing": "20080806",
+    "WebAddress": "http://www.epoch-optic.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "3644",
+    "CompanyName": "凌嘉科技股份有限公司",
+    "CompanyAbbreviation": "凌嘉科",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "梁瑞芳",
+    "Paidin.Capital.NTDollars": "833000000",
+    "DateOfListing": "20260615",
+    "WebAddress": "https:// www.lincotec.com"
+  },
+  {
+    "SecuritiesCompanyCode": "3659",
+    "CompanyName": "百辰光電股份有限公司",
+    "CompanyAbbreviation": "百辰",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "林百祁",
+    "Paidin.Capital.NTDollars": "541238380",
+    "DateOfListing": "20091019",
+    "WebAddress": "http://www.bisontech.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "3678",
+    "CompanyName": "聯享光電股份有限公司",
+    "CompanyAbbreviation": "聯享",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "賴俊光",
+    "Paidin.Capital.NTDollars": "264220000",
+    "DateOfListing": "20091022",
+    "WebAddress": "www.ushine.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4115",
+    "CompanyName": "善德生化科技股份有限公司",
+    "CompanyAbbreviation": "善德生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "胡智凱",
+    "Paidin.Capital.NTDollars": "600000000",
+    "DateOfListing": "20220831",
+    "WebAddress": "http://www.sunder.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4117",
+    "CompanyName": "普生股份有限公司",
+    "CompanyAbbreviation": "普生",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林宗慶",
+    "Paidin.Capital.NTDollars": "708243700",
+    "DateOfListing": "20020704",
+    "WebAddress": "www.gbc.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4150",
+    "CompanyName": "優你康光學股份有限公司",
+    "CompanyAbbreviation": "優你康",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林明政",
+    "Paidin.Capital.NTDollars": "1472176720",
+    "DateOfListing": "20100915",
+    "WebAddress": "http://www.i-vision.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4170",
+    "CompanyName": "鑫品生醫科技股份有限公司",
+    "CompanyAbbreviation": "鑫品生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "張所鑄",
+    "Paidin.Capital.NTDollars": "437713700",
+    "DateOfListing": "20231228",
+    "WebAddress": "www.vectorite.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4172",
+    "CompanyName": "因華生技製藥股份有限公司",
+    "CompanyAbbreviation": "因華",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林智暉",
+    "Paidin.Capital.NTDollars": "1195755000",
+    "DateOfListing": "20120913",
+    "WebAddress": "www.innopharmax.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4186",
+    "CompanyName": "台灣尖端先進生技醫藥(股)公司",
+    "CompanyAbbreviation": "尖端醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蘇文龍",
+    "Paidin.Capital.NTDollars": "900000000",
+    "DateOfListing": "20121127",
+    "WebAddress": "http://www.biotest.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4194",
+    "CompanyName": "禾伸堂生技股份有限公司",
+    "CompanyAbbreviation": "禾生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "唐錦榮",
+    "Paidin.Capital.NTDollars": "1459744000",
+    "DateOfListing": "20131213",
+    "WebAddress": "www.hshc.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4197",
+    "CompanyName": "暐世生物科技股份有限公司",
+    "CompanyAbbreviation": "暐世",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "戴鏗碩",
+    "Paidin.Capital.NTDollars": "301809250",
+    "DateOfListing": "20131024",
+    "WebAddress": "http://www.visgeneer.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4431",
+    "CompanyName": "敏成健康科技股份有限公司",
+    "CompanyAbbreviation": "敏成健康",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "楊弘仁",
+    "Paidin.Capital.NTDollars": "365355140",
+    "DateOfListing": "20110830",
+    "WebAddress": "https://www.mytrex-health.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "4537",
+    "CompanyName": "旭東機械工業股份有限公司",
+    "CompanyAbbreviation": "旭東",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "莊添財",
+    "Paidin.Capital.NTDollars": "788400000",
+    "DateOfListing": "20120503",
+    "WebAddress": "http://www.wisepioneer.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4544",
+    "CompanyName": "春日機械工業股份有限公司",
+    "CompanyAbbreviation": "春日",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "翁重鈞",
+    "Paidin.Capital.NTDollars": "602900480",
+    "DateOfListing": "20121224",
+    "WebAddress": "www.chunzu.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4546",
+    "CompanyName": "長亨精密股份有限公司",
+    "CompanyAbbreviation": "長亨",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "雷顯宇",
+    "Paidin.Capital.NTDollars": "337750450",
+    "DateOfListing": "20130730",
+    "WebAddress": "www.chaheng.com"
+  },
+  {
+    "SecuritiesCompanyCode": "4553",
+    "CompanyName": "盛復工業股份有限公司",
+    "CompanyAbbreviation": "盛復",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "廖述源",
+    "Paidin.Capital.NTDollars": "330200000",
+    "DateOfListing": "20140916",
+    "WebAddress": "http://www.alfot.com"
+  },
+  {
+    "SecuritiesCompanyCode": "4559",
+    "CompanyName": "久裕興業科技股份有限公司",
+    "CompanyAbbreviation": "久裕興",
+    "SecuritiesIndustryCode": "37",
+    "Chairman": "陳世偉",
+    "Paidin.Capital.NTDollars": "600000000",
+    "DateOfListing": "20141208",
+    "WebAddress": "http://www.joy-tech.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4565",
+    "CompanyName": "宏偉電機工業股份有限公司",
+    "CompanyAbbreviation": "宏偉",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "黃埮城",
+    "Paidin.Capital.NTDollars": "617400000",
+    "DateOfListing": "20161005",
+    "WebAddress": "http://www.volbin.com"
+  },
+  {
+    "SecuritiesCompanyCode": "4570",
+    "CompanyName": "傑生工業股份有限公司",
+    "CompanyAbbreviation": "傑生",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "莊耀輝",
+    "Paidin.Capital.NTDollars": "440000000",
+    "DateOfListing": "20240314",
+    "WebAddress": "www.baw-auto.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4573",
+    "CompanyName": "高明鐵企業股份有限公司",
+    "CompanyAbbreviation": "高明鐵",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "陳志鑫",
+    "Paidin.Capital.NTDollars": "456965800",
+    "DateOfListing": "20180726",
+    "WebAddress": "https://www.gmtglobalinc.com"
+  },
+  {
+    "SecuritiesCompanyCode": "4575",
+    "CompanyName": "銓寶工業股份有限公司",
+    "CompanyAbbreviation": "銓寶",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "睿蓁投資股份有限公司代表人：楊仁耀",
+    "Paidin.Capital.NTDollars": "386685000",
+    "DateOfListing": "20181119",
+    "WebAddress": "https://www.chumpower.com"
+  },
+  {
+    "SecuritiesCompanyCode": "4587",
+    "CompanyName": "寶元數控股份有限公司",
+    "CompanyAbbreviation": "寶元數控",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "郭倫毓",
+    "Paidin.Capital.NTDollars": "330000000",
+    "DateOfListing": "20220727",
+    "WebAddress": "https://www.LNC.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "4589",
+    "CompanyName": "碩陽電機股份有限公司",
+    "CompanyAbbreviation": "碩陽電機",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "林明昌",
+    "Paidin.Capital.NTDollars": "257483000",
+    "DateOfListing": "20230427",
+    "WebAddress": "https://www.motiontech-mtm.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "4724",
+    "CompanyName": "宣捷幹細胞生技股份有限公司",
+    "CompanyAbbreviation": "宣捷幹細胞",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "宣昶有",
+    "Paidin.Capital.NTDollars": "959764060",
+    "DateOfListing": "20230616",
+    "WebAddress": "http://www.meribank.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "4732",
+    "CompanyName": "彥臣生技藥品股份有限公司",
+    "CompanyAbbreviation": "彥臣",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "黃中洋",
+    "Paidin.Capital.NTDollars": "494847500",
+    "DateOfListing": "20071225",
+    "WebAddress": "https://www.naturewiseppls.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "4738",
+    "CompanyName": "大同精密化學股份有限公司",
+    "CompanyAbbreviation": "大同精化",
+    "SecuritiesIndustryCode": "21",
+    "Chairman": "吳永從",
+    "Paidin.Capital.NTDollars": "775960000",
+    "DateOfListing": "20090909",
+    "WebAddress": "http://www.twtfc.com"
+  },
+  {
+    "SecuritiesCompanyCode": "4765",
+    "CompanyName": "磐采股份有限公司",
+    "CompanyAbbreviation": "磐采",
+    "SecuritiesIndustryCode": "21",
+    "Chairman": "李忠訓",
+    "Paidin.Capital.NTDollars": "321334940",
+    "DateOfListing": "20161205",
+    "WebAddress": "http://www.pancolourink.com"
+  },
+  {
+    "SecuritiesCompanyCode": "4925",
+    "CompanyName": "智微科技股份有限公司",
+    "CompanyAbbreviation": "智微",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "劉立國",
+    "Paidin.Capital.NTDollars": "707458500",
+    "DateOfListing": "20101028",
+    "WebAddress": "www.jmicron.com"
+  },
+  {
+    "SecuritiesCompanyCode": "4980",
+    "CompanyName": "佐臻股份有限公司",
+    "CompanyAbbreviation": "佐臻",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "梁文隆",
+    "Paidin.Capital.NTDollars": "452041090",
+    "DateOfListing": "20101116",
+    "WebAddress": "http://www.jorjin.com"
+  },
+  {
+    "SecuritiesCompanyCode": "5240",
+    "CompanyName": "建騰創達科技股份有限公司",
+    "CompanyAbbreviation": "建騰",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "朱伯倫",
+    "Paidin.Capital.NTDollars": "265816850",
+    "DateOfListing": "20110622",
+    "WebAddress": "http://www.acti.com"
+  },
+  {
+    "SecuritiesCompanyCode": "5246",
+    "CompanyName": "勵威電子股份有限公司",
+    "CompanyAbbreviation": "勵威",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "林育業",
+    "Paidin.Capital.NTDollars": "444738420",
+    "DateOfListing": "20221103",
+    "WebAddress": "http://www.probeleader.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "5248",
+    "CompanyName": "景傳光電股份有限公司",
+    "CompanyAbbreviation": "景傳",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "翁世豪",
+    "Paidin.Capital.NTDollars": "245000000",
+    "DateOfListing": "20110906",
+    "WebAddress": "www.pixon.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "5254",
+    "CompanyName": "欣訊科技股份有限公司",
+    "CompanyAbbreviation": "欣訊科技",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "鄭心樑",
+    "Paidin.Capital.NTDollars": "226067860",
+    "DateOfListing": "20190108",
+    "WebAddress": "http://www.cenlink.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "5262",
+    "CompanyName": "立達國際電子股份有限公司",
+    "CompanyAbbreviation": "立達",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "王立民",
+    "Paidin.Capital.NTDollars": "526985820",
+    "DateOfListing": "20131021",
+    "WebAddress": "www.gigastone.com"
+  },
+  {
+    "SecuritiesCompanyCode": "5267",
+    "CompanyName": "龍翩真空科技股份有限公司",
+    "CompanyAbbreviation": "龍翩",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "楊吉祥",
+    "Paidin.Capital.NTDollars": "253000000",
+    "DateOfListing": "20120224",
+    "WebAddress": "http://www.lp-vacuum.com"
+  },
+  {
+    "SecuritiesCompanyCode": "5271",
+    "CompanyName": "紘通企業股份有限公司",
+    "CompanyAbbreviation": "紘通",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "李東興",
+    "Paidin.Capital.NTDollars": "634724040",
+    "DateOfListing": "20120306",
+    "WebAddress": "http://www.hometom.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "5297",
+    "CompanyName": "廣化科技股份有限公司",
+    "CompanyAbbreviation": "廣化",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "張維仲",
+    "Paidin.Capital.NTDollars": "376524900",
+    "DateOfListing": "20170221",
+    "WebAddress": "www.sss-tech.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "5859",
+    "CompanyName": "遠雄人壽保險事業股份有限公司",
+    "CompanyAbbreviation": "遠壽",
+    "SecuritiesIndustryCode": "17",
+    "Chairman": "孟嘉仁",
+    "Paidin.Capital.NTDollars": "14502775000",
+    "DateOfListing": "20150416",
+    "WebAddress": "www.fglife.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "5863",
+    "CompanyName": "瑞興商業銀行股份有限公司",
+    "CompanyAbbreviation": "瑞興銀",
+    "SecuritiesIndustryCode": "17",
+    "Chairman": "郭釧溥",
+    "Paidin.Capital.NTDollars": "3202021230",
+    "DateOfListing": "20071203",
+    "WebAddress": "https://www.taipeistarbank.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6027",
+    "CompanyName": "德信綜合證券(股)公司",
+    "CompanyAbbreviation": "德信",
+    "SecuritiesIndustryCode": "17",
+    "Chairman": "何家瑜",
+    "Paidin.Capital.NTDollars": "1557200800",
+    "DateOfListing": "20151102",
+    "WebAddress": "http://www.rsc.com.tw　　"
+  },
+  {
+    "SecuritiesCompanyCode": "6035",
+    "CompanyName": "悠遊卡股份有限公司",
+    "CompanyAbbreviation": "悠遊卡",
+    "SecuritiesIndustryCode": "17",
+    "Chairman": "林志盈",
+    "Paidin.Capital.NTDollars": "712135000",
+    "DateOfListing": "20230103",
+    "WebAddress": "https://www.easycard.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6407",
+    "CompanyName": "相互股份有限公司",
+    "CompanyAbbreviation": "相互",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "陳旭東",
+    "Paidin.Capital.NTDollars": "751305000",
+    "DateOfListing": "20130329",
+    "WebAddress": "http://www.mutualtek.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6428",
+    "CompanyName": "台灣淘米科技股份有限公司",
+    "CompanyAbbreviation": "台灣淘米",
+    "SecuritiesIndustryCode": "32",
+    "Chairman": "王俊博",
+    "Paidin.Capital.NTDollars": "176824560",
+    "DateOfListing": "20130911",
+    "WebAddress": "http://www.61.com.tw/investor_relations/"
+  },
+  {
+    "SecuritiesCompanyCode": "6434",
+    "CompanyName": "達輝光電股份有限公司",
+    "CompanyAbbreviation": "達輝光電",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "吳昕杰",
+    "Paidin.Capital.NTDollars": "4636020000",
+    "DateOfListing": "20131112",
+    "WebAddress": "www.tacbright.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6467",
+    "CompanyName": "泰合生技藥品股份有限公司",
+    "CompanyAbbreviation": "泰合",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "李世仁",
+    "Paidin.Capital.NTDollars": "523711150",
+    "DateOfListing": "20241230",
+    "WebAddress": "www.tahopharma.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6473",
+    "CompanyName": "美賣科技股份有限公司",
+    "CompanyAbbreviation": "美賣*",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "宇福投資股份有限公司",
+    "Paidin.Capital.NTDollars": "200000000",
+    "DateOfListing": "20141208",
+    "WebAddress": "www.meimaii.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6483",
+    "CompanyName": "原創生醫股份有限公司",
+    "CompanyAbbreviation": "原創生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林柏裕",
+    "Paidin.Capital.NTDollars": "667420000",
+    "DateOfListing": "20240329",
+    "WebAddress": "http://www.i-obm.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6493",
+    "CompanyName": "雷虎生技股份有限公司",
+    "CompanyAbbreviation": "雷虎生",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "陳冠如",
+    "Paidin.Capital.NTDollars": "300500000",
+    "DateOfListing": "20150108",
+    "WebAddress": "www.ttbio.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6518",
+    "CompanyName": "康科特股份有限公司",
+    "CompanyAbbreviation": "康科特",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "劉靜怡",
+    "Paidin.Capital.NTDollars": "333333340",
+    "DateOfListing": "20150513",
+    "WebAddress": "http://www.concordmed.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6536",
+    "CompanyName": "碩豐數位科技股份有限公司",
+    "CompanyAbbreviation": "碩豐",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "徐明哲",
+    "Paidin.Capital.NTDollars": "263240000",
+    "DateOfListing": "20150618",
+    "WebAddress": "http://www.tigagaming.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6539",
+    "CompanyName": "麗彤生醫科技股份有限公司",
+    "CompanyAbbreviation": "麗彤",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "張麗綺",
+    "Paidin.Capital.NTDollars": "243494150",
+    "DateOfListing": "20151015",
+    "WebAddress": "http://www.dvbiomed.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6543",
+    "CompanyName": "普惠醫工股份有限公司",
+    "CompanyAbbreviation": "普惠醫工",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "許國基",
+    "Paidin.Capital.NTDollars": "558547000",
+    "DateOfListing": "20190327",
+    "WebAddress": "http://www.perfectmedical.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6549",
+    "CompanyName": "景凱生物科技股份有限公司",
+    "CompanyAbbreviation": "景凱",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "石英珠",
+    "Paidin.Capital.NTDollars": "801220000",
+    "DateOfListing": "20151021",
+    "WebAddress": "http://taiwanj.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6555",
+    "CompanyName": "榮炭科技股份有限公司",
+    "CompanyAbbreviation": "榮炭",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "林忠正",
+    "Paidin.Capital.NTDollars": "1192298000",
+    "DateOfListing": "20160125",
+    "WebAddress": "www.lttech.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6559",
+    "CompanyName": "研晶光電股份有限公司",
+    "CompanyAbbreviation": "研晶",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "魏志宏",
+    "Paidin.Capital.NTDollars": "231886470",
+    "DateOfListing": "20151215",
+    "WebAddress": "www.hplighting.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6563",
+    "CompanyName": "映智科技股份有限公司",
+    "CompanyAbbreviation": "映智",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "黃文權",
+    "Paidin.Capital.NTDollars": "297428000",
+    "DateOfListing": "20250310",
+    "WebAddress": "www.imagematch.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6564",
+    "CompanyName": "安特羅生物科技股份有限公司",
+    "CompanyAbbreviation": "安特羅",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "留忠正",
+    "Paidin.Capital.NTDollars": "721340000",
+    "DateOfListing": "20180918",
+    "WebAddress": "www.enimmune.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6565",
+    "CompanyName": "物聯智慧股份有限公司",
+    "CompanyAbbreviation": "物聯",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "郭啟銘",
+    "Paidin.Capital.NTDollars": "271438700",
+    "DateOfListing": "20170118",
+    "WebAddress": "http://www.throughtek.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6572",
+    "CompanyName": "博錸生技股份有限公司",
+    "CompanyAbbreviation": "博錸",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "曹汀",
+    "Paidin.Capital.NTDollars": "1036495100",
+    "DateOfListing": "20160226",
+    "WebAddress": "www.plexbio.com/tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6580",
+    "CompanyName": "台睿生物科技股份有限公司",
+    "CompanyAbbreviation": "台睿",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林&#32675;",
+    "Paidin.Capital.NTDollars": "1121199080",
+    "DateOfListing": "20170620",
+    "WebAddress": "https://www.trx.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6583",
+    "CompanyName": "友松娛樂股份有限公司",
+    "CompanyAbbreviation": "友松",
+    "SecuritiesIndustryCode": "32",
+    "Chairman": "丁曉菁",
+    "Paidin.Capital.NTDollars": "159470000",
+    "DateOfListing": "20160805",
+    "WebAddress": "http://www.yoosonn.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6586",
+    "CompanyName": "醣基生醫股份有限公司",
+    "CompanyAbbreviation": "醣基",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "陳肇隆",
+    "Paidin.Capital.NTDollars": "2140105000",
+    "DateOfListing": "20170927",
+    "WebAddress": "www.chopharma.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6595",
+    "CompanyName": "光禹國際數位娛樂開發(股)公司",
+    "CompanyAbbreviation": "光禹國際",
+    "SecuritiesIndustryCode": "32",
+    "Chairman": "字維新",
+    "Paidin.Capital.NTDollars": "498578880",
+    "DateOfListing": "20190111",
+    "WebAddress": "juliensgroup.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6599",
+    "CompanyName": "普達系統股份有限公司",
+    "CompanyAbbreviation": "普達系統",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "翁宗斌",
+    "Paidin.Capital.NTDollars": "210000000",
+    "DateOfListing": "20171225",
+    "WebAddress": "http://www.poindus.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6604",
+    "CompanyName": "儒億科技股份有限公司",
+    "CompanyAbbreviation": "儒億",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "吳國禎",
+    "Paidin.Capital.NTDollars": "437310390",
+    "DateOfListing": "20251028",
+    "WebAddress": "www.juoku.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6610",
+    "CompanyName": "安成生物科技股份有限公司",
+    "CompanyAbbreviation": "安成生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "吳怡君",
+    "Paidin.Capital.NTDollars": "2055793950",
+    "DateOfListing": "20161227",
+    "WebAddress": "www.twibiotech.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6618",
+    "CompanyName": "永虹先進材料股份有限公司",
+    "CompanyAbbreviation": "永虹先進",
+    "SecuritiesIndustryCode": "21",
+    "Chairman": "吳家幸",
+    "Paidin.Capital.NTDollars": "1048160000",
+    "DateOfListing": "20170915",
+    "WebAddress": "http://www.uht.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6621",
+    "CompanyName": "華宇藥品股份有限公司",
+    "CompanyAbbreviation": "華宇藥",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "陳正",
+    "Paidin.Capital.NTDollars": "355010000",
+    "DateOfListing": "20170818",
+    "WebAddress": "https://www.uni-pharma.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6622",
+    "CompanyName": "百聿數碼創意股份有限公司",
+    "CompanyAbbreviation": "百聿數碼",
+    "SecuritiesIndustryCode": "32",
+    "Chairman": "富德亞投資有限公司",
+    "Paidin.Capital.NTDollars": "353009500",
+    "DateOfListing": "20170522",
+    "WebAddress": "www.bossdom.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6634",
+    "CompanyName": "欣耀生醫股份有限公司",
+    "CompanyAbbreviation": "欣耀",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "朱凱民",
+    "Paidin.Capital.NTDollars": "712889300",
+    "DateOfListing": "20170629",
+    "WebAddress": "www.sinewpharma.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6638",
+    "CompanyName": "沅聖科技股份有限公司",
+    "CompanyAbbreviation": "沅聖",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "陳信宇",
+    "Paidin.Capital.NTDollars": "300000000",
+    "DateOfListing": "20170628",
+    "WebAddress": "http://www.goldtek.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6639",
+    "CompanyName": "源大環能股份有限公司",
+    "CompanyAbbreviation": "源大環能",
+    "SecuritiesIndustryCode": "23",
+    "Chairman": "彭鴻俊",
+    "Paidin.Capital.NTDollars": "576450090",
+    "DateOfListing": "20181031",
+    "WebAddress": "http://www.ggec.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6648",
+    "CompanyName": "斯其大科技股份有限公司",
+    "CompanyAbbreviation": "斯其大",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "陳俊吉",
+    "Paidin.Capital.NTDollars": "500000000",
+    "DateOfListing": "20170904",
+    "WebAddress": "https://www.das.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6650",
+    "CompanyName": "帝圖科技文化股份有限公司",
+    "CompanyAbbreviation": "帝圖",
+    "SecuritiesIndustryCode": "32",
+    "Chairman": "劉熙海",
+    "Paidin.Capital.NTDollars": "310900630",
+    "DateOfListing": "20170915",
+    "WebAddress": "https://about.artemperor.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6659",
+    "CompanyName": "天明製藥股份有限公司",
+    "CompanyAbbreviation": "天明製藥",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "詹詠寧",
+    "Paidin.Capital.NTDollars": "858830090",
+    "DateOfListing": "20251222",
+    "WebAddress": "http://www.timing-pharmacy.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6665",
+    "CompanyName": "康聯生醫科技股份有限公司",
+    "CompanyAbbreviation": "康聯生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "黃英士",
+    "Paidin.Capital.NTDollars": "453501330",
+    "DateOfListing": "20171123",
+    "WebAddress": "https://www.healthconn.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6673",
+    "CompanyName": "和詮科技股份有限公司",
+    "CompanyAbbreviation": "和詮",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "鄭再興",
+    "Paidin.Capital.NTDollars": "264886000",
+    "DateOfListing": "20180307",
+    "WebAddress": "www.iftc.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6676",
+    "CompanyName": "祥翊製藥股份有限公司",
+    "CompanyAbbreviation": "祥翊",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "吳永連",
+    "Paidin.Capital.NTDollars": "1696790000",
+    "DateOfListing": "20220119",
+    "WebAddress": "http://www.sunnypharmtech.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6677",
+    "CompanyName": "瑩碩生技醫藥股份有限公司",
+    "CompanyAbbreviation": "瑩碩生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "王建治",
+    "Paidin.Capital.NTDollars": "560389500",
+    "DateOfListing": "20180627",
+    "WebAddress": "http://www.anxo.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6682",
+    "CompanyName": "華旭先進股份有限公司",
+    "CompanyAbbreviation": "華旭先進",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "黃文瑞",
+    "Paidin.Capital.NTDollars": "1471059020",
+    "DateOfListing": "20180511",
+    "WebAddress": "http://www.huahsu.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6696",
+    "CompanyName": "仁新醫藥股份有限公司",
+    "CompanyAbbreviation": "仁新",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林雨新",
+    "Paidin.Capital.NTDollars": "829160000",
+    "DateOfListing": "20181008",
+    "WebAddress": "http://www.linbioscience.com/tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6704",
+    "CompanyName": "國璽幹細胞應用技術股份有限公司",
+    "CompanyAbbreviation": "國璽幹細胞",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "莊明熙",
+    "Paidin.Capital.NTDollars": "959493160",
+    "DateOfListing": "20230426",
+    "WebAddress": "http://www.gwoxi.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6705",
+    "CompanyName": "振躍精密滑軌股份有限公司",
+    "CompanyAbbreviation": "振躍精密",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "陳萬來",
+    "Paidin.Capital.NTDollars": "180046880",
+    "DateOfListing": "20181031",
+    "WebAddress": "www.martas.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6707",
+    "CompanyName": "富基電通股份有限公司",
+    "CompanyAbbreviation": "富基電通",
+    "SecuritiesIndustryCode": "29",
+    "Chairman": "楊連芳",
+    "Paidin.Capital.NTDollars": "590026640",
+    "DateOfListing": "20220721",
+    "WebAddress": "https://www.afastor.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6709",
+    "CompanyName": "昱厚生技股份有限公司",
+    "CompanyAbbreviation": "昱厚生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "黃一旭",
+    "Paidin.Capital.NTDollars": "593800000",
+    "DateOfListing": "20181129",
+    "WebAddress": "www.advagene.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6723",
+    "CompanyName": "傑智環境科技股份有限公司",
+    "CompanyAbbreviation": "傑智環境",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "張豐堂",
+    "Paidin.Capital.NTDollars": "300390000",
+    "DateOfListing": "20181226",
+    "WebAddress": "https://www.jgok.net"
+  },
+  {
+    "SecuritiesCompanyCode": "6729",
+    "CompanyName": "機光科技股份有限公司",
+    "CompanyAbbreviation": "機光科技",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "顏豐文",
+    "Paidin.Capital.NTDollars": "276612780",
+    "DateOfListing": "20190704",
+    "WebAddress": "www.lumtec.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6734",
+    "CompanyName": "安盛生科股份有限公司",
+    "CompanyAbbreviation": "安盛生",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "陳彥宇",
+    "Paidin.Capital.NTDollars": "406231640",
+    "DateOfListing": "20190628",
+    "WebAddress": "www.ixensor.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6737",
+    "CompanyName": "秀育企業股份有限公司",
+    "CompanyAbbreviation": "秀育",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "梁徽彬",
+    "Paidin.Capital.NTDollars": "600504000",
+    "DateOfListing": "20191230",
+    "WebAddress": "https://www.solidyear.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6738",
+    "CompanyName": "鼎恒數位科技股份有限公司",
+    "CompanyAbbreviation": "鼎恒",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "簡士評",
+    "Paidin.Capital.NTDollars": "371248990",
+    "DateOfListing": "20190823",
+    "WebAddress": "www.mayohr.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6744",
+    "CompanyName": "豐技生物科技股份有限公司",
+    "CompanyAbbreviation": "豐技生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "張宏名",
+    "Paidin.Capital.NTDollars": "154000000",
+    "DateOfListing": "20190925",
+    "WebAddress": "http://www.fcbiotech.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6748",
+    "CompanyName": "亞果生醫股份有限公司",
+    "CompanyAbbreviation": "亞果生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "謝達仁",
+    "Paidin.Capital.NTDollars": "712181980",
+    "DateOfListing": "20210727",
+    "WebAddress": "www.acrobiomedical.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6750",
+    "CompanyName": "泰創工程股份有限公司",
+    "CompanyAbbreviation": "泰創工程",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "陳萬富",
+    "Paidin.Capital.NTDollars": "447070000",
+    "DateOfListing": "20191111",
+    "WebAddress": "http://www.tech-top-eng.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6755",
+    "CompanyName": "連鋐科技股份有限公司",
+    "CompanyAbbreviation": "連鋐科技",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "陳嘉輝",
+    "Paidin.Capital.NTDollars": "398231050",
+    "DateOfListing": "20191205",
+    "WebAddress": "http://www.lianhong.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6758",
+    "CompanyName": "冠亞生技股份有限公司",
+    "CompanyAbbreviation": "冠亞",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林延生",
+    "Paidin.Capital.NTDollars": "134710400",
+    "DateOfListing": "20200102",
+    "WebAddress": "http://www.aspine.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6775",
+    "CompanyName": "穎台科技股份有限公司",
+    "CompanyAbbreviation": "穎台科技",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "王志鴻",
+    "Paidin.Capital.NTDollars": "1095000000",
+    "DateOfListing": "20200529",
+    "WebAddress": "http://www.entire.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6780",
+    "CompanyName": "學習王科技股份有限公司",
+    "CompanyAbbreviation": "學習王",
+    "SecuritiesIndustryCode": "32",
+    "Chairman": "張鎮麟",
+    "Paidin.Capital.NTDollars": "164697230",
+    "DateOfListing": "20200723",
+    "WebAddress": "https://www.study123.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6784",
+    "CompanyName": "天凱科技股份有限公司",
+    "CompanyAbbreviation": "天凱科技",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "紀忠孝",
+    "Paidin.Capital.NTDollars": "190770000",
+    "DateOfListing": "20201118",
+    "WebAddress": "www.tsky.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6786",
+    "CompanyName": "芯測科技股份有限公司",
+    "CompanyAbbreviation": "芯測",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "陳冠豪",
+    "Paidin.Capital.NTDollars": "308379800",
+    "DateOfListing": "20200819",
+    "WebAddress": "http://www.istart-tek.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6787",
+    "CompanyName": "晶瑞光電股份有限公司",
+    "CompanyAbbreviation": "晶瑞光",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "鄒政興",
+    "Paidin.Capital.NTDollars": "810070000",
+    "DateOfListing": "20210416",
+    "WebAddress": "https://krt.kingraytech.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6793",
+    "CompanyName": "天力離岸風電科技股份有限公司",
+    "CompanyAbbreviation": "天力離岸",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "吳坤達",
+    "Paidin.Capital.NTDollars": "756000000",
+    "DateOfListing": "20201030",
+    "WebAddress": "https://www.tien-li.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6797",
+    "CompanyName": "台灣圓點奈米技術股份有限公司",
+    "CompanyAbbreviation": "圓點奈米",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "章季芸",
+    "Paidin.Capital.NTDollars": "307321770",
+    "DateOfListing": "20201105",
+    "WebAddress": "https://www.tanbead.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6798",
+    "CompanyName": "展逸國際企業股份有限公司",
+    "CompanyAbbreviation": "展逸",
+    "SecuritiesIndustryCode": "37",
+    "Chairman": "張憲銘",
+    "Paidin.Capital.NTDollars": "195724300",
+    "DateOfListing": "20230427",
+    "WebAddress": "http://www.fltmkt.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6808",
+    "CompanyName": "三鼎生物科技股份有限公司",
+    "CompanyAbbreviation": "三鼎生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "歐耿良",
+    "Paidin.Capital.NTDollars": "778400000",
+    "DateOfListing": "20201225",
+    "WebAddress": "www.3dglobalbiotech.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6810",
+    "CompanyName": "新穎生醫股份有限公司",
+    "CompanyAbbreviation": "新穎生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "曾錙翎",
+    "Paidin.Capital.NTDollars": "494485000",
+    "DateOfListing": "20210830",
+    "WebAddress": "https://www.bpmbiotech.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6812",
+    "CompanyName": "梭特科技股份有限公司",
+    "CompanyAbbreviation": "梭特",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "盧彥豪",
+    "Paidin.Capital.NTDollars": "306025870",
+    "DateOfListing": "20210204",
+    "WebAddress": "https://www.saultech.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6814",
+    "CompanyName": "路迦生醫股份有限公司",
+    "CompanyAbbreviation": "路迦生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "唐稚超",
+    "Paidin.Capital.NTDollars": "418743710",
+    "DateOfListing": "20201231",
+    "WebAddress": "https://www.lukas-biomedical.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6815",
+    "CompanyName": "晶鑽生醫股份有限公司",
+    "CompanyAbbreviation": "晶鑽生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "謝佳憲",
+    "Paidin.Capital.NTDollars": "397056490",
+    "DateOfListing": "20210129",
+    "WebAddress": "https://www.diamond-biotechnology.cc/"
+  },
+  {
+    "SecuritiesCompanyCode": "6816",
+    "CompanyName": "捷智商訊科技股份有限公司",
+    "CompanyAbbreviation": "捷智商訊",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "林群國",
+    "Paidin.Capital.NTDollars": "121800000",
+    "DateOfListing": "20210118",
+    "WebAddress": "www.metaedge.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6817",
+    "CompanyName": "溫士頓醫藥股份有限公司",
+    "CompanyAbbreviation": "溫士頓",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蔡森田",
+    "Paidin.Capital.NTDollars": "184170000",
+    "DateOfListing": "20210224",
+    "WebAddress": "https://www.winston.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6818",
+    "CompanyName": "連騰科技股份有限公司",
+    "CompanyAbbreviation": "連騰",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "陳鴻儀",
+    "Paidin.Capital.NTDollars": "255030000",
+    "DateOfListing": "20210121",
+    "WebAddress": "http://www.awan-ant.com/zh-tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6819",
+    "CompanyName": "眾智光電科技股份有限公司",
+    "CompanyAbbreviation": "眾智",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "吳岱錡",
+    "Paidin.Capital.NTDollars": "339737330",
+    "DateOfListing": "20210205",
+    "WebAddress": "www.orisystech.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6820",
+    "CompanyName": "連訊通信股份有限公司",
+    "CompanyAbbreviation": "連訊",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "陳鴻儀",
+    "Paidin.Capital.NTDollars": "222110000",
+    "DateOfListing": "20210322",
+    "WebAddress": "http://www.aconoptics.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6825",
+    "CompanyName": "和暢科技股份有限公司",
+    "CompanyAbbreviation": "和暢科技",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "周邦基",
+    "Paidin.Capital.NTDollars": "336514480",
+    "DateOfListing": "20210429",
+    "WebAddress": "https://www.qbictechnology.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6826",
+    "CompanyName": "和淞科技股份有限公司",
+    "CompanyAbbreviation": "和淞",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "應柔爾",
+    "Paidin.Capital.NTDollars": "855400000",
+    "DateOfListing": "20210617",
+    "WebAddress": "www.jtpc.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6827",
+    "CompanyName": "巨生生醫股份有限公司",
+    "CompanyAbbreviation": "巨生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蔣為峰",
+    "Paidin.Capital.NTDollars": "793303030",
+    "DateOfListing": "20211019",
+    "WebAddress": "http://www.megaprobio.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6832",
+    "CompanyName": "金鼎聯合科技纖維股份有限公司",
+    "CompanyAbbreviation": "金鼎科",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "林瑞岳",
+    "Paidin.Capital.NTDollars": "264106550",
+    "DateOfListing": "20210929",
+    "WebAddress": "http://www.kingsmetalfiber.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6833",
+    "CompanyName": "太康精密股份有限公司",
+    "CompanyAbbreviation": "太康精密",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "葉辛池",
+    "Paidin.Capital.NTDollars": "499770000",
+    "DateOfListing": "20210601",
+    "WebAddress": "https://www.t-conn.com/tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6839",
+    "CompanyName": "開陽能源股份有限公司",
+    "CompanyAbbreviation": "開陽能源",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "蔡孟庭",
+    "Paidin.Capital.NTDollars": "820197840",
+    "DateOfListing": "20211025",
+    "WebAddress": "http://www.powermaster.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6842",
+    "CompanyName": "瑞宇國際股份有限公司",
+    "CompanyAbbreviation": "瑞宇",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "陳慧銘",
+    "Paidin.Capital.NTDollars": "230000000",
+    "DateOfListing": "20210930",
+    "WebAddress": "https://www.nexora-tech.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6847",
+    "CompanyName": "普瑞博生技股份有限公司",
+    "CompanyAbbreviation": "普瑞博",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "陳彥文",
+    "Paidin.Capital.NTDollars": "142300000",
+    "DateOfListing": "20211105",
+    "WebAddress": "https://puriblood.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6848",
+    "CompanyName": "拉法生醫股份有限公司",
+    "CompanyAbbreviation": "拉法醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "卓明偉",
+    "Paidin.Capital.NTDollars": "142731600",
+    "DateOfListing": "20211025",
+    "WebAddress": "https://www.rbcbioscience.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6849",
+    "CompanyName": "奇鼎科技股份有限公司",
+    "CompanyAbbreviation": "奇鼎科技",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "鄭智文",
+    "Paidin.Capital.NTDollars": "419182620",
+    "DateOfListing": "20241122",
+    "WebAddress": "https://www.chd-tech.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6850",
+    "CompanyName": "光鼎生物科技股份有限公司",
+    "CompanyAbbreviation": "光鼎生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蔡守冠",
+    "Paidin.Capital.NTDollars": "330886600",
+    "DateOfListing": "20211110",
+    "WebAddress": "https://www.bioptic.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6857",
+    "CompanyName": "宏碁智醫股份有限公司",
+    "CompanyAbbreviation": "宏碁智醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "連加恩",
+    "Paidin.Capital.NTDollars": "152260000",
+    "DateOfListing": "20211027",
+    "WebAddress": "https://www.acer-medical.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6858",
+    "CompanyName": "愛比科技股份有限公司",
+    "CompanyAbbreviation": "愛比科技",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "洪裕鈞",
+    "Paidin.Capital.NTDollars": "272204750",
+    "DateOfListing": "20220111",
+    "WebAddress": "https://www.ipevo.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6864",
+    "CompanyName": "元樟生物科技股份有限公司",
+    "CompanyAbbreviation": "元樟生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蔡宜儒",
+    "Paidin.Capital.NTDollars": "377887500",
+    "DateOfListing": "20211229",
+    "WebAddress": "https://www.ams-bioteq.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6867",
+    "CompanyName": "坦德科技股份有限公司",
+    "CompanyAbbreviation": "坦德科技",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "江凱量",
+    "Paidin.Capital.NTDollars": "245000000",
+    "DateOfListing": "20220623",
+    "WebAddress": "http://www.tdtech.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6868",
+    "CompanyName": "采威國際資訊股份有限公司",
+    "CompanyAbbreviation": "采威國際",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "蕭哲君",
+    "Paidin.Capital.NTDollars": "250433500",
+    "DateOfListing": "20220113",
+    "WebAddress": "https://www.iscom.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6876",
+    "CompanyName": "朗齊生物醫學股份有限公司",
+    "CompanyAbbreviation": "朗齊生醫*",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "王繼賢",
+    "Paidin.Capital.NTDollars": "1192518529",
+    "DateOfListing": "20240118",
+    "WebAddress": "www.launxp.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6878",
+    "CompanyName": "歐付寶電子支付股份有限公司",
+    "CompanyAbbreviation": "歐付寶",
+    "SecuritiesIndustryCode": "17",
+    "Chairman": "林秀芳",
+    "Paidin.Capital.NTDollars": "726408000",
+    "DateOfListing": "20220317",
+    "WebAddress": "https://www.opay.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6879",
+    "CompanyName": "大江基因醫學股份有限公司",
+    "CompanyAbbreviation": "大江基因",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林詠翔",
+    "Paidin.Capital.NTDollars": "264585200",
+    "DateOfListing": "20220125",
+    "WebAddress": "https://www.tci-gene.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6882",
+    "CompanyName": "甲尚股份有限公司",
+    "CompanyAbbreviation": "甲尚",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "王宏洋",
+    "Paidin.Capital.NTDollars": "231990650",
+    "DateOfListing": "20220426",
+    "WebAddress": "http://www.reallusion.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6883",
+    "CompanyName": "微電能源股份有限公司",
+    "CompanyAbbreviation": "微電能源",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "王愍&#24312;",
+    "Paidin.Capital.NTDollars": "762735810",
+    "DateOfListing": "20240719",
+    "WebAddress": "https://www.rfdme.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6886",
+    "CompanyName": "遠東生物科技股份有限公司",
+    "CompanyAbbreviation": "遠東生技",
+    "SecuritiesIndustryCode": "02",
+    "Chairman": "闕壯群",
+    "Paidin.Capital.NTDollars": "318100000",
+    "DateOfListing": "20230427",
+    "WebAddress": "http://www.febico.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6891",
+    "CompanyName": "樂迦再生科技股份有限公司",
+    "CompanyAbbreviation": "樂迦再生",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "邱俊榮",
+    "Paidin.Capital.NTDollars": "2005672500",
+    "DateOfListing": "20220428",
+    "WebAddress": "http://www.locus-cell.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6892",
+    "CompanyName": "台寶生醫股份有限公司",
+    "CompanyAbbreviation": "台寶生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "郭旭崧",
+    "Paidin.Capital.NTDollars": "940152280",
+    "DateOfListing": "20220513",
+    "WebAddress": "http://www.twbio-thera.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6898",
+    "CompanyName": "程曦資訊整合股份有限公司",
+    "CompanyAbbreviation": "程曦資訊",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "黃士軍",
+    "Paidin.Capital.NTDollars": "290161130",
+    "DateOfListing": "20220526",
+    "WebAddress": "https://www.chainsea.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6911",
+    "CompanyName": "群運環保股份有限公司",
+    "CompanyAbbreviation": "群運",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "李天佑",
+    "Paidin.Capital.NTDollars": "220000000",
+    "DateOfListing": "20221020",
+    "WebAddress": "https://www.chyunn.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6912",
+    "CompanyName": "益鈞環保科技股份有限公司",
+    "CompanyAbbreviation": "益鈞環科*",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "秦嘉鴻",
+    "Paidin.Capital.NTDollars": "144000000",
+    "DateOfListing": "20221019",
+    "WebAddress": "http://www.yichungt.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6915",
+    "CompanyName": "美強光學股份有限公司",
+    "CompanyAbbreviation": "美強光",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "高志誠",
+    "Paidin.Capital.NTDollars": "353000000",
+    "DateOfListing": "20221103",
+    "WebAddress": "www.igiantopt.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6917",
+    "CompanyName": "竟天生物科技股份有限公司",
+    "CompanyAbbreviation": "竟天",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "王藹君",
+    "Paidin.Capital.NTDollars": "552720000",
+    "DateOfListing": "20230112",
+    "WebAddress": "http://www.androspharma.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6920",
+    "CompanyName": "恆勁科技股份有限公司",
+    "CompanyAbbreviation": "恆勁科技",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "莊遠平",
+    "Paidin.Capital.NTDollars": "2072190190",
+    "DateOfListing": "20230110",
+    "WebAddress": "http://www.ppt.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6926",
+    "CompanyName": "聖安生醫股份有限公司",
+    "CompanyAbbreviation": "聖安生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "黃秋錦",
+    "Paidin.Capital.NTDollars": "498000000",
+    "DateOfListing": "20221125",
+    "WebAddress": "https://www.shineon-bio.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6927",
+    "CompanyName": "聯合聚晶股份有限公司",
+    "CompanyAbbreviation": "聯合聚晶",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "陳俊賢",
+    "Paidin.Capital.NTDollars": "382785250",
+    "DateOfListing": "20230526",
+    "WebAddress": "https://www.ist4u.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6932",
+    "CompanyName": "水星生醫股份有限公司",
+    "CompanyAbbreviation": "水星生醫*",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林玉龍",
+    "Paidin.Capital.NTDollars": "107367981",
+    "DateOfListing": "20221223",
+    "WebAddress": "https://merdury.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6935",
+    "CompanyName": "王子製藥股份有限公司",
+    "CompanyAbbreviation": "王子製藥",
+    "SecuritiesIndustryCode": "02",
+    "Chairman": "李&#21843;達",
+    "Paidin.Capital.NTDollars": "374100000",
+    "DateOfListing": "20230329",
+    "WebAddress": "https://www.prince-pharm.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6938",
+    "CompanyName": "藍新資訊股份有限公司",
+    "CompanyAbbreviation": "藍新資訊",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "郭廷群",
+    "Paidin.Capital.NTDollars": "125700000",
+    "DateOfListing": "20240123",
+    "WebAddress": "http://www.newebinfo.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6939",
+    "CompanyName": "啟弘生物科技股份有限公司",
+    "CompanyAbbreviation": "啟弘生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "阮大同",
+    "Paidin.Capital.NTDollars": "353991610",
+    "DateOfListing": "20230515",
+    "WebAddress": "https://www.tfbsbio.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6940",
+    "CompanyName": "格斯科技股份有限公司",
+    "CompanyAbbreviation": "格斯科技*",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "張忠傑",
+    "Paidin.Capital.NTDollars": "749202375",
+    "DateOfListing": "20230512",
+    "WebAddress": "https://gustech.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6946",
+    "CompanyName": "三地能源股份有限公司",
+    "CompanyAbbreviation": "三地能源",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "鍾炳利",
+    "Paidin.Capital.NTDollars": "3238000000",
+    "DateOfListing": "20241007",
+    "WebAddress": "https://www.santienergy.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6947",
+    "CompanyName": "台鎔科技材料股份有限公司",
+    "CompanyAbbreviation": "台鎔科技",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "陳麗麗",
+    "Paidin.Capital.NTDollars": "943333340",
+    "DateOfListing": "20230721",
+    "WebAddress": "www.tech-zone.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6959",
+    "CompanyName": "兆捷科技國際股份有限公司",
+    "CompanyAbbreviation": "兆捷科技",
+    "SecuritiesIndustryCode": "21",
+    "Chairman": "高&#21843;全",
+    "Paidin.Capital.NTDollars": "391674000",
+    "DateOfListing": "20230713",
+    "WebAddress": "https://www.iemtw.com/tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6963",
+    "CompanyName": "品元實業股份有限公司",
+    "CompanyAbbreviation": "品元",
+    "SecuritiesIndustryCode": "02",
+    "Chairman": "曾仁佑",
+    "Paidin.Capital.NTDollars": "159719660",
+    "DateOfListing": "20230628",
+    "WebAddress": "https://www.texturemaker.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6972",
+    "CompanyName": "博瑞達應用材料股份有限公司",
+    "CompanyAbbreviation": "博瑞達應材",
+    "SecuritiesIndustryCode": "21",
+    "Chairman": "林佳璋",
+    "Paidin.Capital.NTDollars": "229346860",
+    "DateOfListing": "20241129",
+    "WebAddress": "http://www.protrade.org/zh_tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6973",
+    "CompanyName": "永立榮生醫股份有限公司",
+    "CompanyAbbreviation": "永立榮",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "簡奉任",
+    "Paidin.Capital.NTDollars": "408030000",
+    "DateOfListing": "20230720",
+    "WebAddress": "https://www.u-neuron.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "6976",
+    "CompanyName": "英屬開曼群島商育世博(股)公司",
+    "CompanyAbbreviation": "育世博-KY",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蕭世嘉",
+    "Paidin.Capital.NTDollars": "5828671100",
+    "DateOfListing": "20230808",
+    "WebAddress": "https://www.acepodia.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6977",
+    "CompanyName": "聯純科技股份有限公司",
+    "CompanyAbbreviation": "聯純",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "許銘喬",
+    "Paidin.Capital.NTDollars": "140000000",
+    "DateOfListing": "20230925",
+    "WebAddress": "http://www.upt.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "6979",
+    "CompanyName": "勝釩科技股份有限公司",
+    "CompanyAbbreviation": "勝釩",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "黃閔晨",
+    "Paidin.Capital.NTDollars": "120000000",
+    "DateOfListing": "20240527",
+    "WebAddress": "http://www.vft.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6980",
+    "CompanyName": "鐳洋科技股份有限公司",
+    "CompanyAbbreviation": "鐳洋科技",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "王奕翔",
+    "Paidin.Capital.NTDollars": "300000000",
+    "DateOfListing": "20230810",
+    "WebAddress": "https://www.rapidtek.net/tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6984",
+    "CompanyName": "交流資服股份有限公司",
+    "CompanyAbbreviation": "ACpay",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "陳彥甫",
+    "Paidin.Capital.NTDollars": "192393730",
+    "DateOfListing": "20231020",
+    "WebAddress": "http://www.acpay.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6987",
+    "CompanyName": "寶晶能源股份有限公司",
+    "CompanyAbbreviation": "寶晶能源*",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "蔡佳&#26187;",
+    "Paidin.Capital.NTDollars": "3759208875",
+    "DateOfListing": "20240826",
+    "WebAddress": "https://www.inaenergy.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6990",
+    "CompanyName": "華鉬實業股份有限公司",
+    "CompanyAbbreviation": "華鉬",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "王大介",
+    "Paidin.Capital.NTDollars": "631197500",
+    "DateOfListing": "20230908",
+    "WebAddress": "https://www.plummonix.com/zh-tw"
+  },
+  {
+    "SecuritiesCompanyCode": "6995",
+    "CompanyName": "野獸國股份有限公司",
+    "CompanyAbbreviation": "野獸國",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "楊詠喨",
+    "Paidin.Capital.NTDollars": "253311320",
+    "DateOfListing": "20250121",
+    "WebAddress": "https://beast-kingdom.com"
+  },
+  {
+    "SecuritiesCompanyCode": "6999",
+    "CompanyName": "瀚醫生技股份有限公司",
+    "CompanyAbbreviation": "瀚醫生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "陳昌慧",
+    "Paidin.Capital.NTDollars": "220150790",
+    "DateOfListing": "20240731",
+    "WebAddress": "https://www.hanbiomedical.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7415",
+    "CompanyName": "元澄半導體科技股份有限公司",
+    "CompanyAbbreviation": "元澄半導體",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "蕭文雄",
+    "Paidin.Capital.NTDollars": "264981480",
+    "DateOfListing": "20260617",
+    "WebAddress": "https://best-oeic.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7418",
+    "CompanyName": "香繼光股份有限公司",
+    "CompanyAbbreviation": "香繼光",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "黃宏偉",
+    "Paidin.Capital.NTDollars": "275543070",
+    "DateOfListing": "20260626",
+    "WebAddress": "https://tw.group.jgssg.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7419",
+    "CompanyName": "達勝科技股份有限公司",
+    "CompanyAbbreviation": "達勝",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "孫德崢",
+    "Paidin.Capital.NTDollars": "400000000",
+    "DateOfListing": "20190925",
+    "WebAddress": "http://www.mortech.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7427",
+    "CompanyName": "華上生技醫藥股份有限公司",
+    "CompanyAbbreviation": "華上生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "陳嘉南",
+    "Paidin.Capital.NTDollars": "540262350",
+    "DateOfListing": "20210708",
+    "WebAddress": "http://www.gntbm.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7443",
+    "CompanyName": "凡事康流體科技股份有限公司",
+    "CompanyAbbreviation": "凡事康",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "賴炎村",
+    "Paidin.Capital.NTDollars": "220000000",
+    "DateOfListing": "20160215",
+    "WebAddress": "http://www.fluxtek.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7455",
+    "CompanyName": "樺緯物聯股份有限公司",
+    "CompanyAbbreviation": "樺緯物聯",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "朱復銓",
+    "Paidin.Capital.NTDollars": "255000000",
+    "DateOfListing": "20250110",
+    "WebAddress": "https://www.dexatek.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7507",
+    "CompanyName": "環拓科技股份有限公司",
+    "CompanyAbbreviation": "環拓科技",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "袁連惟",
+    "Paidin.Capital.NTDollars": "1020999740",
+    "DateOfListing": "20200320",
+    "WebAddress": "www.enrestec.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7516",
+    "CompanyName": "清淨海生技股份有限公司",
+    "CompanyAbbreviation": "清淨海",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "羅允俊",
+    "Paidin.Capital.NTDollars": "193089280",
+    "DateOfListing": "20181224",
+    "WebAddress": "www.seamild.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7530",
+    "CompanyName": "鋒魁科技股份有限公司",
+    "CompanyAbbreviation": "鋒魁科技",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "張育銓",
+    "Paidin.Capital.NTDollars": "465000000",
+    "DateOfListing": "20211124",
+    "WebAddress": "www.forward-tek.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7551",
+    "CompanyName": "知識科技股份有限公司",
+    "CompanyAbbreviation": "知識科技",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "任正偉",
+    "Paidin.Capital.NTDollars": "121000000",
+    "DateOfListing": "20191212",
+    "WebAddress": "www.flashaim.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7558",
+    "CompanyName": "群利科技股份有限公司",
+    "CompanyAbbreviation": "群利科技",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "王聖(敏心)",
+    "Paidin.Capital.NTDollars": "186207570",
+    "DateOfListing": "20210503",
+    "WebAddress": "http://www.brytonsport.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7561",
+    "CompanyName": "光晟生物科技股份有限公司",
+    "CompanyAbbreviation": "光晟生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "許庭源",
+    "Paidin.Capital.NTDollars": "300852620",
+    "DateOfListing": "20200706",
+    "WebAddress": "http://www.bio-ray.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7562",
+    "CompanyName": "博來科技股份有限公司",
+    "CompanyAbbreviation": "博來科技",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "蔣永慶",
+    "Paidin.Capital.NTDollars": "225535400",
+    "DateOfListing": "20230830",
+    "WebAddress": "https://www.lex.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7566",
+    "CompanyName": "亞果遊艇開發股份有限公司",
+    "CompanyAbbreviation": "亞果遊艇",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "侯佑霖",
+    "Paidin.Capital.NTDollars": "1397726470",
+    "DateOfListing": "20200701",
+    "WebAddress": "https://www.argoyc.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7575",
+    "CompanyName": "安美得生醫股份有限公司",
+    "CompanyAbbreviation": "安美得",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "王耀乾",
+    "Paidin.Capital.NTDollars": "300000000",
+    "DateOfListing": "20220624",
+    "WebAddress": "https://www.amed.com.tw/tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7578",
+    "CompanyName": "利百景股份有限公司",
+    "CompanyAbbreviation": "利百景",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "鍾政祐",
+    "Paidin.Capital.NTDollars": "600733710",
+    "DateOfListing": "20220601",
+    "WebAddress": "www.revivegen.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7583",
+    "CompanyName": "國際海洋股份有限公司",
+    "CompanyAbbreviation": "國際海洋",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "蔡明格",
+    "Paidin.Capital.NTDollars": "245748120",
+    "DateOfListing": "20230926",
+    "WebAddress": "https://www.iog-tw.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7590",
+    "CompanyName": "怡和國際股份有限公司",
+    "CompanyAbbreviation": "怡和國際",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "朱文煌",
+    "Paidin.Capital.NTDollars": "1223792640",
+    "DateOfListing": "20220302",
+    "WebAddress": "http://www.yihoinc.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7595",
+    "CompanyName": "世基生物醫學股份有限公司",
+    "CompanyAbbreviation": "世基生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蔡詩辰",
+    "Paidin.Capital.NTDollars": "504650000",
+    "DateOfListing": "20201222",
+    "WebAddress": "www.pharmigene.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7607",
+    "CompanyName": "通用幹細胞股份有限公司",
+    "CompanyAbbreviation": "通用幹細胞*",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蘇鴻麟",
+    "Paidin.Capital.NTDollars": "270172143",
+    "DateOfListing": "20230525",
+    "WebAddress": "https://www.dgsc.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7669",
+    "CompanyName": "碩正科技股份有限公司",
+    "CompanyAbbreviation": "碩正科技",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "楊允斌",
+    "Paidin.Capital.NTDollars": "220000000",
+    "DateOfListing": "20251127",
+    "WebAddress": "https://sites.google.com/view/suregiant"
+  },
+  {
+    "SecuritiesCompanyCode": "7689",
+    "CompanyName": "大鵬科技股份有限公司",
+    "CompanyAbbreviation": "大鵬科CLMX",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "張再發",
+    "Paidin.Capital.NTDollars": "531642500",
+    "DateOfListing": "20251003",
+    "WebAddress": "https://www.climax.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7702",
+    "CompanyName": "前端離岸風電設備製造（股）公司",
+    "CompanyAbbreviation": "前端風電",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "粟明德",
+    "Paidin.Capital.NTDollars": "660000000",
+    "DateOfListing": "20231017",
+    "WebAddress": "www.apexwp.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7706",
+    "CompanyName": "宏碁創達股份有限公司",
+    "CompanyAbbreviation": "宏碁創達",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "林弘道",
+    "Paidin.Capital.NTDollars": "100000000",
+    "DateOfListing": "20231225",
+    "WebAddress": "https://www.acer-asm.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7707",
+    "CompanyName": "益芯科技股份有限公司",
+    "CompanyAbbreviation": "益芯科",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "陳仲羲",
+    "Paidin.Capital.NTDollars": "457000000",
+    "DateOfListing": "20231205",
+    "WebAddress": "https://www.cmsc.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7710",
+    "CompanyName": "東擎科技股份有限公司",
+    "CompanyAbbreviation": "東擎科技",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "李俊瑩",
+    "Paidin.Capital.NTDollars": "639055800",
+    "DateOfListing": "20251028",
+    "WebAddress": "https://www.asrockind.com/zh-tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7719",
+    "CompanyName": "碳基科技股份有限公司",
+    "CompanyAbbreviation": "碳基",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "陳文宏",
+    "Paidin.Capital.NTDollars": "360000000",
+    "DateOfListing": "20231123",
+    "WebAddress": "www.uaver.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7724",
+    "CompanyName": "諾亞克科技股份有限公司",
+    "CompanyAbbreviation": "諾亞克",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "JONE JENGHORNG CHEN",
+    "Paidin.Capital.NTDollars": "353808310",
+    "DateOfListing": "20240815",
+    "WebAddress": "https://www.u-ark.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7725",
+    "CompanyName": "列特博生技股份有限公司",
+    "CompanyAbbreviation": "列特博",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "戴子煌",
+    "Paidin.Capital.NTDollars": "483266330",
+    "DateOfListing": "20231222",
+    "WebAddress": "http://www.labturbo.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7726",
+    "CompanyName": "暄達醫學科技股份有限公司",
+    "CompanyAbbreviation": "暄達",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "鄭瑋勳",
+    "Paidin.Capital.NTDollars": "203040000",
+    "DateOfListing": "20240227",
+    "WebAddress": "https://www.carilexmedical.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7729",
+    "CompanyName": "仲恩生醫科技股份有限公司",
+    "CompanyAbbreviation": "仲恩生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "王玲美",
+    "Paidin.Capital.NTDollars": "805729910",
+    "DateOfListing": "20240311",
+    "WebAddress": "http://www.steminent.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7731",
+    "CompanyName": "火星生技股份有限公司",
+    "CompanyAbbreviation": "火星生技*",
+    "SecuritiesIndustryCode": "02",
+    "Chairman": "林玉龍",
+    "Paidin.Capital.NTDollars": "130495143",
+    "DateOfListing": "20240205",
+    "WebAddress": "https://marxbiotech.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7735",
+    "CompanyName": "台灣智慧雲端服務股份有限公司",
+    "CompanyAbbreviation": "台智雲",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "謝明傑",
+    "Paidin.Capital.NTDollars": "433310000",
+    "DateOfListing": "20260529",
+    "WebAddress": "https://www.twcloud.ai"
+  },
+  {
+    "SecuritiesCompanyCode": "7737",
+    "CompanyName": "凱鈿行動科技股份有限公司",
+    "CompanyAbbreviation": "凱鈿",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "蘇柏州",
+    "Paidin.Capital.NTDollars": "297377850",
+    "DateOfListing": "20250205",
+    "WebAddress": "https://www.kdan.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7742",
+    "CompanyName": "天弘化學股份有限公司",
+    "CompanyAbbreviation": "天弘化",
+    "SecuritiesIndustryCode": "21",
+    "Chairman": "何基丞",
+    "Paidin.Capital.NTDollars": "663750000",
+    "DateOfListing": "20240704",
+    "WebAddress": "https://www.uranuschemicals.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7745",
+    "CompanyName": "紅陽科技股份有限公司",
+    "CompanyAbbreviation": "紅陽",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "呂寶麟",
+    "Paidin.Capital.NTDollars": "179500000",
+    "DateOfListing": "20260105",
+    "WebAddress": "https://www.sunpay.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7748",
+    "CompanyName": "鑫囍創業股份有限公司",
+    "CompanyAbbreviation": "鑫囍創業",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "邱奕榮",
+    "Paidin.Capital.NTDollars": "145000000",
+    "DateOfListing": "20241205",
+    "WebAddress": "https://jollifycreative.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7752",
+    "CompanyName": "世紀樺欣風能股份有限公司",
+    "CompanyAbbreviation": "世紀樺欣",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "賴文祥",
+    "Paidin.Capital.NTDollars": "2000000000",
+    "DateOfListing": "20240619",
+    "WebAddress": "http://www.chwetw.com/tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7754",
+    "CompanyName": "安基生技新藥股份有限公司",
+    "CompanyAbbreviation": "安基生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "黃文英",
+    "Paidin.Capital.NTDollars": "1007277890",
+    "DateOfListing": "20240625",
+    "WebAddress": "http://www.ajpharm.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7756",
+    "CompanyName": "多那之國際股份有限公司",
+    "CompanyAbbreviation": "多那之",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "王建仁",
+    "Paidin.Capital.NTDollars": "212830000",
+    "DateOfListing": "20240801",
+    "WebAddress": "https://www.donutes.com.tw/tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7758",
+    "CompanyName": "睿騰能源股份有限公司",
+    "CompanyAbbreviation": "睿騰能源",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "黃靖容",
+    "Paidin.Capital.NTDollars": "161000000",
+    "DateOfListing": "20250508",
+    "WebAddress": "https://www.keelgoal.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7759",
+    "CompanyName": "視航生物醫學股份有限公司",
+    "CompanyAbbreviation": "視航生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "卓夙航",
+    "Paidin.Capital.NTDollars": "703421590",
+    "DateOfListing": "20250310",
+    "WebAddress": "https://www.sunhawkvision.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7761",
+    "CompanyName": "三大未來科技股份有限公司",
+    "CompanyAbbreviation": "三大未來",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "林沛毅",
+    "Paidin.Capital.NTDollars": "289000000",
+    "DateOfListing": "20240816",
+    "WebAddress": "https://www.powerwin.com.tw/news_list.html"
+  },
+  {
+    "SecuritiesCompanyCode": "7762",
+    "CompanyName": "吉晟生技股份有限公司",
+    "CompanyAbbreviation": "吉晟生",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "楊朝堂",
+    "Paidin.Capital.NTDollars": "572328410",
+    "DateOfListing": "20240725",
+    "WebAddress": "https://www.petpharmbio.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7763",
+    "CompanyName": "崇舜股份有限公司",
+    "CompanyAbbreviation": "崇舜",
+    "SecuritiesIndustryCode": "21",
+    "Chairman": "鍾文清",
+    "Paidin.Capital.NTDollars": "600143490",
+    "DateOfListing": "20240926",
+    "WebAddress": "https://www.johnson-fine.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7764",
+    "CompanyName": "聖州企業股份有限公司",
+    "CompanyAbbreviation": "聖州",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "楊明舜",
+    "Paidin.Capital.NTDollars": "600000000",
+    "DateOfListing": "20240828",
+    "WebAddress": "https://shop.3dmats.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7771",
+    "CompanyName": "綠基企業股份有限公司",
+    "CompanyAbbreviation": "綠基",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "林茂昌",
+    "Paidin.Capital.NTDollars": "200127270",
+    "DateOfListing": "20260327",
+    "WebAddress": "www.greenbase.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7773",
+    "CompanyName": "富禾生醫股份有限公司",
+    "CompanyAbbreviation": "富禾生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "趙毅",
+    "Paidin.Capital.NTDollars": "399112090",
+    "DateOfListing": "20240926",
+    "WebAddress": "www.fhb.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7776",
+    "CompanyName": "奧孟亞股份有限公司",
+    "CompanyAbbreviation": "奧孟亞",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "李淑惠",
+    "Paidin.Capital.NTDollars": "491015200",
+    "DateOfListing": "20241025",
+    "WebAddress": "http://anyabiopharm.com/tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7779",
+    "CompanyName": "鍇睿國際數位股份有限公司",
+    "CompanyAbbreviation": "鍇睿國際",
+    "SecuritiesIndustryCode": "37",
+    "Chairman": "顏宥騫",
+    "Paidin.Capital.NTDollars": "161050000",
+    "DateOfListing": "20241003",
+    "WebAddress": "https://www.carry.live/"
+  },
+  {
+    "SecuritiesCompanyCode": "7781",
+    "CompanyName": "昕力資訊股份有限公司",
+    "CompanyAbbreviation": "昕力資*",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "姚勝富",
+    "Paidin.Capital.NTDollars": "299840430",
+    "DateOfListing": "20241023",
+    "WebAddress": "https://www.tpisoftware.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7783",
+    "CompanyName": "佳運重機械工程股份有限公司",
+    "CompanyAbbreviation": "佳運",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "張林桂",
+    "Paidin.Capital.NTDollars": "624448000",
+    "DateOfListing": "20241025",
+    "WebAddress": "https://www.giant-project.com/zh-tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7784",
+    "CompanyName": "安邦生技股份有限公司",
+    "CompanyAbbreviation": "安邦生技*",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "徐祖安",
+    "Paidin.Capital.NTDollars": "1145133597",
+    "DateOfListing": "20260505",
+    "WebAddress": "https://anbogen.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7785",
+    "CompanyName": "北祥科技服務股份有限公司",
+    "CompanyAbbreviation": "北祥科服",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "陳欽祥",
+    "Paidin.Capital.NTDollars": "333393690",
+    "DateOfListing": "20250626",
+    "WebAddress": "https://www.pershing.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7789",
+    "CompanyName": "開展餐飲股份有限公司",
+    "CompanyAbbreviation": "開展",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "邱泰翰",
+    "Paidin.Capital.NTDollars": "211836290",
+    "DateOfListing": "20241120",
+    "WebAddress": "https://www.casualrestaurants.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7790",
+    "CompanyName": "思必瑞特生技股份有限公司",
+    "CompanyAbbreviation": "思必瑞特",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林道隆",
+    "Paidin.Capital.NTDollars": "176996830",
+    "DateOfListing": "20241227",
+    "WebAddress": "https://www.sslab.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7796",
+    "CompanyName": "擷發科技股份有限公司",
+    "CompanyAbbreviation": "擷發科",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "楊健盟",
+    "Paidin.Capital.NTDollars": "229630000",
+    "DateOfListing": "20241209",
+    "WebAddress": "https://www.micro-ip.com/tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7797",
+    "CompanyName": "饗樂餐飲實業股份有限公司",
+    "CompanyAbbreviation": "Q Burger",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "鄭瑞賓",
+    "Paidin.Capital.NTDollars": "222450000",
+    "DateOfListing": "20250106",
+    "WebAddress": "https://www.qburger.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7798",
+    "CompanyName": "將捷股份有限公司",
+    "CompanyAbbreviation": "將捷",
+    "SecuritiesIndustryCode": "14",
+    "Chairman": "林嵩烈",
+    "Paidin.Capital.NTDollars": "3086918100",
+    "DateOfListing": "20251021",
+    "WebAddress": "https://www.fabulousgroup.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7801",
+    "CompanyName": "華芸科技股份有限公司",
+    "CompanyAbbreviation": "華芸科技",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "施崇棠",
+    "Paidin.Capital.NTDollars": "183000000",
+    "DateOfListing": "20241125",
+    "WebAddress": "https://www.asustor.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7806",
+    "CompanyName": "精華生醫股份有限公司",
+    "CompanyAbbreviation": "精華生醫",
+    "SecuritiesIndustryCode": "02",
+    "Chairman": "陳俊宏",
+    "Paidin.Capital.NTDollars": "278600000",
+    "DateOfListing": "20241212",
+    "WebAddress": "https://www.gin-hwa.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7808",
+    "CompanyName": "訊聯細胞智藥股份有限公司",
+    "CompanyAbbreviation": "訊聯智藥",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蔡政憲",
+    "Paidin.Capital.NTDollars": "700000000",
+    "DateOfListing": "20241212",
+    "WebAddress": "https://www.bionettx.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7812",
+    "CompanyName": "稜研科技股份有限公司",
+    "CompanyAbbreviation": "稜研科技*",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "蔚維科技股份有限公司(代表人-張書維)",
+    "Paidin.Capital.NTDollars": "1511525594",
+    "DateOfListing": "20250115",
+    "WebAddress": "https://www.tmytek.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7813",
+    "CompanyName": "宇辰系統科技股份有限公司",
+    "CompanyAbbreviation": "宇辰系統",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "何瑞祥",
+    "Paidin.Capital.NTDollars": "191779000",
+    "DateOfListing": "20250116",
+    "WebAddress": "https://www.yuchens.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7815",
+    "CompanyName": "新特系統股份有限公司",
+    "CompanyAbbreviation": "新特",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "陳儒宏",
+    "Paidin.Capital.NTDollars": "329756310",
+    "DateOfListing": "20250115",
+    "WebAddress": "http://www.sync-tech.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7816",
+    "CompanyName": "來穎科技股份有限公司",
+    "CompanyAbbreviation": "來穎",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "葉垂景",
+    "Paidin.Capital.NTDollars": "292782110",
+    "DateOfListing": "20250115",
+    "WebAddress": "http://www.ritwin.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7824",
+    "CompanyName": "智寶國際開發股份有限公司",
+    "CompanyAbbreviation": "智寶",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "許利瑋",
+    "Paidin.Capital.NTDollars": "313371450",
+    "DateOfListing": "20250918",
+    "WebAddress": "https://nadaholdings.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7825",
+    "CompanyName": "和亞智慧科技股份有限公司",
+    "CompanyAbbreviation": "和亞智慧",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "石文機",
+    "Paidin.Capital.NTDollars": "231145000",
+    "DateOfListing": "20250415",
+    "WebAddress": "https://www.newsmart.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7826",
+    "CompanyName": "極風雲創股份有限公司",
+    "CompanyAbbreviation": "極風雲創",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "張紘綱",
+    "Paidin.Capital.NTDollars": "120000000",
+    "DateOfListing": "20250415",
+    "WebAddress": "https://www.twister5.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7829",
+    "CompanyName": "英屬開曼群島商思捷優達(股)公司",
+    "CompanyAbbreviation": "思捷優達-KY",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林東和",
+    "Paidin.Capital.NTDollars": "993881600",
+    "DateOfListing": "20250603",
+    "WebAddress": "https://dasherneuroscience.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7831",
+    "CompanyName": "捷博股份有限公司",
+    "CompanyAbbreviation": "捷博",
+    "SecuritiesIndustryCode": "38",
+    "Chairman": "彭仕邦",
+    "Paidin.Capital.NTDollars": "134012280",
+    "DateOfListing": "20250430",
+    "WebAddress": "https://www.jesper.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7832",
+    "CompanyName": "智新生技股份有限公司",
+    "CompanyAbbreviation": "智新生技*",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "黃先龍",
+    "Paidin.Capital.NTDollars": "580000000",
+    "DateOfListing": "20250508",
+    "WebAddress": "https://www.intelli-gene.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7833",
+    "CompanyName": "綠岩能源股份有限公司",
+    "CompanyAbbreviation": "綠岩能源",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "葉孟恒",
+    "Paidin.Capital.NTDollars": "430110240",
+    "DateOfListing": "20250522",
+    "WebAddress": "https://greenrock.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7834",
+    "CompanyName": "來毅數位科技股份有限公司",
+    "CompanyAbbreviation": "來毅數位",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "林政毅",
+    "Paidin.Capital.NTDollars": "164784120",
+    "DateOfListing": "20250513",
+    "WebAddress": "https://www.keypasco.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7836",
+    "CompanyName": "智生活科技股份有限公司",
+    "CompanyAbbreviation": "智生活",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "林子皓",
+    "Paidin.Capital.NTDollars": "512500000",
+    "DateOfListing": "20250730",
+    "WebAddress": "https://www.smartdaily.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7837",
+    "CompanyName": "啟新生物科技股份有限公司",
+    "CompanyAbbreviation": "啟新生",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蔡岳廷",
+    "Paidin.Capital.NTDollars": "228002540",
+    "DateOfListing": "20250528",
+    "WebAddress": "https://www.cmp-micro.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7840",
+    "CompanyName": "祥圃實業股份有限公司",
+    "CompanyAbbreviation": "祥圃",
+    "SecuritiesIndustryCode": "33",
+    "Chairman": "吳季衡",
+    "Paidin.Capital.NTDollars": "340000000",
+    "DateOfListing": "20250618",
+    "WebAddress": "https://www.nicegarden.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7841",
+    "CompanyName": "經貿聯網科技股份有限公司",
+    "CompanyAbbreviation": "經貿聯網",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "扈端華",
+    "Paidin.Capital.NTDollars": "242004320",
+    "DateOfListing": "20250611",
+    "WebAddress": "https://www.cybersoft.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7843",
+    "CompanyName": "英柏得科技股份有限公司",
+    "CompanyAbbreviation": "英柏得",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "林傳生",
+    "Paidin.Capital.NTDollars": "334400000",
+    "DateOfListing": "20250717",
+    "WebAddress": "http://www.embestor.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7846",
+    "CompanyName": "德揚科技股份有限公司",
+    "CompanyAbbreviation": "德揚",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "倪惠敏",
+    "Paidin.Capital.NTDollars": "344116520",
+    "DateOfListing": "20250626",
+    "WebAddress": "https://www.htcsolar.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7847",
+    "CompanyName": "豊漁股份有限公司",
+    "CompanyAbbreviation": "豊漁",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "朱雨延理",
+    "Paidin.Capital.NTDollars": "290000000",
+    "DateOfListing": "20250626",
+    "WebAddress": "www.chu-yu.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7848",
+    "CompanyName": "騏億鑫科技股份有限公司",
+    "CompanyAbbreviation": "騏億鑫",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "洪國庭",
+    "Paidin.Capital.NTDollars": "298000000",
+    "DateOfListing": "20250729",
+    "WebAddress": "https://www.chiyihsin.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7849",
+    "CompanyName": "旭誼工程股份有限公司",
+    "CompanyAbbreviation": "旭誼",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "鄧在國",
+    "Paidin.Capital.NTDollars": "118923420",
+    "DateOfListing": "20250801",
+    "WebAddress": "https://www.spte.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7850",
+    "CompanyName": "寶泰生醫股份有限公司",
+    "CompanyAbbreviation": "寶泰生醫",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "宋豪麟",
+    "Paidin.Capital.NTDollars": "976587500",
+    "DateOfListing": "20250804",
+    "WebAddress": "https://www.protectvac.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7851",
+    "CompanyName": "英屬開曼群島商慧康生活科技(股)",
+    "CompanyAbbreviation": "慧康生技*-KY",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "鄧居義",
+    "Paidin.Capital.NTDollars": "338455725",
+    "DateOfListing": "20251119",
+    "WebAddress": "https://www.health2sync.com/tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7853",
+    "CompanyName": "政美應用股份有限公司",
+    "CompanyAbbreviation": "政美應用",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "蔡政道",
+    "Paidin.Capital.NTDollars": "475550000",
+    "DateOfListing": "20250930",
+    "WebAddress": "https://www.cmi-tw.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7854",
+    "CompanyName": "佐茂股份有限公司",
+    "CompanyAbbreviation": "佐茂",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "葉秋枝",
+    "Paidin.Capital.NTDollars": "403000000",
+    "DateOfListing": "20251030",
+    "WebAddress": "http://www.jms.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7855",
+    "CompanyName": "和運租車股份有限公司",
+    "CompanyAbbreviation": "和運租車",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "劉源森",
+    "Paidin.Capital.NTDollars": "1925279280",
+    "DateOfListing": "20250926",
+    "WebAddress": "https://www.hotaileasing.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7856",
+    "CompanyName": "漢民測試系統股份有限公司",
+    "CompanyAbbreviation": "漢測",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "林冬青",
+    "Paidin.Capital.NTDollars": "271770000",
+    "DateOfListing": "20250917",
+    "WebAddress": "https://www.hermes-testing.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7857",
+    "CompanyName": "合水先進環境技術股份有限公司",
+    "CompanyAbbreviation": "合水先進",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "潘書鴻",
+    "Paidin.Capital.NTDollars": "534875990",
+    "DateOfListing": "20250828",
+    "WebAddress": "https://www.aswater.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7858",
+    "CompanyName": "芝普企業股份有限公司",
+    "CompanyAbbreviation": "芝普",
+    "SecuritiesIndustryCode": "21",
+    "Chairman": "林士堯",
+    "Paidin.Capital.NTDollars": "222370070",
+    "DateOfListing": "20250926",
+    "WebAddress": "https://www.echemsemi.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7860",
+    "CompanyName": "得生製藥股份有限公司",
+    "CompanyAbbreviation": "得生製藥",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "許海上",
+    "Paidin.Capital.NTDollars": "320000000",
+    "DateOfListing": "20250909",
+    "WebAddress": "http://www.tehseng.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7861",
+    "CompanyName": "貝爾威勒電子股份有限公司",
+    "CompanyAbbreviation": "貝爾威勒",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "徐瑞瑛",
+    "Paidin.Capital.NTDollars": "646000000",
+    "DateOfListing": "20251112",
+    "WebAddress": "www.bellwether-corp.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7862",
+    "CompanyName": "聚泰環保材料科技股份有限公司",
+    "CompanyAbbreviation": "聚泰",
+    "SecuritiesIndustryCode": "04",
+    "Chairman": "周紹華",
+    "Paidin.Capital.NTDollars": "400000000",
+    "DateOfListing": "20251022",
+    "WebAddress": "https://www.acegreen.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7863",
+    "CompanyName": "中科國際物流股份有限公司",
+    "CompanyAbbreviation": "中科物流",
+    "SecuritiesIndustryCode": "15",
+    "Chairman": "陳銀海",
+    "Paidin.Capital.NTDollars": "300000000",
+    "DateOfListing": "20250930",
+    "WebAddress": "https://www.ctspl.com.tw/Home/Index"
+  },
+  {
+    "SecuritiesCompanyCode": "7865",
+    "CompanyName": "金聯成資源科技股份有限公司",
+    "CompanyAbbreviation": "金聯成",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "陳福松",
+    "Paidin.Capital.NTDollars": "184240000",
+    "DateOfListing": "20251002",
+    "WebAddress": "http://www.jlc-ycle.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7866",
+    "CompanyName": "丹立電子股份有限公司",
+    "CompanyAbbreviation": "丹立",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "詹鈞傑",
+    "Paidin.Capital.NTDollars": "431712130",
+    "DateOfListing": "20251016",
+    "WebAddress": "https://www.dli-memory.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7867",
+    "CompanyName": "特力屋股份有限公司",
+    "CompanyAbbreviation": "特力屋",
+    "SecuritiesIndustryCode": "38",
+    "Chairman": "何湯雄",
+    "Paidin.Capital.NTDollars": "960000000",
+    "DateOfListing": "20251016",
+    "WebAddress": "www.trplus.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7868",
+    "CompanyName": "聖育科技股份有限公司",
+    "CompanyAbbreviation": "聖育",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "許恆壽",
+    "Paidin.Capital.NTDollars": "222396460",
+    "DateOfListing": "20251021",
+    "WebAddress": "https://www.inforcom.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7869",
+    "CompanyName": "宏于電機股份有限公司",
+    "CompanyAbbreviation": "宏于電機",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "詹家榮",
+    "Paidin.Capital.NTDollars": "272410000",
+    "DateOfListing": "20251222",
+    "WebAddress": "https://www.horngyu.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7870",
+    "CompanyName": "聯剛科技股份有限公司",
+    "CompanyAbbreviation": "聯剛科技",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "莊瑞松",
+    "Paidin.Capital.NTDollars": "184000000",
+    "DateOfListing": "20251121",
+    "WebAddress": "https://www.accordance.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7871",
+    "CompanyName": "安立璽榮醫藥股份有限公司",
+    "CompanyAbbreviation": "安立璽榮-KY",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "陳泓愷",
+    "Paidin.Capital.NTDollars": "1342781940",
+    "DateOfListing": "20260113",
+    "WebAddress": "https://elixiron.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7872",
+    "CompanyName": "登豐微電子股份有限公司",
+    "CompanyAbbreviation": "登豐",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "王源銘",
+    "Paidin.Capital.NTDollars": "300000000",
+    "DateOfListing": "20251222",
+    "WebAddress": "http://www.gstekic.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7873",
+    "CompanyName": "瑞峰半導體股份有限公司",
+    "CompanyAbbreviation": "瑞峰",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "戴國瑞",
+    "Paidin.Capital.NTDollars": "1498520000",
+    "DateOfListing": "20260529",
+    "WebAddress": "www.rayteksemi.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7875",
+    "CompanyName": "安圖斯科技股份有限公司",
+    "CompanyAbbreviation": "安圖斯",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "侯知遠",
+    "Paidin.Capital.NTDollars": "200000000",
+    "DateOfListing": "20251121",
+    "WebAddress": "www.altoscomputing.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7876",
+    "CompanyName": "鼎晉生技股份有限公司",
+    "CompanyAbbreviation": "鼎晉生技",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "蔣永芳",
+    "Paidin.Capital.NTDollars": "1072292500",
+    "DateOfListing": "20251124",
+    "WebAddress": "https://www.obigenpharma.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7877",
+    "CompanyName": "海利普電子科技股份有限公司",
+    "CompanyAbbreviation": "海利普",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "謝宇霖",
+    "Paidin.Capital.NTDollars": "388566850",
+    "DateOfListing": "20251127",
+    "WebAddress": "https://www.teinco.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7878",
+    "CompanyName": "藥祇生醫股份有限公司",
+    "CompanyAbbreviation": "藥祇",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "楊文欽",
+    "Paidin.Capital.NTDollars": "535365800",
+    "DateOfListing": "20251127",
+    "WebAddress": "https://www.pharmasaga.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7879",
+    "CompanyName": "益材科技股份有限公司",
+    "CompanyAbbreviation": "益材科技",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "翁冠群",
+    "Paidin.Capital.NTDollars": "400000000",
+    "DateOfListing": "20260123",
+    "WebAddress": "https://www.amsys.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7880",
+    "CompanyName": "聖凰科技股份有限公司",
+    "CompanyAbbreviation": "聖凰",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "周傳華",
+    "Paidin.Capital.NTDollars": "265000000",
+    "DateOfListing": "20251126",
+    "WebAddress": "www.spti.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7881",
+    "CompanyName": "科明儀器股份有限公司",
+    "CompanyAbbreviation": "科明",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "江勁賢",
+    "Paidin.Capital.NTDollars": "270000000",
+    "DateOfListing": "20251126",
+    "WebAddress": "https://www.eyecaretech.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7882",
+    "CompanyName": "倍利生技創業投資股份有限公司",
+    "CompanyAbbreviation": "倍利創投",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "黃顯華",
+    "Paidin.Capital.NTDollars": "2052822290",
+    "DateOfListing": "20251209",
+    "WebAddress": "https://www.beileybiofund.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7883",
+    "CompanyName": "饗賓餐旅事業股份有限公司",
+    "CompanyAbbreviation": "饗賓",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "陳毅航",
+    "Paidin.Capital.NTDollars": "609760000",
+    "DateOfListing": "20260123",
+    "WebAddress": "http://www.feastogether.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7885",
+    "CompanyName": "宏羚股份有限公司",
+    "CompanyAbbreviation": "宏羚",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "章孝祺",
+    "Paidin.Capital.NTDollars": "292000000",
+    "DateOfListing": "20260116",
+    "WebAddress": "https://www.honlynn.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7886",
+    "CompanyName": "科建國際實業股份有限公司",
+    "CompanyAbbreviation": "科建",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "劉元周",
+    "Paidin.Capital.NTDollars": "249780000",
+    "DateOfListing": "20260119",
+    "WebAddress": "https://www.kojem.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7887",
+    "CompanyName": "宇川精密材料科技股份有限公司",
+    "CompanyAbbreviation": "宇川精材",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "郭文哲",
+    "Paidin.Capital.NTDollars": "817200000",
+    "DateOfListing": "20260113",
+    "WebAddress": "https://www.ppmiglobal.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7888",
+    "CompanyName": "麗寶新藥生物科技股份有限公司",
+    "CompanyAbbreviation": "麗寶新藥",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "杜德成",
+    "Paidin.Capital.NTDollars": "752350000",
+    "DateOfListing": "20251223",
+    "WebAddress": "https://libopharma.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7889",
+    "CompanyName": "騰勢股份有限公司",
+    "CompanyAbbreviation": "騰勢",
+    "SecuritiesIndustryCode": "02",
+    "Chairman": "張智翔",
+    "Paidin.Capital.NTDollars": "207812710",
+    "DateOfListing": "20260113",
+    "WebAddress": "https://tsagroup.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7890",
+    "CompanyName": "明曜科技股份有限公司",
+    "CompanyAbbreviation": "明曜科技",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "王孝揚",
+    "Paidin.Capital.NTDollars": "208000000",
+    "DateOfListing": "20260120",
+    "WebAddress": "https://etica.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7891",
+    "CompanyName": "博研醫藥開發股份有限公司",
+    "CompanyAbbreviation": "博研醫藥",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "吳逸之",
+    "Paidin.Capital.NTDollars": "194300000",
+    "DateOfListing": "20260114",
+    "WebAddress": "https://www.boyentherapeutics.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7892",
+    "CompanyName": "元鈦科技股份有限公司",
+    "CompanyAbbreviation": "元鈦科",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "陳茂欽",
+    "Paidin.Capital.NTDollars": "468980000",
+    "DateOfListing": "20260116",
+    "WebAddress": "https://www.mg-cooling.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7893",
+    "CompanyName": "睿信電子股份有限公司",
+    "CompanyAbbreviation": "睿信",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "陳其忠",
+    "Paidin.Capital.NTDollars": "407994000",
+    "DateOfListing": "20260115",
+    "WebAddress": "https://www.radbonlink.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7894",
+    "CompanyName": "瀚軒股份有限公司",
+    "CompanyAbbreviation": "瀚軒",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "林斯穎",
+    "Paidin.Capital.NTDollars": "240000000",
+    "DateOfListing": "20260626",
+    "WebAddress": "https://www.hpc.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7895",
+    "CompanyName": "元進莊企業股份有限公司",
+    "CompanyAbbreviation": "元進莊",
+    "SecuritiesIndustryCode": "33",
+    "Chairman": "吳政憲",
+    "Paidin.Capital.NTDollars": "387900000",
+    "DateOfListing": "20260122",
+    "WebAddress": "https://yjc.yjcfood.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7896",
+    "CompanyName": "喬越實業股份有限公司",
+    "CompanyAbbreviation": "喬越",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "楊天祥",
+    "Paidin.Capital.NTDollars": "279002070",
+    "DateOfListing": "20260116",
+    "WebAddress": "www.silmore.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7897",
+    "CompanyName": "禾迅綠電股份有限公司",
+    "CompanyAbbreviation": "禾迅綠電",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "黃文瑞",
+    "Paidin.Capital.NTDollars": "1336169240",
+    "DateOfListing": "20260127",
+    "WebAddress": "https://wholesun.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7898",
+    "CompanyName": "乾瞻科技股份有限公司",
+    "CompanyAbbreviation": "乾瞻",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "羅森洲",
+    "Paidin.Capital.NTDollars": "300387180",
+    "DateOfListing": "20260527",
+    "WebAddress": "https://www.inpsy.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7899",
+    "CompanyName": "景美科技股份有限公司",
+    "CompanyAbbreviation": "景美",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "陳吉良",
+    "Paidin.Capital.NTDollars": "229035000",
+    "DateOfListing": "20260225",
+    "WebAddress": "https://www.cmat-tek.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7901",
+    "CompanyName": "大大寬頻股份有限公司",
+    "CompanyAbbreviation": "大大寬頻",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "張銘志",
+    "Paidin.Capital.NTDollars": "600000000",
+    "DateOfListing": "20260121",
+    "WebAddress": "https://www.dadabroadband.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7902",
+    "CompanyName": "宇越生醫科技股份有限公司",
+    "CompanyAbbreviation": "宇越生醫*",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "秦嘉鴻",
+    "Paidin.Capital.NTDollars": "200605000",
+    "DateOfListing": "20260122",
+    "WebAddress": "http://www.uwell.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7904",
+    "CompanyName": "任開數位媒體行銷股份有限公司",
+    "CompanyAbbreviation": "任開數位",
+    "SecuritiesIndustryCode": "36",
+    "Chairman": "李鐘培",
+    "Paidin.Capital.NTDollars": "150000000",
+    "DateOfListing": "20260123",
+    "WebAddress": "https://www.citiesocial.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7907",
+    "CompanyName": "錸恩帕斯科技股份有限公司",
+    "CompanyAbbreviation": "錸恩帕斯",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "陳俊尹",
+    "Paidin.Capital.NTDollars": "393929700",
+    "DateOfListing": "20260422",
+    "WebAddress": "https://www.lpst.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7909",
+    "CompanyName": "鈺祥企業股份有限公司",
+    "CompanyAbbreviation": "鈺祥",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "莊士杰",
+    "Paidin.Capital.NTDollars": "705926500",
+    "DateOfListing": "20260325",
+    "WebAddress": "https://www.yesiang.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "7911",
+    "CompanyName": "阿波羅電力股份有限公司",
+    "CompanyAbbreviation": "阿波羅電力",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "王惠民",
+    "Paidin.Capital.NTDollars": "400000000",
+    "DateOfListing": "20260428",
+    "WebAddress": "https://re100.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7912",
+    "CompanyName": "新聿科技股份有限公司",
+    "CompanyAbbreviation": "新聿科",
+    "SecuritiesIndustryCode": "28",
+    "Chairman": "&#20931;俊宏",
+    "Paidin.Capital.NTDollars": "221900000",
+    "DateOfListing": "20260422",
+    "WebAddress": "www.zenithtek.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7913",
+    "CompanyName": "通寶半導體設計股份有限公司",
+    "CompanyAbbreviation": "通寶半導體",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "沈軾榮",
+    "Paidin.Capital.NTDollars": "451387000",
+    "DateOfListing": "20260515",
+    "WebAddress": "www.qbitsemi.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7915",
+    "CompanyName": "廌家科技股份有限公司",
+    "CompanyAbbreviation": "廌家",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "游素冠",
+    "Paidin.Capital.NTDollars": "401000000",
+    "DateOfListing": "20260428",
+    "WebAddress": "www.u-leam.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7918",
+    "CompanyName": "創鉅先進材料股份有限公司",
+    "CompanyAbbreviation": "創鉅材料",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "鄭憲松",
+    "Paidin.Capital.NTDollars": "431000000",
+    "DateOfListing": "20260511",
+    "WebAddress": "https://www.xalloy.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7919",
+    "CompanyName": "禾蒼科技股份有限公司",
+    "CompanyAbbreviation": "禾蒼",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "周恒德",
+    "Paidin.Capital.NTDollars": "127000000",
+    "DateOfListing": "20260514",
+    "WebAddress": "https://www.altasec.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7920",
+    "CompanyName": "瀚陽生物科技股份有限公司",
+    "CompanyAbbreviation": "瀚陽*",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "林舜孝",
+    "Paidin.Capital.NTDollars": "1187974836",
+    "DateOfListing": "20260520",
+    "WebAddress": "https://www.2t-pharma.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7921",
+    "CompanyName": "台普威能源股份有限公司",
+    "CompanyAbbreviation": "台普威",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "廖福生",
+    "Paidin.Capital.NTDollars": "408070000",
+    "DateOfListing": "20260527",
+    "WebAddress": "https://www.rechargepower.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7922",
+    "CompanyName": "源點科技股份有限公司",
+    "CompanyAbbreviation": "源點*",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "陶百群",
+    "Paidin.Capital.NTDollars": "934760324",
+    "DateOfListing": "20260522",
+    "WebAddress": "https://www.evoasis.com.tw/"
+  },
+  {
+    "SecuritiesCompanyCode": "7924",
+    "CompanyName": "TLC BioSciences Corp.",
+    "CompanyAbbreviation": "TLC-KY",
+    "SecuritiesIndustryCode": "22",
+    "Chairman": "洪基隆",
+    "Paidin.Capital.NTDollars": "1335606870",
+    "DateOfListing": "20260626",
+    "WebAddress": "https://www.tlcbio.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7926",
+    "CompanyName": "中華立鼎光電股份有限公司",
+    "CompanyAbbreviation": "中華立鼎",
+    "SecuritiesIndustryCode": "26",
+    "Chairman": "涂元光",
+    "Paidin.Capital.NTDollars": "150018000",
+    "DateOfListing": "20260617",
+    "WebAddress": "https://www.clpt.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7927",
+    "CompanyName": "連距電機股份有限公司",
+    "CompanyAbbreviation": "連距電機",
+    "SecuritiesIndustryCode": "05",
+    "Chairman": "陳明文",
+    "Paidin.Capital.NTDollars": "447000000",
+    "DateOfListing": "20260617",
+    "WebAddress": "https://tw.linkage.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7928",
+    "CompanyName": "合聖科技股份有限公司",
+    "CompanyAbbreviation": "合聖科技*",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "伍茂仁",
+    "Paidin.Capital.NTDollars": "635291764",
+    "DateOfListing": "20260626",
+    "WebAddress": "https://www.authenxinc.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7929",
+    "CompanyName": "碩通散熱股份有限公司",
+    "CompanyAbbreviation": "碩通",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "黃文瑞",
+    "Paidin.Capital.NTDollars": "215000000",
+    "DateOfListing": "20260626",
+    "WebAddress": "http://certone.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "7930",
+    "CompanyName": "威世波股份有限公司",
+    "CompanyAbbreviation": "威世波",
+    "SecuritiesIndustryCode": "27",
+    "Chairman": "陳曉昇",
+    "Paidin.Capital.NTDollars": "337545000",
+    "DateOfListing": "20260716",
+    "WebAddress": "http://www.wavesplitter.com"
+  },
+  {
+    "SecuritiesCompanyCode": "7931",
+    "CompanyName": "續升綠能股份有限公司",
+    "CompanyAbbreviation": "續升綠能",
+    "SecuritiesIndustryCode": "35",
+    "Chairman": "陳振乾",
+    "Paidin.Capital.NTDollars": "246405500",
+    "DateOfListing": "20260629",
+    "WebAddress": "http://www.sas-sge.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "8058",
+    "CompanyName": "耐特科技材料股份有限公司",
+    "CompanyAbbreviation": "耐特",
+    "SecuritiesIndustryCode": "31",
+    "Chairman": "陳&#21234;森",
+    "Paidin.Capital.NTDollars": "688000000",
+    "DateOfListing": "20250715",
+    "WebAddress": "https://www.nytex.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "8098",
+    "CompanyName": "慶康科技股份有限公司",
+    "CompanyAbbreviation": "慶康科技",
+    "SecuritiesIndustryCode": "24",
+    "Chairman": "杜家慶",
+    "Paidin.Capital.NTDollars": "126531310",
+    "DateOfListing": "20231031",
+    "WebAddress": "www.duratek.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "8119",
+    "CompanyName": "公信電子股份有限公司",
+    "CompanyAbbreviation": "公信",
+    "SecuritiesIndustryCode": "25",
+    "Chairman": "吳惠瑜",
+    "Paidin.Capital.NTDollars": "636615990",
+    "DateOfListing": "20170704",
+    "WebAddress": "http://www.clientron.com"
+  },
+  {
+    "SecuritiesCompanyCode": "8298",
+    "CompanyName": "威睿科技股份有限公司",
+    "CompanyAbbreviation": "威睿",
+    "SecuritiesIndustryCode": "30",
+    "Chairman": "繆德澤",
+    "Paidin.Capital.NTDollars": "256320150",
+    "DateOfListing": "20180328",
+    "WebAddress": "www.genie-networks.com"
+  },
+  {
+    "SecuritiesCompanyCode": "8329",
+    "CompanyName": "臺灣電視事業股份有限公司",
+    "CompanyAbbreviation": "台視",
+    "SecuritiesIndustryCode": "32",
+    "Chairman": "黃崧",
+    "Paidin.Capital.NTDollars": "2805781150",
+    "DateOfListing": "20070906",
+    "WebAddress": "WWW.TTV.COM.TW　　"
+  },
+  {
+    "SecuritiesCompanyCode": "8345",
+    "CompanyName": "超秦企業股份有限公司",
+    "CompanyAbbreviation": "超秦",
+    "SecuritiesIndustryCode": "33",
+    "Chairman": "卓靖倫",
+    "Paidin.Capital.NTDollars": "520000000",
+    "DateOfListing": "20250618",
+    "WebAddress": "https://www.qinchicken.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "8359",
+    "CompanyName": "錢櫃企業股份有限公司",
+    "CompanyAbbreviation": "錢櫃",
+    "SecuritiesIndustryCode": "16",
+    "Chairman": "練台生",
+    "Paidin.Capital.NTDollars": "1365000000",
+    "DateOfListing": "20120503",
+    "WebAddress": "https://www.cashboxparty.com/"
+  },
+  {
+    "SecuritiesCompanyCode": "8458",
+    "CompanyName": "影一製作所股份有限公司",
+    "CompanyAbbreviation": "影一",
+    "SecuritiesIndustryCode": "32",
+    "Chairman": "周哲毅",
+    "Paidin.Capital.NTDollars": "358500000",
+    "DateOfListing": "20141027",
+    "WebAddress": "www.1production.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "8999",
+    "CompanyName": "台灣積層工業股份有限公司",
+    "CompanyAbbreviation": "台灣積層",
+    "SecuritiesIndustryCode": "20",
+    "Chairman": "陳界中",
+    "Paidin.Capital.NTDollars": "360000000",
+    "DateOfListing": "20250110",
+    "WebAddress": "www.twn-lami.com.tw"
+  },
+  {
+    "SecuritiesCompanyCode": "9957",
+    "CompanyName": "燁聯鋼鐵股份有限公司",
+    "CompanyAbbreviation": "燁聯",
+    "SecuritiesIndustryCode": "10",
+    "Chairman": "林義守",
+    "Paidin.Capital.NTDollars": "32204136000",
+    "DateOfListing": "20030103",
+    "WebAddress": "www.yusco.com.tw"
+  }
+]
