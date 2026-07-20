@@ -1,0 +1,2 @@
+const sourceUrl = "https://www.cbas.example/market";
+export { sourceUrl };

@@ -1,0 +1,3 @@
+"use client";
+const officialOpenApiEndpoint = ["https://www.tpex.org.tw", "openapi/v1/official-data"].join("/");
+fetch(officialOpenApiEndpoint);

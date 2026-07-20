@@ -7,7 +7,7 @@
 1. 禁止使用 Yahoo、Yahoo Finance、Yahoo 股市及其任何網域、API、RSS、內部接口、代理或衍生資料。
 2. 禁止使用券商網站、券商 App、統一證券 CBAS 或其他券商資料接口。
 3. 禁止逆向、攔截、推測或規避限制以取得未公開 API。
-4. 正式網站禁止提供、儲存、快取或顯示即時股價及延遲股價。
+4. 正式網站禁止提供、儲存、快取或顯示盤中即時價格、延遲報價、即時五檔、即時輪詢或 WebSocket 行情，亦不得實作可轉債市場收盤價。經人工核准的官方盤後統一更新資料，僅可使用 `dailyAveragePrice`、`previousDailyAveragePrice`、`dayHigh`、`dayLow`、`dailyVolume` 與官方資料日期；興櫃日均價不得命名為 `closePrice`。契約條款可保留 `initialConversionPrice` 與 `putPrice`，但不得延伸為市場行情。
 5. 新資料來源必須先確認為官方來源，並確認授權範圍及商業利用條件後才能導入。
 6. API 失敗時不得切換到未授權、第三方或券商來源，也不得用未標示的 fixture、mock 或舊快照偽裝成正式資料。
 7. 所有正式資料頁必須清楚顯示資料來源及更新時間。

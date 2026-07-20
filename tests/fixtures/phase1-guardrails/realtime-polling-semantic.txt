@@ -1,0 +1,2 @@
+const latestSnapshot = { dailyAveragePrice: "42.00" };
+setInterval(() => refreshLatestData(latestSnapshot), 60_000);

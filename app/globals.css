@@ -160,7 +160,6 @@ button { cursor: pointer; }
 .status-chip.normal { color: #236148; background: var(--teal-soft); }
 .status-chip.low { color: #76551c; background: var(--amber-soft); }
 .status-chip.warning { color: #8f312c; background: var(--red-soft); }
-.price-cell { color: #172a36; font-size: 12px; font-weight: 750; }
 .change { min-width: 82px; text-align: right; font-variant-numeric: tabular-nums; }
 .change b { font-weight: 750; }
 .up { color: var(--red) !important; }
@@ -428,7 +427,6 @@ button { cursor: pointer; }
   .data-table th { height: 38px; font-size: 10px; }
   .data-table td { height: 46px; padding-top: 8px; padding-bottom: 8px; }
   .subtext, .tag, .status-chip, .signal-chip, .event-type, .pricing-chip { font-size: 10px; }
-  .price-cell { font-size: 13px; }
   .priority-grid button > b, .signal-legend span { font-size: 12px; }
   .priority-grid button > small, .priority-grid button > i, .signal-legend small { font-size: 10px; }
   .priority-grid button > strong, .ipo-stage-head b, .ipo-company-line b { font-size: 11px; }

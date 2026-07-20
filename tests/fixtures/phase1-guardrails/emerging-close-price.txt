@@ -1,0 +1,1 @@
+type EmergingEndOfDay = { closePrice: string };

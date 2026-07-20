@@ -1,0 +1,2 @@
+const provider = "Yahoo Finance";
+export { provider };

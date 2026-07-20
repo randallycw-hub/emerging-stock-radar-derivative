@@ -1,0 +1,9 @@
+export const allowedEndOfDayAndContractualFields = {
+  dailyAveragePrice: "42.00",
+  previousDailyAveragePrice: "41.50",
+  dayHigh: "43.00",
+  dayLow: "40.50",
+  dailyVolume: "12000",
+  initialConversionPrice: "38.00",
+  putPrice: "101.00",
+};

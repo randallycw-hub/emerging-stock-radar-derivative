@@ -1,0 +1,3 @@
+const brokerFallback = "https://broker.example/market";
+const proxyFallbackUrl = "https://market-proxy.example/data";
+export { brokerFallback, proxyFallbackUrl };
