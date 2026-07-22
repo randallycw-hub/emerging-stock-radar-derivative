@@ -265,11 +265,8 @@ test("monthly revenue amounts are non-negative while growth percentages allow si
 
 test("approved end-of-day and contractual decimal field names are accepted", () => {
   const endOfDay = EndOfDayMarketDataSchema.parse({
-    id: "eod:7777:2026-07-19",
-    companyId: company.id,
     market: "emerging",
     tradingDate: "2026-07-19",
-    sourceTime: "18:00:00",
     priceSemantics: "emerging_daily_average",
     dailyAveragePrice: "42.5",
     previousDailyAveragePrice: "41.5",
@@ -307,13 +304,15 @@ test("approved end-of-day and contractual decimal field names are accepted", () 
 
 test("emerging end-of-day data requires daily-average semantics", () => {
   const base = {
-    id: "eod:7777:2026-07-19",
-    companyId: company.id,
     market: "emerging",
     tradingDate: "2026-07-19",
-    sourceTime: "18:00:00",
     priceSemantics: "emerging_daily_average",
     dailyAveragePrice: "42.5",
+    previousDailyAveragePrice: "41.5",
+    dayHigh: "43",
+    dayLow: "41",
+    dailyVolume: "100000",
+    dailyTurnover: "4250000",
     sourceAttribution: officialAttribution,
   };
   assert.equal(EndOfDayMarketDataSchema.parse(base).priceSemantics, "emerging_daily_average");
@@ -327,36 +326,45 @@ test("emerging end-of-day data requires daily-average semantics", () => {
   assert.throws(
     () => EndOfDayMarketDataSchema.parse({
       ...base,
-      dailyAveragePrice: undefined,
+      previousDailyAveragePrice: undefined,
     }),
-    /dailyAveragePrice/,
+    /previousDailyAveragePrice/,
   );
+  for (const extraKey of ["id", "companyId", "sourceTime"]) {
+    assert.throws(
+      () => EndOfDayMarketDataSchema.parse({ ...base, [extraKey]: "not-approved" }),
+      /unknown key/,
+      extraKey,
+    );
+  }
 });
 
 test("strict schemas reject prohibited market, analysis, and prediction keys", () => {
   const base = {
-    id: "eod:7777:2026-07-19",
-    companyId: company.id,
     market: "emerging",
     tradingDate: "2026-07-19",
-    sourceTime: "18:00:00",
     priceSemantics: "emerging_daily_average",
     dailyAveragePrice: "42.5",
+    previousDailyAveragePrice: "41.5",
+    dayHigh: "43",
+    dayLow: "41",
+    dailyVolume: "100000",
+    dailyTurnover: "4250000",
     sourceAttribution: officialAttribution,
   };
   const prohibitedKeys = [
-    "livePrice",
-    "realtimePrice",
-    "streamingPrice",
-    "bidPrice",
-    "askPrice",
+    "live",
+    "realtime",
+    "streaming",
+    "bid",
+    "ask",
     "orderBook",
-    "intradayTrades",
+    "intraday",
     "conversionValue",
     "premiumDiscount",
-    "theoreticalPrice",
-    "arbitrageSpread",
-    "targetPrice",
+    "theoretical",
+    "arbitrage",
+    "target",
     "expectedReturn",
     "closePrice",
     "closingPrice",
@@ -687,13 +695,15 @@ test("publishable schema manifest rejects every missing attribution", () => {
       name: "EndOfDayMarketData",
       schema: EndOfDayMarketDataSchema,
       value: {
-        id: "eod:7777:2026-07-19",
-        companyId: company.id,
         market: "emerging",
         tradingDate: "2026-07-19",
-        sourceTime: "18:00:00",
         priceSemantics: "emerging_daily_average",
         dailyAveragePrice: "42.5",
+        previousDailyAveragePrice: "41.5",
+        dayHigh: "43",
+        dayLow: "41",
+        dailyVolume: "100000",
+        dailyTurnover: "4250000",
         sourceAttribution: officialAttribution,
       },
       attributionKey: "sourceAttribution",

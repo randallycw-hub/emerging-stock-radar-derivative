@@ -488,11 +488,8 @@ export const EndOfDayMarketDataSchema = schema<EndOfDayMarketData>(
   (value) => {
     const input = record(value, "EndOfDayMarketData");
     strict(input, [
-      "id",
-      "companyId",
       "market",
       "tradingDate",
-      "sourceTime",
       "priceSemantics",
       "dailyAveragePrice",
       "previousDailyAveragePrice",
@@ -517,33 +514,38 @@ export const EndOfDayMarketDataSchema = schema<EndOfDayMarketData>(
         "EndOfDayMarketData for emerging companies requires emerging_daily_average semantics",
       );
     }
-    if (market === "emerging" && dailyAveragePrice === undefined) {
+    if (dailyAveragePrice === undefined) {
       throw new DomainValidationError(
-        "EndOfDayMarketData.dailyAveragePrice is required for emerging companies",
+        "EndOfDayMarketData.dailyAveragePrice is required",
       );
     }
+    const previousDailyAveragePrice = optionalPositiveDecimal(
+      input.previousDailyAveragePrice,
+      "EndOfDayMarketData.previousDailyAveragePrice",
+    );
+    if (previousDailyAveragePrice === undefined) {
+      throw new DomainValidationError(
+        "EndOfDayMarketData.previousDailyAveragePrice is required",
+      );
+    }
+    const dayHigh = optionalPositiveDecimal(input.dayHigh, "EndOfDayMarketData.dayHigh");
+    if (dayHigh === undefined) {
+      throw new DomainValidationError("EndOfDayMarketData.dayHigh is required");
+    }
+    const dayLow = optionalPositiveDecimal(input.dayLow, "EndOfDayMarketData.dayLow");
+    if (dayLow === undefined) {
+      throw new DomainValidationError("EndOfDayMarketData.dayLow is required");
+    }
     return {
-      id: requiredString(input.id, "EndOfDayMarketData.id"),
-      companyId: requiredString(input.companyId, "EndOfDayMarketData.companyId"),
       market,
       tradingDate: isoDate(input.tradingDate, "EndOfDayMarketData.tradingDate"),
-      sourceTime: requiredString(input.sourceTime, "EndOfDayMarketData.sourceTime"),
       priceSemantics,
       dailyAveragePrice,
-      previousDailyAveragePrice: optionalPositiveDecimal(
-        input.previousDailyAveragePrice,
-        "EndOfDayMarketData.previousDailyAveragePrice",
-      ),
-      dayHigh: optionalPositiveDecimal(input.dayHigh, "EndOfDayMarketData.dayHigh"),
-      dayLow: optionalPositiveDecimal(input.dayLow, "EndOfDayMarketData.dayLow"),
-      dailyVolume: optionalNonNegativeDecimal(
-        input.dailyVolume,
-        "EndOfDayMarketData.dailyVolume",
-      ),
-      dailyTurnover: optionalNonNegativeDecimal(
-        input.dailyTurnover,
-        "EndOfDayMarketData.dailyTurnover",
-      ),
+      previousDailyAveragePrice,
+      dayHigh,
+      dayLow,
+      dailyVolume: nonNegativeDecimal(input.dailyVolume, "EndOfDayMarketData.dailyVolume"),
+      dailyTurnover: nonNegativeDecimal(input.dailyTurnover, "EndOfDayMarketData.dailyTurnover"),
       sourceAttribution: sourceAttribution(input.sourceAttribution),
     };
   },

@@ -85,18 +85,15 @@ export interface MonthlyRevenue {
 }
 
 export interface EndOfDayMarketData {
-  id: string;
-  companyId: string;
   market: CompanyMarket;
   tradingDate: string;
-  sourceTime: string;
   priceSemantics: PriceSemantics;
-  dailyAveragePrice?: string;
-  previousDailyAveragePrice?: string;
-  dayHigh?: string;
-  dayLow?: string;
-  dailyVolume?: string;
-  dailyTurnover?: string;
+  dailyAveragePrice: string;
+  previousDailyAveragePrice: string;
+  dayHigh: string;
+  dayLow: string;
+  dailyVolume: string;
+  dailyTurnover: string;
   sourceAttribution: SourceAttribution;
 }
 
