@@ -1,54 +1,48 @@
-# 可轉換／交換債欄位對映
+# 可轉換／交換公司債欄位對映
 
-來源：櫃買中心 `bond_ISSBD5_data`；政府資料集 11406。2026-07-20 已依 Swagger、資料集、OGL 1.0 與實際欄位改列 `APPROVED`。批准只表示可在 Phase 5 依本白名單建立 adapter，本次文件審查不介接資料。
+資料集 11406「轉(交)換債發行資料下載」目前為 `APPROVED_FOR_V1_DESIGN`，不是 implementation 或 production 核准。候選資源為官方 CSV `ISSBD5_data.csv` 與 TPEx OpenAPI `/bond_ISSBD5_data`；正式 adapter 前須保存同日最小合法樣本、驗證兩者 schema，再只選一個主要 resource。
 
-| 外部欄位 | 內部欄位 | 型別／轉換 | 必填 | 語意 |
-|---|---|---|---|---|
-| `BondCode` | `bondCode` | trim 後非空字串；空值轉為 `undefined` | 否 | 官方債券代碼；官方私募債紀錄可能未提供 |
-| `IssuerCode` | `issuerIdentifier.value` | 字串 | 是 | 發行人公司代號 |
-| `IssuerName` | `issuerName` | trim 後字串 | 是 | 僅供識別對映，不作公司唯一鍵 |
-| `BondType` | `sourceBondTypeCode` | trim 後字串 | 是 | 先保存官方種類代碼；Phase 5 取得官方代碼表後才能映射 `bondKind` |
-| `SeriesNumber` | `seriesNumber` | trim 後字串 | 是 | 債券期別，也是空代碼紀錄的複合識別欄位 |
-| `TrancheNumber` | `trancheNumber` | trim 後字串 | 否 | 債券別，也是空代碼紀錄的複合識別欄位 |
-| `ShortName` | `shortName` | 字串 | 是 | 債券簡稱 |
-| `IssueDate` | `issueDate` | 正規化為 `YYYY-MM-DD` | 是 | 發行日 |
-| `MaturityDate` | `maturityDate` | `YYYY-MM-DD` | 是 | 到期日 |
-| `IssueAmount` | `issueAmount` | 十進位數值及明確單位 | 否 | 發行總額 |
-| `OutstandingAmount` | `outstandingAmount` | 十進位數值及明確單位 | 否 | 流通餘額，不是成交量 |
-| `CouponRate` | `couponRate` | decimal 字串或原始條款字串 | 否 | 票面利率 |
-| `Guaranteed` | `guaranteed` | 明確映射為 boolean | 否 | 有無擔保 |
-| `GuaranteeDescription` | `guaranteeDescription` | 字串 | 否 | 擔保情形 |
-| `Conversion/ExchangePriceAtIssuance` | `initialConversionPrice` | 正數 decimal | 否 | 發行時契約轉換／交換價格，不是行情 |
-| `PutOptionDate` | `putOptionDate` | `YYYY-MM-DD` | 否 | 賣回權日期 |
-| `PutOptionPrice` | `putPrice` | 正數 decimal | 否 | 契約賣回價格，不是行情 |
-| `Conversion/ExchangePeriodStartDate` | `conversionPeriodStartDate` | `YYYY-MM-DD` | 否 | 轉換／交換期間起日 |
-| `Conversion/ExchangePeriodEndDate` | `conversionPeriodEndDate` | `YYYY-MM-DD` | 否 | 轉換／交換期間迄日 |
-| `ListingDate` | `listingDate` | `YYYY-MM-DD` | 否 | 掛牌日期 |
-| `Underwriter` | `underwriter` | 字串 | 否 | 承銷機構 |
-| `Trustee` | `trustee` | 字串 | 否 | 受託人 |
-| `OutstandingChangeDate` | `outstandingChangeDate` | `YYYY-MM-DD` | 否 | 最近餘額變動日期 |
-| `OutstandingChangeDescription` | `outstandingChangeReason` | 字串 | 否 | 最近餘額變動原因 |
-| `OfferingMethod` | `offeringMethod` | 字串 | 否 | 募集方式 |
-| `Date` | `sourcePublishedOn` | `YYYY-MM-DD` | 是 | 來源資料日期 |
+## V1 欄位
 
-每筆資料另加 `SourceAttribution`：`sourceId`、`sourceRecordId`（優先用債券代碼；空值時用複合識別）、`originalUrl`、`publishedAt`、`retrievedAt`、`licenseName`、`attributionText`。
+| 官方欄位 | 內部欄位 | 規則 | 可得性 |
+|---|---|---|---|
+| 資料日期 | `officialDataDate` | `YYYY-MM-DD`，Asia/Taipei 日曆日 | 明列 |
+| 機構代碼 | `issuerCode` | trim；必要 | 明列 |
+| 機構名稱 | `issuerName` | trim；不作唯一鍵 | 明列 |
+| 債券代碼 | `bondCode` | trim；可空 | 明列 |
+| 債券種類 | `sourceBondTypeCode` | 保留官方值；需官方代碼表才映射 | 明列、語意待驗證 |
+| 債券期／債券別 | `seriesNumber`／`trancheNumber` | 空代碼時參與複合鍵 | 明列 |
+| 債券簡稱 | `shortName` | 必要 | 明列 |
+| 發行日期 | `issueDate` | 日期 | 明列 |
+| 掛牌日期 | `listingDate` | 可空日期 | 明列 |
+| 到期日期 | `maturityDate` | 日期且不得早於發行日 | 明列 |
+| 發行總額 | `issueAmount` | 非負 decimal＋單位 | 明列 |
+| 目前餘額 | `outstandingAmount` | 非負 decimal＋單位；不是成交量 | 明列 |
+| 票面利率 | `couponRate` | decimal 或經核准的條款字串 | 明列 |
+| 有無擔保／擔保情形 | `secured`／`securityDescription` | 官方值明確 mapping | 明列 |
+| 發行時轉換價格 | `initialConversionPrice` | 正 decimal；契約欄位 | 明列 |
+| 轉換期間起／迄 | `conversionStartDate`／`conversionEndDate` | 可空日期，順序驗證 | 明列 |
+| 賣回權日期 | `putDates` | 官方格式可能含多日，fixture 決定解析規則 | 明列、格式待驗證 |
+| 賣回權價格 | `putPrice` | 正 decimal；契約欄位 | 明列 |
+| 承銷機構 | `underwriter` | trim | 明列 |
+| 受託人 | `trustee` | trim | 明列 |
+| 最近餘額變動日 | `outstandingChangeDate` | 可空日期 | 明列 |
+| 最近餘額變動原因 | `outstandingChangeReason` | trim | 明列 |
+| 募集方式 | `offeringMethod` | 保留官方文字 | 明列 |
+| 發行公司市場別 | `issuerMarket` | 不由 11406 單獨推測；需已核准公司來源 | 非可靠直接欄位 |
+| 本站擷取日期 | `fetchedAt` | UTC ISO datetime | 本站 metadata |
 
-## 識別與去重
+使用者提出的 24 個候選欄位中，債券代碼、名稱、發行人、日期、金額、餘額、利率、擔保、契約價格、轉換期間、賣回權、承銷、受託、異動、募集方式與來源時間均有對應；「發行公司市場別」必須跨來源判定，不得假設。
 
-- 有債券代碼時：`Bond.id = "bond:" + bondCode`。
-- `BondCode` 空白時，使用 `IssuerCode + BondType + SeriesNumber + TrancheNumber + IssueDate` 形成穩定來源識別；UI 顯示「官方資料未提供債券代碼」，不得虛構代碼。
-- 發行人以公司正式代碼對映，不以名稱連結。
-- 同一債券代碼多筆時，依來源發布日保留最新快照；差異保留於匯入稽核紀錄。
-- 缺少發行人代碼、種類、發行日或到期日即拒絕正式發布；債券代碼空白時必須有完整複合識別欄位。
-- `BondType` 的數值代碼對應尚未由本輪資料集頁說明；Phase 5 必須取得官方代碼定義，否則只可保存 raw snapshot，不得正式發布 `bondKind`。
-- 來源消失不等於債券失效；只有正式狀態資料、到期日或連續完整快照規則可改變狀態。
+## 識別、去重與拒絕條件
 
-## 禁止欄位與語意
+- 有代碼：`bondId = "bond:" + normalizedBondCode`。
+- 無代碼：使用 `issuerCode + sourceBondTypeCode + seriesNumber + trancheNumber + issueDate` 的 hash；UI 明示官方未提供代碼。
+- 同 snapshot 重複鍵、發行人代碼缺失、發行／到期日無效或複合鍵不足時，整個 run 不得發布。
+- 同債券跨 snapshot 以 published snapshot ID 留存版本；不覆寫歷史。
+- source 消失不等於到期、下櫃或餘額歸零。
+- 禁止一般 `price`、`quote`、`closePrice`、`volume`、`change`、行情、轉換價值及套利欄位。
 
-不得在此模型加入一般化的 `price`、`quote`、`closePrice`、`change`、`changePercent`、`volume`、`candlestick`、`technicalIndicator`。`initialConversionPrice` 與 `putPrice` 必須完整命名，不得縮寫為一般 `price`。所有金額、利率及契約價格以 decimal 字串正規化，不能用 JavaScript 浮點數進行財務運算。
+## 升級 `VERIFIED_FOR_IMPLEMENTATION`
 
-個別可轉債日終行情需另有已 `APPROVED` 的官方資料源及獨立模型；目前無合格來源，因此不實作。
-
-## 白名單邊界
-
-只允許本表及 Source Registry 列出的發行、餘額、擔保、契約價格、轉換期間、承銷、受託、募集方式與餘額異動欄位。評等、幣別、還本說明、計付息細節及其他 Swagger 欄位不在第一版核准範圍。此來源不可用來產生市場成交價格。
+需完成：資料集頁與 resource 再核對、帶取得日期與 hash 的最小 CSV/OpenAPI fixture、source schema、所有白名單 mapping、債券種類代碼、賣回日格式、decimal 單位、錯誤樣本、顯名文字與授權證據。預設測試不得連線官方網站。

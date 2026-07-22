@@ -1,68 +1,46 @@
-# 事件產生規則
+# V1 事件產生規則
 
 ## 原則
 
-- 原始來源紀錄先正規化，再由純函式產生事件。
-- `CompanyEvent`、`BondEvent`、`BondStatus` 與 `BondAlertWindow` 分開保存，不得混成一個模型。
-- 事件一旦正式發布不因來源暫時消失而直接刪除。
-- 每一事件必須有完整 `SourceAttribution`。
-- 所有衍生事件固定顯示：「本事件由興債觀測網依官方日期欄位自動整理。」
+- 只有 published snapshot 可產生公開事件。
+- 官方事件、本站衍生事件、目前狀態與提醒窗口分開保存。
+- 衍生事件固定標示：「本事件由本站依官方公開資料欄位自動整理」。
+- 官方日期是 `Asia/Taipei` 的 `YYYY-MM-DD` 日曆日期；不先轉 UTC。計算時間使用 UTC ISO datetime。
 
-## 事件種類
+## 事件與可靠性
 
-| 種類 | 觸發 | 事件日期 | 標題範式 |
-|---|---|---|---|
-| `LISTING_APPLICATION` | 首次觀察到有效申請日 | 申請日 | `{公司}申請{上市／上櫃}` |
-| `LISTING_REVIEW` | 審議日期由空值變為有效日期 | 審議日 | `{公司}{上市／上櫃}申請進入審議` |
-| `LISTING_APPROVED` | 核准日期或狀態首次轉為核准 | 核准日 | `{公司}{上市／上櫃}申請獲核准` |
-| `LISTING_DATE_SET` | 掛牌／上市日期首次出現或變更 | 新日期 | `{公司}預定於{日期}{上市／上櫃}` |
-| `IPO` | 官方資料出現 IPO 公告 | 官方公告日或正式事件日 | `{公司}發布 IPO 事件` |
-| `AUCTION` | 競拍起迄或結果首次出現／變更 | 官方事件日 | `{公司}競拍事件` |
-| `LOTTERY` | 申購或抽籤日期首次出現／變更 | 官方事件日 | `{公司}公開申購／抽籤事件` |
-| `MATERIAL_ANNOUNCEMENT` | 官方重大公告具有穩定公告識別碼 | 發布日 | 使用正規化官方標題 |
-| `BOND_ISSUED` | 首次觀察到有效債券與發行日 | 發行日 | `{發行人}發行{債券簡稱}` |
-| `BOND_CONVERSION_STARTS` | 有效轉換／交換期間起日 | 起日 | `{債券簡稱}進入轉換／交換期間` |
-| `BOND_PUT_DATE` | 有效賣回權日期 | 賣回日 | `{債券簡稱}賣回權日期` |
-| `BOND_MATURES` | 有效到期日 | 到期日 | `{債券簡稱}到期` |
-| `BOND_BALANCE_CHANGED` | 完整成功快照的餘額與上一份不同 | 來源餘額變動日 | `{債券簡稱}餘額異動` |
-| `MARKET_IDENTITY_CHANGED` | 公司市場別有正式狀態變更 | 官方生效日 | `{公司}市場身分異動` |
+| 事件 | 來源欄位 | 規則 |
+|---|---|---|
+| 新掛牌可轉債 | `listingDate` | 首次發布有效日期；不是首次被本站看到的日期 |
+| 即將開始轉換 | `conversionStartDate` | 距離 1–30 日的窗口 |
+| 正在轉換期間 | 起日、迄日 | `start <= today <= end`；狀態，不重複建每日事件 |
+| 即將結束轉換 | `conversionEndDate` | 距離 1–30 日 |
+| 到期 30／60／90 日 | `maturityDate` | 分開窗口；同日可同時屬較寬窗口，但 UI 只顯示最近門檻 |
+| 賣回權日期接近 | `putDates[]` | 每個有效日期距離 1–30 日；同日去重 |
+| 餘額變化 | `outstandingAmount`、`outstandingChangeDate` | 兩個完整成功 snapshot 且數值不同；缺異動日不公開事件，只記品質警示 |
+| 已到期 | `maturityDate` | `today > maturityDate`；是日期衍生狀態，不代表已下櫃 |
+| 可能下櫃 | snapshot 消失 | 不公開；只進 `awaiting_official_confirmation` 內部狀態 |
+| 上市申請里程碑 | 11586 各日期 | 有效日期首次發布或官方修正 |
 
-## 去重與多來源
-
-基礎鍵：
+## 穩定鍵與修正
 
 ```text
-companyId | bondId-or-empty | eventKind | occurredOn | normalizedTitle
+entityId | eventKind | officialEffectiveDate | sourceId | ruleVersion
 ```
 
-- 同來源有穩定紀錄 ID 時加上 `sourceId + sourceRecordId` 作稽核鍵。
-- 同一事件由多個來源報導時，建立一個呈現事件並保留多筆 attribution。
-- 日期或狀態實質變更時建立修正紀錄；不覆寫已發布歷史。
-- 空白、全半形、標點及公司新舊名稱先正規化；公司關聯仍以 identifier 為準。
+- 相同鍵重跑為冪等。
+- 多來源指向同事件時可建立 presentation group，但每筆 attribution 保留。
+- 官方日期修正建立 revision，舊事件標 `superseded`，不靜默刪除。
+- 標題不參與唯一鍵，避免文字微調產生重複。
+- `ruleVersion` 改變時先 dry-run 比較事件數，再由獨立 migration 決定是否重算。
 
-## 目前狀態與提醒區間
+## 日期與格式錯誤
 
-`BondStatus` 只描述目前狀態：尚未開始轉換、轉換期間中、已結束轉換、即將到期、已到期、申請中、待官方確認。
+- 不存在日期、混合時區、到期早於發行、轉換迄日早於起日：拒絕該 snapshot 發布。
+- 可選日期缺失：不產生相應事件，不以發行日推測。
+- ROC 日期只有 source fixture 證明格式後才能轉換。
+- daylight-saving 不適用於臺北日曆日計算；`daysUntil` 以日曆日而非毫秒除法。
 
-`BondAlertWindow` 只描述日期窗口：
+## 完整發布關卡
 
-- 距離轉換開始 30 日內。
-- 距離轉換結束 30 日內。
-- 距離到期 30、60、90 日。
-- 距離賣回權日期 30 日內。
-
-窗口每天依 `Asia/Taipei` 日期重算，不建立假的官方事件；跨入窗口時可建立 `DerivedEvent`，但必須帶規則版本、計算時間與固定衍生聲明。
-
-## 狀態變更與資料消失
-
-- 首次同步只建立能由明確日期支持的事件，不能把所有現況推定成今天發生。
-- 只有完整成功同步可做消失比對；部分成功或 API 失敗完全不得判定下櫃。
-- 第一次在完整成功快照中消失：`missing_from_latest_snapshot`。
-- 連續多次完整成功快照仍未出現：`awaiting_official_confirmation`。
-- 只有取得正式狀態資料後才可改為 `delisted`、`matured` 或其他正式狀態。
-- 來源提供明確撤回、終止或駁回狀態時，才產生相對事件。
-- 來源欄位變更但語意不明時，拒絕該筆並使 ingestion run 為 `PARTIAL`。
-
-## 發布條件
-
-事件缺少公司或債券穩定識別、事件日期、原始網址、來源 ID、擷取時間、必要歸屬任一項，不得進入正式發布資料集。
+差異與事件可在 staging 計算，但只有 schema、正規化、完整性與 event validation 全部成功後，才隨 snapshot pointer 一起成為可見資料。失敗或 `PARTIAL` 不移動 pointer、不產生消失、歸零或公開部分事件。
