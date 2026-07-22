@@ -13,6 +13,7 @@ const METADATA_KEYS = new Set([
   "resourceUrl",
   "fetchedAt",
   "httpContentType",
+  "httpStatus",
   "sourceResponseSha256",
   "fixtureSha256",
   "sourceRowCount",
@@ -20,6 +21,7 @@ const METADATA_KEYS = new Set([
   "licenseName",
   "providerName",
   "manuallyReviewed",
+  "reviewedAt",
   "privacyReview",
   "samplingMethod",
 ]);
@@ -62,6 +64,7 @@ export function parseFixtureMetadata(value: unknown): FixtureMetadata {
   if (!isIsoDateTime(fetchedAt) || !fetchedAt.endsWith("Z")) {
     throw new TypeError("fetchedAt must be a UTC ISO datetime");
   }
+  const httpStatus = requireHttpStatus(record.httpStatus);
 
   const sourceRowCount = requireNonNegativeInteger(record.sourceRowCount, "sourceRowCount");
   const fixtureRowCount = requireNonNegativeInteger(record.fixtureRowCount, "fixtureRowCount");
@@ -72,6 +75,10 @@ export function parseFixtureMetadata(value: unknown): FixtureMetadata {
   if (record.manuallyReviewed !== true) {
     throw new TypeError("manuallyReviewed must be true");
   }
+  const reviewedAt = requireNonEmptyString(record.reviewedAt, "reviewedAt");
+  if (!isIsoDateTime(reviewedAt) || !reviewedAt.endsWith("Z")) {
+    throw new TypeError("reviewedAt must be a UTC ISO datetime");
+  }
 
   return {
     sourceId,
@@ -81,6 +88,7 @@ export function parseFixtureMetadata(value: unknown): FixtureMetadata {
     resourceUrl,
     fetchedAt,
     httpContentType: requireNonEmptyString(record.httpContentType, "httpContentType"),
+    httpStatus,
     sourceResponseSha256: requireSha256(record.sourceResponseSha256, "sourceResponseSha256"),
     fixtureSha256: requireSha256(record.fixtureSha256, "fixtureSha256"),
     sourceRowCount,
@@ -88,6 +96,7 @@ export function parseFixtureMetadata(value: unknown): FixtureMetadata {
     licenseName: requireLicenseName(record.licenseName),
     providerName: requireNonEmptyString(record.providerName, "providerName"),
     manuallyReviewed: true,
+    reviewedAt,
     privacyReview: parsePrivacyReview(record.privacyReview),
     samplingMethod: requireNonEmptyString(record.samplingMethod, "samplingMethod"),
   };
@@ -249,6 +258,13 @@ function requireSha256(value: unknown, name: string): `sha256:${string}` {
 function requireNonNegativeInteger(value: unknown, name: string): number {
   if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
     throw new TypeError(`${name} must be a non-negative integer`);
+  }
+  return value;
+}
+
+function requireHttpStatus(value: unknown): number {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 100 || value > 599) {
+    throw new TypeError("httpStatus must be an integer from 100 to 599");
   }
   return value;
 }

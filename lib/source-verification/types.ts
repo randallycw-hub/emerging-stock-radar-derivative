@@ -22,6 +22,7 @@ export interface FixtureMetadata {
   resourceUrl: string;
   fetchedAt: string;
   httpContentType: string;
+  httpStatus: number;
   sourceResponseSha256: `sha256:${string}`;
   fixtureSha256: `sha256:${string}`;
   sourceRowCount: number;
@@ -29,6 +30,7 @@ export interface FixtureMetadata {
   licenseName: "政府資料開放授權條款－第1版";
   providerName: string;
   manuallyReviewed: boolean;
+  reviewedAt: string;
   privacyReview: FixturePrivacyReview;
   samplingMethod: string;
 }

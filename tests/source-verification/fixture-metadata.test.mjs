@@ -24,6 +24,7 @@ function validMetadata() {
     resourceUrl: "https://data.gov.tw/dataset/11406/resource.csv",
     fetchedAt: "2026-07-22T01:02:03Z",
     httpContentType: "text/csv; charset=utf-8",
+    httpStatus: 200,
     sourceResponseSha256: sha256,
     fixtureSha256: sha256,
     sourceRowCount: 2,
@@ -31,6 +32,7 @@ function validMetadata() {
     licenseName: "政府資料開放授權條款－第1版",
     providerName: "金融監督管理委員會",
     manuallyReviewed: true,
+    reviewedAt: "2026-07-22T01:03:04Z",
     privacyReview: {
       containsPersonalData: false,
       excludedFields: ["承銷價"],
@@ -45,10 +47,37 @@ function validMetadata() {
 test("fixture metadata requires provenance, minimization, privacy review and two hashes", () => {
   const value = validMetadata();
   assert.equal(parseFixtureMetadata(value).datasetId, "11406");
-  for (const key of ["sourceId", "datasetId", "datasetName", "resourceRole", "resourceUrl", "fetchedAt", "httpContentType", "sourceResponseSha256", "fixtureSha256", "sourceRowCount", "fixtureRowCount", "licenseName", "providerName", "manuallyReviewed", "privacyReview", "samplingMethod"]) {
+  for (const key of ["sourceId", "datasetId", "datasetName", "resourceRole", "resourceUrl", "fetchedAt", "httpContentType", "httpStatus", "sourceResponseSha256", "fixtureSha256", "sourceRowCount", "fixtureRowCount", "licenseName", "providerName", "manuallyReviewed", "reviewedAt", "privacyReview", "samplingMethod"]) {
     const invalid = structuredClone(value);
     delete invalid[key];
     assert.throws(() => parseFixtureMetadata(invalid), new RegExp(key));
+  }
+});
+
+test("fixture metadata validates HTTP status and manual review timestamp", () => {
+  for (const httpStatus of [200, 304]) {
+    assert.equal(parseFixtureMetadata({ ...validMetadata(), httpStatus }).httpStatus, httpStatus);
+  }
+  assert.equal(
+    parseFixtureMetadata(validMetadata()).reviewedAt,
+    "2026-07-22T01:03:04Z",
+  );
+
+  const invalidValues = [
+    [{ httpStatus: "200" }, /httpStatus/],
+    [{ httpStatus: 200.5 }, /httpStatus/],
+    [{ httpStatus: 99 }, /httpStatus/],
+    [{ httpStatus: 600 }, /httpStatus/],
+    [{ reviewedAt: "2026-07-22T09:03:04+08:00" }, /reviewedAt/],
+    [{ manuallyReviewed: false, reviewedAt: "2026-07-22T01:03:04Z" }, /manuallyReviewed/],
+    [{ unknown: true }, /unknown key/],
+  ];
+
+  const missingReviewedAt = validMetadata();
+  delete missingReviewedAt.reviewedAt;
+  assert.throws(() => parseFixtureMetadata(missingReviewedAt), /reviewedAt/);
+  for (const [patch, expected] of invalidValues) {
+    assert.throws(() => parseFixtureMetadata({ ...validMetadata(), ...patch }), expected);
   }
 });
 
