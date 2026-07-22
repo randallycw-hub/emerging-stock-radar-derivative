@@ -55,9 +55,6 @@ button { cursor: pointer; }
 .breadcrumb span::after { margin-left: 9px; color: #a5afb8; content: "/"; }
 .breadcrumb b { color: var(--ink-2); }
 .command-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-.quote-clock { text-align: right; font-size: 10px; }
-.quote-clock span { display: block; color: var(--muted); }
-.quote-clock b { display: block; margin-top: 2px; color: var(--ink-2); font-size: 11px; font-variant-numeric: tabular-nums; }
 .icon-action, .icon-button { display: grid; width: 34px; height: 34px; place-items: center; color: var(--ink-2); background: #fff; border: 1px solid var(--line-strong); border-radius: 5px; font-size: 18px; line-height: 1; }
 .icon-action:hover { color: var(--teal); border-color: var(--teal); }
 .content { width: min(1540px, 100%); margin: 0 auto; padding: 24px 26px 42px; }
@@ -108,13 +105,6 @@ button { cursor: pointer; }
 .surface-title h2 { margin: 3px 0 0; font-size: 15px; }
 .result-count { margin-left: auto; color: var(--muted); font-size: 10px; }
 .result-count b { color: var(--ink); font-size: 12px; }
-.quote-source-bar { display: grid; grid-template-columns: repeat(3, 1fr); background: #f7faf9; border-bottom: 1px solid var(--line); }
-.quote-source-bar > div { min-height: 48px; padding: 9px 12px; border-right: 1px solid var(--line); }
-.quote-source-bar > div:last-child { border-right: 0; }
-.quote-source-bar span, .quote-source-bar b { display: block; }
-.quote-source-bar span { color: var(--muted); font-size: 8px; }
-.quote-source-bar b { margin-top: 4px; font-size: 10px; font-variant-numeric: tabular-nums; }
-.quote-source-bar .source-warning b { color: #8a5a15; }
 .filter-bar { display: flex; align-items: flex-end; gap: 8px; padding: 10px 14px; background: #fafbfc; border-bottom: 1px solid var(--line); }
 .filter-bar label { display: block; }
 .filter-bar label > span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 9px; }
@@ -278,13 +268,6 @@ button { cursor: pointer; }
 .profile-refresh-status::before { width: 5px; height: 5px; margin-right: 5px; content: ""; background: #55b9a4; border-radius: 50%; }
 .drawer-head .icon-button { margin-left: auto; color: #fff; background: transparent; border-color: #4a6167; }
 .drawer-body { padding: 18px 20px 32px; }
-.quote-panel { display: grid; grid-template-columns: 1.1fr repeat(5, 1fr); margin-bottom: 16px; background: #fff; border: 1px solid var(--line); border-radius: 5px; }
-.quote-panel > div { min-height: 72px; padding: 12px; border-right: 1px solid var(--line); }
-.quote-panel > div:last-child { border-right: 0; }
-.quote-panel span, .quote-panel b, .quote-panel strong { display: block; }
-.quote-panel span { color: var(--muted); font-size: 9px; }
-.quote-panel b, .quote-panel strong { margin-top: 8px; font-size: 14px; font-variant-numeric: tabular-nums; }
-.quote-panel strong { font-size: 21px; }
 .profile-section { margin-bottom: 14px; padding: 16px; background: #fff; border: 1px solid var(--line); border-radius: 5px; }
 .profile-section-title { display: flex; align-items: center; min-height: 28px; margin-bottom: 10px; border-bottom: 1px solid var(--line); }
 .profile-section-title > span { color: var(--teal); font-size: 9px; font-weight: 750; }
@@ -385,10 +368,6 @@ button { cursor: pointer; }
   .drawer-head p { font-size: 13px; }
   .drawer-head > div > span { font-size: 11px; }
   .drawer-body { padding: 24px 28px 36px; }
-  .quote-panel > div { min-height: 82px; padding: 15px; }
-  .quote-panel span { font-size: 12px; }
-  .quote-panel b { font-size: 17px; }
-  .quote-panel strong { font-size: 25px; }
   .profile-section { margin-bottom: 18px; padding: 20px 22px; }
   .profile-section-title { min-height: 34px; margin-bottom: 14px; }
   .profile-section-title > span, .profile-section-title small, .news-list small { font-size: 11px; }
@@ -405,8 +384,8 @@ button { cursor: pointer; }
   .brand-block span:not(.brand-mark) { font-size: 10px; }
   .side-nav b { font-size: 14px; }
   .side-nav small { font-size: 11px; }
-  .breadcrumb, .quote-clock b { font-size: 12px; }
-  .quote-clock, .rail-status > span, .rail-status > small { font-size: 11px; }
+  .breadcrumb { font-size: 12px; }
+  .rail-status > span, .rail-status > small { font-size: 11px; }
   .page-kicker, .surface-title span, .snapshot-copy > span, .radar-copy > span { font-size: 10px; }
   .page-heading h1 { font-size: 28px; }
   .page-heading p { font-size: 13px; }
@@ -420,8 +399,8 @@ button { cursor: pointer; }
   .surface-title h2 { font-size: 17px; }
   .result-count { font-size: 11px; }
   .result-count b { font-size: 13px; }
-  .quote-source-bar span, .filter-bar label > span, .quick-filter-bar > span { font-size: 10px; }
-  .quote-source-bar b, .quick-filter-bar button, .radar-filter-bar button { font-size: 11px; }
+  .filter-bar label > span, .quick-filter-bar > span { font-size: 10px; }
+  .quick-filter-bar button, .radar-filter-bar button { font-size: 11px; }
   .filter-bar input, .filter-bar select, .segmented button, .refresh-button { font-size: 12px; }
   .data-table { font-size: 12px; }
   .data-table th { height: 38px; font-size: 10px; }
@@ -455,7 +434,6 @@ button { cursor: pointer; }
   .mobile-brand { display: flex; align-items: center; gap: 8px; }
   .mobile-brand strong { font-size: 12px; }
   .breadcrumb { display: none; }
-  .quote-clock { display: none; }
   .content { padding: 18px 12px 82px; }
   .page-heading h1 { font-size: 21px; }
   .fraud-strip { grid-template-columns: 1fr; gap: 4px; padding: 10px; }
@@ -465,9 +443,6 @@ button { cursor: pointer; }
   .metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
   .market-movers { grid-template-columns: repeat(3, 365px); }
   .mover-lane { grid-template-columns: 95px repeat(3, 90px); }
-  .quote-source-bar { grid-template-columns: repeat(2, 1fr); }
-  .quote-source-bar > div:nth-child(2) { border-right: 0; }
-  .quote-source-bar > div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
   .filter-bar { flex-wrap: wrap; }
   .search-field { width: 100%; }
   .search-field input { width: 100%; }
@@ -512,9 +487,6 @@ button { cursor: pointer; }
   .market-table { min-width: 900px; }
   .market-table th:nth-child(1), .market-table td:nth-child(1) { display: none; }
   .data-table th, .data-table td { padding: 7px 6px; }
-  .quote-panel { grid-template-columns: repeat(2, 1fr); }
-  .quote-panel > div:nth-child(even) { border-right: 0; }
-  .quote-panel > div:not(:nth-last-child(-n+2)) { border-bottom: 1px solid var(--line); }
   .drawer-head { min-height: 100px; padding: 18px; }
   .drawer-body { padding: 14px 12px 26px; }
   .profile-grid { grid-template-columns: 92px 1fr; }

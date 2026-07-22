@@ -143,7 +143,8 @@ test("uses only the approved formal brand and fixed subtitle", async () => {
   }
 });
 
-test("does not retain the unused generic price-cell UI selector", async () => {
+test("does not retain unused market-price UI selectors", async () => {
   const stylesheet = await readFile(path.join(root, "app/globals.css"), "utf8");
   assert.doesNotMatch(stylesheet, /\.price-cell\b/);
+  assert.doesNotMatch(stylesheet, /\.quote-(?:clock|source-bar|panel)\b/);
 });
