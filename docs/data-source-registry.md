@@ -3,9 +3,11 @@
 檢查日期：2026-07-22
 本文件是工程與內部授權控制，不是法律意見。
 
-## 核准狀態
+## 四個循序核准階段與獨立暫停狀態
 
-`CANDIDATE` → `APPROVED_FOR_V1_DESIGN` → `VERIFIED_FOR_IMPLEMENTATION` → `APPROVED_FOR_PRODUCTION`；任何階段可因重大變更轉為 `SUSPENDED`。只有 `VERIFIED_FOR_IMPLEMENTATION` 可開始正式 adapter，只有 `APPROVED_FOR_PRODUCTION` 可在 production 啟用。
+`CANDIDATE` → `APPROVED_FOR_V1_DESIGN` → `VERIFIED_FOR_IMPLEMENTATION` → `APPROVED_FOR_PRODUCTION`。這是唯一的四階段核准順序。`SUSPENDED` 是任何階段都可因重大變更進入的獨立暫停狀態，不是第五階段，也不代表核准升級。只有 `VERIFIED_FOR_IMPLEMENTATION` 可開始正式 adapter，只有 `APPROVED_FOR_PRODUCTION` 可在 production 啟用。
+
+本輪核准只允許修訂本 registry 與其餘設計文件；不授權啟用來源、實作 adapter、建立或綁定遠端資源、寫入遠端資料或上線。
 
 `APPROVED_FOR_V1_DESIGN` 必須有獨立 data.gov.tw 頁、OGL 1.0、免費、官方提供者、可對應正式 resource、無衝突條款、完整顯名計畫、無 Logo／仿官方設計、無混入禁用來源且只使用資料集明列欄位。
 

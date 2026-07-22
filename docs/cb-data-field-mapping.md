@@ -1,5 +1,7 @@
 # 可轉換／交換公司債欄位對映
 
+> 本文件目前僅為設計 mapping。四個循序核准階段不包含獨立暫停狀態 `SUSPENDED`；本輪文件核准不等於來源啟用、adapter 實作、遠端資源建立或 production 核准。
+
 資料集 11406「轉(交)換債發行資料下載」目前為 `APPROVED_FOR_V1_DESIGN`，不是 implementation 或 production 核准。候選資源為官方 CSV `ISSBD5_data.csv` 與 TPEx OpenAPI `/bond_ISSBD5_data`；正式 adapter 前須保存同日最小合法樣本、驗證兩者 schema，再只選一個主要 resource。
 
 ## V1 欄位

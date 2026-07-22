@@ -1,5 +1,7 @@
 # 興櫃公司資料涵蓋與欄位對映
 
+> 本文件目前僅為設計 mapping。資料來源必須依 `CANDIDATE` → `APPROVED_FOR_V1_DESIGN` → `VERIFIED_FOR_IMPLEMENTATION` → `APPROVED_FOR_PRODUCTION` 四個階段循序核准；`SUSPENDED` 是獨立暫停狀態。本輪不授權來源啟用、功能實作、遠端資源或上線。
+
 ## 涵蓋集合
 
 V1 在完整興櫃名錄核准前，以資料集 94025 某一 `資料年月` 內成功發布的公司代號集合建立 `EmergingCoverageMembership`。名稱固定為「興櫃月營收資料涵蓋公司」，不宣稱是當前完整名錄或市場身分。

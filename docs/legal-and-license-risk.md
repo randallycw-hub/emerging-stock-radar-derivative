@@ -8,13 +8,15 @@
 
 只有獨立 data.gov.tw 頁面明示 OGL 1.0、免費、官方提供者，且正式 resource 可與頁面/OAS 明確對應、沒有衝突條款、欄位與顯名範圍清楚的資料集，才能成為 `APPROVED_FOR_V1_DESIGN`。
 
-## 五階段控制
+## 四個循序核准階段與獨立暫停狀態
+
+本輪核准僅限設計文件修訂。下列前四項才是循序核准階段；`SUSPENDED` 是獨立暫停狀態，不是第五階段，也不授權跳過任何核准步驟。
 
 - `CANDIDATE`：不建立正式 model assumption 或 adapter。
 - `APPROVED_FOR_V1_DESIGN`：可寫模型、mapping 與計畫；不可連正式 runtime。
 - `VERIFIED_FOR_IMPLEMENTATION`：保存合法 fixture、schema 與顯名驗證後才可實作 adapter。
 - `APPROVED_FOR_PRODUCTION`：live smoke、來源再次覆核、正式顯名頁與人工上線確認完成。
-- `SUSPENDED`：停止新同步與發布；保留 registry、run、hash、snapshot metadata 與決策紀錄。既有資料是否繼續公開或刪除，依授權覆核結果決定。
+- `SUSPENDED`（獨立暫停狀態）：停止新同步與發布；保留 registry、run、hash、snapshot metadata 與決策紀錄。既有資料是否繼續公開或刪除，依授權覆核結果決定；解除後須重新核對並回到適當核准階段。
 
 ## 顯名最低內容
 

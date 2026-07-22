@@ -24,6 +24,8 @@ V1 不做會員、登入、付款、通知、原生 App、廣告、投資組合�
 
 ## Source Registry 狀態
 
+本輪核准僅限設計文件修訂，不授權正式資料來源啟用、功能實作、遠端資源建立或上線。資料來源只有下列四個循序核准階段；`SUSPENDED` 是可由任何階段進入的獨立暫停狀態，不是第五個核准階段。
+
 ```text
 CANDIDATE
   → APPROVED_FOR_V1_DESIGN
@@ -35,7 +37,7 @@ CANDIDATE
 - `APPROVED_FOR_V1_DESIGN`：可進模型與計畫，不能撰寫正式 adapter。
 - `VERIFIED_FOR_IMPLEMENTATION`：完成資料集頁、端點、最小合法樣本、schema、mapping、授權與顯名確認，才可撰寫 adapter。
 - `APPROVED_FOR_PRODUCTION`：正式 smoke test、來源再次覆核、顯名驗證與人工上線確認完成。
-- `SUSPENDED`：授權、端點、欄位或來源重大改變時停止同步及發布，保留稽核紀錄。
+- `SUSPENDED`（獨立暫停狀態）：授權、端點、欄位或來源重大改變時停止同步及發布，保留稽核紀錄；解除暫停後仍須重新核對並回到適當的循序核准階段。
 
 目前 11406、94025、11586、28567 最高只到 `APPROVED_FOR_V1_DESIGN`。
 
