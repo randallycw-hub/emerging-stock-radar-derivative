@@ -7,6 +7,8 @@ import type { FixtureMetadata, FixturePrivacyReview } from "./types.ts";
 const DATASET_IDS = new Set(["11406", "94025", "11586", "28567"]);
 const METADATA_KEYS = new Set([
   "sourceId",
+  "schemaVersion",
+  "fixtureVersion",
   "datasetId",
   "datasetName",
   "resourceRole",
@@ -33,6 +35,7 @@ const PRIVACY_REVIEW_KEYS = new Set([
   "rationale",
 ]);
 const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/;
+const VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
 const LICENSE_NAME = "政府資料開放授權條款－第1版";
 
 export class FixtureIntegrityError extends Error {
@@ -57,6 +60,8 @@ export function parseFixtureMetadata(value: unknown): FixtureMetadata {
   if (sourceId !== `data-gov-${datasetId}`) {
     throw new TypeError("sourceId must match data-gov-{datasetId}");
   }
+  const schemaVersion = requireVersion(record.schemaVersion, "schemaVersion");
+  const fixtureVersion = requireVersion(record.fixtureVersion, "fixtureVersion");
 
   const resourceUrl = requireNonEmptyString(record.resourceUrl, "resourceUrl");
   assertHttpsUrl(resourceUrl, "resourceUrl");
@@ -82,6 +87,8 @@ export function parseFixtureMetadata(value: unknown): FixtureMetadata {
 
   return {
     sourceId,
+    schemaVersion,
+    fixtureVersion,
     datasetId,
     datasetName: requireNonEmptyString(record.datasetName, "datasetName"),
     resourceRole: requireResourceRole(record.resourceRole),
@@ -219,6 +226,17 @@ function assertPresent(record: Record<string, unknown>, key: string): void {
 function requireNonEmptyString(value: unknown, name: string): string {
   if (typeof value !== "string" || value.trim() === "") {
     throw new TypeError(`${name} must be a non-empty string`);
+  }
+  return value;
+}
+
+function requireVersion(value: unknown, name: string): string {
+  if (
+    typeof value !== "string"
+    || !VERSION_PATTERN.test(value)
+    || /[\r\n\u2028\u2029]/.test(value)
+  ) {
+    throw new TypeError(`${name} must be a valid version string`);
   }
   return value;
 }

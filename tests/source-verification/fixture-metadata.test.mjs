@@ -18,6 +18,8 @@ const sha256 = `sha256:${"a".repeat(64)}`;
 function validMetadata() {
   return {
     sourceId: "data-gov-11406",
+    schemaVersion: "1.0.0",
+    fixtureVersion: "official-minimal-v1",
     datasetId: "11406",
     datasetName: "轉(交)換債發行資料下載",
     resourceRole: "csv",
@@ -44,15 +46,95 @@ function validMetadata() {
   };
 }
 
-test("fixture metadata requires provenance, minimization, privacy review and two hashes", () => {
+test("fixture metadata requires provenance, versions, minimization, privacy review and two hashes", () => {
   const value = validMetadata();
   assert.equal(parseFixtureMetadata(value).datasetId, "11406");
-  for (const key of ["sourceId", "datasetId", "datasetName", "resourceRole", "resourceUrl", "fetchedAt", "httpContentType", "httpStatus", "sourceResponseSha256", "fixtureSha256", "sourceRowCount", "fixtureRowCount", "licenseName", "providerName", "manuallyReviewed", "reviewedAt", "privacyReview", "samplingMethod"]) {
+  for (const key of ["sourceId", "schemaVersion", "fixtureVersion", "datasetId", "datasetName", "resourceRole", "resourceUrl", "fetchedAt", "httpContentType", "httpStatus", "sourceResponseSha256", "fixtureSha256", "sourceRowCount", "fixtureRowCount", "licenseName", "providerName", "manuallyReviewed", "reviewedAt", "privacyReview", "samplingMethod"]) {
     const invalid = structuredClone(value);
     delete invalid[key];
     assert.throws(() => parseFixtureMetadata(invalid), new RegExp(key));
   }
 });
+
+test("fixture metadata requires safe explicit schema and fixture versions", () => {
+  assert.deepEqual(
+    pickVersions(parseFixtureMetadata(validMetadata())),
+    { schemaVersion: "1.0.0", fixtureVersion: "official-minimal-v1" },
+  );
+  assert.deepEqual(
+    pickVersions(parseFixtureMetadata({
+      ...validMetadata(),
+      schemaVersion: "dataset-11406-raw-v1",
+      fixtureVersion: "synthetic-edge-cases-v1",
+    })),
+    { schemaVersion: "dataset-11406-raw-v1", fixtureVersion: "synthetic-edge-cases-v1" },
+  );
+
+  for (const key of ["schemaVersion", "fixtureVersion"]) {
+    const invalid = structuredClone(validMetadata());
+    delete invalid[key];
+    assert.throws(() => parseFixtureMetadata(invalid), new RegExp(key));
+  }
+
+  const invalidValues = [
+    [{ schemaVersion: "" }, /schemaVersion/],
+    [{ fixtureVersion: "   " }, /fixtureVersion/],
+    [{ schemaVersion: "schema v1" }, /schemaVersion/],
+    [{ fixtureVersion: "version/v1" }, /fixtureVersion/],
+    [{ fixtureVersion: "version\\v1" }, /fixtureVersion/],
+    [{ schemaVersion: 1 }, /schemaVersion/],
+    [{ fixtureVersion: {} }, /fixtureVersion/],
+    [{ schemaVersion: "a".repeat(65) }, /schemaVersion/],
+    [{ fixtureVersion: "a".repeat(65) }, /fixtureVersion/],
+  ];
+
+  for (const [patch, expected] of invalidValues) {
+    assert.throws(() => parseFixtureMetadata({ ...validMetadata(), ...patch }), expected);
+  }
+});
+
+test("schema and fixture versions reject unsafe values without normalization", () => {
+  const versionAtMaximumLength = `v${"a".repeat(63)}`;
+  const unsafeValues = [
+    ["empty", ""],
+    ["only whitespace", "   "],
+    ["leading whitespace", " 1.0.0"],
+    ["trailing whitespace", "1.0.0 "],
+    ["embedded whitespace", "1.0. 0"],
+    ["line feed", "1.0.0\n"],
+    ["carriage return", "1.0.0\r"],
+    ["line separator", "1.0.0\u2028"],
+    ["paragraph separator", "1.0.0\u2029"],
+    ["null control", "1.0.0\0"],
+    ["tab control", "1.0.0\t"],
+    ["URL", "https://example.test/version"],
+    ["invalid initial character", "-1.0.0"],
+    ["forward slash", "version/v1"],
+    ["backslash", "version\\v1"],
+    ["over maximum length", "a".repeat(65)],
+  ];
+
+  for (const key of ["schemaVersion", "fixtureVersion"]) {
+    assert.equal(
+      parseFixtureMetadata({ ...validMetadata(), [key]: versionAtMaximumLength })[key],
+      versionAtMaximumLength,
+    );
+    for (const [description, value] of unsafeValues) {
+      assert.throws(
+        () => parseFixtureMetadata({ ...validMetadata(), [key]: value }),
+        new RegExp(key),
+        `${key} must reject ${description}`,
+      );
+    }
+  }
+});
+
+function pickVersions(metadata) {
+  return {
+    schemaVersion: metadata.schemaVersion,
+    fixtureVersion: metadata.fixtureVersion,
+  };
+}
 
 test("fixture metadata validates HTTP status and manual review timestamp", () => {
   for (const httpStatus of [200, 304]) {

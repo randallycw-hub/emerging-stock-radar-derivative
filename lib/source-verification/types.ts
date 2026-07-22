@@ -16,6 +16,8 @@ export interface FixturePrivacyReview {
 
 export interface FixtureMetadata {
   sourceId: string;
+  schemaVersion: string;
+  fixtureVersion: string;
   datasetId: "11406" | "94025" | "11586" | "28567";
   datasetName: string;
   resourceRole: "csv" | "openapi_json";
