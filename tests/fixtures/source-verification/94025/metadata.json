@@ -1,0 +1,68 @@
+{
+  "metadataPageUrl": "https://data.gov.tw/dataset/94025",
+  "oasUrl": "https://openapi.twse.com.tw/v1/swagger.json",
+  "csv": {
+    "sourceId": "data-gov-94025",
+    "schemaVersion": "dataset-94025-raw-v1",
+    "fixtureVersion": "official-minimal-v1",
+    "datasetId": "94025",
+    "datasetName": "興櫃公司每月營業收入彙總表",
+    "resourceRole": "csv",
+    "resourceUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
+    "fetchedAt": "2026-07-23T06:10:42.382Z",
+    "httpContentType": "text/csv",
+    "httpStatus": 200,
+    "sourceResponseSha256": "sha256:f9bc7d149bb5a602fc798f0f1f5f007d0f8eff1aa6cd2a68f80084636249ac44",
+    "fixtureSha256": "sha256:f4937f9f2a6832087521cbe58aa820ecb9cf32a3733279e92884146f039cd45b",
+    "sourceRowCount": 354,
+    "fixtureRowCount": 3,
+    "licenseName": "政府資料開放授權條款－第1版",
+    "providerName": "金融監督管理委員會證券期貨局",
+    "manuallyReviewed": true,
+    "reviewedAt": "2026-07-23T06:12:00.000Z",
+    "privacyReview": {
+      "containsPersonalData": false,
+      "excludedFields": [
+        "個人姓名",
+        "電話",
+        "電子郵件"
+      ],
+      "minimized": true,
+      "deidentified": false,
+      "rationale": "三列備註經人工檢查僅含公司層級營收說明，未保存個人姓名、電話或電子郵件等聯絡人個資。"
+    },
+    "samplingMethod": "由354列保留codes 1260/2245/4172及完整14欄、其餘351列刪除；保留cell原值。"
+  },
+  "openapi": {
+    "sourceId": "data-gov-94025",
+    "schemaVersion": "dataset-94025-raw-v1",
+    "fixtureVersion": "official-minimal-v1",
+    "datasetId": "94025",
+    "datasetName": "興櫃公司每月營業收入彙總表",
+    "resourceRole": "openapi_json",
+    "resourceUrl": "https://www.tpex.org.tw/openapi/v1/t187ap05_R",
+    "fetchedAt": "2026-07-23T06:10:42.739Z",
+    "httpContentType": "application/json",
+    "httpStatus": 200,
+    "sourceResponseSha256": "sha256:7a4b973dabad31d3073cf73ad5218b35d33652ce738b346938fb3b2bc8cbc73d",
+    "fixtureSha256": "sha256:5e120121939459710a5ff222f71c74dd86a72c56c58bb053c42bceb346e7f46e",
+    "sourceRowCount": 354,
+    "fixtureRowCount": 3,
+    "licenseName": "政府資料開放授權條款－第1版",
+    "providerName": "金融監督管理委員會證券期貨局",
+    "manuallyReviewed": true,
+    "reviewedAt": "2026-07-23T06:12:00.000Z",
+    "privacyReview": {
+      "containsPersonalData": false,
+      "excludedFields": [
+        "個人姓名",
+        "電話",
+        "電子郵件"
+      ],
+      "minimized": true,
+      "deidentified": false,
+      "rationale": "三列備註經人工檢查僅含公司層級營收說明，未保存個人姓名、電話或電子郵件等聯絡人個資。"
+    },
+    "samplingMethod": "由354列保留codes 1260/2245/4172及完整14欄、其餘351列刪除；保留cell原值。"
+  }
+}
