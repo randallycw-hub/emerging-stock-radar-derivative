@@ -1,0 +1,3 @@
+sourceRecordId,companyCode,companyName,applicationDate,chairmanName,applicationCapitalThousandsTwd,listingReviewDate,boardApprovalDate,listingContractApprovalOrFilingDate,listingDate,underwriters,underwritingPrice,note
+TWSE:1234,1234,測試公司,20260105,測試董事長,123456,20260210,20260220,20260301,20260415,測試承銷商,120.5,
+TWSE:5678,5678,第二測試公司,20260301,,50000,,,,,另一承銷商,,資料尚在審議

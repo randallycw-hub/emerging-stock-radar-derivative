@@ -1,0 +1,4 @@
+[
+  {"sourceRecordId":"TWSE:1234","companyCode":"1234","companyName":"測試公司","applicationDate":"20260105","chairmanName":"測試董事長","applicationCapitalThousandsTwd":"123456","listingReviewDate":"20260210","boardApprovalDate":"20260220","listingContractApprovalOrFilingDate":"20260301","listingDate":"20260415","underwriters":"測試承銷商","underwritingPrice":"120.5","note":""},
+  {"sourceRecordId":"TWSE:5678","companyCode":"5678","companyName":"第二測試公司","applicationDate":"20260301","chairmanName":"","applicationCapitalThousandsTwd":"50000","listingReviewDate":"","boardApprovalDate":"","listingContractApprovalOrFilingDate":"","listingDate":"","underwriters":"另一承銷商","underwritingPrice":"","note":"資料尚在審議"}
+]
