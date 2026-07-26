@@ -1,0 +1,15 @@
+{
+  "datasetId":"28567",
+  "datasetName":"公開發行公司基本資料",
+  "metadataPageUrl":"https://data.gov.tw/dataset/28567",
+  "csv":{"resourceUrl":"https://mopsfin.twse.com.tw/opendata/t187ap03_P.csv","httpStatus":200,"contentType":"text/csv","sourceSha256":"sha256:fixture-source-28567-csv","sourceRowCount":1,"fixtureSha256":"sha256:fixture-28567-csv","fixtureRowCount":1},
+  "openapi":{"resourceUrl":"https://openapi.twse.com.tw/v1/opendata/t187ap03_P","httpStatus":200,"contentType":"application/json","sourceSha256":"sha256:fixture-source-28567-json","sourceRowCount":1,"fixtureSha256":"sha256:fixture-28567-json","fixtureRowCount":1},
+  "oasUrl":"https://openapi.twse.com.tw/v1/swagger.json",
+  "license":"政府資料開放授權條款－第1版",
+  "provider":"臺灣證券交易所",
+  "manuallyReviewed":true,
+  "sampledAt":"2026-07-26T00:00:00.000Z",
+  "samplingMethod":"minimal synthetic contract fixture; no official rows retained",
+  "personalData":false,
+  "minimized":true
+}
