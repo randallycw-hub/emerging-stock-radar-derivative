@@ -118,3 +118,31 @@ The CSV evidence and decision records are preserved in:
 The CSV and OpenAPI resources must remain separately evaluated. The dataset remains at the design-approval stage; no production approval is granted by this amendment. The approved CSV scope must not be described as a complete listing-application universe.
 
 正式廣告、付費或其他營利功能前，再逐筆覆核授權頁、endpoint、欄位、顯名與實際用途；只有矛盾、不明或第三方權利才升級專業法律審查。
+
+## 28567 resource-level manual amendment (2026-07-26)
+
+Dataset 28567 status: `APPROVED_FOR_V1_DESIGN`.
+
+Primary implementation resource: the official CSV at `https://mopsfin.twse.com.tw/opendata/t187ap03_P.csv`.
+
+CSV resource-level status: `VERIFIED_FOR_IMPLEMENTATION`.
+The CSV is the sole approved primary resource candidate for a future 28567 adapter. It is enrichment-only and may be joined only to the exact company-code coverage set produced by dataset 94025.
+
+OpenAPI `/opendata/t187ap03_P` resource-level status: `SUSPENDED` and `NOT_APPROVED_FOR_DATA_INGESTION`. The observed HTTP 200 response fails strict JSON parsing. It must not be used for ingestion, fallback, failover, or published snapshots; it is comparison-only for schema and operation drift.
+
+Swagger/OAS is limited to endpoint-existence, operation, schema, and schema-drift evidence. It does not establish payload reliability or authorize ingestion, fallback, or production publication.
+
+28567 usage restrictions:
+
+- Build the 94025 coverage set first, then exact-join 28567 profiles by `companyCode`.
+- Exclude unmatched and ambiguous company codes from enrichment output; never auto-merge them.
+- Do not infer `isEmerging`, `currentlyEmerging`, `emergingStatus`, `marketStatus`, or `listingStatus` from 28567.
+- Do not describe 28567 as a complete current emerging-company roster.
+
+Evidence references:
+
+- `docs/source-verification/28567-evidence.md`
+- `docs/source-verification/28567-resource-decision.md`
+- `tests/fixtures/source-verification/28567/metadata.json`
+
+This amendment does not grant production approval and does not authorize an adapter, scheduler, runtime fetch, API, page, or remote resource.
