@@ -7,6 +7,7 @@ import {
 import type {
   PreviewSourceDto,
 } from "../../../lib/preview/types.ts";
+import { PreviewThemeToggle } from "./PreviewThemeToggle.tsx";
 
 export function PreviewHeader() {
   return (
@@ -24,6 +25,7 @@ export function PreviewHeader() {
           <Link href="/dev-preview/emerging">月營收涵蓋</Link>
           <Link href="/dev-preview/bonds">可轉債資料</Link>
         </nav>
+        <PreviewThemeToggle />
       </div>
     </header>
   );
