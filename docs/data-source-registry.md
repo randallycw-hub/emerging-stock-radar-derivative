@@ -99,4 +99,22 @@
 
 升級 `VERIFIED_FOR_IMPLEMENTATION` 必須保存：人工取得日期、來源 URL、HTTP metadata、最小合法原始 fixture、hash、row count、source schema、normalized mapping、錯誤案例、授權頁快照摘要與顯名驗收。升級 `APPROVED_FOR_PRODUCTION` 必須另有 live smoke test、來源頁再次覆核、正式顯名頁檢查與人工簽核。
 
+## 11586 resource-level manual amendment (2026-07-26)
+
+Dataset 11586 status: `APPROVED_FOR_V1_DESIGN`.
+
+CSV resource status: `VERIFIED_FOR_IMPLEMENTATION`.
+The CSV resource is the primary implementation resource and the only resource eligible for a future 11586 adapter.
+
+OpenAPI resource status: `SUSPENDED`. The OpenAPI payload is not approved for data ingestion; fallback is forbidden. It may be used only for schema-drift comparison and endpoint evidence.
+
+Swagger/OAS role: endpoint existence and schema evidence only; the Swagger/OAS description does not establish payload semantic reliability.
+
+The CSV evidence and decision records are preserved in:
+
+- `docs/source-verification/11586-evidence.md`
+- `docs/source-verification/11586-resource-decision.md`
+
+The CSV and OpenAPI resources must remain separately evaluated. The dataset remains at the design-approval stage; no production approval is granted by this amendment. The approved CSV scope must not be described as a complete listing-application universe.
+
 正式廣告、付費或其他營利功能前，再逐筆覆核授權頁、endpoint、欄位、顯名與實際用途；只有矛盾、不明或第三方權利才升級專業法律審查。
