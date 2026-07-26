@@ -21,6 +21,22 @@ test("28567 CSV and OpenAPI fixtures expose the same canonical fields", async ()
   assert.deepEqual(jsonRow, csvRow);
 });
 
+test("28567 evidence records official HTTP, hash, row-count and OAS proof", async () => {
+  const metadata = JSON.parse(await text("metadata.json"));
+  assert.equal(metadata.csv.httpStatus, 200);
+  assert.equal(metadata.csv.sourceRowCount, 299);
+  assert.match(metadata.csv.sourceSha256, /^sha256:[0-9a-f]{64}$/);
+  assert.equal(metadata.openapi.httpStatus, 200);
+  assert.equal(metadata.openapi.sourceRowCount, 299);
+  assert.equal(metadata.openapi.payloadParseable, false);
+  assert.match(metadata.openapi.sourceSha256, /^sha256:[0-9a-f]{64}$/);
+  assert.equal(metadata.oas.operation, "/opendata/t187ap03_P");
+  assert.match(metadata.oas.sourceSha256, /^sha256:[0-9a-f]{64}$/);
+  const evidence = await readFile(new URL("../../docs/source-verification/28567-evidence.md", import.meta.url), "utf8");
+  assert.match(evidence, /fallback/);
+  assert.match(evidence, /APPROVED_FOR_V1_DESIGN/);
+});
+
 test("28567 normalizes dates, URLs and capital while excluding market status", () => {
   const row = normalize28567Row({
     companyCode: "A", companyName: "Name", companyShortName: "Short", industryName: "Industry",
