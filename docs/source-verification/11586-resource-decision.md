@@ -1,7 +1,7 @@
 # 11586 資源採用決策
 
-檢查日期：2026-07-26  
-基線：`623de5532b1a947cfff289890442f2cc8b568002`  
+檢查日期：2026-07-26
+基線：`623de5532b1a947cfff289890442f2cc8b568002`
 目前資料集狀態：`APPROVED_FOR_V1_DESIGN`
 
 ## 決策摘要
@@ -70,9 +70,9 @@ CommitteeDate = 334400
 
 ## Swagger／OAS 角色
 
-Swagger URL：`https://openapi.twse.com.tw/v1/swagger.json`  
-HTTP status：200  
-Content-Type：`application/json`  
+Swagger URL：`https://openapi.twse.com.tw/v1/swagger.json`
+HTTP status：200
+Content-Type：`application/json`
 Response hash：`sha256:2c2cecccb7a220ac9e263228a7659aa49b1ada5aea397650e601ad3dfcc48043`
 
 Swagger UI 確認存在 `/company/applylistingLocal` operation，但 OAS 只能證明 endpoint 與 schema 文件存在，不能證明實際 payload 的欄位值語意可靠。因此 OAS 不得單獨授權資料 ingest。
