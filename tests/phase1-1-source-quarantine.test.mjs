@@ -12,6 +12,10 @@ const file = relativePath => readFile(new URL(relativePath, root), "utf8");
 const productionRoots = ["app", "lib", "worker", "db", "scripts", "public"];
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".mjs"]);
 const approvedEndpoints = new Set([
+  "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+  "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
+  "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
+  "https://mopsfin.twse.com.tw/opendata/t187ap03_P.csv",
   "https://www.tpex.org.tw/openapi/v1/bond_ISSBD5_data",
   "https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics",
   "https://www.tpex.org.tw/openapi/v1/t187ap05_R",
