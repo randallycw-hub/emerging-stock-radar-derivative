@@ -105,11 +105,23 @@ test("11586 fixture metadata records both resources and integrity hashes", async
   const jsonMetadata = parseFixtureMetadata(metadata.openapi);
   assert.equal(csvMetadata.datasetId, "11586");
   assert.equal(csvMetadata.resourceRole, "csv");
+  assert.equal(csvMetadata.resourceUrl, "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data");
+  assert.equal(csvMetadata.sourceRowCount, 695);
   assert.equal(jsonMetadata.resourceRole, "openapi_json");
+  assert.equal(jsonMetadata.sourceRowCount, 695);
+  assert.equal(jsonMetadata.sourceResponseSha256, "sha256:f15a53807561b1da17355d899c5a030beaac714905e8b249882a6329350ea3fd");
   const csvBytes = new Uint8Array(await readFile(new URL("../../tests/fixtures/source-verification/11586/csv-minimal.csv", import.meta.url)));
   assert.equal(sha256Hex(csvBytes), csvMetadata.fixtureSha256);
   verifyFixtureIntegrity(csvMetadata, csvBytes, 2);
   const openapiBytes = new Uint8Array(await readFile(new URL("../../tests/fixtures/source-verification/11586/openapi-minimal.json", import.meta.url)));
   assert.equal(sha256Hex(openapiBytes), jsonMetadata.fixtureSha256);
   verifyFixtureIntegrity(jsonMetadata, openapiBytes, 2);
+});
+
+test("11586 evidence records the live endpoint field-shift risk without upgrading the registry", async () => {
+  const evidence = await readFile(new URL("../../docs/source-verification/11586-evidence.md", import.meta.url), "utf8");
+  assert.match(evidence, /APPROVED_FOR_V1_DESIGN/);
+  assert.match(evidence, /applylistingLocal/);
+  assert.match(evidence, /field-shift|misalignment/i);
+  assert.match(evidence, /VERIFIED_FOR_IMPLEMENTATION/);
 });

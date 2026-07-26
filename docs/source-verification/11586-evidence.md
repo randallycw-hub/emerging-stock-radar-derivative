@@ -10,11 +10,15 @@
 | --- | --- |
 | Dataset metadata and license | Government Data Open Platform dataset 11586, `https://data.gov.tw/dataset/11586` |
 | OAS / Swagger | TWSE OAS document, `https://openapi.twse.com.tw/v1/swagger.json` |
-| Candidate CSV resource | `https://www.twse.com.tw/staticFiles/product/publication/11586.csv` |
+| Candidate CSV resource | `https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data` |
 | Candidate OpenAPI endpoint | `https://openapi.twse.com.tw/v1/company/applylistingLocal` |
 | Primary resource | `NOT_SELECTED`; CSV and OpenAPI are comparison-only in this Task |
 
-The exact dataset-page-to-resource evidence and licensing language remain a manual review item. No live request is made by the default tests.
+The dataset page was checked on 2026-07-26 and states provider `金融監督管理委員會證券期貨局`, license `政府資料開放授權條款-第1版`, and free charge. It lists the CSV resource and the TWSE Swagger URL. The CSV GET returned HTTP 200, `text/csv;charset=utf-8`, 695 data rows, and response hash `sha256:8e7b9d81b54701dc75e3f0550cecd0f2d2968ddd09346935d46ed7108d58fd75`.
+
+The OpenAPI GET returned HTTP 200, `application/json`, 695 records, and response hash `sha256:f15a53807561b1da17355d899c5a030beaac714905e8b249882a6329350ea3fd`. Swagger returned HTTP 200, `application/json`, and contains the `/company/applylistingLocal` operation; its response hash was `sha256:2c2cecccb7a220ac9e263228a7659aa49b1ada5aea397650e601ad3dfcc48043`.
+
+The live OpenAPI response is not semantically aligned with its property names: the first record currently has `Code=1`, `Company=7843`, `ApplicationDate=英柏得`, `Chairman=1150724`, and `AmountofCapital =林傳生`. This is a field-shift/misalignment risk, so the endpoint is not eligible for `VERIFIED_FOR_IMPLEMENTATION`. The minimal Fixture remains an offline canonical contract sample and must not be described as a raw copy of the live response.
 
 ## Fixture files and metadata
 
@@ -55,5 +59,6 @@ Dates are calendar dates in Asia/Taipei semantics and are not converted through 
 4. Blank optional dates and non-monotonic chronology are handled deterministically.
 5. Duplicate company/application identities and unknown fields are rejected.
 6. Fixture metadata, SHA-256 and row count integrity are verified offline.
+7. Live endpoint evidence records the observed JSON field-shift risk; no adapter may consume it until manually resolved.
 
 No `fetch`, adapter, fallback, repository, D1, API route, scheduler or published snapshot is used.
