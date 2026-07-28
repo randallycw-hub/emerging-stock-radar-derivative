@@ -18,7 +18,7 @@ for (const [datasetId, sourceUrl] of Object.entries(sources)) {
   console.log(`${datasetId}: fetched ${bytes.byteLength} bytes`);
 }
 
-const result = await fetch(workerUrl, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ datasets }) });
+  const result = await fetch(workerUrl, { method: "POST", headers: { Authorization: `Bearer ${token}`, "X-Ingestion-Token": token, "Content-Type": "application/json" }, body: JSON.stringify({ datasets }) });
 const text = await result.text();
 console.log(text);
 if (!result.ok) process.exitCode = 1;

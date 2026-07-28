@@ -13,7 +13,11 @@ type RelayEnv = typeof env & { INGESTION_TOKEN?: string };
 
 export async function POST(request: Request) {
   const runtimeEnv = env as RelayEnv;
-  if (!authorizeIngestionRequest(request.headers.get("authorization"), runtimeEnv.INGESTION_TOKEN)) return Response.json({ status: "unauthorized" }, { status: 401 });
+  const authorization = request.headers.get("authorization");
+  const customToken = request.headers.get("x-ingestion-token");
+  const authorized = authorizeIngestionRequest(authorization, runtimeEnv.INGESTION_TOKEN)
+    || (customToken !== null && customToken === runtimeEnv.INGESTION_TOKEN);
+  if (!authorized) return Response.json({ status: "unauthorized" }, { status: 401 });
   const repository = createRuntimePipelineRepository({ PIPELINE_DB: runtimeEnv.PIPELINE_DB });
   if (!repository) return Response.json({ status: "unavailable", reasons: ["PIPELINE_DB_NOT_CONFIGURED"] }, { status: 503 });
   try {
