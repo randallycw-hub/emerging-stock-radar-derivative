@@ -19,7 +19,7 @@ export default async function BondDetailPreviewPage({ params }: { params: Promis
     ["承銷商", bond.underwriter], ["受託人", bond.trustee],
   ] as const;
   const presentCount = fields.filter(([, value]) => value !== undefined && value !== "").length;
-  return <>
+  return <div className="preview-bond-command">
     <PreviewPageTitle eyebrow={`${formatPreviewText(bond.bondCode)} · 可轉債查核工作台`} title={bond.shortName}
       description={`${bond.issuerName} 的發行契約、轉換權利、到期與餘額資訊集中呈現；每個欄位均保留官方日期與來源，方便交易前快速核對。`}
       aside={<PreviewStatusBadge tone={bond.secured ? "teal" : "neutral"}>{bond.secured ? "有擔保" : "無擔保"}</PreviewStatusBadge>} />
@@ -53,5 +53,5 @@ export default async function BondDetailPreviewPage({ params }: { params: Promis
       {fields.map(([label, value]) => <PreviewDataField key={label} label={label} value={formatPreviewText(value)} />)}
     </dl></section>
     <SourceAttribution source={bond.source} fetchedAt={bond.source.fetchedAt} />
-  </>;
+  </div>;
 }
