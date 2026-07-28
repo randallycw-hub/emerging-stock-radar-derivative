@@ -24,4 +24,15 @@ npm run build
 npm run dev
 ```
 
+### 本機介面預覽
+
+啟動開發伺服器後，可前往 `/dev-preview` 查看完整的 fixture 介面：
+
+- `/dev-preview`：營收摘要、可轉債條款、重要日期與來源透明度
+- `/dev-preview/emerging`：興櫃月營收涵蓋清單與公司詳情
+- `/dev-preview/bonds`：可轉債清單與債券詳情
+- 首頁的 IPO 區塊會明確標示來源驗證中，不以虛構資料補位
+
+這些頁面只在開發環境可用，正式路由不會把 fixture 當作外部資料同步的替代品。
+
 部署由獨立的 `.openai/hosting.json` 與 Sites project 管理，不得改用原網站的 project ID。
