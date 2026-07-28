@@ -3,33 +3,33 @@
   overflow-x: clip;
   color: var(--preview-ink);
   background: var(--preview-background);
-  --preview-navy: #17324D;
-  --preview-navy-soft: #244A68;
-  --preview-teal: #238A83;
-  --preview-teal-dark: #1C716C;
-  --preview-teal-soft: #e3f2f1;
-  --preview-background: #F4F7F9;
-  --preview-paper: #FFFFFF;
-  --preview-ink: #1F2933;
-  --preview-muted: #64748B;
-  --preview-line: #DCE4EA;
-  --preview-amber: #B7791F;
-  --preview-amber-soft: #fff5df;
-  --preview-danger: #B42318;
+  --preview-navy: #173F42;
+  --preview-navy-soft: #245B58;
+  --preview-teal: #0B6B68;
+  --preview-teal-dark: #07504E;
+  --preview-teal-soft: #E3F1E9;
+  --preview-background: #F4F1E9;
+  --preview-paper: #FFFDF8;
+  --preview-ink: #203433;
+  --preview-muted: #5B6B67;
+  --preview-line: #D6DED8;
+  --preview-amber: #8C5A2B;
+  --preview-amber-soft: #F4E6D5;
+  --preview-danger: #A94442;
 }
 
 .preview-root[data-preview-theme="b"] {
-  --preview-navy: #17324D;
-  --preview-navy-soft: #244A68;
-  --preview-teal: #238A83;
-  --preview-teal-dark: #1C716C;
-  --preview-background: #F4F7F9;
-  --preview-paper: #FFFFFF;
-  --preview-ink: #1F2933;
-  --preview-muted: #64748B;
-  --preview-line: #DCE4EA;
-  --preview-amber: #B7791F;
-  --preview-danger: #B42318;
+  --preview-navy: #173F42;
+  --preview-navy-soft: #245B58;
+  --preview-teal: #0B6B68;
+  --preview-teal-dark: #07504E;
+  --preview-background: #F4F1E9;
+  --preview-paper: #FFFDF8;
+  --preview-ink: #203433;
+  --preview-muted: #5B6B67;
+  --preview-line: #D6DED8;
+  --preview-amber: #8C5A2B;
+  --preview-danger: #A94442;
 }
 
 .preview-root[data-preview-theme="a"] {

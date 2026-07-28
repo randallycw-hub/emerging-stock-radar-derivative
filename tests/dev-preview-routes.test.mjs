@@ -266,17 +266,17 @@ test("preview styles keep tables locally scrollable and switch to cards without 
 test("Theme B uses the exact approved tokens while Theme A retains its original palette", async () => {
   const css = (await read("app/dev-preview/preview.css")).toLowerCase();
   for (const token of [
-    "#17324d",
-    "#244a68",
-    "#238a83",
-    "#1c716c",
-    "#f4f7f9",
-    "#ffffff",
-    "#1f2933",
-    "#64748b",
-    "#dce4ea",
-    "#b7791f",
-    "#b42318",
+    "#173f42",
+    "#245b58",
+    "#0b6b68",
+    "#07504e",
+    "#f4f1e9",
+    "#fffdf8",
+    "#203433",
+    "#5b6b67",
+    "#d6ded8",
+    "#8c5a2b",
+    "#a94442",
   ]) {
     assert.equal(css.includes(token), true, `missing Theme B token ${token}`);
   }
