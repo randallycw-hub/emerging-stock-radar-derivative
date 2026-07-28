@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { createD1PipelineRepository } from "../../lib/pipeline/repositories/d1.ts";
 import { normalize28567Row, parse28567Csv } from "../../lib/source-verification/source-28567.ts";
+import { normalize11406Row, parse11406Csv } from "../../lib/source-verification/source-11406.ts";
 import { normalize94025Row, parse94025Csv } from "../../lib/source-verification/source-94025.ts";
 
 const fixedDependencies = { clock: () => "2026-07-28T00:00:00.000Z" };
@@ -19,7 +20,7 @@ function createRecordingD1(selectRows = [], batchResults) {
           return this;
         },
         async first() { return null; },
-        async all() { return { results: selectRows }; },
+        async all() { return { results: typeof selectRows === "function" ? selectRows(sql) : selectRows }; },
         async run() { return { success: true }; },
       };
     },
@@ -31,17 +32,88 @@ function createRecordingD1(selectRows = [], batchResults) {
 }
 
 async function normalizedFixtureRecords() {
-  const [revenueCsv, profileCsv] = await Promise.all([
+  const [bondCsv, revenueCsv, profileCsv] = await Promise.all([
+    readFile(new URL("../fixtures/source-verification/11406/csv-minimal.csv", import.meta.url), "utf8"),
     readFile(new URL("../fixtures/source-verification/94025/csv-minimal.csv", import.meta.url), "utf8"),
     readFile(new URL("../fixtures/source-verification/28567/csv-minimal.csv", import.meta.url), "utf8"),
   ]);
+  const bondRow = parse11406Csv(bondCsv).find((row) => row.bondCode === "35221");
+  if (!bondRow) throw new Error("11406 fixture is missing the coded bond representative row");
   const revenueRow = parse94025Csv(revenueCsv).find((row) => row.companyCode === "4172");
   if (!revenueRow) throw new Error("94025 fixture is missing the optional-field representative row");
   return {
+    bond: normalize11406Row(bondRow),
     revenue: normalize94025Row(revenueRow),
     profile: normalize28567Row(parse28567Csv(profileCsv)[0]),
   };
 }
+
+test("D1 mapper stores a 11406 bond parent before ordered put-right children and reconstructs their dates", async () => {
+  const snapshotId = "snapshot-11406";
+  const { bond: fixtureBond } = await normalizedFixtureRecords();
+  const bond = { ...fixtureBond, putDates: ["2024-12-18", "2025-12-18"] };
+  const db = createRecordingD1((sql) => {
+    if (sql.includes("FROM bond_issuances")) return [{
+      snapshotId,
+      bondCode: bond.bondCode,
+      bondName: bond.shortName,
+      issuerCompanyCode: bond.issuerCode,
+      issuerCompanyName: bond.issuerName,
+      issueDate: bond.issueDate,
+      listingDate: bond.listingDate ?? null,
+      maturityDate: bond.maturityDate,
+      issueAmount: bond.issueAmount,
+      currentOutstandingBalance: bond.outstandingAmount,
+      couponRate: bond.couponRate ?? null,
+      guaranteeStatus: "secured",
+      initialConversionPrice: bond.initialConversionPrice ?? null,
+      conversionStartDate: bond.conversionStartDate ?? null,
+      conversionEndDate: bond.conversionEndDate ?? null,
+      underwriter: bond.underwriter ?? null,
+      trustee: bond.trustee ?? null,
+      latestBalanceChangeDate: bond.outstandingChangeDate ?? null,
+      latestBalanceChangeReason: bond.outstandingChangeReason ?? null,
+      offeringMethod: bond.offeringMethod ?? null,
+      officialDataDate: bond.officialDataDate,
+      sourceRecordId: bond.bondId,
+      sourceId: "11406",
+      resourceId: "11406-csv",
+      fetchedAt: "2026-07-28T00:00:00.000Z",
+      responseHash: "sha256:11406",
+    }];
+    if (sql.includes("FROM bond_put_rights")) return [
+      { snapshotId, bondCode: bond.bondCode, sequence: 1, putDate: bond.putDates[0], putPrice: bond.putPrice },
+      { snapshotId, bondCode: bond.bondCode, sequence: 2, putDate: bond.putDates[1], putPrice: bond.putPrice },
+    ];
+    return [];
+  });
+  const repo = createD1PipelineRepository(db, fixedDependencies);
+
+  await repo.writeDatasetRecords("11406", snapshotId, [{
+    datasetId: "11406", snapshotId, naturalIdentity: bond.bondId, value: bond,
+  }]);
+  const inserts = db.calls.filter((call) => typeof call.sql === "string" && call.sql.startsWith("INSERT INTO bond_"));
+  assert.equal(inserts.length, 3);
+  assert.match(inserts[0].sql, /^INSERT INTO bond_issuances/);
+  assert.match(inserts[1].sql, /^INSERT INTO bond_put_rights/);
+  assert.match(inserts[2].sql, /^INSERT INTO bond_put_rights/);
+  assert.deepEqual(inserts.slice(1).map((call) => call.binds[2]), [1, 2]);
+  assert.deepEqual((await repo.readDatasetRecords("11406", snapshotId))[0].value.putDates, bond.putDates);
+  assertFixedSql(db, snapshotId);
+});
+
+test("D1 mapper rejects a failed 11406 bond parent write", async () => {
+  const { bond } = await normalizedFixtureRecords();
+  const db = createRecordingD1([], [{ success: false, meta: { changes: 0 } }]);
+  const repo = createD1PipelineRepository(db, fixedDependencies);
+
+  await assert.rejects(
+    repo.writeDatasetRecords("11406", "snapshot-failed-bond", [{
+      datasetId: "11406", snapshotId: "snapshot-failed-bond", naturalIdentity: bond.bondId, value: bond,
+    }]),
+    /DATASET_RECORD_WRITE_FAILED/,
+  );
+});
 
 function assertFixedSql(db, snapshotId) {
   const sql = db.calls.filter((call) => typeof call.sql === "string").map((call) => call.sql);
