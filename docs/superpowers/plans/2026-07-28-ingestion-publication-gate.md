@@ -42,7 +42,7 @@
 
 **Interfaces:**
 - Consumes: a `SourceAdapter`, `PipelineRepository`, clock, and approved HTTP client.
-- Produces: `ingestDataset(options)` returning `{ run, snapshot, publishedSnapshotId }`, or a structured failed run with no pointer change.
+- Produces: `ingestDataset(options)` returning `{ run, snapshot, records }`, or a structured failed run with no pointer change. It never advances a published pointer; only Task 3 may publish.
 
 - [ ] **Step 1: Write failing tests** for successful persistence, invalid integrity, fetch failure, idempotent snapshot IDs, and preservation of the previous pointer.
 - [ ] **Step 2: Run** the focused test and confirm failure.

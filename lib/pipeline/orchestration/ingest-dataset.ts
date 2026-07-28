@@ -1,0 +1,70 @@
+import type { SourceAdapter, AdapterExecutionContext, AdapterExecutionResult } from "../adapters/types.ts";
+import type { PipelineRepository } from "../repositories/contracts.ts";
+import type { DatasetId, IngestionRunRecord, SourceSnapshotRecord } from "../repositories/types.ts";
+import { RepositoryError } from "../repositories/errors.ts";
+import { toDatasetRecords } from "./record-converters.ts";
+
+type IngestOptions = {
+  datasetId: DatasetId;
+  adapter: SourceAdapter<unknown, unknown>;
+  repository: PipelineRepository;
+  clock: () => string;
+  executionMode: AdapterExecutionContext["executionMode"];
+  approvedHttpClient: AdapterExecutionContext["approvedHttpClient"];
+  runId?: string;
+};
+
+export type IngestDatasetOutput = {
+  run: IngestionRunRecord;
+  snapshot?: SourceSnapshotRecord;
+  records: readonly ReturnType<typeof toDatasetRecords>[number][];
+};
+
+function makeRun(options: IngestOptions, result: Partial<AdapterExecutionResult<unknown>>, runId: string, now: string, status: IngestionRunRecord["status"], failureCode?: string): IngestionRunRecord {
+  return {
+    runId, datasetId: options.datasetId, sourceId: options.adapter.sourceId, resourceId: options.adapter.resourceId,
+    executionMode: options.executionMode, status, startedAt: now, completedAt: now,
+    adapterVersion: options.adapter.adapterVersion, rawSchemaVersion: options.adapter.rawSchemaVersion, domainSchemaVersion: options.adapter.domainSchemaVersion,
+    fetchedAt: result.fetchedAt, responseHash: result.responseHash, responseBytes: result.responseBytes,
+    rawRowCount: result.rawRowCount, normalizedRecordCount: result.normalizedRecordCount, rejectedRecordCount: result.rejectedRecordCount,
+    warningCount: result.integrityReport?.warningCount, failureCode, createdAt: now, updatedAt: now,
+  };
+}
+
+export async function ingestDataset(options: IngestOptions): Promise<IngestDatasetOutput> {
+  const now = options.clock();
+  const runId = options.runId ?? `${options.datasetId}:${now}`;
+  let result: AdapterExecutionResult<unknown>;
+  try {
+    result = await options.adapter.execute({ runId, executionMode: options.executionMode, clock: options.clock, approvedHttpClient: options.approvedHttpClient });
+  } catch (error) {
+    const run = makeRun(options, {}, runId, now, "failed", error instanceof Error ? error.message : String(error));
+    await options.repository.withTransaction((tx) => tx.createIngestionRun(run));
+    return { run, records: [] };
+  }
+
+  const effectiveRunId = result.runId || runId;
+  const successful = result.executionStatus === "succeeded";
+  const run = makeRun(options, result, effectiveRunId, now, successful ? "succeeded" : "failed", successful ? undefined : result.executionStatus);
+  if (!successful) {
+    await options.repository.withTransaction((tx) => tx.createIngestionRun(run));
+    return { run, records: [] };
+  }
+  if (!result.fetchedAt || !result.responseHash || result.responseBytes === undefined) throw new RepositoryError("SNAPSHOT_METADATA_INCOMPLETE");
+  const snapshotId = `${options.datasetId}:${result.responseHash}`;
+  const records = toDatasetRecords(options.datasetId, snapshotId, result);
+  const snapshot: SourceSnapshotRecord = {
+    snapshotId, runId: effectiveRunId, datasetId: options.datasetId, sourceId: result.sourceId, resourceId: result.resourceId,
+    adapterVersion: result.adapterVersion, rawSchemaVersion: result.rawSchemaVersion, domainSchemaVersion: result.domainSchemaVersion,
+    fetchedAt: result.fetchedAt, responseHash: result.responseHash, responseBytes: result.responseBytes, rawRowCount: result.rawRowCount,
+    acceptedRecordCount: result.integrityReport.acceptedRecordCount, rejectedRecordCount: result.integrityReport.rejectedRecordCount,
+    warningCount: result.integrityReport.warningCount, validationStatus: result.integrityReport.status,
+    publicationEligibility: result.integrityReport.canPublishCandidate ? "eligible" : "ineligible", createdAt: now,
+  };
+  await options.repository.withTransaction(async (tx) => {
+    await tx.createIngestionRun(run);
+    await tx.createSnapshot(snapshot);
+    await tx.writeDatasetRecords(options.datasetId, snapshotId, records);
+  });
+  return { run, snapshot, records };
+}

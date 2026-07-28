@@ -25,7 +25,7 @@ export function toDatasetRecords(
 ): DatasetRecord[] {
   const scope = SOURCE_SCOPE[datasetId];
   if (result.executionStatus !== "succeeded") throw new RepositoryError("ADAPTER_NOT_SUCCESSFUL");
-  if (result.sourceId !== scope.sourceId || result.resourceId !== scope.resourceId || result.integrityReport.canPublishCandidate !== true) {
+  if (result.sourceId !== scope.sourceId || result.resourceId !== scope.resourceId) {
     throw new RepositoryError("ADAPTER_SCOPE_OR_INTEGRITY_MISMATCH");
   }
   const identities = new Set<string>();
