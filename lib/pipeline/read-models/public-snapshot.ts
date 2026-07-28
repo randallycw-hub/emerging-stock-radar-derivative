@@ -19,9 +19,13 @@ export async function readPublishedPublicSnapshot(repository: PipelineRepository
   const reasons: string[] = [];
   const pointers = new Map<DatasetId, NonNullable<Awaited<ReturnType<PipelineRepository["getPublishedSnapshotPointer"]>>>>();
   for (const datasetId of REQUIRED_DATASETS) {
-    const pointer = await repository.getPublishedSnapshotPointer(datasetId);
-    if (!pointer) reasons.push(`MISSING_POINTER:${datasetId}`);
-    else pointers.set(datasetId, pointer);
+    try {
+      const pointer = await repository.getPublishedSnapshotPointer(datasetId);
+      if (!pointer) reasons.push(`MISSING_POINTER:${datasetId}`);
+      else pointers.set(datasetId, pointer);
+    } catch {
+      reasons.push(`POINTER_READ_FAILED:${datasetId}`);
+    }
   }
   if (reasons.length) return { status: "unavailable", reasons };
 
@@ -33,7 +37,8 @@ export async function readPublishedPublicSnapshot(repository: PipelineRepository
     const scope = SOURCE_SCOPE[datasetId];
     if (pointer.datasetId !== datasetId || pointer.sourceId !== scope.sourceId || pointer.resourceId !== scope.resourceId) reasons.push(`POINTER_SCOPE_MISMATCH:${datasetId}`);
     if (pointer.publicationRunId !== firstPointer.publicationRunId || pointer.publishedAt !== firstPointer.publishedAt) reasons.push(`PUBLICATION_RUN_MISMATCH:${datasetId}`);
-    const snapshot = await repository.getSnapshot(pointer.currentSnapshotId);
+    let snapshot;
+    try { snapshot = await repository.getSnapshot(pointer.currentSnapshotId); } catch { reasons.push(`SNAPSHOT_READ_FAILED:${datasetId}`); continue; }
     if (!snapshot || snapshot.datasetId !== datasetId || snapshot.snapshotId !== pointer.currentSnapshotId || snapshot.sourceId !== scope.sourceId || snapshot.resourceId !== scope.resourceId) reasons.push(`SNAPSHOT_SCOPE_MISMATCH:${datasetId}`);
     else if (snapshot.publicationEligibility !== "eligible" || snapshot.validationStatus === "invalid" || snapshot.rejectedRecordCount !== 0) reasons.push(`SNAPSHOT_NOT_ELIGIBLE:${datasetId}`);
     if (snapshot) {
@@ -48,12 +53,16 @@ export async function readPublishedPublicSnapshot(repository: PipelineRepository
   if (reasons.length) return { status: "unavailable", reasons };
   let enrichmentStatus: PublishedPublicSnapshot["enrichmentStatus"] = "unavailable";
   let enrichment: PublishedDatasetRead | undefined;
-  const profilePointer = await repository.getPublishedSnapshotPointer("28567");
+  let profilePointer;
+  try { profilePointer = await repository.getPublishedSnapshotPointer("28567"); } catch { profilePointer = undefined; }
   if (profilePointer && profilePointer.publicationRunId === firstPointer.publicationRunId && profilePointer.publishedAt === firstPointer.publishedAt && profilePointer.sourceId === SOURCE_SCOPE["28567"].sourceId && profilePointer.resourceId === SOURCE_SCOPE["28567"].resourceId) {
-    const profileSnapshot = await repository.getSnapshot(profilePointer.currentSnapshotId);
-    if (profileSnapshot && profileSnapshot.datasetId === "28567" && profileSnapshot.publicationEligibility === "eligible" && profileSnapshot.validationStatus !== "invalid" && profileSnapshot.rejectedRecordCount === 0) {
+    let profileSnapshot;
+    try { profileSnapshot = await repository.getSnapshot(profilePointer.currentSnapshotId); } catch { profileSnapshot = undefined; }
+    if (profileSnapshot && profileSnapshot.datasetId === "28567" && profileSnapshot.snapshotId === profilePointer.currentSnapshotId && profileSnapshot.sourceId === SOURCE_SCOPE["28567"].sourceId && profileSnapshot.resourceId === SOURCE_SCOPE["28567"].resourceId && profileSnapshot.publicationEligibility === "eligible" && profileSnapshot.validationStatus !== "invalid" && profileSnapshot.rejectedRecordCount === 0) {
       try {
-        enrichment = { snapshotId: profilePointer.currentSnapshotId, sourceId: profilePointer.sourceId, resourceId: profilePointer.resourceId, records: structuredClone(await repository.readDatasetRecords("28567", profilePointer.currentSnapshotId)) };
+        const coverageCodes = new Set(datasets["94025"].records.map((record) => (record.value as { companyCode?: unknown }).companyCode).filter((code): code is string => typeof code === "string"));
+        const profileRecords = await repository.readDatasetRecords("28567", profilePointer.currentSnapshotId);
+        enrichment = { snapshotId: profilePointer.currentSnapshotId, sourceId: profilePointer.sourceId, resourceId: profilePointer.resourceId, records: structuredClone(profileRecords.filter((record) => coverageCodes.has((record.value as { companyCode?: unknown }).companyCode as string))) };
         enrichmentStatus = "published";
       } catch {
         enrichmentStatus = "unavailable";

@@ -4,10 +4,10 @@ import { readPublishedPublicSnapshot } from "../../lib/pipeline/read-models/publ
 import { InMemoryPipelineRepository } from "../../lib/pipeline/repositories/in-memory.ts";
 
 const required = ["94025", "11406", "11586"];
-async function seed(repository, datasetId, snapshotId, publicationRunId = "publish-1", eligible = true) {
+async function seed(repository, datasetId, snapshotId, publicationRunId = "publish-1", eligible = true, records = undefined) {
   await repository.createIngestionRun({ runId: `run-${datasetId}-${snapshotId}`, datasetId, sourceId: datasetId, resourceId: `${datasetId}-csv`, executionMode: "offline_fixture", status: "succeeded", startedAt: "2026-07-28T00:00:00.000Z", adapterVersion: "v1", rawSchemaVersion: "raw", domainSchemaVersion: "domain", createdAt: "2026-07-28T00:00:00.000Z", updatedAt: "2026-07-28T00:00:00.000Z" });
   await repository.createSnapshot({ snapshotId, runId: `run-${datasetId}-${snapshotId}`, datasetId, sourceId: datasetId, resourceId: `${datasetId}-csv`, adapterVersion: "v1", rawSchemaVersion: "raw", domainSchemaVersion: "domain", fetchedAt: "2026-07-28T00:00:00.000Z", responseHash: `sha256:${snapshotId}`, responseBytes: 1, rawRowCount: 1, acceptedRecordCount: 1, rejectedRecordCount: 0, warningCount: 0, validationStatus: eligible ? "valid" : "invalid", publicationEligibility: eligible ? "eligible" : "ineligible", createdAt: "2026-07-28T00:00:00.000Z" });
-  await repository.writeDatasetRecords(datasetId, snapshotId, [{ datasetId, snapshotId, naturalIdentity: `${datasetId}:row`, value: { datasetId } }]);
+  await repository.writeDatasetRecords(datasetId, snapshotId, records ?? [{ datasetId, snapshotId, naturalIdentity: `${datasetId}:row`, value: { datasetId, companyCode: datasetId === "94025" ? "C1" : undefined } }]);
   return { datasetId, sourceId: datasetId, resourceId: `${datasetId}-csv`, currentSnapshotId: snapshotId, previousSnapshotId: null, publicationRunId, publishedAt: "2026-07-28T01:00:00.000Z" };
 }
 async function publish(repository, pointers) { return repository.publishPointersAtomically(pointers.map((pointer) => ({ datasetId: pointer.datasetId, expectedCurrentSnapshotId: null, pointer }))); }
@@ -49,7 +49,10 @@ test("attaches optional company profiles only when their publication run aligns"
   const pointers = [];
   for (const datasetId of required) pointers.push(await seed(repository, datasetId, `${datasetId}-snapshot`));
   await publish(repository, pointers);
-  const profilePointer = await seed(repository, "28567", "28567-snapshot", "publish-1");
+  const profilePointer = await seed(repository, "28567", "28567-snapshot", "publish-1", true, [
+    { datasetId: "28567", snapshotId: "28567-snapshot", naturalIdentity: "match", value: { companyCode: "C1" } },
+    { datasetId: "28567", snapshotId: "28567-snapshot", naturalIdentity: "other", value: { companyCode: "other" } },
+  ]);
   await publish(repository, [profilePointer]);
   const withProfile = await readPublishedPublicSnapshot(repository);
   assert.equal(withProfile.status, "published");
@@ -60,4 +63,27 @@ test("attaches optional company profiles only when their publication run aligns"
   const withoutAlignedProfile = await readPublishedPublicSnapshot(repository);
   assert.equal(withoutAlignedProfile.status, "published");
   assert.equal(withoutAlignedProfile.enrichmentStatus, "unavailable");
+});
+
+test("contains repository pointer failures as unavailable", async () => {
+  const repository = new InMemoryPipelineRepository();
+  const original = repository.getPublishedSnapshotPointer.bind(repository);
+  const failing = { getPublishedSnapshotPointer: async (datasetId) => { if (datasetId === "11406") throw new Error("db down"); return original(datasetId); }, getSnapshot: repository.getSnapshot.bind(repository), readDatasetRecords: repository.readDatasetRecords.bind(repository) };
+  const result = await readPublishedPublicSnapshot(failing);
+  assert.equal(result.status, "unavailable");
+  assert.match(result.reasons.join(","), /POINTER_READ_FAILED:11406/);
+});
+
+test("keeps public data when optional profile snapshot is mis-scoped", async () => {
+  const repository = new InMemoryPipelineRepository();
+  const pointers = [];
+  for (const datasetId of required) pointers.push(await seed(repository, datasetId, `${datasetId}-snapshot`));
+  await publish(repository, pointers);
+  const profilePointer = await seed(repository, "28567", "28567-snapshot", "publish-1");
+  await publish(repository, [profilePointer]);
+  const original = repository.getSnapshot.bind(repository);
+  const wrapped = { getPublishedSnapshotPointer: repository.getPublishedSnapshotPointer.bind(repository), getSnapshot: async (snapshotId) => { const value = await original(snapshotId); return snapshotId === "28567-snapshot" ? { ...value, sourceId: "wrong" } : value; }, readDatasetRecords: repository.readDatasetRecords.bind(repository) };
+  const result = await readPublishedPublicSnapshot(wrapped);
+  assert.equal(result.status, "published");
+  assert.equal(result.enrichmentStatus, "unavailable");
 });
