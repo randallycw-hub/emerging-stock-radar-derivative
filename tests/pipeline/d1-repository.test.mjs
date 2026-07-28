@@ -65,6 +65,30 @@ test("D1 repository returns undefined when the requested dataset has no pointer"
   assert.equal(pointer, undefined);
 });
 
+test("D1 repository accepts a pointer with no previous snapshot", async () => {
+  const pointer = await createRepo(createRecordingD1({
+    first: {
+      datasetId: "94025",
+      sourceId: "94025",
+      resourceId: "94025-csv",
+      currentSnapshotId: "snapshot-1",
+      previousSnapshotId: null,
+      publicationRunId: "run-1",
+      publishedAt: "2026-07-28T00:00:00.000Z",
+    },
+  })).getPublishedSnapshotPointer("94025");
+
+  assert.deepEqual(pointer, {
+    datasetId: "94025",
+    sourceId: "94025",
+    resourceId: "94025-csv",
+    currentSnapshotId: "snapshot-1",
+    previousSnapshotId: null,
+    publicationRunId: "run-1",
+    publishedAt: "2026-07-28T00:00:00.000Z",
+  });
+});
+
 test("D1 repository rejects pointer rows with blank required fields", async () => {
   const validRow = {
     datasetId: "94025",
