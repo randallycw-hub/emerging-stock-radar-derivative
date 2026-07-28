@@ -15,13 +15,14 @@ export async function POST(request: Request) {
   const runtimeEnv = env as RelayEnv;
   const authorization = request.headers.get("authorization");
   const customToken = request.headers.get("x-ingestion-token");
+  const body = await request.json() as { ingestionToken?: string; datasets?: Partial<Record<RelayDatasetId, RelayDatasetPayload>> };
   const authorized = authorizeIngestionRequest(authorization, runtimeEnv.INGESTION_TOKEN)
-    || (customToken !== null && customToken === runtimeEnv.INGESTION_TOKEN);
+    || (customToken !== null && customToken === runtimeEnv.INGESTION_TOKEN)
+    || (body.ingestionToken !== undefined && body.ingestionToken === runtimeEnv.INGESTION_TOKEN);
   if (!authorized) return Response.json({ status: "unauthorized" }, { status: 401 });
   const repository = createRuntimePipelineRepository({ PIPELINE_DB: runtimeEnv.PIPELINE_DB });
   if (!repository) return Response.json({ status: "unavailable", reasons: ["PIPELINE_DB_NOT_CONFIGURED"] }, { status: 503 });
   try {
-    const body = await request.json() as { datasets?: Partial<Record<RelayDatasetId, RelayDatasetPayload>> };
     if (!body.datasets || required.some((datasetId) => !body.datasets?.[datasetId])) return Response.json({ status: "invalid", reasons: ["RELAY_DATASETS_INCOMPLETE"] }, { status: 400 });
     const responses = Object.fromEntries(await Promise.all(required.map(async (datasetId) => [datasetId, await createRelaySourceResponse(datasetId, body.datasets![datasetId]!) ]))) as Record<RelayDatasetId, Awaited<ReturnType<typeof createRelaySourceResponse>>>;
     const result = await runPublicSnapshotIngestion({
