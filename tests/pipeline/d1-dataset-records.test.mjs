@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { createD1PipelineRepository } from "../../lib/pipeline/repositories/d1.ts";
 import { normalize28567Row, parse28567Csv } from "../../lib/source-verification/source-28567.ts";
-import { normalize11406Row } from "../../lib/source-verification/source-11406.ts";
+import { normalize11406Row, parse11406Csv } from "../../lib/source-verification/source-11406.ts";
 import { normalize94025Row, parse94025Csv } from "../../lib/source-verification/source-94025.ts";
 
 const fixedDependencies = { clock: () => "2026-07-28T00:00:00.000Z" };
@@ -44,43 +44,26 @@ async function normalizedFixtureRecords() {
   };
 }
 
-function syntheticTwoPutRight11406Row() {
-  return {
-    officialDataDate: "20260723",
-    issuerCode: "3522",
-    issuerName: "Synthetic issuer",
-    bondCode: "SYN11406",
-    sourceBondTypeCode: "5",
-    seriesNumber: "1",
-    trancheNumber: "",
-    shortName: "Synthetic bond",
-    issueDate: "20231218",
-    listingDate: "20231218",
-    maturityDate: "20261218",
-    issueAmount: "150000000",
-    outstandingAmount: "123100000",
-    couponRate: "0.000000",
-    securedText: "1",
-    securityDescription: "Synthetic security",
-    initialConversionPrice: "19.5000",
-    conversionStartDate: "20240319",
-    conversionEndDate: "20261218",
-    putDatesText: "20241218、20251218",
-    putPrice: "101.0025、101.0025",
-    underwriter: "Synthetic underwriter",
-    trustee: "Synthetic trustee",
-    outstandingChangeDate: "20250228",
-    outstandingChangeReason: "Synthetic change reason",
-    offeringMethod: "7",
-  };
+async function officialOnePutRight11406Bond() {
+  const csv = await readFile(
+    new URL("../fixtures/source-verification/11406/csv-minimal.csv", import.meta.url),
+    "utf8",
+  );
+  const row = parse11406Csv(csv).find((candidate) => candidate.bondCode === "35221");
+  if (!row) throw new Error("official 11406 fixture is missing its coded one-put-right bond");
+  return normalize11406Row(row);
 }
 
-test("D1 mapper stores a normalized two-put-right 11406 bond parent before ordered children", async () => {
-  const snapshotId = "snapshot-11406";
-  const bond = normalize11406Row(syntheticTwoPutRight11406Row());
-  assert.deepEqual(bond.putDates, ["2024-12-18", "2025-12-18"]);
-  assert.equal(bond.putPrice, "101.0025");
-  const db = createRecordingD1((sql) => {
+async function syntheticTwoPutRight11406Bond() {
+  const raw = JSON.parse(await readFile(
+    new URL("../fixtures/pipeline/11406/synthetic-two-put-right-raw.json", import.meta.url),
+    "utf8",
+  ));
+  return normalize11406Row(raw);
+}
+
+function createBondRoundTripD1(snapshotId, bond) {
+  return createRecordingD1((sql) => {
     if (sql.includes("FROM bond_issuances")) return [{
       snapshotId,
       bondCode: bond.bondCode,
@@ -109,12 +92,36 @@ test("D1 mapper stores a normalized two-put-right 11406 bond parent before order
       fetchedAt: "2026-07-28T00:00:00.000Z",
       responseHash: "sha256:11406",
     }];
-    if (sql.includes("FROM bond_put_rights")) return [
-      { snapshotId, bondCode: bond.bondCode, sequence: 1, putDate: bond.putDates[0], putPrice: bond.putPrice },
-      { snapshotId, bondCode: bond.bondCode, sequence: 2, putDate: bond.putDates[1], putPrice: bond.putPrice },
-    ];
+    if (sql.includes("FROM bond_put_rights")) return bond.putDates.map((putDate, index) => ({
+      snapshotId, bondCode: bond.bondCode, sequence: index + 1, putDate, putPrice: bond.putPrice,
+    }));
     return [];
   });
+}
+
+test("D1 mapper round-trips the official 11406 fixture's one put right", async () => {
+  const snapshotId = "snapshot-11406-official";
+  const bond = await officialOnePutRight11406Bond();
+  assert.deepEqual(bond.putDates, ["2025-12-18"]);
+  assert.equal(bond.putPrice, "101.0025");
+  const db = createBondRoundTripD1(snapshotId, bond);
+  const repo = createD1PipelineRepository(db, fixedDependencies);
+
+  await repo.writeDatasetRecords("11406", snapshotId, [{
+    datasetId: "11406", snapshotId, naturalIdentity: bond.bondId, value: bond,
+  }]);
+  const [roundTripped] = await repo.readDatasetRecords("11406", snapshotId);
+  assert.deepEqual(roundTripped.value.putDates, bond.putDates);
+  assert.equal(roundTripped.value.putPrice, bond.putPrice);
+  assertFixedSql(db, snapshotId);
+});
+
+test("D1 mapper orders prices and round-trips a synthetic raw two-put-right 11406 fixture", async () => {
+  const snapshotId = "snapshot-11406-synthetic";
+  const bond = await syntheticTwoPutRight11406Bond();
+  assert.deepEqual(bond.putDates, ["2024-12-18", "2025-12-18"]);
+  assert.equal(bond.putPrice, "101.0025");
+  const db = createBondRoundTripD1(snapshotId, bond);
   const repo = createD1PipelineRepository(db, fixedDependencies);
 
   await repo.writeDatasetRecords("11406", snapshotId, [{
@@ -135,7 +142,7 @@ test("D1 mapper stores a normalized two-put-right 11406 bond parent before order
 });
 
 test("D1 mapper rejects a failed 11406 bond parent write", async () => {
-  const bond = normalize11406Row(syntheticTwoPutRight11406Row());
+  const bond = await syntheticTwoPutRight11406Bond();
   const db = createRecordingD1([], [{ success: false, meta: { changes: 0 } }]);
   const repo = createD1PipelineRepository(db, fixedDependencies);
 
@@ -148,7 +155,7 @@ test("D1 mapper rejects a failed 11406 bond parent write", async () => {
 });
 
 test("D1 mapper rejects a 11406 batch that omits a put-right result", async () => {
-  const bond = normalize11406Row(syntheticTwoPutRight11406Row());
+  const bond = await syntheticTwoPutRight11406Bond();
   const db = createRecordingD1([], [
     { success: true, meta: { changes: 1 } },
     { success: true, meta: { changes: 1 } },
