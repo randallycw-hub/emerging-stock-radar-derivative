@@ -153,7 +153,7 @@ export function normalize94025Row(
     row.previousMonthRevenue,
     "previousMonthRevenue",
   );
-  const priorYearMonthRevenue = optionalRevenue(
+  const priorYearMonthRevenue = optionalRevenueSnapshot(
     row.priorYearMonthRevenue,
     "priorYearMonthRevenue",
   );
@@ -411,6 +411,21 @@ function optionalRevenue(value: string, name: string): string | undefined {
     percent: false,
     name,
   });
+}
+
+// A small number of official rows report negative comparative revenue after
+// restatements.  The v1 contract intentionally stores revenue as non-negative;
+// preserve correctness by omitting that unsupported comparative value instead
+// of coercing it to zero.  Current-period revenue remains strict and required.
+function optionalRevenueSnapshot(value: string, name: string): string | undefined {
+  try {
+    return optionalRevenue(value, name);
+  } catch (error) {
+    if (error instanceof Source94025ValidationError && /non-negative/.test(error.message) && /^[-－]/.test(value.trim())) {
+      return undefined;
+    }
+    throw error;
+  }
 }
 
 function optionalPercent(value: string, name: string): string | undefined {

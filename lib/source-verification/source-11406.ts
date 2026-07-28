@@ -157,7 +157,16 @@ const COMMA_DECIMAL_PATTERN = /^(?:[1-9]\d{0,2})(?:,\d{3})+(?:\.\d+)?$/;
 
 export function parse11406Csv(text: string): Source11406Row[] {
   if (typeof text !== "string") throw new TypeError("11406 CSV must be a string");
-  return parseAliasedDataset(parseCsv(text), CSV_ALIASES, "11406 CSV");
+  // The live TPEx export includes additional official columns that are outside
+  // the approved v1 contract.  Drop only this reviewed allow-list; arbitrary
+  // unknown columns must still fail closed below.
+  const ignored = new Set([
+    "計付息方式", "計息次數", "付息次數", "債券評等機構", "債券評等等級",
+    "發行公司評等機構", "發行公司評等等級", "擔保機構評等機構", "擔保機構評等等級",
+    "掛牌地點", "還本FLAG", "還本敘述", "發行期限年", "發行期限月", "上市櫃否", "幣別",
+  ]);
+  const rows = parseCsv(text).map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => !ignored.has(key))));
+  return parseAliasedDataset(rows, CSV_ALIASES, "11406 CSV");
 }
 
 export function parse11406Json(value: unknown): Source11406Row[] {

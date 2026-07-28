@@ -47,7 +47,9 @@ export class Source11586ValidationError extends TypeError {
 
 export function parse11586Csv(text: string): Source11586Row[] {
   if (typeof text !== "string") throw new Source11586ValidationError("11586 CSV must be a string");
-  return parseRows(parseCsv(text), "11586 CSV");
+  // TWSE currently emits a non-contractual helper column named 索引.
+  const rows = parseCsv(text).map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => key !== "索引")));
+  return parseRows(rows, "11586 CSV");
 }
 
 export function parse11586Json(value: unknown): Source11586Row[] {
