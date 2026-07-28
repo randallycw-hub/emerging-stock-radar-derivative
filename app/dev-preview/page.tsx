@@ -69,6 +69,30 @@ export default async function DevPreviewPage() {
         </article>
       </section>
 
+      <section className="preview-visual-overview" aria-label="資料狀態視覺摘要">
+        <div className="preview-visual-overview-head">
+          <div>
+            <span className="preview-section-label">Snapshot signal</span>
+            <h2>目前資料輪廓</h2>
+          </div>
+          <PreviewStatusBadge tone="teal">fixture 可核對</PreviewStatusBadge>
+        </div>
+        <div className="preview-visual-overview-grid">
+          <article className="preview-visual-card preview-visual-card-teal">
+            <span>公司涵蓋</span><strong>{dashboard.companyCount}</strong><small>筆月營收樣本</small>
+            <div className="preview-visual-track"><i style={{ width: `${Math.min(100, dashboard.companyCount * 25)}%` }} /></div>
+          </article>
+          <article className="preview-visual-card preview-visual-card-ink">
+            <span>債券條款</span><strong>{dashboard.bondCount}</strong><small>筆契約樣本</small>
+            <div className="preview-visual-track"><i style={{ width: `${Math.min(100, dashboard.bondCount * 25)}%` }} /></div>
+          </article>
+          <article className="preview-visual-card preview-visual-card-clay">
+            <span>資料月份</span><strong>{dashboard.latestRevenueMonth}</strong><small>官方資料日期</small>
+            <div className="preview-visual-rule" />
+          </article>
+        </div>
+      </section>
+
       <section className="preview-panel" id="revenue-summary">
         <div className="preview-panel-head">
           <div>
@@ -109,6 +133,7 @@ export default async function DevPreviewPage() {
                     </td>
                     <td className="preview-align-right preview-numeric">
                       {formatPreviewPercent(company.yearOverYearPercent)}
+                      <span className="preview-growth-meter" aria-hidden="true"><i style={{ width: `${percentWidth(company.yearOverYearPercent)}%` }} /></span>
                     </td>
                     <td className="preview-align-right preview-numeric">
                       {formatPreviewPercent(company.cumulativeYearOverYearPercent)}
@@ -197,6 +222,7 @@ export default async function DevPreviewPage() {
                 />
                 <PreviewDataField label="到期日" value={bond.maturityDate} />
               </dl>
+              <div className="preview-bond-meta"><span>條款狀態</span><strong>{bond.secured ? "已標示擔保" : "未標示擔保"}</strong><span>資料來源</span><strong>{bond.source.providerName}</strong></div>
             </article>
           ))}
         </div>
@@ -310,4 +336,10 @@ export default async function DevPreviewPage() {
       />
     </>
   );
+}
+
+function percentWidth(value?: string): number {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.min(100, Math.max(6, Math.abs(numeric)));
 }
