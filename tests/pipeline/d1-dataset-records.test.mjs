@@ -64,13 +64,13 @@ async function syntheticTwoPutRight11406Bond() {
   return normalize11406Row(raw);
 }
 
-async function official11586ListingApplication() {
+async function official11586ListingApplication(index = 0) {
   const csv = await readFile(
     new URL("../fixtures/source-verification/11586/csv-minimal.csv", import.meta.url),
     "utf8",
   );
-  const [application] = new Source11586CsvAdapter().normalize(parse11586Csv(csv));
-  if (!application) throw new Error("official 11586 fixture is missing its completed application");
+  const application = new Source11586CsvAdapter().normalize(parse11586Csv(csv))[index];
+  if (!application) throw new Error(`official 11586 fixture is missing application ${index}`);
   return application;
 }
 
@@ -83,7 +83,13 @@ function syntheticMultipleUnderwriter11586Contract(officialApplication) {
   };
 }
 
-function createListingRoundTripD1(snapshotId, application) {
+function createListingRoundTripD1(snapshotId, application, options = {}) {
+  const underwriterRows = application.underwriters.map((underwriterName, index) => ({
+    snapshotId,
+    sourceRecordId: application.sourceRecordId,
+    sequence: index + 1,
+    underwriterName,
+  }));
   return createRecordingD1((sql) => {
     if (sql.includes("FROM listing_applications")) return [{
       snapshotId,
@@ -91,6 +97,7 @@ function createListingRoundTripD1(snapshotId, application) {
       officialIndex: application.sourceRecordId,
       companyCode: application.companyCode,
       companyShortName: application.companyName,
+      chairmanName: application.chairmanName,
       applicationDate: application.applicationDate,
       applicationCapitalThousandsTwd: application.applicationCapitalThousandsTwd || null,
       listingReviewDate: application.listingReviewDate ?? null,
@@ -103,13 +110,11 @@ function createListingRoundTripD1(snapshotId, application) {
       resourceId: "11586-csv",
       fetchedAt: "2026-07-28T00:00:00.000Z",
       responseHash: "sha256:11586",
+      ...options.parentOverrides,
     }];
-    if (sql.includes("FROM listing_application_underwriters")) return application.underwriters.map((underwriterName, index) => ({
-      snapshotId,
-      sourceRecordId: application.sourceRecordId,
-      sequence: index + 1,
-      underwriterName,
-    }));
+    if (sql.includes("FROM listing_application_underwriters")) {
+      return options.childRowsForSql ? options.childRowsForSql(sql, underwriterRows) : underwriterRows;
+    }
     return [];
   });
 }
@@ -238,13 +243,87 @@ test("D1 mapper writes listing applications before ordered underwriters and roun
   assert.match(inserts[0].sql, /^INSERT INTO listing_applications/);
   assert.deepEqual(inserts.slice(1).map((call) => call.binds[2]), [1, 2]);
   assert.deepEqual(inserts.slice(1).map((call) => call.binds[3]), application.underwriters);
-  assert.equal(inserts[0].binds[12], "complete");
+  assert.equal(inserts[0].binds[13], "complete");
   assert.doesNotMatch(inserts.map((call) => call.sql).join("\n"), /underwriting.?price|stock.?price|\bprice\b|volume|recommendation/i);
 
   const [roundTripped] = await repo.readDatasetRecords("11586", snapshotId);
   assert.deepEqual(roundTripped.value.underwriters, application.underwriters);
   assert.equal(roundTripped.value.stage, application.stage);
+  assert.equal(roundTripped.value.chairmanName, application.chairmanName);
   assertFixedSql(db, snapshotId);
+});
+
+test("D1 mapper persists the official partial listing chronology", async () => {
+  const snapshotId = "snapshot-11586-partial";
+  const application = await official11586ListingApplication(1);
+  const db = createListingRoundTripD1(snapshotId, application);
+  const repo = createD1PipelineRepository(db, fixedDependencies);
+
+  await repo.writeDatasetRecords("11586", snapshotId, [{
+    datasetId: "11586", snapshotId, naturalIdentity: application.sourceRecordId, value: application,
+  }]);
+
+  const parentInsert = db.calls.find((call) => typeof call.sql === "string" && call.sql.startsWith("INSERT INTO listing_applications"));
+  assert.equal(parentInsert.binds[13], "partial");
+  const [roundTripped] = await repo.readDatasetRecords("11586", snapshotId);
+  assert.equal(roundTripped.value.stage, "applied");
+  assert.equal(roundTripped.value.chairmanName, application.chairmanName);
+});
+
+test("D1 mapper rejects malformed and out-of-order listing dates before SQL", async () => {
+  const application = await official11586ListingApplication();
+  for (const value of [
+    { ...application, listingReviewDate: "2026-01-01" },
+    { ...application, boardApprovalDate: "2026-99-99" },
+  ]) {
+    const db = createRecordingD1();
+    const repo = createD1PipelineRepository(db, fixedDependencies);
+    await assert.rejects(
+      repo.writeDatasetRecords("11586", "snapshot-invalid-listing-dates", [{
+        datasetId: "11586",
+        snapshotId: "snapshot-invalid-listing-dates",
+        naturalIdentity: application.sourceRecordId,
+        value,
+      }]),
+      /INVALID_DATASET_RECORD/,
+    );
+    assert.equal(db.calls.length, 0);
+  }
+});
+
+test("D1 mapper rejects malformed and out-of-order listing chronology read rows", async () => {
+  const snapshotId = "snapshot-invalid-listing-read";
+  const application = await official11586ListingApplication();
+  for (const parentOverrides of [
+    { listingReviewDate: "not-an-iso-date" },
+    { listingReviewDate: "2026-01-01" },
+  ]) {
+    const db = createListingRoundTripD1(snapshotId, application, { parentOverrides });
+    const repo = createD1PipelineRepository(db, fixedDependencies);
+    await assert.rejects(repo.readDatasetRecords("11586", snapshotId), /INVALID_DATASET_RECORD/);
+  }
+});
+
+test("D1 mapper scopes listing underwriter reads to the selected source parents", async () => {
+  const snapshotId = "snapshot-11586-source-scope";
+  const application = syntheticMultipleUnderwriter11586Contract(await official11586ListingApplication());
+  const db = createListingRoundTripD1(snapshotId, application, {
+    childRowsForSql(sql, expectedRows) {
+      if (sql.includes("JOIN listing_applications")) return expectedRows;
+      return [...expectedRows, {
+        snapshotId,
+        sourceRecordId: "orphan-from-another-source",
+        sequence: 1,
+        underwriterName: "must not be selected",
+      }];
+    },
+  });
+  const repo = createD1PipelineRepository(db, fixedDependencies);
+
+  const [roundTripped] = await repo.readDatasetRecords("11586", snapshotId);
+  assert.deepEqual(roundTripped.value.underwriters, application.underwriters);
+  const childRead = db.calls.find((call) => typeof call.sql === "string" && call.sql.includes("FROM listing_application_underwriters"));
+  assert.deepEqual(childRead.binds, [snapshotId, "11586", "11586-csv"]);
 });
 
 test("D1 mapper rejects prohibited listing pricing and market fields before SQL", async () => {
