@@ -17,6 +17,7 @@ export type PublicSnapshotRunnerOptions = {
 
 export async function runPublicSnapshotIngestion(options: PublicSnapshotRunnerOptions): Promise<PublicationDecision> {
   const candidates: Partial<Record<DatasetId, { datasetId: DatasetId; snapshot?: { snapshotId: string; sourceId: string; resourceId: string; runId: string } }>> = {};
+  const failures = new Map<DatasetId, string>();
   for (const datasetId of REQUIRED_DATASETS) {
     const adapter = options.adapters[datasetId];
     if (!adapter) continue;
@@ -29,7 +30,13 @@ export async function runPublicSnapshotIngestion(options: PublicSnapshotRunnerOp
       approvedHttpClient: options.approvedHttpClient,
       runId: `${options.publicationRunId}:${datasetId}`,
     });
+    if (output.run.status !== "succeeded") failures.set(datasetId, output.run.failureCode ?? "UNKNOWN");
     candidates[datasetId] = { datasetId, snapshot: output.snapshot && { snapshotId: output.snapshot.snapshotId, sourceId: output.snapshot.sourceId, resourceId: output.snapshot.resourceId, runId: output.snapshot.runId } };
   }
-  return publishPublicSnapshot(candidates, { repository: options.repository, clock: options.clock, publicationRunId: options.publicationRunId });
+  const decision = await publishPublicSnapshot(candidates, { repository: options.repository, clock: options.clock, publicationRunId: options.publicationRunId });
+  return { ...decision, reasons: decision.reasons.map((reason) => {
+    const match = /^MISSING_DATASET:(.+)$/.exec(reason);
+    const datasetId = match?.[1] as DatasetId | undefined;
+    return datasetId && failures.has(datasetId) ? `INGESTION_FAILED:${datasetId}:${failures.get(datasetId)}` : reason;
+  }) };
 }
