@@ -11,26 +11,29 @@ export interface D1RepositoryDependencies { clock: () => string; }
 const RUN_COLUMNS = "run_id as runId,dataset_id as datasetId,source_id as sourceId,resource_id as resourceId,execution_mode as executionMode,status,started_at as startedAt,completed_at as completedAt,adapter_version as adapterVersion,raw_schema_version as rawSchemaVersion,domain_schema_version as domainSchemaVersion,fetched_at as fetchedAt,http_status as httpStatus,content_type as contentType,response_hash as responseHash,response_bytes as responseBytes,raw_row_count as rawRowCount,normalized_record_count as normalizedRecordCount,rejected_record_count as rejectedRecordCount,warning_count as warningCount,failure_code as failureCode,created_at as createdAt,updated_at as updatedAt";
 const PUBLISHED_POINTER_COLUMNS = "dataset_id as datasetId,source_id as sourceId,resource_id as resourceId,current_snapshot_id as currentSnapshotId,previous_snapshot_id as previousSnapshotId,publication_run_id as publicationRunId,published_at as publishedAt";
 
+function requiredString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
 function mapPublishedSnapshotPointer(row: unknown, datasetId: DatasetId): PublishedSnapshotPointer | undefined {
   if (typeof row !== "object" || row === null || Array.isArray(row)) return undefined;
   const candidate = row as Record<string, unknown>;
-  if (
-    candidate.datasetId !== datasetId
-    || typeof candidate.sourceId !== "string"
-    || typeof candidate.resourceId !== "string"
-    || typeof candidate.currentSnapshotId !== "string"
-    || (candidate.previousSnapshotId !== null && typeof candidate.previousSnapshotId !== "string")
-    || typeof candidate.publicationRunId !== "string"
-    || typeof candidate.publishedAt !== "string"
-  ) return undefined;
+  if (candidate.datasetId !== datasetId) return undefined;
+  const sourceId = requiredString(candidate.sourceId);
+  const resourceId = requiredString(candidate.resourceId);
+  const currentSnapshotId = requiredString(candidate.currentSnapshotId);
+  const previousSnapshotId = candidate.previousSnapshotId === null ? null : requiredString(candidate.previousSnapshotId);
+  const publicationRunId = requiredString(candidate.publicationRunId);
+  const publishedAt = requiredString(candidate.publishedAt);
+  if (!sourceId || !resourceId || !currentSnapshotId || previousSnapshotId === undefined || !publicationRunId || !publishedAt) return undefined;
   return {
     datasetId,
-    sourceId: candidate.sourceId,
-    resourceId: candidate.resourceId,
-    currentSnapshotId: candidate.currentSnapshotId,
-    previousSnapshotId: candidate.previousSnapshotId,
-    publicationRunId: candidate.publicationRunId,
-    publishedAt: candidate.publishedAt,
+    sourceId,
+    resourceId,
+    currentSnapshotId,
+    previousSnapshotId,
+    publicationRunId,
+    publishedAt,
   };
 }
 

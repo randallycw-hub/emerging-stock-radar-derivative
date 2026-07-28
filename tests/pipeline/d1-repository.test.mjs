@@ -64,3 +64,29 @@ test("D1 repository returns undefined when the requested dataset has no pointer"
 
   assert.equal(pointer, undefined);
 });
+
+test("D1 repository rejects pointer rows with blank required fields", async () => {
+  const validRow = {
+    datasetId: "94025",
+    sourceId: "94025",
+    resourceId: "94025-csv",
+    currentSnapshotId: "snapshot-2",
+    previousSnapshotId: "snapshot-1",
+    publicationRunId: "run-2",
+    publishedAt: "2026-07-28T00:00:00.000Z",
+  };
+  for (const [field, value] of [
+    ["sourceId", " "],
+    ["resourceId", "\t"],
+    ["currentSnapshotId", "  "],
+    ["previousSnapshotId", "\n"],
+    ["publicationRunId", " "],
+    ["publishedAt", " "],
+  ]) {
+    const pointer = await createRepo(createRecordingD1({
+      first: { ...validRow, [field]: value },
+    })).getPublishedSnapshotPointer("94025");
+
+    assert.equal(pointer, undefined, `${field} must be nonblank when present`);
+  }
+});
