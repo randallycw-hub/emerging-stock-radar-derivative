@@ -314,7 +314,7 @@ export async function writeD1DatasetRecords(
   if (statements.length === 0) return;
 
   const results = await db.batch(statements);
-  if (results.some((result) => {
+  if (results.length !== statements.length || results.some((result) => {
     const changes = (result.meta as { changes?: unknown } | undefined)?.changes;
     return result.success !== true || changes !== 1;
   })) {
