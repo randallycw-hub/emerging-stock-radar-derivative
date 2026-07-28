@@ -47,9 +47,24 @@ export class D1PipelineRepository implements PipelineRepository {
   async writeDatasetRecords(datasetId: DatasetId, snapshotId: string, records: readonly DatasetRecord[]) { return writeD1DatasetRecords(this.db, datasetId, snapshotId, records); }
   async persistIngestionCandidate(run: IngestionRunRecord, snapshot: SourceSnapshotRecord, records: readonly DatasetRecord[]) {
     const runStatement = this.db.prepare("INSERT INTO ingestion_runs (run_id,dataset_id,source_id,resource_id,execution_mode,status,started_at,completed_at,adapter_version,raw_schema_version,domain_schema_version,fetched_at,http_status,content_type,response_hash,response_bytes,raw_row_count,normalized_record_count,rejected_record_count,warning_count,failure_code,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(run.runId,run.datasetId,run.sourceId,run.resourceId,run.executionMode,run.status,run.startedAt,run.completedAt ?? null,run.adapterVersion,run.rawSchemaVersion,run.domainSchemaVersion,run.fetchedAt ?? null,run.httpStatus ?? null,run.contentType ?? null,run.responseHash ?? null,run.responseBytes ?? null,run.rawRowCount ?? null,run.normalizedRecordCount ?? null,run.rejectedRecordCount ?? null,run.warningCount ?? null,run.failureCode ?? null,run.createdAt,run.updatedAt);
+    const runResult = await runStatement.run();
+    if (runResult.success === false) throw new RepositoryError("RUN_ALREADY_EXISTS");
+    const existing = await this.getSnapshot(snapshot.snapshotId);
+    if (existing) {
+      if (existing.datasetId !== snapshot.datasetId || existing.sourceId !== snapshot.sourceId || existing.resourceId !== snapshot.resourceId || existing.responseHash !== snapshot.responseHash) {
+        throw new RepositoryError("SNAPSHOT_ID_CONFLICT");
+      }
+      return;
+    }
     const snapshotStatement = this.db.prepare("INSERT INTO source_snapshots (snapshot_id,run_id,dataset_id,source_id,resource_id,adapter_version,raw_schema_version,domain_schema_version,fetched_at,response_hash,response_bytes,raw_row_count,accepted_record_count,rejected_record_count,warning_count,validation_status,publication_eligibility,revenue_year_month,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(snapshot.snapshotId,snapshot.runId,snapshot.datasetId,snapshot.sourceId,snapshot.resourceId,snapshot.adapterVersion,snapshot.rawSchemaVersion,snapshot.domainSchemaVersion,snapshot.fetchedAt,snapshot.responseHash,snapshot.responseBytes,snapshot.rawRowCount,snapshot.acceptedRecordCount,snapshot.rejectedRecordCount,snapshot.warningCount,snapshot.validationStatus,snapshot.publicationEligibility === "eligible" ? 1 : 0,snapshot.revenueYearMonth ?? null,snapshot.createdAt);
-    const statements = [runStatement, snapshotStatement, ...prepareD1DatasetRecordStatements(this.db, snapshot.datasetId, snapshot.snapshotId, records)];
-    const results = await this.db.batch(statements);
+    const snapshotResult = await snapshotStatement.run();
+    if (snapshotResult.success === false) {
+      const raced = await this.getSnapshot(snapshot.snapshotId);
+      if (raced && raced.datasetId === snapshot.datasetId && raced.sourceId === snapshot.sourceId && raced.resourceId === snapshot.resourceId && raced.responseHash === snapshot.responseHash) return;
+      throw new RepositoryError("SNAPSHOT_ALREADY_EXISTS");
+    }
+    const statements = prepareD1DatasetRecordStatements(this.db, snapshot.datasetId, snapshot.snapshotId, records);
+    const results = statements.length === 0 ? [] : await this.db.batch(statements);
     if (results.length !== statements.length || results.some((result) => result.success !== true || ((result.meta as { changes?: unknown } | undefined)?.changes ?? 0) !== 1)) throw new RepositoryError("INGESTION_TRANSACTION_FAILED");
   }
   async readDatasetRecords(datasetId: DatasetId, snapshotId: string) { return readD1DatasetRecords(this.db, datasetId, snapshotId); }
