@@ -1,0 +1,23 @@
+const sources = {
+  "94025": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
+  "11406": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+  "11586": "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
+};
+const workerUrl = process.env.WORKER_INGEST_URL ?? "https://emerging-stock-radar-derivative.randall-ycw.workers.dev/api/admin/ingest-relay";
+const token = process.env.WORKER_INGESTION_TOKEN;
+if (!token) throw new Error("WORKER_INGESTION_TOKEN is required");
+
+const datasets = {};
+for (const [datasetId, sourceUrl] of Object.entries(sources)) {
+  const response = await fetch(sourceUrl, { headers: { Accept: "text/csv, application/octet-stream" }, redirect: "error" });
+  if (!response.ok) throw new Error(`${datasetId}: HTTP_${response.status}`);
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (bytes.byteLength === 0 || bytes.byteLength > 8_000_000) throw new Error(`${datasetId}: INVALID_RESPONSE_SIZE`);
+  datasets[datasetId] = { sourceUrl, fetchedAt: new Date().toISOString(), bodyBase64: Buffer.from(bytes).toString("base64") };
+  console.log(`${datasetId}: fetched ${bytes.byteLength} bytes`);
+}
+
+const result = await fetch(workerUrl, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ datasets }) });
+const text = await result.text();
+console.log(text);
+if (!result.ok) process.exitCode = 1;
