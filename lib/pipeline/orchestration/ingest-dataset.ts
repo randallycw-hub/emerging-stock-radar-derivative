@@ -43,7 +43,8 @@ export async function ingestDataset(options: IngestOptions): Promise<IngestDatas
     return { run, records: [] };
   }
 
-  const effectiveRunId = result.runId || runId;
+  if (result.runId !== runId) throw new RepositoryError("RUN_ID_MISMATCH");
+  const effectiveRunId = runId;
   const successful = result.executionStatus === "succeeded";
   const run = makeRun(options, result, effectiveRunId, now, successful ? "succeeded" : "failed", successful ? undefined : result.executionStatus);
   if (!successful) {
@@ -51,6 +52,7 @@ export async function ingestDataset(options: IngestOptions): Promise<IngestDatas
     return { run, records: [] };
   }
   if (!result.fetchedAt || !result.responseHash || result.responseBytes === undefined) throw new RepositoryError("SNAPSHOT_METADATA_INCOMPLETE");
+  if (result.records.length !== result.normalizedRecordCount || result.normalizedRecordCount !== result.integrityReport.acceptedRecordCount || result.rawRowCount !== result.normalizedRecordCount + result.integrityReport.rejectedRecordCount || result.rejectedRecordCount !== result.integrityReport.rejectedRecordCount) throw new RepositoryError("RESULT_COUNT_MISMATCH");
   const snapshotId = `${options.datasetId}:${result.responseHash}`;
   const records = toDatasetRecords(options.datasetId, snapshotId, result);
   const snapshot: SourceSnapshotRecord = {
@@ -61,10 +63,6 @@ export async function ingestDataset(options: IngestOptions): Promise<IngestDatas
     warningCount: result.integrityReport.warningCount, validationStatus: result.integrityReport.status,
     publicationEligibility: result.integrityReport.canPublishCandidate ? "eligible" : "ineligible", createdAt: now,
   };
-  await options.repository.withTransaction(async (tx) => {
-    await tx.createIngestionRun(run);
-    await tx.createSnapshot(snapshot);
-    await tx.writeDatasetRecords(options.datasetId, snapshotId, records);
-  });
+  await options.repository.withTransaction((tx) => tx.persistIngestionCandidate(run, snapshot, records));
   return { run, snapshot, records };
 }

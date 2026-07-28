@@ -545,14 +545,23 @@ async function readRows(db: D1Database, sql: string, snapshotId: string, sourceI
   return requireReadRows(result);
 }
 
+export function prepareD1DatasetRecordStatements(
+  db: D1Database,
+  datasetId: DatasetId,
+  snapshotId: string,
+  records: readonly DatasetRecord[],
+): D1Prepared[] {
+  records.forEach((record) => assertRecordScope(datasetId, snapshotId, record));
+  return records.flatMap((record) => bindInsertStatements(db, datasetId, snapshotId, record));
+}
+
 export async function writeD1DatasetRecords(
   db: D1Database,
   datasetId: DatasetId,
   snapshotId: string,
   records: readonly DatasetRecord[],
 ): Promise<void> {
-  records.forEach((record) => assertRecordScope(datasetId, snapshotId, record));
-  const statements = records.flatMap((record) => bindInsertStatements(db, datasetId, snapshotId, record));
+  const statements = prepareD1DatasetRecordStatements(db, datasetId, snapshotId, records);
   if (statements.length === 0) return;
 
   const results = await db.batch(statements);
