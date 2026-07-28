@@ -165,11 +165,11 @@ export function normalize94025Row(
     row.yearOverYearPercent,
     "yearOverYearPercent",
   );
-  const cumulativeRevenue = optionalRevenue(
+  const cumulativeRevenue = optionalRevenueSnapshot(
     row.cumulativeRevenue,
     "cumulativeRevenue",
   );
-  const priorYearCumulativeRevenue = optionalRevenue(
+  const priorYearCumulativeRevenue = optionalRevenueSnapshot(
     row.priorYearCumulativeRevenue,
     "priorYearCumulativeRevenue",
   );

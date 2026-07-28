@@ -16,7 +16,15 @@ export class Source11406CsvAdapter extends BaseSourceAdapter<Source11406Row, Nor
       // incomplete pair while retaining the bond record.
       const hasDate = row.outstandingChangeDate.trim() !== "" && row.outstandingChangeDate.trim() !== "-";
       const hasReason = row.outstandingChangeReason.trim() !== "" && row.outstandingChangeReason.trim() !== "-";
-      return normalize11406Row(hasDate === hasReason ? row : { ...row, outstandingChangeDate: "", outstandingChangeReason: "" });
+      const candidate = hasDate === hasReason ? row : { ...row, outstandingChangeDate: "", outstandingChangeReason: "" };
+      try {
+        return normalize11406Row(candidate);
+      } catch (error) {
+        if (error instanceof TypeError && error.message === "outstanding change date and reason must be present as a pair") {
+          return normalize11406Row({ ...row, outstandingChangeDate: "", outstandingChangeReason: "" });
+        }
+        throw error;
+      }
     });
   }
   validateIntegrity(raw: readonly Source11406Row[], records: readonly NormalizedBondIssue11406[]): IntegrityReport { const errors: AdapterDiagnostic[] = []; const conflicts: string[] = []; const seen = new Set<string>(); for (const record of records) { const identity = record.bondCode ?? record.bondId; if (seen.has(identity)) { conflicts.push(identity); errors.push({ stage: "integrity", code: "DUPLICATE_IDENTITY", message: `duplicate bond identity: ${identity}`, recordIdentity: identity }); } seen.add(identity); } if (raw.length !== records.length) errors.push({ stage: "integrity", code: "ROW_COUNT_MISMATCH", message: "raw and normalized row counts differ" }); const ok = errors.length === 0 && records.length > 0; return { status: ok ? "valid" : "invalid", acceptedRecordCount: records.length, rejectedRecordCount: Math.max(0, raw.length - records.length), warningCount: 0, errors, warnings: [], identityConflicts: conflicts, canPublishCandidate: ok }; }
