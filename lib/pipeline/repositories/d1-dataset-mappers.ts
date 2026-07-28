@@ -186,7 +186,7 @@ export async function writeD1DatasetRecords(
   const results = await db.batch(statements);
   if (results.some((result) => {
     const changes = (result.meta as { changes?: unknown } | undefined)?.changes;
-    return result.success === false || (changes !== undefined && changes !== 1);
+    return result.success !== true || changes !== 1;
   })) {
     throw new RepositoryError("DATASET_RECORD_WRITE_FAILED");
   }

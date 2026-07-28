@@ -25,7 +25,7 @@ function createRecordingD1(selectRows = [], batchResults) {
     },
     async batch(statements) {
       calls.push({ batch: statements });
-      return batchResults ?? statements.map(() => ({ success: true }));
+      return batchResults ?? statements.map(() => ({ success: true, meta: { changes: 1 } }));
     },
   };
 }
@@ -130,6 +130,20 @@ test("D1 mapper rejects writes when the source snapshot cannot prove dataset and
   const snapshotId = "snapshot-without-approved-source";
   const { revenue } = await normalizedFixtureRecords();
   const db = createRecordingD1([], [{ success: true, meta: { changes: 0 } }]);
+  const repo = createD1PipelineRepository(db, fixedDependencies);
+
+  await assert.rejects(
+    repo.writeDatasetRecords("94025", snapshotId, [{
+      datasetId: "94025", snapshotId, naturalIdentity: `${revenue.companyCode}:${revenue.yearMonth}`, value: revenue,
+    }]),
+    /DATASET_RECORD_WRITE_FAILED/,
+  );
+});
+
+test("D1 mapper rejects writes without an affected-row count", async () => {
+  const snapshotId = "snapshot-without-change-metadata";
+  const { revenue } = await normalizedFixtureRecords();
+  const db = createRecordingD1([], [{ success: true }]);
   const repo = createD1PipelineRepository(db, fixedDependencies);
 
   await assert.rejects(
