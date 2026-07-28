@@ -1152,3 +1152,8 @@
     font-size: 25px;
   }
 }
+.preview-listing-stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.preview-listing-stages > div { display: grid; gap: 5px; padding: 12px; background: var(--preview-paper, #fff); border: 1px solid var(--preview-line, #d7dfda); }
+.preview-listing-stages strong { color: var(--preview-ink, #173238); font-size: 13px; }
+.preview-listing-stages span { color: var(--preview-muted, #5d716c); font-size: 11px; line-height: 1.5; }
+@media (max-width: 640px) { .preview-listing-stages { grid-template-columns: 1fr; } }

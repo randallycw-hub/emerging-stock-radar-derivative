@@ -24,6 +24,7 @@ export function PreviewHeader() {
           <Link href="/dev-preview">預覽首頁</Link>
           <Link href="/dev-preview/emerging">月營收涵蓋</Link>
           <Link href="/dev-preview/bonds">可轉債資料</Link>
+          <Link href="/dev-preview#listing-progress">IPO 進度</Link>
         </nav>
         <PreviewThemeToggle />
       </div>

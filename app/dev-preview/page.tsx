@@ -262,6 +262,11 @@ export default async function DevPreviewPage() {
           <PreviewStatusBadge tone="amber">來源驗證中</PreviewStatusBadge>
           <h2>上市櫃進度</h2>
           <p>官方資料來源尚在驗證中，完成後將提供申請、審議與掛牌進度。</p>
+          <div className="preview-listing-stages" aria-label="上市櫃進度資料狀態">
+            <div><strong>申請</strong><span>尚未納入預覽</span></div>
+            <div><strong>審議</strong><span>等待來源驗證</span></div>
+            <div><strong>掛牌</strong><span>不以推測內容補位</span></div>
+          </div>
         </div>
       </section>
 
