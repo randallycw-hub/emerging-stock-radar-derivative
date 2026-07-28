@@ -8,16 +8,16 @@ import { RepositoryError } from "./errors.ts";
 import type { DatasetId, DatasetRecord } from "./types.ts";
 
 const REVENUE_INSERT = `INSERT INTO emerging_monthly_revenue (snapshot_id,company_code,company_name,industry,report_date,revenue_year_month,current_month_revenue_thousands_twd,previous_month_revenue_thousands_twd,previous_year_same_month_revenue_thousands_twd,month_over_month_percent,year_over_year_percent,current_year_cumulative_revenue_thousands_twd,previous_year_cumulative_revenue_thousands_twd,cumulative_year_over_year_percent,source_record_identity,source_id,resource_id,fetched_at,response_hash) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,source_id,resource_id,fetched_at,response_hash FROM source_snapshots WHERE snapshot_id = ? AND dataset_id = ? AND source_id = ? AND resource_id = ?`;
-const PROFILE_INSERT = `INSERT INTO public_company_profiles (snapshot_id,company_code,company_name,company_short_name,unified_business_number,paid_in_capital,chairperson,general_manager,industry_code,industry_name,establishment_date,company_address,company_phone,company_website,public_offering_date,source_record_identity,source_id,resource_id,fetched_at,response_hash) SELECT ?,?,?,?,?,?,?,?,NULL,?,?,?,?,NULL,?,NULL,?,source_id,resource_id,fetched_at,response_hash FROM source_snapshots WHERE snapshot_id = ? AND dataset_id = ? AND source_id = ? AND resource_id = ?`;
-const BOND_INSERT = `INSERT INTO bond_issuances (snapshot_id,bond_code,bond_name,issuer_company_code,issuer_company_name,issue_date,listing_date,maturity_date,issue_amount,current_outstanding_balance,coupon_rate,guarantee_status,initial_conversion_price,conversion_start_date,conversion_end_date,underwriter,trustee,latest_balance_change_date,latest_balance_change_reason,offering_method,official_data_date,source_record_identity,source_id,resource_id,fetched_at,response_hash) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,source_id,resource_id,fetched_at,response_hash FROM source_snapshots WHERE snapshot_id = ? AND dataset_id = ? AND source_id = ? AND resource_id = ?`;
+const PROFILE_INSERT = `INSERT INTO public_company_profiles (snapshot_id,company_code,company_name,company_short_name,unified_business_number,paid_in_capital,chairperson,general_manager,industry_code,industry_name,establishment_date,company_address,company_phone,company_website,public_offering_date,source_record_identity,source_id,resource_id,fetched_at,response_hash) SELECT ?,?,?,?,?,?,?,?,NULL,?,?,?,NULL,?,NULL,?,source_id,resource_id,fetched_at,response_hash FROM source_snapshots WHERE snapshot_id = ? AND dataset_id = ? AND source_id = ? AND resource_id = ?`;
+const BOND_INSERT = `INSERT INTO bond_issuances (snapshot_id,bond_code,bond_name,issuer_company_code,issuer_company_name,source_bond_type_code,series_number,tranche_number,issue_date,listing_date,maturity_date,issue_amount,current_outstanding_balance,coupon_rate,guarantee_status,security_description,initial_conversion_price,conversion_start_date,conversion_end_date,underwriter,trustee,latest_balance_change_date,latest_balance_change_reason,offering_method,official_data_date,source_record_identity,source_id,resource_id,fetched_at,response_hash) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,source_id,resource_id,fetched_at,response_hash FROM source_snapshots WHERE snapshot_id = ? AND dataset_id = ? AND source_id = ? AND resource_id = ?`;
 const BOND_PUT_RIGHT_INSERT = `INSERT INTO bond_put_rights (snapshot_id,bond_code,sequence,put_date,put_price) SELECT ?,?,?,?,? WHERE EXISTS (SELECT 1 FROM bond_issuances WHERE snapshot_id = ? AND bond_code = ? AND source_id = ? AND resource_id = ?)`;
 const LISTING_APPLICATION_INSERT = `INSERT INTO listing_applications (snapshot_id,source_record_identity,official_index,company_code,company_short_name,chairman_name,application_date,application_capital_thousands_twd,listing_review_date,board_approval_date,listing_contract_approval_or_filing_date,listing_date,note,chronology_status,source_id,resource_id,fetched_at,response_hash) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,source_id,resource_id,fetched_at,response_hash FROM source_snapshots WHERE snapshot_id = ? AND dataset_id = ? AND source_id = ? AND resource_id = ?`;
 const LISTING_UNDERWRITER_INSERT = `INSERT INTO listing_application_underwriters (snapshot_id,source_record_identity,sequence,underwriter_name) SELECT ?,?,?,? WHERE EXISTS (SELECT 1 FROM listing_applications WHERE snapshot_id = ? AND source_record_identity = ? AND source_id = ? AND resource_id = ?)`;
 
 const REVENUE_SELECT = `SELECT snapshot_id as snapshotId, company_code as companyCode, company_name as companyName, industry, report_date as reportDate, revenue_year_month as revenueYearMonth, current_month_revenue_thousands_twd as currentMonthRevenueThousandsTwd, previous_month_revenue_thousands_twd as previousMonthRevenueThousandsTwd, previous_year_same_month_revenue_thousands_twd as previousYearSameMonthRevenueThousandsTwd, month_over_month_percent as monthOverMonthPercent, year_over_year_percent as yearOverYearPercent, current_year_cumulative_revenue_thousands_twd as currentYearCumulativeRevenueThousandsTwd, previous_year_cumulative_revenue_thousands_twd as previousYearCumulativeRevenueThousandsTwd, cumulative_year_over_year_percent as cumulativeYearOverYearPercent, source_record_identity as sourceRecordId, source_id as sourceId, resource_id as resourceId, fetched_at as fetchedAt, response_hash as responseHash FROM emerging_monthly_revenue WHERE snapshot_id = ? AND source_id = ? AND resource_id = ? ORDER BY company_code, revenue_year_month`;
 const PROFILE_SELECT = `SELECT snapshot_id as snapshotId, company_code as companyCode, company_name as companyName, company_short_name as companyShortName, unified_business_number as unifiedBusinessNumber, paid_in_capital as paidInCapital, chairperson, general_manager as generalManager, industry_code as industryCode, industry_name as industryName, establishment_date as establishmentDate, company_address as companyAddress, company_phone as companyPhone, company_website as companyWebsite, public_offering_date as publicOfferingDate, source_record_identity as sourceRecordId, source_id as sourceId, resource_id as resourceId, fetched_at as fetchedAt, response_hash as responseHash FROM public_company_profiles WHERE snapshot_id = ? AND source_id = ? AND resource_id = ? ORDER BY company_code`;
-const BOND_SELECT = `SELECT snapshot_id as snapshotId, bond_code as bondCode, bond_name as bondName, issuer_company_code as issuerCompanyCode, issuer_company_name as issuerCompanyName, issue_date as issueDate, listing_date as listingDate, maturity_date as maturityDate, issue_amount as issueAmount, current_outstanding_balance as currentOutstandingBalance, coupon_rate as couponRate, guarantee_status as guaranteeStatus, initial_conversion_price as initialConversionPrice, conversion_start_date as conversionStartDate, conversion_end_date as conversionEndDate, underwriter, trustee, latest_balance_change_date as latestBalanceChangeDate, latest_balance_change_reason as latestBalanceChangeReason, offering_method as offeringMethod, official_data_date as officialDataDate, source_record_identity as sourceRecordId, source_id as sourceId, resource_id as resourceId, fetched_at as fetchedAt, response_hash as responseHash FROM bond_issuances WHERE snapshot_id = ? AND source_id = ? AND resource_id = ? ORDER BY bond_code`;
-const BOND_PUT_RIGHT_SELECT = `SELECT snapshot_id as snapshotId, bond_code as bondCode, sequence, put_date as putDate, put_price as putPrice FROM bond_put_rights WHERE snapshot_id = ? ORDER BY bond_code, sequence`;
+const BOND_SELECT = `SELECT snapshot_id as snapshotId, bond_code as bondCode, bond_name as bondName, issuer_company_code as issuerCompanyCode, issuer_company_name as issuerCompanyName, source_bond_type_code as sourceBondTypeCode, series_number as seriesNumber, tranche_number as trancheNumber, issue_date as issueDate, listing_date as listingDate, maturity_date as maturityDate, issue_amount as issueAmount, current_outstanding_balance as currentOutstandingBalance, coupon_rate as couponRate, guarantee_status as guaranteeStatus, security_description as securityDescription, initial_conversion_price as initialConversionPrice, conversion_start_date as conversionStartDate, conversion_end_date as conversionEndDate, underwriter, trustee, latest_balance_change_date as latestBalanceChangeDate, latest_balance_change_reason as latestBalanceChangeReason, offering_method as offeringMethod, official_data_date as officialDataDate, source_record_identity as sourceRecordId, source_id as sourceId, resource_id as resourceId, fetched_at as fetchedAt, response_hash as responseHash FROM bond_issuances WHERE snapshot_id = ? AND source_id = ? AND resource_id = ? ORDER BY bond_code`;
+const BOND_PUT_RIGHT_SELECT = `SELECT child.snapshot_id as snapshotId, parent.source_record_identity as sourceRecordId, child.bond_code as bondCode, child.sequence, child.put_date as putDate, child.put_price as putPrice FROM bond_put_rights AS child INNER JOIN bond_issuances AS parent ON parent.snapshot_id = child.snapshot_id AND parent.bond_code = child.bond_code WHERE child.snapshot_id = ? AND parent.source_id = ? AND parent.resource_id = ? ORDER BY child.bond_code, child.sequence`;
 const LISTING_APPLICATION_SELECT = `SELECT snapshot_id as snapshotId, source_record_identity as sourceRecordId, official_index as officialIndex, company_code as companyCode, company_short_name as companyShortName, chairman_name as chairmanName, application_date as applicationDate, application_capital_thousands_twd as applicationCapitalThousandsTwd, listing_review_date as listingReviewDate, board_approval_date as boardApprovalDate, listing_contract_approval_or_filing_date as listingContractApprovalOrFilingDate, listing_date as listingDate, note, chronology_status as chronologyStatus, source_id as sourceId, resource_id as resourceId, fetched_at as fetchedAt, response_hash as responseHash FROM listing_applications WHERE snapshot_id = ? AND source_id = ? AND resource_id = ? ORDER BY official_index, company_code`;
 const LISTING_UNDERWRITER_SELECT = `SELECT child.snapshot_id as snapshotId, child.source_record_identity as sourceRecordId, child.sequence, child.underwriter_name as underwriterName FROM listing_application_underwriters AS child INNER JOIN listing_applications AS parent ON parent.snapshot_id = child.snapshot_id AND parent.source_record_identity = child.source_record_identity WHERE child.snapshot_id = ? AND parent.source_id = ? AND parent.resource_id = ? ORDER BY child.source_record_identity, child.sequence`;
 
@@ -56,6 +56,11 @@ function optionalString(value: unknown): string | null {
   return requiredString(value);
 }
 
+function normalizedUnavailableString(value: unknown): string | null {
+  if (value === "") return null;
+  return requiredString(value);
+}
+
 function requiredIsoDate(value: unknown): string {
   const date = requiredString(value);
   if (!isIsoDate(date)) return invalidRecord();
@@ -66,6 +71,15 @@ function optionalIsoDate(value: unknown): string | null {
   const date = optionalString(value);
   if (date !== null && !isIsoDate(date)) return invalidRecord();
   return date;
+}
+
+function requiredPositiveDecimal(value: unknown): string {
+  const decimal = requiredString(value);
+  if (
+    decimal === "0"
+    || !/^(?:0|[1-9]\d*)(?:\.\d*[1-9])?$/.test(decimal)
+  ) return invalidRecord();
+  return decimal;
 }
 
 const LISTING_STAGES = new Set<ListingApplicationStage11586>([
@@ -170,21 +184,28 @@ function bindBondInsert(db: D1Database, snapshotId: string, record: DatasetRecor
   const bondCode = optionalString(value.bondCode) ?? bondId;
   const putDates = value.putDates;
   if (!Array.isArray(putDates)) return invalidRecord();
-  const putPrice = putDates.length === 0 ? optionalString(value.putPrice) : requiredString(value.putPrice);
+  const putPrice = putDates.length === 0 ? optionalString(value.putPrice) : requiredPositiveDecimal(value.putPrice);
   if (putDates.length === 0 && putPrice !== null) return invalidRecord();
+  const issueDate = requiredIsoDate(value.issueDate);
+  const maturityDate = requiredIsoDate(value.maturityDate);
+  if (issueDate > maturityDate) return invalidRecord();
   const parentBinds = [
     snapshotId,
     bondCode,
     requiredString(value.shortName),
     requiredString(value.issuerCode),
     requiredString(value.issuerName),
-    requiredString(value.issueDate),
+    requiredString(value.sourceBondTypeCode),
+    optionalString(value.seriesNumber),
+    optionalString(value.trancheNumber),
+    issueDate,
     optionalString(value.listingDate),
-    requiredString(value.maturityDate),
+    maturityDate,
     requiredString(value.issueAmount),
     requiredString(value.outstandingAmount),
     optionalString(value.couponRate),
     value.secured === true ? "secured" : value.secured === false ? "unsecured" : invalidRecord(),
+    optionalString(value.securityDescription),
     optionalString(value.initialConversionPrice),
     optionalString(value.conversionStartDate),
     optionalString(value.conversionEndDate),
@@ -202,10 +223,17 @@ function bindBondInsert(db: D1Database, snapshotId: string, record: DatasetRecor
   ];
   const statements = [db.prepare(BOND_INSERT).bind(...parentBinds)];
   const dates = new Set<string>();
+  let previousPutDate: string | undefined;
   for (const [index, putDate] of putDates.entries()) {
-    const normalizedDate = requiredString(putDate);
-    if (dates.has(normalizedDate) || index + 1 <= 0) return invalidRecord();
+    const normalizedDate = requiredIsoDate(putDate);
+    if (
+      dates.has(normalizedDate)
+      || normalizedDate < issueDate
+      || normalizedDate > maturityDate
+      || (previousPutDate !== undefined && normalizedDate <= previousPutDate)
+    ) return invalidRecord();
     dates.add(normalizedDate);
+    previousPutDate = normalizedDate;
     statements.push(db.prepare(BOND_PUT_RIGHT_INSERT).bind(
       snapshotId,
       bondCode,
@@ -252,7 +280,7 @@ function bindListingApplicationInsert(db: D1Database, snapshotId: string, record
     requiredString(value.companyName),
     stringValue(value.chairmanName),
     applicationDate,
-    optionalString(value.applicationCapitalThousandsTwd),
+    normalizedUnavailableString(value.applicationCapitalThousandsTwd),
     listingReviewDate,
     boardApprovalDate,
     listingContractApprovalOrFilingDate,
@@ -356,6 +384,7 @@ function mapProfileRow(row: Record<string, unknown>, snapshotId: string): Datase
 }
 
 interface BondPutRightRow {
+  sourceRecordId: string;
   bondCode: string;
   sequence: number;
   putDate: string;
@@ -367,10 +396,11 @@ function mapBondPutRightRow(row: Record<string, unknown>, snapshotId: string): B
   const sequence = row.sequence;
   if (typeof sequence !== "number" || !Number.isInteger(sequence) || sequence <= 0) return invalidRecord();
   return {
+    sourceRecordId: requiredString(row.sourceRecordId),
     bondCode: requiredString(row.bondCode),
     sequence,
-    putDate: requiredString(row.putDate),
-    putPrice: requiredString(row.putPrice),
+    putDate: requiredIsoDate(row.putDate),
+    putPrice: requiredPositiveDecimal(row.putPrice),
   };
 }
 
@@ -382,10 +412,23 @@ function mapBondRow(
   assertRowScope(row, snapshotId, "11406", "11406-csv");
   const sourceRecordId = requiredString(row.sourceRecordId);
   const bondCode = requiredString(row.bondCode);
-  const seenSequences = new Set<number>();
-  for (const putRight of putRights) {
-    if (putRight.bondCode !== bondCode || seenSequences.has(putRight.sequence)) return invalidRecord();
-    seenSequences.add(putRight.sequence);
+  const issueDate = requiredIsoDate(row.issueDate);
+  const maturityDate = requiredIsoDate(row.maturityDate);
+  if (issueDate > maturityDate) return invalidRecord();
+  const seenDates = new Set<string>();
+  let previousPutDate: string | undefined;
+  for (const [index, putRight] of putRights.entries()) {
+    if (
+      putRight.sourceRecordId !== sourceRecordId
+      || putRight.bondCode !== bondCode
+      || putRight.sequence !== index + 1
+      || seenDates.has(putRight.putDate)
+      || putRight.putDate < issueDate
+      || putRight.putDate > maturityDate
+      || (previousPutDate !== undefined && putRight.putDate <= previousPutDate)
+    ) return invalidRecord();
+    seenDates.add(putRight.putDate);
+    previousPutDate = putRight.putDate;
   }
   const putPrice = putRights.length === 0
     ? undefined
@@ -393,19 +436,23 @@ function mapBondRow(
   if (putRights.some((putRight) => putRight.putPrice !== putPrice)) return invalidRecord();
   const guaranteeStatus = requiredString(row.guaranteeStatus);
   if (guaranteeStatus !== "secured" && guaranteeStatus !== "unsecured") return invalidRecord();
-  const value = {
+  const value: NormalizedBondIssue11406 = {
     bondId: sourceRecordId,
     bondCode: bondCode === sourceRecordId ? undefined : bondCode,
     issuerCode: requiredString(row.issuerCompanyCode),
     issuerName: requiredString(row.issuerCompanyName),
     shortName: requiredString(row.bondName),
-    issueDate: requiredString(row.issueDate),
+    sourceBondTypeCode: requiredString(row.sourceBondTypeCode),
+    seriesNumber: optionalString(row.seriesNumber) ?? undefined,
+    trancheNumber: optionalString(row.trancheNumber) ?? undefined,
+    issueDate,
     listingDate: optionalString(row.listingDate) ?? undefined,
-    maturityDate: requiredString(row.maturityDate),
+    maturityDate,
     issueAmount: requiredString(row.issueAmount),
     outstandingAmount: requiredString(row.currentOutstandingBalance),
     couponRate: optionalString(row.couponRate) ?? undefined,
     secured: guaranteeStatus === "secured",
+    securityDescription: optionalString(row.securityDescription) ?? undefined,
     initialConversionPrice: optionalString(row.initialConversionPrice) ?? undefined,
     conversionStartDate: optionalString(row.conversionStartDate) ?? undefined,
     conversionEndDate: optionalString(row.conversionEndDate) ?? undefined,
@@ -417,7 +464,7 @@ function mapBondRow(
     outstandingChangeReason: optionalString(row.latestBalanceChangeReason) ?? undefined,
     offeringMethod: optionalString(row.offeringMethod) ?? undefined,
     officialDataDate: requiredString(row.officialDataDate),
-  } satisfies Partial<NormalizedBondIssue11406>;
+  };
   return { datasetId: "11406", snapshotId, naturalIdentity: sourceRecordId, value };
 }
 
@@ -486,9 +533,16 @@ function mapListingApplicationRow(
   return { datasetId: "11586", snapshotId, naturalIdentity: sourceRecordId, value };
 }
 
+function requireReadRows<T>(result: { success?: boolean; results?: T[] }): T[] {
+  if (result.success !== true || !Array.isArray(result.results)) {
+    throw new RepositoryError("DATASET_RECORD_READ_FAILED");
+  }
+  return result.results;
+}
+
 async function readRows(db: D1Database, sql: string, snapshotId: string, sourceId: string, resourceId: string): Promise<Record<string, unknown>[]> {
   const result = await db.prepare(sql).bind(snapshotId, sourceId, resourceId).all<Record<string, unknown>>();
-  return result.results ?? [];
+  return requireReadRows(result);
 }
 
 export async function writeD1DatasetRecords(
@@ -537,10 +591,10 @@ export async function readD1DatasetRecords(
 async function readBondRecords(db: D1Database, snapshotId: string): Promise<readonly DatasetRecord[]> {
   const [parentRows, putRightRows] = await Promise.all([
     readRows(db, BOND_SELECT, snapshotId, "11406", "11406-csv"),
-    db.prepare(BOND_PUT_RIGHT_SELECT).bind(snapshotId).all<Record<string, unknown>>(),
+    db.prepare(BOND_PUT_RIGHT_SELECT).bind(snapshotId, "11406", "11406-csv").all<Record<string, unknown>>(),
   ]);
   const putRightsByBondCode = new Map<string, BondPutRightRow[]>();
-  for (const row of putRightRows.results ?? []) {
+  for (const row of requireReadRows(putRightRows)) {
     const putRight = mapBondPutRightRow(asObject(row), snapshotId);
     const existing = putRightsByBondCode.get(putRight.bondCode) ?? [];
     existing.push(putRight);
@@ -563,7 +617,7 @@ async function readListingApplicationRecords(db: D1Database, snapshotId: string)
     db.prepare(LISTING_UNDERWRITER_SELECT).bind(snapshotId, "11586", "11586-csv").all<Record<string, unknown>>(),
   ]);
   const underwritersBySourceRecordId = new Map<string, ListingApplicationUnderwriterRow[]>();
-  for (const row of underwriterResult.results ?? []) {
+  for (const row of requireReadRows(underwriterResult)) {
     const underwriter = mapListingApplicationUnderwriterRow(asObject(row), snapshotId);
     const existing = underwritersBySourceRecordId.get(underwriter.sourceRecordId) ?? [];
     existing.push(underwriter);

@@ -8,6 +8,7 @@ const allMigrations = async () => {
     sql("0002_pipeline_dataset_records.sql"),
     sql("0003_company_profile_completeness.sql"),
     sql("0004_listing_application_completeness.sql"),
+    sql("0005_bond_contract_completeness.sql"),
   ]);
   return migrations.join("\n").toLowerCase();
 };
@@ -24,5 +25,14 @@ test("forward-only listing migration persists chairman identity without rewritin
   assert.ok(migrationNames.includes("0004_listing_application_completeness.sql"));
   const four = await sql("0004_listing_application_completeness.sql");
   assert.match(four, /ALTER TABLE listing_applications ADD COLUMN chairman_name TEXT NOT NULL DEFAULT '';/);
+});
+test("forward-only bond migration persists the complete normalized 11406 contract", async () => {
+  const migrationNames = await readdir(new URL("../../migrations/", import.meta.url));
+  assert.ok(migrationNames.includes("0005_bond_contract_completeness.sql"));
+  const five = await sql("0005_bond_contract_completeness.sql");
+  assert.match(five, /ALTER TABLE bond_issuances ADD COLUMN source_bond_type_code TEXT;/);
+  assert.match(five, /ALTER TABLE bond_issuances ADD COLUMN series_number TEXT;/);
+  assert.match(five, /ALTER TABLE bond_issuances ADD COLUMN tranche_number TEXT;/);
+  assert.match(five, /ALTER TABLE bond_issuances ADD COLUMN security_description TEXT;/);
 });
 test("schema excludes prohibited market and generic payload surfaces", async () => { const all = await allMigrations(); for (const word of ["stock_price","bid_price","ask_price","volume","premium_discount","conversion_value","theoretical_price","arbitrage","recommendation","generic_records","payload_json"]) assert.doesNotMatch(all, new RegExp(word)); });

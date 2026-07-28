@@ -22,7 +22,10 @@ function createRecordingD1(selectRows = [], batchResults) {
           return this;
         },
         async first() { return null; },
-        async all() { return { results: typeof selectRows === "function" ? selectRows(sql) : selectRows }; },
+        async all() {
+          const selected = typeof selectRows === "function" ? selectRows(sql) : selectRows;
+          return Array.isArray(selected) ? { success: true, results: selected } : selected;
+        },
         async run() { return { success: true }; },
       };
     },
@@ -31,6 +34,10 @@ function createRecordingD1(selectRows = [], batchResults) {
       return batchResults ?? statements.map(() => ({ success: true, meta: { changes: 1 } }));
     },
   };
+}
+
+function isChildRead(sql) {
+  return sql.includes("FROM bond_put_rights") || sql.includes("FROM listing_application_underwriters");
 }
 
 async function normalizedFixtureRecords() {
@@ -83,6 +90,15 @@ function syntheticMultipleUnderwriter11586Contract(officialApplication) {
   };
 }
 
+function syntheticUnavailableCapital11586Contract(officialApplication) {
+  // Pipeline-only normalized contract case; the official fixture remains unchanged.
+  return {
+    ...officialApplication,
+    sourceRecordId: `${officialApplication.sourceRecordId}:synthetic-unavailable-capital`,
+    applicationCapitalThousandsTwd: "",
+  };
+}
+
 function createListingRoundTripD1(snapshotId, application, options = {}) {
   const underwriterRows = application.underwriters.map((underwriterName, index) => ({
     snapshotId,
@@ -119,7 +135,15 @@ function createListingRoundTripD1(snapshotId, application, options = {}) {
   });
 }
 
-function createBondRoundTripD1(snapshotId, bond) {
+function createBondRoundTripD1(snapshotId, bond, options = {}) {
+  const putRightRows = bond.putDates.map((putDate, index) => ({
+    snapshotId,
+    sourceRecordId: bond.bondId,
+    bondCode: bond.bondCode,
+    sequence: index + 1,
+    putDate,
+    putPrice: bond.putPrice,
+  }));
   return createRecordingD1((sql) => {
     if (sql.includes("FROM bond_issuances")) return [{
       snapshotId,
@@ -127,6 +151,9 @@ function createBondRoundTripD1(snapshotId, bond) {
       bondName: bond.shortName,
       issuerCompanyCode: bond.issuerCode,
       issuerCompanyName: bond.issuerName,
+      sourceBondTypeCode: bond.sourceBondTypeCode,
+      seriesNumber: bond.seriesNumber ?? null,
+      trancheNumber: bond.trancheNumber ?? null,
       issueDate: bond.issueDate,
       listingDate: bond.listingDate ?? null,
       maturityDate: bond.maturityDate,
@@ -134,6 +161,7 @@ function createBondRoundTripD1(snapshotId, bond) {
       currentOutstandingBalance: bond.outstandingAmount,
       couponRate: bond.couponRate ?? null,
       guaranteeStatus: "secured",
+      securityDescription: bond.securityDescription ?? null,
       initialConversionPrice: bond.initialConversionPrice ?? null,
       conversionStartDate: bond.conversionStartDate ?? null,
       conversionEndDate: bond.conversionEndDate ?? null,
@@ -148,10 +176,11 @@ function createBondRoundTripD1(snapshotId, bond) {
       resourceId: "11406-csv",
       fetchedAt: "2026-07-28T00:00:00.000Z",
       responseHash: "sha256:11406",
+      ...options.parentOverrides,
     }];
-    if (sql.includes("FROM bond_put_rights")) return bond.putDates.map((putDate, index) => ({
-      snapshotId, bondCode: bond.bondCode, sequence: index + 1, putDate, putPrice: bond.putPrice,
-    }));
+    if (sql.includes("FROM bond_put_rights")) {
+      return options.childRowsForSql ? options.childRowsForSql(sql, putRightRows) : putRightRows;
+    }
     return [];
   });
 }
@@ -168,8 +197,7 @@ test("D1 mapper round-trips the official 11406 fixture's one put right", async (
     datasetId: "11406", snapshotId, naturalIdentity: bond.bondId, value: bond,
   }]);
   const [roundTripped] = await repo.readDatasetRecords("11406", snapshotId);
-  assert.deepEqual(roundTripped.value.putDates, bond.putDates);
-  assert.equal(roundTripped.value.putPrice, bond.putPrice);
+  assert.deepEqual(roundTripped.value, bond);
   assertFixedSql(db, snapshotId);
 });
 
@@ -193,8 +221,7 @@ test("D1 mapper orders prices and round-trips a synthetic raw two-put-right 1140
   assert.deepEqual(inserts.slice(1).map((call) => call.binds[3]), bond.putDates);
   assert.deepEqual(inserts.slice(1).map((call) => call.binds[4]), [bond.putPrice, bond.putPrice]);
   const [roundTripped] = await repo.readDatasetRecords("11406", snapshotId);
-  assert.deepEqual(roundTripped.value.putDates, bond.putDates);
-  assert.equal(roundTripped.value.putPrice, bond.putPrice);
+  assert.deepEqual(roundTripped.value, bond);
   assertFixedSql(db, snapshotId);
 });
 
@@ -225,6 +252,100 @@ test("D1 mapper rejects a 11406 batch that omits a put-right result", async () =
     }]),
     /DATASET_RECORD_WRITE_FAILED/,
   );
+});
+
+test("D1 mapper rejects a gap in one-based bond put-right sequences", async () => {
+  const snapshotId = "snapshot-bond-sequence-gap";
+  const bond = await syntheticTwoPutRight11406Bond();
+  const db = createBondRoundTripD1(snapshotId, bond, {
+    childRowsForSql(_sql, rows) {
+      return rows.map((row, index) => ({ ...row, sequence: index === 1 ? 3 : row.sequence }));
+    },
+  });
+
+  await assert.rejects(
+    createD1PipelineRepository(db, fixedDependencies).readDatasetRecords("11406", snapshotId),
+    /INVALID_DATASET_RECORD/,
+  );
+});
+
+test("D1 mapper rejects duplicate bond put-right dates", async () => {
+  const snapshotId = "snapshot-bond-duplicate-put-date";
+  const bond = await syntheticTwoPutRight11406Bond();
+  const db = createBondRoundTripD1(snapshotId, bond, {
+    childRowsForSql(_sql, rows) {
+      return rows.map((row, index) => ({ ...row, putDate: index === 1 ? rows[0].putDate : row.putDate }));
+    },
+  });
+
+  await assert.rejects(
+    createD1PipelineRepository(db, fixedDependencies).readDatasetRecords("11406", snapshotId),
+    /INVALID_DATASET_RECORD/,
+  );
+});
+
+test("D1 mapper rejects mismatched bond child identity", async () => {
+  const snapshotId = "snapshot-bond-child-identity";
+  const bond = await syntheticTwoPutRight11406Bond();
+  const db = createBondRoundTripD1(snapshotId, bond, {
+    childRowsForSql(_sql, rows) {
+      return rows.map((row, index) => ({
+        ...row,
+        sourceRecordId: index === 1 ? "bond:other-source-record" : row.sourceRecordId,
+      }));
+    },
+  });
+
+  await assert.rejects(
+    createD1PipelineRepository(db, fixedDependencies).readDatasetRecords("11406", snapshotId),
+    /INVALID_DATASET_RECORD/,
+  );
+});
+
+test("D1 mapper rejects malformed bond child dates and prices", async () => {
+  const bond = await syntheticTwoPutRight11406Bond();
+  for (const [name, childOverride] of [
+    ["date", { putDate: "not-an-iso-date" }],
+    ["price", { putPrice: "not-a-positive-decimal" }],
+  ]) {
+    const snapshotId = `snapshot-bond-invalid-${name}`;
+    const db = createBondRoundTripD1(snapshotId, bond, {
+      childRowsForSql(_sql, rows) {
+        return rows.map((row, index) => ({ ...row, ...(index === 1 ? childOverride : {}) }));
+      },
+    });
+
+    await assert.rejects(
+      createD1PipelineRepository(db, fixedDependencies).readDatasetRecords("11406", snapshotId),
+      /INVALID_DATASET_RECORD/,
+    );
+  }
+});
+
+test("D1 mapper scopes bond put-right reads through selected source parents", async () => {
+  const snapshotId = "snapshot-bond-source-scope";
+  const bond = await syntheticTwoPutRight11406Bond();
+  const db = createBondRoundTripD1(snapshotId, bond, {
+    childRowsForSql(sql, rows) {
+      if (sql.includes("JOIN bond_issuances")) return rows;
+      return [...rows, {
+        snapshotId,
+        sourceRecordId: "bond:orphan-from-another-source",
+        bondCode: "ORPHAN",
+        sequence: 1,
+        putDate: "2025-01-01",
+        putPrice: "100",
+      }];
+    },
+  });
+  const repo = createD1PipelineRepository(db, fixedDependencies);
+
+  const [roundTripped] = await repo.readDatasetRecords("11406", snapshotId);
+  assert.deepEqual(roundTripped.value, bond);
+  const childRead = db.calls.find((call) => (
+    typeof call.sql === "string" && call.sql.includes("FROM bond_put_rights")
+  ));
+  assert.deepEqual(childRead.binds, [snapshotId, "11406", "11406-csv"]);
 });
 
 test("D1 mapper writes listing applications before ordered underwriters and round-trips their stage", async () => {
@@ -268,6 +389,24 @@ test("D1 mapper persists the official partial listing chronology", async () => {
   const [roundTripped] = await repo.readDatasetRecords("11586", snapshotId);
   assert.equal(roundTripped.value.stage, "applied");
   assert.equal(roundTripped.value.chairmanName, application.chairmanName);
+});
+
+test("D1 mapper persists unavailable normalized listing capital as NULL and restores an empty string", async () => {
+  const snapshotId = "snapshot-11586-unavailable-capital";
+  const application = syntheticUnavailableCapital11586Contract(await official11586ListingApplication());
+  const db = createListingRoundTripD1(snapshotId, application);
+  const repo = createD1PipelineRepository(db, fixedDependencies);
+
+  await repo.writeDatasetRecords("11586", snapshotId, [{
+    datasetId: "11586", snapshotId, naturalIdentity: application.sourceRecordId, value: application,
+  }]);
+
+  const parentInsert = db.calls.find((call) => (
+    typeof call.sql === "string" && call.sql.startsWith("INSERT INTO listing_applications")
+  ));
+  assert.equal(parentInsert.binds[7], null);
+  const [roundTripped] = await repo.readDatasetRecords("11586", snapshotId);
+  assert.deepEqual(roundTripped.value, application);
 });
 
 test("D1 mapper rejects malformed and out-of-order listing dates before SQL", async () => {
@@ -361,6 +500,46 @@ test("D1 mapper rejects an unknown listing application stage before SQL", async 
   assert.equal(db.calls.length, 0);
 });
 
+test("D1 mapper fails closed when any dataset parent read reports failure or lacks result evidence", async () => {
+  for (const datasetId of ["94025", "28567", "11406", "11586"]) {
+    for (const failedResult of [
+      { success: false, results: [] },
+      { success: true },
+      { results: [] },
+    ]) {
+      const db = createRecordingD1((sql) => (isChildRead(sql)
+        ? { success: true, results: [] }
+        : failedResult));
+      const repo = createD1PipelineRepository(db, fixedDependencies);
+
+      await assert.rejects(
+        repo.readDatasetRecords(datasetId, `snapshot-failed-parent-${datasetId}`),
+        (error) => error?.name === "RepositoryError" && error?.code === "DATASET_RECORD_READ_FAILED",
+      );
+    }
+  }
+});
+
+test("D1 mapper fails closed when a bond or listing child read reports failure or lacks result evidence", async () => {
+  for (const datasetId of ["11406", "11586"]) {
+    for (const failedResult of [
+      { success: false, results: [] },
+      { success: true },
+      { results: [] },
+    ]) {
+      const db = createRecordingD1((sql) => (isChildRead(sql)
+        ? failedResult
+        : { success: true, results: [] }));
+      const repo = createD1PipelineRepository(db, fixedDependencies);
+
+      await assert.rejects(
+        repo.readDatasetRecords(datasetId, `snapshot-failed-child-${datasetId}`),
+        (error) => error?.name === "RepositoryError" && error?.code === "DATASET_RECORD_READ_FAILED",
+      );
+    }
+  }
+});
+
 function assertFixedSql(db, snapshotId) {
   const sql = db.calls.filter((call) => typeof call.sql === "string").map((call) => call.sql);
   assert.ok(sql.length > 0);
@@ -370,6 +549,16 @@ function assertFixedSql(db, snapshotId) {
     assert.doesNotMatch(statement, /INSERT\s+OR\s+REPLACE/i);
     assert.equal(statement.includes(snapshotId), false);
   }
+}
+
+function parseInsertSelectShape(sql) {
+  const match = /^INSERT INTO [^(]+\(([^)]+)\)\s+SELECT\s+(.+?)\s+FROM\s+/is.exec(sql);
+  assert.ok(match, "expected fixed INSERT ... SELECT statement");
+  return {
+    destinationColumns: match[1].split(",").map((column) => column.trim()),
+    selectExpressions: match[2].split(",").map((expression) => expression.trim()),
+    placeholderCount: [...sql.matchAll(/\?/g)].length,
+  };
 }
 
 test("D1 mapper round-trips a normalized 94025 monthly revenue record", async () => {
@@ -438,6 +627,14 @@ test("D1 mapper round-trips a normalized 28567 company profile record", async ()
   await repo.writeDatasetRecords("28567", snapshotId, [{
     datasetId: "28567", snapshotId, naturalIdentity: profile.sourceRecordId, value: profile,
   }]);
+  const insert = db.calls.find((call) => (
+    typeof call.sql === "string" && call.sql.startsWith("INSERT INTO public_company_profiles")
+  ));
+  const shape = parseInsertSelectShape(insert.sql);
+  assert.equal(shape.destinationColumns.length, 20);
+  assert.equal(shape.selectExpressions.length, 20);
+  assert.equal(shape.placeholderCount, 17);
+  assert.equal(insert.binds.length, 17);
   assert.deepEqual(await repo.readDatasetRecords("28567", snapshotId), [{
     datasetId: "28567", snapshotId, naturalIdentity: profile.sourceRecordId, value: profile,
   }]);
