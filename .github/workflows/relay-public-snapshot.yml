@@ -21,6 +21,10 @@ jobs:
         env:
           WORKER_INGESTION_TOKEN: ${{ secrets.WORKER_INGESTION_TOKEN }}
         run: node -e "const crypto=require('node:crypto'); const t=process.env.WORKER_INGESTION_TOKEN||''; console.log(JSON.stringify({length:t.length,sha256:crypto.createHash('sha256').update(t).digest('hex')}));"
+      - name: Probe Worker authentication
+        env:
+          WORKER_INGESTION_TOKEN: ${{ secrets.WORKER_INGESTION_TOKEN }}
+        run: node -e "fetch('https://emerging-stock-radar-derivative.randall-ycw.workers.dev/api/admin/ingest-relay',{method:'POST',headers:{Authorization:'Bearer '+process.env.WORKER_INGESTION_TOKEN,'Content-Type':'application/json'},body:'{}'}).then(async r=>console.log(JSON.stringify({status:r.status,body:await r.text()})))"
       - name: Relay approved sources to Worker
         env:
           WORKER_INGESTION_TOKEN: ${{ secrets.WORKER_INGESTION_TOKEN }}
