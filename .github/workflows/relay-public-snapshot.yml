@@ -20,4 +20,5 @@ jobs:
       - name: Relay approved sources to Worker
         env:
           WORKER_INGESTION_TOKEN: ${{ secrets.WORKER_INGESTION_TOKEN }}
+          WORKER_INGEST_URL: https://emerging-stock-radar-derivative.randall-ycw.workers.dev/api/admin/ingest-relay
         run: node scripts/relay-approved-sources.mjs

@@ -3,7 +3,8 @@ const sources = {
   "11406": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
   "11586": "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
 };
-const workerUrl = process.env.WORKER_INGEST_URL ?? "https://emerging-stock-radar-derivative.randall-ycw.workers.dev/api/admin/ingest-relay";
+const workerUrl = process.env.WORKER_INGEST_URL;
+if (!workerUrl) throw new Error("WORKER_INGEST_URL is required");
 const token = process.env.WORKER_INGESTION_TOKEN;
 if (!token) throw new Error("WORKER_INGESTION_TOKEN is required");
 
