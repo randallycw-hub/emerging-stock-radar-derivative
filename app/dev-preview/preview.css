@@ -330,6 +330,14 @@
   line-height: 1.65;
 }
 
+.preview-summary-card-ink::before { background: var(--preview-navy); }
+.preview-summary-card-clay::before { background: var(--preview-amber); }
+.preview-trader-summary { margin-bottom: 18px; }
+.preview-bond-lifecycle { padding-top: 4px; }
+.preview-bond-lifecycle li { min-height: 58px; }
+.preview-bond-lifecycle li div span { color: var(--preview-muted); font-size: 11px; }
+.preview-completeness-grid { padding: 2px 0 0; }
+
 .preview-entry-card {
   display: flex;
   min-height: 158px;
