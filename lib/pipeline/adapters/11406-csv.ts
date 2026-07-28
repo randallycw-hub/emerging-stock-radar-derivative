@@ -20,7 +20,7 @@ export class Source11406CsvAdapter extends BaseSourceAdapter<Source11406Row, Nor
       try {
         return normalize11406Row(candidate);
       } catch (error) {
-        if (error instanceof TypeError && error.message === "outstanding change date and reason must be present as a pair") {
+        if (error instanceof Error && error.message === "outstanding change date and reason must be present as a pair") {
           return normalize11406Row({ ...row, outstandingChangeDate: "", outstandingChangeReason: "" });
         }
         throw error;

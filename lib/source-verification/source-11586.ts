@@ -51,6 +51,9 @@ export function parse11586Csv(text: string): Source11586Row[] {
   // reviewed fields; keep the parser strict for all other unknown columns.
   const ignored = new Set(["索引", "公司代號"]);
   const rows = parseCsv(text).map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => !ignored.has(key) && key !== "索引" && key !== "公司代號" && key !== "公司簡稱")));
+  for (const row of rows) {
+    for (const helper of ["申請日期", "公司代號", "公司簡稱", "索引"]) delete row[helper];
+  }
   return parseRows(rows, "11586 CSV");
 }
 
