@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const DATASETS = [
-  { label: "興櫃公司", english: "EMERGING COMPANIES", href: "/market", accent: "teal" },
-  { label: "可轉債", english: "CONVERTIBLE BONDS", href: "/radar", accent: "blue" },
-  { label: "上市櫃進度", english: "LISTING PROGRESS", href: "/ipo", accent: "amber" },
+  { label: "興櫃公司", english: "EMERGING COMPANIES", description: "查看官方公司資料範圍", href: "/market", accent: "teal" },
+  { label: "可轉債", english: "CONVERTIBLE BONDS", description: "查看債券事件與契約欄位", href: "/radar", accent: "blue" },
+  { label: "上市櫃進度", english: "LISTING PROGRESS", description: "查看送件與公開時程", href: "/ipo", accent: "amber" },
 ] as const;
 
 export default function Homepage() {
@@ -48,12 +48,21 @@ export default function Homepage() {
         </div>
         <div className="public-home-dataset-grid">
           {DATASETS.map((dataset) => (
-            <article className={`public-home-dataset ${dataset.accent}`} key={dataset.label}>
+            <Link className={`public-home-dataset ${dataset.accent}`} href={dataset.href} key={dataset.label} aria-label={`前往${dataset.label}`}>
               <span className="public-home-dataset-index">0{DATASETS.indexOf(dataset) + 1}</span>
-              <span className="public-home-dataset-copy"><small>{dataset.english}</small><strong>{dataset.label}</strong><em>尚未發布</em></span>
+              <span className="public-home-dataset-copy"><small>{dataset.english}</small><strong>{dataset.label}</strong><em>{dataset.description}</em><i>目前尚未發布完整快照</i></span>
               <span className="public-home-dataset-arrow" aria-hidden="true">↗</span>
-            </article>
+            </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="public-home-source-note" aria-labelledby="source-note-title">
+        <div><p className="public-home-kicker">SOURCE TRANSPARENCY</p><h2 id="source-note-title">每個狀態，都能回到來源。</h2><p>目前資料同步正在處理中；在完整快照完成前，網站不會用片段或推測內容補位。</p></div>
+        <div className="public-home-source-list">
+          <div><span className="source-status pending" aria-hidden="true" /><strong>官方端點</strong><small>已登錄、待最新批次驗證</small></div>
+          <div><span className="source-status pending" aria-hidden="true" /><strong>發布快照</strong><small>等待三類資料同批完成</small></div>
+          <Link href="/methodology">查看來源與驗證方法 <span aria-hidden="true">→</span></Link>
         </div>
       </section>
 

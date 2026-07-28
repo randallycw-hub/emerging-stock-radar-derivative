@@ -156,6 +156,7 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
               className={tab === item.tab ? "active" : ""}
               href={item.href}
               onClick={() => setTab(item.tab)}
+              aria-current={tab === item.tab ? "page" : undefined}
             >
               <b>{item.title}</b><small>{item.description}</small>
             </Link>
