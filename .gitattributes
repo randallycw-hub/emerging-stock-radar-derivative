@@ -1,0 +1,3 @@
+# These manually reviewed source fixtures are byte-hashed evidence.
+# Preserve their exact UTF-8 bytes across checkouts regardless of core.autocrlf.
+tests/fixtures/source-verification/** -text
