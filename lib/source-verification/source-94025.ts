@@ -149,7 +149,7 @@ export function normalize94025Row(
     row.currentMonthRevenue,
     "currentMonthRevenue",
   );
-  const previousMonthRevenue = optionalRevenue(
+  const previousMonthRevenue = optionalRevenueSnapshot(
     row.previousMonthRevenue,
     "previousMonthRevenue",
   );

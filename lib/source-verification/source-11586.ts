@@ -47,8 +47,10 @@ export class Source11586ValidationError extends TypeError {
 
 export function parse11586Csv(text: string): Source11586Row[] {
   if (typeof text !== "string") throw new Source11586ValidationError("11586 CSV must be a string");
-  // TWSE currently emits a non-contractual helper column named 索引.
-  const rows = parseCsv(text).map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => key !== "索引")));
+  // TWSE currently emits non-contractual helper columns alongside the
+  // reviewed fields; keep the parser strict for all other unknown columns.
+  const ignored = new Set(["索引", "公司代號"]);
+  const rows = parseCsv(text).map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => !ignored.has(key))));
   return parseRows(rows, "11586 CSV");
 }
 
