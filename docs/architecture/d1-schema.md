@@ -17,3 +17,7 @@ D1 reads are local database operations only. They never fetch, contact, substitu
 `ingestDataset` is the only boundary that turns an adapter result into a persisted candidate. It creates an `ingestion_runs` row, an immutable `source_snapshots` row keyed by dataset and response hash, and the normalized dataset records in one repository transaction. Invalid integrity results are retained as `publication_eligibility = 0` for auditability; adapter failures create only a failed run and never create a snapshot or pointer.
 
 The public publication gate requires exactly `94025`, `11406`, and `11586`. Dataset `28567` is an enrichment dependency and is not independently sufficient to publish the public view. The gate preflights every candidate, resolves each current pointer, then calls `publishPointersAtomically`. D1 emits one fixed prepared statement per pointer in a single batch; the batch must return one successful affected-row result per dataset. A missing or invalid dataset, source/resource mismatch, compare-and-set conflict, failed result, or incomplete batch leaves every existing pointer unchanged.
+
+## Runtime binding and migration handoff
+
+The Sites project now declares the logical `PIPELINE_DB` binding and packages these forward-only migrations into `dist/.openai/migrations`. The generated Wrangler configuration points that binding at the packaged migration directory. A local Wrangler smoke test applies all five migrations successfully; no remote D1 database is created or modified by the build.
