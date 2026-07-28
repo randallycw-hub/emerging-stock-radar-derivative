@@ -9,6 +9,31 @@ export interface D1Database { prepare(sql: string): D1Prepared; batch(statements
 export interface D1RepositoryDependencies { clock: () => string; }
 
 const RUN_COLUMNS = "run_id as runId,dataset_id as datasetId,source_id as sourceId,resource_id as resourceId,execution_mode as executionMode,status,started_at as startedAt,completed_at as completedAt,adapter_version as adapterVersion,raw_schema_version as rawSchemaVersion,domain_schema_version as domainSchemaVersion,fetched_at as fetchedAt,http_status as httpStatus,content_type as contentType,response_hash as responseHash,response_bytes as responseBytes,raw_row_count as rawRowCount,normalized_record_count as normalizedRecordCount,rejected_record_count as rejectedRecordCount,warning_count as warningCount,failure_code as failureCode,created_at as createdAt,updated_at as updatedAt";
+const PUBLISHED_POINTER_COLUMNS = "dataset_id as datasetId,source_id as sourceId,resource_id as resourceId,current_snapshot_id as currentSnapshotId,previous_snapshot_id as previousSnapshotId,publication_run_id as publicationRunId,published_at as publishedAt";
+
+function mapPublishedSnapshotPointer(row: unknown, datasetId: DatasetId): PublishedSnapshotPointer | undefined {
+  if (typeof row !== "object" || row === null || Array.isArray(row)) return undefined;
+  const candidate = row as Record<string, unknown>;
+  if (
+    candidate.datasetId !== datasetId
+    || typeof candidate.sourceId !== "string"
+    || typeof candidate.resourceId !== "string"
+    || typeof candidate.currentSnapshotId !== "string"
+    || (candidate.previousSnapshotId !== null && typeof candidate.previousSnapshotId !== "string")
+    || typeof candidate.publicationRunId !== "string"
+    || typeof candidate.publishedAt !== "string"
+  ) return undefined;
+  return {
+    datasetId,
+    sourceId: candidate.sourceId,
+    resourceId: candidate.resourceId,
+    currentSnapshotId: candidate.currentSnapshotId,
+    previousSnapshotId: candidate.previousSnapshotId,
+    publicationRunId: candidate.publicationRunId,
+    publishedAt: candidate.publishedAt,
+  };
+}
+
 export class D1PipelineRepository implements PipelineRepository {
   private readonly db: D1Database; private readonly deps: D1RepositoryDependencies;
   constructor(db: D1Database, deps: D1RepositoryDependencies) { this.db = db; this.deps = deps; }
@@ -19,7 +44,7 @@ export class D1PipelineRepository implements PipelineRepository {
   async writeDatasetRecords(datasetId: DatasetId, snapshotId: string, records: readonly DatasetRecord[]) { return writeD1DatasetRecords(this.db, datasetId, snapshotId, records); }
   async readDatasetRecords(datasetId: DatasetId, snapshotId: string) { return readD1DatasetRecords(this.db, datasetId, snapshotId); }
   async compareAndSetPublishedSnapshotPointer(datasetId: DatasetId, expected: string | null, p: PublishedSnapshotPointer) { if (expected === null) { const r = await this.db.prepare("INSERT INTO published_snapshot_pointers (dataset_id,source_id,resource_id,current_snapshot_id,previous_snapshot_id,publication_run_id,published_at,version) SELECT ?,?,?,?,?,?,?,1 WHERE NOT EXISTS (SELECT 1 FROM published_snapshot_pointers WHERE dataset_id = ?) AND EXISTS (SELECT 1 FROM source_snapshots WHERE snapshot_id = ? AND dataset_id = ? AND source_id = ? AND resource_id = ?)").bind(datasetId,p.sourceId,p.resourceId,p.currentSnapshotId,p.previousSnapshotId,p.publicationRunId,p.publishedAt,datasetId,p.currentSnapshotId,datasetId,p.sourceId,p.resourceId).run(); return r.success !== false && ((r.meta as { changes?: number } | undefined)?.changes ?? 1) > 0; } const r = await this.db.prepare("UPDATE published_snapshot_pointers SET current_snapshot_id = ?, previous_snapshot_id = ?, publication_run_id = ?, published_at = ?, version = version + 1 WHERE dataset_id = ? AND current_snapshot_id = ? AND EXISTS (SELECT 1 FROM source_snapshots WHERE snapshot_id = ? AND dataset_id = ? AND source_id = ? AND resource_id = ?)").bind(p.currentSnapshotId,p.previousSnapshotId,p.publicationRunId,p.publishedAt,datasetId,expected,p.currentSnapshotId,datasetId,p.sourceId,p.resourceId).run(); return r.success !== false && ((r.meta as { changes?: number } | undefined)?.changes ?? 1) > 0; }
-  async getPublishedSnapshotPointer(datasetId: DatasetId) { void datasetId; return undefined; }
+  async getPublishedSnapshotPointer(datasetId: DatasetId) { const row = await this.db.prepare(`SELECT ${PUBLISHED_POINTER_COLUMNS} FROM published_snapshot_pointers WHERE dataset_id = ?`).bind(datasetId).first<unknown>(); return mapPublishedSnapshotPointer(row, datasetId); }
   async updateSourceHealth(next: SourceHealthRecord, expectedVersion: number) { const r = await this.db.prepare("UPDATE source_health SET status = ?, consecutive_failure_count = ?, last_failure_code = ?, updated_at = ?, version = version + 1 WHERE source_id = ? AND resource_id = ? AND version = ?").bind(next.status,next.consecutiveFailureCount,next.lastFailureCode ?? null,next.updatedAt,next.sourceId,next.resourceId,expectedVersion).run(); if (r.success === false) throw new RepositoryError("SOURCE_HEALTH_VERSION_CONFLICT"); return { ...next, version: expectedVersion + 1 }; }
   async withTransaction<T>(operation: (tx: PipelineRepositoryTransaction) => Promise<T>) { return operation(this); }
 }
