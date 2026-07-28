@@ -48,11 +48,11 @@ export default function Homepage() {
         </div>
         <div className="public-home-dataset-grid">
           {DATASETS.map((dataset) => (
-            <Link className={`public-home-dataset ${dataset.accent}`} href={dataset.href} key={dataset.label}>
+            <article className={`public-home-dataset ${dataset.accent}`} key={dataset.label}>
               <span className="public-home-dataset-index">0{DATASETS.indexOf(dataset) + 1}</span>
               <span className="public-home-dataset-copy"><small>{dataset.english}</small><strong>{dataset.label}</strong><em>尚未發布</em></span>
               <span className="public-home-dataset-arrow" aria-hidden="true">↗</span>
-            </Link>
+            </article>
           ))}
         </div>
       </section>
