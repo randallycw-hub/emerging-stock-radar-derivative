@@ -8,9 +8,25 @@ if (!workerUrl) throw new Error("WORKER_INGEST_URL is required");
 const token = process.env.WORKER_INGESTION_TOKEN;
 if (!token) throw new Error("WORKER_INGESTION_TOKEN is required");
 
+async function fetchWithRetry(url, options, label) {
+  const attempts = 3;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || response.status < 500 || attempt === attempts) return response;
+      console.warn(`${label}: HTTP_${response.status}; retrying (${attempt}/${attempts})`);
+    } catch (error) {
+      if (attempt === attempts) throw error;
+      console.warn(`${label}: ${error instanceof Error ? error.message : String(error)}; retrying (${attempt}/${attempts})`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2_000 * attempt));
+  }
+  throw new Error(`${label}: RETRY_EXHAUSTED`);
+}
+
 const datasets = {};
 for (const [datasetId, sourceUrl] of Object.entries(sources)) {
-  const response = await fetch(sourceUrl, { headers: { Accept: "text/csv, application/octet-stream" }, redirect: "error" });
+  const response = await fetchWithRetry(sourceUrl, { headers: { Accept: "text/csv, application/octet-stream" }, redirect: "error" }, datasetId);
   if (!response.ok) throw new Error(`${datasetId}: HTTP_${response.status}`);
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (bytes.byteLength === 0 || bytes.byteLength > 8_000_000) throw new Error(`${datasetId}: INVALID_RESPONSE_SIZE`);
