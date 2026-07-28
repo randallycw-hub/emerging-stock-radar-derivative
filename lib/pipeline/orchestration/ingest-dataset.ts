@@ -1,4 +1,4 @@
-import type { SourceAdapter, AdapterExecutionContext, AdapterExecutionResult } from "../adapters/types.ts";
+import type { SourceAdapter, AdapterExecutionContext, AdapterExecutionResult, AdapterDiagnostic } from "../adapters/types.ts";
 import type { PipelineRepository } from "../repositories/contracts.ts";
 import type { DatasetId, IngestionRunRecord, SourceSnapshotRecord } from "../repositories/types.ts";
 import { RepositoryError } from "../repositories/errors.ts";
@@ -18,6 +18,7 @@ export type IngestDatasetOutput = {
   run: IngestionRunRecord;
   snapshot?: SourceSnapshotRecord;
   records: readonly ReturnType<typeof toDatasetRecords>[number][];
+  diagnostics: readonly AdapterDiagnostic[];
 };
 
 function makeRun(options: IngestOptions, result: Partial<AdapterExecutionResult<unknown>>, runId: string, now: string, status: IngestionRunRecord["status"], failureCode?: string): IngestionRunRecord {
@@ -40,7 +41,7 @@ export async function ingestDataset(options: IngestOptions): Promise<IngestDatas
   } catch (error) {
     const run = makeRun(options, {}, runId, now, "failed", error instanceof Error ? error.message : String(error));
     await options.repository.withTransaction((tx) => tx.createIngestionRun(run));
-    return { run, records: [] };
+    return { run, records: [], diagnostics: [{ stage: "execute", code: "EXECUTION_ERROR", message: error instanceof Error ? error.message : String(error) }] };
   }
 
   if (result.runId !== runId) throw new RepositoryError("RUN_ID_MISMATCH");
@@ -49,7 +50,7 @@ export async function ingestDataset(options: IngestOptions): Promise<IngestDatas
   const run = makeRun(options, result, effectiveRunId, now, successful ? "succeeded" : "failed", successful ? undefined : result.executionStatus);
   if (!successful) {
     await options.repository.withTransaction((tx) => tx.createIngestionRun(run));
-    return { run, records: [] };
+    return { run, records: [], diagnostics: result.diagnostics };
   }
   if (!result.fetchedAt || !result.responseHash || result.responseBytes === undefined) throw new RepositoryError("SNAPSHOT_METADATA_INCOMPLETE");
   if (result.records.length !== result.normalizedRecordCount || result.normalizedRecordCount !== result.integrityReport.acceptedRecordCount || result.rawRowCount !== result.normalizedRecordCount + result.integrityReport.rejectedRecordCount || result.rejectedRecordCount !== result.integrityReport.rejectedRecordCount) throw new RepositoryError("RESULT_COUNT_MISMATCH");
@@ -64,5 +65,5 @@ export async function ingestDataset(options: IngestOptions): Promise<IngestDatas
     publicationEligibility: result.integrityReport.canPublishCandidate ? "eligible" : "ineligible", createdAt: now,
   };
   await options.repository.withTransaction((tx) => tx.persistIngestionCandidate(run, snapshot, records));
-  return { run, snapshot, records };
+  return { run, snapshot, records, diagnostics: result.diagnostics };
 }

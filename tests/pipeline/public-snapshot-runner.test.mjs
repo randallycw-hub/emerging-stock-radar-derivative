@@ -59,9 +59,10 @@ test("publishes the required datasets atomically after all ingestions succeed", 
 test("does not move any pointer when one required ingestion fails", async () => {
   const repository = new InMemoryPipelineRepository();
   const adapters = Object.fromEntries(required.map((datasetId) => [datasetId, adapter(datasetId)]));
-  adapters["11406"] = adapter("11406", { executionStatus: "failed_fetch", records: [], rawRowCount: 0, normalizedRecordCount: 0 });
+  adapters["11406"] = adapter("11406", { executionStatus: "failed_fetch", records: [], rawRowCount: 0, normalizedRecordCount: 0, diagnostics: [{ stage: "fetch", code: "NETWORK_ERROR", message: "network request failed" }] });
   const result = await runPublicSnapshotIngestion(options(repository, adapters));
   assert.equal(result.published, false);
   assert.match(result.reasons.join(","), /INGESTION_FAILED:11406:failed_fetch/);
+  assert.equal(result.diagnostics["11406"][0].code, "NETWORK_ERROR");
   for (const datasetId of required) assert.equal(await repository.getPublishedSnapshotPointer(datasetId), undefined);
 });
