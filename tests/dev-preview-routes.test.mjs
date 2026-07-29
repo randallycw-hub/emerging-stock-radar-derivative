@@ -95,8 +95,8 @@ test("preview layout fixes brand, subtitle, warning and noindex metadata for eve
   assert.match(themeToggle, /"use client"/);
   assert.match(themeToggle, /aria-pressed/);
   assert.match(themeToggle, /type="button"/);
-  assert.match(themeToggle, />A</);
-  assert.match(themeToggle, />B</);
+  assert.match(themeToggle, />淺色</);
+  assert.match(themeToggle, />深色</);
 });
 
 test("preview homepage is a fixture-derived daily dashboard with search and exact sections", async () => {

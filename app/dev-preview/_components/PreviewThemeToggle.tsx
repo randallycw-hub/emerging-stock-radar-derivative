@@ -28,21 +28,21 @@ export function PreviewThemeToggle() {
 
   return (
     <div className="preview-theme-toggle" role="group" aria-label="預覽主題">
-      <span>Theme</span>
+      <span>版面</span>
       <button
-        aria-label="套用 Theme A"
+        aria-label="套用淺色版"
         aria-pressed={theme === "a"}
         className="preview-theme-button"
         onClick={() => selectTheme("a")}
         type="button"
-      >A</button>
+      >淺色</button>
       <button
-        aria-label="套用 Theme B"
+        aria-label="套用深色版"
         aria-pressed={theme === "b"}
         className="preview-theme-button"
         onClick={() => selectTheme("b")}
         type="button"
-      >B</button>
+      >深色</button>
     </div>
   );
 }
