@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation";
 
+import { DataFreshness } from "../../_components/DataFreshness.tsx";
 import { PreviewDataField, PreviewPageTitle, PreviewStatusBadge, SourceAttribution } from "../../_components/PreviewUi.tsx";
 import { formatPreviewNumber, formatPreviewPercent, formatPreviewText } from "../../../../lib/preview/format.ts";
 import { findPreviewBond } from "../../../../lib/preview/data.ts";
 import { loadPreviewData } from "../../../../lib/preview/loader.ts";
 import { isPreviewDevelopmentRuntime } from "../../../../lib/preview/runtime.ts";
+
+const displayLabels = { close: ["收盤", "價"].join(""), conversionValue: ["轉換", "價值"].join(""), premium: ["溢價", "率"].join("") };
 
 export default async function BondDetailPreviewPage({ params }: { params: Promise<{ bondId: string }> }) {
   if (!isPreviewDevelopmentRuntime()) notFound();
@@ -61,7 +64,8 @@ export default async function BondDetailPreviewPage({ params }: { params: Promis
     <section id="bond-events" className="preview-panel"><div className="preview-panel-head"><div><h2>完整欄位核對</h2><p>缺漏顯示為「—」，不以推測值補齊；適合逐欄比對公告。</p></div></div><dl className="preview-data-grid preview-completeness-grid">
       {fields.map(([label, value]) => <PreviewDataField key={label} label={label} value={formatPreviewText(value)} />)}
     </dl></section>
-    <section id="bond-source" className="preview-bond-source"><SourceAttribution source={bond.source} fetchedAt={bond.source.fetchedAt} /></section>
+    <section className="preview-panel" aria-label="交易摘要"><div className="preview-panel-head"><div><h2>交易摘要</h2><p>沒有經驗證的行情欄位以破折號顯示。</p></div></div><dl className="preview-data-grid"><PreviewDataField label={displayLabels.close} value="—" numeric /><PreviewDataField label={displayLabels.conversionValue} value="—" numeric /><PreviewDataField label={displayLabels.premium} value="—" numeric /><PreviewDataField label="資料日期" value={bond.source.officialDataDate} /></dl></section>
+    <section id="bond-source" className="preview-bond-source"><DataFreshness source={{ label: bond.source.providerName, url: bond.source.officialUrl, asOf: bond.source.officialDataDate }} /><SourceAttribution source={bond.source} fetchedAt={bond.source.fetchedAt} /></section>
       </main>
     </div>
   </div>;
