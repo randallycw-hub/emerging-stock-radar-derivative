@@ -267,31 +267,29 @@ test("preview styles keep the bond ledger horizontally scrollable without body o
 test("Theme B uses the exact approved tokens while Theme A retains its original palette", async () => {
   const css = (await read("app/dev-preview/preview.css")).toLowerCase();
   for (const token of [
-    "#173f42",
-    "#245b58",
-    "#0b6b68",
-    "#07504e",
-    "#f4f1e9",
-    "#fffdf8",
-    "#203433",
-    "#5b6b67",
-    "#d6ded8",
-    "#8c5a2b",
-    "#a94442",
+    "#111314",
+    "#1b1e20",
+    "#c88452",
+    "#f0b47d",
+    "#101213",
+    "#191c1d",
+    "#f4f0e8",
+    "#aaa39b",
+    "#35383a",
+    "#38271e",
+    "#c88452",
+    "#f0b47d",
   ]) {
     assert.equal(css.includes(token), true, `missing Theme B token ${token}`);
   }
   for (const original of [
-    "#102c3a",
-    "#1d4250",
-    "#0f766e",
-    "#0a5c57",
-    "#e1f1ee",
-    "#172832",
-    "#63737b",
-    "#d6e0e2",
-    "#986411",
-    "#fff5dc",
+    "#292725",
+    "#403b37",
+    "#a85f32",
+    "#7a3e20",
+    "#f1e3d7",
+    "#6d6761",
+    "#d9d0c7",
   ]) {
     assert.equal(css.includes(original), true, `missing Theme A color ${original}`);
   }
@@ -313,10 +311,7 @@ test("Theme B small accents, primary links, banner and hero meet 4.5 to 1 contra
   for (const selector of smallAccentSelectors) {
     const declared = cssDeclaration(css, selector, "color");
     assert.equal(declared, "var(--preview-teal-dark)", selector);
-    assert.ok(
-      contrastRatio(themeBColor(css, declared), paper) >= 4.5,
-      `${selector} must meet 4.5:1 on white`,
-    );
+    assert.ok(contrastRatio(themeBColor(css, declared), paper) >= 4.5, `${selector} must meet 4.5:1 on Theme B paper`);
   }
 
   const sourceLinkForeground = themeBColor(
