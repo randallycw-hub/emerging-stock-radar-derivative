@@ -47,13 +47,26 @@ export class Source11586ValidationError extends TypeError {
 
 export function parse11586Csv(text: string): Source11586Row[] {
   if (typeof text !== "string") throw new Source11586ValidationError("11586 CSV must be a string");
-  // TWSE currently emits non-contractual helper columns alongside the
-  // reviewed fields; keep the parser strict for all other unknown columns.
-  const ignored = new Set(["索引", "公司代號"]);
-  const rows = parseCsv(text).map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => !ignored.has(key) && key !== "索引" && key !== "公司代號" && key !== "公司簡稱")));
-  for (const row of rows) {
-    for (const helper of ["申請日期", "公司代號", "公司簡稱", "索引"]) delete row[helper];
-  }
+  const rows = parseCsv(text).map((row) => {
+    if ("公司代號" in row) {
+      return {
+        sourceRecordId: `TWSE:${row["公司代號"]}:${row["申請日期"]}`,
+        companyCode: row["公司代號"],
+        companyName: row["公司簡稱"],
+        applicationDate: row["申請日期"],
+        chairmanName: row["董事長"],
+        applicationCapitalThousandsTwd: row["申請時股本(仟元)"],
+        listingReviewDate: row["上市審議委員會審議日期"],
+        boardApprovalDate: row["交易所董事會通過上市日期"],
+        listingContractApprovalOrFilingDate: row["上市契約報請主管機關備查(主管機關核准)日期"],
+        listingDate: row["股票上市買賣日期"],
+        underwriters: row["承銷商"],
+        underwritingPrice: row["承銷價"],
+        note: row["備註"],
+      };
+    }
+    return row;
+  });
   return parseRows(rows, "11586 CSV");
 }
 
@@ -154,7 +167,7 @@ function optionalText(value: string): string | undefined { const text = value.tr
 function requiredDate(value: string, name: string): string { const date = optionalDate(value, name); if (!date) throw new Source11586ValidationError(`${name} is required`); return date; }
 function optionalDate(value: string, name: string): string | undefined {
   const text = optionalText(value); if (!text) return undefined;
-  const match = /^(?:(\d{4})[-/]?(\d{2})[-/]?(\d{2})|(\d{3})[/-](\d{2})[/-](\d{2}))$/.exec(text);
+  const match = /^(?:(\d{4})[-/]?(\d{2})[-/]?(\d{2})|(\d{3})[-/]?(\d{2})[-/]?(\d{2}))$/.exec(text);
   if (!match) throw new Source11586ValidationError(`${name} must be a valid official date`);
   const date = match[1] ? `${match[1]}-${match[2]}-${match[3]}` : `${Number(match[4]) + 1911}-${match[5]}-${match[6]}`;
   if (!isIsoDate(date)) throw new Source11586ValidationError(`${name} must be a valid official date`);

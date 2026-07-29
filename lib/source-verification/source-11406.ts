@@ -320,7 +320,12 @@ function parseAliasedDataset(
   );
   const identities = new Set<string>();
   for (const row of rows) {
-    const identity = normalize11406Row(row).bondId;
+    const hasDate = row.outstandingChangeDate.trim() !== "" && row.outstandingChangeDate.trim() !== "-";
+    const hasReason = row.outstandingChangeReason.trim() !== "" && row.outstandingChangeReason.trim() !== "-";
+    const candidate = hasDate === hasReason
+      ? row
+      : { ...row, outstandingChangeDate: "", outstandingChangeReason: "" };
+    const identity = normalize11406Row(candidate).bondId;
     if (identities.has(identity)) {
       throw new TypeError(`${name} contains duplicate bond identity: ${identity}`);
     }
