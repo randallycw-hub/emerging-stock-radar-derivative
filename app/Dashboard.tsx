@@ -118,6 +118,23 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
   const [profileLoading, setProfileLoading] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("xingzhai-dashboard-theme");
+      if (stored === "dark" || stored === "light") setTheme(stored);
+    } catch {
+      // 儲存空間被封鎖時仍維持正常渲染。
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("xingzhai-dashboard-theme", theme);
+    } catch {
+      // 儲存空間被封鎖時不影響頁面功能。
+    }
+  }, [theme]);
+
   const loadTracker = useCallback(async () => {
     try {
       setTracker(await fetchTrackerPayload());
