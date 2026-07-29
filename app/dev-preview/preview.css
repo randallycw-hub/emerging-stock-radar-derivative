@@ -790,6 +790,39 @@
   font-size: 12px;
 }
 
+.preview-bond-ledger-table {
+  min-width: 1450px;
+}
+
+.preview-bond-ledger-table th,
+.preview-bond-ledger-table td {
+  white-space: nowrap;
+}
+
+.preview-bond-ledger-table th:first-child,
+.preview-bond-ledger-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--preview-paper);
+  box-shadow: 1px 0 0 var(--preview-line);
+}
+
+.preview-bond-ledger-table th:first-child {
+  background: #f0f6e9;
+}
+
+.preview-bond-ledger-table td small {
+  display: block;
+  margin-top: 4px;
+  color: var(--preview-muted);
+  font-size: 9px;
+}
+
+.preview-ledger-period {
+  line-height: 1.65;
+}
+
 .preview-table th {
   padding: 11px 12px;
   color: #51646d;

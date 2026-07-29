@@ -9,6 +9,7 @@ import {
 } from "../_components/PreviewUi.tsx";
 import {
   formatPreviewNumber,
+  formatPreviewPercent,
   formatPreviewText,
 } from "../../../lib/preview/format.ts";
 import { loadPreviewData } from "../../../lib/preview/loader.ts";
@@ -39,16 +40,20 @@ export default async function BondsPreviewPage() {
 
         <div className="preview-table-region">
           <div className="preview-table-scroll">
-            <table className="preview-table">
+            <table className="preview-table preview-bond-ledger-table">
               <thead>
                 <tr>
                   <th>債券代碼／簡稱</th>
                   <th>發行人</th>
-                  <th>發行／掛牌／到期</th>
+                  <th>發行日</th>
+                  <th>到期日</th>
                   <th className="preview-align-right">發行總額</th>
                   <th className="preview-align-right">目前餘額</th>
-                  <th>擔保</th>
+                  <th className="preview-align-right">票面利率</th>
+                  <th className="preview-align-right">初始轉換價</th>
                   <th>轉換期間</th>
+                  <th>賣回條件</th>
+                  <th>擔保</th>
                 </tr>
               </thead>
               <tbody>
@@ -60,25 +65,27 @@ export default async function BondsPreviewPage() {
                       </Link>
                     </td>
                     <td>{bond.issuerName}<small>{bond.issuerCode}</small></td>
-                    <td className="preview-numeric">
-                      {bond.issueDate}<br />
-                      {formatPreviewText(bond.listingDate)}<br />
-                      {bond.maturityDate}
-                    </td>
+                    <td className="preview-numeric">{bond.issueDate}<small>掛牌 {formatPreviewText(bond.listingDate)}</small></td>
+                    <td className="preview-numeric">{bond.maturityDate}</td>
                     <td className="preview-align-right preview-numeric">
                       {formatPreviewNumber(bond.issueAmount)}
                     </td>
                     <td className="preview-align-right preview-numeric">
                       {formatPreviewNumber(bond.outstandingAmount)}
                     </td>
+                    <td className="preview-align-right preview-numeric">{formatPreviewPercent(bond.couponRate)}</td>
+                    <td className="preview-align-right preview-numeric">{formatPreviewNumber(bond.initialConversionPrice)}</td>
+                    <td className="preview-numeric preview-ledger-period">
+                      {formatPreviewText(bond.conversionStartDate)}<br />
+                      {formatPreviewText(bond.conversionEndDate)}
+                    </td>
+                    <td className="preview-numeric">
+                      {bond.putDates.length ? bond.putDates.join("、") : "—"}<small>{formatPreviewNumber(bond.putPrice)}</small>
+                    </td>
                     <td>
                       <PreviewStatusBadge tone={bond.secured ? "teal" : "neutral"}>
                         {bond.secured ? "有擔保" : "無擔保"}
                       </PreviewStatusBadge>
-                    </td>
-                    <td className="preview-numeric">
-                      {formatPreviewText(bond.conversionStartDate)}<br />
-                      {formatPreviewText(bond.conversionEndDate)}
                     </td>
                   </tr>
                 ))}
@@ -110,6 +117,8 @@ export default async function BondsPreviewPage() {
                   value={formatPreviewNumber(bond.outstandingAmount)}
                   numeric
                 />
+                <PreviewDataField label="票面利率" value={formatPreviewPercent(bond.couponRate)} numeric />
+                <PreviewDataField label="初始轉換價" value={formatPreviewNumber(bond.initialConversionPrice)} numeric />
                 <PreviewDataField
                   label="擔保"
                   value={bond.secured ? "有擔保" : "無擔保"}
@@ -118,6 +127,8 @@ export default async function BondsPreviewPage() {
                   label="轉換期間"
                   value={`${formatPreviewText(bond.conversionStartDate)} ～ ${formatPreviewText(bond.conversionEndDate)}`}
                 />
+                <PreviewDataField label="賣回日期" value={bond.putDates.length ? bond.putDates.join("、") : "—"} />
+                <PreviewDataField label="賣回價格" value={formatPreviewNumber(bond.putPrice)} numeric />
               </dl>
             </article>
           ))}
