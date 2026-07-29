@@ -1156,6 +1156,13 @@
 .preview-bond-command .preview-page-title h1 { color: #fffdf8; font-size: clamp(31px, 4vw, 50px); }
 .preview-bond-command .preview-page-title p { max-width: 760px; color: #d8ece5; }
 .preview-bond-command .preview-page-title .preview-status { color: #173f42; background: #d7efbf; border-color: #d7efbf; }
+.preview-bond-workbench { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 18px; align-items: start; }
+.preview-bond-rail { position: sticky; top: 18px; display: grid; gap: 8px; padding: 12px 8px; background: #211e2c; border: 1px solid #4f5265; }
+.preview-bond-rail-kicker { padding: 7px 5px 11px; color: #e6c364; font-size: 9px; font-weight: 850; letter-spacing: .13em; }
+.preview-bond-rail a { padding: 11px 9px; color: #b9bdc7; border-left: 3px solid transparent; font-size: 11px; text-decoration: none; }
+.preview-bond-rail a:hover, .preview-bond-rail a:focus-visible { color: #211e2c; background: #e6c364; border-left-color: #e4865b; outline: 0; }
+.preview-bond-workspace { min-width: 0; }
+.preview-bond-source .preview-source { margin-top: 0; }
 .preview-bond-command .preview-summary-card { min-height: 148px; padding: 24px; border: 0; border-radius: 16px; box-shadow: 0 12px 28px rgba(20, 56, 57, .1); }
 .preview-bond-command .preview-summary-card strong { font-size: 38px; }
 .preview-bond-command .preview-summary-card-ink { color: #f4fbef; background: #173f42; }
@@ -1182,6 +1189,11 @@
 .preview-bond-command .preview-source { margin-top: 4px; border-radius: 16px; }
 @media (max-width: 760px) {
   .preview-bond-command .preview-page-title { padding: 24px 20px; border-radius: 18px 18px 7px 18px; }
+  .preview-bond-workbench { grid-template-columns: 1fr; gap: 12px; }
+  .preview-bond-rail { position: static; grid-template-columns: repeat(4, 1fr); align-items: center; padding: 6px; }
+  .preview-bond-rail-kicker { display: none; }
+  .preview-bond-rail a { padding: 9px 5px; border-left: 0; border-bottom: 3px solid transparent; text-align: center; }
+  .preview-bond-rail a:hover, .preview-bond-rail a:focus-visible { border-bottom-color: #e4865b; }
   .preview-bond-command .preview-timeline.preview-bond-lifecycle { display: grid; grid-template-columns: 1fr; padding: 14px 18px 18px; }
   .preview-bond-command .preview-bond-lifecycle li { min-height: 0; padding: 12px 0 12px 22px; border-top: 0; border-left: 3px solid #b8cfbf; }
   .preview-bond-command .preview-bond-lifecycle li::before { top: 15px; left: -8px; }
