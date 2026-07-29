@@ -58,14 +58,13 @@ type MarketRow = {
   name: string;
   industry: string;
   tradingDate: string;
-  endOfDayPrice?: string;
-  previousEndOfDayPrice?: string;
-  dayChange?: string;
-  dayChangePercent?: string;
-  weeklyClose?: string;
-  weeklyChangePercent?: string;
-  volume?: string;
-  turnover?: string;
+  dailyAveragePrice?: string;
+  previousDailyAveragePrice?: string;
+  dailyHighPrice?: string;
+  dailyLowPrice?: string;
+  transactionVolume?: string;
+  listingApplicationDate?: string;
+  listingApplicationStatus?: string;
   status: "normal" | "no_baseline" | "unavailable";
 };
 
@@ -278,9 +277,9 @@ function MarketView({ tracker, loading }: { tracker: TrackerPayload; loading: bo
   const rows = tracker.marketRows ?? [];
   return (
     <section className="market-workbench" aria-labelledby="market-title">
-      <div className="market-workbench-head"><div><span>END-OF-DAY MARKET</span><h2 id="market-title">興櫃收盤價市場表</h2><p>只呈現最近交易日收盤價與官方日終資料，不提供買價、賣價或盤中更新。</p></div><b>{tracker.marketSource?.dataDate || "資料日期尚未提供"}</b></div>
-      <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{loading ? "載入中" : rows.length ? "可查核" : "未提供"}</strong></div><div><span>價格語意</span><strong>收盤價</strong></div></div>
-      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>產業</th><th>交易日</th><th>收盤價</th><th>前收</th><th>日漲跌</th><th>週收盤</th><th>週漲跌幅</th><th>成交量</th><th>成交額</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.endOfDayPrice || "—"}</td><td>{row.previousEndOfDayPrice || "—"}</td><td>{row.dayChange || "—"} <span className="subtext">{row.dayChangePercent || "—"}</span></td><td>{row.weeklyClose || "—"}</td><td>{row.weeklyChangePercent || "—"}</td><td>{row.volume || "—"}</td><td>{row.turnover || "—"}</td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>目前尚未接入已驗證的官方收盤價資料</strong><p>版面已按收盤價邏輯完成；待日終來源通過來源登錄與完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
+      <div className="market-workbench-head"><div><span>OFFICIAL END-OF-DAY MARKET</span><h2 id="market-title" aria-label="興櫃收盤價市場表（實際欄位為官方日均價）">興櫃官方盤後資料</h2><p>只呈現官方日終資料；興櫃核准欄位的價格語意是日均價，不提供買價、賣價或盤中更新。</p></div><b>{tracker.marketSource?.dataDate || "資料日期尚未提供"}</b></div>
+      <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{loading ? "載入中" : rows.length ? "可查核" : "未提供"}</strong></div><div><span>價格語意</span><strong>日均價</strong></div></div>
+      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>市場</th><th>交易日</th><th>當日均價</th><th>前日均價</th><th>日最高</th><th>日最低</th><th>成交量</th><th>上市櫃進度</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.dailyAveragePrice || "—"}</td><td>{row.previousDailyAveragePrice || "—"}</td><td>{row.dailyHighPrice || "—"}</td><td>{row.dailyLowPrice || "—"}</td><td>{row.transactionVolume || "—"}</td><td>{row.listingApplicationStatus || "—"}<span className="subtext">{row.listingApplicationDate || ""}</span></td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無前日基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>官方盤後資料尚未提供</strong><p>待核准的官方日終來源成功取得並通過完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
     </section>
   );
 }
