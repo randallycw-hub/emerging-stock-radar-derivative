@@ -263,7 +263,7 @@ test("preview styles keep the bond ledger horizontally scrollable without body o
   assert.match(css, /\.preview-theme-button\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.preview-search-input\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.preview-root\[data-preview-theme="b"\] \.preview-panel-head h2[\s\S]*color:\s*var\(--preview-ink\)/);
-  assert.match(css, /\.preview-root\[data-preview-theme="b"\] \.preview-source > a[\s\S]*color:\s*var\(--preview-navy\)/);
+  assert.match(css, /\.preview-source > a\s*\{[\s\S]*color:\s*var\(--preview-navy\)/);
 });
 
 test("Theme B uses the exact approved tokens while Theme A retains its original palette", async () => {
