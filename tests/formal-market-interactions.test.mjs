@@ -14,4 +14,7 @@ test("市場預覽提供篩選與資料日期元件", async () => {
   assert.match(freshness, /資料來源/);
   assert.match(css, /\.market-filters/);
   assert.match(css, /\.data-freshness/);
+  const ipo = await readFile(new URL("../app/dev-preview/ipo/page.tsx", import.meta.url), "utf8");
+  assert.match(ipo, /IPO 申請與掛牌時程/);
+  assert.match(ipo, /資料待發布/);
 });

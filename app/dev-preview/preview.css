@@ -259,6 +259,10 @@
   font-size: 11px;
 }
 .data-freshness a { color: var(--preview-teal-dark); text-decoration-thickness: 1px; }
+.market-filter-status { margin: -8px 0 14px; color: var(--preview-muted); font-size: 11px; }
+.preview-empty-state { padding: 28px; }
+.preview-empty-state h2 { margin: 0 0 8px; color: var(--preview-ink); }
+.preview-empty-state p { margin: 0; color: var(--preview-muted); line-height: 1.7; }
 @media (max-width: 760px) {
   .market-filters { grid-template-columns: 1fr; }
   .market-filter-clear { width: 100%; }

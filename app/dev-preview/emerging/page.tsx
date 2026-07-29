@@ -7,6 +7,8 @@ import {
   PreviewStatusBadge,
   SourceAttribution,
 } from "../_components/PreviewUi.tsx";
+import { DataFreshness } from "../_components/DataFreshness.tsx";
+import { MarketFilterPanel } from "../_components/MarketFilterPanel.tsx";
 import {
   formatPreviewNumber,
   formatPreviewPercent,
@@ -29,6 +31,7 @@ export default async function EmergingPreviewPage() {
       />
 
       <section className="preview-panel">
+        <MarketFilterPanel total={data.companies.length} types={[...new Set(data.companies.map((company) => company.industryName))]} />
         <div className="preview-panel-head">
           <div>
             <h2>月營收資料</h2>
@@ -36,6 +39,7 @@ export default async function EmergingPreviewPage() {
           </div>
           <PreviewStatusBadge>資料年月 {data.companies[0]?.yearMonth ?? "—"}</PreviewStatusBadge>
         </div>
+        <DataFreshness source={{ label: source.providerName, url: source.officialUrl, asOf: source.officialDataDate }} />
 
         <div className="preview-table-region">
           <div className="preview-table-scroll">
