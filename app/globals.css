@@ -400,6 +400,9 @@ button { cursor: pointer; }
 .dashboard-theme-dark .market-workbench-head,
 .dashboard-theme-dark .market-summary,
 .dashboard-theme-dark .market-unavailable,
+.dashboard-theme-dark .bond-status-hero,
+.dashboard-theme-dark .bond-status-grid article,
+.dashboard-theme-dark .bond-status-note,
 .dashboard-theme-dark .ipo-stage-overview,
 .dashboard-theme-dark .upcoming-events,
 .dashboard-theme-dark .site-footer,
@@ -434,6 +437,7 @@ button { cursor: pointer; }
 .dashboard-theme-dark .ipo-company-row,
 .dashboard-theme-dark .market-summary > div,
 .dashboard-theme-dark .market-source-card { color: var(--ink); background: var(--paper); border-color: var(--line); }
+.dashboard-theme-dark .bond-status-note { background: var(--teal-soft); }
 .dashboard-theme-dark .data-table tbody tr:nth-child(even) td { background: #292724; }
 .dashboard-theme-dark .market-state,
 .dashboard-theme-dark .market-workbench-head > b,
@@ -461,11 +465,29 @@ button { cursor: pointer; }
 .market-unavailable strong { display: block; margin-bottom: 8px; color: var(--ink); font-size: 17px; }
 .market-unavailable p { margin: 0 0 8px; font-size: 12px; line-height: 1.7; }
 .market-unavailable small { font-size: 10px; }
+.bond-status-workbench { display: grid; gap: 16px; }
+.bond-status-hero { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 24px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); }
+.bond-status-hero > div > span { color: var(--teal); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.bond-status-hero h2 { margin: 6px 0; font-size: 25px; }
+.bond-status-hero p { max-width: 620px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.bond-status-hero > strong { padding: 9px 11px; color: var(--ink); background: var(--amber-soft); font-size: 11px; white-space: nowrap; }
+.bond-status-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.bond-status-grid article { min-height: 142px; padding: 16px; background: var(--paper); border: 1px solid var(--line); }
+.bond-status-grid article > span { display: block; color: var(--muted); font-size: 10px; }
+.bond-status-grid article > strong { display: block; margin-top: 28px; color: var(--teal); font-size: 15px; }
+.bond-status-grid article > p { margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.bond-status-note { padding: 20px; background: var(--teal-soft); border: 1px solid var(--line); }
+.bond-status-note b { color: var(--ink); font-size: 13px; }
+.bond-status-note p { margin: 8px 0; color: var(--ink-2); font-size: 12px; line-height: 1.8; }
+.bond-status-note small { color: var(--muted); font-size: 10px; }
 @media (max-width: 680px) {
   .market-workbench-head { display: block; }
   .market-workbench-head > b { display: inline-block; margin-top: 13px; }
   .market-summary { grid-template-columns: 1fr; }
   .market-audit-grid { grid-template-columns: 1fr; }
+  .bond-status-hero { display: block; }
+  .bond-status-hero > strong { display: inline-block; margin-top: 14px; }
+  .bond-status-grid { grid-template-columns: 1fr; }
 }
 
 /* Public homepage: Cloud Dancer × Transformative Teal */

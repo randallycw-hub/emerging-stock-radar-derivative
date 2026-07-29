@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const DATASETS = [
   { label: "興櫃公司", english: "EMERGING COMPANIES", description: "查看官方公司資料範圍", href: "/market", accent: "teal" },
-  { label: "可轉債", english: "CONVERTIBLE BONDS", description: "查看債券事件與契約欄位", href: "/radar", accent: "blue" },
+  { label: "可轉債", english: "CONVERTIBLE BONDS", description: "查看債券事件與契約欄位", href: "/bonds", accent: "blue" },
   { label: "上市櫃進度", english: "LISTING PROGRESS", description: "查看送件與公開時程", href: "/ipo", accent: "amber" },
 ] as const;
 
@@ -16,6 +16,7 @@ export default function Homepage() {
         </Link>
         <nav aria-label="主要導覽">
           <Link href="/market">資料總覽</Link>
+          <Link href="/bonds">可轉債契約</Link>
           <Link href="/radar">事件雷達</Link>
           <Link href="/ipo">上市進度</Link>
           <Link href="/methodology">方法與來源</Link>

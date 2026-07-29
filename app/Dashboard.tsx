@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-type Tab = "market" | "radar" | "ipo";
+type Tab = "market" | "bonds" | "radar" | "ipo";
 type StageKey = "submitted" | "review" | "board" | "contract" | "auction";
 
 type RadarRow = {
@@ -95,6 +95,7 @@ const EMPTY_TRACKER: TrackerPayload = {
 
 const NAV_ITEMS: Array<{ tab: Tab; href: string; title: string; description: string }> = [
   { tab: "market", href: "/market", title: "資料總覽", description: "來源建置狀態" },
+  { tab: "bonds", href: "/bonds", title: "可轉債契約", description: "條款與事件欄位" },
   { tab: "radar", href: "/radar", title: "上市櫃進度", description: "公開事件整理" },
   { tab: "ipo", href: "/ipo", title: "IPO 時程", description: "申請階段與日期" },
 ];
@@ -225,6 +226,7 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
 
           {error && <div className="error-banner" role="alert">{error}</div>}
           {tab === "market" && <MarketView tracker={tracker} loading={loading} />}
+          {tab === "bonds" && <BondView />}
           {tab === "radar" && (
             <RadarView
               tracker={tracker}
@@ -269,6 +271,25 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
         />
       )}
     </div>
+  );
+}
+
+function BondView() {
+  const fields = [
+    ["發行條件", "待正式快照", "發行日、到期日、發行總額與票面利率"],
+    ["轉換權利", "待正式快照", "初始轉換價與可轉換期間"],
+    ["賣回條件", "待正式快照", "官方公告的賣回日期與價格條款"],
+    ["餘額異動", "待正式快照", "餘額異動日期與官方原因"],
+    ["事件與來源", "來源驗證中", "掛牌、契約異動與原始公告連結"],
+  ];
+  return (
+    <section className="bond-status-workbench" aria-labelledby="bond-title">
+      <div className="bond-status-hero"><div><span>CONVERTIBLE BOND CONTRACTS</span><h2 id="bond-title">可轉債契約資料</h2><p>正式版先建立完整查核結構；來源驗證與發布快照完成前，不顯示測試樣本或未核准數字。</p></div><strong>正式資料尚未發布</strong></div>
+      <div className="bond-status-grid" aria-label="可轉債正式資料狀態">
+        {fields.map(([title, status, detail]) => <article key={title}><span>{title}</span><strong>{status}</strong><p>{detail}</p></article>)}
+      </div>
+      <div className="bond-status-note"><b>資料邊界</b><p>正式頁只會呈現官方發行條件、契約事件與來源資訊；不提供可轉債成交價格、買賣價、折溢價、理論價格或投資建議。</p><small>目前可查閱的條款版面位於開發預覽，正式版資料以核准快照為準。</small></div>
+    </section>
   );
 }
 
