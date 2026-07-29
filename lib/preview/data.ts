@@ -11,11 +11,53 @@ import {
 } from "../source-verification/source-94025.ts";
 import type { FixtureMetadata } from "../source-verification/types.ts";
 import type {
+  EmergingMarketRow,
   PreviewBondDto,
   PreviewCompanyDto,
   PreviewDataDto,
   PreviewSourceDto,
 } from "./types.ts";
+
+export interface EmergingMarketInput {
+  code: string;
+  name: string;
+  industry?: string;
+  closePrice?: number;
+  change?: number;
+  volume?: number;
+  turnover?: number;
+  asOf: string;
+  sourceLabel?: string;
+  sourceUrl?: string;
+}
+
+export function normalizeEmergingRow(input: EmergingMarketInput): EmergingMarketRow {
+  if (!input.code.trim() || !input.name.trim()) {
+    throw new TypeError("emerging market identity is required");
+  }
+  if (!input.asOf.trim()) throw new TypeError("emerging market asOf is required");
+  return {
+    companyId: input.code,
+    code: input.code,
+    name: input.name,
+    industry: input.industry,
+    closePrice: finiteOrUndefined(input.closePrice),
+    change: finiteOrUndefined(input.change),
+    volume: finiteOrUndefined(input.volume),
+    turnover: finiteOrUndefined(input.turnover),
+    priceLabel: "收盤價",
+    asOf: input.asOf,
+    source: {
+      label: input.sourceLabel ?? "資料來源",
+      url: input.sourceUrl,
+      asOf: input.asOf,
+    },
+  };
+}
+
+function finiteOrUndefined(value: number | undefined): number | undefined {
+  return value !== undefined && Number.isFinite(value) ? value : undefined;
+}
 
 export interface PreviewDataInput {
   revenueCsv: string;

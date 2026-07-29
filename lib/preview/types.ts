@@ -63,3 +63,52 @@ export interface PreviewDataDto {
   lastUpdatedAt: string;
   fixtureNotice: "測試樣本";
 }
+
+export interface MarketSourceRef {
+  label: string;
+  url?: string;
+  asOf: string;
+}
+
+export interface EmergingMarketRow {
+  companyId: string;
+  code: string;
+  name: string;
+  industry?: string;
+  closePrice?: number;
+  change?: number;
+  volume?: number;
+  turnover?: number;
+  priceLabel: "收盤價";
+  asOf: string;
+  source: MarketSourceRef;
+}
+
+export interface MarketBondRow {
+  bondId: string;
+  code?: string;
+  name: string;
+  issueDate: string;
+  maturityDate: string;
+  couponRate?: number;
+  conversionPrice?: number;
+  conversionStartDate?: string;
+  conversionEndDate?: string;
+  issueAmount?: number;
+  outstandingAmount?: number;
+  closePrice?: number;
+  conversionValue?: number;
+  premiumRate?: number;
+  asOf: string;
+  source: MarketSourceRef;
+}
+
+export interface IpoScheduleRow {
+  id: string;
+  companyCode: string;
+  companyName: string;
+  eventType: string;
+  eventDate: string;
+  status?: string;
+  source: MarketSourceRef;
+}
