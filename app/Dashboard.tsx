@@ -116,6 +116,7 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
   const [stage, setStage] = useState("all");
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const loadTracker = useCallback(async () => {
     try {
@@ -162,7 +163,7 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
   }, [search, stage, tracker.radar]);
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell dashboard-theme-${theme}`}>
       <aside className="side-rail">
         <Link className="brand-block" href="/market">
           <span><strong>興債觀測網</strong><span>PUBLIC DATA OBSERVER</span></span>
@@ -192,6 +193,7 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
           <div className="mobile-brand"><b>興債觀測網</b><span>興櫃公司、可轉債與上市櫃進度資訊</span></div>
           <div className="breadcrumb"><span>興債觀測網</span><b>{NAV_ITEMS.find(item => item.tab === tab)?.title}</b></div>
           <div className="command-actions">
+            <button className="theme-action" type="button" onClick={() => setTheme(current => current === "light" ? "dark" : "light")} aria-label={theme === "light" ? "切換深色版" : "切換淺色版"}>{theme === "light" ? "深色" : "淺色"}</button>
             <button className="icon-action" type="button" onClick={() => { setLoading(true); setError(""); void loadTracker(); }} aria-label="重新整理公開進度" title="重新整理公開進度">↻</button>
           </div>
         </header>

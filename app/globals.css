@@ -55,6 +55,8 @@ button { cursor: pointer; }
 .breadcrumb span::after { margin-left: 9px; color: #a5afb8; content: "/"; }
 .breadcrumb b { color: var(--ink-2); }
 .command-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.theme-action { min-height: 34px; padding: 0 11px; color: var(--ink-2); background: var(--paper); border: 1px solid var(--line-strong); border-radius: 5px; font-size: 10px; font-weight: 750; }
+.theme-action:hover { color: var(--teal); border-color: var(--teal); }
 .icon-action, .icon-button { display: grid; width: 34px; height: 34px; place-items: center; color: var(--ink-2); background: #fff; border: 1px solid var(--line-strong); border-radius: 5px; font-size: 18px; line-height: 1; }
 .icon-action:hover { color: var(--teal); border-color: var(--teal); }
 .content { width: min(1540px, 100%); margin: 0 auto; padding: 24px 26px 42px; }
@@ -368,6 +370,77 @@ button { cursor: pointer; }
 .market-workbench-head h2 { margin: 6px 0; color: var(--ink); font-size: 25px; }
 .market-workbench-head p { margin: 0; color: var(--muted); font-size: 12px; }
 .market-workbench-head > b { padding: 8px 10px; color: var(--ink); background: var(--blue-soft); font-size: 11px; white-space: nowrap; }
+
+.dashboard-theme-dark {
+  --ink: #FFF8ED;
+  --ink-2: #F1E5D8;
+  --muted: #D0C4B8;
+  --line: #61584F;
+  --line-strong: #7C6E61;
+  --canvas: #242322;
+  --paper: #302E2B;
+  --nav: #1A1918;
+  --nav-soft: #3B3733;
+  --teal: #D99158;
+  --teal-soft: #4A3428;
+  --blue: #FFCB9C;
+  --blue-soft: #4A3428;
+  --amber: #D99158;
+  --amber-soft: #4A3428;
+  --purple: #D99158;
+  --purple-soft: #4A3428;
+  color: var(--ink);
+  background: var(--canvas);
+}
+
+.dashboard-theme-dark .command-bar,
+.dashboard-theme-dark .page-intro,
+.dashboard-theme-dark .filter-surface,
+.dashboard-theme-dark .table-surface,
+.dashboard-theme-dark .market-workbench-head,
+.dashboard-theme-dark .market-summary,
+.dashboard-theme-dark .market-unavailable,
+.dashboard-theme-dark .ipo-stage-overview,
+.dashboard-theme-dark .upcoming-events,
+.dashboard-theme-dark .site-footer,
+.dashboard-theme-dark .drawer {
+  color: var(--ink);
+  background: var(--paper);
+  border-color: var(--line);
+}
+
+.dashboard-theme-dark .command-bar { background: rgba(26,25,24,.97); }
+.dashboard-theme-dark .breadcrumb span,
+.dashboard-theme-dark .page-intro p,
+.dashboard-theme-dark .market-workbench-head p,
+.dashboard-theme-dark .table-title small,
+.dashboard-theme-dark .site-footer small,
+.dashboard-theme-dark .market-summary span,
+.dashboard-theme-dark .market-unavailable p,
+.dashboard-theme-dark .filter-grid label > span { color: var(--muted); }
+.dashboard-theme-dark .breadcrumb b,
+.dashboard-theme-dark .page-intro h1,
+.dashboard-theme-dark .market-workbench-head h2,
+.dashboard-theme-dark .table-title h2,
+.dashboard-theme-dark .ipo-stage-head b,
+.dashboard-theme-dark .ipo-upcoming-item span { color: var(--ink); }
+.dashboard-theme-dark .icon-action,
+.dashboard-theme-dark .theme-action,
+.dashboard-theme-dark .filter-grid input,
+.dashboard-theme-dark .filter-grid select { color: var(--ink-2); background: var(--paper); border-color: var(--line-strong); }
+.dashboard-theme-dark .data-table th,
+.dashboard-theme-dark .ipo-stage-head { color: var(--ink-2); background: #433A34; border-color: var(--line); }
+.dashboard-theme-dark .data-table td,
+.dashboard-theme-dark .ipo-company-row,
+.dashboard-theme-dark .market-summary > div { color: var(--ink); background: var(--paper); border-color: var(--line); }
+.dashboard-theme-dark .data-table tbody tr:nth-child(even) td { background: #292724; }
+.dashboard-theme-dark .market-state,
+.dashboard-theme-dark .market-workbench-head > b,
+.dashboard-theme-dark .status-chip.normal { color: var(--ink); background: var(--teal-soft); }
+.dashboard-theme-dark .ipo-stage-empty,
+.dashboard-theme-dark .empty,
+.dashboard-theme-dark .profile-section-title small { color: var(--muted); }
+.dashboard-theme-dark .site-footer { border-top-color: var(--line); }
 .market-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .market-summary > div { padding: 15px 17px; background: var(--paper); border: 1px solid var(--line); }
 .market-summary span { display: block; color: var(--muted); font-size: 10px; }
