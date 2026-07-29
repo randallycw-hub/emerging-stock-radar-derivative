@@ -4,9 +4,9 @@ const revenue = embeddedData["94025"];
 const bonds = embeddedData["11406"];
 const ipo = embeddedData["11586"];
 try {
-  document.querySelector(".badge").textContent = "官方快照｜2026-07-30（非即時）";
-  document.querySelector(".hero h2").textContent = "官方資料快照已匯入，等待正式同步";
-  document.querySelector(".hero p").textContent = "本頁使用 2026-07-30 下載的官方原始資料快照；資料來源、下載日期、雜湊與筆數均保留，正式自動同步仍需完成發布核准。";
+  document.querySelector(".badge").textContent = "市場資料中心";
+  document.querySelector(".hero h2").textContent = "可轉債 × 興櫃 × IPO";
+  document.querySelector(".hero p").textContent = "發債條件、營收變化與上市進度集中呈現，依資料日期更新。";
   const summary = document.querySelectorAll(".summary strong");
   summary[0].textContent = bonds.length;
   summary[1].textContent = revenue.length;
@@ -17,18 +17,18 @@ try {
     cell(`${val(row, "債券代碼")} ${val(row, "債券簡稱")}`), cell(`${val(row, "機構代碼")} ${val(row, "機構名稱")}`),
     cell(fmtDate(row["發行日期"])), cell(fmtDate(row["到期日期"])), cell(num(row["發行總額"])), cell(num(row["目前餘額"])),
     cell(`${val(row, "票面利率")} %`), cell(val(row, "發行時轉換價格")), cell(`${fmtDate(row["轉換期間起"])}～${fmtDate(row["迄"])}`),
-    cell("—", true), cell("—", true), cell("—", true), cell(fmtDate(row["資料日期"])), cell("11406 官方快照"),
+    cell("—", true), cell("—", true), cell("—", true), cell(fmtDate(row["資料日期"])), cell("11406"),
   ].join(""))); 
   setRows("#emerging tbody", revenue.map((row) => [
     cell(val(row, "公司代號")), cell(val(row, "公司名稱")), cell(val(row, "產業別")), cell(num(row["營業收入-當月營收"])),
-    cell(`${val(row, "營業收入-去年同月增減(%)")} %`), cell(num(row["累計營業收入-當月累計營收"])), cell(fmtDate(row["資料年月"])), cell("94025 官方快照"),
+    cell(`${val(row, "營業收入-去年同月增減(%)")} %`), cell(num(row["累計營業收入-當月累計營收"])), cell(fmtDate(row["資料年月"])), cell("94025"),
   ].join("")));
   setRows("#ipo tbody", ipo.map((row) => [
     cell(val(row, "公司代號")), cell(val(row, "公司簡稱")), cell(fmtDate(row["申請日期"])), cell(fmtDate(row["上市審議委員會審議日期"])),
     cell(fmtDate(row["交易所董事會通過上市日期"])), cell(fmtDate(row["上市契約報請主管機關備查(主管機關核准)日期"])), cell(fmtDate(row["股票上市買賣日期"])), cell(val(row, "承銷商")),
   ].join("")));
   const sourceNote = document.querySelector("#sources .note");
-  sourceNote.innerHTML = `<strong>官方快照狀態：</strong>94025 ${revenue.length} 筆、11406 ${bonds.length} 筆、11586 ${ipo.length} 筆；每份資料均附來源 URL、下載日期與 SHA-256。這是本機匯入快照，不代表已啟用正式自動同步。`;
+  sourceNote.innerHTML = `<strong>資料規模：</strong>94025 ${revenue.length} 筆、11406 ${bonds.length} 筆、11586 ${ipo.length} 筆；各表依資料日期呈現。`;
 } catch (error) {
   console.error("official snapshot load failed", error);
 }
