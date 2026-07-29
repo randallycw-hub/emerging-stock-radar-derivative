@@ -33,12 +33,13 @@ export default async function BondsPreviewPage() {
         <div className="preview-panel-head">
           <div>
             <h2>發行契約與餘額</h2>
-            <p>金額沿用 parser 正規化結果，日期統一為 ISO 格式。</p>
+            <p>寬版合約台：向右滑動即可查看完整發債條件；金額沿用 parser 正規化結果，日期統一為 ISO 格式。</p>
           </div>
           <PreviewStatusBadge>資料日期 {source.officialDataDate}</PreviewStatusBadge>
         </div>
 
         <div className="preview-table-region">
+          <div className="preview-table-hint" role="note">桌機可直接檢視全部欄位；窄螢幕請左右滑動資料表。</div>
           <div className="preview-table-scroll">
             <table className="preview-table preview-bond-ledger-table">
               <thead>

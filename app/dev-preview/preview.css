@@ -791,7 +791,17 @@
 }
 
 .preview-bond-ledger-table {
-  min-width: 1450px;
+  min-width: 1760px;
+  table-layout: auto;
+}
+
+.preview-table-hint {
+  padding: 9px 14px;
+  color: var(--preview-teal-dark);
+  background: #f2f7f5;
+  border-bottom: 1px solid var(--preview-line);
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .preview-bond-ledger-table th,
@@ -1145,13 +1155,11 @@
   }
 
   .preview-table-region {
-    display: none;
+    display: block;
   }
 
   .preview-card-list {
-    display: grid;
-    gap: 12px;
-    padding: 12px;
+    display: none;
   }
 
   .preview-data-grid {
