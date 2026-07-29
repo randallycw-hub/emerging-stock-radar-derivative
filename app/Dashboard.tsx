@@ -102,6 +102,8 @@ type BondRecord = {
   officialDataDate?: string;
 };
 
+// 審計欄位契約仍保留：官方資料日期、官方來源；介面文案改用「資料日期／資料來源」。
+
 const EMPTY_TRACKER: TrackerPayload = {
   generatedAt: "",
   counts: {},
@@ -273,7 +275,7 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
                 <Link href="/privacy">隱私權政策</Link>
               </nav>
             </div>
-            <small>資料來源：臺灣證券交易所、證券櫃檯買賣中心及公開資訊觀測站等官方公開資料。各資料頁應以其標示的來源及更新時間為準。</small>
+            <small>資料來源：臺灣證券交易所、證券櫃檯買賣中心及公開資訊觀測站等公開資料。各資料頁應以其標示的來源及更新時間為準。</small>
           </footer>
         </div>
       </main>
@@ -319,18 +321,18 @@ function BondView() {
   const fields = [
     ["發行條件", "待正式快照", "發行日、到期日、發行總額與票面利率"],
     ["轉換權利", "待正式快照", "初始轉換價與可轉換期間"],
-    ["賣回條件", "待正式快照", "官方公告的賣回日期與價格條款"],
-    ["餘額異動", "待正式快照", "餘額異動日期與官方原因"],
+    ["賣回條件", "待正式快照", "公告的賣回日期與價格條款"],
+    ["餘額異動", "待正式快照", "餘額異動日期與公告原因"],
     ["事件與來源", "來源驗證中", "掛牌、契約異動與原始公告連結"],
   ];
   return (
     <section className="bond-status-workbench" aria-labelledby="bond-title">
-      <div className="bond-status-hero"><div><span>CONVERTIBLE BOND CONTRACTS</span><h2 id="bond-title">可轉債契約資料</h2><p>正式版只讀取通過發布門檻的官方快照；不使用開發 fixture，也不把未核准市場資料混入契約欄位。</p></div><strong>{state === "loading" ? "正在查詢發布快照" : state === "published" ? `已發布 ${records.length} 筆` : "正式資料尚未發布"}</strong></div>
-      {state === "published" && <div className="table-surface bond-table-surface"><div className="table-title"><div><span>OFFICIAL CONTRACT SNAPSHOT</span><h2>發行條件總表</h2></div><small>發布時間：{publishedAt || "官方未提供"}</small></div><div className="bond-filter-row"><label><span>搜尋債券或發行人</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="代碼、名稱、公司" /></label><strong>{visibleRecords.length} / {records.length} 筆</strong></div><div className="table-wrap"><table className="data-table bond-contract-table"><thead><tr><th>債券代碼／名稱</th><th>發行人</th><th>發行日</th><th>到期日</th><th>發行總額</th><th>目前餘額</th><th>票面利率</th><th>初始轉換價</th><th>轉換期間</th><th>擔保</th><th>官方資料日期</th></tr></thead><tbody>{visibleRecords.map((bond, index) => <tr key={`${bond.bondCode || "bond"}-${index}`}><td>{bond.bondCode ? <Link href={`/bonds/${encodeURIComponent(bond.bondCode)}`}>{bond.bondCode}</Link> : <strong>—</strong>}<span className="subtext">{bond.bondName || "官方未提供"}</span></td><td>{bond.issuerCompanyName || "—"}<span className="subtext">{bond.issuerCompanyCode || ""}</span></td><td>{bond.issueDate || "—"}</td><td>{bond.maturityDate || "—"}</td><td>{bond.issueAmount || "—"}</td><td>{bond.currentOutstandingBalance || "—"}</td><td>{bond.couponRate || "—"}</td><td>{bond.initialConversionPrice || "—"}</td><td>{bond.conversionStartDate || "—"}<span className="subtext">{bond.conversionEndDate || ""}</span></td><td>{bond.guaranteeStatus || "—"}</td><td>{bond.officialDataDate || "—"}</td></tr>)}</tbody></table></div></div>}
+      <div className="bond-status-hero"><div><span>CONVERTIBLE BOND CONTRACTS</span><h2 id="bond-title">可轉債契約資料</h2><p>正式版只讀取通過發布門檻的資料快照；不使用開發 fixture，也不把未核准市場資料混入契約欄位。</p></div><strong>{state === "loading" ? "正在查詢發布快照" : state === "published" ? `已發布 ${records.length} 筆` : "正式資料尚未發布"}</strong></div>
+      {state === "published" && <div className="table-surface bond-table-surface"><div className="table-title"><div><span>CONTRACT SNAPSHOT</span><h2>發行條件總表</h2></div><small>發布時間：{publishedAt || "未提供"}</small></div><div className="bond-filter-row"><label><span>搜尋債券或發行人</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="代碼、名稱、公司" /></label><strong>{visibleRecords.length} / {records.length} 筆</strong></div><div className="table-wrap"><table className="data-table bond-contract-table"><thead><tr><th>債券代碼／名稱</th><th>發行人</th><th>發行日</th><th>到期日</th><th>發行總額</th><th>目前餘額</th><th>票面利率</th><th>初始轉換價</th><th>轉換期間</th><th>擔保</th><th>資料日期</th></tr></thead><tbody>{visibleRecords.map((bond, index) => <tr key={`${bond.bondCode || "bond"}-${index}`}><td>{bond.bondCode ? <Link href={`/bonds/${encodeURIComponent(bond.bondCode)}`}>{bond.bondCode}</Link> : <strong>—</strong>}<span className="subtext">{bond.bondName || "未提供名稱"}</span></td><td>{bond.issuerCompanyName || "—"}<span className="subtext">{bond.issuerCompanyCode || ""}</span></td><td>{bond.issueDate || "—"}</td><td>{bond.maturityDate || "—"}</td><td>{bond.issueAmount || "—"}</td><td>{bond.currentOutstandingBalance || "—"}</td><td>{bond.couponRate || "—"}</td><td>{bond.initialConversionPrice || "—"}</td><td>{bond.conversionStartDate || "—"}<span className="subtext">{bond.conversionEndDate || ""}</span></td><td>{bond.guaranteeStatus || "—"}</td><td>{bond.officialDataDate || "—"}</td></tr>)}</tbody></table></div></div>}
       <div className="bond-status-grid" aria-label="可轉債正式資料狀態">
         {fields.map(([title, status, detail]) => <article key={title}><span>{title}</span><strong>{status}</strong><p>{detail}</p></article>)}
       </div>
-      <div className="bond-status-note"><b>資料邊界</b><p>正式頁只會呈現官方發行條件、契約事件與來源資訊；不提供可轉債成交價格、買賣價、折溢價、理論價格或投資建議。</p><small>{state === "published" ? "本頁資料來自已發布的官方快照。" : "目前尚無合格發布快照，頁面會在發布後自動顯示。"}</small></div>
+      <div className="bond-status-note"><b>資料邊界</b><p>正式頁只會呈現發行條件、契約事件與來源資訊；不提供可轉債成交價格、買賣價、折溢價、理論價格或投資建議。</p><small>{state === "published" ? "本頁資料來自已發布的資料快照。" : "目前尚無合格發布快照，頁面會在發布後自動顯示。"}</small></div>
     </section>
   );
 }
@@ -341,12 +343,12 @@ function MarketView({ tracker, loading }: { tracker: TrackerPayload; loading: bo
   const dataStatus = loading ? "載入中" : rows.length ? "可查核" : "尚未提供";
   return (
     <section className="market-workbench" aria-labelledby="market-title">
-      <div className="market-workbench-head"><div><span>OFFICIAL END-OF-DAY MARKET</span><h2 id="market-title" aria-label="興櫃收盤價市場表（實際欄位為官方日均價）">興櫃官方盤後資料</h2><p>只呈現官方日終資料；興櫃核准欄位的價格語意是日均價，不提供買價、賣價或盤中更新。</p></div><b>{tracker.marketSource?.dataDate || "資料日期尚未提供"}</b></div>
+      <div className="market-workbench-head"><div><span>END-OF-DAY MARKET</span><h2 id="market-title" aria-label="興櫃收盤價市場表（實際欄位為日均價）">興櫃盤後資料</h2><p>只呈現日終資料；興櫃欄位的價格語意是日均價，不提供買價、賣價或盤中更新。</p></div><b>{tracker.marketSource?.dataDate || "資料日期尚未提供"}</b></div>
       <div className="market-audit-grid" aria-label="市場資料查核資訊">
-        <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{dataStatus}</strong></div><div><span>資料語意</span><strong>官方日均價</strong></div></div>
-        <div className="market-source-card"><div><span>官方來源</span><strong>興櫃股票當日行情表</strong><small>官方資料日期：{tracker.marketSource?.dataDate || "尚未取得"}</small><small>本站擷取時間：{tracker.marketSource?.fetchedAt || "尚未取得"}</small></div>{officialUrl ? <a href={officialUrl} target="_blank" rel="noreferrer">查看官方資料 ↗</a> : <small className="market-source-pending">來源連結待資料成功取得</small>}</div>
+        <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{dataStatus}</strong></div><div><span>資料語意</span><strong>日均價</strong></div></div>
+        <div className="market-source-card"><div><span>資料來源</span><strong>興櫃股票當日行情表</strong><small>資料日期：{tracker.marketSource?.dataDate || "尚未取得"}</small><small>本站擷取時間：{tracker.marketSource?.fetchedAt || "尚未取得"}</small></div>{officialUrl ? <a href={officialUrl} target="_blank" rel="noreferrer">查看資料來源 ↗</a> : <small className="market-source-pending">來源連結待資料成功取得</small>}</div>
       </div>
-      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>市場</th><th>交易日</th><th>當日均價</th><th>前日均價</th><th>日最高</th><th>日最低</th><th>成交量</th><th>上市櫃進度</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.dailyAveragePrice || "—"}</td><td>{row.previousDailyAveragePrice || "—"}</td><td>{row.dailyHighPrice || "—"}</td><td>{row.dailyLowPrice || "—"}</td><td>{row.transactionVolume || "—"}</td><td>{row.listingApplicationStatus || "—"}<span className="subtext">{row.listingApplicationDate || ""}</span></td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無前日基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>官方盤後資料尚未提供</strong><p>待核准的官方日終來源成功取得並通過完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
+      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>市場</th><th>交易日</th><th>當日均價</th><th>前日均價</th><th>日最高</th><th>日最低</th><th>成交量</th><th>上市櫃進度</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.dailyAveragePrice || "—"}</td><td>{row.previousDailyAveragePrice || "—"}</td><td>{row.dailyHighPrice || "—"}</td><td>{row.dailyLowPrice || "—"}</td><td>{row.transactionVolume || "—"}</td><td>{row.listingApplicationStatus || "—"}<span className="subtext">{row.listingApplicationDate || ""}</span></td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無前日基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>盤後資料尚未提供</strong><p>待資料來源成功取得並通過完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
     </section>
   );
 }
@@ -381,7 +383,7 @@ function RadarView({
   return (
     <>
       <section className="radar-banner">
-        <div className="radar-copy"><span>LISTING PROGRESS</span><h2>上市櫃公開進度</h2><p>依官方申請、審議、核准、競拍與買賣日公告整理；事件標籤不是推薦。</p></div>
+        <div className="radar-copy"><span>LISTING PROGRESS</span><h2>上市櫃公開進度</h2><p>依申請、審議、核准、競拍與買賣日公告整理；事件標籤不是推薦。</p></div>
         <div className="radar-counts">
           <div><span>追蹤公司</span><b>{tracker.counts.total || 0}</b></div>
           <div><span>近期事件</span><b>{tracker.counts.alerts || 0}</b></div>
@@ -399,7 +401,7 @@ function RadarView({
       </section>
 
       <section className="table-surface">
-        <div className="table-title"><div><span>PUBLIC EVENT TABLE</span><h2>公司進度明細</h2></div><small>來源：TWSE、TPEx 官方公開資料 · 更新：{tracker.generatedAt || "等待資料"}</small></div>
+        <div className="table-title"><div><span>PUBLIC EVENT TABLE</span><h2>公司進度明細</h2></div><small>來源：TWSE、TPEx 公開資料 · 更新：{tracker.generatedAt || "等待資料"}</small></div>
         <div className="table-wrap">
           <table className="data-table progress-table">
             <thead><tr><th>階段</th><th>代號／公司</th><th>市場</th><th>目前進度</th><th>主要事件</th><th>事件日期</th><th>分類依據</th></tr></thead>
@@ -418,7 +420,7 @@ function RadarView({
             </tbody>
           </table>
         </div>
-        {!rows.length && <div className="empty">{loading ? "正在整理官方進度資料" : "目前篩選條件沒有資料"}</div>}
+        {!rows.length && <div className="empty">{loading ? "正在整理進度資料" : "目前篩選條件沒有資料"}</div>}
       </section>
     </>
   );
@@ -434,7 +436,7 @@ function IpoView({ tracker, loading, openProfile }: { tracker: TrackerPayload; l
   ];
   return (
     <section className="ipo-stage-overview">
-      <div className="table-title"><div><span>IPO TIMELINE</span><h2>上市櫃申請階段</h2></div><small>來源：TWSE、TPEx 官方公開資料 · 更新：{tracker.generatedAt || "等待資料"}</small></div>
+      <div className="table-title"><div><span>IPO TIMELINE</span><h2>上市櫃申請階段</h2></div><small>來源：TWSE、TPEx 公開資料 · 更新：{tracker.generatedAt || "等待資料"}</small></div>
       <div className="ipo-stage-board">
         {stages.map((stage, index) => {
           const items = tracker.categories[stage.key] || [];
@@ -461,7 +463,7 @@ function IpoView({ tracker, loading, openProfile }: { tracker: TrackerPayload; l
       </section>
 
       <section className="table-surface ipo-detail-surface">
-        <div className="table-title"><div><span>PUBLIC EVENT DETAIL</span><h2>公開事件明細</h2></div><small>依主要事件日排序 · 價格欄位僅保留官方公告狀態</small></div>
+        <div className="table-title"><div><span>PUBLIC EVENT DETAIL</span><h2>公開事件明細</h2></div><small>依主要事件日排序 · 價格欄位僅保留公告狀態</small></div>
         <div className="table-wrap"><table className="data-table ipo-detail-table"><thead><tr><th>代號／公司</th><th>市場</th><th>目前階段</th><th>事件類型</th><th>主要事件日</th><th>距今天</th><th>定價狀態</th><th>暫定承銷價</th><th>實際承銷價</th><th>股票上市／上櫃買賣日</th><th>競拍進度</th><th>分類依據</th></tr></thead><tbody>{tracker.radar.map(row => <tr key={`ipo-${row.market}-${row.code}`}><td><button className="company-button" type="button" onClick={() => openProfile(row.code)}>{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.market}</td><td>{row.stage}</td><td>{row.mainExit || row.auctionNext || "公開事件"}</td><td>{row.exitDate || row.listingDate || "待公告"}</td><td>{formatEventDays(row.exitDays)}</td><td>依公告</td><td>未公告</td><td>未公告</td><td>{row.listingDate || "待公告"}</td><td>{row.auctionNext || "未公告"}</td><td className="reason-cell">{row.reason || row.note || "依公開日期分類"}</td></tr>)}</tbody></table></div>
         {!tracker.radar.length && <div className="empty">目前沒有可確認的公開事件時程</div>}
       </section>
@@ -483,18 +485,18 @@ function CompanyDrawer({ profile, loading, onClose }: { profile: CompanyProfile 
           {loading && <div className="profile-loading"><span /><span /><span /><span /></div>}
           {profile && (
             <section className="profile-section">
-              <div className="profile-section-title"><span>01</span><h3>官方公司基本資料</h3><small>查核：{formatTaipeiDateTime(profile.checkedAt)}</small></div>
+              <div className="profile-section-title"><span>01</span><h3>公司基本資料</h3><small>查核：{formatTaipeiDateTime(profile.checkedAt)}</small></div>
               <dl className="profile-grid">
                 <dt>公司全名</dt><dd>{profile.fullName || profile.name}</dd>
                 <dt>產業</dt><dd>{profile.industry}</dd>
                 <dt>主要業務</dt><dd>{profile.mainBusiness}</dd>
-                <dt>董事長</dt><dd>{profile.chairman || "官方資料未提供"}</dd>
-                <dt>資本額</dt><dd>{profile.capital ? `${profile.capital.toLocaleString("zh-TW")} 元` : "官方資料未提供"}</dd>
-                <dt>登錄日期</dt><dd>{profile.listedDate || "官方資料未提供"}</dd>
+                <dt>董事長</dt><dd>{profile.chairman || "資料未提供"}</dd>
+                <dt>資本額</dt><dd>{profile.capital ? `${profile.capital.toLocaleString("zh-TW")} 元` : "資料未提供"}</dd>
+                <dt>登錄日期</dt><dd>{profile.listedDate || "資料未提供"}</dd>
               </dl>
               <div className="concept-list">{profile.concepts.map(label => <span className="tag" key={label}>{label}</span>)}</div>
               <div className="actions">
-                {website ? <a className="link-button" href={website} target="_blank" rel="noopener noreferrer">公司官網 <span>↗</span></a> : <span className="link-unavailable">官方資料未登錄公司官網</span>}
+                {website ? <a className="link-button" href={website} target="_blank" rel="noopener noreferrer">公司網站 <span>↗</span></a> : <span className="link-unavailable">尚未登錄公司網站</span>}
                 <a className="link-button primary" href={profile.sourceUrl} target="_blank" rel="noopener noreferrer">櫃買中心資料 <span>↗</span></a>
               </div>
             </section>

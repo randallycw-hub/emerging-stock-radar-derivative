@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const DATASETS = [
-  { label: "興櫃公司", english: "EMERGING COMPANIES", description: "查看官方公司資料範圍", href: "/market", accent: "teal" },
+  { label: "興櫃公司", english: "EMERGING COMPANIES", description: "查看公司資料範圍", href: "/market", accent: "teal" },
   { label: "可轉債", english: "CONVERTIBLE BONDS", description: "查看債券事件與契約欄位", href: "/bonds", accent: "blue" },
   { label: "上市櫃進度", english: "LISTING PROGRESS", description: "查看送件與公開時程", href: "/ipo", accent: "amber" },
 ] as const;
@@ -27,7 +27,7 @@ export default function Homepage() {
         <div className="public-home-hero-copy">
           <p className="public-home-kicker">PUBLIC SNAPSHOT / READ-ONLY</p>
           <h1 id="public-home-title">把公開資料，整理成<br /><em>可以核對的脈絡。</em></h1>
-          <p className="public-home-lede">興櫃公司、可轉債與上市櫃進度，從官方來源逐批驗證，只有完整發布的資料才會進入公開首頁。</p>
+          <p className="public-home-lede">興櫃公司、可轉債與上市櫃進度，從登錄來源逐批驗證，只有完整發布的資料才會進入公開首頁。</p>
           <div className="public-home-actions">
             <Link className="public-home-button primary" href="/methodology">查看資料方法</Link>
             <Link className="public-home-button secondary" href="/radar">瀏覽研究頁</Link>
@@ -61,7 +61,7 @@ export default function Homepage() {
       <section className="public-home-source-note" aria-labelledby="source-note-title">
         <div><p className="public-home-kicker">SOURCE TRANSPARENCY</p><h2 id="source-note-title">每個狀態，都能回到來源。</h2><p>目前資料同步正在處理中；在完整快照完成前，網站不會用片段或推測內容補位。</p></div>
         <div className="public-home-source-list">
-          <div><span className="source-status pending" aria-hidden="true" /><strong>官方端點</strong><small>已登錄、待最新批次驗證</small></div>
+          <div><span className="source-status pending" aria-hidden="true" /><strong>資料端點</strong><small>已登錄、待最新批次驗證</small></div>
           <div><span className="source-status pending" aria-hidden="true" /><strong>發布快照</strong><small>等待三類資料同批完成</small></div>
           <Link href="/methodology">查看來源與驗證方法 <span aria-hidden="true">→</span></Link>
         </div>
@@ -70,7 +70,7 @@ export default function Homepage() {
       <section className="public-home-principles" aria-labelledby="principles-title">
         <div><p className="public-home-kicker">WHY THIS SITE</p><h2 id="principles-title">先確認，再解讀。</h2><p>每一筆公開資料都保留來源、時間與發布批次。沒有完整快照，就不把片段包裝成結論。</p></div>
         <div className="public-home-principle-list">
-          <article><span>01</span><div><strong>官方來源</strong><p>只使用經核准的官方資料端點。</p></div></article>
+          <article><span>01</span><div><strong>來源可查</strong><p>只使用經核准的資料端點。</p></div></article>
           <article><span>02</span><div><strong>版本一致</strong><p>三類資料同批完成才更新公開版本。</p></div></article>
           <article><span>03</span><div><strong>可回溯</strong><p>保留 snapshot、時間與資料來源脈絡。</p></div></article>
         </div>
