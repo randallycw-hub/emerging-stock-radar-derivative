@@ -19,18 +19,18 @@
 }
 
 .preview-root[data-preview-theme="b"] {
-  --preview-navy: #111314;
-  --preview-navy-soft: #1B1E20;
-  --preview-teal: #C88452;
-  --preview-teal-dark: #F0B47D;
-  --preview-teal-soft: #38271E;
-  --preview-background: #101213;
-  --preview-paper: #191C1D;
-  --preview-ink: #F4F0E8;
-  --preview-muted: #AAA39B;
-  --preview-line: #35383A;
-  --preview-amber: #C88452;
-  --preview-danger: #F0B47D;
+  --preview-navy: #1A1918;
+  --preview-navy-soft: #3B3733;
+  --preview-teal: #D99158;
+  --preview-teal-dark: #FFCB9C;
+  --preview-teal-soft: #4A3428;
+  --preview-background: #242322;
+  --preview-paper: #302E2B;
+  --preview-ink: #FFF8ED;
+  --preview-muted: #D0C4B8;
+  --preview-line: #61584F;
+  --preview-amber: #D99158;
+  --preview-danger: #FFCB9C;
 }
 
 .preview-root[data-preview-theme="a"] {
@@ -72,7 +72,7 @@
 
 .preview-root[data-preview-theme="b"] .preview-table th {
   color: var(--preview-teal-dark);
-  background: #19302F;
+  background: #433A34;
   border-color: var(--preview-line);
 }
 
@@ -84,7 +84,7 @@
 
 .preview-root[data-preview-theme="b"] .preview-table tbody tr:nth-child(even) td,
 .preview-root[data-preview-theme="b"] .preview-data-field {
-  background: #102020;
+  background: #292724;
   border-color: var(--preview-line);
 }
 
@@ -105,7 +105,7 @@
 
 .preview-root[data-preview-theme="b"] .preview-bond-ledger-table th:first-child,
 .preview-root[data-preview-theme="b"] .preview-bond-ledger-table td:first-child {
-  background: #19302F;
+  background: #433A34;
   box-shadow: 1px 0 0 var(--preview-teal);
 }
 

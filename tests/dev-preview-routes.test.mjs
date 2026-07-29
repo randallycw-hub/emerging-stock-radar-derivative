@@ -267,18 +267,16 @@ test("preview styles keep the bond ledger horizontally scrollable without body o
 test("Theme B uses the exact approved tokens while Theme A retains its original palette", async () => {
   const css = (await read("app/dev-preview/preview.css")).toLowerCase();
   for (const token of [
-    "#111314",
-    "#1b1e20",
-    "#c88452",
-    "#f0b47d",
-    "#101213",
-    "#191c1d",
-    "#f4f0e8",
-    "#aaa39b",
-    "#35383a",
-    "#38271e",
-    "#c88452",
-    "#f0b47d",
+    "#1a1918",
+    "#3b3733",
+    "#d99158",
+    "#ffcb9c",
+    "#242322",
+    "#302e2b",
+    "#fff8ed",
+    "#d0c4b8",
+    "#61584f",
+    "#4a3428",
   ]) {
     assert.equal(css.includes(token), true, `missing Theme B token ${token}`);
   }
