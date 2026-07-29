@@ -84,6 +84,24 @@ type CompanyProfile = {
   checkedAt: string;
 };
 
+type BondRecord = {
+  bondCode?: string;
+  bondName?: string;
+  issuerCompanyCode?: string;
+  issuerCompanyName?: string;
+  issueDate?: string;
+  listingDate?: string;
+  maturityDate?: string;
+  issueAmount?: string;
+  currentOutstandingBalance?: string;
+  couponRate?: string;
+  guaranteeStatus?: string;
+  initialConversionPrice?: string;
+  conversionStartDate?: string;
+  conversionEndDate?: string;
+  officialDataDate?: string;
+};
+
 const EMPTY_TRACKER: TrackerPayload = {
   generatedAt: "",
   counts: {},
@@ -275,6 +293,23 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
 }
 
 function BondView() {
+  const [records, setRecords] = useState<BondRecord[]>([]);
+  const [state, setState] = useState<"loading" | "published" | "unavailable">("loading");
+  const [publishedAt, setPublishedAt] = useState("");
+  useEffect(() => {
+    let active = true;
+    fetch("/api/public-snapshot", { cache: "no-store" })
+      .then(response => response.json() as Promise<{ status?: string; publishedAt?: string; datasets?: { "11406"?: { records?: Array<{ value?: BondRecord }> } } }>)
+      .then(payload => {
+        if (!active) return;
+        const values = payload.datasets?.["11406"]?.records?.map(record => record.value || {}).filter(record => Object.keys(record).length) || [];
+        setRecords(values);
+        setPublishedAt(payload.publishedAt || "");
+        setState(payload.status === "published" && values.length ? "published" : "unavailable");
+      })
+      .catch(() => { if (active) setState("unavailable"); });
+    return () => { active = false; };
+  }, []);
   const fields = [
     ["發行條件", "待正式快照", "發行日、到期日、發行總額與票面利率"],
     ["轉換權利", "待正式快照", "初始轉換價與可轉換期間"],
@@ -284,11 +319,12 @@ function BondView() {
   ];
   return (
     <section className="bond-status-workbench" aria-labelledby="bond-title">
-      <div className="bond-status-hero"><div><span>CONVERTIBLE BOND CONTRACTS</span><h2 id="bond-title">可轉債契約資料</h2><p>正式版先建立完整查核結構；來源驗證與發布快照完成前，不顯示測試樣本或未核准數字。</p></div><strong>正式資料尚未發布</strong></div>
+      <div className="bond-status-hero"><div><span>CONVERTIBLE BOND CONTRACTS</span><h2 id="bond-title">可轉債契約資料</h2><p>正式版只讀取通過發布門檻的官方快照；不使用開發 fixture，也不把未核准市場資料混入契約欄位。</p></div><strong>{state === "loading" ? "正在查詢發布快照" : state === "published" ? `已發布 ${records.length} 筆` : "正式資料尚未發布"}</strong></div>
+      {state === "published" && <div className="table-surface bond-table-surface"><div className="table-title"><div><span>OFFICIAL CONTRACT SNAPSHOT</span><h2>發行條件總表</h2></div><small>發布時間：{publishedAt || "官方未提供"}</small></div><div className="table-wrap"><table className="data-table bond-contract-table"><thead><tr><th>債券代碼／名稱</th><th>發行人</th><th>發行日</th><th>到期日</th><th>發行總額</th><th>目前餘額</th><th>票面利率</th><th>初始轉換價</th><th>轉換期間</th><th>擔保</th><th>官方資料日期</th></tr></thead><tbody>{records.map((bond, index) => <tr key={`${bond.bondCode || "bond"}-${index}`}><td><strong>{bond.bondCode || "—"}</strong><span className="subtext">{bond.bondName || "官方未提供"}</span></td><td>{bond.issuerCompanyName || "—"}<span className="subtext">{bond.issuerCompanyCode || ""}</span></td><td>{bond.issueDate || "—"}</td><td>{bond.maturityDate || "—"}</td><td>{bond.issueAmount || "—"}</td><td>{bond.currentOutstandingBalance || "—"}</td><td>{bond.couponRate || "—"}</td><td>{bond.initialConversionPrice || "—"}</td><td>{bond.conversionStartDate || "—"}<span className="subtext">{bond.conversionEndDate || ""}</span></td><td>{bond.guaranteeStatus || "—"}</td><td>{bond.officialDataDate || "—"}</td></tr>)}</tbody></table></div></div>}
       <div className="bond-status-grid" aria-label="可轉債正式資料狀態">
         {fields.map(([title, status, detail]) => <article key={title}><span>{title}</span><strong>{status}</strong><p>{detail}</p></article>)}
       </div>
-      <div className="bond-status-note"><b>資料邊界</b><p>正式頁只會呈現官方發行條件、契約事件與來源資訊；不提供可轉債成交價格、買賣價、折溢價、理論價格或投資建議。</p><small>目前可查閱的條款版面位於開發預覽，正式版資料以核准快照為準。</small></div>
+      <div className="bond-status-note"><b>資料邊界</b><p>正式頁只會呈現官方發行條件、契約事件與來源資訊；不提供可轉債成交價格、買賣價、折溢價、理論價格或投資建議。</p><small>{state === "published" ? "本頁資料來自已發布的官方快照。" : "目前尚無合格發布快照，頁面會在發布後自動顯示。"}</small></div>
     </section>
   );
 }

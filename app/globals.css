@@ -480,6 +480,9 @@ button { cursor: pointer; }
 .bond-status-note b { color: var(--ink); font-size: 13px; }
 .bond-status-note p { margin: 8px 0; color: var(--ink-2); font-size: 12px; line-height: 1.8; }
 .bond-status-note small { color: var(--muted); font-size: 10px; }
+.bond-table-surface { overflow: hidden; }
+.bond-contract-table { min-width: 1280px; }
+.bond-contract-table th, .bond-contract-table td { white-space: nowrap; }
 @media (max-width: 680px) {
   .market-workbench-head { display: block; }
   .market-workbench-head > b { display: inline-block; margin-top: 13px; }
