@@ -1130,6 +1130,16 @@
   background: var(--preview-teal-dark);
 }
 
+.preview-root[data-preview-theme="a"] .preview-source > a {
+  color: #FFFDF8;
+  background: #7A3E20;
+}
+
+.preview-root[data-preview-theme="a"] .preview-source > a:hover {
+  color: #FFFDF8;
+  background: #5A2A13;
+}
+
 .preview-footer {
   display: flex;
   width: min(1640px, calc(100% - 48px));
