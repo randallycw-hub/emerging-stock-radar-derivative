@@ -245,7 +245,7 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
           </section>
 
           {error && <div className="error-banner" role="alert">{error}</div>}
-          {tab === "market" && <MarketView tracker={tracker} loading={loading} />}
+          {tab === "market" && <MarketView tracker={tracker} loading={loading} openProfile={openProfile} />}
           {tab === "bonds" && <BondView />}
           {tab === "radar" && (
             <RadarView
@@ -337,7 +337,7 @@ function BondView() {
   );
 }
 
-function MarketView({ tracker, loading }: { tracker: TrackerPayload; loading: boolean }) {
+function MarketView({ tracker, loading, openProfile }: { tracker: TrackerPayload; loading: boolean; openProfile: (code: string) => void }) {
   const rows = tracker.marketRows ?? [];
   const officialUrl = tracker.marketSource?.officialUrl || "";
   const dataStatus = loading ? "載入中" : rows.length ? "可查核" : "尚未提供";
@@ -348,7 +348,7 @@ function MarketView({ tracker, loading }: { tracker: TrackerPayload; loading: bo
         <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{dataStatus}</strong></div><div><span>資料語意</span><strong>日均價</strong></div></div>
         <div className="market-source-card"><div><span>資料來源</span><strong>興櫃股票當日行情表</strong><small>資料日期：{tracker.marketSource?.dataDate || "尚未取得"}</small><small>本站擷取時間：{tracker.marketSource?.fetchedAt || "尚未取得"}</small></div>{officialUrl ? <a href={officialUrl} target="_blank" rel="noreferrer">查看資料來源 ↗</a> : <small className="market-source-pending">來源連結待資料成功取得</small>}</div>
       </div>
-      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>市場</th><th>交易日</th><th>當日均價</th><th>前日均價</th><th>日最高</th><th>日最低</th><th>成交量</th><th>上市櫃進度</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.dailyAveragePrice || "—"}</td><td>{row.previousDailyAveragePrice || "—"}</td><td>{row.dailyHighPrice || "—"}</td><td>{row.dailyLowPrice || "—"}</td><td>{row.transactionVolume || "—"}</td><td>{row.listingApplicationStatus || "—"}<span className="subtext">{row.listingApplicationDate || ""}</span></td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無前日基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>盤後資料尚未提供</strong><p>待資料來源成功取得並通過完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
+      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>市場</th><th>交易日</th><th>當日均價</th><th>前日均價</th><th>日最高</th><th>日最低</th><th>成交量</th><th>上市櫃進度</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button" onClick={() => openProfile(row.code)} aria-label={`查看${row.code} ${row.name}公司資料`}>{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.dailyAveragePrice || "—"}</td><td>{row.previousDailyAveragePrice || "—"}</td><td>{row.dailyHighPrice || "—"}</td><td>{row.dailyLowPrice || "—"}</td><td>{row.transactionVolume || "—"}</td><td>{row.listingApplicationStatus || "—"}<span className="subtext">{row.listingApplicationDate || ""}</span></td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無前日基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>盤後資料尚未提供</strong><p>待資料來源成功取得並通過完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
     </section>
   );
 }
