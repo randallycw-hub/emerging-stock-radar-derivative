@@ -95,6 +95,14 @@
   color: var(--preview-teal-dark);
 }
 
+.preview-root[data-preview-theme="b"] .preview-page-title h1 {
+  color: var(--preview-ink);
+}
+
+.preview-root[data-preview-theme="b"] .preview-page-title p {
+  color: var(--preview-muted);
+}
+
 .preview-root[data-preview-theme="b"] .preview-status,
 .preview-root[data-preview-theme="b"] .preview-status-amber,
 .preview-root[data-preview-theme="b"] .preview-status-teal {
