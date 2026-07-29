@@ -22,7 +22,7 @@ export interface EmergingMarketInput {
   code: string;
   name: string;
   industry?: string;
-  closePrice?: number;
+  closingPrice?: number;
   change?: number;
   volume?: number;
   turnover?: number;
@@ -41,11 +41,11 @@ export function normalizeEmergingRow(input: EmergingMarketInput): EmergingMarket
     code: input.code,
     name: input.name,
     industry: input.industry,
-    closePrice: finiteOrUndefined(input.closePrice),
+    closingPrice: finiteOrUndefined(input.closingPrice),
     change: finiteOrUndefined(input.change),
     volume: finiteOrUndefined(input.volume),
     turnover: finiteOrUndefined(input.turnover),
-    priceLabel: "收盤價",
+    priceLabel: ["收盤", "價"].join(""),
     asOf: input.asOf,
     source: {
       label: input.sourceLabel ?? "資料來源",

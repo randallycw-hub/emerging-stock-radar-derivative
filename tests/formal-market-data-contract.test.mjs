@@ -6,10 +6,10 @@ test("興櫃列只接受收盤價並保留資料日期", async () => {
   const row = normalizeEmergingRow({
     code: "6543",
     name: "測試公司",
-    closePrice: 42.5,
+    closingPrice: 42.5,
     asOf: "2026-07-29",
   });
-  assert.equal(row.closePrice, 42.5);
+  assert.equal(row.closingPrice, 42.5);
   assert.equal(row.priceLabel, "收盤價");
   assert.equal(row.asOf, "2026-07-29");
   assert.equal("realtimePrice" in row, false);

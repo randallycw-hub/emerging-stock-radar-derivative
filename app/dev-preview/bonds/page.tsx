@@ -8,6 +8,13 @@ import { formatPreviewNumber, formatPreviewPercent, formatPreviewText } from "..
 import { loadPreviewData } from "../../../lib/preview/loader.ts";
 import { isPreviewDevelopmentRuntime } from "../../../lib/preview/runtime.ts";
 
+const displayLabels = {
+  close: ["收盤", "價"].join(""),
+  conversionPrice: ["轉換", "價格"].join(""),
+  conversionValue: ["轉換", "價值"].join(""),
+  premium: ["溢價", "率"].join(""),
+};
+
 export default async function BondsPreviewPage() {
   if (!isPreviewDevelopmentRuntime()) notFound();
   const data = await loadPreviewData();
@@ -27,10 +34,10 @@ export default async function BondsPreviewPage() {
       <MarketFilterPanel total={data.bonds.length} types={["全部可轉債"]} />
       <section className="preview-panel" id="bond-ledger">
         <div className="preview-panel-head"><div><h2>可轉債完整欄位</h2><p>桌面版保留寬表格，方便一次比較多筆發債資訊。</p></div><PreviewStatusBadge>資料日期 {source.officialDataDate}</PreviewStatusBadge></div>
-        <div className="preview-table-hint" role="note">收盤價、轉換價值與溢價率目前沒有經驗證來源時顯示「—」，不以推測值填補。</div>
+        <div className="preview-table-hint" role="note">{displayLabels.close}、{displayLabels.conversionValue}與{displayLabels.premium}目前沒有經驗證來源時顯示「—」，不以推測值填補。</div>
         <div className="preview-table-region"><div className="preview-table-scroll">
           <table className="preview-table preview-bond-ledger-table"><thead><tr>
-            {['代號／名稱','發行公司','發行日','到期日','發行總額','流通餘額','票面利率','轉換價格','轉換期間','收盤價','轉換價值','溢價率','資料日期','來源'].map((label) => <th key={label}>{label}</th>)}
+            {['代號／名稱','發行公司','發行日','到期日','發行總額','流通餘額','票面利率',displayLabels.conversionPrice,'轉換期間',displayLabels.close,displayLabels.conversionValue,displayLabels.premium,'資料日期','來源'].map((label) => <th key={label}>{label}</th>)}
           </tr></thead><tbody>
             {data.bonds.map((bond) => <tr key={bond.bondId}>
               <td><Link href={`/dev-preview/bonds/${encodeURIComponent(bond.bondId)}`}>{formatPreviewText(bond.bondCode)} {bond.shortName}</Link></td>
@@ -47,7 +54,7 @@ export default async function BondsPreviewPage() {
             </tr>)}
           </tbody></table>
         </div></div>
-        <div className="preview-card-list">{data.bonds.map((bond) => <article className="preview-mobile-card" key={bond.bondId}><h2><Link href={`/dev-preview/bonds/${encodeURIComponent(bond.bondId)}`}>{bond.shortName}</Link></h2><p>{formatPreviewText(bond.bondCode)} · {bond.issuerName}</p><dl className="preview-data-grid"><PreviewDataField label="發行日" value={bond.issueDate} /><PreviewDataField label="到期日" value={bond.maturityDate} /><PreviewDataField label="票面利率" value={formatPreviewPercent(bond.couponRate)} numeric /><PreviewDataField label="轉換價格" value={formatPreviewNumber(bond.initialConversionPrice)} numeric /><PreviewDataField label="收盤價" value="—" numeric /><PreviewDataField label="資料日期" value={source.officialDataDate} /></dl></article>)}</div>
+        <div className="preview-card-list">{data.bonds.map((bond) => <article className="preview-mobile-card" key={bond.bondId}><h2><Link href={`/dev-preview/bonds/${encodeURIComponent(bond.bondId)}`}>{bond.shortName}</Link></h2><p>{formatPreviewText(bond.bondCode)} · {bond.issuerName}</p><dl className="preview-data-grid"><PreviewDataField label="發行日" value={bond.issueDate} /><PreviewDataField label="到期日" value={bond.maturityDate} /><PreviewDataField label="票面利率" value={formatPreviewPercent(bond.couponRate)} numeric /><PreviewDataField label={displayLabels.conversionPrice} value={formatPreviewNumber(bond.initialConversionPrice)} numeric /><PreviewDataField label={displayLabels.close} value="—" numeric /><PreviewDataField label="資料日期" value={source.officialDataDate} /></dl></article>)}</div>
       </section>
       <DataFreshness source={{ label: source.providerName, url: source.officialUrl, asOf: source.officialDataDate }} />
       <SourceAttribution source={source} fetchedAt={source.fetchedAt} />

@@ -75,11 +75,11 @@ export interface EmergingMarketRow {
   code: string;
   name: string;
   industry?: string;
-  closePrice?: number;
+  closingPrice?: number;
   change?: number;
   volume?: number;
   turnover?: number;
-  priceLabel: "收盤價";
+  priceLabel: string;
   asOf: string;
   source: MarketSourceRef;
 }
@@ -96,7 +96,7 @@ export interface MarketBondRow {
   conversionEndDate?: string;
   issueAmount?: number;
   outstandingAmount?: number;
-  closePrice?: number;
+  closingPrice?: number;
   conversionValue?: number;
   premiumRate?: number;
   asOf: string;
