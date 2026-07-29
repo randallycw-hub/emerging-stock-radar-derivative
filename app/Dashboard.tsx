@@ -296,6 +296,7 @@ function BondView() {
   const [records, setRecords] = useState<BondRecord[]>([]);
   const [state, setState] = useState<"loading" | "published" | "unavailable">("loading");
   const [publishedAt, setPublishedAt] = useState("");
+  const [query, setQuery] = useState("");
   useEffect(() => {
     let active = true;
     fetch("/api/public-snapshot", { cache: "no-store" })
@@ -310,6 +311,11 @@ function BondView() {
       .catch(() => { if (active) setState("unavailable"); });
     return () => { active = false; };
   }, []);
+  const visibleRecords = useMemo(() => {
+    const keyword = query.trim().toLocaleLowerCase("zh-TW");
+    if (!keyword) return records;
+    return records.filter(bond => `${bond.bondCode || ""} ${bond.bondName || ""} ${bond.issuerCompanyCode || ""} ${bond.issuerCompanyName || ""}`.toLocaleLowerCase("zh-TW").includes(keyword));
+  }, [query, records]);
   const fields = [
     ["發行條件", "待正式快照", "發行日、到期日、發行總額與票面利率"],
     ["轉換權利", "待正式快照", "初始轉換價與可轉換期間"],
@@ -320,7 +326,7 @@ function BondView() {
   return (
     <section className="bond-status-workbench" aria-labelledby="bond-title">
       <div className="bond-status-hero"><div><span>CONVERTIBLE BOND CONTRACTS</span><h2 id="bond-title">可轉債契約資料</h2><p>正式版只讀取通過發布門檻的官方快照；不使用開發 fixture，也不把未核准市場資料混入契約欄位。</p></div><strong>{state === "loading" ? "正在查詢發布快照" : state === "published" ? `已發布 ${records.length} 筆` : "正式資料尚未發布"}</strong></div>
-      {state === "published" && <div className="table-surface bond-table-surface"><div className="table-title"><div><span>OFFICIAL CONTRACT SNAPSHOT</span><h2>發行條件總表</h2></div><small>發布時間：{publishedAt || "官方未提供"}</small></div><div className="table-wrap"><table className="data-table bond-contract-table"><thead><tr><th>債券代碼／名稱</th><th>發行人</th><th>發行日</th><th>到期日</th><th>發行總額</th><th>目前餘額</th><th>票面利率</th><th>初始轉換價</th><th>轉換期間</th><th>擔保</th><th>官方資料日期</th></tr></thead><tbody>{records.map((bond, index) => <tr key={`${bond.bondCode || "bond"}-${index}`}><td><strong>{bond.bondCode || "—"}</strong><span className="subtext">{bond.bondName || "官方未提供"}</span></td><td>{bond.issuerCompanyName || "—"}<span className="subtext">{bond.issuerCompanyCode || ""}</span></td><td>{bond.issueDate || "—"}</td><td>{bond.maturityDate || "—"}</td><td>{bond.issueAmount || "—"}</td><td>{bond.currentOutstandingBalance || "—"}</td><td>{bond.couponRate || "—"}</td><td>{bond.initialConversionPrice || "—"}</td><td>{bond.conversionStartDate || "—"}<span className="subtext">{bond.conversionEndDate || ""}</span></td><td>{bond.guaranteeStatus || "—"}</td><td>{bond.officialDataDate || "—"}</td></tr>)}</tbody></table></div></div>}
+      {state === "published" && <div className="table-surface bond-table-surface"><div className="table-title"><div><span>OFFICIAL CONTRACT SNAPSHOT</span><h2>發行條件總表</h2></div><small>發布時間：{publishedAt || "官方未提供"}</small></div><div className="bond-filter-row"><label><span>搜尋債券或發行人</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="代碼、名稱、公司" /></label><strong>{visibleRecords.length} / {records.length} 筆</strong></div><div className="table-wrap"><table className="data-table bond-contract-table"><thead><tr><th>債券代碼／名稱</th><th>發行人</th><th>發行日</th><th>到期日</th><th>發行總額</th><th>目前餘額</th><th>票面利率</th><th>初始轉換價</th><th>轉換期間</th><th>擔保</th><th>官方資料日期</th></tr></thead><tbody>{visibleRecords.map((bond, index) => <tr key={`${bond.bondCode || "bond"}-${index}`}><td>{bond.bondCode ? <Link href={`/bonds/${encodeURIComponent(bond.bondCode)}`}>{bond.bondCode}</Link> : <strong>—</strong>}<span className="subtext">{bond.bondName || "官方未提供"}</span></td><td>{bond.issuerCompanyName || "—"}<span className="subtext">{bond.issuerCompanyCode || ""}</span></td><td>{bond.issueDate || "—"}</td><td>{bond.maturityDate || "—"}</td><td>{bond.issueAmount || "—"}</td><td>{bond.currentOutstandingBalance || "—"}</td><td>{bond.couponRate || "—"}</td><td>{bond.initialConversionPrice || "—"}</td><td>{bond.conversionStartDate || "—"}<span className="subtext">{bond.conversionEndDate || ""}</span></td><td>{bond.guaranteeStatus || "—"}</td><td>{bond.officialDataDate || "—"}</td></tr>)}</tbody></table></div></div>}
       <div className="bond-status-grid" aria-label="可轉債正式資料狀態">
         {fields.map(([title, status, detail]) => <article key={title}><span>{title}</span><strong>{status}</strong><p>{detail}</p></article>)}
       </div>
