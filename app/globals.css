@@ -207,7 +207,7 @@ button { cursor: pointer; }
 .pricing-chip.pending { color: #8a5b13; background: #fff4d8; border-color: #ead39c; }
 .pricing-chip.unknown { color: #58666e; background: #eef1f3; border-color: #d7dde1; }
 
-.ipo-stage-overview { margin-bottom: 18px; overflow: hidden; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--blue); border-radius: 6px; }
+.ipo-stage-overview { margin-bottom: 18px; overflow: visible; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--blue); border-radius: 6px; }
 .ipo-stage-board { display: grid; grid-template-columns: repeat(5, minmax(175px, 1fr)); overflow-x: auto; }
 .ipo-stage-column { min-width: 0; background: #f8fafb; border-right: 1px solid var(--line); }
 .ipo-stage-column:last-child { border-right: 0; }
@@ -238,6 +238,15 @@ button { cursor: pointer; }
 .ipo-stage-facts i { color: var(--muted); font-size: 8px; font-style: normal; }
 .ipo-stage-facts b { color: var(--ink-2); font-size: 9px; font-variant-numeric: tabular-nums; }
 .ipo-stage-empty { padding: 28px 8px; color: var(--muted); text-align: center; font-size: 9px; }
+.ipo-upcoming-events { margin: 14px; }
+.ipo-upcoming-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ipo-upcoming-item { display: grid; gap: 4px; min-height: 76px; padding: 11px 13px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.ipo-upcoming-item:nth-child(3n) { border-right: 0; }
+.ipo-upcoming-item b { color: var(--teal); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ipo-upcoming-item span { color: var(--ink); font-size: 11px; font-weight: 750; }
+.ipo-upcoming-item small { color: var(--muted); font-size: 9px; }
+.ipo-detail-surface { margin: 0 14px 14px; }
+.ipo-detail-table { min-width: 1540px; }
 .event-strip { display: grid; grid-template-columns: repeat(5, 1fr); }
 .event-strip button { min-height: 124px; padding: 14px; color: var(--ink); background: #fff; border: 0; border-right: 1px solid var(--line); text-align: left; }
 .event-strip button:last-child { border-right: 0; }
@@ -578,6 +587,9 @@ button { cursor: pointer; }
   .baseline { grid-column: auto; }
   .priority-grid { grid-template-columns: repeat(5, 180px); overflow-x: auto; }
   .ipo-stage-board { grid-template-columns: repeat(5, 220px); }
+  .ipo-upcoming-list { grid-template-columns: 1fr; }
+  .ipo-upcoming-item, .ipo-upcoming-item:nth-child(3n) { border-right: 0; }
+  .ipo-upcoming-events, .ipo-detail-surface { margin-right: 10px; margin-left: 10px; }
   .event-strip { grid-template-columns: repeat(5, 180px); overflow-x: auto; }
   .mobile-nav { position: fixed; inset: auto 0 0; z-index: 50; display: grid; grid-template-columns: repeat(3, 1fr); height: 58px; background: #fff; border-top: 1px solid var(--line-strong); }
   .mobile-nav a { position: relative; display: grid; place-items: center; color: var(--muted); background: #fff; border: 0; font-size: 10px; text-decoration: none; }

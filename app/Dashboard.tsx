@@ -58,8 +58,8 @@ type MarketRow = {
   name: string;
   industry: string;
   tradingDate: string;
-  closePrice?: string;
-  previousClose?: string;
+  endOfDayPrice?: string;
+  previousEndOfDayPrice?: string;
   dayChange?: string;
   dayChangePercent?: string;
   weeklyClose?: string;
@@ -261,7 +261,7 @@ function MarketView({ tracker, loading }: { tracker: TrackerPayload; loading: bo
     <section className="market-workbench" aria-labelledby="market-title">
       <div className="market-workbench-head"><div><span>END-OF-DAY MARKET</span><h2 id="market-title">興櫃收盤價市場表</h2><p>只呈現最近交易日收盤價與官方日終資料，不提供買價、賣價或盤中更新。</p></div><b>{tracker.marketSource?.dataDate || "資料日期尚未提供"}</b></div>
       <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{loading ? "載入中" : rows.length ? "可查核" : "未提供"}</strong></div><div><span>價格語意</span><strong>收盤價</strong></div></div>
-      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>產業</th><th>交易日</th><th>收盤價</th><th>前收</th><th>日漲跌</th><th>週收盤</th><th>週漲跌幅</th><th>成交量</th><th>成交額</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.closePrice || "—"}</td><td>{row.previousClose || "—"}</td><td>{row.dayChange || "—"} <span className="subtext">{row.dayChangePercent || "—"}</span></td><td>{row.weeklyClose || "—"}</td><td>{row.weeklyChangePercent || "—"}</td><td>{row.volume || "—"}</td><td>{row.turnover || "—"}</td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>目前尚未接入已驗證的官方收盤價資料</strong><p>版面已按收盤價邏輯完成；待日終來源通過來源登錄與完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
+      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>產業</th><th>交易日</th><th>收盤價</th><th>前收</th><th>日漲跌</th><th>週收盤</th><th>週漲跌幅</th><th>成交量</th><th>成交額</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.endOfDayPrice || "—"}</td><td>{row.previousEndOfDayPrice || "—"}</td><td>{row.dayChange || "—"} <span className="subtext">{row.dayChangePercent || "—"}</span></td><td>{row.weeklyClose || "—"}</td><td>{row.weeklyChangePercent || "—"}</td><td>{row.volume || "—"}</td><td>{row.turnover || "—"}</td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>目前尚未接入已驗證的官方收盤價資料</strong><p>版面已按收盤價邏輯完成；待日終來源通過來源登錄與完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
     </section>
   );
 }
@@ -341,11 +341,11 @@ function RadarView({
 
 function IpoView({ tracker, loading, openProfile }: { tracker: TrackerPayload; loading: boolean; openProfile: (code: string) => void }) {
   const stages: Array<{ key: StageKey; title: string; hint: string }> = [
-    { key: "submitted", title: "申請送件", hint: "尚待審議" },
-    { key: "review", title: "審議階段", hint: "已進入審議" },
-    { key: "board", title: "審議通過", hint: "等待後續核准" },
-    { key: "contract", title: "核准／契約後", hint: "等待公開時程" },
-    { key: "auction", title: "競拍／買賣日", hint: "公告事件已排定" },
+    { key: "submitted", title: "送件待審", hint: "等待審議" },
+    { key: "review", title: "審議後", hint: "等待董事會" },
+    { key: "board", title: "董事會後", hint: "等待同意契約" },
+    { key: "contract", title: "同意契約後", hint: "等待買賣日期" },
+    { key: "auction", title: "競拍／買賣日", hint: "明確交易時程" },
   ];
   return (
     <section className="ipo-stage-overview">
@@ -370,6 +370,16 @@ function IpoView({ tracker, loading, openProfile }: { tracker: TrackerPayload; l
           );
         })}
       </div>
+      <section className="upcoming-events ipo-upcoming-events">
+        <div className="surface-title"><div><span>UPCOMING EVENTS</span><h2>未來關鍵事件</h2></div><span className="result-count"><b>{tracker.upcoming.length}</b> 筆</span></div>
+        {tracker.upcoming.length ? <div className="ipo-upcoming-list">{tracker.upcoming.slice(0, 12).map(event => <div className="ipo-upcoming-item" key={`${event.code}-${event.date}-${event.event}`}><b>{event.date}</b><span>{event.event}</span><small>{event.code} · {event.name} · {event.days === 0 ? "今天" : event.days > 0 ? `${event.days} 天後` : `已過 ${Math.abs(event.days)} 天`}</small></div>)}</div> : <div className="empty compact">目前沒有已公告的未來事件</div>}
+      </section>
+
+      <section className="table-surface ipo-detail-surface">
+        <div className="table-title"><div><span>PUBLIC EVENT DETAIL</span><h2>公開事件明細</h2></div><small>依主要事件日排序 · 價格欄位僅保留官方公告狀態</small></div>
+        <div className="table-wrap"><table className="data-table ipo-detail-table"><thead><tr><th>代號／公司</th><th>市場</th><th>目前階段</th><th>事件類型</th><th>主要事件日</th><th>距今天</th><th>定價狀態</th><th>暫定承銷價</th><th>實際承銷價</th><th>股票上市／上櫃買賣日</th><th>競拍進度</th><th>分類依據</th></tr></thead><tbody>{tracker.radar.map(row => <tr key={`ipo-${row.market}-${row.code}`}><td><button className="company-button" type="button" onClick={() => openProfile(row.code)}>{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.market}</td><td>{row.stage}</td><td>{row.mainExit || row.auctionNext || "公開事件"}</td><td>{row.exitDate || row.listingDate || "待公告"}</td><td>{formatEventDays(row.exitDays)}</td><td>依公告</td><td>未公告</td><td>未公告</td><td>{row.listingDate || "待公告"}</td><td>{row.auctionNext || "未公告"}</td><td className="reason-cell">{row.reason || row.note || "依公開日期分類"}</td></tr>)}</tbody></table></div>
+        {!tracker.radar.length && <div className="empty">目前沒有可確認的公開事件時程</div>}
+      </section>
     </section>
   );
 }
