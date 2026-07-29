@@ -49,6 +49,24 @@ type TrackerPayload = {
     signal: string;
   }>;
   raw: Record<string, number>;
+  marketRows?: MarketRow[];
+  marketSource?: { dataDate: string; fetchedAt: string; officialUrl: string };
+};
+
+type MarketRow = {
+  code: string;
+  name: string;
+  industry: string;
+  tradingDate: string;
+  closePrice?: string;
+  previousClose?: string;
+  dayChange?: string;
+  dayChangePercent?: string;
+  weeklyClose?: string;
+  weeklyChangePercent?: string;
+  volume?: string;
+  turnover?: string;
+  status: "normal" | "no_baseline" | "unavailable";
 };
 
 type CompanyProfile = {
@@ -189,7 +207,7 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
           </section>
 
           {error && <div className="error-banner" role="alert">{error}</div>}
-          {tab === "market" && <ConstructionView />}
+          {tab === "market" && <MarketView tracker={tracker} loading={loading} />}
           {tab === "radar" && (
             <RadarView
               tracker={tracker}
@@ -237,17 +255,13 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
   );
 }
 
-function ConstructionView() {
+function MarketView({ tracker, loading }: { tracker: TrackerPayload; loading: boolean }) {
+  const rows = tracker.marketRows ?? [];
   return (
-    <section className="construction-panel" aria-labelledby="construction-title">
-      <span>DATA SOURCE STATUS</span>
-      <h2 id="construction-title">官方資料來源建置中</h2>
-      <p>官方資料來源建置中，目前不提供即時或延遲行情。</p>
-      <div className="construction-grid">
-        <article><b>興櫃公司</b><small>資料規格、授權及商業利用條件確認中</small></article>
-        <article><b>可轉債</b><small>正式來源尚未完成，不顯示 fixture 或 mock</small></article>
-        <article><b>上市櫃進度</b><small>僅整理官方公告型事件，不含市場行情</small></article>
-      </div>
+    <section className="market-workbench" aria-labelledby="market-title">
+      <div className="market-workbench-head"><div><span>END-OF-DAY MARKET</span><h2 id="market-title">興櫃收盤價市場表</h2><p>只呈現最近交易日收盤價與官方日終資料，不提供買價、賣價或盤中更新。</p></div><b>{tracker.marketSource?.dataDate || "資料日期尚未提供"}</b></div>
+      <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{loading ? "載入中" : rows.length ? "可查核" : "未提供"}</strong></div><div><span>價格語意</span><strong>收盤價</strong></div></div>
+      {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>產業</th><th>交易日</th><th>收盤價</th><th>前收</th><th>日漲跌</th><th>週收盤</th><th>週漲跌幅</th><th>成交量</th><th>成交額</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.closePrice || "—"}</td><td>{row.previousClose || "—"}</td><td>{row.dayChange || "—"} <span className="subtext">{row.dayChangePercent || "—"}</span></td><td>{row.weeklyClose || "—"}</td><td>{row.weeklyChangePercent || "—"}</td><td>{row.volume || "—"}</td><td>{row.turnover || "—"}</td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>目前尚未接入已驗證的官方收盤價資料</strong><p>版面已按收盤價邏輯完成；待日終來源通過來源登錄與完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
     </section>
   );
 }

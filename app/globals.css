@@ -353,6 +353,30 @@ button { cursor: pointer; }
   .construction-panel { min-height: 0; }
 }
 
+.market-workbench { display: grid; gap: 16px; }
+.market-workbench-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 22px; background: var(--paper); border: 1px solid var(--line); }
+.market-workbench-head > div > span { color: var(--teal); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.market-workbench-head h2 { margin: 6px 0; color: var(--ink); font-size: 25px; }
+.market-workbench-head p { margin: 0; color: var(--muted); font-size: 12px; }
+.market-workbench-head > b { padding: 8px 10px; color: var(--ink); background: var(--blue-soft); font-size: 11px; white-space: nowrap; }
+.market-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.market-summary > div { padding: 15px 17px; background: var(--paper); border: 1px solid var(--line); }
+.market-summary span { display: block; color: var(--muted); font-size: 10px; }
+.market-summary strong { display: block; margin-top: 7px; color: var(--ink); font-size: 22px; }
+.market-table-surface { overflow: hidden; }
+.market-close-table { min-width: 1180px; }
+.market-close-table th, .market-close-table td { white-space: nowrap; }
+.market-close-table td:first-child { min-width: 140px; }
+.market-unavailable { padding: 26px; color: var(--muted); background: var(--paper); border: 1px dashed var(--line); }
+.market-unavailable strong { display: block; margin-bottom: 8px; color: var(--ink); font-size: 17px; }
+.market-unavailable p { margin: 0 0 8px; font-size: 12px; line-height: 1.7; }
+.market-unavailable small { font-size: 10px; }
+@media (max-width: 680px) {
+  .market-workbench-head { display: block; }
+  .market-workbench-head > b { display: inline-block; margin-top: 13px; }
+  .market-summary { grid-template-columns: 1fr; }
+}
+
 /* Public homepage: Cloud Dancer × Transformative Teal */
 .public-home { min-height: 100vh; color: #173238; background: #f4f1e9; }
 .public-home-nav { display: flex; width: min(1180px, calc(100% - 48px)); min-height: 78px; align-items: center; justify-content: space-between; margin: 0 auto; border-bottom: 1px solid #d9e2df; }
