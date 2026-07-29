@@ -32,7 +32,7 @@ export default function ShowcasePage() {
               <article className="showcase-callout"><small>轉換權查核</small><strong>100.00</strong><div className="showcase-row"><span>開始</span><strong>2025.07.01</strong></div><div className="showcase-row"><span>截止</span><strong>2030.05.20</strong></div></article>
             </div>
             <div className="showcase-timeline"><div>發行<b>2025.06.20</b></div><div>掛牌<b>2025.06.25</b></div><div>轉換窗口<b>2025.07—2030.05</b></div><div>到期<b>2030.06.20</b></div></div>
-            <p className="showcase-note"><strong>展示說明</strong>　此頁用於確認前端版面與操作方向，不代表即時行情；正式資料會顯示官方資料日期、抓取時間與原始來源。</p>
+            <p className="showcase-note"><strong>展示說明</strong>　此頁用於確認前端版面與操作方向，不代表正式市場資料；正式資料會顯示官方資料日期、抓取時間與原始來源。</p>
           </section>
         </div>
       </div>
