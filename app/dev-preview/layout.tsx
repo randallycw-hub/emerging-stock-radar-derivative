@@ -37,6 +37,7 @@ export default function DevPreviewLayout({ children }: { children: ReactNode }) 
     <div
       className="preview-root"
       data-preview-theme="b"
+      data-preview-night="true"
       suppressHydrationWarning
     >
       <script dangerouslySetInnerHTML={{ __html: previewThemeScript }} />

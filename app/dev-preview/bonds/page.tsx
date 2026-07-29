@@ -19,6 +19,8 @@ export default async function BondsPreviewPage() {
   if (!isPreviewDevelopmentRuntime()) notFound();
   const data = await loadPreviewData();
   const source = data.bondSource;
+  const totalIssueAmount = data.bonds.reduce((sum, bond) => sum + Number(bond.issueAmount || 0), 0);
+  const securedCount = data.bonds.filter((bond) => bond.secured).length;
 
   return (
     <>
@@ -29,7 +31,23 @@ export default async function BondsPreviewPage() {
         aside={<PreviewStatusBadge tone="teal">{data.bonds.length} 筆測試樣本</PreviewStatusBadge>}
       />
 
-      <section className="preview-panel">
+      <div className="preview-terminal-strip" aria-label="可轉債資料摘要">
+        <div><span>LEDGER</span><strong>{data.bonds.length}</strong><small>合約樣本</small></div>
+        <div><span>ISSUE AMOUNT</span><strong>{formatPreviewNumber(String(totalIssueAmount))}</strong><small>合計發行總額</small></div>
+        <div><span>SECURED</span><strong>{securedCount}</strong><small>有擔保債券</small></div>
+        <div><span>AS-OF</span><strong>{source.officialDataDate}</strong><small>官方資料日期</small></div>
+      </div>
+
+      <div className="preview-bond-layout">
+        <aside className="preview-index-rail" aria-label="可轉債頁面索引">
+          <span>INDEX</span>
+          <a href="#bond-ledger">01 <b>發行合約</b></a>
+          <a href="#bond-fields">02 <b>欄位說明</b></a>
+          <a href="#bond-source">03 <b>資料來源</b></a>
+        </aside>
+        <div className="preview-bond-main">
+
+      <section className="preview-panel" id="bond-ledger">
         <div className="preview-panel-head">
           <div>
             <h2>發行契約與餘額</h2>
@@ -136,7 +154,15 @@ export default async function BondsPreviewPage() {
         </div>
       </section>
 
-      <SourceAttribution source={source} fetchedAt={source.fetchedAt} />
+      <section className="preview-panel preview-field-note" id="bond-fields">
+        <span className="preview-section-label">FIELD MAP</span>
+        <h2>閱讀順序</h2>
+        <p>先以發行額與目前餘額掌握規模，再對照票面利率、初始轉換價與轉換期間；賣回條件與擔保狀態保留原始契約語意，不做推測性評級。</p>
+      </section>
+
+      <div id="bond-source"><SourceAttribution source={source} fetchedAt={source.fetchedAt} /></div>
+        </div>
+      </div>
     </>
   );
 }
