@@ -103,6 +103,18 @@
   color: var(--preview-muted);
 }
 
+.preview-root[data-preview-theme="b"] .preview-panel-head h2,
+.preview-root[data-preview-theme="b"] .preview-panel h2,
+.preview-root[data-preview-theme="b"] .preview-panel h3,
+.preview-root[data-preview-theme="b"] .preview-bond-card-head h3 {
+  color: var(--preview-ink);
+}
+
+.preview-root[data-preview-theme="b"] .preview-panel-head p,
+.preview-root[data-preview-theme="b"] .preview-bond-card-head p {
+  color: var(--preview-muted);
+}
+
 .preview-root[data-preview-theme="b"] .preview-status,
 .preview-root[data-preview-theme="b"] .preview-status-amber,
 .preview-root[data-preview-theme="b"] .preview-status-teal {
