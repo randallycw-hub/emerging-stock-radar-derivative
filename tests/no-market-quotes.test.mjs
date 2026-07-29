@@ -62,6 +62,9 @@ test("formal project has no prohibited quote provider or market-price feature", 
   const dashboard = await readFile(path.join(root, "app", "Dashboard.tsx"), "utf8");
   assert.match(dashboard, /興櫃收盤價市場表/);
   assert.match(dashboard, /不提供買價、賣價或盤中更新/);
+  assert.match(dashboard, /官方資料日期/);
+  assert.match(dashboard, /本站擷取時間/);
+  assert.match(dashboard, /官方來源/);
 });
 
 test("formal brand and fixed subtitle are consistent", async () => {

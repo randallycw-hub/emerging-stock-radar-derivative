@@ -432,7 +432,8 @@ button { cursor: pointer; }
 .dashboard-theme-dark .ipo-stage-head { color: var(--ink-2); background: #433A34; border-color: var(--line); }
 .dashboard-theme-dark .data-table td,
 .dashboard-theme-dark .ipo-company-row,
-.dashboard-theme-dark .market-summary > div { color: var(--ink); background: var(--paper); border-color: var(--line); }
+.dashboard-theme-dark .market-summary > div,
+.dashboard-theme-dark .market-source-card { color: var(--ink); background: var(--paper); border-color: var(--line); }
 .dashboard-theme-dark .data-table tbody tr:nth-child(even) td { background: #292724; }
 .dashboard-theme-dark .market-state,
 .dashboard-theme-dark .market-workbench-head > b,
@@ -445,6 +446,13 @@ button { cursor: pointer; }
 .market-summary > div { padding: 15px 17px; background: var(--paper); border: 1px solid var(--line); }
 .market-summary span { display: block; color: var(--muted); font-size: 10px; }
 .market-summary strong { display: block; margin-top: 7px; color: var(--ink); font-size: 22px; }
+.market-audit-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); gap: 12px; }
+.market-source-card { display: flex; min-height: 100%; flex-direction: column; justify-content: space-between; padding: 15px 17px; background: var(--paper); border: 1px solid var(--line); }
+.market-source-card span { display: block; color: var(--muted); font-size: 10px; }
+.market-source-card strong { display: block; margin-top: 7px; color: var(--ink); font-size: 15px; }
+.market-source-card small { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
+.market-source-card a { display: inline-flex; align-self: flex-start; margin-top: 14px; color: var(--teal); font-size: 11px; font-weight: 700; text-decoration: none; }
+.market-source-card a:hover { text-decoration: underline; }
 .market-table-surface { overflow: hidden; }
 .market-close-table { min-width: 1180px; }
 .market-close-table th, .market-close-table td { white-space: nowrap; }
@@ -457,6 +465,7 @@ button { cursor: pointer; }
   .market-workbench-head { display: block; }
   .market-workbench-head > b { display: inline-block; margin-top: 13px; }
   .market-summary { grid-template-columns: 1fr; }
+  .market-audit-grid { grid-template-columns: 1fr; }
 }
 
 /* Public homepage: Cloud Dancer × Transformative Teal */

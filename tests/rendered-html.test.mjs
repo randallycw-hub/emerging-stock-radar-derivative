@@ -21,6 +21,10 @@ test("renders the agreed no-quote product baseline", async () => {
     assert.match(source, /興櫃公司、可轉債與上市櫃進度資訊/);
   }
   assert.match(dashboard, /興櫃收盤價市場表/);
+  assert.match(dashboard, /官方資料日期/);
+  assert.match(dashboard, /本站擷取時間/);
+  assert.match(dashboard, /資料語意/);
+  assert.match(dashboard, /官方來源/);
   assert.match(dashboard, /不提供買價、賣價或盤中更新/);
   assert.match(dashboard, /\/api\/tracker/);
   assert.match(dashboard, /\/api\/company/);

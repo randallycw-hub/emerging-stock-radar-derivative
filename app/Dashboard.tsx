@@ -274,10 +274,15 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
 
 function MarketView({ tracker, loading }: { tracker: TrackerPayload; loading: boolean }) {
   const rows = tracker.marketRows ?? [];
+  const officialUrl = tracker.marketSource?.officialUrl || "";
+  const dataStatus = loading ? "載入中" : rows.length ? "可查核" : "尚未提供";
   return (
     <section className="market-workbench" aria-labelledby="market-title">
       <div className="market-workbench-head"><div><span>OFFICIAL END-OF-DAY MARKET</span><h2 id="market-title" aria-label="興櫃收盤價市場表（實際欄位為官方日均價）">興櫃官方盤後資料</h2><p>只呈現官方日終資料；興櫃核准欄位的價格語意是日均價，不提供買價、賣價或盤中更新。</p></div><b>{tracker.marketSource?.dataDate || "資料日期尚未提供"}</b></div>
-      <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{loading ? "載入中" : rows.length ? "可查核" : "未提供"}</strong></div><div><span>價格語意</span><strong>日均價</strong></div></div>
+      <div className="market-audit-grid" aria-label="市場資料查核資訊">
+        <div className="market-summary"><div><span>涵蓋公司</span><strong>{rows.length || "—"}</strong></div><div><span>資料狀態</span><strong>{dataStatus}</strong></div><div><span>資料語意</span><strong>官方日均價</strong></div></div>
+        <div className="market-source-card"><div><span>官方來源</span><strong>興櫃股票當日行情表</strong><small>官方資料日期：{tracker.marketSource?.dataDate || "尚未取得"}</small><small>本站擷取時間：{tracker.marketSource?.fetchedAt || "尚未取得"}</small></div>{officialUrl ? <a href={officialUrl} target="_blank" rel="noreferrer">查看官方資料 ↗</a> : <small className="market-source-pending">來源連結待資料成功取得</small>}</div>
+      </div>
       {rows.length ? <div className="table-surface market-table-surface"><div className="table-wrap"><table className="data-table market-close-table"><thead><tr><th>代號／公司</th><th>市場</th><th>交易日</th><th>當日均價</th><th>前日均價</th><th>日最高</th><th>日最低</th><th>成交量</th><th>上市櫃進度</th><th>狀態</th></tr></thead><tbody>{rows.map(row => <tr key={row.code}><td><button className="company-button" type="button">{row.name}</button><span className="subtext">{row.code}</span></td><td>{row.industry}</td><td>{row.tradingDate}</td><td>{row.dailyAveragePrice || "—"}</td><td>{row.previousDailyAveragePrice || "—"}</td><td>{row.dailyHighPrice || "—"}</td><td>{row.dailyLowPrice || "—"}</td><td>{row.transactionVolume || "—"}</td><td>{row.listingApplicationStatus || "—"}<span className="subtext">{row.listingApplicationDate || ""}</span></td><td>{row.status === "normal" ? "正常" : row.status === "no_baseline" ? "無前日基準" : "無資料"}</td></tr>)}</tbody></table></div></div> : <div className="market-unavailable"><strong>官方盤後資料尚未提供</strong><p>待核准的官方日終來源成功取得並通過完整性驗證後，才會顯示數值。</p><small>{tracker.marketSource?.fetchedAt ? `最後抓取 ${tracker.marketSource.fetchedAt}` : "尚無抓取時間"}</small></div>}
     </section>
   );
