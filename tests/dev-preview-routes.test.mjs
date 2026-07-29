@@ -257,7 +257,7 @@ test("preview styles keep the bond ledger horizontally scrollable without body o
   assert.match(css, /@media\s*\(max-width:\s*760px\)/);
   assert.match(css, /@media[\s\S]*\.preview-table-region\s*\{[^}]*display:\s*block/s);
   assert.match(css, /@media[\s\S]*\.preview-card-list\s*\{[^}]*display:\s*none/s);
-  assert.match(css, /\.preview-bond-ledger-table\s*\{[^}]*min-width:\s*1760px/s);
+  assert.match(css, /\.preview-bond-ledger-table\s*\{[^}]*min-width:\s*1540px/s);
   assert.match(css, /:focus-visible/);
   assert.match(css, /overflow-wrap:\s*anywhere/);
   assert.match(css, /\.preview-theme-button\s*\{[^}]*min-height:\s*44px/s);
