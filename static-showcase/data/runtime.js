@@ -17,7 +17,7 @@ try {
     cell(`${val(row, "債券代碼")} ${val(row, "債券簡稱")}`), cell(`${val(row, "機構代碼")} ${val(row, "機構名稱")}`),
     cell(fmtDate(row["發行日期"])), cell(fmtDate(row["到期日期"])), cell(num(row["發行總額"])), cell(num(row["目前餘額"])),
     cell(`${val(row, "票面利率")} %`), cell(val(row, "發行時轉換價格")), cell(`${fmtDate(row["轉換期間起"])}～${fmtDate(row["迄"])}`),
-    cell(fmtDate(row["賣回權日期"]), true), cell(val(row, "賣回權價格"), true), cell(fmtDate(row["資料日期"])), cell("11406 官方快照"), cell(val(row, "債券種類")),
+    cell("—", true), cell("—", true), cell("—", true), cell(fmtDate(row["資料日期"])), cell("11406 官方快照"),
   ].join(""))); 
   setRows("#emerging tbody", revenue.map((row) => [
     cell(val(row, "公司代號")), cell(val(row, "公司名稱")), cell(val(row, "產業別")), cell(num(row["營業收入-當月營收"])),
