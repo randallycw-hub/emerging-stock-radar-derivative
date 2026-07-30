@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { getBasicRows } from "../lib/company.ts";
+import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
 import { getTrackerData } from "../lib/tracker.mjs";
 
 const root = new URL("../", import.meta.url);
@@ -163,4 +164,40 @@ test("retains allowed end-of-day and contractual price semantics", async () => {
     assert.match(allowed, new RegExp(`\\b${field}\\b`));
   }
   assert.doesNotMatch(allowed, /\bclosePrice\b/);
+});
+
+test("emerging market parser cannot publish forbidden quote fields", () => {
+  const [row] = parseEmergingMarketSource([{
+    Date: "1150730",
+    Time: "140006",
+    SecuritiesCompanyCode: "1260",
+    CompanyName: "富味鄉",
+    PreviousAveragePrice: "25.29",
+    BuyingPrice: "24.6",
+    BuyingQuantity: "3000",
+    SellingPrice: "25.55",
+    SellingQuantity: "3000",
+    Highest: "26.5",
+    Lowest: "25.2",
+    Average: "25.45",
+    LatestPrice: "25.2",
+    "Buy/Sell": "S",
+    SuspendTime: "000000",
+    TransactionVolume: "22001",
+    ApplyingDate: "",
+    ApplyingStatus: "",
+  }]);
+  assert.deepEqual(Object.keys(row).sort(), [
+    "applyingDate",
+    "applyingStatus",
+    "companyCode",
+    "companyName",
+    "dailyAveragePrice",
+    "dailyHighPrice",
+    "dailyLowPrice",
+    "previousAveragePrice",
+    "publishedTime",
+    "tradingDate",
+    "transactionVolume",
+  ]);
 });

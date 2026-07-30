@@ -91,7 +91,7 @@
 | 興櫃新增／終止／重大訊息 | `CANDIDATE` | 未找到符合本輪標準的確切資料集與 resource 證據 |
 | TDCC 可轉換公司債月分析 11462 | `CANDIDATE` | 可作後續餘額／保管統計研究，未完成 endpoint 與用途核准 |
 | 金管會預計生效案件／新聞附件 | `CANDIDATE` | 一般新聞與附件不是已核准 API；V1 不自動更新 |
-| 興櫃行情 11747 | `SUSPENDED` | 即使 OGL 明確，價格、買賣與成交量違反產品永久禁令 |
+| 興櫃行情 11747／TPEx `GET /openapi/v1/tpex_esb_latest_statistics` | `VERIFIED_FOR_IMPLEMENTATION` | 僅限興櫃股票當日盤後行情的白名單欄位；買賣、最新價與即時欄位永久禁止 |
 | 可轉債金融機構買賣彙總 `bond_cb_daily` | `SUSPENDED` | 實際欄位依金融機構彙總買賣面額與金額，不是每檔可轉債行情；不得 ingest 或 fallback |
 | Yahoo、CBAS、券商、未公開接口、HTML 爬蟲 | `SUSPENDED` | 永久禁止，不得重新評估為 fallback |
 
@@ -170,3 +170,16 @@ Evidence references:
 - `tests/fixtures/source-verification/28567/metadata.json`
 
 This amendment does not grant production approval and does not authorize an adapter, scheduler, runtime fetch, API, page, or remote resource.
+
+## 興櫃盤後行情 resource-level manual amendment（2026-07-30）
+
+Resource: GET https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics
+Status: VERIFIED_FOR_IMPLEMENTATION
+Purpose: 興櫃股票當日盤後行情
+Published source fields: Average, PreviousAveragePrice, Highest, Lowest, TransactionVolume
+Allowed derived fields: 均價漲跌額、均價漲跌幅、上漲/下跌/平盤分類、估算成交金額、同日排行
+Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, LatestPrice, Buy/Sell, SuspendTime
+
+`估算成交金額` is derived from rounded source values and is unsuitable for exact reconciliation.
+
+此狀態只核准嚴格 parser、快照建立與發布前驗證；不得發布即時、買賣價量或 `LatestPrice`，也不授予 `APPROVED_FOR_PRODUCTION`。

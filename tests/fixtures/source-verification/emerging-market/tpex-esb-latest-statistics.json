@@ -1,0 +1,22 @@
+[
+  {
+    "Date": "1150730",
+    "Time": "140006",
+    "SecuritiesCompanyCode": "1260",
+    "CompanyName": "富味鄉",
+    "PreviousAveragePrice": "25.29",
+    "BuyingPrice": "24.6",
+    "BuyingQuantity": "3000",
+    "SellingPrice": "25.55",
+    "SellingQuantity": "3000",
+    "Highest": "26.5",
+    "Lowest": "25.2",
+    "Average": "25.45",
+    "LatestPrice": "25.2",
+    "Buy/Sell": "S",
+    "SuspendTime": "000000",
+    "TransactionVolume": "22001",
+    "ApplyingDate": "",
+    "ApplyingStatus": ""
+  }
+]

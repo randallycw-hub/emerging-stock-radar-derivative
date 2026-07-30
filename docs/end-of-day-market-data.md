@@ -2,12 +2,12 @@
 
 人工審查日期：2026-07-20
 
-## 興櫃 APPROVED 來源
+## 興櫃 VERIFIED_FOR_IMPLEMENTATION 來源
 
 - 官方資料集：興櫃股票當日行情表。
 - 政府資料集：[11747](https://data.gov.tw/dataset/11747)。
 - 官方端點：`https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics`。
-- 狀態：`APPROVED`，但尚未建立 adapter。
+- 狀態：`VERIFIED_FOR_IMPLEMENTATION`。
 - 授權：政府資料開放授權條款－第1版。
 
 批准只涵蓋以下欄位：
@@ -26,7 +26,9 @@
 | `ApplyingDate` | `listingApplicationDate` | 上市櫃進度日期 |
 | `ApplyingStatus` | `listingApplicationStatus` | 上市櫃進度 |
 
-第一版明確排除 `BuyingPrice`、`BuyingQuantity`、`SellingPrice`、`SellingQuantity`，避免形成盤中報價介面；同時排除 `LatestPrice`、`Buy/Sell`、`SuspendTime` 及所有未列入白名單的欄位。不得計算漲跌幅、價格排行、K 線或技術指標。
+第一版明確排除 `BuyingPrice`、`BuyingQuantity`、`SellingPrice`、`SellingQuantity`，避免形成盤中報價介面；同時排除 `LatestPrice`、`Buy/Sell`、`SuspendTime` 及所有未列入白名單的欄位。只允許衍生均價漲跌額、均價漲跌幅、上漲／下跌／平盤分類、估算成交金額與同日排行；不得發布即時、買賣價量或 `LatestPrice`，不得計算 K 線或技術指標。
+
+`估算成交金額` is derived from rounded source values and is unsuitable for exact reconciliation.
 
 ```ts
 interface EmergingEndOfDayObservation {

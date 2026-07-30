@@ -24,3 +24,14 @@
 | Evidence path | |
 | 結論（通過／暫停／需補件） | |
 | 補件或暫停理由 | |
+
+## 興櫃盤後行情 `tpex_esb_latest_statistics` 專項覆核
+
+- [ ] Resource: GET https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics
+- [ ] Status: VERIFIED_FOR_IMPLEMENTATION
+- [ ] Purpose: 興櫃股票當日盤後行情
+- [ ] Published source fields: Average, PreviousAveragePrice, Highest, Lowest, TransactionVolume
+- [ ] Allowed derived fields: 均價漲跌額、均價漲跌幅、上漲/下跌/平盤分類、估算成交金額、同日排行
+- [ ] Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, LatestPrice, Buy/Sell, SuspendTime
+- [ ] 已確認 `估算成交金額` is derived from rounded source values and is unsuitable for exact reconciliation.
+- [ ] 已確認公開輸出沒有即時、買賣價量或 `LatestPrice`。
