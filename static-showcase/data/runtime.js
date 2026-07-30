@@ -19,7 +19,7 @@ const fmtDate = (value) => {
 };
 const setRows = (selector, rows) => {
   const target = document.querySelector(selector);
-  if (target) target.innerHTML = rows.join("");
+  if (target) target.innerHTML = rows.map((row) => `<tr>${row}</tr>`).join("");
 };
 try {
   document.querySelector(".badge").textContent = "市場資料中心";
