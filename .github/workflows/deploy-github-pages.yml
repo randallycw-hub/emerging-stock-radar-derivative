@@ -43,6 +43,17 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Resolve Taipei date
+        id: market-date
+        shell: bash
+        run: echo "date=$(TZ=Asia/Taipei date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Restore partial market collection
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/official-market
+          key: official-market-${{ runner.os }}-${{ steps.market-date.outputs.date }}-${{ github.run_id }}
+          restore-keys: |
+            official-market-${{ runner.os }}-${{ steps.market-date.outputs.date }}-
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
@@ -55,6 +66,12 @@ jobs:
       - name: Refresh verified public datasets
         if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && steps.freshness.outputs.needed == 'true')
         run: npm run snapshot:showcase
+      - name: Save partial market collection
+        if: always() && (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/official-market
+          key: official-market-${{ runner.os }}-${{ steps.market-date.outputs.date }}-${{ github.run_id }}
       - name: Verify website
         if: github.event_name != 'schedule' || steps.freshness.outputs.needed == 'true'
         run: npm test

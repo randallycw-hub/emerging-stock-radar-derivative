@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
+import { buildHistoryPoints } from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
 import { multiplyDecimal } from "../lib/market-data/decimal.ts";
 import { fetchCurrentOfficialMarketData } from "./lib/official-market-fetch.mjs";
@@ -22,6 +23,7 @@ const MARKET_FILE_ENTRIES = [
   ["stock-closes.json", "stockCloses"],
   ["conversion-prices.json", "conversionPrices"],
   ["bond-market-view.json", "views"],
+  ["bond-market-history.json", "history"],
 ];
 
 export async function buildBondMarketSnapshot({
@@ -63,6 +65,17 @@ export async function buildBondMarketSnapshot({
   }
 
   await mkdir(outputDir, { recursive: true });
+  const previousHistory =
+    await readOptionalJson(join(outputDir, "bond-market-history.json")) ?? [];
+  if (!Array.isArray(previousHistory)) {
+    throw new TypeError("bond market history must be an array");
+  }
+  const currentHistory = buildHistoryPoints({
+    cbQuotes: collected.cbQuotes,
+    stockCloses: collected.stockCloses,
+    conversionPrices: collected.conversionPrices,
+  });
+  const history = mergeHistory(previousHistory, currentHistory);
   const stagingDir = await mkdtemp(join(dirname(outputDir), ".cb-market-"));
   try {
     const documents = {
@@ -70,6 +83,7 @@ export async function buildBondMarketSnapshot({
       stockCloses: collected.stockCloses,
       conversionPrices: collected.conversionPrices,
       views,
+      history,
     };
     const files = [];
     for (const [name, key] of MARKET_FILE_ENTRIES) {
@@ -89,12 +103,20 @@ export async function buildBondMarketSnapshot({
         generatedAt: asOfDate,
         datasets: [],
       };
+    const latestCbPriceDate = latestTradingDate(collected.cbQuotes);
+    const latestStockPriceDate = latestTradingDate(collected.stockCloses);
+    const dataDate = [latestCbPriceDate, latestStockPriceDate]
+      .filter(Boolean)
+      .sort()[0] ?? null;
     const manifest = {
       ...currentManifest,
       market: {
         status: "verified",
         generatedAt: generatedDate.toISOString(),
         requestedDate: collected.requestedDate ?? asOfDate,
+        latestCbPriceDate,
+        latestStockPriceDate,
+        dataDate,
         files,
       },
     };
@@ -115,6 +137,7 @@ export async function buildBondMarketSnapshot({
       report: {
         generatedAt: generatedDate.toISOString(),
         requestedDate: collected.requestedDate ?? asOfDate,
+        dataDate,
         validation: "passed",
         concurrency: 2,
         counts: {
@@ -133,6 +156,34 @@ export async function buildBondMarketSnapshot({
   }
 }
 
+function mergeHistory(previous, current) {
+  const points = new Map();
+  for (const point of [...previous, ...current]) {
+    if (
+      point === null
+      || typeof point !== "object"
+      || !/^\d{5,6}$/.test(point.bondCode)
+      || !isIsoDate(point.date)
+    ) {
+      throw new TypeError("invalid bond market history point");
+    }
+    points.set(`${point.bondCode}\u001f${point.date}`, point);
+  }
+  return [...points.values()].sort(
+    (left, right) =>
+      left.date.localeCompare(right.date)
+      || left.bondCode.localeCompare(right.bondCode),
+  );
+}
+
+function latestTradingDate(records) {
+  return records
+    .map((record) => record.tradingDate)
+    .filter(isIsoDate)
+    .sort()
+    .at(-1) ?? null;
+}
+
 export function bondInputsFrom11406Rows(rows) {
   if (!Array.isArray(rows)) throw new TypeError("11406 rows must be an array");
   return rows.flatMap((row, index) => {
@@ -140,8 +191,12 @@ export function bondInputsFrom11406Rows(rows) {
       throw new TypeError(`11406 row ${index + 1} must be an object`);
     }
     const bondCode = sourceText(row, "債券代碼");
-    if (bondCode === "") return [];
+    if (bondCode === "") {
+      if (isExplicitPrivateUnlistedBond(row)) return [];
+      throw new TypeError(`11406 row ${index + 1} has missing bond code`);
+    }
     if (!/^\d{5,6}$/.test(bondCode)) {
+      if (isExplicitPrivateUnlistedBond(row)) return [];
       throw new TypeError(`11406 row ${index + 1} has invalid bond code`);
     }
     const putText = sourceText(row, "賣回權日期");
@@ -172,6 +227,13 @@ export function bondInputsFrom11406Rows(rows) {
           )),
     }];
   });
+}
+
+function isExplicitPrivateUnlistedBond(row) {
+  return (
+    sourceText(row, "募集方式") === "8"
+    && sourceText(row, "上市櫃否") === "5"
+  );
 }
 
 function validateCandidate({ bondInputs, collected, views }) {

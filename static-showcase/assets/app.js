@@ -71,7 +71,7 @@ async function loadAndRender() {
   renderEmerging();
   renderIpo();
   renderHashRoute();
-  const marketDate = state.manifest?.market?.requestedDate;
+  const marketDate = state.manifest?.market?.dataDate;
   document.querySelector("#update-status").textContent = marketDate
     ? `盤後資料日 ${marketDate}`
     : `資料版本 ${state.manifest?.generatedAt ?? "讀取完成"}`;
@@ -147,7 +147,7 @@ function renderSummary() {
   setText("#summary-emerging", formatNumber(state.revenue.length));
   setText(
     "#summary-date",
-    state.manifest?.market?.requestedDate ?? state.manifest?.generatedAt ?? "—",
+    state.manifest?.market?.dataDate ?? state.manifest?.generatedAt ?? "—",
   );
 }
 

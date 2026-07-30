@@ -17,6 +17,11 @@ test("GitHub Pages retries after close and contains no Worker relay", async () =
   assert.match(workflow, /npm\.cmd|npm ci/);
   assert.match(workflow, /snapshot:showcase/);
   assert.match(workflow, /check-market-refresh-needed\.mjs/);
+  assert.match(workflow, /actions\/cache\/restore@v4/);
+  assert.match(workflow, /actions\/cache\/save@v4/);
+  assert.match(workflow, /\.cache\/official-market/);
+  assert.match(workflow, /TZ=Asia\/Taipei date \+%F/);
+  assert.match(workflow, /if:\s*always\(\)/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.doesNotMatch(workflow, /cloudflare|workers\.dev|relay-approved/i);
 
@@ -39,6 +44,7 @@ test("scheduled retry skips only a verified snapshot for the Taipei date", () =>
         market: {
           status: "verified",
           requestedDate: "2026-07-30",
+          dataDate: "2026-07-30",
         },
       },
       now,
@@ -51,6 +57,7 @@ test("scheduled retry skips only a verified snapshot for the Taipei date", () =>
         market: {
           status: "verified",
           requestedDate: "2026-07-29",
+          dataDate: "2026-07-29",
         },
       },
       now,
@@ -63,6 +70,20 @@ test("scheduled retry skips only a verified snapshot for the Taipei date", () =>
         market: {
           status: "failed",
           requestedDate: "2026-07-30",
+          dataDate: "2026-07-30",
+        },
+      },
+      now,
+    }),
+    true,
+  );
+  assert.equal(
+    marketRefreshNeeded({
+      manifest: {
+        market: {
+          status: "verified",
+          requestedDate: "2026-07-30",
+          dataDate: "2026-07-29",
         },
       },
       now,

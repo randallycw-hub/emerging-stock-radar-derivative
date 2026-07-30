@@ -54,13 +54,48 @@ export async function fetchMopsDetail(
   );
 }
 
+export async function fetchMopsConversionPrice(
+  entry,
+  fetchImpl = fetch,
+  sleepImpl = sleep,
+) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    try {
+      return parseMopsConversionPrice(
+        await fetchMopsDetail(entry.officialDetailUrl, fetchImpl),
+        entry.officialDetailUrl,
+      );
+    } catch (error) {
+      const retryableMissingFields = (
+        error instanceof TypeError
+        && error.message === "missing MOPS conversion field"
+      );
+      if (!retryableMissingFields || attempt === MAX_ATTEMPTS) {
+        throw new Error(
+          `MOPS_CONVERSION_PARSE_FAILED:${entry.bondCode}:${entry.officialDetailUrl}`,
+          { cause: error },
+        );
+      }
+      await sleepImpl(250 * 2 ** (attempt - 1));
+    }
+  }
+  throw new Error(`MOPS_CONVERSION_PARSE_FAILED:${entry.bondCode}`);
+}
+
 export async function fetchCurrentOfficialMarketData({
   bondCodes,
   issuerCodes,
   date,
   fetchImpl = fetch,
+  sleepImpl = sleep,
+  perRequestDelayMs = 350,
+  checkpoint = {},
+  onCheckpoint = async () => {},
 }) {
   if (!isIsoDate(date)) throw new TypeError("date must be a valid ISO date");
+  if (!Number.isInteger(perRequestDelayMs) || perRequestDelayMs < 0) {
+    throw new TypeError("perRequestDelayMs must be a non-negative integer");
+  }
   const requestedBondCodes = uniqueCodes(bondCodes, /^\d{5,6}$/, "bond code");
   const requestedIssuerCodes = uniqueCodes(
     issuerCodes,
@@ -101,7 +136,10 @@ export async function fetchCurrentOfficialMarketData({
     .filter((entry) => bondSet.has(entry.bondCode));
 
   const requestDate = date.replaceAll("-", "/");
-  const quoteGroups = await mapLimit(requestedBondCodes, 2, async (bondCode) => {
+  const quoteGroups = await mapLimit(requestedBondCodes, 1, async (bondCode) => {
+    const cached = checkpoint.cbQuotesByBondCode?.[bondCode];
+    if (Array.isArray(cached)) return cached;
+    await sleepImpl(perRequestDelayMs);
     const body = new URLSearchParams({
       date: requestDate,
       code: bondCode,
@@ -113,16 +151,40 @@ export async function fetchCurrentOfficialMarketData({
       fetchImpl,
     );
     const table = verifiedCbQuoteTable(payload);
-    return table.data.map((row) => normalizeCbQuoteRow(bondCode, row));
+    const values = table.data.map((row) => normalizeCbQuoteRow(bondCode, row));
+    await onCheckpoint({
+      kind: "cbQuotesByBondCode",
+      key: bondCode,
+      value: values,
+    });
+    return values;
   });
 
   const conversionPrices = await mapLimit(
     conversionEntries,
-    2,
-    async (entry) => parseMopsConversionPrice(
-      await fetchMopsDetail(entry.officialDetailUrl, fetchImpl),
-      entry.officialDetailUrl,
-    ),
+    1,
+    async (entry) => {
+      const cached = checkpoint.conversionPricesByBondCode?.[entry.bondCode];
+      if (
+        cached !== null
+        && typeof cached === "object"
+        && !Array.isArray(cached)
+      ) {
+        return cached;
+      }
+      await sleepImpl(perRequestDelayMs);
+      const value = await fetchMopsConversionPrice(
+        entry,
+        fetchImpl,
+        sleepImpl,
+      );
+      await onCheckpoint({
+        kind: "conversionPricesByBondCode",
+        key: entry.bondCode,
+        value,
+      });
+      return value;
+    },
   );
 
   return {
@@ -138,6 +200,10 @@ export async function fetchCurrentOfficialMarketData({
       ...conversionEntries.map((entry) => entry.officialDetailUrl),
     ],
   };
+}
+
+function sleep(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 export async function fetchCbMonthlyHistory({
@@ -293,7 +359,7 @@ async function fetchTextWithRetry(
       if (!contentType.toLowerCase().includes(expectedContentType)) {
         throw new TypeError(`UNEXPECTED_CONTENT_TYPE:${url}:${contentType}`);
       }
-      return response.text();
+      return await response.text();
     } catch (error) {
       lastError = error;
       if (attempt === MAX_ATTEMPTS || !isRetryableNetworkError(error)) throw error;

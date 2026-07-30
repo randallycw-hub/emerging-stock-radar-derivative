@@ -94,15 +94,25 @@ export function normalizeTpexStockClose(
   row: Record<string, string>,
 ): StockClose {
   assertOfficialRow(row, TPEX_FIELDS, "TPEx stock close");
+  const change = normalizeTpexChange(row.Change);
   return {
     companyCode: companyCode(row.SecuritiesCompanyCode),
     market: "otc",
     tradingDate: normalizeOfficialDate(row.Date),
     close: requiredDecimal(row.Close, "Close"),
-    change: requiredSignedDecimal(row.Change, "Change"),
+    ...change,
     volume: requiredInteger(row.TradingShares, "TradingShares"),
     turnover: requiredInteger(row.TransactionAmount, "TransactionAmount"),
   };
+}
+
+function normalizeTpexChange(
+  value: string,
+): Pick<StockClose, "change" | "changeEvent"> {
+  if (value.trim() === "除息") {
+    return { change: null, changeEvent: "ex-dividend" };
+  }
+  return { change: requiredSignedDecimal(value, "Change") };
 }
 
 export function parseConversionIndex(payload: unknown): readonly {

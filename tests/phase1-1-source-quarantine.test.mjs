@@ -21,6 +21,12 @@ const approvedEndpoints = new Set([
   "https://www.tpex.org.tw/openapi/v1/t187ap05_R",
   "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies",
   "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_R",
+  "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry",
+  "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL",
+  "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes",
+  "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
+  "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
+  "https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock",
 ]);
 
 async function filesUnder(relativePath) {

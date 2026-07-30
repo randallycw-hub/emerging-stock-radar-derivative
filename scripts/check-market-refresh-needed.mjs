@@ -13,7 +13,7 @@ export function marketRefreshNeeded({ manifest, now = new Date() } = {}) {
 
   return !(
     manifest?.market?.status === "verified"
-    && manifest.market.requestedDate === taipeiDate
+    && manifest.market.dataDate === taipeiDate
   );
 }
 

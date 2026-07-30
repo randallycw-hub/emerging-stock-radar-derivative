@@ -20,7 +20,8 @@ export type StockClose = {
   market: "listed" | "otc";
   tradingDate: string;
   close: string;
-  change: string;
+  change: string | null;
+  changeEvent?: "ex-dividend";
   volume: string;
   turnover: string;
 };

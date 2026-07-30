@@ -99,6 +99,66 @@ test("maps official 11406 dates, put dates and amount units exactly", () => {
   }]);
 });
 
+test("excludes only explicitly private unlisted 11406 bonds without hiding malformed public codes", () => {
+  assert.deepEqual(bondInputsFrom11406Rows([
+    {
+      債券代碼: "YI31AA",
+      機構代碼: "2911",
+      債券簡稱: "麗嬰房私債一",
+      到期日期: "20281206",
+      發行總額: "300000000",
+      目前餘額: "300000000",
+      賣回權日期: "",
+      掛牌地點: "0",
+      上市櫃否: "5",
+      募集方式: "8",
+    },
+    {
+      債券代碼: "YB66AC",
+      機構代碼: "6165",
+      債券簡稱: "浪凡私債三",
+      到期日期: "20281206",
+      發行總額: "300000000",
+      目前餘額: "300000000",
+      賣回權日期: "",
+      掛牌地點: "1",
+      上市櫃否: "5",
+      募集方式: "8",
+    },
+  ]), []);
+
+  assert.throws(
+    () => bondInputsFrom11406Rows([{
+      債券代碼: "BAD-CODE",
+      機構代碼: "2911",
+      債券簡稱: "錯誤公開債券",
+      到期日期: "20281206",
+      發行總額: "300000000",
+      目前餘額: "300000000",
+      賣回權日期: "",
+      掛牌地點: "1",
+      上市櫃否: "1",
+      募集方式: "1",
+    }]),
+    /invalid bond code/,
+  );
+  assert.throws(
+    () => bondInputsFrom11406Rows([{
+      債券代碼: "",
+      機構代碼: "2911",
+      債券簡稱: "缺少代碼的公開債券",
+      到期日期: "20281206",
+      發行總額: "300000000",
+      目前餘額: "300000000",
+      賣回權日期: "",
+      掛牌地點: "1",
+      上市櫃否: "1",
+      募集方式: "1",
+    }]),
+    /missing bond code/,
+  );
+});
+
 test("a failed candidate leaves every published market file unchanged", async () => {
   const outputDir = await makePublishedDirectory();
   const names = [
@@ -135,8 +195,20 @@ test("a failed candidate leaves every published market file unchanged", async ()
   }
 });
 
-test("a valid candidate publishes four verified files with one generatedAt", async () => {
+test("a valid candidate publishes verified files and appends exact-date history", async () => {
   const outputDir = await makePublishedDirectory();
+  await writeFile(
+    join(outputDir, "bond-market-history.json"),
+    `${JSON.stringify([{
+      bondCode: "35221",
+      date: "2026-07-28",
+      cbClose: "102",
+      stockClose: "37",
+      effectiveConversionPrice: "35.1",
+      conversionValue: "105.41",
+      premiumRate: "-3.24",
+    }])}\n`,
+  );
   const result = await buildBondMarketSnapshot({
     outputDir,
     bonds: [bond],
@@ -145,9 +217,13 @@ test("a valid candidate publishes four verified files with one generatedAt", asy
   });
 
   assert.equal(result.status, "published");
-  assert.equal(result.files.length, 4);
+  assert.equal(result.files.length, 5);
   assert.equal(result.manifest.market.generatedAt, "2026-07-30T12:30:00.000Z");
   assert.equal(result.manifest.market.status, "verified");
+  assert.equal(result.manifest.market.requestedDate, "2026-07-30");
+  assert.equal(result.manifest.market.latestCbPriceDate, "2026-07-29");
+  assert.equal(result.manifest.market.latestStockPriceDate, "2026-07-29");
+  assert.equal(result.manifest.market.dataDate, "2026-07-29");
   assert.equal(result.report.validation, "passed");
 
   for (const file of result.manifest.market.files) {
@@ -163,5 +239,12 @@ test("a valid candidate publishes four verified files with one generatedAt", asy
   assert.equal(
     storedManifest.market.generatedAt,
     result.manifest.market.generatedAt,
+  );
+  const history = JSON.parse(
+    await readFile(join(outputDir, "bond-market-history.json"), "utf8"),
+  );
+  assert.deepEqual(
+    history.map((point) => point.date),
+    ["2026-07-28", "2026-07-29"],
   );
 });

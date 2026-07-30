@@ -79,6 +79,26 @@ test("normalizes official TWSE and TPEx stock closes", async () => {
   });
 });
 
+test("preserves a TPEx ex-dividend marker without inventing a numeric change", async () => {
+  const [tpex] = await jsonFixture("tpex-stock-close.json");
+
+  assert.deepEqual(normalizeTpexStockClose({
+    ...tpex,
+    SecuritiesCompanyCode: "3131",
+    Close: "2255.00",
+    Change: "除息 ",
+  }), {
+    companyCode: "3131",
+    market: "otc",
+    tradingDate: "2026-07-29",
+    close: "2255",
+    change: null,
+    changeEvent: "ex-dividend",
+    volume: "346776",
+    turnover: "4119795",
+  });
+});
+
 test("extracts exact bond and issuer codes from the approved MOPS URL", async () => {
   const payload = await jsonFixture("tpex-conversion-index.json");
   const [entry] = parseConversionIndex(payload);

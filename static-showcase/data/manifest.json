@@ -27,5 +27,40 @@
       "rawBytes": 66187,
       "rowCount": 354
     }
-  ]
+  ],
+  "market": {
+    "status": "verified",
+    "generatedAt": "2026-07-30T07:20:56.600Z",
+    "requestedDate": "2026-07-30",
+    "latestCbPriceDate": "2026-07-30",
+    "latestStockPriceDate": "2026-07-29",
+    "dataDate": "2026-07-29",
+    "files": [
+      {
+        "name": "cb-quotes.json",
+        "sha256": "sha256:0878f99d79ce13ef7be07435ae7ef1f3ee669319875435fe5908c9fda70d913e",
+        "recordCount": 15130
+      },
+      {
+        "name": "stock-closes.json",
+        "sha256": "sha256:c2d74faa6555ded378469aecbfd29772fcf14a2b44fda2deb0c1784d86530c3f",
+        "recordCount": 309
+      },
+      {
+        "name": "conversion-prices.json",
+        "sha256": "sha256:7497b2218ee3e1df2aba360a4ab388784142316e073965346c7ae3bd8d599a74",
+        "recordCount": 383
+      },
+      {
+        "name": "bond-market-view.json",
+        "sha256": "sha256:4b2e216ff4a0f56e892d2611f519b0457b9688286534090ea38152a93331d523",
+        "recordCount": 384
+      },
+      {
+        "name": "bond-market-history.json",
+        "sha256": "sha256:a6d2cbff3f35b379dd46fe302f2868dd179f3ed0db88ba978ddd2ed1560f47e4",
+        "recordCount": 4007
+      }
+    ]
+  }
 }

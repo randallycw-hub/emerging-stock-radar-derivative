@@ -6,6 +6,7 @@ import { mapLimit } from "../scripts/lib/map-limit.mjs";
 import {
   fetchCbMonthlyHistory,
   fetchCurrentOfficialMarketData,
+  fetchMopsConversionPrice,
   fetchMopsDetail,
   fetchTpexMonthlyStockHistory,
   fetchTwseMonthlyStockHistory,
@@ -67,6 +68,67 @@ test("fetchMopsDetail retries the same official URL for retryable status only", 
   assert.deepEqual(calls, [url, url]);
 });
 
+test("fetchMopsDetail retries when the official response body is interrupted", async () => {
+  const url =
+    "https://mopsov.twse.com.tw/mops/web/t120sg01?bond_id=35221&issuer_stock_code=3522";
+  const calls = [];
+  const fakeFetch = async (requestedUrl) => {
+    calls.push(requestedUrl);
+    if (calls.length === 1) {
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "text/html; charset=utf-8" }),
+        text: async () => {
+          throw new TypeError("terminated");
+        },
+      };
+    }
+    return new Response("<html>complete</html>", {
+      status: 200,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  };
+
+  assert.equal(
+    await fetchMopsDetail(url, fakeFetch),
+    "<html>complete</html>",
+  );
+  assert.deepEqual(calls, [url, url]);
+});
+
+test("fetchMopsConversionPrice retries a temporary HTML page without fields", async () => {
+  const entry = {
+    bondCode: "35221",
+    issuerCode: "3522",
+    officialDetailUrl:
+      "https://mopsov.twse.com.tw/mops/web/t120sg01?bond_id=35221&issuer_stock_code=3522",
+  };
+  const detail = await fixture("mops-bond-detail.html");
+  const calls = [];
+  const delays = [];
+  const result = await fetchMopsConversionPrice(
+    entry,
+    async (url) => {
+      calls.push(String(url));
+      return new Response(
+        calls.length === 1 ? "<html>系統忙碌</html>" : detail,
+        {
+          status: 200,
+          headers: { "content-type": "text/html; charset=utf-8" },
+        },
+      );
+    },
+    async (milliseconds) => {
+      delays.push(milliseconds);
+    },
+  );
+
+  assert.equal(result.currentConversionPrice, "18.2");
+  assert.deepEqual(calls, [entry.officialDetailUrl, entry.officialDetailUrl]);
+  assert.deepEqual(delays, [250]);
+});
+
 test("collects only requested official CB, stock and conversion records", async () => {
   const values = {
     quote: await fixture("tpex-cb-quote.json"),
@@ -104,12 +166,26 @@ test("collects only requested official CB, stock and conversion records", async 
     }
     throw new Error(`unexpected request: ${request.url}`);
   };
+  const delays = [];
+  const checkpoint = {
+    cbQuotesByBondCode: {},
+    conversionPricesByBondCode: {},
+  };
+  const onCheckpoint = async ({ kind, key, value }) => {
+    checkpoint[kind][key] = value;
+  };
 
   const result = await fetchCurrentOfficialMarketData({
     bondCodes: ["35221"],
     issuerCodes: ["2330", "3522"],
     date: "2026-07-30",
     fetchImpl: fakeFetch,
+    sleepImpl: async (milliseconds) => {
+      delays.push(milliseconds);
+    },
+    perRequestDelayMs: 350,
+    checkpoint,
+    onCheckpoint,
   });
 
   assert.equal(result.cbQuotes.length, 2);
@@ -126,6 +202,36 @@ test("collects only requested official CB, stock and conversion records", async 
   assert.ok(requests.some((request) =>
     request.body === "name=bondIssuer&searchNo=&response=json"
   ));
+  assert.deepEqual(delays, [350, 350]);
+  assert.equal(checkpoint.cbQuotesByBondCode["35221"].length, 2);
+  assert.equal(
+    checkpoint.conversionPricesByBondCode["35221"].currentConversionPrice,
+    "18.2",
+  );
+
+  requests.length = 0;
+  delays.length = 0;
+  await fetchCurrentOfficialMarketData({
+    bondCodes: ["35221"],
+    issuerCodes: ["2330", "3522"],
+    date: "2026-07-30",
+    fetchImpl: fakeFetch,
+    sleepImpl: async (milliseconds) => {
+      delays.push(milliseconds);
+    },
+    perRequestDelayMs: 350,
+    checkpoint,
+    onCheckpoint,
+  });
+  assert.equal(requests.length, 3);
+  assert.equal(
+    requests.some((request) =>
+      request.url.endsWith("/bond/cbDayQry")
+      || request.url.startsWith("https://mopsov.twse.com.tw/")
+    ),
+    false,
+  );
+  assert.deepEqual(delays, []);
 });
 
 test("normalizes the three verified monthly history contracts", async () => {
