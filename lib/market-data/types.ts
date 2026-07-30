@@ -34,3 +34,28 @@ export type ConversionPriceVersion = {
   officialDetailUrl: string;
 };
 
+export type BondMarketView = {
+  bondCode: string;
+  issuerCode: string;
+  bondName: string;
+  cbClose: string | null;
+  cbPriceDate: string | null;
+  cbTradeUnits: string;
+  stockClose: string | null;
+  stockPriceDate: string | null;
+  currentConversionPrice: string | null;
+  conversionPriceEffectiveDate: string | null;
+  valuationDate: string | null;
+  valuationCbClose: string | null;
+  valuationStockClose: string | null;
+  conversionValue: string | null;
+  premiumRate: string | null;
+  outstandingAmount: string | null;
+  outstandingReductionRate: string | null;
+  maturityDate: string;
+  daysToMaturity: number;
+  nextPutDate: string | null;
+  daysToNextPut: number | null;
+  staleCbPrice: boolean;
+  missingReasons: readonly string[];
+};
