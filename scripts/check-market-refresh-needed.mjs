@@ -24,9 +24,21 @@ export async function checkPublishedMarket({
 } = {}) {
   if (!manifestUrl) return true;
   try {
-    const response = await fetchImpl(manifestUrl, {
+    const pointerResponse = await fetchImpl(manifestUrl, {
       headers: { Accept: "application/json" },
       redirect: "error",
+    });
+    if (!pointerResponse.ok) return true;
+    const pointer = await pointerResponse.json();
+    if (typeof pointer?.runtimeUrl !== "string") return true;
+    const runtimeResponse = await fetchImpl(pointer.runtimeUrl, {
+      headers: { Accept: "application/json" }, redirect: "error",
+    });
+    if (!runtimeResponse.ok) return true;
+    const runtime = await runtimeResponse.json();
+    if (typeof runtime?.manifestUrl !== "string") return true;
+    const response = await fetchImpl(runtime.manifestUrl, {
+      headers: { Accept: "application/json" }, redirect: "error",
     });
     if (!response.ok) return true;
     return marketRefreshNeeded({

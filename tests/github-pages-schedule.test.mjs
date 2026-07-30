@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { marketRefreshNeeded } from "../scripts/check-market-refresh-needed.mjs";
+import { checkPublishedMarket, marketRefreshNeeded } from "../scripts/check-market-refresh-needed.mjs";
 
 test("GitHub Pages retries after close and contains no Worker relay", async () => {
   const workflow = await readFile(
@@ -98,4 +98,17 @@ test("scheduled retry skips only a verified snapshot for the Taipei date", () =>
     true,
   );
   assert.equal(marketRefreshNeeded({ manifest: null, now }), true);
+});
+
+test("published freshness resolves current generation and fails open for stale or invalid pointers", async () => {
+  const now = new Date("2026-07-30T13:30:00.000Z");
+  const urls = ["https://site.test/data/current.json", "https://site.test/data/generations/a/runtime.json", "https://site.test/data/generations/a/manifest.json"];
+  const fetchImpl = async (url) => new Response(JSON.stringify(
+    url === urls[0] ? { runtimeUrl: urls[1] }
+      : url === urls[1] ? { manifestUrl: urls[2] }
+      : { market: { status: "verified", dataDate: "2026-07-30" } },
+  ), { status: 200 });
+  assert.equal(await checkPublishedMarket({ manifestUrl: urls[0], fetchImpl, now }), false);
+  assert.equal(await checkPublishedMarket({ manifestUrl: urls[0], fetchImpl: async () => new Response("{}", { status: 200 }), now }), true);
+  assert.equal(await checkPublishedMarket({ manifestUrl: urls[0], fetchImpl: async () => new Response("", { status: 404 }), now }), true);
 });

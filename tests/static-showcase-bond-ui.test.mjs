@@ -60,6 +60,7 @@ test("static showcase exposes the complete CB trading workspace", async () => {
 test("static showcase keeps presentation out of generated runtime data", async () => {
   const runtime = await readFile(new URL("data/runtime.js", root), "utf8");
   assert.match(runtime, /window\.__OFFICIAL_SHOWCASE__/);
-  assert.match(runtime, /manifestUrl/);
+  assert.match(runtime, /generationPointerUrl/);
+  assert.doesNotMatch(runtime, /manifestUrl/);
   assert.doesNotMatch(runtime, /document\.querySelector|innerHTML|const val =/);
 });

@@ -61,7 +61,7 @@ jobs:
         if: github.event_name == 'schedule'
         id: freshness
         env:
-          PUBLIC_MANIFEST_URL: ${{ steps.pages.outputs.base_url }}/data/manifest.json
+          PUBLIC_MANIFEST_URL: ${{ steps.pages.outputs.base_url }}/data/current.json
         run: node scripts/check-market-refresh-needed.mjs >> "$GITHUB_OUTPUT"
       - name: Refresh verified public datasets
         id: refresh
