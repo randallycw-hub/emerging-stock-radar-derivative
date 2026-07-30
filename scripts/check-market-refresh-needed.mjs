@@ -31,13 +31,13 @@ export async function checkPublishedMarket({
     if (!pointerResponse.ok) return true;
     const pointer = await pointerResponse.json();
     if (typeof pointer?.runtimeUrl !== "string") return true;
-    const runtimeResponse = await fetchImpl(pointer.runtimeUrl, {
+    const runtimeResponse = await fetchImpl(resolvePublishedUrl(manifestUrl, pointer.runtimeUrl), {
       headers: { Accept: "application/json" }, redirect: "error",
     });
     if (!runtimeResponse.ok) return true;
     const runtime = await runtimeResponse.json();
     if (typeof runtime?.manifestUrl !== "string") return true;
-    const response = await fetchImpl(runtime.manifestUrl, {
+    const response = await fetchImpl(resolvePublishedUrl(manifestUrl, runtime.manifestUrl), {
       headers: { Accept: "application/json" }, redirect: "error",
     });
     if (!response.ok) return true;
@@ -48,6 +48,15 @@ export async function checkPublishedMarket({
   } catch {
     return true;
   }
+}
+
+function resolvePublishedUrl(currentUrl, publishedUrl) {
+  const current = new URL(currentUrl);
+  if (!publishedUrl.startsWith("./data/")) return new URL(publishedUrl, current).href;
+  const marker = "/data/";
+  const index = current.pathname.indexOf(marker);
+  if (index < 0) throw new TypeError("current pointer must be under /data/");
+  return new URL(publishedUrl.slice(2), `${current.origin}${current.pathname.slice(0, index + 1)}`).href;
 }
 
 const entryUrl = process.argv[1]
