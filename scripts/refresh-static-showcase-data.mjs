@@ -20,20 +20,22 @@ const DATA_DIRECTORY = "static-showcase/data";
 const RUNTIME_PATH = `${DATA_DIRECTORY}/runtime.js`;
 const INDEX_PATH = "static-showcase/index.html";
 
-export function buildEmbeddedRuntime(existingRuntime, manifest, datasets) {
-  const presentationStart = existingRuntime.indexOf("const val = ");
-  if (presentationStart < 0) {
-    throw new Error("runtime presentation marker not found");
-  }
-  const prefix = [
-    `const manifest = ${JSON.stringify(manifest)};`,
-    `const embeddedData = ${JSON.stringify(datasets)};`,
-    'const revenue = embeddedData["94025"];',
-    'const bonds = embeddedData["11406"];',
-    'const ipo = embeddedData["11586"];',
-    "",
-  ].join("\n");
-  return prefix + existingRuntime.slice(presentationStart);
+export function buildRuntimeBootstrap() {
+  return [
+    "window.__OFFICIAL_SHOWCASE__ = ",
+    JSON.stringify({
+      manifestUrl: "./data/manifest.json",
+      datasets: {
+        "94025": "./data/94025.json",
+        "11406": "./data/11406.json",
+        "11586": "./data/11586.json",
+        bondMarket: "./data/bond-market-view.json",
+        conversionPrices: "./data/conversion-prices.json",
+        bondHistory: "./data/bond-market-history.json",
+      },
+    }),
+    ";\n",
+  ].join("");
 }
 
 export async function refreshStaticShowcase({
@@ -99,9 +101,7 @@ export async function refreshStaticShowcase({
       "utf8",
     );
   }
-  const currentRuntime = await readFile(RUNTIME_PATH, "utf8");
-  const nextRuntime = buildEmbeddedRuntime(currentRuntime, manifest, datasets);
-  await writeFile(RUNTIME_PATH, nextRuntime, "utf8");
+  await writeFile(RUNTIME_PATH, buildRuntimeBootstrap(manifest), "utf8");
 
   const cacheKey = createHash("sha256")
     .update(JSON.stringify(manifestDatasets))

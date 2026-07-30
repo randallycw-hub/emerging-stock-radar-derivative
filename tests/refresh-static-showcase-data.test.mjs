@@ -3,7 +3,7 @@ import test from "node:test";
 
 import {
   OFFICIAL_SHOWCASE_SOURCES,
-  buildEmbeddedRuntime,
+  buildRuntimeBootstrap,
 } from "../scripts/refresh-static-showcase-data.mjs";
 
 test("正式展示資料只從核准的三個官方 CSV 匯入", () => {
@@ -15,15 +15,12 @@ test("正式展示資料只從核准的三個官方 CSV 匯入", () => {
   });
 });
 
-test("重新產生 runtime 時保留呈現程式並替換正式資料前綴", () => {
-  const existing =
-    'const manifest = {"old":true};\nconst embeddedData = {};\nconst revenue = [];\nconst bonds = [];\nconst ipo = [];\nconst val = () => "保留";\n';
+test("重新產生 runtime 時只寫入正式資料網址，不嵌入呈現程式", () => {
   const manifest = { generatedAt: "2026-07-30", datasets: [] };
-  const datasets = { "94025": [{ 公司代號: "1260" }], "11406": [], "11586": [] };
+  const result = buildRuntimeBootstrap(manifest);
 
-  const result = buildEmbeddedRuntime(existing, manifest, datasets);
-
-  assert.match(result, /"公司代號":"1260"/);
-  assert.match(result, /const val = \(\) => "保留";/);
-  assert.doesNotMatch(result, /"old":true/);
+  assert.match(result, /window\.__OFFICIAL_SHOWCASE__/);
+  assert.match(result, /"manifestUrl":"\.\/data\/manifest\.json"/);
+  assert.match(result, /"11406":"\.\/data\/11406\.json"/);
+  assert.doesNotMatch(result, /公司代號|document\.querySelector/);
 });
