@@ -64,7 +64,8 @@ jobs:
           PUBLIC_MANIFEST_URL: ${{ steps.pages.outputs.base_url }}/data/manifest.json
         run: node scripts/check-market-refresh-needed.mjs >> "$GITHUB_OUTPUT"
       - name: Refresh verified public datasets
-        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && steps.freshness.outputs.needed == 'true')
+        id: refresh
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && steps.freshness.outputs.needed == 'true')
         run: npm run snapshot:showcase
       - name: Save partial market collection
         if: always() && (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
@@ -73,14 +74,14 @@ jobs:
           path: .cache/official-market
           key: official-market-${{ runner.os }}-${{ steps.market-date.outputs.date }}-${{ github.run_id }}
       - name: Verify website
-        if: github.event_name != 'schedule' || steps.freshness.outputs.needed == 'true'
+        if: steps.refresh.outcome == 'success'
         run: npm test
       - name: Upload showcase
-        if: github.event_name != 'schedule' || steps.freshness.outputs.needed == 'true'
+        if: steps.refresh.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
         with:
           path: static-showcase
       - name: Deploy
-        if: github.event_name != 'schedule' || steps.freshness.outputs.needed == 'true'
+        if: steps.refresh.outcome == 'success'
         id: deployment
         uses: actions/deploy-pages@v4

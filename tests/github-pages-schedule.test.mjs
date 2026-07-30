@@ -16,6 +16,8 @@ test("GitHub Pages retries after close and contains no Worker relay", async () =
   assert.match(workflow, /node-version:\s*22/);
   assert.match(workflow, /npm\.cmd|npm ci/);
   assert.match(workflow, /snapshot:showcase/);
+  assert.match(workflow, /github\.event_name == 'push'/);
+  assert.match(workflow, /steps\.refresh\.outcome == 'success'/);
   assert.match(workflow, /check-market-refresh-needed\.mjs/);
   assert.match(workflow, /actions\/cache\/restore@v4/);
   assert.match(workflow, /actions\/cache\/save@v4/);
@@ -33,6 +35,11 @@ test("GitHub Pages retries after close and contains no Worker relay", async () =
     access("scripts/relay-approved-sources.mjs"),
     /ENOENT/,
   );
+});
+
+test("tracked showcase contains no emerging-market fixture or active generation pointer", async () => {
+  await assert.rejects(access("static-showcase/data/emerging-market.json"), /ENOENT/);
+  await assert.rejects(access("static-showcase/data/current.json"), /ENOENT/);
 });
 
 test("scheduled retry skips only a verified snapshot for the Taipei date", () => {

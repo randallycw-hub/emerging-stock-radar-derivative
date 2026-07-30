@@ -43,19 +43,23 @@ export function buildRuntimeBootstrap() {
   return [
     "window.__OFFICIAL_SHOWCASE__ = ",
     JSON.stringify({
-      manifestUrl: "./data/manifest.json",
-      emergingMarketUrl: "./data/emerging-market.json",
-      datasets: {
-        "94025": "./data/94025.json",
-        "11406": "./data/11406.json",
-        "11586": "./data/11586.json",
-        bondMarket: "./data/bond-market-view.json",
-        conversionPrices: "./data/conversion-prices.json",
-        bondHistory: "./data/bond-market-history.json",
-      },
+      generationPointerUrl: "./data/current.json",
     }),
     ";\n",
   ].join("");
+}
+
+function buildGenerationRuntime(generation) {
+  const base = `./data/${generation}`;
+  return {
+    generation,
+    manifestUrl: `${base}/manifest.json`,
+    emergingMarketUrl: `${base}/emerging-market.json`,
+    datasets: {
+      "94025": `${base}/94025.json`, "11406": `${base}/11406.json`, "11586": `${base}/11586.json`,
+      bondMarket: `${base}/bond-market-view.json`, conversionPrices: `${base}/conversion-prices.json`, bondHistory: `${base}/bond-market-history.json`,
+    },
+  };
 }
 
 export function updateRuntimeCacheKey(html, cacheKey) {
@@ -229,22 +233,19 @@ export async function refreshStaticShowcase({
   const companyRows = newest94025CompanyRows(datasetTexts["94025"]);
   const emergingSnapshot = buildEmergingMarketSnapshot({ marketRows, companyRows });
 
+  const generation = `generations/${createHash("sha256").update(JSON.stringify(manifestDatasets)).update(now.toISOString()).digest("hex").slice(0, 16)}`;
   const baseManifest = {
     kind: "official-source-snapshot",
     status: "official-static-snapshot",
     generatedAt: taipeiDate(now),
     datasets: manifestDatasets,
-    emergingMarketUrl: "./data/emerging-market.json",
+    emergingMarketUrl: `./data/${generation}/emerging-market.json`,
   };
 
   const stagingRoot = await mkdtemp(join(dirname(DATA_DIRECTORY), ".showcase-"));
   const stagingDataDirectory = join(stagingRoot, "data");
-  const stagingIndexPath = join(stagingRoot, "index.html");
   try {
-    await copyDirectoryIfExists(DATA_DIRECTORY, stagingDataDirectory);
     await mkdir(stagingDataDirectory, { recursive: true });
-    const currentIndex = await readFile(INDEX_PATH, "utf8");
-    await writeFile(stagingIndexPath, currentIndex, "utf8");
 
     for (const [datasetId, rows] of Object.entries(datasets)) {
       await writeFile(
@@ -281,18 +282,8 @@ export async function refreshStaticShowcase({
       "utf8",
     );
     await writeFile(
-      join(stagingDataDirectory, "runtime.js"),
-      buildRuntimeBootstrap(manifest),
-      "utf8",
-    );
-
-    const cacheKey = createHash("sha256")
-      .update(JSON.stringify(manifest))
-      .digest("hex")
-      .slice(0, 12);
-    await writeFile(
-      stagingIndexPath,
-      updateRuntimeCacheKey(currentIndex, cacheKey),
+      join(stagingDataDirectory, "runtime.json"),
+      `${JSON.stringify(buildGenerationRuntime(generation), null, 2)}\n`,
       "utf8",
     );
     await verifyStagedEmergingSnapshot(stagingDataDirectory);
@@ -301,16 +292,14 @@ export async function refreshStaticShowcase({
       ...Object.keys(datasets).map((datasetId) => `${datasetId}.json`),
       "emerging-market.json",
       "manifest.json",
-      "runtime.js",
+      "runtime.json",
       ...(marketResult.files ?? []),
     ];
-    await publishAtomically([
-      ...[...new Set(publishedNames)].map((name) => ({
-        source: join(stagingDataDirectory, name),
-        target: join(DATA_DIRECTORY, name),
-      })),
-      { source: stagingIndexPath, target: INDEX_PATH },
-    ]);
+    await mkdir(join(DATA_DIRECTORY, "generations"), { recursive: true });
+    await rename(stagingDataDirectory, join(DATA_DIRECTORY, generation));
+    const pointerStage = join(stagingRoot, "current.json");
+    await writeFile(pointerStage, `${JSON.stringify({ schemaVersion: 1, generation, runtimeUrl: `./data/${generation}/runtime.json` })}\n`, "utf8");
+    await rename(pointerStage, join(DATA_DIRECTORY, "current.json"));
 
     return {
       manifest,
@@ -388,11 +377,11 @@ async function verifyStagedEmergingSnapshot(stagingDataDirectory) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_INTEGRITY");
   }
   const manifest = JSON.parse(await readFile(join(stagingDataDirectory, "manifest.json"), "utf8"));
-  if (manifest.emergingMarketUrl !== "./data/emerging-market.json") {
+  if (!/^\.\/data\/generations\/[a-f0-9]+\/emerging-market\.json$/.test(manifest.emergingMarketUrl)) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_MANIFEST");
   }
-  const runtime = await readFile(join(stagingDataDirectory, "runtime.js"), "utf8");
-  if (!runtime.includes('"emergingMarketUrl":"./data/emerging-market.json"')) {
+  const runtime = JSON.parse(await readFile(join(stagingDataDirectory, "runtime.json"), "utf8"));
+  if (runtime.generation === undefined || runtime.emergingMarketUrl !== manifest.emergingMarketUrl) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_RUNTIME");
   }
 }

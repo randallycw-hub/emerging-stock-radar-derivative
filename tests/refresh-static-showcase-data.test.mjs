@@ -73,9 +73,9 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
     assert.equal(requested.filter((url) => url === OFFICIAL_SHOWCASE_SOURCES.emergingMarket).length, 1);
     assert.ok(maximumConcurrency <= 2);
 
-    const snapshot = JSON.parse(await readFile(
-      join(root, "static-showcase/data/emerging-market.json"), "utf8",
-    ));
+    const pointer = JSON.parse(await readFile(join(root, "static-showcase/data/current.json"), "utf8"));
+    const generationRoot = join(root, "static-showcase/data", pointer.generation);
+    const snapshot = JSON.parse(await readFile(join(generationRoot, "emerging-market.json"), "utf8"));
     assert.deepEqual(Object.keys(snapshot).sort(), [
       "publishedAt", "records", "schemaVersion", "sourceId", "tradingDate",
     ]);
@@ -89,10 +89,25 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
     assert.equal("LatestPrice" in snapshot.records[0], false);
     assert.equal("BuyingPrice" in snapshot.records[0], false);
 
-    const manifest = JSON.parse(await readFile(join(root, "static-showcase/data/manifest.json"), "utf8"));
-    assert.equal(manifest.emergingMarketUrl, "./data/emerging-market.json");
-    const runtime = await readFile(join(root, "static-showcase/data/runtime.js"), "utf8");
-    assert.match(runtime, /"emergingMarketUrl":"\.\/data\/emerging-market\.json"/);
+    const manifest = JSON.parse(await readFile(join(generationRoot, "manifest.json"), "utf8"));
+    assert.equal(manifest.emergingMarketUrl, `./data/${pointer.generation}/emerging-market.json`);
+    const runtime = JSON.parse(await readFile(join(generationRoot, "runtime.json"), "utf8"));
+    assert.equal(runtime.generation, pointer.generation);
+    assert.equal(runtime.manifestUrl, `./data/${pointer.generation}/manifest.json`);
+  });
+});
+
+test("refresh leaves the prior generation untouched when publication fails before pointer switch", async () => {
+  await withTemporaryShowcase(async (root) => {
+    await seedPriorGeneration(root);
+    const beforePointer = await readFile(join(root, "static-showcase/data/current.json"), "utf8");
+    const beforeManifest = await readFile(join(root, "static-showcase/data/generations/old/manifest.json"), "utf8");
+    await assert.rejects(refreshStaticShowcase({
+      fetchImpl: async () => new Response("ignored", { status: 500 }),
+      marketBuilder: async () => assert.fail("must not publish"),
+    }));
+    assert.equal(await readFile(join(root, "static-showcase/data/current.json"), "utf8"), beforePointer);
+    assert.equal(await readFile(join(root, "static-showcase/data/generations/old/manifest.json"), "utf8"), beforeManifest);
   });
 });
 
@@ -143,9 +158,7 @@ test("重新產生 runtime 時只寫入正式資料網址，不嵌入呈現程�
   const result = buildRuntimeBootstrap(manifest);
 
   assert.match(result, /window\.__OFFICIAL_SHOWCASE__/);
-  assert.match(result, /"manifestUrl":"\.\/data\/manifest\.json"/);
-  assert.match(result, /"11406":"\.\/data\/11406\.json"/);
-  assert.match(result, /"emergingMarketUrl":"\.\/data\/emerging-market\.json"/);
+  assert.match(result, /"generationPointerUrl":"\.\/data\/current\.json"/);
   assert.doesNotMatch(result, /公司代號|document\.querySelector/);
 });
 
@@ -217,4 +230,12 @@ async function withTemporaryShowcase(run) {
     process.chdir(originalDirectory);
     await rm(root, { recursive: true, force: true });
   }
+}
+
+async function seedPriorGeneration(root) {
+  const generation = join(root, "static-showcase/data/generations/old");
+  await mkdir(generation, { recursive: true });
+  await writeFile(join(generation, "manifest.json"), "old-manifest", "utf8");
+  await writeFile(join(generation, "runtime.json"), "old-runtime", "utf8");
+  await writeFile(join(root, "static-showcase/data/current.json"), JSON.stringify({ generation: "generations/old" }), "utf8");
 }

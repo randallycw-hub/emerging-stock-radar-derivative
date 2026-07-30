@@ -27,8 +27,8 @@ const reasonLabels = {
   NO_EFFECTIVE_CONVERSION_PRICE: "估值日缺少已生效轉換價",
   SNAPSHOT_NOT_PUBLISHED: "盤後市場快照尚未發布",
 };
-const config = window.__OFFICIAL_SHOWCASE__ ?? {
-  manifestUrl: "./data/manifest.json",
+const bootstrapConfig = window.__OFFICIAL_SHOWCASE__ ?? {
+  generationPointerUrl: "./data/current.json",
   datasets: {},
 };
 const state = {
@@ -47,6 +47,10 @@ await loadAndRender();
 window.addEventListener("hashchange", renderHashRoute);
 
 async function loadAndRender() {
+  const pointer = await loadJson(bootstrapConfig.generationPointerUrl, null);
+  const config = pointer?.runtimeUrl
+    ? await loadJson(pointer.runtimeUrl, { manifestUrl: null, datasets: {} })
+    : bootstrapConfig;
   const [manifest, revenue, bondTerms, ipo, market, conversions, history] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
