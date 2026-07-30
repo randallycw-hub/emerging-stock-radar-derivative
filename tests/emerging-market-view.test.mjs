@@ -59,6 +59,36 @@ test("uses null industry only when the exact company code has no match", () => {
   assert.equal(view.industryName, null);
 });
 
+test("calculates from parser-accepted grouped numeric source strings without changing them", () => {
+  const [view] = buildEmergingMarketViews({
+    marketRows: [row({
+      previousAveragePrice: "1,000.00",
+      dailyAveragePrice: "1,000.25",
+      transactionVolume: "22,001",
+    })],
+    companyRows: [],
+  });
+
+  assert.deepEqual(
+    {
+      previousAveragePrice: view.previousAveragePrice,
+      dailyAveragePrice: view.dailyAveragePrice,
+      transactionVolume: view.transactionVolume,
+      averageChange: view.averageChange,
+      averageChangePercent: view.averageChangePercent,
+      estimatedTransactionAmount: view.estimatedTransactionAmount,
+    },
+    {
+      previousAveragePrice: "1,000.00",
+      dailyAveragePrice: "1,000.25",
+      transactionVolume: "22,001",
+      averageChange: "0.25",
+      averageChangePercent: "0.03",
+      estimatedTransactionAmount: "22006500.25",
+    },
+  );
+});
+
 test("returns unavailable derived change values when a source price is missing or prior price is zero", () => {
   const views = buildEmergingMarketViews({
     marketRows: [

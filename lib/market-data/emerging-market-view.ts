@@ -25,28 +25,37 @@ function buildView(
   row: EmergingMarketSourceRow,
   industries: ReadonlyMap<string, string>,
 ): EmergingMarketView {
-  const averageChange = row.dailyAveragePrice !== null && row.previousAveragePrice !== null
+  const dailyAveragePrice = row.dailyAveragePrice === null
+    ? null
+    : decimalInput(row.dailyAveragePrice);
+  const previousAveragePrice = row.previousAveragePrice === null
+    ? null
+    : decimalInput(row.previousAveragePrice);
+  const transactionVolume = row.transactionVolume === null
+    ? null
+    : decimalInput(row.transactionVolume);
+  const averageChange = dailyAveragePrice !== null && previousAveragePrice !== null
     ? subtractDecimal(
-      row.dailyAveragePrice,
-      row.previousAveragePrice,
-      decimalScale(row.dailyAveragePrice, row.previousAveragePrice),
+      dailyAveragePrice,
+      previousAveragePrice,
+      decimalScale(dailyAveragePrice, previousAveragePrice),
     )
     : null;
   const averageChangePercent = averageChange !== null
-    && row.previousAveragePrice !== null
-    && !isZeroDecimal(row.previousAveragePrice)
+    && previousAveragePrice !== null
+    && !isZeroDecimal(previousAveragePrice)
     ? multiplyDecimal(
-      divideDecimal(averageChange, row.previousAveragePrice, 8),
+      divideDecimal(averageChange, previousAveragePrice, 8),
       "100",
       2,
     )
     : null;
-  const estimatedTransactionAmount = row.dailyAveragePrice !== null
-    && row.transactionVolume !== null
+  const estimatedTransactionAmount = dailyAveragePrice !== null
+    && transactionVolume !== null
     ? multiplyDecimal(
-      row.dailyAveragePrice,
-      row.transactionVolume,
-      decimalScale(row.dailyAveragePrice, row.transactionVolume),
+      dailyAveragePrice,
+      transactionVolume,
+      decimalScale(dailyAveragePrice, transactionVolume),
     )
     : null;
 
@@ -67,6 +76,10 @@ function buildView(
     applyingDate: row.applyingDate,
     applyingStatus: row.applyingStatus,
   };
+}
+
+function decimalInput(value: string): string {
+  return value.replaceAll(",", "");
 }
 
 function decimalScale(...values: string[]): number {
