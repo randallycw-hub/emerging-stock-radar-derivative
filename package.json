@@ -14,7 +14,8 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
     "snapshot:companies": "node scripts/update-company-basic-snapshot.mjs",
-    "snapshot:cb-market": "node scripts/build-bond-market-snapshot.mjs"
+    "snapshot:cb-market": "node scripts/build-bond-market-snapshot.mjs",
+    "snapshot:cb-history": "node scripts/backfill-bond-market-history.mjs"
   },
   "dependencies": {
     "next": "16.2.6",

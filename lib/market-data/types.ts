@@ -59,3 +59,13 @@ export type BondMarketView = {
   staleCbPrice: boolean;
   missingReasons: readonly string[];
 };
+
+export type BondMarketHistoryPoint = {
+  bondCode: string;
+  date: string;
+  cbClose: string | null;
+  stockClose: string | null;
+  effectiveConversionPrice: string | null;
+  conversionValue: string | null;
+  premiumRate: string | null;
+};

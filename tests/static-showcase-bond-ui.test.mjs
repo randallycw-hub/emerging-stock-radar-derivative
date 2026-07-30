@@ -52,6 +52,9 @@ test("static showcase exposes the complete CB trading workspace", async () => {
     /const history =[\s\S]*history\.replaceState/,
     "單檔歷史資料不得遮蔽瀏覽器 history 導覽物件",
   );
+  assert.match(js, /drawHistoryChart/);
+  assert.match(js, /data-history-range="1M"/);
+  assert.match(js, /<canvas[^>]+bond-history-chart/);
 });
 
 test("static showcase keeps presentation out of generated runtime data", async () => {

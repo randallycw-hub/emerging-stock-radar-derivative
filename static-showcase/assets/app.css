@@ -229,8 +229,46 @@ a { color: inherit; }
 .workbench-panel h3 { margin: 0 0 12px; font: 800 18px/1.2 Georgia, serif; color: var(--violet); }
 .workbench-panel dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
 .workbench-panel dd { margin: 2px 0 0; font-weight: 700; overflow-wrap: anywhere; }
-.history-ranges { display: flex; gap: 6px; margin-bottom: 12px; }
-.history-ranges button { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 5px 8px; }
+.history-panel { grid-column: span 2; }
+.workbench-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.history-ranges { display: flex; gap: 6px; }
+.history-ranges button {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  min-width: 42px;
+  padding: 6px 9px;
+  border-radius: 0;
+  cursor: pointer;
+}
+.history-ranges button:hover,
+.history-ranges button:focus-visible { border-color: var(--violet); color: var(--violet); }
+.history-ranges button.is-active { background: var(--violet); border-color: var(--violet); color: var(--paper); }
+.history-chart {
+  width: 100%;
+  min-height: 230px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 86%, var(--paper));
+}
+.history-chart canvas { display: block; max-width: 100%; }
+.history-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.history-legend { display: inline-flex; align-items: center; gap: 6px; }
+.history-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--legend-color);
+}
 .document-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .document-links a { padding: 7px 9px; border-bottom: 2px solid var(--clay); text-decoration: none; }
 
@@ -282,6 +320,7 @@ a { color: inherit; }
   .bond-card-grid span { display: block; color: var(--muted); font-size: 10px; }
   .bond-card-grid strong { display: block; margin-top: 3px; }
   .workbench-summary, .workbench-grid { grid-template-columns: 1fr; }
+  .history-panel { grid-column: span 1; }
   .source-grid { grid-template-columns: repeat(2, 1fr); }
 }
 

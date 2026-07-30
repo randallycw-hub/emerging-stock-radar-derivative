@@ -16,6 +16,10 @@ const TPEX_CLOSE =
   "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes";
 const TPEX_CONVERSION_INDEX =
   "https://www.tpex.org.tw/www/zh-tw/bond/convSearch";
+const TWSE_MONTHLY_STOCK =
+  "https://www.twse.com.tw/exchangeReport/STOCK_DAY";
+const TPEX_MONTHLY_STOCK =
+  "https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock";
 const CB_QUOTE_FIELDS = [
   "日期",
   "交易模式",
@@ -136,6 +140,123 @@ export async function fetchCurrentOfficialMarketData({
   };
 }
 
+export async function fetchCbMonthlyHistory({
+  bondCode,
+  month,
+  fetchImpl = fetch,
+}) {
+  const code = uniqueCodes([bondCode], /^\d{5,6}$/, "bond code")[0];
+  const monthStart = officialMonthStart(month);
+  const body = new URLSearchParams({
+    date: monthStart,
+    code,
+    response: "json",
+  });
+  const payload = await fetchJsonWithRetry(
+    TPEX_CB_QUOTE,
+    postOptions(body),
+    fetchImpl,
+  );
+  return verifiedCbQuoteTable(payload).data.map(
+    (row) => normalizeCbQuoteRow(code, row),
+  );
+}
+
+export async function fetchTwseMonthlyStockHistory({
+  issuerCode,
+  month,
+  fetchImpl = fetch,
+}) {
+  const code = uniqueCodes(
+    [issuerCode],
+    /^[0-9A-Z]{4,6}$/,
+    "issuer code",
+  )[0];
+  const monthStart = officialMonthStart(month).replaceAll("/", "");
+  const url = new URL(TWSE_MONTHLY_STOCK);
+  url.searchParams.set("response", "json");
+  url.searchParams.set("date", monthStart);
+  url.searchParams.set("stockNo", code);
+  const payload = await fetchJsonWithRetry(url.toString(), {}, fetchImpl);
+  const table = verifiedMonthlyTable(
+    payload,
+    [
+      "日期", "成交股數", "成交金額", "開盤價", "最高價",
+      "最低價", "收盤價", "漲跌價差", "成交筆數", "註記",
+    ],
+    "TWSE monthly stock",
+  );
+  return table.data.map((row) => {
+    assertMonthlyRow(row, 10, "TWSE monthly stock");
+    return normalizeTwseStockClose({
+      Date: row[0],
+      Code: code,
+      Name: "",
+      TradeVolume: row[1],
+      TradeValue: row[2],
+      OpeningPrice: row[3],
+      HighestPrice: row[4],
+      LowestPrice: row[5],
+      ClosingPrice: row[6],
+      Change: row[7],
+      Transaction: row[8],
+    });
+  });
+}
+
+export async function fetchTpexMonthlyStockHistory({
+  issuerCode,
+  month,
+  fetchImpl = fetch,
+}) {
+  const code = uniqueCodes(
+    [issuerCode],
+    /^[0-9A-Z]{4,6}$/,
+    "issuer code",
+  )[0];
+  const body = new URLSearchParams({
+    code,
+    date: officialMonthStart(month),
+    response: "json",
+  });
+  const payload = await fetchJsonWithRetry(
+    TPEX_MONTHLY_STOCK,
+    postOptions(body),
+    fetchImpl,
+  );
+  const table = verifiedMonthlyTable(
+    Array.isArray(payload?.tables) ? payload.tables[0] : undefined,
+    [
+      "日 期", "成交張數", "成交仟元", "開盤",
+      "最高", "最低", "收盤", "漲跌", "筆數",
+    ],
+    "TPEx monthly stock",
+  );
+  return table.data.map((row) => {
+    assertMonthlyRow(row, 9, "TPEx monthly stock");
+    return normalizeTpexStockClose({
+      Date: row[0],
+      SecuritiesCompanyCode: code,
+      CompanyName: "",
+      Close: row[6],
+      Change: row[7],
+      Open: row[3],
+      High: row[4],
+      Low: row[5],
+      Average: row[6],
+      TradingShares: multiplyIntegerText(row[1], 1000),
+      TransactionAmount: multiplyIntegerText(row[2], 1000),
+      TransactionNumber: row[8],
+      LatestBidPrice: "",
+      LatesAskPrice: "",
+      Capitals: "",
+      NextReferencePrice: "",
+      NextLimitUp: "",
+      NextLimitDown: "",
+    });
+  });
+}
+
 async function fetchJsonWithRetry(url, init, fetchImpl) {
   const text = await fetchTextWithRetry(
     url,
@@ -224,6 +345,49 @@ function verifiedCbQuoteTable(payload) {
   return table;
 }
 
+function verifiedMonthlyTable(payload, expectedFields, name) {
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new TypeError(`${name} payload must contain a table`);
+  }
+  if (
+    !Array.isArray(payload.fields)
+    || payload.fields.length !== expectedFields.length
+    || !payload.fields.every((field, index) => field === expectedFields[index])
+  ) {
+    throw new TypeError(`${name} fields do not match the verified contract`);
+  }
+  if (!Array.isArray(payload.data)) {
+    throw new TypeError(`${name} data must be an array`);
+  }
+  return payload;
+}
+
+function assertMonthlyRow(row, length, name) {
+  if (!Array.isArray(row) || row.length !== length) {
+    throw new TypeError(`${name} row must contain ${length} fields`);
+  }
+  if (row.some((value) => typeof value !== "string")) {
+    throw new TypeError(`${name} row fields must be strings`);
+  }
+}
+
+function multiplyIntegerText(value, multiplier) {
+  const text = value.trim();
+  if (!/^(?:0|[1-9]\d{0,2}(?:,\d{3})*|[1-9]\d*)$/.test(text)) {
+    throw new TypeError("monthly amount must be a non-negative integer");
+  }
+  return (
+    BigInt(text.replaceAll(",", "")) * BigInt(multiplier)
+  ).toString();
+}
+
+function officialMonthStart(value) {
+  if (typeof value !== "string" || !/^\d{4}-(?:0[1-9]|1[0-2])$/.test(value)) {
+    throw new TypeError("month must be YYYY-MM");
+  }
+  return `${value.replace("-", "/")}/01`;
+}
+
 function recordCode(value, key) {
   if (
     value === null
@@ -274,4 +438,3 @@ function isRetryableNetworkError(error) {
   }
   return !(error instanceof Error && /^HTTP_\d+/.test(error.message));
 }
-

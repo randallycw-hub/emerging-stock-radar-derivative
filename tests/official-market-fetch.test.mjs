@@ -4,8 +4,11 @@ import test from "node:test";
 
 import { mapLimit } from "../scripts/lib/map-limit.mjs";
 import {
+  fetchCbMonthlyHistory,
   fetchCurrentOfficialMarketData,
   fetchMopsDetail,
+  fetchTpexMonthlyStockHistory,
+  fetchTwseMonthlyStockHistory,
 } from "../scripts/lib/official-market-fetch.mjs";
 
 const fixtureDirectory = new URL(
@@ -122,6 +125,91 @@ test("collects only requested official CB, stock and conversion records", async 
   ));
   assert.ok(requests.some((request) =>
     request.body === "name=bondIssuer&searchNo=&response=json"
+  ));
+});
+
+test("normalizes the three verified monthly history contracts", async () => {
+  const quote = await fixture("tpex-cb-quote.json");
+  const requests = [];
+  const fakeFetch = async (url, init = {}) => {
+    const request = {
+      url: String(url),
+      body: init.body?.toString() ?? "",
+    };
+    requests.push(request);
+    if (request.url.endsWith("/bond/cbDayQry")) return jsonResponse(quote);
+    if (request.url.includes("/exchangeReport/STOCK_DAY?")) {
+      return jsonResponse(JSON.stringify({
+        stat: "OK",
+        fields: [
+          "日期", "成交股數", "成交金額", "開盤價", "最高價",
+          "最低價", "收盤價", "漲跌價差", "成交筆數", "註記",
+        ],
+        data: [[
+          "115/07/30", "44,328,000", "98,479,995,000", "2,205.00",
+          "2,260.00", "2,190.00", "2,205.00", "+5.00", "22,290", "",
+        ]],
+      }));
+    }
+    if (request.url.endsWith("/afterTrading/tradingStock")) {
+      return jsonResponse(JSON.stringify({
+        tables: [{
+          fields: [
+            "日 期", "成交張數", "成交仟元", "開盤",
+            "最高", "最低", "收盤", "漲跌", "筆數",
+          ],
+          data: [[
+            "115/07/29", "347", "4,120", "12.20",
+            "12.20", "11.65", "11.65", "-0.60", "147",
+          ]],
+        }],
+      }));
+    }
+    throw new Error(`unexpected request: ${request.url}`);
+  };
+
+  const [cb, twse, tpex] = await Promise.all([
+    fetchCbMonthlyHistory({
+      bondCode: "35221",
+      month: "2026-07",
+      fetchImpl: fakeFetch,
+    }),
+    fetchTwseMonthlyStockHistory({
+      issuerCode: "2330",
+      month: "2026-07",
+      fetchImpl: fakeFetch,
+    }),
+    fetchTpexMonthlyStockHistory({
+      issuerCode: "3522",
+      month: "2026-07",
+      fetchImpl: fakeFetch,
+    }),
+  ]);
+
+  assert.equal(cb.at(-1).tradingDate, "2026-07-29");
+  assert.deepEqual(twse[0], {
+    companyCode: "2330",
+    market: "listed",
+    tradingDate: "2026-07-30",
+    close: "2205",
+    change: "5",
+    volume: "44328000",
+    turnover: "98479995000",
+  });
+  assert.deepEqual(tpex[0], {
+    companyCode: "3522",
+    market: "otc",
+    tradingDate: "2026-07-29",
+    close: "11.65",
+    change: "-0.6",
+    volume: "347000",
+    turnover: "4120000",
+  });
+  assert.ok(requests.some((request) =>
+    request.url.includes("date=20260701&stockNo=2330")
+  ));
+  assert.ok(requests.some((request) =>
+    request.body === "code=3522&date=2026%2F07%2F01&response=json"
   ));
 });
 

@@ -275,9 +275,15 @@ function renderWorkbench(view) {
         ["轉換價生效日", view.conversionPriceEffectiveDate],
         ["共同估值日", view.valuationDate],
       ])}
-      <section class="workbench-panel"><h3>${workbenchSections[2]}</h3>
-        <div class="history-ranges"><button type="button">1M</button><button type="button">3M</button><button type="button">6M</button><button type="button">1Y</button></div>
-        <p>${historyPoints.length ? `已載入 ${historyPoints.length} 個已驗證日資料點` : "目前區間尚無可驗證歷史資料；不插補價格。"}</p>
+      <section class="workbench-panel history-panel"><div class="workbench-heading"><h3>${workbenchSections[2]}</h3>
+        <div class="history-ranges" aria-label="選擇價格走勢區間">
+          <button type="button" data-history-range="1M">1M</button>
+          <button type="button" data-history-range="3M" class="is-active">3M</button>
+          <button type="button" data-history-range="6M">6M</button>
+          <button type="button" data-history-range="1Y">1Y</button>
+        </div></div>
+        <div class="history-chart"><canvas id="bond-history-chart" height="230" aria-label="可轉債、標的股與轉換價值歷史走勢圖" role="img"></canvas></div>
+        <p id="bond-history-caption" class="history-caption">${historyPoints.length ? `已載入 ${historyPoints.length} 個共同交易日資料點；缺漏日期不插值。` : "目前區間尚無可驗證歷史資料；不插補價格。"}</p>
       </section>
       ${panel(workbenchSections[3], [
         ["發行時轉換價", term["發行時轉換價格"]],
@@ -321,6 +327,125 @@ function renderWorkbench(view) {
     );
     target.hidden = true;
   });
+  const drawSelectedHistory = (range) => {
+    drawHistoryChart(historyPoints, range);
+    target.querySelectorAll("[data-history-range]").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.historyRange === range);
+    });
+  };
+  target.querySelectorAll("[data-history-range]").forEach((button) => {
+    button.addEventListener("click", () => drawSelectedHistory(button.dataset.historyRange));
+  });
+  drawSelectedHistory("3M");
+}
+
+function drawHistoryChart(points, range) {
+  const canvas = document.getElementById("bond-history-chart");
+  const caption = document.getElementById("bond-history-caption");
+  if (!canvas || !caption) return;
+
+  const daysByRange = { "1M": 31, "3M": 93, "6M": 186, "1Y": 366 };
+  const datedPoints = (Array.isArray(points) ? points : [])
+    .map((point) => ({ ...point, timestamp: Date.parse(`${point.date}T00:00:00Z`) }))
+    .filter((point) => Number.isFinite(point.timestamp))
+    .sort((a, b) => a.timestamp - b.timestamp);
+  const latest = datedPoints.at(-1)?.timestamp;
+  const cutoff = latest == null
+    ? Number.POSITIVE_INFINITY
+    : latest - (daysByRange[range] || daysByRange["3M"]) * 86_400_000;
+  const visible = datedPoints.filter((point) => point.timestamp >= cutoff);
+  const context = canvas.getContext("2d");
+  if (!context) return;
+
+  const cssWidth = Math.max(320, Math.floor(canvas.parentElement?.clientWidth || 720));
+  const cssHeight = 230;
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.floor(cssWidth * pixelRatio);
+  canvas.height = Math.floor(cssHeight * pixelRatio);
+  canvas.style.width = `${cssWidth}px`;
+  canvas.style.height = `${cssHeight}px`;
+  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  context.clearRect(0, 0, cssWidth, cssHeight);
+
+  const styles = getComputedStyle(document.documentElement);
+  const colors = {
+    grid: styles.getPropertyValue("--line").trim() || "#d8d0c4",
+    muted: styles.getPropertyValue("--muted").trim() || "#746f68",
+    clay: styles.getPropertyValue("--clay").trim() || "#b55f45",
+    violet: styles.getPropertyValue("--violet").trim() || "#6652a3",
+    ink: styles.getPropertyValue("--ink").trim() || "#211e1b",
+  };
+  const series = [
+    { key: "bondClose", label: "可轉債收盤", color: colors.clay },
+    { key: "stockClose", label: "標的股收盤", color: colors.violet },
+    { key: "conversionValue", label: "轉換價值", color: colors.ink },
+  ];
+  const values = visible.flatMap((point) =>
+    series.map(({ key }) => Number(point[key])).filter(Number.isFinite)
+  );
+
+  if (!visible.length || !values.length) {
+    context.fillStyle = colors.muted;
+    context.font = "14px system-ui, sans-serif";
+    context.textAlign = "center";
+    context.fillText("此區間尚無共同交易日資料", cssWidth / 2, cssHeight / 2);
+    caption.textContent = "目前區間尚無可驗證歷史資料；不插補價格。";
+    return;
+  }
+
+  const padding = { top: 22, right: 20, bottom: 34, left: 54 };
+  const plotWidth = cssWidth - padding.left - padding.right;
+  const plotHeight = cssHeight - padding.top - padding.bottom;
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const spread = Math.max(maxValue - minValue, Math.abs(maxValue) * 0.04, 1);
+  const yMin = minValue - spread * 0.08;
+  const yMax = maxValue + spread * 0.08;
+  const xFor = (timestamp) => visible.length === 1
+    ? padding.left + plotWidth / 2
+    : padding.left + ((timestamp - visible[0].timestamp) /
+      Math.max(visible.at(-1).timestamp - visible[0].timestamp, 1)) * plotWidth;
+  const yFor = (value) =>
+    padding.top + (1 - (value - yMin) / (yMax - yMin)) * plotHeight;
+
+  context.font = "12px system-ui, sans-serif";
+  context.textBaseline = "middle";
+  for (let index = 0; index <= 4; index += 1) {
+    const y = padding.top + (plotHeight / 4) * index;
+    const value = yMax - ((yMax - yMin) / 4) * index;
+    context.strokeStyle = colors.grid;
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(padding.left, y);
+    context.lineTo(cssWidth - padding.right, y);
+    context.stroke();
+    context.fillStyle = colors.muted;
+    context.textAlign = "right";
+    context.fillText(value.toFixed(value >= 100 ? 0 : 1), padding.left - 8, y);
+  }
+
+  series.forEach(({ key, color }) => {
+    visible.forEach((point) => {
+      const value = Number(point[key]);
+      if (!Number.isFinite(value)) return;
+      context.fillStyle = color;
+      context.beginPath();
+      context.arc(xFor(point.timestamp), yFor(value), 3, 0, Math.PI * 2);
+      context.fill();
+    });
+  });
+
+  const first = visible[0];
+  const last = visible.at(-1);
+  context.fillStyle = colors.muted;
+  context.textBaseline = "alphabetic";
+  context.textAlign = "left";
+  context.fillText(first.date, padding.left, cssHeight - 8);
+  context.textAlign = "right";
+  context.fillText(last.date, cssWidth - padding.right, cssHeight - 8);
+  caption.innerHTML = `${series.map(({ label, color }) =>
+    `<span class="history-legend"><i style="--legend-color:${escapeHtml(color)}"></i>${label}</span>`
+  ).join("")}<span>共 ${visible.length} 個共同交易日；缺漏日期不插值。</span>`;
 }
 
 function renderEmerging() {
