@@ -1,0 +1,277 @@
+import { isIsoDate } from "../../lib/domain/dates.ts";
+import {
+  normalizeCbQuoteRow,
+  normalizeTpexStockClose,
+  normalizeTwseStockClose,
+  parseConversionIndex,
+  parseMopsConversionPrice,
+} from "../../lib/source-verification/source-cb-market.ts";
+import { mapLimit } from "./map-limit.mjs";
+
+const TPEX_CB_QUOTE =
+  "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry";
+const TWSE_CLOSE =
+  "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL";
+const TPEX_CLOSE =
+  "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes";
+const TPEX_CONVERSION_INDEX =
+  "https://www.tpex.org.tw/www/zh-tw/bond/convSearch";
+const CB_QUOTE_FIELDS = [
+  "日期",
+  "交易模式",
+  "收市價",
+  "漲跌",
+  "開市價",
+  "最高價",
+  "最低價",
+  "成交筆數",
+  "單位",
+  "成交金額(元)",
+  "平均價",
+];
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+const MAX_ATTEMPTS = 3;
+
+export async function fetchMopsDetail(
+  officialDetailUrl,
+  fetchImpl = fetch,
+) {
+  assertApprovedMopsUrl(officialDetailUrl);
+  return fetchTextWithRetry(
+    officialDetailUrl,
+    {
+      headers: {
+        accept: "text/html,application/xhtml+xml",
+        "user-agent": "EmergingStockRadar/1.0 official-eod-collector",
+      },
+    },
+    fetchImpl,
+    "text/html",
+  );
+}
+
+export async function fetchCurrentOfficialMarketData({
+  bondCodes,
+  issuerCodes,
+  date,
+  fetchImpl = fetch,
+}) {
+  if (!isIsoDate(date)) throw new TypeError("date must be a valid ISO date");
+  const requestedBondCodes = uniqueCodes(bondCodes, /^\d{5,6}$/, "bond code");
+  const requestedIssuerCodes = uniqueCodes(
+    issuerCodes,
+    /^[0-9A-Z]{4,6}$/,
+    "issuer code",
+  );
+  const issuerSet = new Set(requestedIssuerCodes);
+  const bondSet = new Set(requestedBondCodes);
+
+  const [twsePayload, tpexPayload] = await mapLimit(
+    [TWSE_CLOSE, TPEX_CLOSE],
+    2,
+    (url) => fetchJsonWithRetry(url, {}, fetchImpl),
+  );
+  if (!Array.isArray(twsePayload) || !Array.isArray(tpexPayload)) {
+    throw new TypeError("official stock close payload must be an array");
+  }
+  const stockCloses = [
+    ...twsePayload
+      .filter((row) => issuerSet.has(recordCode(row, "Code")))
+      .map(normalizeTwseStockClose),
+    ...tpexPayload
+      .filter((row) => issuerSet.has(recordCode(row, "SecuritiesCompanyCode")))
+      .map(normalizeTpexStockClose),
+  ];
+
+  const conversionBody = new URLSearchParams({
+    name: "bondIssuer",
+    searchNo: "",
+    response: "json",
+  });
+  const conversionPayload = await fetchJsonWithRetry(
+    TPEX_CONVERSION_INDEX,
+    postOptions(conversionBody),
+    fetchImpl,
+  );
+  const conversionEntries = parseConversionIndex(conversionPayload)
+    .filter((entry) => bondSet.has(entry.bondCode));
+
+  const requestDate = date.replaceAll("-", "/");
+  const quoteGroups = await mapLimit(requestedBondCodes, 2, async (bondCode) => {
+    const body = new URLSearchParams({
+      date: requestDate,
+      code: bondCode,
+      response: "json",
+    });
+    const payload = await fetchJsonWithRetry(
+      TPEX_CB_QUOTE,
+      postOptions(body),
+      fetchImpl,
+    );
+    const table = verifiedCbQuoteTable(payload);
+    return table.data.map((row) => normalizeCbQuoteRow(bondCode, row));
+  });
+
+  const conversionPrices = await mapLimit(
+    conversionEntries,
+    2,
+    async (entry) => parseMopsConversionPrice(
+      await fetchMopsDetail(entry.officialDetailUrl, fetchImpl),
+      entry.officialDetailUrl,
+    ),
+  );
+
+  return {
+    requestedDate: date,
+    cbQuotes: quoteGroups.flat(),
+    stockCloses,
+    conversionPrices,
+    sourceUrls: [
+      TPEX_CB_QUOTE,
+      TWSE_CLOSE,
+      TPEX_CLOSE,
+      TPEX_CONVERSION_INDEX,
+      ...conversionEntries.map((entry) => entry.officialDetailUrl),
+    ],
+  };
+}
+
+async function fetchJsonWithRetry(url, init, fetchImpl) {
+  const text = await fetchTextWithRetry(
+    url,
+    init,
+    fetchImpl,
+    "application/json",
+  );
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new TypeError(`INVALID_JSON:${url}`);
+  }
+}
+
+async function fetchTextWithRetry(
+  url,
+  init,
+  fetchImpl,
+  expectedContentType,
+) {
+  let lastError;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetchImpl(url, cloneRequestInit(init));
+      if (!response.ok) {
+        const error = new Error(`HTTP_${response.status}:${url}`);
+        if (!RETRYABLE_STATUS.has(response.status) || attempt === MAX_ATTEMPTS) {
+          throw error;
+        }
+        lastError = error;
+        continue;
+      }
+      const contentType = response.headers.get("content-type") ?? "";
+      if (!contentType.toLowerCase().includes(expectedContentType)) {
+        throw new TypeError(`UNEXPECTED_CONTENT_TYPE:${url}:${contentType}`);
+      }
+      return response.text();
+    } catch (error) {
+      lastError = error;
+      if (attempt === MAX_ATTEMPTS || !isRetryableNetworkError(error)) throw error;
+    }
+  }
+  throw lastError;
+}
+
+function cloneRequestInit(init) {
+  return {
+    ...init,
+    headers: init.headers === undefined ? undefined : { ...init.headers },
+    body: init.body instanceof URLSearchParams
+      ? new URLSearchParams(init.body)
+      : init.body,
+  };
+}
+
+function postOptions(body) {
+  return {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+      "user-agent": "EmergingStockRadar/1.0 official-eod-collector",
+    },
+    body,
+  };
+}
+
+function verifiedCbQuoteTable(payload) {
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new TypeError("CB quote payload must be an object");
+  }
+  const table = Array.isArray(payload.tables) ? payload.tables[0] : undefined;
+  if (table === null || typeof table !== "object" || Array.isArray(table)) {
+    throw new TypeError("CB quote payload must contain a table");
+  }
+  if (
+    !Array.isArray(table.fields)
+    || table.fields.length !== CB_QUOTE_FIELDS.length
+    || !table.fields.every((field, index) => field === CB_QUOTE_FIELDS[index])
+  ) {
+    throw new TypeError("CB quote fields do not match the verified contract");
+  }
+  if (!Array.isArray(table.data)) {
+    throw new TypeError("CB quote table data must be an array");
+  }
+  return table;
+}
+
+function recordCode(value, key) {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || typeof value[key] !== "string"
+  ) {
+    return "";
+  }
+  return value[key].trim().toUpperCase();
+}
+
+function uniqueCodes(values, pattern, name) {
+  if (!Array.isArray(values)) throw new TypeError(`${name}s must be an array`);
+  const normalized = values.map((value) => {
+    if (typeof value !== "string") throw new TypeError(`invalid ${name}`);
+    const code = value.trim().toUpperCase();
+    if (!pattern.test(code)) throw new TypeError(`invalid ${name}: ${value}`);
+    return code;
+  });
+  if (new Set(normalized).size !== normalized.length) {
+    throw new TypeError(`duplicate ${name}`);
+  }
+  return normalized.sort();
+}
+
+function assertApprovedMopsUrl(value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new TypeError("URL_NOT_ALLOWED");
+  }
+  if (
+    url.protocol !== "https:"
+    || url.hostname !== "mopsov.twse.com.tw"
+    || url.pathname !== "/mops/web/t120sg01"
+    || url.username
+    || url.password
+  ) {
+    throw new TypeError("URL_NOT_ALLOWED");
+  }
+}
+
+function isRetryableNetworkError(error) {
+  if (error instanceof TypeError && /^UNEXPECTED_CONTENT_TYPE|^INVALID_JSON/.test(error.message)) {
+    return false;
+  }
+  return !(error instanceof Error && /^HTTP_\d+/.test(error.message));
+}
+
