@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { EmergingMarketViewSchema } from "../lib/domain/schema.ts";
 import { buildEmergingMarketViews } from "../lib/market-data/emerging-market-view.ts";
 
 function row(overrides = {}) {
@@ -64,6 +65,8 @@ test("calculates from parser-accepted grouped numeric source strings without cha
     marketRows: [row({
       previousAveragePrice: "1,000.00",
       dailyAveragePrice: "1,000.25",
+      dailyHighPrice: "1,001.50",
+      dailyLowPrice: "1,000.01",
       transactionVolume: "22,001",
     })],
     companyRows: [],
@@ -87,6 +90,19 @@ test("calculates from parser-accepted grouped numeric source strings without cha
       estimatedTransactionAmount: "22006500.25",
     },
   );
+});
+
+test("accepts a complete grouped-source view at the public schema boundary", () => {
+  const [view] = buildEmergingMarketViews({
+    marketRows: [row({
+      previousAveragePrice: "1,000.00",
+      dailyAveragePrice: "1,000.25",
+      transactionVolume: "22,001",
+    })],
+    companyRows: [],
+  });
+
+  assert.deepEqual(EmergingMarketViewSchema.parse(view), view);
 });
 
 test("returns unavailable derived change values when a source price is missing or prior price is zero", () => {

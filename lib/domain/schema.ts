@@ -160,6 +160,19 @@ function nullableNonNegativeDecimal(value: unknown, path: string): string | null
   return value === null ? null : nonNegativeDecimal(value, path);
 }
 
+function nullableNonNegativeGroupedDecimal(value: unknown, path: string): string | null {
+  if (value === null) return null;
+  if (
+    typeof value !== "string"
+    || !/^(?:0|[1-9]\d*|[1-9]\d{0,2}(?:,\d{3})+)(?:\.\d+)?$/.test(value)
+  ) {
+    throw new DomainValidationError(
+      `${path} must be a non-negative grouped decimal string`,
+    );
+  }
+  return value;
+}
+
 function signedDecimal(value: unknown, path: string): string {
   if (typeof value !== "string" || !/^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value)) {
     throw new DomainValidationError(`${path} must be a signed plain decimal string`);
@@ -590,11 +603,11 @@ export const EmergingMarketViewSchema = schema<EmergingMarketView>(
       "applyingDate",
       "applyingStatus",
     ], "EmergingMarketView");
-    const dailyAveragePrice = nullableNonNegativeDecimal(
+    const dailyAveragePrice = nullableNonNegativeGroupedDecimal(
       input.dailyAveragePrice,
       "EmergingMarketView.dailyAveragePrice",
     );
-    const previousAveragePrice = nullableNonNegativeDecimal(
+    const previousAveragePrice = nullableNonNegativeGroupedDecimal(
       input.previousAveragePrice,
       "EmergingMarketView.previousAveragePrice",
     );
@@ -638,12 +651,15 @@ export const EmergingMarketViewSchema = schema<EmergingMarketView>(
       industryName: nullableString(input.industryName, "EmergingMarketView.industryName"),
       dailyAveragePrice,
       previousAveragePrice,
-      dailyHighPrice: nullableNonNegativeDecimal(input.dailyHighPrice, "EmergingMarketView.dailyHighPrice"),
-      dailyLowPrice: nullableNonNegativeDecimal(input.dailyLowPrice, "EmergingMarketView.dailyLowPrice"),
+      dailyHighPrice: nullableNonNegativeGroupedDecimal(input.dailyHighPrice, "EmergingMarketView.dailyHighPrice"),
+      dailyLowPrice: nullableNonNegativeGroupedDecimal(input.dailyLowPrice, "EmergingMarketView.dailyLowPrice"),
       averageChange,
       averageChangePercent,
       direction,
-      transactionVolume: nullableNonNegativeDecimal(input.transactionVolume, "EmergingMarketView.transactionVolume"),
+      transactionVolume: nullableNonNegativeGroupedDecimal(
+        input.transactionVolume,
+        "EmergingMarketView.transactionVolume",
+      ),
       estimatedTransactionAmount: nullableNonNegativeDecimal(
         input.estimatedTransactionAmount,
         "EmergingMarketView.estimatedTransactionAmount",
