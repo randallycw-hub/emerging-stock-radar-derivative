@@ -1,23 +1,15 @@
 {
   "kind": "official-source-snapshot",
-  "status": "local-import-not-production",
+  "status": "official-static-snapshot",
   "generatedAt": "2026-07-30",
   "datasets": [
-    {
-      "datasetId": "94025",
-      "sourceUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
-      "downloadedAt": "2026-07-30",
-      "sha256": "sha256:f9bc7d149bb5a602fc798f0f1f5f007d0f8eff1aa6cd2a68f80084636249ac44",
-      "rawBytes": 66187,
-      "rowCount": 354
-    },
     {
       "datasetId": "11406",
       "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
       "downloadedAt": "2026-07-30",
-      "sha256": "sha256:883dbc1cb7b589047e28f033b6e4d385dde6518d7c0209085f293058c9bae855",
-      "rawBytes": 136751,
-      "rowCount": 413
+      "sha256": "sha256:0258cf382ff813b19e95e6cedef9b30ae8428b2c59e0040fb962f5ce012f97e1",
+      "rawBytes": 137078,
+      "rowCount": 414
     },
     {
       "datasetId": "11586",
@@ -26,6 +18,14 @@
       "sha256": "sha256:0373ecf384f13492d3be544a031a55ec6b04a36e2c3677345452454f07a01a4b",
       "rawBytes": 80020,
       "rowCount": 697
+    },
+    {
+      "datasetId": "94025",
+      "sourceUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
+      "downloadedAt": "2026-07-30",
+      "sha256": "sha256:f9bc7d149bb5a602fc798f0f1f5f007d0f8eff1aa6cd2a68f80084636249ac44",
+      "rawBytes": 66187,
+      "rowCount": 354
     }
   ]
 }
