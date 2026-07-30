@@ -177,9 +177,9 @@ Resource: GET https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics
 Status: VERIFIED_FOR_IMPLEMENTATION
 Purpose: 興櫃股票當日盤後行情
 Published source fields: Average, PreviousAveragePrice, Highest, Lowest, TransactionVolume
-Allowed derived fields: 均價漲跌額、均價漲跌幅、上漲/下跌/平盤分類、估算成交金額、同日排行
+Allowed derived fields: 均價漲跌額、均價漲跌幅、上漲/下跌/平盤分類、估算成交金額（盤後）、同日排行
 Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, LatestPrice, Buy/Sell, SuspendTime
 
-`估算成交金額` is derived from rounded source values and is unsuitable for exact reconciliation.
+`估算成交金額（盤後）` 是以 `當日成交均價（盤後）×成交量` 計算的估算值，源自四捨五入的來源值，不能用於精確對帳。
 
 此狀態只核准嚴格 parser、快照建立與發布前驗證；不得發布即時、買賣價量或 `LatestPrice`，也不授予 `APPROVED_FOR_PRODUCTION`。

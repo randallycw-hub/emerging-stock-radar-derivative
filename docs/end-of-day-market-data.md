@@ -26,9 +26,9 @@
 | `ApplyingDate` | `listingApplicationDate` | 上市櫃進度日期 |
 | `ApplyingStatus` | `listingApplicationStatus` | 上市櫃進度 |
 
-第一版明確排除 `BuyingPrice`、`BuyingQuantity`、`SellingPrice`、`SellingQuantity`，避免形成盤中報價介面；同時排除 `LatestPrice`、`Buy/Sell`、`SuspendTime` 及所有未列入白名單的欄位。只允許衍生均價漲跌額、均價漲跌幅、上漲／下跌／平盤分類、估算成交金額與同日排行；不得發布即時、買賣價量或 `LatestPrice`，不得計算 K 線或技術指標。
+第一版明確排除 `BuyingPrice`、`BuyingQuantity`、`SellingPrice`、`SellingQuantity`，避免形成盤中報價介面；同時排除 `LatestPrice`、`Buy/Sell`、`SuspendTime` 及所有未列入白名單的欄位。只允許衍生均價漲跌額、均價漲跌幅、上漲/下跌/平盤分類、估算成交金額（盤後）與同日排行；不得發布即時、買賣價量或 `LatestPrice`，不得計算 K 線或技術指標。
 
-`估算成交金額` is derived from rounded source values and is unsuitable for exact reconciliation.
+`估算成交金額（盤後）` 是以 `當日成交均價（盤後）×成交量` 計算的估算值，源自四捨五入的來源值，不能用於精確對帳。
 
 ```ts
 interface EmergingEndOfDayObservation {

@@ -31,7 +31,7 @@
 - [ ] Status: VERIFIED_FOR_IMPLEMENTATION
 - [ ] Purpose: 興櫃股票當日盤後行情
 - [ ] Published source fields: Average, PreviousAveragePrice, Highest, Lowest, TransactionVolume
-- [ ] Allowed derived fields: 均價漲跌額、均價漲跌幅、上漲/下跌/平盤分類、估算成交金額、同日排行
+- [ ] Allowed derived fields: 均價漲跌額、均價漲跌幅、上漲/下跌/平盤分類、估算成交金額（盤後）、同日排行
 - [ ] Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, LatestPrice, Buy/Sell, SuspendTime
-- [ ] 已確認 `估算成交金額` is derived from rounded source values and is unsuitable for exact reconciliation.
+- [ ] 已確認 `估算成交金額（盤後）` 是以 `當日成交均價（盤後）×成交量` 計算的估算值，源自四捨五入的來源值，不能用於精確對帳。
 - [ ] 已確認公開輸出沒有即時、買賣價量或 `LatestPrice`。
