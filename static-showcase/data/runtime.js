@@ -3,6 +3,24 @@ const embeddedData = {"11406":[{"資料日期":"20260728","機構代碼":"000098
 const revenue = embeddedData["94025"];
 const bonds = embeddedData["11406"];
 const ipo = embeddedData["11586"];
+const val = (row, key) => row[key] == null || row[key] === "" ? "—" : String(row[key]);
+const cell = (value, muted = false) => `<td${muted ? ' class="muted"' : ""}>${value}</td>`;
+const num = (value) => {
+  if (value == null || value === "") return "—";
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed.toLocaleString("zh-TW") : String(value);
+};
+const fmtDate = (value) => {
+  if (value == null || value === "") return "—";
+  const text = String(value);
+  if (/^\d{8}$/.test(text)) return `${text.slice(0, 4)}-${text.slice(4, 6)}-${text.slice(6)}`;
+  if (/^\d{6}$/.test(text)) return `${Number(text.slice(0, 3)) + 1911}-${text.slice(3, 5)}-${text.slice(5)}`;
+  return text;
+};
+const setRows = (selector, rows) => {
+  const target = document.querySelector(selector);
+  if (target) target.innerHTML = rows.join("");
+};
 try {
   document.querySelector(".badge").textContent = "市場資料中心";
   document.querySelector(".hero h2").textContent = "可轉債 × 興櫃 × IPO";
@@ -21,7 +39,7 @@ try {
   ].join(""))); 
   setRows("#emerging tbody", revenue.map((row) => [
     cell(val(row, "公司代號")), cell(val(row, "公司名稱")), cell(val(row, "產業別")), cell(num(row["營業收入-當月營收"])),
-    cell(`${val(row, "營業收入-去年同月增減(%)")} %`), cell(num(row["累計營業收入-當月累計營收"])), cell(fmtDate(row["資料年月"])), cell("94025"),
+    cell(`${val(row, "營業收入-去年同月增減(%)")} %`), cell("—", true), cell(fmtDate(row["資料年月"])), cell("94025"),
   ].join("")));
   setRows("#ipo tbody", ipo.map((row) => [
     cell(val(row, "公司代號")), cell(val(row, "公司簡稱")), cell(fmtDate(row["申請日期"])), cell(fmtDate(row["上市審議委員會審議日期"])),
