@@ -1,0 +1,60 @@
+{
+  "capturedAt": "2026-07-30T05:51:01.055Z",
+  "resources": [
+    {
+      "resourceId": "tpex-cb-day-query",
+      "method": "POST",
+      "url": "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "responseHash": "sha256:b43fe9ef1acbf5b82bb6aba7110148cf1a5872de5a9ec0e8f66e798f375a6fdb",
+      "recordCount": 41
+    },
+    {
+      "resourceId": "twse-stock-day-all",
+      "method": "GET",
+      "url": "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL",
+      "status": 200,
+      "contentType": "application/json",
+      "responseHash": "sha256:e971eaf3a569121ad80cf110efc2a21b8c4b6be3052257588167225c25955986",
+      "recordCount": 1373
+    },
+    {
+      "resourceId": "tpex-mainboard-daily-close",
+      "method": "GET",
+      "url": "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes",
+      "status": 200,
+      "contentType": "application/json",
+      "responseHash": "sha256:e6b7659588f3a5c17953eb592e87e72ec7374049dd5879e0bf41c5983f8b06ba",
+      "recordCount": 10280
+    },
+    {
+      "resourceId": "tpex-conversion-index",
+      "method": "POST",
+      "url": "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "responseHash": "sha256:b93290aa0903140d25d8dcfb0afd5643e3b81ece459f09530e4da7e405fd66e4",
+      "recordCount": 383
+    },
+    {
+      "resourceId": "mops-conversion-detail",
+      "method": "GET",
+      "url": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35221&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3522&monyr_reg=202606&pg=&step=0&tg=",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "responseHash": "sha256:8e5e94b8f459006a2c76c406452d6e188e578c9a393f47fbff898f21a1739f76",
+      "recordCount": 1
+    },
+    {
+      "resourceId": "tpex-bond-cb-daily-suspended",
+      "method": "GET",
+      "url": "https://www.tpex.org.tw/openapi/v1/bond_cb_daily",
+      "status": 200,
+      "contentType": "application/json",
+      "responseHash": "sha256:657994ca884f0d4402ff458d5863a03e43e136bc3965ad689caddff83a00d487",
+      "recordCount": 37
+    }
+  ]
+}
+

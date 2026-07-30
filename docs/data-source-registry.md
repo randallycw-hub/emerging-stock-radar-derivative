@@ -92,7 +92,7 @@
 | TDCC 可轉換公司債月分析 11462 | `CANDIDATE` | 可作後續餘額／保管統計研究，未完成 endpoint 與用途核准 |
 | 金管會預計生效案件／新聞附件 | `CANDIDATE` | 一般新聞與附件不是已核准 API；V1 不自動更新 |
 | 興櫃行情 11747 | `SUSPENDED` | 即使 OGL 明確，價格、買賣與成交量違反產品永久禁令 |
-| 可轉債成交行情 `bond_cb_daily` | `SUSPENDED` | 市場價格與成交資料永久禁止 |
+| 可轉債金融機構買賣彙總 `bond_cb_daily` | `SUSPENDED` | 實際欄位依金融機構彙總買賣面額與金額，不是每檔可轉債行情；不得 ingest 或 fallback |
 | Yahoo、CBAS、券商、未公開接口、HTML 爬蟲 | `SUSPENDED` | 永久禁止，不得重新評估為 fallback |
 
 ## 升級與撤回證據
@@ -118,6 +118,30 @@ The CSV evidence and decision records are preserved in:
 The CSV and OpenAPI resources must remain separately evaluated. The dataset remains at the design-approval stage; no production approval is granted by this amendment. The approved CSV scope must not be described as a complete listing-application universe.
 
 正式廣告、付費或其他營利功能前，再逐筆覆核授權頁、endpoint、欄位、顯名與實際用途；只有矛盾、不明或第三方權利才升級專業法律審查。
+
+## 可轉債官方盤後市場資源 amendment（2026-07-30）
+
+本 amendment 只解除先前對「任何市場價格功能」的概括禁止，改為允許下列五個經實際回應驗證的官方資源進入實作階段。即時行情、第三方行情、名稱模糊關聯與自動 fallback 仍然禁止。
+
+| 資源 | resource-level 狀態 | 限定用途 |
+| --- | --- | --- |
+| TPEx `POST /www/zh-tw/bond/cbDayQry` | `VERIFIED_FOR_IMPLEMENTATION` | 每檔可轉債等價／議價盤後行情與實際交易日 |
+| TWSE `GET /v1/exchangeReport/STOCK_DAY_ALL` | `VERIFIED_FOR_IMPLEMENTATION` | 上市標的股票盤後收盤 |
+| TPEx `GET /openapi/v1/tpex_mainboard_daily_close_quotes` | `VERIFIED_FOR_IMPLEMENTATION` | 上櫃標的股票盤後收盤 |
+| TPEx `POST /www/zh-tw/bond/convSearch` | `VERIFIED_FOR_IMPLEMENTATION` | 可轉債發行機構與 MOPS 明細連結索引 |
+| MOPS `GET /mops/web/t120sg01` | `VERIFIED_FOR_IMPLEMENTATION` | 發行時／最新轉換價與最近生效日 |
+| TPEx `GET /openapi/v1/bond_cb_daily` | `SUSPENDED` | 金融機構買賣彙總，非每檔行情；禁止 ingest 與 fallback |
+
+實作限制：
+
+- 僅盤後資料；不得宣稱即時。
+- CB、股票與轉換價必須按債券代碼／公司代碼精確關聯。
+- 每個值保存官方日期；沒有共同估值日就不計算一般溢價。
+- 轉換價只適用於不早於其生效日的估值日。
+- 任何必要來源失敗時保留上一個已發布版本，不使用 The Few、Yahoo、Goodinfo、CBAS、券商或其他第三方替代。
+- 詳細證據與隔離原因見 `docs/source-verification/cb-market-evidence.md` 及 `docs/source-verification/cb-market-resource-decision.md`。
+
+本 amendment 只核准 adapter 與發布前驗證，不授予 `APPROVED_FOR_PRODUCTION`。正式公開仍需 live smoke、顯名、頁面、深淺模式、手機版與發布回復測試全部通過。
 
 ## 28567 resource-level manual amendment (2026-07-26)
 
