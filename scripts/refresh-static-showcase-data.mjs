@@ -3,6 +3,11 @@ import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 import { parseCsv } from "../lib/source-verification/csv.ts";
+import {
+  bondInputsFrom11406Rows,
+  buildBondMarketSnapshot,
+} from "./build-bond-market-snapshot.mjs";
+import { fetchCurrentOfficialMarketData } from "./lib/official-market-fetch.mjs";
 
 export const OFFICIAL_SHOWCASE_SOURCES = {
   "94025": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
@@ -34,6 +39,7 @@ export function buildEmbeddedRuntime(existingRuntime, manifest, datasets) {
 export async function refreshStaticShowcase({
   fetchImpl = fetch,
   now = new Date(),
+  marketBuilder = buildBondMarketSnapshot,
 } = {}) {
   const datasets = {};
   const manifestDatasets = [];
@@ -67,12 +73,24 @@ export async function refreshStaticShowcase({
     });
   }
 
-  const manifest = {
+  const baseManifest = {
     kind: "official-source-snapshot",
     status: "official-static-snapshot",
     generatedAt: taipeiDate(now),
     datasets: manifestDatasets,
   };
+
+  const marketResult = await marketBuilder({
+    outputDir: DATA_DIRECTORY,
+    bonds: bondInputsFrom11406Rows(datasets["11406"]),
+    collectImpl: (options) => fetchCurrentOfficialMarketData({
+      ...options,
+      fetchImpl,
+    }),
+    now: () => now,
+    manifestBase: baseManifest,
+  });
+  const manifest = marketResult.manifest;
 
   for (const [datasetId, rows] of Object.entries(datasets)) {
     await writeFile(
@@ -81,12 +99,6 @@ export async function refreshStaticShowcase({
       "utf8",
     );
   }
-  await writeFile(
-    `${DATA_DIRECTORY}/manifest.json`,
-    `${JSON.stringify(manifest, null, 2)}\n`,
-    "utf8",
-  );
-
   const currentRuntime = await readFile(RUNTIME_PATH, "utf8");
   const nextRuntime = buildEmbeddedRuntime(currentRuntime, manifest, datasets);
   await writeFile(RUNTIME_PATH, nextRuntime, "utf8");
@@ -113,6 +125,7 @@ export async function refreshStaticShowcase({
         rows.length,
       ]),
     ),
+    market: marketResult.report,
   };
 }
 
