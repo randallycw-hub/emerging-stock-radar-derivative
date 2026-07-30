@@ -1,0 +1,23 @@
+[
+  {
+    "Date": "1150729",
+    "SecuritiesCompanyCode": "3522",
+    "CompanyName": "御嵿",
+    "Close": "11.65",
+    "Change": "-0.60 ",
+    "Open": "12.20",
+    "High": "12.20",
+    "Low": "11.65",
+    "Average": "11.88",
+    "TradingShares": "346776",
+    "TransactionAmount": "4119795",
+    "TransactionNumber": "147",
+    "LatestBidPrice": "11.65",
+    "LatesAskPrice": "11.80",
+    "Capitals": "104096209",
+    "NextReferencePrice": "11.65",
+    "NextLimitUp": "12.80",
+    "NextLimitDown": "10.50"
+  }
+]
+

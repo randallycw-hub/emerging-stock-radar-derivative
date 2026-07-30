@@ -1,0 +1,23 @@
+{
+  "tables": [
+    {
+      "fields": [
+        "發行機構代碼",
+        "發行機構名稱",
+        "債券名稱",
+        "掛牌日期",
+        "發行資料"
+      ],
+      "data": [
+        [
+          "3522",
+          "御嵿國際股份有限公司",
+          "御嵿國際股份有限公司國內第一次有擔保轉換公司債",
+          "112/12/18",
+          "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35221&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3522&monyr_reg=202606&pg=&step=0&tg="
+        ]
+      ]
+    }
+  ]
+}
+
