@@ -20,6 +20,8 @@ import {
   type DataFreshnessLevel,
   type DerivedEvent,
   type EmergingCompanyProfile,
+  type EmergingMarketDirection,
+  type EmergingMarketView,
   type EndOfDayMarketData,
   type IngestionRun,
   type ListingApplication,
@@ -154,6 +156,10 @@ function optionalNonNegativeDecimal(value: unknown, path: string): string | unde
   return value === undefined ? undefined : nonNegativeDecimal(value, path);
 }
 
+function nullableNonNegativeDecimal(value: unknown, path: string): string | null {
+  return value === null ? null : nonNegativeDecimal(value, path);
+}
+
 function signedDecimal(value: unknown, path: string): string {
   if (typeof value !== "string" || !/^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value)) {
     throw new DomainValidationError(`${path} must be a signed plain decimal string`);
@@ -163,6 +169,18 @@ function signedDecimal(value: unknown, path: string): string {
 
 function optionalSignedDecimal(value: unknown, path: string): string | undefined {
   return value === undefined ? undefined : signedDecimal(value, path);
+}
+
+function nullableSignedDecimal(value: unknown, path: string): string | null {
+  return value === null ? null : signedDecimal(value, path);
+}
+
+function nullableString(value: unknown, path: string): string | null {
+  return value === null ? null : requiredString(value, path);
+}
+
+function isZeroDecimal(value: string): boolean {
+  return /^0(?:\.0+)?$/.test(value);
 }
 
 function optionalPositiveDecimal(value: unknown, path: string): string | undefined {
@@ -547,6 +565,91 @@ export const EndOfDayMarketDataSchema = schema<EndOfDayMarketData>(
       dailyVolume: nonNegativeDecimal(input.dailyVolume, "EndOfDayMarketData.dailyVolume"),
       dailyTurnover: nonNegativeDecimal(input.dailyTurnover, "EndOfDayMarketData.dailyTurnover"),
       sourceAttribution: sourceAttribution(input.sourceAttribution),
+    };
+  },
+);
+
+export const EmergingMarketViewSchema = schema<EmergingMarketView>(
+  "EmergingMarketView",
+  (value) => {
+    const input = record(value, "EmergingMarketView");
+    strict(input, [
+      "tradingDate",
+      "companyCode",
+      "companyName",
+      "industryName",
+      "dailyAveragePrice",
+      "previousAveragePrice",
+      "dailyHighPrice",
+      "dailyLowPrice",
+      "averageChange",
+      "averageChangePercent",
+      "direction",
+      "transactionVolume",
+      "estimatedTransactionAmount",
+      "applyingDate",
+      "applyingStatus",
+    ], "EmergingMarketView");
+    const dailyAveragePrice = nullableNonNegativeDecimal(
+      input.dailyAveragePrice,
+      "EmergingMarketView.dailyAveragePrice",
+    );
+    const previousAveragePrice = nullableNonNegativeDecimal(
+      input.previousAveragePrice,
+      "EmergingMarketView.previousAveragePrice",
+    );
+    const averageChange = nullableSignedDecimal(
+      input.averageChange,
+      "EmergingMarketView.averageChange",
+    );
+    const averageChangePercent = nullableSignedDecimal(
+      input.averageChangePercent,
+      "EmergingMarketView.averageChangePercent",
+    );
+    const direction = enumValue(
+      input.direction,
+      ["up", "down", "flat", "unavailable"],
+      "EmergingMarketView.direction",
+    ) as EmergingMarketDirection;
+
+    if (dailyAveragePrice === null || previousAveragePrice === null) {
+      if (averageChange !== null || direction !== "unavailable") {
+        throw new DomainValidationError(
+          "EmergingMarketView.averageChange requires both average prices",
+        );
+      }
+    }
+    if (
+      dailyAveragePrice === null
+      || previousAveragePrice === null
+      || isZeroDecimal(previousAveragePrice)
+    ) {
+      if (averageChangePercent !== null) {
+        throw new DomainValidationError(
+          "EmergingMarketView.averageChangePercent requires a non-zero previous average price",
+        );
+      }
+    }
+
+    return {
+      tradingDate: isoDate(input.tradingDate, "EmergingMarketView.tradingDate"),
+      companyCode: requiredString(input.companyCode, "EmergingMarketView.companyCode"),
+      companyName: requiredString(input.companyName, "EmergingMarketView.companyName"),
+      industryName: nullableString(input.industryName, "EmergingMarketView.industryName"),
+      dailyAveragePrice,
+      previousAveragePrice,
+      dailyHighPrice: nullableNonNegativeDecimal(input.dailyHighPrice, "EmergingMarketView.dailyHighPrice"),
+      dailyLowPrice: nullableNonNegativeDecimal(input.dailyLowPrice, "EmergingMarketView.dailyLowPrice"),
+      averageChange,
+      averageChangePercent,
+      direction,
+      transactionVolume: nullableNonNegativeDecimal(input.transactionVolume, "EmergingMarketView.transactionVolume"),
+      estimatedTransactionAmount: nullableNonNegativeDecimal(
+        input.estimatedTransactionAmount,
+        "EmergingMarketView.estimatedTransactionAmount",
+      ),
+      applyingDate: nullableString(input.applyingDate, "EmergingMarketView.applyingDate"),
+      applyingStatus: nullableString(input.applyingStatus, "EmergingMarketView.applyingStatus"),
     };
   },
 );

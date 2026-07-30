@@ -97,6 +97,26 @@ export interface EndOfDayMarketData {
   sourceAttribution: SourceAttribution;
 }
 
+export type EmergingMarketDirection = "up" | "down" | "flat" | "unavailable";
+
+export interface EmergingMarketView {
+  tradingDate: string;
+  companyCode: string;
+  companyName: string;
+  industryName: string | null;
+  dailyAveragePrice: string | null;
+  previousAveragePrice: string | null;
+  dailyHighPrice: string | null;
+  dailyLowPrice: string | null;
+  averageChange: string | null;
+  averageChangePercent: string | null;
+  direction: EmergingMarketDirection;
+  transactionVolume: string | null;
+  estimatedTransactionAmount: string | null;
+  applyingDate: string | null;
+  applyingStatus: string | null;
+}
+
 export interface BondIssue {
   id: string;
   bondCode: string;

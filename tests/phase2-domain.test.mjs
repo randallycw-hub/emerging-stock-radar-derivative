@@ -15,6 +15,7 @@ import {
   DerivedEventSchema,
   DomainValidationError,
   EmergingCompanyProfileSchema,
+  EmergingMarketViewSchema,
   EndOfDayMarketDataSchema,
   IngestionRunSchema,
   ListingApplicationSchema,
@@ -300,6 +301,65 @@ test("approved end-of-day and contractual decimal field names are accepted", () 
   });
   assert.equal(bond.initialConversionPrice, "50");
   assert.equal(bond.putPrice, "102.5");
+});
+
+test("emerging market views validate public fields and unavailable derivations", () => {
+  const base = {
+    tradingDate: "2026-07-30",
+    companyCode: "1260",
+    companyName: "台灣虎航",
+    industryName: "航運業",
+    dailyAveragePrice: "25.45",
+    previousAveragePrice: "25.29",
+    dailyHighPrice: "26.5",
+    dailyLowPrice: "25.2",
+    averageChange: "0.16",
+    averageChangePercent: "0.63",
+    direction: "up",
+    transactionVolume: "22001",
+    estimatedTransactionAmount: "559925.45",
+    applyingDate: null,
+    applyingStatus: null,
+  };
+  assert.equal(EmergingMarketViewSchema.parse(base).direction, "up");
+  assert.throws(
+    () => EmergingMarketViewSchema.parse({ ...base, tradingDate: "2026-02-30" }),
+    /tradingDate/,
+  );
+  assert.throws(
+    () => EmergingMarketViewSchema.parse({ ...base, companyCode: "" }),
+    /companyCode/,
+  );
+  assert.throws(
+    () => EmergingMarketViewSchema.parse({ ...base, dailyAveragePrice: "2.5e1" }),
+    /dailyAveragePrice/,
+  );
+  assert.throws(
+    () => EmergingMarketViewSchema.parse({ ...base, direction: "sideways" }),
+    /direction/,
+  );
+  assert.throws(
+    () => EmergingMarketViewSchema.parse({ ...base, transactionVolume: "-1" }),
+    /transactionVolume/,
+  );
+  assert.throws(
+    () => EmergingMarketViewSchema.parse({
+      ...base,
+      dailyAveragePrice: null,
+      averageChange: "0.16",
+    }),
+    /averageChange/,
+  );
+  assert.throws(
+    () => EmergingMarketViewSchema.parse({
+      ...base,
+      dailyAveragePrice: null,
+      averageChange: null,
+      averageChangePercent: "0.63",
+      direction: "unavailable",
+    }),
+    /averageChangePercent/,
+  );
 });
 
 test("emerging end-of-day data requires daily-average semantics", () => {
