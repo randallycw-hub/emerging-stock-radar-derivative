@@ -1,9 +1,25 @@
 import { createHash } from "node:crypto";
-import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import {
+  access,
+  appendFile,
+  copyFile,
+  cp,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rename,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
+import { EmergingMarketViewSchema } from "../lib/domain/schema.ts";
+import { buildEmergingMarketViews } from "../lib/market-data/emerging-market-view.ts";
 import { parseCsv } from "../lib/source-verification/csv.ts";
+import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
+import { normalize94025Row, parse94025Csv } from "../lib/source-verification/source-94025.ts";
 import {
   bondInputsFrom11406Rows,
   buildBondMarketSnapshot,
@@ -15,6 +31,8 @@ export const OFFICIAL_SHOWCASE_SOURCES = {
   "11406": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
   "11586":
     "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
+  emergingMarket:
+    "https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics",
 };
 
 const DATA_DIRECTORY = "static-showcase/data";
@@ -26,6 +44,7 @@ export function buildRuntimeBootstrap() {
     "window.__OFFICIAL_SHOWCASE__ = ",
     JSON.stringify({
       manifestUrl: "./data/manifest.json",
+      emergingMarketUrl: "./data/emerging-market.json",
       datasets: {
         "94025": "./data/94025.json",
         "11406": "./data/11406.json",
@@ -60,7 +79,7 @@ export async function fetchOfficialCsvWithRetry(
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       const response = await fetchImpl(url, {
-        headers: { Accept: "text/csv, application/octet-stream" },
+        headers: { Accept: "text/csv, application/json, application/octet-stream" },
         redirect: "error",
       });
       if (!response.ok) {
@@ -161,11 +180,11 @@ export async function refreshStaticShowcase({
   marketBuilder = buildBondMarketSnapshot,
 } = {}) {
   const datasets = {};
+  const datasetTexts = {};
   const manifestDatasets = [];
 
-  for (const [datasetId, sourceUrl] of Object.entries(
-    OFFICIAL_SHOWCASE_SOURCES,
-  )) {
+  for (const [datasetId, sourceUrl] of Object.entries(OFFICIAL_SHOWCASE_SOURCES)) {
+    if (datasetId === "emergingMarket") continue;
     const response = await fetchOfficialCsvWithRetry(sourceUrl, fetchImpl);
     if (!response.ok) {
       throw new Error(`${datasetId}: HTTP_${response.status}`);
@@ -178,6 +197,7 @@ export async function refreshStaticShowcase({
     const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
     const rows = parseCsv(text);
     datasets[datasetId] = rows;
+    datasetTexts[datasetId] = text;
 
     manifestDatasets.push({
       datasetId,
@@ -189,57 +209,236 @@ export async function refreshStaticShowcase({
     });
   }
 
+  const emergingResponse = await fetchOfficialCsvWithRetry(
+    OFFICIAL_SHOWCASE_SOURCES.emergingMarket,
+    fetchImpl,
+  );
+  if (!emergingResponse.ok) {
+    throw new Error(`emergingMarket: HTTP_${emergingResponse.status}`);
+  }
+  if (
+    emergingResponse.bytes.byteLength === 0
+    || emergingResponse.bytes.byteLength > 8_000_000
+  ) {
+    throw new Error("emergingMarket: invalid response size");
+  }
+  const emergingText = new TextDecoder("utf-8", { fatal: true }).decode(
+    emergingResponse.bytes,
+  );
+  const marketRows = parseEmergingMarketSource(JSON.parse(emergingText));
+  const companyRows = newest94025CompanyRows(datasetTexts["94025"]);
+  const emergingSnapshot = buildEmergingMarketSnapshot({ marketRows, companyRows });
+
   const baseManifest = {
     kind: "official-source-snapshot",
     status: "official-static-snapshot",
     generatedAt: taipeiDate(now),
     datasets: manifestDatasets,
+    emergingMarketUrl: "./data/emerging-market.json",
   };
 
-  const marketResult = await marketBuilder({
-    outputDir: DATA_DIRECTORY,
-    bonds: bondInputsFrom11406Rows(datasets["11406"]),
-    collectImpl: async (options) => {
-      const store = await openMarketCheckpoint({ date: options.date });
-      return fetchCurrentOfficialMarketData({
-        ...options,
-        fetchImpl,
-        checkpoint: store.checkpoint,
-        onCheckpoint: store.onCheckpoint,
-      });
-    },
-    now: () => now,
-    manifestBase: baseManifest,
-  });
-  const manifest = marketResult.manifest;
+  const stagingRoot = await mkdtemp(join(dirname(DATA_DIRECTORY), ".showcase-"));
+  const stagingDataDirectory = join(stagingRoot, "data");
+  const stagingIndexPath = join(stagingRoot, "index.html");
+  try {
+    await copyDirectoryIfExists(DATA_DIRECTORY, stagingDataDirectory);
+    await mkdir(stagingDataDirectory, { recursive: true });
+    const currentIndex = await readFile(INDEX_PATH, "utf8");
+    await writeFile(stagingIndexPath, currentIndex, "utf8");
 
-  for (const [datasetId, rows] of Object.entries(datasets)) {
+    for (const [datasetId, rows] of Object.entries(datasets)) {
+      await writeFile(
+        join(stagingDataDirectory, `${datasetId}.json`),
+        `${JSON.stringify(rows)}\n`,
+        "utf8",
+      );
+    }
     await writeFile(
-      `${DATA_DIRECTORY}/${datasetId}.json`,
-      JSON.stringify(rows),
+      join(stagingDataDirectory, "emerging-market.json"),
+      `${JSON.stringify(emergingSnapshot, null, 2)}\n`,
       "utf8",
     );
+
+    const marketResult = await marketBuilder({
+      outputDir: stagingDataDirectory,
+      bonds: bondInputsFrom11406Rows(datasets["11406"]),
+      collectImpl: async (options) => {
+        const store = await openMarketCheckpoint({ date: options.date });
+        return fetchCurrentOfficialMarketData({
+          ...options,
+          fetchImpl,
+          checkpoint: store.checkpoint,
+          onCheckpoint: store.onCheckpoint,
+        });
+      },
+      now: () => now,
+      manifestBase: baseManifest,
+    });
+    const manifest = marketResult.manifest;
+    await writeFile(
+      join(stagingDataDirectory, "manifest.json"),
+      `${JSON.stringify(manifest, null, 2)}\n`,
+      "utf8",
+    );
+    await writeFile(
+      join(stagingDataDirectory, "runtime.js"),
+      buildRuntimeBootstrap(manifest),
+      "utf8",
+    );
+
+    const cacheKey = createHash("sha256")
+      .update(JSON.stringify(manifest))
+      .digest("hex")
+      .slice(0, 12);
+    await writeFile(
+      stagingIndexPath,
+      updateRuntimeCacheKey(currentIndex, cacheKey),
+      "utf8",
+    );
+    await verifyStagedEmergingSnapshot(stagingDataDirectory);
+
+    const publishedNames = [
+      ...Object.keys(datasets).map((datasetId) => `${datasetId}.json`),
+      "emerging-market.json",
+      "manifest.json",
+      "runtime.js",
+      ...(marketResult.files ?? []),
+    ];
+    await publishAtomically([
+      ...[...new Set(publishedNames)].map((name) => ({
+        source: join(stagingDataDirectory, name),
+        target: join(DATA_DIRECTORY, name),
+      })),
+      { source: stagingIndexPath, target: INDEX_PATH },
+    ]);
+
+    return {
+      manifest,
+      rowCounts: {
+        ...Object.fromEntries(
+          Object.entries(datasets).map(([datasetId, rows]) => [datasetId, rows.length]),
+        ),
+        emergingMarket: emergingSnapshot.records.length,
+      },
+      market: marketResult.report,
+    };
+  } finally {
+    await rm(stagingRoot, { recursive: true, force: true });
   }
-  await writeFile(RUNTIME_PATH, buildRuntimeBootstrap(manifest), "utf8");
+}
 
-  const cacheKey = createHash("sha256")
-    .update(JSON.stringify(manifestDatasets))
-    .digest("hex")
-    .slice(0, 12);
-  const currentIndex = await readFile(INDEX_PATH, "utf8");
-  const nextIndex = updateRuntimeCacheKey(currentIndex, cacheKey);
-  await writeFile(INDEX_PATH, nextIndex, "utf8");
+function newest94025CompanyRows(text) {
+  const latestByCompanyCode = new Map();
+  for (const sourceRow of parse94025Csv(text)) {
+    const row = normalize94025Row(sourceRow);
+    const current = latestByCompanyCode.get(row.companyCode);
+    if (
+      current === undefined
+      || `${row.sourcePublishedOn}\u001f${row.yearMonth}`
+        > `${current.sourcePublishedOn}\u001f${current.yearMonth}`
+    ) {
+      latestByCompanyCode.set(row.companyCode, row);
+    }
+  }
+  return [...latestByCompanyCode.values()];
+}
 
+function buildEmergingMarketSnapshot({ marketRows, companyRows }) {
+  if (!Array.isArray(marketRows) || marketRows.length === 0) {
+    throw new TypeError("emerging market payload must contain at least one row");
+  }
+  const records = buildEmergingMarketViews({ marketRows, companyRows })
+    .map((record) => EmergingMarketViewSchema.parse(record));
+  const tradingDate = marketRows[0].tradingDate;
+  if (!records.every((record) => record.tradingDate === tradingDate)) {
+    throw new TypeError("emerging market records must use one trading date");
+  }
+  if (new Set(records.map((record) => record.companyCode)).size !== records.length) {
+    throw new TypeError("emerging market records must have unique company codes");
+  }
+  const publishedTime = marketRows.map((row) => row.publishedTime).sort().at(-1);
   return {
-    manifest,
-    rowCounts: Object.fromEntries(
-      Object.entries(datasets).map(([datasetId, rows]) => [
-        datasetId,
-        rows.length,
-      ]),
-    ),
-    market: marketResult.report,
+    schemaVersion: 1,
+    tradingDate,
+    publishedAt: `${tradingDate}T${publishedTime}+08:00`,
+    sourceId: "tpex_esb_latest_statistics",
+    records,
   };
+}
+
+async function verifyStagedEmergingSnapshot(stagingDataDirectory) {
+  const snapshot = JSON.parse(await readFile(
+    join(stagingDataDirectory, "emerging-market.json"),
+    "utf8",
+  ));
+  if (
+    snapshot?.schemaVersion !== 1
+    || snapshot?.sourceId !== "tpex_esb_latest_statistics"
+    || !isIsoDate(snapshot?.tradingDate)
+    || !Array.isArray(snapshot?.records)
+    || snapshot.records.length === 0
+  ) {
+    throw new Error("VALIDATION_FAILED:EMERGING_MARKET_SNAPSHOT");
+  }
+  const records = snapshot.records.map((record) => EmergingMarketViewSchema.parse(record));
+  if (
+    records.some((record) => record.tradingDate !== snapshot.tradingDate)
+    || new Set(records.map((record) => record.companyCode)).size !== records.length
+  ) {
+    throw new Error("VALIDATION_FAILED:EMERGING_MARKET_INTEGRITY");
+  }
+  const manifest = JSON.parse(await readFile(join(stagingDataDirectory, "manifest.json"), "utf8"));
+  if (manifest.emergingMarketUrl !== "./data/emerging-market.json") {
+    throw new Error("VALIDATION_FAILED:EMERGING_MARKET_MANIFEST");
+  }
+  const runtime = await readFile(join(stagingDataDirectory, "runtime.js"), "utf8");
+  if (!runtime.includes('"emergingMarketUrl":"./data/emerging-market.json"')) {
+    throw new Error("VALIDATION_FAILED:EMERGING_MARKET_RUNTIME");
+  }
+}
+
+async function copyDirectoryIfExists(source, target) {
+  if (await pathExists(source)) {
+    await cp(source, target, { recursive: true });
+  }
+}
+
+async function publishAtomically(entries) {
+  const existing = [];
+  const backupDirectory = await mkdtemp(join(dirname(entries[0].target), ".showcase-backup-"));
+  try {
+    for (const [index, entry] of entries.entries()) {
+      if (await pathExists(entry.target)) {
+        const backup = join(backupDirectory, String(index));
+        await copyFile(entry.target, backup);
+        existing.push([entry.target, backup]);
+      }
+    }
+    for (const entry of entries) {
+      await rename(entry.source, entry.target);
+    }
+  } catch (error) {
+    for (const entry of entries) {
+      const backup = existing.find(([target]) => target === entry.target)?.[1];
+      if (backup !== undefined) {
+        await copyFile(backup, entry.target);
+      } else {
+        await rm(entry.target, { force: true });
+      }
+    }
+    throw error;
+  } finally {
+    await rm(backupDirectory, { recursive: true, force: true });
+  }
+}
+
+async function pathExists(path) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function taipeiDate(date) {

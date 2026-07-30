@@ -2,6 +2,7 @@
   "kind": "official-source-snapshot",
   "status": "official-static-snapshot",
   "generatedAt": "2026-07-30",
+  "emergingMarketUrl": "./data/emerging-market.json",
   "datasets": [
     {
       "datasetId": "11406",
