@@ -5,8 +5,14 @@ on:
     branches: [main]
     paths:
       - "static-showcase/**"
+      - "scripts/**"
       - ".github/workflows/deploy-github-pages.yml"
   workflow_dispatch:
+  schedule:
+    # UTC；台北時間為平日 20:30、21:30、23:00。
+    - cron: "30 12 * * 1-5"
+    - cron: "30 13 * * 1-5"
+    - cron: "0 15 * * 1-5"
 
 permissions:
   contents: read
@@ -19,19 +25,45 @@ concurrency:
 
 jobs:
   deploy:
+    timeout-minutes: 30
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      UV_THREADPOOL_SIZE: "2"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
       - name: Configure Pages
+        id: pages
         uses: actions/configure-pages@v5
+      - name: Check whether today's market snapshot is already published
+        if: github.event_name == 'schedule'
+        id: freshness
+        env:
+          PUBLIC_MANIFEST_URL: ${{ steps.pages.outputs.base_url }}/data/manifest.json
+        run: node scripts/check-market-refresh-needed.mjs >> "$GITHUB_OUTPUT"
+      - name: Refresh verified public datasets
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && steps.freshness.outputs.needed == 'true')
+        run: npm run snapshot:showcase
+      - name: Verify website
+        if: github.event_name != 'schedule' || steps.freshness.outputs.needed == 'true'
+        run: npm test
       - name: Upload showcase
+        if: github.event_name != 'schedule' || steps.freshness.outputs.needed == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: static-showcase
       - name: Deploy
+        if: github.event_name != 'schedule' || steps.freshness.outputs.needed == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
