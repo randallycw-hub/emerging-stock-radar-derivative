@@ -14,6 +14,8 @@ const fmtDate = (value) => {
   if (value == null || value === "") return "—";
   const text = String(value);
   if (/^\d{8}$/.test(text)) return `${text.slice(0, 4)}-${text.slice(4, 6)}-${text.slice(6)}`;
+  if (/^\d{7}$/.test(text)) return `${Number(text.slice(0, 3)) + 1911}-${text.slice(3, 5)}-${text.slice(5)}`;
+  if (/^\d{5}$/.test(text)) return `${Number(text.slice(0, 3)) + 1911}-${text.slice(3, 5)}`;
   if (/^\d{6}$/.test(text)) return `${Number(text.slice(0, 3)) + 1911}-${text.slice(3, 5)}-${text.slice(5)}`;
   return text;
 };
