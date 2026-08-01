@@ -25,6 +25,8 @@
 
 `sourceRecordId` 與上述五個原始日期必須逐字完全一致，而且錯誤必須確實是 chronology violation，才會隔離該列。隔離列不進入 normalized rows、snapshot 或事件。任何日期改動、新 id、新 chronology anomaly，或同列其他已驗證欄位錯誤仍會失敗。production source 保留具審核日期與理由的 `REVIEWED_CHRONOLOGY_ANOMALIES` 常數。
 
+P1 複核補強：exact allowlisted anomaly 仍參與完整來源 canonical `(companyCode, applicationDate)` uniqueness 檢查。正常列使用 normalized identity；exact anomaly 使用相同的 required text/date canonical validators。每一筆 reviewed anomaly 最多只能隔離一次；同一 anomaly exact duplicate 出現兩次即拋 `duplicate application identity`，不能用 allowlist 無限降低來源 cardinality。日期斜線或 companyCode 空白等格式差異也不能繞過 duplicate identity。uniqueness 在所有列都已完成正常 normalize 或 exact-reviewed isolation 判斷後、回傳 accepted rows 前執行，因此其他 malformed row 的驗證優先順序不變。
+
 ### 2. TWSE table live envelope
 
 auction/publicForm root envelope 新增允許 `notes` 與 `total`，但未放寬其他 key：
@@ -82,9 +84,12 @@ node --test --test-concurrency=2 tests/source-verification/source-11586.test.mjs
 
 獨立 code review 再發現四個邊界：pre-application evidence、同日 nested price、same-attempt note 與無 application 時的 downstream identity。依 TDD 先加入測試，第三輪 RED 為 **26 pass / 4 fail**，四項皆以預期原因失敗。follow-up review 再指出 application 承銷商空白時的 downstream precedence；新增測試先以 **15 pass / 1 fail** 證明缺口。最小修正後完整 focused command 最終結果：**31 pass / 0 fail**。
 
+P1 複核另先加入 exact anomaly duplicate regression：`source-11586` focused RED 為 **7 pass / 1 fail**，失敗原因是 missing expected `duplicate application identity`。review 再要求 canonical identity 不得因日期／空白格式差異繞過，該 regression 同樣先以 **7 pass / 1 fail** 重現。將 uniqueness 改為檢查完整 canonical identity set 後，同檔 GREEN 為 **8 pass / 0 fail**，完整 focused 仍為 **31 pass / 0 fail**。
+
 測試同時證明：
 
 - 兩筆 exact anomaly 被隔離，任一審核日期改一字仍 fail-closed。
+- 任一 exact anomaly 出現 duplicate 時仍由 application identity uniqueness fail-closed。
 - 合法 `notes/total` 可解析，錯型別、負數、小數、mismatch 與 unknown key 被拒絕。
 - 1623 選取 `2025-09-30` 最新 application；舊 attempt 不污染 stage/events；同一最新日期的非空欄位衝突仍失敗。
 - 新 application 不會吸收早於 applicationDate 的 listing/auction/public evidence。

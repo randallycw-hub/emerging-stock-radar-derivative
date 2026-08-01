@@ -102,6 +102,12 @@ test("11586 isolates only the two reviewed historical chronology anomalies", () 
   const ordinary = make11586Row({ sourceRecordId: "TWSE:9999:1150105" });
 
   assert.deepEqual(parse11586Json([...reviewedAnomalies, ordinary]), [ordinary]);
+  for (const anomaly of reviewedAnomalies) {
+    assert.throws(
+      () => parse11586Json([anomaly, { ...anomaly }, ordinary]),
+      /duplicate application identity/,
+    );
+  }
   assert.throws(
     () => parse11586Json([{ ...reviewedAnomalies[0], listingReviewDate: "0930908" }, ordinary]),
     /chronology/,
@@ -130,6 +136,15 @@ test("11586 rejects duplicate application identity and unknown fields", () => {
   };
   const normalized = normalize11586Application(row);
   assert.throws(() => assertUnique11586Applications([normalized, normalized]), /duplicate/);
+  assert.throws(
+    () => parse11586Json([row, {
+      ...row,
+      sourceRecordId: "TWSE:1234:formatted-duplicate",
+      companyCode: " 1234 ",
+      applicationDate: "2026/01/05",
+    }]),
+    /duplicate application identity/,
+  );
   assert.throws(() => normalize11586Application({ ...row, unexpected: "x" }), /unknown/);
 });
 

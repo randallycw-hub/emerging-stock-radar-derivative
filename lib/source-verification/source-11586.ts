@@ -142,7 +142,9 @@ export function normalize11586Application(row: Source11586Row): NormalizedListin
   };
 }
 
-export function assertUnique11586Applications(rows: readonly NormalizedListingApplication11586[]): void {
+export function assertUnique11586Applications(
+  rows: readonly Pick<NormalizedListingApplication11586, "companyCode" | "applicationDate">[],
+): void {
   const seen = new Set<string>();
   for (const row of rows) {
     const identity = `${row.companyCode}:${row.applicationDate}`;
@@ -163,18 +165,23 @@ function parseRows(values: readonly unknown[], name: string): Source11586Row[] {
     return record as unknown as Source11586Row;
   });
   const acceptedRows: Source11586Row[] = [];
-  const normalizedRows: NormalizedListingApplication11586[] = [];
+  const applicationIdentities: Array<Pick<NormalizedListingApplication11586, "companyCode" | "applicationDate">> = [];
   for (const row of rows) {
     try {
-      normalizedRows.push(normalize11586Application(row));
+      const normalized = normalize11586Application(row);
+      applicationIdentities.push(normalized);
       acceptedRows.push(row);
     } catch (error) {
       if (!(error instanceof Source11586ValidationError)
         || !error.message.endsWith("violates application chronology")
         || !isReviewedChronologyAnomaly(row)) throw error;
+      applicationIdentities.push({
+        companyCode: requiredText(row.companyCode, "companyCode"),
+        applicationDate: requiredDate(row.applicationDate, "applicationDate"),
+      });
     }
   }
-  assertUnique11586Applications(normalizedRows);
+  assertUnique11586Applications(applicationIdentities);
   return acceptedRows;
 }
 
