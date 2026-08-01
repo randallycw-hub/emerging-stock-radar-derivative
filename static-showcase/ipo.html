@@ -9,45 +9,59 @@
 </head>
 <body data-page="ipo">
   <a class="skip-link" href="#main-content">跳到主要內容</a>
-  <header class="site-header">
-    <div class="site-header__inner">
-      <a class="site-mark" href="./index.html" aria-label="可轉債與興櫃盤後資訊首頁">
-        <span>POST-CLOSE</span>
-        <strong>市場資訊台</strong>
-      </a>
-      <button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
-        <span aria-hidden="true">☰</span>
-        <span>選單</span>
-      </button>
-      <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽">
-        <a data-page-link="home" href="./index.html">首頁</a>
-        <a data-page-link="bonds" href="./bonds.html">可轉債</a>
-        <a data-page-link="emerging" href="./emerging.html">興櫃市場</a>
-        <a data-page-link="ipo" href="./ipo.html" aria-current="page">IPO 行程</a>
-        <a data-page-link="methodology" href="./methodology.html">資料方法</a>
-      </nav>
-      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false">
-        <span aria-hidden="true">◐</span>
-        <span data-theme-label>深色模式</span>
-      </button>
-    </div>
-  </header>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-mark" href="./index.html" aria-label="可轉債與興櫃盤後資訊首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a>
+    <button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"><span aria-hidden="true">☰</span><span>選單</span></button>
+    <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽">
+      <a data-page-link="home" href="./index.html">首頁</a><a data-page-link="bonds" href="./bonds.html">可轉債</a><a data-page-link="emerging" href="./emerging.html">興櫃市場</a><a data-page-link="ipo" href="./ipo.html" aria-current="page">IPO 行程</a><a data-page-link="methodology" href="./methodology.html">資料方法</a>
+    </nav>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
+  </div></header>
 
   <main id="main-content" class="page-content" tabindex="-1">
-    <header class="page-heading">
-      <p class="kicker">IPO CALENDAR</p>
-      <h1>IPO 公開行程</h1>
-      <p>依公開節點整理上市與上櫃申請、審議及掛牌時程。</p>
-    </header>
-    <section id="ipo-calendar-root" class="page-placeholder" data-page-root="ipo" aria-labelledby="ipo-calendar-heading">
-      <p class="section-number">CALENDAR WORKSPACE</p>
-      <h2 id="ipo-calendar-heading">IPO 行程資料</h2>
-      <p>行程篩選與公司時程將由 IPO 頁面模組載入。</p>
+    <header class="page-heading"><p class="kicker">IPO CALENDAR</p><h1>IPO 公開行程</h1><p>依申請、審議、董事會、契約核准／備查與掛牌交易順序整理公開時程。</p></header>
+
+    <section id="ipo-calendar-root" class="ledger-section" data-page-root="ipo" aria-labelledby="ipo-calendar-heading">
+      <header class="section-heading"><div><p class="section-number">CALENDAR WORKSPACE</p><h2 id="ipo-calendar-heading">IPO 行程資料</h2></div><p id="ipo-update-status" class="update-status" aria-live="polite">資料讀取中</p></header>
+
+      <div id="ipo-stage-summary" class="ipo-stage-summary" aria-label="IPO 進度概況">
+        <article><span>篩選結果</span><strong data-ipo-summary="total">—</strong></article>
+        <article><span>申請／審議中</span><strong data-ipo-summary="review">—</strong></article>
+        <article><span>已通過</span><strong data-ipo-summary="approved">—</strong></article>
+        <article><span>已掛牌</span><strong data-ipo-summary="listed">—</strong></article>
+        <article><span>已撤件</span><strong data-ipo-summary="withdrawn">—</strong></article>
+      </div>
+
+      <form id="ipo-filters" class="filters ipo-filters" aria-label="IPO 行程篩選">
+        <label class="search-field"><span>搜尋</span><input id="ipo-search" name="q" type="search" placeholder="公司代碼、名稱或承銷商"></label>
+        <label><span>市場</span><select id="ipo-market" name="market"><option value="all">全部市場</option></select></label>
+        <label><span>目前進度</span><select id="ipo-status" name="status"><option value="all">全部進度</option></select></label>
+        <label><span>年份</span><select id="ipo-year" name="year"><option value="all">全部年份</option></select></label>
+        <label class="mobile-sort-control"><span>排序日期</span><select id="ipo-sort-field" name="sort"><option value="eventDate">最近進度日期</option><option value="applicationDate">申請日期</option><option value="reviewDate">審議日期</option><option value="boardDate">董事會通過日期</option><option value="filingDate">契約核准／備查日期</option><option value="listingDate">掛牌交易日期</option></select></label>
+        <button id="ipo-sort-direction" class="sort-direction" type="button" aria-label="切換日期排序方向" data-direction="desc">新到舊 ↓</button>
+        <output id="ipo-result-count" aria-live="polite">—</output>
+      </form>
+
+      <div class="ipo-table-shell"><table class="ipo-table">
+        <thead><tr>
+          <th>公司代碼／名稱</th><th>市場</th><th>目前進度</th>
+          <th aria-sort="none"><button type="button" data-ipo-sort="applicationDate">申請日期 <span aria-hidden="true"></span></button></th>
+          <th aria-sort="none"><button type="button" data-ipo-sort="reviewDate">審議日期 <span aria-hidden="true"></span></button></th>
+          <th aria-sort="none"><button type="button" data-ipo-sort="boardDate">董事會通過日期 <span aria-hidden="true"></span></button></th>
+          <th aria-sort="none"><button type="button" data-ipo-sort="filingDate">契約核准／備查日期 <span aria-hidden="true"></span></button></th>
+          <th aria-sort="none"><button type="button" data-ipo-sort="listingDate">掛牌交易日期 <span aria-hidden="true"></span></button></th>
+          <th>承銷商</th><th>備註</th><th>資料更新</th>
+        </tr></thead>
+        <tbody id="ipo-table-body"><tr><td colspan="11" class="empty-cell">IPO 行程讀取中</td></tr></tbody>
+      </table></div>
+      <div id="ipo-card-list" class="ipo-card-list" aria-live="polite"></div>
+      <nav id="ipo-pagination" class="pagination" aria-label="IPO 行程分頁"></nav>
       <p class="data-error" data-page-error hidden role="status"></p>
     </section>
   </main>
 
-  <footer class="footer">市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer>
+  <footer class="footer">市場資訊台 · <a href="./methodology.html">資料來源與計算方法</a> · 僅整理公開資訊，不構成投資建議。</footer>
   <script type="module" src="./assets/site-shell.js"></script>
+  <script type="module" src="./assets/ipo-page.js"></script>
 </body>
 </html>

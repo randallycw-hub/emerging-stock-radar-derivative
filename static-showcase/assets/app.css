@@ -662,6 +662,48 @@ a { color: inherit; }
 .subsection-heading > p { color: var(--muted); }
 .revenue-table { min-width: 980px; }
 
+.ipo-stage-summary {
+  margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.ipo-stage-summary article { padding: 14px 16px; border-right: 1px solid var(--line); }
+.ipo-stage-summary article:last-child { border-right: 0; }
+.ipo-stage-summary span { color: var(--muted); font-size: 11px; }
+.ipo-stage-summary strong { display: block; margin-top: 4px; font: 800 24px/1 Georgia, serif; }
+.ipo-filters { grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(130px, .38fr)) minmax(175px, .46fr) auto; }
+.ipo-table-shell { width: 100%; overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
+.ipo-table { width: 100%; min-width: 1320px; border-collapse: collapse; font-size: 11px; }
+.ipo-table th,
+.ipo-table td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.ipo-table thead th { color: var(--clay-ink); border-bottom: 2px solid var(--ink); }
+.ipo-table thead button { width: 100%; border: 0; padding: 0; color: inherit; background: transparent; font: inherit; font-weight: 850; text-align: left; cursor: pointer; }
+.ipo-table thead button:hover,
+.ipo-table thead button:focus-visible { color: var(--violet-ink); }
+.ipo-table tbody tr:hover { background: var(--clay-soft); }
+.ipo-status { display: inline-block; border: 1px solid currentColor; padding: 3px 6px; color: var(--violet-ink); font-size: 10px; font-weight: 850; white-space: nowrap; }
+.ipo-status-listed_for_trading,
+.ipo-status-contract_filed_or_regulator_approved,
+.ipo-status-board_approved { color: var(--clay-ink); }
+.ipo-status-withdrawn { color: var(--muted); text-decoration: line-through; }
+.ipo-card-list { display: none; }
+.ipo-card { border: 1px solid var(--line); background: var(--panel); }
+.ipo-card > header { padding: 14px; display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); }
+.ipo-card h3 { margin: 3px 0 0; font: 800 20px/1.1 Georgia, serif; }
+.ipo-card header span { color: var(--muted); font-size: 10px; }
+.ipo-timeline { margin: 0; padding: 16px 14px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); list-style: none; }
+.ipo-timeline li { position: relative; min-width: 0; padding: 15px 5px 0; border-top: 2px solid var(--line); color: var(--muted); text-align: center; }
+.ipo-timeline li::before { content: ""; position: absolute; top: -6px; left: calc(50% - 5px); width: 10px; height: 10px; border: 2px solid var(--line-strong); border-radius: 50%; background: var(--panel); }
+.ipo-timeline li.is-complete { border-color: var(--clay); color: var(--ink); }
+.ipo-timeline li.is-complete::before { border-color: var(--clay); background: var(--clay); }
+.ipo-timeline span,
+.ipo-timeline time { display: block; overflow-wrap: anywhere; }
+.ipo-timeline span { font-size: 10px; font-weight: 800; }
+.ipo-timeline time { margin-top: 3px; font-size: 10px; }
+.ipo-card > footer { padding: 12px 14px; display: grid; gap: 4px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+
 @media (max-width: 900px) {
   .mobile-sort-control,
   .sort-direction {
@@ -681,11 +723,21 @@ a { color: inherit; }
   .market-card dl { margin: 0; padding: 13px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .market-card dt { color: var(--muted); font-size: 10px; }
   .market-card dd { margin: 2px 0 0; font-weight: 750; }
+  .ipo-stage-summary { grid-template-columns: repeat(2, 1fr); }
+  .ipo-stage-summary article { border-bottom: 1px solid var(--line); }
+  .ipo-stage-summary article:nth-child(2n) { border-right: 0; }
+  .ipo-stage-summary article:last-child { grid-column: span 2; border-bottom: 0; }
+  .ipo-filters { grid-template-columns: 1fr; }
+  .ipo-table-shell { display: none; }
+  .ipo-card-list { display: grid; gap: 12px; }
 }
 
 @media (max-width: 560px) {
   .ranking-grid { grid-template-columns: 1fr; }
   .market-card dl { grid-template-columns: 1fr; }
+  .ipo-timeline { grid-template-columns: 1fr; padding-left: 24px; }
+  .ipo-timeline li { padding: 5px 0 13px 18px; border-top: 0; border-left: 2px solid var(--line); text-align: left; }
+  .ipo-timeline li::before { top: 5px; left: -6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
