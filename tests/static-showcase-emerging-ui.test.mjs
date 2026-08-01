@@ -13,6 +13,7 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
   const source = html + js;
 
   for (const label of [
+    "最後成交價（盤後）",
     "當日成交均價（盤後）",
     "公司家數",
     "有效樣本",
@@ -56,6 +57,9 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
   assert.match(js, /matchMedia\("\(max-width: 900px\)"\)/);
   assert.match(js, /\.slice\(0, 5\)/);
   assert.match(js, /estimatedTransactionAmount/);
+  assert.match(js, /row\.lastTradedPrice/);
+  assert.match(html, /data-market-sort="lastTradedPrice"/);
+  assert.match(js, /emptyRow\(11/);
   assert.match(js, /monthlyRevenue/);
   assert.match(css, /market-breadth/);
   assert.match(css, /ranking-grid/);
@@ -67,4 +71,32 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
 
   assert.doesNotMatch(html, /即時|最新價|買進價|賣出價|買進量|賣出量|WebSocket|自動更新/);
   assert.doesNotMatch(html, /興櫃[^<]{0,12}收盤價|興櫃收盤價/);
+});
+
+test("月營收八個欄位可獨立排序並保留網址狀態", async () => {
+  const [html, js] = await Promise.all([
+    readFile(new URL("emerging.html", root), "utf8"),
+    readFile(new URL("assets/emerging-page.js", root), "utf8"),
+  ]);
+
+  for (const [key, type] of [
+    ["companyCode", "text"],
+    ["industryName", "text"],
+    ["yearMonth", "text"],
+    ["monthRevenue", "number"],
+    ["monthChangePercent", "number"],
+    ["yearChangePercent", "number"],
+    ["cumulativeRevenue", "number"],
+    ["cumulativeChangePercent", "number"],
+  ]) {
+    assert.match(html, new RegExp(`data-revenue-sort="${key}" data-sort-type="${type}"`));
+  }
+
+  assert.match(js, /revenueSortKey/);
+  assert.match(js, /revenueSortDirection/);
+  assert.match(js, /params\.get\("revenueSort"\)/);
+  assert.match(js, /params\.get\("revenueDirectionSort"\)/);
+  assert.match(js, /params\.set\("revenueSort"/);
+  assert.match(js, /params\.set\("revenueDirectionSort"/);
+  assert.match(js, /querySelectorAll\("\[data-revenue-sort\]"\)/);
 });

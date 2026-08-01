@@ -13,6 +13,8 @@ const state = {
   marketDirection: "all",
   sortKey: "companyCode",
   sortDirection: "asc",
+  revenueSortKey: "companyCode",
+  revenueSortDirection: "asc",
   page: 1,
   revenuePage: 1,
 };
@@ -58,6 +60,8 @@ function initializeFromUrl() {
   state.marketDirection = params.get("direction") ?? "all";
   state.sortKey = params.get("sort") ?? "companyCode";
   state.sortDirection = params.get("directionSort") === "desc" ? "desc" : "asc";
+  state.revenueSortKey = params.get("revenueSort") ?? "companyCode";
+  state.revenueSortDirection = params.get("revenueDirectionSort") === "desc" ? "desc" : "asc";
   state.page = positiveInteger(params.get("page"));
   state.revenuePage = positiveInteger(params.get("revenuePage"));
 }
@@ -109,6 +113,17 @@ function bindControls() {
       updateSortControls();
       syncUrl();
       renderMarketTable();
+    });
+  }
+  for (const button of document.querySelectorAll("[data-revenue-sort]")) {
+    button.addEventListener("click", () => {
+      const key = button.dataset.revenueSort;
+      state.revenueSortDirection = state.revenueSortKey === key && state.revenueSortDirection === "desc" ? "asc" : "desc";
+      state.revenueSortKey = key;
+      state.revenuePage = 1;
+      updateRevenueSortControls();
+      syncUrl();
+      renderRevenue();
     });
   }
   window.addEventListener("popstate", () => {
@@ -181,7 +196,7 @@ function renderMarketTable() {
   state.page = Math.min(state.page, pages);
   const visible = sorted.slice((state.page - 1) * size, state.page * size);
   document.querySelector("#emerging-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
-  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(10);
+  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(11);
   document.querySelector("#emerging-card-list").innerHTML = visible.map(marketCardHtml).join("");
   renderPagination("#emerging-pagination", state.page, pages, (page) => {
     state.page = page;
@@ -198,13 +213,18 @@ function renderRevenue() {
     const matchesIndustry = state.industry === "all" || row.industryName === state.industry;
     return matchesQuery && matchesIndustry;
   });
-  const sorted = [...rows].sort((a, b) => a.companyCode.localeCompare(b.companyCode));
+  const type = document.querySelector(`[data-revenue-sort="${CSS.escape(state.revenueSortKey)}"]`)?.dataset.sortType ?? "number";
+  const sorted = sortRows(
+    rows.map((row) => ({ ...row, bondCode: row.companyCode })),
+    { key: state.revenueSortKey, direction: state.revenueSortDirection, type },
+  );
   const size = pageSize();
   const pages = Math.max(1, Math.ceil(sorted.length / size));
   state.revenuePage = Math.min(state.revenuePage, pages);
   const visible = sorted.slice((state.revenuePage - 1) * size, state.revenuePage * size);
   document.querySelector("#revenue-period").textContent = visible[0]?.yearMonth ? `資料年月 ${formatRocMonth(visible[0].yearMonth)}` : "尚無月營收資料";
   document.querySelector("#emerging-revenue-body").innerHTML = visible.length ? visible.map(revenueRowHtml).join("") : emptyRow(8);
+  updateRevenueSortControls();
   renderPagination("#revenue-pagination", state.revenuePage, pages, (page) => {
     state.revenuePage = page;
     syncUrl();
@@ -227,6 +247,7 @@ function marketRowHtml(row) {
   return `<tr id="company-${escapeHtml(row.companyCode)}">
     <th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th>
     <td>${escapeHtml(row.industryName ?? "未分類")}</td>
+    <td>${formatNumber(row.lastTradedPrice, { maximumFractionDigits: 2 })}</td>
     <td>${formatNumber(row.dailyAveragePrice, { maximumFractionDigits: 2 })}</td>
     <td class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}<small>${formatPercent(row.averageChangePercent)}</small></td>
     <td>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}</td>
@@ -240,6 +261,7 @@ function marketRowHtml(row) {
 
 function marketCardHtml(row) {
   return `<article class="market-card" id="card-${escapeHtml(row.companyCode)}"><header><strong>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</strong><span>${escapeHtml(row.industryName ?? "未分類")}</span></header><dl>
+    <div><dt>最後成交價（盤後）</dt><dd>${formatNumber(row.lastTradedPrice, { maximumFractionDigits: 2 })}</dd></div>
     <div><dt>當日成交均價（盤後）</dt><dd>${formatNumber(row.dailyAveragePrice, { maximumFractionDigits: 2 })}</dd></div>
     <div><dt>均價漲跌</dt><dd class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}／${formatPercent(row.averageChangePercent)}</dd></div>
     <div><dt>最高／最低</dt><dd>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}／${formatNumber(row.dailyLowPrice, { maximumFractionDigits: 2 })}</dd></div>
@@ -272,6 +294,16 @@ function applyStateToControls() {
   selectExistingValue("#emerging-direction", state.marketDirection);
   selectExistingValue("#emerging-sort-field", state.sortKey);
   updateSortControls();
+  updateRevenueSortControls();
+}
+
+function updateRevenueSortControls() {
+  for (const button of document.querySelectorAll("[data-revenue-sort]")) {
+    const active = button.dataset.revenueSort === state.revenueSortKey;
+    const th = button.closest("th");
+    th.setAttribute("aria-sort", active ? (state.revenueSortDirection === "desc" ? "descending" : "ascending") : "none");
+    button.querySelector("span").textContent = active ? (state.revenueSortDirection === "desc" ? "↓" : "↑") : "";
+  }
 }
 
 function updateSortControls() {
@@ -295,6 +327,8 @@ function syncUrl() {
   if (state.marketDirection !== "all") params.set("direction", state.marketDirection);
   if (state.sortKey !== "companyCode") params.set("sort", state.sortKey);
   if (state.sortDirection !== "asc") params.set("directionSort", state.sortDirection);
+  if (state.revenueSortKey !== "companyCode") params.set("revenueSort", state.revenueSortKey);
+  if (state.revenueSortDirection !== "asc") params.set("revenueDirectionSort", state.revenueSortDirection);
   if (state.page > 1) params.set("page", String(state.page));
   if (state.revenuePage > 1) params.set("revenuePage", String(state.revenuePage));
   history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
@@ -334,7 +368,7 @@ function normalizeRevenueRow(row) {
 
 function showUnavailable() {
   document.querySelector("#emerging-update-status").textContent = "盤後市場資料尚未發布";
-  document.querySelector("#emerging-table-body").innerHTML = emptyRow(10, "目前沒有可顯示的盤後市場資料");
+  document.querySelector("#emerging-table-body").innerHTML = emptyRow(11, "目前沒有可顯示的盤後市場資料");
   document.querySelector("#emerging-revenue-body").innerHTML = emptyRow(8, "目前沒有可顯示的月營收資料");
 }
 
