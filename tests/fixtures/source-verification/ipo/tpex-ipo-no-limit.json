@@ -1,0 +1,17 @@
+[
+  {
+    "Date": "1150608",
+    "SecuritiesCompanyCode": "6945",
+    "CompanyName": "圓祥生技",
+    "StartDateForStabilizationOperation": "1150605",
+    "EndDateForStabilizationOperation": "1150611",
+    "UnderwritingPrice": "105.40",
+    "OverAllotmentShares": "500,000",
+    "TransactionType": "主辦承銷商執行穩定價格操作專戶",
+    "Underwriter": "9800 元大",
+    "TradingType": "買",
+    "TradingPrice": "104.00",
+    "TradingVolume": "35,000",
+    "CurrentDayCumulativeTradingVolume": "35,000"
+  }
+]
