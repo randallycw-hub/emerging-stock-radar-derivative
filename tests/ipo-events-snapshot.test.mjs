@@ -110,6 +110,48 @@ test("preserves explicit exception states and null missing underwriting prices",
   assert.equal(cancelled.records[0].finalUnderwritingPrice, null);
 });
 
+test("does not invent a cancellation event date from an auction or draw date", () => {
+  const auction = buildIpoEventSnapshot(snapshotInput({
+    tpexListings: [],
+    auctions: [{
+      companyCode: "7819",
+      companyName: "測試公司",
+      market: "上櫃",
+      bidStartDate: "2026-08-02",
+      bidEndDate: "2026-08-03",
+      auctionOpenDate: "2026-08-04",
+      listingDate: null,
+      minimumBidPrice: null,
+      finalUnderwritingPrice: null,
+      underwriter: "測試承銷商",
+      cancelled: true,
+      sourceRecordId: "TWSE:auction:7819:2026-08-04",
+    }],
+  }));
+  const publicOffering = buildIpoEventSnapshot(snapshotInput({
+    tpexListings: [],
+    publicOfferings: [{
+      companyCode: "7819",
+      companyName: "測試公司",
+      market: "上櫃",
+      subscriptionStartDate: "2026-08-05",
+      subscriptionEndDate: "2026-08-06",
+      drawDate: "2026-08-07",
+      listingDate: null,
+      provisionalUnderwritingPrice: null,
+      finalUnderwritingPrice: null,
+      underwriter: "測試承銷商",
+      cancelled: true,
+      sourceRecordId: "TWSE:public:7819:2026-08-07",
+    }],
+  }));
+
+  assert.equal(auction.records[0].stage, "cancelled");
+  assert.equal(publicOffering.records[0].stage, "cancelled");
+  assert.equal(auction.records[0].events.some((event) => event.kind === "cancelled"), false);
+  assert.equal(publicOffering.records[0].events.some((event) => event.kind === "cancelled"), false);
+});
+
 test("does not invent a withdrawal or delay event date from an application date", () => {
   const withdrawn = buildIpoEventSnapshot(snapshotInput({
     tpexListings: [],
@@ -182,7 +224,7 @@ test("fills missing auction and public-offering fields from duplicate official r
   );
 });
 
-test("represents a missing application date as null for listing, auction, and public-offering-only records", () => {
+test("represents a missing application date with the approved display placeholder", () => {
   const listingOnly = { ...listing, companyCode: "7001", sourceRecordId: "TPEx:ipo-no-limit:7001:2026-08-05" };
   const auctionOnly = {
     companyCode: "7002",
@@ -219,7 +261,8 @@ test("represents a missing application date as null for listing, auction, and pu
     publicOfferings: [publicOfferingOnly],
   })).records;
 
-  assert.deepEqual(records.map((record) => record.applicationDate), [null, null, null]);
+  assert.deepEqual(records.map((record) => record.applicationDate), ["—", "—", "—"]);
+  assert.throws(() => taipeiCalendarDistance("—", "2026-08-05"), /valid ISO dates/);
 });
 
 test("does not merge records with the same code in different markets", () => {

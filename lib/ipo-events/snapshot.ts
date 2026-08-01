@@ -46,7 +46,7 @@ export interface IpoTimelineRecord {
   market: IpoMarket;
   stage: IpoStage;
   exceptionStatus: "withdrawn" | "delayed" | "cancelled" | null;
-  applicationDate: string | null;
+  applicationDate: string;
   reviewDate: string | null;
   boardDate: string | null;
   contractDate: string | null;
@@ -132,7 +132,6 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     addEventIfPresent(record, "listing_date", row.listingDate, row.sourceRecordId);
     if (row.cancelled) {
       mergeExceptionStatus(record, "cancelled");
-      addEvent(record, "cancelled", row.auctionOpenDate, row.sourceRecordId);
     }
   }
 
@@ -149,7 +148,6 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     addEventIfPresent(record, "listing_date", row.listingDate, row.sourceRecordId);
     if (row.cancelled) {
       mergeExceptionStatus(record, "cancelled");
-      addEvent(record, "cancelled", row.drawDate, row.sourceRecordId);
     }
   }
 
@@ -199,7 +197,7 @@ function getRecord(records: Map<string, MutableRecord>, companyCode: string, com
     market,
     stage: "A",
     exceptionStatus: null,
-    applicationDate: null,
+    applicationDate: "—",
     reviewDate: null,
     boardDate: null,
     contractDate: null,
@@ -268,8 +266,8 @@ function exceptionFromNote(note: string): "withdrawn" | "delayed" | null {
   return null;
 }
 
-function isMissingValue(value: unknown): value is null | "" {
-  return value === null || value === "";
+function isMissingValue(value: unknown): value is null | "" | "—" {
+  return value === null || value === "" || value === "—";
 }
 
 function compareEvents(left: IpoEvent, right: IpoEvent): number {
