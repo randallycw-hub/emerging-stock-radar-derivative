@@ -7,10 +7,11 @@
 - 搜尋公司、名稱與承銷商；市場、階段、事件類型與年份篩選；可排序公司、階段、事件日、距今天數、競拍日與買賣日。篩選、檢視、排序與頁碼都會還原 URL 狀態。
 - 桌面提供可橫向捲動的資料表；手機改用可展開歷程的事件卡。沿用深淺主題、鍵盤焦點與 reduced-motion 樣式。
 - 依工作指示，未顯示價格、報酬、資料方法或內部擷取／快照文字；僅呈現不含數值的定價狀態。
+- 複核修正：未來關鍵事件與月份檢視現在共用事件層篩選結果，確保公司、市場、階段、事件類型與年份條件一致。
 
 ## 驗證
 
-- `node --test tests/static-showcase-ipo-ui.test.mjs tests/static-showcase-pages.test.mjs tests/static-showcase-ipo-radar-ui.test.mjs` — 15 passed
+- `node --test tests/static-showcase-ipo-ui.test.mjs tests/static-showcase-pages.test.mjs tests/static-showcase-ipo-radar-ui.test.mjs` — 16 passed
 - `npm.cmd run lint` — passed
 - `npm.cmd run typecheck` — passed
 - `node --check static-showcase/assets/ipo-page.js` 與 `git diff --check` — passed

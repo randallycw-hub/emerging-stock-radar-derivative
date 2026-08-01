@@ -58,3 +58,12 @@ test("IPO 時程頁由正式事件快照提供五階段、篩選與完整時程"
   assert.doesNotMatch(source, /本站擷取|資料方法|擷取版本|官方快照/);
   assert.doesNotMatch(source, /暫定承銷價|實際承銷價|承銷價格|漲跌幅|報酬率/);
 });
+
+test("IPO 時程的未來與月份檢視在事件層共用目前篩選", async () => {
+  const js = await readFile(new URL("assets/ipo-page.js", root), "utf8");
+
+  assert.match(js, /const filteredEvents = filteredEventEntries\(state\.rows, state\);/);
+  assert.match(js, /renderUpcoming\(filteredEvents\);/);
+  assert.match(js, /renderMonthView\(filteredEvents\);/);
+  assert.match(js, /function filteredEventEntries[\s\S]*event\.kind === filters\.event[\s\S]*event\.date\.slice\(0, 4\) === filters\.year/);
+});

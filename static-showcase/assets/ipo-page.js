@@ -69,7 +69,8 @@ function bindControls() {
 }
 
 function render() {
-  const filtered = filteredRows();
+  const filteredEvents = filteredEventEntries(state.rows, state);
+  const filtered = uniqueRows(filteredEvents);
   const sorted = sortRows(filtered, { key: state.sortKey === "stage" ? "stageOrder" : state.sortKey, direction: state.direction, type: state.sortKey === "stage" ? sortTypes.stage : sortTypes[state.sortKey] });
   const size = pageSize();
   const pages = Math.max(1, Math.ceil(sorted.length / size));
@@ -78,35 +79,38 @@ function render() {
   document.querySelector("#ipo-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
   document.querySelector("#ipo-table-body").innerHTML = visible.length ? visible.map(tableRowHtml).join("") : emptyRow();
   document.querySelector("#ipo-card-list").innerHTML = visible.length ? visible.map(cardHtml).join("") : emptyCard();
-  renderMonthView(filtered);
-  renderUpcoming();
+  renderMonthView(filteredEvents);
+  renderUpcoming(filteredEvents);
   renderPagination(pages);
   updateSortControls();
 }
 
-function filteredRows() {
-  const query = state.query.trim().toLocaleLowerCase("zh-Hant");
-  return state.rows.filter((row) => (!query || `${row.companyCode} ${row.companyName} ${row.underwriter}`.toLocaleLowerCase("zh-Hant").includes(query))
-    && (state.market === "all" || row.market === state.market)
-    && (state.stage === "all" || row.stage === state.stage)
-    && (state.event === "all" || row.events.some((event) => event.kind === state.event))
-    && (state.year === "all" || row.events.some((event) => event.date.slice(0, 4) === state.year)));
+function filteredEventEntries(rows, filters) {
+  const query = filters.query.trim().toLocaleLowerCase("zh-Hant");
+  return rows.flatMap((row) => {
+    const matchesCompany = (!query || `${row.companyCode} ${row.companyName} ${row.underwriter}`.toLocaleLowerCase("zh-Hant").includes(query))
+      && (filters.market === "all" || row.market === filters.market)
+      && (filters.stage === "all" || row.stage === filters.stage);
+    if (!matchesCompany) return [];
+    return row.events.filter((event) => (filters.event === "all" || event.kind === filters.event)
+      && (filters.year === "all" || event.date.slice(0, 4) === filters.year)).map((event) => ({ row, event }));
+  });
 }
 
-function renderUpcoming() {
+function uniqueRows(entries) { return [...new Map(entries.map(({ row }) => [`${row.companyCode}\u0000${row.market}`, row])).values()]; }
+
+function renderUpcoming(entries) {
   const today = taipeiToday();
-  const upcoming = state.rows.flatMap((row) => row.events.filter((event) => event.date >= today).map((event) => ({ row, event }))).sort((left, right) => left.event.date.localeCompare(right.event.date) || left.row.companyCode.localeCompare(right.row.companyCode)).slice(0, 6);
+  const upcoming = entries.filter(({ event }) => event.date >= today).sort((left, right) => left.event.date.localeCompare(right.event.date) || left.row.companyCode.localeCompare(right.row.companyCode)).slice(0, 6);
   document.querySelector("#ipo-upcoming-grid").innerHTML = upcoming.length ? upcoming.map(({ row, event }) => `<article class="ranking-panel"><p>${escapeHtml(row.market)}</p><h3>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</h3><strong>${escapeHtml(event.label)}</strong><span>${formatDate(event.date)} · ${daysLabel(taipeiCalendarDistance(taipeiToday(), event.date))}</span></article>`).join("") : "<p class=\"empty-cell\">目前沒有未來關鍵事件</p>";
 }
 
-function renderMonthView(rows) {
+function renderMonthView(entries) {
   const groups = new Map();
-  for (const row of rows) {
-    for (const event of row.events) {
-      const month = event.date.slice(0, 7);
-      if (!groups.has(month)) groups.set(month, []);
-      groups.get(month).push({ row, event });
-    }
+  for (const { row, event } of entries) {
+    const month = event.date.slice(0, 7);
+    if (!groups.has(month)) groups.set(month, []);
+    groups.get(month).push({ row, event });
   }
   const target = document.querySelector("#ipo-month-view");
   target.innerHTML = [...groups.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([month, events]) => `<section><h3>${month.replace("-", " 年 ")} 月</h3><ol>${events.sort((left, right) => left.event.date.localeCompare(right.event.date) || left.row.companyCode.localeCompare(right.row.companyCode)).map(({ row, event }) => `<li><time>${formatDate(event.date)}</time><strong>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</strong><span>${escapeHtml(event.label)} · ${escapeHtml(row.market)}</span></li>`).join("")}</ol></section>`).join("") || "<p class=\"empty-cell\">沒有符合條件的事件</p>";
