@@ -39,7 +39,7 @@ const sourceUrls = (year: number) => ({
 export function shouldRefreshIpoSnapshot({ now, current }: { now: Date; current: IpoEventSnapshot | null }): boolean {
   if (!current) return true;
   const taipei = taipeiDateTime(now);
-  return taipei.date !== current.dataDate && taipei.hour >= 22 && (taipei.hour > 22 || taipei.minute >= 30);
+  return current.dataDate < taipei.date && taipei.hour >= 22 && (taipei.hour > 22 || taipei.minute >= 30);
 }
 
 export async function refreshOfficialIpoSnapshot({ fetchImpl, now }: RefreshOptions): Promise<IpoEventSnapshot> {

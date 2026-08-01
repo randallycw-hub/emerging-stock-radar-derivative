@@ -18,11 +18,13 @@ const urls = [
 const now = new Date("2026-08-01T14:30:00Z");
 const previousDay = { schemaVersion: 1, dataDate: "2026-07-31", generatedAt: "2026-07-31T14:30:00Z", sourceManifest: [], records: [] };
 const sameDay = { ...previousDay, dataDate: "2026-08-01" };
+const futureDay = { ...previousDay, dataDate: "2026-08-02" };
 
 test("refreshes only after the Taipei 22:30 cutoff unless no snapshot exists", () => {
   assert.equal(shouldRefreshIpoSnapshot({ now: new Date("2026-08-01T14:29:59Z"), current: sameDay }), false);
   assert.equal(shouldRefreshIpoSnapshot({ now, current: previousDay }), true);
   assert.equal(shouldRefreshIpoSnapshot({ now, current: sameDay }), false);
+  assert.equal(shouldRefreshIpoSnapshot({ now, current: futureDay }), false);
   assert.equal(shouldRefreshIpoSnapshot({ now: new Date("2026-08-01T02:00:00Z"), current: null }), true);
 });
 
