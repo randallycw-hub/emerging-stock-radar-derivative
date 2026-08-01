@@ -23,14 +23,29 @@ test("Sites staging copies the complete static showcase including the active gen
   );
   await writeFile(
     join(source, "data", "generations", "abc123", "manifest.json"),
-    '{"market":{"status":"verified","dataDate":"2026-07-31"}}\n',
+    '{"market":{"status":"verified","dataDate":"2026-07-31"},"emergingMarketUrl":"./data/generations/abc123/emerging-market.json"}\n',
     "utf8",
   );
   await writeFile(
     join(source, "data", "generations", "abc123", "runtime.json"),
-    '{"generation":"generations/abc123","manifestUrl":"./data/generations/abc123/manifest.json"}\n',
+    '{"generation":"generations/abc123","manifestUrl":"./data/generations/abc123/manifest.json","emergingMarketUrl":"./data/generations/abc123/emerging-market.json","datasets":{"94025":"./data/generations/abc123/94025.json","11406":"./data/generations/abc123/11406.json","11586":"./data/generations/abc123/11586.json","bondMarket":"./data/generations/abc123/bond-market-view.json","conversionPrices":"./data/generations/abc123/conversion-prices.json","bondHistory":"./data/generations/abc123/bond-market-history.json"}}\n',
     "utf8",
   );
+  for (const file of [
+    "emerging-market.json",
+    "94025.json",
+    "11406.json",
+    "11586.json",
+    "bond-market-view.json",
+    "conversion-prices.json",
+    "bond-market-history.json",
+  ]) {
+    await writeFile(
+      join(source, "data", "generations", "abc123", file),
+      file === "emerging-market.json" ? '{"records":[]}\n' : "[]\n",
+      "utf8",
+    );
+  }
 
   await execFileAsync(process.execPath, [
     "scripts/stage-static-showcase.mjs",
@@ -53,7 +68,41 @@ test("Sites staging copies the complete static showcase including the active gen
       join(destination, "data", "generations", "abc123", "manifest.json"),
       "utf8",
     )),
-    { market: { status: "verified", dataDate: "2026-07-31" } },
+    {
+      market: { status: "verified", dataDate: "2026-07-31" },
+      emergingMarketUrl: "./data/generations/abc123/emerging-market.json",
+    },
+  );
+});
+
+test("Sites staging rejects a runtime that omits required dataset artifacts", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-incomplete-"));
+  const source = join(root, "source");
+  const generation = join(source, "data", "generations", "abc123");
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(source, "data", "current.json"),
+    '{"schemaVersion":1,"generation":"generations/abc123","runtimeUrl":"./data/generations/abc123/runtime.json"}\n',
+    "utf8",
+  );
+  await writeFile(
+    join(generation, "runtime.json"),
+    '{"generation":"generations/abc123","manifestUrl":"./data/generations/abc123/manifest.json","datasets":{}}\n',
+    "utf8",
+  );
+  await writeFile(
+    join(generation, "manifest.json"),
+    '{"market":{"status":"verified","dataDate":"2026-07-31"}}\n',
+    "utf8",
+  );
+
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      "scripts/stage-static-showcase.mjs",
+      source,
+      join(root, "destination"),
+    ]),
+    /required dataset artifacts/i,
   );
 });
 

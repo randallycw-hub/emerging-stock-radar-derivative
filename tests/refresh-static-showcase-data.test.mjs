@@ -131,6 +131,38 @@ test("refresh reads the prior generation bond history before staging a replaceme
   assert.deepEqual(await readPublishedBondHistory(dataRoot), history);
 });
 
+test("refresh merges a restored CI history cache with the committed generation", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-history-cache-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  const cachePath = join(root, ".cache", "published-history", "bond-market-history.json");
+  await mkdir(generation, { recursive: true });
+  await mkdir(join(root, ".cache", "published-history"), { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    "utf8",
+  );
+  await writeFile(
+    join(generation, "bond-market-history.json"),
+    JSON.stringify([{ bondCode: "35221", date: "2026-06-30" }]),
+    "utf8",
+  );
+  await writeFile(
+    cachePath,
+    JSON.stringify([
+      { bondCode: "35221", date: "2026-06-30", cbClose: "101" },
+      { bondCode: "35221", date: "2026-07-31", cbClose: "102" },
+    ]),
+    "utf8",
+  );
+
+  assert.deepEqual(await readPublishedBondHistory(dataRoot, cachePath), [
+    { bondCode: "35221", date: "2026-06-30", cbClose: "101" },
+    { bondCode: "35221", date: "2026-07-31", cbClose: "102" },
+  ]);
+});
+
 test("refresh leaves the prior generation untouched when publication fails before pointer switch", async () => {
   await withTemporaryShowcase(async (root) => {
     await seedPriorGeneration(root);

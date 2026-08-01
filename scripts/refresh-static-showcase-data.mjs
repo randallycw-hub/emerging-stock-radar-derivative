@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import {
   appendFile,
+  copyFile,
   mkdir,
   mkdtemp,
   readFile,
@@ -33,6 +34,7 @@ export const OFFICIAL_SHOWCASE_SOURCES = {
 };
 
 const DATA_DIRECTORY = "static-showcase/data";
+const PUBLISHED_HISTORY_CACHE = ".cache/published-history/bond-market-history.json";
 
 export function buildRuntimeBootstrap() {
   return [
@@ -251,7 +253,10 @@ export async function refreshStaticShowcase({
   const stagingDataDirectory = join(stagingRoot, "data");
   try {
     await mkdir(stagingDataDirectory, { recursive: true });
-    const previousHistory = await readPublishedBondHistory(DATA_DIRECTORY);
+    const previousHistory = await readPublishedBondHistory(
+      DATA_DIRECTORY,
+      PUBLISHED_HISTORY_CACHE,
+    );
     await writeFile(
       join(stagingDataDirectory, "bond-market-history.json"),
       `${JSON.stringify(previousHistory, null, 2)}\n`,
@@ -299,6 +304,11 @@ export async function refreshStaticShowcase({
       "utf8",
     );
     await verifyStagedEmergingSnapshot(stagingDataDirectory);
+    await mkdir(dirname(PUBLISHED_HISTORY_CACHE), { recursive: true });
+    await copyFile(
+      join(stagingDataDirectory, "bond-market-history.json"),
+      PUBLISHED_HISTORY_CACHE,
+    );
 
     await mkdir(join(DATA_DIRECTORY, "generations"), { recursive: true });
     await rename(stagingDataDirectory, join(DATA_DIRECTORY, generation));
@@ -321,22 +331,51 @@ export async function refreshStaticShowcase({
   }
 }
 
-export async function readPublishedBondHistory(dataDirectory = DATA_DIRECTORY) {
-  let pointerText;
+export async function readPublishedBondHistory(
+  dataDirectory = DATA_DIRECTORY,
+  cachePath,
+) {
+  const histories = [];
   try {
-    pointerText = await readFile(join(dataDirectory, "current.json"), "utf8");
+    const pointerText = await readFile(join(dataDirectory, "current.json"), "utf8");
+    const pointer = JSON.parse(pointerText);
+    if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
+      throw new Error("INVALID_CURRENT_GENERATION_POINTER");
+    }
+    histories.push(await readHistoryFile(
+      join(dataDirectory, pointer.generation, "bond-market-history.json"),
+    ));
   } catch (error) {
-    if (error?.code === "ENOENT") return [];
-    throw error;
+    if (error?.code !== "ENOENT") throw error;
   }
-  const pointer = JSON.parse(pointerText);
-  if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
-    throw new Error("INVALID_CURRENT_GENERATION_POINTER");
+  if (cachePath) {
+    try {
+      histories.push(await readHistoryFile(cachePath));
+    } catch (error) {
+      if (error?.code !== "ENOENT") throw error;
+    }
   }
-  const history = JSON.parse(await readFile(
-    join(dataDirectory, pointer.generation, "bond-market-history.json"),
-    "utf8",
-  ));
+  const merged = new Map();
+  for (const history of histories) {
+    for (const row of history) {
+      if (
+        row === null
+        || typeof row !== "object"
+        || typeof row.bondCode !== "string"
+        || !isIsoDate(row.date)
+      ) {
+        throw new Error("INVALID_PUBLISHED_BOND_HISTORY");
+      }
+      merged.set(`${row.bondCode}\u0000${row.date}`, row);
+    }
+  }
+  return [...merged.values()].sort((left, right) =>
+    left.bondCode.localeCompare(right.bondCode)
+    || left.date.localeCompare(right.date));
+}
+
+async function readHistoryFile(path) {
+  const history = JSON.parse(await readFile(path, "utf8"));
   if (!Array.isArray(history)) throw new Error("INVALID_PUBLISHED_BOND_HISTORY");
   return history;
 }

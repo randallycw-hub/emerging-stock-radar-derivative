@@ -7,7 +7,7 @@ export function build94025CoverageSnapshotCandidate(result: CoverageExecutionRes
   if (result.integrityReport.status === "invalid" || !result.integrityReport.canPublishCandidate) throw new Error("INTEGRITY_NOT_PUBLISHABLE");
   if (!result.responseHash || !result.fetchedAt || !Number.isFinite(result.responseBytes)) throw new Error("PROVENANCE_INCOMPLETE");
   if (result.sourceId !== "94025" || result.resourceId !== "94025-csv") throw new Error("SOURCE_MISMATCH");
-  if (getApprovedResource("94025", "94025-csv").approvalStatus !== "VERIFIED_FOR_IMPLEMENTATION") throw new Error("RESOURCE_NOT_APPROVED");
+  if (getApprovedResource("94025", "94025-csv").approvalStatus !== "APPROVED_FOR_PRODUCTION") throw new Error("RESOURCE_NOT_APPROVED");
   if (result.rawRowCount !== result.records.length || result.normalizedRecordCount !== result.records.length || result.rejectedRecordCount !== 0) throw new Error("ROW_COUNT_MISMATCH");
   const identities = new Set<string>();
   const months = new Set(result.records.map((r) => r.yearMonth));

@@ -57,6 +57,13 @@ jobs:
           key: official-market-${{ runner.os }}-${{ steps.market-date.outputs.date }}-${{ github.run_id }}
           restore-keys: |
             official-market-${{ runner.os }}-${{ steps.market-date.outputs.date }}-
+      - name: Restore published bond history
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/published-history
+          key: published-history-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            published-history-${{ runner.os }}-
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
@@ -76,6 +83,12 @@ jobs:
         with:
           path: .cache/official-market
           key: official-market-${{ runner.os }}-${{ steps.market-date.outputs.date }}-${{ github.run_id }}
+      - name: Save published bond history
+        if: steps.refresh.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/published-history
+          key: published-history-${{ runner.os }}-${{ github.run_id }}
       - name: Verify website
         if: steps.refresh.outcome == 'success'
         run: npm run test:showcase

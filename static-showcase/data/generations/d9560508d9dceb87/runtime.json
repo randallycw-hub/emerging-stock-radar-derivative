@@ -1,0 +1,13 @@
+{
+  "generation": "generations/d9560508d9dceb87",
+  "manifestUrl": "./data/generations/d9560508d9dceb87/manifest.json",
+  "emergingMarketUrl": "./data/generations/d9560508d9dceb87/emerging-market.json",
+  "datasets": {
+    "11406": "./data/generations/d9560508d9dceb87/11406.json",
+    "11586": "./data/generations/d9560508d9dceb87/11586.json",
+    "94025": "./data/generations/d9560508d9dceb87/94025.json",
+    "bondMarket": "./data/generations/d9560508d9dceb87/bond-market-view.json",
+    "conversionPrices": "./data/generations/d9560508d9dceb87/conversion-prices.json",
+    "bondHistory": "./data/generations/d9560508d9dceb87/bond-market-history.json"
+  }
+}

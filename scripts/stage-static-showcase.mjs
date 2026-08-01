@@ -34,6 +34,31 @@ export async function stageStaticShowcase({
   if (manifest?.market?.status !== "verified" || !manifest?.market?.dataDate) {
     throw new Error("active generation manifest is missing or invalid");
   }
+  const base = `./data/${pointer.generation}`;
+  const requiredArtifacts = {
+    emergingMarketUrl: `${base}/emerging-market.json`,
+    "datasets.94025": `${base}/94025.json`,
+    "datasets.11406": `${base}/11406.json`,
+    "datasets.11586": `${base}/11586.json`,
+    "datasets.bondMarket": `${base}/bond-market-view.json`,
+    "datasets.conversionPrices": `${base}/conversion-prices.json`,
+    "datasets.bondHistory": `${base}/bond-market-history.json`,
+  };
+  if (manifest.emergingMarketUrl !== requiredArtifacts.emergingMarketUrl) {
+    throw new Error("active generation required dataset artifacts are missing or invalid");
+  }
+  for (const [key, expectedUrl] of Object.entries(requiredArtifacts)) {
+    const actualUrl = key === "emergingMarketUrl"
+      ? runtime.emergingMarketUrl
+      : runtime.datasets?.[key.slice("datasets.".length)];
+    if (actualUrl !== expectedUrl) {
+      throw new Error("active generation required dataset artifacts are missing or invalid");
+    }
+    await readJson(
+      join(source, expectedUrl.replace(/^\.\//, "")),
+      "active generation required dataset artifacts are missing or invalid",
+    );
+  }
   await rm(destination, { recursive: true, force: true });
   await cp(source, destination, { recursive: true, force: true });
 }

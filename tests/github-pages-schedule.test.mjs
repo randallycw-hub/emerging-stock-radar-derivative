@@ -22,6 +22,8 @@ test("GitHub Pages retries after close and contains no Worker relay", async () =
   assert.match(workflow, /actions\/cache\/restore@v4/);
   assert.match(workflow, /actions\/cache\/save@v4/);
   assert.match(workflow, /\.cache\/official-market/);
+  assert.match(workflow, /\.cache\/published-history/);
+  assert.match(workflow, /published-history-\$\{\{ runner\.os \}\}-/);
   assert.match(workflow, /TZ=Asia\/Taipei date \+%F/);
   assert.match(workflow, /if:\s*always\(\)/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
@@ -39,6 +41,14 @@ test("GitHub Pages retries after close and contains no Worker relay", async () =
     access("scripts/relay-approved-sources.mjs"),
     /ENOENT/,
   );
+});
+
+test("default build stages the formal site and recursive tests cover nested pipeline suites", async () => {
+  const packageJson = JSON.parse(await readFile("package.json", "utf8"));
+  assert.equal(packageJson.scripts["test:showcase"], "node --test");
+  assert.match(packageJson.scripts.test, /npm run build/);
+  assert.match(packageJson.scripts.test, /npm run test:showcase/);
+  assert.match(packageJson.scripts.build, /stage-static-showcase\.mjs/);
 });
 
 test("tracked showcase excludes fixtures while generated snapshots stay ignored", async () => {
