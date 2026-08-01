@@ -18,12 +18,17 @@ test("Sites staging copies the complete static showcase including the active gen
   await writeFile(join(source, "assets", "app.css"), "body{}", "utf8");
   await writeFile(
     join(source, "data", "current.json"),
-    '{"schemaVersion":1,"generation":"generations/abc123"}\n',
+    '{"schemaVersion":1,"generation":"generations/abc123","runtimeUrl":"./data/generations/abc123/runtime.json"}\n',
     "utf8",
   );
   await writeFile(
     join(source, "data", "generations", "abc123", "manifest.json"),
-    '{"market":{"status":"verified"}}\n',
+    '{"market":{"status":"verified","dataDate":"2026-07-31"}}\n',
+    "utf8",
+  );
+  await writeFile(
+    join(source, "data", "generations", "abc123", "runtime.json"),
+    '{"generation":"generations/abc123","manifestUrl":"./data/generations/abc123/manifest.json"}\n',
     "utf8",
   );
 
@@ -37,13 +42,33 @@ test("Sites staging copies the complete static showcase including the active gen
   assert.equal(await readFile(join(destination, "assets", "app.css"), "utf8"), "body{}");
   assert.deepEqual(
     JSON.parse(await readFile(join(destination, "data", "current.json"), "utf8")),
-    { schemaVersion: 1, generation: "generations/abc123" },
+    {
+      schemaVersion: 1,
+      generation: "generations/abc123",
+      runtimeUrl: "./data/generations/abc123/runtime.json",
+    },
   );
   assert.deepEqual(
     JSON.parse(await readFile(
       join(destination, "data", "generations", "abc123", "manifest.json"),
       "utf8",
     )),
-    { market: { status: "verified" } },
+    { market: { status: "verified", dataDate: "2026-07-31" } },
+  );
+});
+
+test("Sites staging rejects a source without an active verified generation", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-missing-"));
+  const source = join(root, "source");
+  await mkdir(source, { recursive: true });
+  await writeFile(join(source, "index.html"), "不完整", "utf8");
+
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      "scripts/stage-static-showcase.mjs",
+      source,
+      join(root, "destination"),
+    ]),
+    /active generation pointer/i,
   );
 });

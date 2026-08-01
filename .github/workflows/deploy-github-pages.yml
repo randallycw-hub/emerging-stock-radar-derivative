@@ -6,6 +6,9 @@ on:
     paths:
       - "static-showcase/**"
       - "scripts/**"
+      - "lib/**"
+      - "package*.json"
+      - "tests/**"
       - ".github/workflows/deploy-github-pages.yml"
   workflow_dispatch:
   schedule:
@@ -75,7 +78,7 @@ jobs:
           key: official-market-${{ runner.os }}-${{ steps.market-date.outputs.date }}-${{ github.run_id }}
       - name: Verify website
         if: steps.refresh.outcome == 'success'
-        run: npm test
+        run: npm run test:showcase
       - name: Upload showcase
         if: steps.refresh.outcome == 'success'
         uses: actions/upload-pages-artifact@v3

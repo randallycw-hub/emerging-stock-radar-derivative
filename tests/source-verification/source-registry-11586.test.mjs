@@ -19,10 +19,10 @@ test("11586 registry amendment suspends OpenAPI and forbids fallback", async () 
   assert.match(registry, /Swagger.*schema evidence/i);
 });
 
-test("11586 amendment retains evidence links and does not approve production", async () => {
+test("11586 retains evidence links and records the later production approval", async () => {
   const [registry, decision] = await Promise.all([registryText(), decisionText()]);
   assert.match(registry, /11586-resource-decision\.md/);
   assert.match(registry, /11586-evidence\.md/);
-  assert.doesNotMatch(registry, /11586[\s\S]{0,600}APPROVED_FOR_PRODUCTION/);
+  assert.match(registry, /11586-csv[^\n]*APPROVED_FOR_PRODUCTION/);
   assert.match(decision, /Dataset-level[：:][\s\S]*APPROVED_FOR_V1_DESIGN/);
 });

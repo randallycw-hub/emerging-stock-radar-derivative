@@ -141,7 +141,10 @@ export async function fetchCurrentOfficialMarketData({
   const requestDate = date.replaceAll("-", "/");
   const quoteGroups = await mapLimit(requestedBondCodes, 1, async (bondCode) => {
     const cached = checkpoint.cbQuotesByBondCode?.[bondCode];
-    if (Array.isArray(cached)) return cached;
+    if (
+      Array.isArray(cached)
+      && cached.some((quote) => quote?.tradingDate === date)
+    ) return cached;
     await sleepImpl(perRequestDelayMs);
     const body = new URLSearchParams({
       date: requestDate,

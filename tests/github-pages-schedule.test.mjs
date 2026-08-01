@@ -25,6 +25,10 @@ test("GitHub Pages retries after close and contains no Worker relay", async () =
   assert.match(workflow, /TZ=Asia\/Taipei date \+%F/);
   assert.match(workflow, /if:\s*always\(\)/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
+  assert.match(workflow, /run:\s*npm run test:showcase/);
+  assert.doesNotMatch(workflow, /run:\s*npm test\s*$/m);
+  assert.match(workflow, /- "lib\/\*\*"/);
+  assert.match(workflow, /- "package\*\.json"/);
   assert.doesNotMatch(workflow, /cloudflare|workers\.dev|relay-approved/i);
 
   await assert.rejects(

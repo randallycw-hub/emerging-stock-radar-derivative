@@ -17,7 +17,12 @@ function sleepDefault(ms: number): Promise<void> { return new Promise((resolve) 
 
 export async function fetchApprovedResource(request: FetchApprovedRequest): Promise<RawHttpResponse> {
   const resource = request.resource;
-  if (resource.approvalStatus !== "VERIFIED_FOR_IMPLEMENTATION") throw new ApprovedHttpError("RESOURCE_NOT_APPROVED", "resource approval gate rejected");
+  if (![
+    "VERIFIED_FOR_IMPLEMENTATION",
+    "APPROVED_FOR_PRODUCTION",
+  ].includes(resource.approvalStatus)) {
+    throw new ApprovedHttpError("RESOURCE_NOT_APPROVED", "resource approval gate rejected");
+  }
   const requestedUrl = request.requestedUrl ?? resource.exactUrl;
   try { assertExactResourceUrl(resource, requestedUrl); } catch { throw new ApprovedHttpError("URL_NOT_ALLOWED", "requested URL is not exact registry resource"); }
   const transport = request.transport ?? fetch;

@@ -229,6 +229,14 @@ export async function refreshStaticShowcase({
   const marketRows = parseEmergingMarketSource(JSON.parse(emergingText));
   const companyRows = newest94025CompanyRows(datasetTexts["94025"]);
   const emergingSnapshot = buildEmergingMarketSnapshot({ marketRows, companyRows });
+  manifestDatasets.push({
+    datasetId: "emergingMarket",
+    sourceUrl: OFFICIAL_SHOWCASE_SOURCES.emergingMarket,
+    downloadedAt: taipeiDate(now),
+    sha256: `sha256:${createHash("sha256").update(emergingResponse.bytes).digest("hex")}`,
+    rawBytes: emergingResponse.bytes.byteLength,
+    rowCount: marketRows.length,
+  });
 
   const generation = `generations/${createHash("sha256").update(JSON.stringify(manifestDatasets)).update(now.toISOString()).digest("hex").slice(0, 16)}`;
   const baseManifest = {
@@ -243,6 +251,12 @@ export async function refreshStaticShowcase({
   const stagingDataDirectory = join(stagingRoot, "data");
   try {
     await mkdir(stagingDataDirectory, { recursive: true });
+    const previousHistory = await readPublishedBondHistory(DATA_DIRECTORY);
+    await writeFile(
+      join(stagingDataDirectory, "bond-market-history.json"),
+      `${JSON.stringify(previousHistory, null, 2)}\n`,
+      "utf8",
+    );
 
     for (const [datasetId, rows] of Object.entries(datasets)) {
       await writeFile(
@@ -305,6 +319,26 @@ export async function refreshStaticShowcase({
   } finally {
     await rm(stagingRoot, { recursive: true, force: true });
   }
+}
+
+export async function readPublishedBondHistory(dataDirectory = DATA_DIRECTORY) {
+  let pointerText;
+  try {
+    pointerText = await readFile(join(dataDirectory, "current.json"), "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") return [];
+    throw error;
+  }
+  const pointer = JSON.parse(pointerText);
+  if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
+    throw new Error("INVALID_CURRENT_GENERATION_POINTER");
+  }
+  const history = JSON.parse(await readFile(
+    join(dataDirectory, pointer.generation, "bond-market-history.json"),
+    "utf8",
+  ));
+  if (!Array.isArray(history)) throw new Error("INVALID_PUBLISHED_BOND_HISTORY");
+  return history;
 }
 
 function newest94025CompanyRows(text) {

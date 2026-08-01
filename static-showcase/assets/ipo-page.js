@@ -13,7 +13,7 @@ const stageLabels = {
 };
 const state = {
   rows: [],
-  dataUpdatedAt: null,
+  snapshotDownloadedAt: null,
   query: "",
   market: "all",
   status: "all",
@@ -42,15 +42,15 @@ async function loadData() {
     safeJsonFetch(new URL(runtime.datasets["11586"], document.baseURI), { errorTarget }),
     safeJsonFetch(new URL(runtime.manifestUrl, document.baseURI), { errorTarget }),
   ]);
-  state.dataUpdatedAt = manifest?.datasets?.find((dataset) => dataset.datasetId === "11586")?.downloadedAt
+  state.snapshotDownloadedAt = manifest?.datasets?.find((dataset) => dataset.datasetId === "11586")?.downloadedAt
     ?? manifest?.generatedAt
     ?? null;
-  state.rows = arrayValue(records).map((row) => normalizeIpoRow(row, state.dataUpdatedAt));
+  state.rows = arrayValue(records).map((row) => normalizeIpoRow(row, state.snapshotDownloadedAt));
   populateFilters();
   applyStateToControls();
   renderRows();
-  document.querySelector("#ipo-update-status").textContent = state.dataUpdatedAt
-    ? `資料更新 ${formatDate(state.dataUpdatedAt)}`
+  document.querySelector("#ipo-update-status").textContent = state.snapshotDownloadedAt
+    ? `本站擷取 ${formatDate(state.snapshotDownloadedAt)}`
     : "IPO 行程資料已載入";
 }
 
@@ -143,7 +143,7 @@ function filteredRows() {
 }
 
 function tableRowHtml(row) {
-  return `<tr><th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th><td>${escapeHtml(row.market)}</td><td><span class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabels[row.stage])}</span></td><td>${formatDate(row.applicationDate)}</td><td>${formatDate(row.reviewDate)}</td><td>${formatDate(row.boardDate)}</td><td>${formatDate(row.filingDate)}</td><td>${formatDate(row.listingDate)}</td><td>${escapeHtml(row.underwriter || "—")}</td><td>${escapeHtml(row.note || "—")}</td><td>${formatDate(row.dataUpdatedAt)}</td></tr>`;
+  return `<tr><th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th><td>${escapeHtml(row.market)}</td><td><span class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabels[row.stage])}</span></td><td>${formatDate(row.applicationDate)}</td><td>${formatDate(row.reviewDate)}</td><td>${formatDate(row.boardDate)}</td><td>${formatDate(row.filingDate)}</td><td>${formatDate(row.listingDate)}</td><td>${escapeHtml(row.underwriter || "—")}</td><td>${escapeHtml(row.note || "—")}</td><td>${formatDate(row.snapshotDownloadedAt)}</td></tr>`;
 }
 
 function cardHtml(row) {
@@ -154,10 +154,10 @@ function cardHtml(row) {
     ["核准／備查", row.filingDate],
     ["掛牌", row.listingDate],
   ];
-  return `<article class="ipo-card"><header><div><span>${escapeHtml(row.market)}</span><h3>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</h3></div><strong class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabels[row.stage])}</strong></header><ol class="ipo-timeline">${events.map(([label, date]) => `<li class="${date ? "is-complete" : ""}"><span>${label}</span><time>${formatDate(date)}</time></li>`).join("")}</ol><footer><span>承銷商：${escapeHtml(row.underwriter || "—")}</span><span>備註：${escapeHtml(row.note || "—")}</span><span>資料更新：${formatDate(row.dataUpdatedAt)}</span></footer></article>`;
+  return `<article class="ipo-card"><header><div><span>${escapeHtml(row.market)}</span><h3>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</h3></div><strong class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabels[row.stage])}</strong></header><ol class="ipo-timeline">${events.map(([label, date]) => `<li class="${date ? "is-complete" : ""}"><span>${label}</span><time>${formatDate(date)}</time></li>`).join("")}</ol><footer><span>承銷商：${escapeHtml(row.underwriter || "—")}</span><span>備註：${escapeHtml(row.note || "—")}</span><span>本站擷取：${formatDate(row.snapshotDownloadedAt)}</span></footer></article>`;
 }
 
-function normalizeIpoRow(row, dataUpdatedAt) {
+function normalizeIpoRow(row, snapshotDownloadedAt) {
   const applicationDate = officialDate(row.applicationDate ?? row["申請日期"]);
   const reviewDate = officialDate(row.listingReviewDate ?? row.reviewDate ?? row["上市審議委員會審議日期"]);
   const boardDate = officialDate(row.boardApprovalDate ?? row.boardDate ?? row["交易所董事會通過上市日期"]);
@@ -178,7 +178,7 @@ function normalizeIpoRow(row, dataUpdatedAt) {
     stage,
     underwriter: arrayOrText(row.underwriters ?? row.underwriter ?? row["承銷商"]),
     note,
-    dataUpdatedAt,
+    snapshotDownloadedAt,
   };
 }
 

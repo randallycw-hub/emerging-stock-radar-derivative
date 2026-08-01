@@ -216,6 +216,10 @@ test("collects only requested official CB, stock and conversion records", async 
 
   requests.length = 0;
   delays.length = 0;
+  checkpoint.cbQuotesByBondCode["35221"] = result.cbQuotes.map((quote, index) => ({
+    ...quote,
+    tradingDate: index === 0 ? "2026-07-30" : quote.tradingDate,
+  }));
   await fetchCurrentOfficialMarketData({
     bondCodes: ["35221"],
     issuerCodes: ["2330", "3522"],
@@ -237,6 +241,26 @@ test("collects only requested official CB, stock and conversion records", async 
     false,
   );
   assert.deepEqual(delays, []);
+
+  checkpoint.cbQuotesByBondCode["35221"] = result.cbQuotes.map((quote) => ({
+    ...quote,
+    tradingDate: "2026-07-29",
+  }));
+  requests.length = 0;
+  await fetchCurrentOfficialMarketData({
+    bondCodes: ["35221"],
+    issuerCodes: ["2330", "3522"],
+    date: "2026-07-30",
+    fetchImpl: fakeFetch,
+    sleepImpl: async () => {},
+    perRequestDelayMs: 0,
+    checkpoint,
+    onCheckpoint,
+  });
+  assert.equal(
+    requests.filter((request) => request.url.endsWith("/bond/cbDayQry")).length,
+    1,
+  );
 });
 
 test("omits a requested TPEx issuer when the official row has no closing value", async () => {

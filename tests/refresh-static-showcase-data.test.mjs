@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -8,6 +9,7 @@ import {
   OFFICIAL_SHOWCASE_SOURCES,
   buildRuntimeBootstrap,
   fetchOfficialCsvWithRetry,
+  readPublishedBondHistory,
   refreshStaticShowcase,
   updateRuntimeCacheKey,
 } from "../scripts/refresh-static-showcase-data.mjs";
@@ -96,10 +98,37 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
 
     const manifest = JSON.parse(await readFile(join(generationRoot, "manifest.json"), "utf8"));
     assert.equal(manifest.emergingMarketUrl, `./data/${pointer.generation}/emerging-market.json`);
+    assert.deepEqual(
+      manifest.datasets.find((dataset) => dataset.datasetId === "emergingMarket"),
+      {
+        datasetId: "emergingMarket",
+        sourceUrl: OFFICIAL_SHOWCASE_SOURCES.emergingMarket,
+        downloadedAt: "2026-07-30",
+        sha256: `sha256:${createHash("sha256").update(sourceTexts.emergingMarket).digest("hex")}`,
+        rawBytes: Buffer.byteLength(sourceTexts.emergingMarket),
+        rowCount: 1,
+      },
+    );
     const runtime = JSON.parse(await readFile(join(generationRoot, "runtime.json"), "utf8"));
     assert.equal(runtime.generation, pointer.generation);
     assert.equal(runtime.manifestUrl, `./data/${pointer.generation}/manifest.json`);
   });
+});
+
+test("refresh reads the prior generation bond history before staging a replacement", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-history-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  const history = [{ bondCode: "35221", date: "2026-06-30" }];
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    "utf8",
+  );
+  await writeFile(join(generation, "bond-market-history.json"), JSON.stringify(history), "utf8");
+
+  assert.deepEqual(await readPublishedBondHistory(dataRoot), history);
 });
 
 test("refresh leaves the prior generation untouched when publication fails before pointer switch", async () => {

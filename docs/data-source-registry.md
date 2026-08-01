@@ -1,19 +1,19 @@
 # 興債觀測網 Source Registry
 
-檢查日期：2026-07-22
+檢查日期：2026-08-01
 本文件是工程與內部授權控制，不是法律意見。
 
 ## 四個循序核准階段與獨立暫停狀態
 
 `CANDIDATE` → `APPROVED_FOR_V1_DESIGN` → `VERIFIED_FOR_IMPLEMENTATION` → `APPROVED_FOR_PRODUCTION`。這是唯一的四階段核准順序。`SUSPENDED` 是任何階段都可因重大變更進入的獨立暫停狀態，不是第五階段，也不代表核准升級。只有 `VERIFIED_FOR_IMPLEMENTATION` 可開始正式 adapter，只有 `APPROVED_FOR_PRODUCTION` 可在 production 啟用。
 
-本輪核准只允許修訂本 registry 與其餘設計文件；不授權啟用來源、實作 adapter、建立或綁定遠端資源、寫入遠端資料或上線。
+2026-07-22 初始核准只允許修訂 registry 與設計文件；其後狀態升級以本文件最末的 dated amendment 為準。
 
 `APPROVED_FOR_V1_DESIGN` 必須有獨立 data.gov.tw 頁、OGL 1.0、免費、官方提供者、可對應正式 resource、無衝突條款、完整顯名計畫、無 Logo／仿官方設計、無混入禁用來源且只使用資料集明列欄位。
 
 ## 11406：轉(交)換債發行資料下載
 
-- 狀態：`APPROVED_FOR_V1_DESIGN`。
+- 狀態：`APPROVED_FOR_PRODUCTION`（限定本文件最末 amendment 的 CSV 用途）。
 - 正式名稱／ID：轉(交)換債發行資料下載／11406。
 - 詮釋資料頁：https://data.gov.tw/dataset/11406
 - 提供機關：金融監督管理委員會證券期貨局；資料描述為櫃買中心資料。
@@ -32,7 +32,7 @@
 
 ## 94025：興櫃公司每月營業收入彙總表
 
-- 狀態：`APPROVED_FOR_V1_DESIGN`。
+- 狀態：`APPROVED_FOR_PRODUCTION`（限定本文件最末 amendment 的 CSV 用途）。
 - 正式名稱／ID：興櫃公司每月營業收入彙總表／94025。
 - 詮釋資料與授權證據：https://data.gov.tw/dataset/94025；頁面標示證交所資料、提供機關為金融監督管理委員會證券期貨局、OGL 1.0、免費、每 1 月更新。
 - 正式 CSV 主機／resource：`mopsfin.twse.com.tw`／https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv
@@ -48,7 +48,7 @@
 
 ## 11586：向本公司申請上市之本國公司
 
-- 狀態：`APPROVED_FOR_V1_DESIGN`。
+- 狀態：`APPROVED_FOR_PRODUCTION`（限定本文件最末 amendment 的 CSV 用途）。
 - 正式名稱／ID：向本公司申請上市之本國公司／11586。
 - 詮釋資料頁：https://data.gov.tw/dataset/11586
 - 提供機關：金融監督管理委員會證券期貨局；資料描述為臺灣證券交易所資料。
@@ -183,3 +183,21 @@ Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, La
 `估算成交金額（盤後）` 是以 `當日成交均價（盤後）×成交量` 計算的估算值，源自四捨五入的來源值，不能用於精確對帳。
 
 此狀態只核准嚴格 parser、快照建立與發布前驗證；不得發布即時、買賣價量或 `LatestPrice`，也不授予 `APPROVED_FOR_PRODUCTION`。
+
+## 正式公開核准 amendment（2026-08-01）
+
+本 amendment 取代前述各 dated amendment 中「尚未核准 production」的限制，但只限下表的精確 resource、白名單欄位與盤後用途。專案擁有人已確認正式版公開上線；2026-08-01 live smoke 取得 2026-07-31 完整交易日，並通過原始回應、嚴格 parser、來源日期、雜湊、筆數、深淺模式、手機版、缺值顯示與原子發布測試。
+
+| 精確 resource | 最終狀態 | production 限定用途 |
+| --- | --- | --- |
+| `11406-csv` | `APPROVED_FOR_PRODUCTION` | 可轉債發行條款主檔；只用核准欄位 |
+| `94025-csv` | `APPROVED_FOR_PRODUCTION` | 興櫃公司月營收與產業別補充 |
+| `11586-csv` | `APPROVED_FOR_PRODUCTION` | 申請上市公開時程；排除價格與個資欄位 |
+| TPEx `cbDayQry` | `APPROVED_FOR_PRODUCTION` | 每檔可轉債盤後成交資料 |
+| TWSE `STOCK_DAY_ALL` | `APPROVED_FOR_PRODUCTION` | 上市標的股票盤後收盤 |
+| TPEx `tpex_mainboard_daily_close_quotes` | `APPROVED_FOR_PRODUCTION` | 上櫃標的股票盤後收盤 |
+| TPEx `convSearch` | `APPROVED_FOR_PRODUCTION` | MOPS 發行明細精確索引 |
+| MOPS `t120sg01` | `APPROVED_FOR_PRODUCTION` | 發行時與最新轉換價及生效日 |
+| TPEx `tpex_esb_latest_statistics` | `APPROVED_FOR_PRODUCTION` | 當日成交均價、高低價、成交量等盤後白名單欄位 |
+
+正式快照 smoke 結果：11406 415 列、94025 354 列、11586 697 列、興櫃盤後 359 家、可轉債 385 檔、轉換價 384 筆；市場資料日期一致為 2026-07-31。未核准 OpenAPI、`bond_cb_daily`、第三方網站、即時價、買賣價量與自動 fallback 仍維持禁止。任何 schema、授權、主機或用途變更都會撤回本核准並停止切換 generation pointer。

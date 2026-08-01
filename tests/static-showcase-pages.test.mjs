@@ -76,6 +76,15 @@ test("資料方法頁使用核准專業詞彙並說明估值公式", async () =>
   );
 });
 
+test("IPO 頁將下載日期標示為本站擷取而不是官方資料更新", async () => {
+  const [html, script] = await Promise.all([
+    readShowcaseFile("ipo.html"),
+    readShowcaseFile("assets/ipo-page.js"),
+  ]);
+  assert.doesNotMatch(`${html}\n${script}`, /資料更新/);
+  assert.match(`${html}\n${script}`, /本站擷取/);
+});
+
 test("共用格式與安全讀取工具提供可預期的顯示結果", async () => {
   const {
     formatDate,

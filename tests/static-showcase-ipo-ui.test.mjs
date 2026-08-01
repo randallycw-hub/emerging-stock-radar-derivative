@@ -23,7 +23,7 @@ test("IPO 頁保留完整事件順序並提供獨立篩選排序", async () => {
     "掛牌交易日期",
     "承銷商",
     "備註",
-    "資料更新",
+    "本站擷取",
   ]) {
     assert.match(source, new RegExp(label));
   }
@@ -52,7 +52,7 @@ test("IPO 頁保留完整事件順序並提供獨立篩選排序", async () => {
   assert.match(js, /withdrawn/);
   assert.match(css, /ipo-timeline/);
   assert.match(css, /ipo-card-list/);
-  for (const mobileLabel of ["申請", "審議", "董事會", "核准／備查", "掛牌", "資料更新"]) {
+  for (const mobileLabel of ["申請", "審議", "董事會", "核准／備查", "掛牌", "本站擷取"]) {
     assert.match(js, new RegExp(mobileLabel));
   }
   assert.doesNotMatch(html, /<h[1-6][^>]*>\s*(?:資料來源|擷取版本|官方快照)\s*<\/h[1-6]>/);
