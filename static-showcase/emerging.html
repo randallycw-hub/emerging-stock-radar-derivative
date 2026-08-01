@@ -12,12 +12,10 @@
   <header class="site-header">
     <div class="site-header__inner">
       <a class="site-mark" href="./index.html" aria-label="可轉債與興櫃盤後資訊首頁">
-        <span>POST-CLOSE</span>
-        <strong>市場資訊台</strong>
+        <span>POST-CLOSE</span><strong>市場資訊台</strong>
       </a>
       <button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
-        <span aria-hidden="true">☰</span>
-        <span>選單</span>
+        <span aria-hidden="true">☰</span><span>選單</span>
       </button>
       <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽">
         <a data-page-link="home" href="./index.html">首頁</a>
@@ -27,8 +25,7 @@
         <a data-page-link="methodology" href="./methodology.html">資料方法</a>
       </nav>
       <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false">
-        <span aria-hidden="true">◐</span>
-        <span data-theme-label>深色模式</span>
+        <span aria-hidden="true">◐</span><span data-theme-label>深色模式</span>
       </button>
     </div>
   </header>
@@ -37,17 +34,79 @@
     <header class="page-heading">
       <p class="kicker">EMERGING MARKET</p>
       <h1>興櫃市場盤後資訊</h1>
-      <p>查看興櫃個股盤後行情、成交資訊與公司基本資料。</p>
+      <p>以當日成交均價（盤後）整理市場變化、成交概況與公司月營收。</p>
     </header>
-    <section id="emerging-market-root" class="page-placeholder" data-page-root="emerging" aria-labelledby="emerging-market-heading">
-      <p class="section-number">MARKET WORKSPACE</p>
-      <h2 id="emerging-market-heading">興櫃市場資料</h2>
-      <p>市場表格、排序與個股詳情將由興櫃頁面模組載入。</p>
+
+    <section id="emerging-market-root" class="ledger-section" data-page-root="emerging" aria-labelledby="emerging-market-heading">
+      <header class="section-heading">
+        <div><p class="section-number">MARKET WORKSPACE</p><h2 id="emerging-market-heading">興櫃市場資料</h2></div>
+        <p id="emerging-update-status" class="update-status" aria-live="polite">盤後資料讀取中</p>
+      </header>
+
+      <div class="view-tabs" role="tablist" aria-label="興櫃資料檢視">
+        <button id="market-tab" type="button" role="tab" aria-selected="true" aria-controls="market-view" data-emerging-view="market">盤後市場</button>
+        <button id="revenue-tab" type="button" role="tab" aria-selected="false" aria-controls="revenue-view" data-emerging-view="revenue">月營收</button>
+      </div>
+
+      <section id="market-view" role="tabpanel" aria-labelledby="market-tab">
+        <div id="market-breadth" class="market-breadth" aria-label="市場概況">
+          <article><span>公司家數</span><strong data-breadth="companies">—</strong></article>
+          <article><span>有效樣本</span><strong data-breadth="effective">—</strong></article>
+          <article><span>上漲／下跌／持平</span><strong data-breadth="directions">—</strong></article>
+          <article><span>成交股數合計</span><strong data-breadth="volume">—</strong></article>
+          <article><span>估算成交金額（盤後）</span><strong data-breadth="amount">—</strong></article>
+        </div>
+
+        <div id="emerging-rankings" class="ranking-grid" aria-label="市場排行"></div>
+
+        <form id="emerging-filters" class="filters emerging-filters" aria-label="興櫃市場篩選">
+          <label class="search-field"><span>搜尋</span><input id="emerging-search" name="q" type="search" placeholder="公司代碼或名稱"></label>
+          <label><span>產業</span><select id="emerging-industry" name="industry"><option value="all">全部產業</option></select></label>
+          <label><span>申請狀態</span><select id="emerging-application" name="application"><option value="all">全部狀態</option></select></label>
+          <label><span>漲跌方向</span><select id="emerging-direction" name="direction"><option value="all">全部</option><option value="up">上漲</option><option value="down">下跌</option><option value="flat">持平</option><option value="unavailable">無法計算</option></select></label>
+          <label class="mobile-sort-control"><span>排序欄位</span><select id="emerging-sort-field" name="sort">
+            <option value="companyCode">公司代碼／名稱</option><option value="dailyAveragePrice">當日成交均價（盤後）</option><option value="averageChangePercent">均價漲跌</option><option value="dailyHighPrice">最高</option><option value="dailyLowPrice">最低</option><option value="transactionVolume">成交股數</option><option value="estimatedTransactionAmount">估算成交金額（盤後）</option><option value="tradingDate">資料日期</option>
+          </select></label>
+          <button id="emerging-sort-direction" class="sort-direction" type="button" aria-label="切換排序方向" data-direction="asc">低到高 ↑</button>
+          <output id="emerging-result-count" aria-live="polite">—</output>
+        </form>
+
+        <div class="market-table-shell">
+          <table class="market-table">
+            <thead><tr>
+              <th aria-sort="none"><button type="button" data-market-sort="companyCode" data-sort-type="text">公司代碼／名稱 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="industryName" data-sort-type="text">產業 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="dailyAveragePrice" data-sort-type="number">當日成交均價（盤後） <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="averageChangePercent" data-sort-type="number">均價漲跌 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="dailyHighPrice" data-sort-type="number">最高 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="dailyLowPrice" data-sort-type="number">最低 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="transactionVolume" data-sort-type="number">成交股數 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="estimatedTransactionAmount" data-sort-type="number">估算成交金額（盤後） <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="applyingStatus" data-sort-type="text">申請狀態 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="tradingDate" data-sort-type="text">資料日期 <span aria-hidden="true"></span></button></th>
+            </tr></thead>
+            <tbody id="emerging-table-body"><tr><td colspan="10" class="empty-cell">盤後資料讀取中</td></tr></tbody>
+          </table>
+        </div>
+        <div id="emerging-card-list" class="market-card-list" aria-live="polite"></div>
+        <nav id="emerging-pagination" class="pagination" aria-label="興櫃資料分頁"></nav>
+      </section>
+
+      <section id="revenue-view" role="tabpanel" aria-labelledby="revenue-tab" hidden>
+        <header class="subsection-heading"><div><p class="section-number">MONTHLY REVENUE</p><h3>公司月營收</h3></div><p id="revenue-period">—</p></header>
+        <div class="market-table-shell revenue-table-shell"><table class="market-table revenue-table">
+          <thead><tr><th>公司代碼／名稱</th><th>產業</th><th>資料年月</th><th>當月營收（仟元）</th><th>月增率</th><th>年增率</th><th>累計營收（仟元）</th><th>累計年增率</th></tr></thead>
+          <tbody id="emerging-revenue-body"><tr><td colspan="8" class="empty-cell">月營收資料讀取中</td></tr></tbody>
+        </table></div>
+        <nav id="revenue-pagination" class="pagination" aria-label="月營收資料分頁"></nav>
+      </section>
+
       <p class="data-error" data-page-error hidden role="status"></p>
     </section>
   </main>
 
-  <footer class="footer">市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer>
+  <footer class="footer">市場資訊台 · <a href="./methodology.html">資料來源與計算方法</a> · 僅整理公開資訊，不構成投資建議。</footer>
   <script type="module" src="./assets/site-shell.js"></script>
+  <script type="module" src="./assets/emerging-page.js"></script>
 </body>
 </html>
