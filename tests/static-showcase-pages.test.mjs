@@ -7,7 +7,8 @@ const primaryPageFiles = [
   ["index.html", "首頁"],
   ["bonds.html", "可轉債"],
   ["emerging.html", "興櫃市場"],
-  ["ipo.html", "IPO 行程"],
+  ["ipo-radar.html", "IPO 雷達"],
+  ["ipo.html", "IPO 時程"],
 ];
 
 async function readShowcaseFile(path) {
@@ -49,17 +50,27 @@ test("資料方法直接頁保留主要導覽但不列出自己", async () => {
   assert.doesNotMatch(html, /href="\.\/methodology\.html"/);
 });
 
-test("首頁只提供三個市場入口與最後成功更新狀態", async () => {
+test("首頁提供市場與 IPO 雙入口以及最後成功更新狀態", async () => {
   const home = await readShowcaseFile("index.html");
 
   assert.match(home, /<h1[^>]*>可轉債與興櫃盤後資訊<\/h1>/);
   assert.match(home, /href="\.\/bonds\.html"/);
   assert.match(home, /href="\.\/emerging\.html"/);
+  assert.match(home, /href="\.\/ipo-radar\.html"/);
   assert.match(home, /href="\.\/ipo\.html"/);
   assert.doesNotMatch(home, /href="\.\/methodology\.html"/);
   assert.match(home, /id="last-successful-update"/);
   assert.doesNotMatch(home, />384<|>343<|>354<|資料日期/);
   assert.doesNotMatch(home, /<table\b/);
+});
+
+test("IPO 兩頁使用可辨識的桌機資料表與行動卡片版面語意", async () => {
+  const css = await readShowcaseFile("assets/app.css");
+  for (const selector of ["ipo-radar-summary", "ipo-upcoming-grid", "ipo-stage-flow", "ipo-timeline-table", "ipo-card-list"]) {
+    assert.match(css, new RegExp(`\\.${selector}`));
+  }
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*\.ipo-timeline-table-shell\s*\{\s*display:\s*none/);
+  assert.match(css, /\[data-theme="dark"\][\s\S]*--ipo-stage-a:/);
 });
 
 test("資料方法頁使用核准專業詞彙並說明估值公式", async () => {

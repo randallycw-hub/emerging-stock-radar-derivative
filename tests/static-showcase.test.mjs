@@ -27,13 +27,13 @@ test("首頁使用核准標題且不再顯示資料筆數摘要列", () => {
   assert.doesNotMatch(html, />384<|>343<|>354<|資料日期/);
 });
 
-test("五個公開頁面已完全移除舊單頁程式與雜湊路由", async () => {
+test("六個公開頁面已完全移除舊單頁程式與雜湊路由", async () => {
   const legacyExists = await access(new URL("../static-showcase/assets/app.js", import.meta.url))
     .then(() => true)
     .catch(() => false);
   assert.equal(legacyExists, false);
 
-  for (const page of ["index.html", "bonds.html", "emerging.html", "ipo.html", "methodology.html"]) {
+  for (const page of ["index.html", "bonds.html", "emerging.html", "ipo-radar.html", "ipo.html", "methodology.html"]) {
     const pageHtml = await readFile(new URL(`../static-showcase/${page}`, import.meta.url), "utf8");
     assert.doesNotMatch(pageHtml, /assets\/app\.js|href="#(?!main-content)[^"]+"/);
   }

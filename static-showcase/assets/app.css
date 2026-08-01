@@ -20,6 +20,10 @@
   --violet: #7a638f;
   --violet-ink: #624d78;
   --violet-soft: #ddd2e5;
+  --ipo-stage-a: #8b412d;
+  --ipo-stage-b: #8b412d;
+  --ipo-stage-c: #624d78;
+  --ipo-stage-d: #624d78;
   --shadow: 0 16px 40px rgb(59 42 43 / 9%);
 }
 
@@ -45,6 +49,10 @@
   --violet: #b69acb;
   --violet-ink: #b69acb;
   --violet-soft: #3d3345;
+  --ipo-stage-a: #f0a080;
+  --ipo-stage-b: #f0a080;
+  --ipo-stage-c: #c4abe0;
+  --ipo-stage-d: #c4abe0;
   --shadow: 0 18px 44px rgb(0 0 0 / 24%);
 }
 
@@ -88,7 +96,7 @@ a { color: inherit; }
   background: color-mix(in srgb, var(--paper) 92%, transparent);
 }
 .site-header__inner {
-  width: min(1240px, calc(100% - 40px));
+  width: min(1440px, calc(100% - 48px));
   min-height: 86px;
   margin: 0 auto;
   display: grid;
@@ -145,7 +153,7 @@ a { color: inherit; }
   cursor: pointer;
 }
 .page-content {
-  width: min(1240px, calc(100% - 40px));
+  width: min(1440px, calc(100% - 48px));
   min-height: calc(100vh - 188px);
   margin: 0 auto;
   padding: clamp(42px, 7vw, 94px) 0 80px;
@@ -216,6 +224,29 @@ a { color: inherit; }
   justify-self: end;
   color: var(--violet-ink);
   font-weight: 800;
+}
+.market-module--ipo {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--clay-soft) 72%, var(--panel)), var(--panel) 70%);
+}
+.market-module--ipo h2 { margin-bottom: 12px; }
+.market-module__copy {
+  grid-column: 1 / -1;
+  max-width: 44ch;
+  margin: 0 0 22px;
+  color: var(--muted);
+}
+.home-ipo-schedule-link {
+  min-height: 44px;
+  margin: 10px 0 0 auto;
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  align-items: center;
+  color: var(--violet-ink);
+  font-weight: 800;
+  text-underline-offset: 4px;
 }
 .update-panel {
   margin-top: 18px;
@@ -715,17 +746,29 @@ a { color: inherit; }
 .subsection-heading > p { color: var(--muted); }
 .revenue-table { min-width: 980px; }
 
-.ipo-stage-summary {
+.ipo-stage-summary,
+.ipo-radar-summary {
   margin-bottom: 18px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border: 1px solid var(--line);
   background: var(--panel);
 }
-.ipo-stage-summary article { padding: 14px 16px; border-right: 1px solid var(--line); }
-.ipo-stage-summary article:last-child { border-right: 0; }
-.ipo-stage-summary span { color: var(--muted); font-size: 11px; }
-.ipo-stage-summary strong { display: block; margin-top: 4px; font: 800 24px/1 Georgia, serif; }
+.ipo-stage-summary article,
+.ipo-radar-summary > * { min-width: 0; min-height: 88px; padding: 14px 16px; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; }
+.ipo-stage-summary article:last-child,
+.ipo-radar-summary > *:last-child { border-right: 0; }
+.ipo-stage-summary span,
+.ipo-radar-summary span { color: var(--muted); font-size: 11px; }
+.ipo-stage-summary strong,
+.ipo-radar-summary strong { display: block; margin-top: 4px; font: 800 24px/1 Georgia, serif; }
+.ipo-radar-summary button { cursor: pointer; }
+.ipo-radar-summary button:hover,
+.ipo-radar-summary button:focus-visible { background: var(--clay-soft); color: var(--ipo-stage-a); }
+.ipo-radar-summary button:nth-child(2):hover,
+.ipo-radar-summary button:nth-child(2):focus-visible,
+.ipo-radar-summary button:nth-child(3):hover,
+.ipo-radar-summary button:nth-child(3):focus-visible { color: var(--ipo-stage-c); }
 .ipo-stage-flow {
   margin: 0 0 22px;
   padding: 0;
@@ -740,6 +783,25 @@ a { color: inherit; }
 .ipo-stage-flow span, .ipo-stage-flow small { display: block; color: var(--muted); font-size: 10px; }
 .ipo-stage-flow span { color: var(--clay-ink); font: 800 11px/1 monospace; }
 .ipo-stage-flow strong { display: block; margin: 7px 0 3px; font: 800 16px/1.15 Georgia, "Noto Serif TC", serif; }
+.ipo-stage-flow button {
+  min-height: 52px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  padding: 13px;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+}
+.ipo-stage-flow button:last-child { border-right: 0; }
+.ipo-stage-flow button:nth-child(1) { color: var(--ipo-stage-a); }
+.ipo-stage-flow button:nth-child(2) { color: var(--ipo-stage-b); }
+.ipo-stage-flow button:nth-child(3) { color: var(--ipo-stage-c); }
+.ipo-stage-flow button:nth-child(4) { color: var(--ipo-stage-d); }
+.ipo-stage-flow button:hover,
+.ipo-stage-flow button:focus-visible { background: var(--violet-soft); }
+.ipo-upcoming-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .ipo-upcoming { margin-bottom: 18px; }
 .ipo-month-view { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .ipo-month-view section { min-width: 0; border: 1px solid var(--line); background: var(--panel); }
@@ -803,17 +865,24 @@ a { color: inherit; }
   .market-card dl { margin: 0; padding: 13px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .market-card dt { color: var(--muted); font-size: 10px; }
   .market-card dd { margin: 2px 0 0; font-weight: 750; }
-  .ipo-stage-summary { grid-template-columns: repeat(2, 1fr); }
-  .ipo-stage-summary article { border-bottom: 1px solid var(--line); }
-  .ipo-stage-summary article:nth-child(2n) { border-right: 0; }
-  .ipo-stage-summary article:last-child { grid-column: span 2; border-bottom: 0; }
-  .ipo-stage-flow { grid-template-columns: repeat(2, 1fr); }
+  .ipo-stage-summary,
+  .ipo-radar-summary { grid-template-columns: repeat(2, 1fr); }
+  .ipo-stage-summary article,
+  .ipo-radar-summary > * { border-bottom: 1px solid var(--line); }
+  .ipo-stage-summary article:nth-child(2n),
+  .ipo-radar-summary > *:nth-child(2n) { border-right: 0; }
+  .ipo-stage-summary article:last-child,
+  .ipo-radar-summary > *:last-child { grid-column: span 2; border-bottom: 0; }
+  .ipo-stage-flow { grid-template-columns: 1fr; }
+  .ipo-stage-flow button { border-right: 0; border-bottom: 1px solid var(--line); }
+  .ipo-stage-flow button:last-child { border-bottom: 0; }
   .ipo-stage-flow li:nth-child(2n) { border-right: 0; }
   .ipo-stage-flow li { border-bottom: 1px solid var(--line); }
   .ipo-stage-flow li:last-child { grid-column: span 2; border-bottom: 0; }
   .ipo-month-view { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ipo-filters { grid-template-columns: 1fr; }
   .ipo-table-shell { display: none; }
+  .ipo-timeline-table-shell { display: none; }
   .ipo-card-list { display: grid; gap: 12px; }
 }
 
