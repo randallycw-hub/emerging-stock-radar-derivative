@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vinext dev",
-    "build": "vinext build",
+    "build": "vinext build && node scripts/stage-static-showcase.mjs",
     "start": "vinext start",
     "test": "npm run build && node --test tests/*.test.mjs tests/source-verification/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
