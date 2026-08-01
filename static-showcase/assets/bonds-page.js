@@ -1,14 +1,5 @@
-const labels = [
-  "CB 代碼／名稱",
-  "CB 收盤價",
-  "股票收盤價",
-  "目前轉換價",
-  "轉換價值",
-  "轉換溢價率",
-  "CB 成交量",
-  "流通餘額",
-  "到期／賣回事件",
-];
+import { sortRows } from "./table-sort.js";
+
 const workbenchSections = [
   "交易摘要",
   "價格日期與估值日",
@@ -17,7 +8,6 @@ const workbenchSections = [
   "契約生命週期",
   "發行條款",
   "公告與文件",
-  "資料來源",
 ];
 const reasonLabels = {
   NO_CB_CLOSE: "尚無可用 CB 收盤",
@@ -27,72 +17,103 @@ const reasonLabels = {
   NO_EFFECTIVE_CONVERSION_PRICE: "估值日缺少已生效轉換價",
   SNAPSHOT_NOT_PUBLISHED: "盤後市場快照尚未發布",
 };
-const bootstrapConfig = window.__OFFICIAL_SHOWCASE__ ?? {
-  generationPointerUrl: "./data/current.json",
+const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
+  generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
   datasets: {},
 };
 const state = {
   manifest: null,
-  revenue: [],
   bondTerms: [],
-  ipo: [],
   views: [],
   conversions: [],
   history: [],
+  sortKey: "bondCode",
+  sortDirection: "asc",
+  page: 1,
 };
 
-initializeTheme();
+initializeFromUrl();
 bindFilters();
 await loadAndRender();
-window.addEventListener("hashchange", renderHashRoute);
+window.addEventListener("popstate", () => {
+  initializeFromUrl();
+  renderRoute();
+});
 
 async function loadAndRender() {
   const pointer = await loadJson(bootstrapConfig.generationPointerUrl, null);
   const config = pointer?.runtimeUrl
-    ? await loadJson(pointer.runtimeUrl, { manifestUrl: null, datasets: {} })
+    ? await loadJson(new URL(pointer.runtimeUrl, document.baseURI), { manifestUrl: null, datasets: {} })
     : bootstrapConfig;
-  const [manifest, revenue, bondTerms, ipo, market, conversions, history] =
+  const [manifest, bondTerms, market, conversions, history] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
-      loadJson(config.datasets["94025"], []),
       loadJson(config.datasets["11406"], []),
-      loadJson(config.datasets["11586"], []),
       loadJson(config.datasets.bondMarket, []),
       loadJson(config.datasets.conversionPrices, []),
       loadJson(config.datasets.bondHistory, []),
     ]);
   state.manifest = manifest;
-  state.revenue = arrayValue(revenue);
   state.bondTerms = arrayValue(bondTerms);
-  state.ipo = arrayValue(ipo);
   state.views = arrayValue(market);
   state.conversions = arrayValue(conversions);
   state.history = arrayValue(history);
 
   if (state.views.length === 0) state.views = fallbackBondViews(state.bondTerms);
-  renderSummary();
-  renderBonds();
-  renderEmerging();
-  renderIpo();
-  renderHashRoute();
+  renderRoute();
   const marketDate = state.manifest?.market?.dataDate;
-  document.querySelector("#update-status").textContent = marketDate
+  document.querySelector("#bond-update-status").textContent = marketDate
     ? `盤後資料日 ${marketDate}`
     : `資料版本 ${state.manifest?.generatedAt ?? "讀取完成"}`;
 }
 
-function initializeTheme() {
-  document.querySelector("#theme-toggle").addEventListener("click", () => {
-    const next =
-      document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try { localStorage.setItem("market-theme", next); } catch {}
-  });
+function initializeFromUrl() {
+  const params = new URLSearchParams(location.search);
+  state.sortKey = params.get("sort") || "bondCode";
+  state.sortDirection = params.get("direction") === "desc" ? "desc" : "asc";
+  state.page = Math.max(1, Number.parseInt(params.get("page") || "1", 10) || 1);
+  document.querySelector("#bond-search").value = params.get("q") || "";
+  document.querySelector("#bond-preset").value = params.get("preset") || "all";
+  document.querySelector("#bond-sort-field").value = state.sortKey;
+  updateDirectionButton();
 }
 
 function bindFilters() {
   for (const selector of ["#bond-search", "#bond-preset"]) {
-    document.querySelector(selector).addEventListener("input", renderBonds);
+    document.querySelector(selector).addEventListener("input", () => {
+      state.page = 1;
+      syncListUrl();
+      renderBonds();
+    });
+  }
+  document.querySelector("#bond-sort-field").addEventListener("change", (event) => {
+    state.sortKey = event.target.value;
+    state.sortDirection = "desc";
+    state.page = 1;
+    updateDirectionButton();
+    syncListUrl();
+    renderBonds();
+  });
+  document.querySelector("#bond-sort-direction").addEventListener("click", () => {
+    state.sortDirection = state.sortDirection === "desc" ? "asc" : "desc";
+    state.page = 1;
+    updateDirectionButton();
+    syncListUrl();
+    renderBonds();
+  });
+  for (const button of document.querySelectorAll("[data-sort-key]")) {
+    button.addEventListener("click", () => {
+      const key = button.dataset.sortKey;
+      state.sortDirection = state.sortKey === key && state.sortDirection === "desc"
+        ? "asc"
+        : "desc";
+      state.sortKey = key;
+      state.page = 1;
+      document.querySelector("#bond-sort-field").value = key;
+      updateDirectionButton();
+      syncListUrl();
+      renderBonds();
+    });
   }
 }
 
@@ -144,21 +165,10 @@ function fallbackBondViews(rows) {
     }));
 }
 
-function renderSummary() {
-  const priced = state.views.filter((view) => view.cbClose !== null).length;
-  setText("#summary-bonds", formatNumber(state.views.length));
-  setText("#summary-priced", formatNumber(priced));
-  setText("#summary-emerging", formatNumber(state.revenue.length));
-  setText(
-    "#summary-date",
-    state.manifest?.market?.dataDate ?? state.manifest?.generatedAt ?? "—",
-  );
-}
-
 function renderBonds() {
   const query = document.querySelector("#bond-search").value.trim().toLowerCase();
   const preset = document.querySelector("#bond-preset").value;
-  const rows = state.views.filter((view) => {
+  const filtered = state.views.filter((view) => {
     const term = termFor(view.bondCode);
     const haystack = [
       view.bondCode,
@@ -168,13 +178,25 @@ function renderBonds() {
     ].join(" ").toLowerCase();
     return haystack.includes(query) && matchesPreset(view, preset);
   });
-  setText("#bond-result-count", `${rows.length} 檔`);
-  document.querySelector("#bond-table-body").innerHTML = rows.length
-    ? rows.map(renderBondRow).join("")
+  const rows = sortRows(filtered, {
+    key: state.sortKey,
+    direction: state.sortDirection,
+    type: state.sortKey === "bondCode" || state.sortKey === "bondName" ? "text" : "number",
+  });
+  const size = pageSize();
+  const pages = Math.max(1, Math.ceil(rows.length / size));
+  state.page = Math.min(state.page, pages);
+  const visible = rows.slice((state.page - 1) * size, state.page * size);
+
+  setText("#bond-result-count", `${rows.length} 檔 · 第 ${state.page}/${pages} 頁`);
+  document.querySelector("#bond-table-body").innerHTML = visible.length
+    ? visible.map(renderBondRow).join("")
     : '<tr><td colspan="9" class="empty-cell">沒有符合條件的可轉債</td></tr>';
-  document.querySelector("#bond-card-list").innerHTML = rows.length
-    ? rows.map(renderBondCard).join("")
+  document.querySelector("#bond-card-list").innerHTML = visible.length
+    ? visible.map(renderBondCard).join("")
     : '<p class="empty-cell">沒有符合條件的可轉債</p>';
+  updateSortHeaders();
+  renderPagination(pages);
   bindBondOpeners();
 }
 
@@ -210,9 +232,7 @@ function renderBondCard(view) {
 
 function bindBondOpeners() {
   for (const element of document.querySelectorAll("[data-bond-code]")) {
-    const open = () => {
-      location.hash = `bond=${encodeURIComponent(element.dataset.bondCode)}`;
-    };
+    const open = () => openBond(element.dataset.bondCode);
     element.addEventListener("click", open);
     element.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
@@ -221,6 +241,69 @@ function bindBondOpeners() {
       }
     });
   }
+}
+
+function updateSortHeaders() {
+  for (const button of document.querySelectorAll("[data-sort-key]")) {
+    const active = button.dataset.sortKey === state.sortKey;
+    const heading = button.closest("th");
+    heading.setAttribute("aria-sort", active
+      ? state.sortDirection === "desc" ? "descending" : "ascending"
+      : "none");
+    button.querySelector("span").textContent = active
+      ? state.sortDirection === "desc" ? "↓" : "↑"
+      : "";
+  }
+}
+
+function updateDirectionButton() {
+  const button = document.querySelector("#bond-sort-direction");
+  button.dataset.direction = state.sortDirection;
+  button.textContent = state.sortDirection === "desc" ? "高到低 ↓" : "低到高 ↑";
+}
+
+function pageSize() {
+  return matchMedia("(max-width: 900px)").matches ? 25 : 50;
+}
+
+function renderPagination(pageCount) {
+  const target = document.querySelector("#bond-pagination");
+  if (pageCount <= 1) {
+    target.innerHTML = "";
+    return;
+  }
+  target.innerHTML = `
+    <button type="button" data-page="${state.page - 1}" ${state.page === 1 ? "disabled" : ""}>上一頁</button>
+    <span>第 ${state.page} / ${pageCount} 頁</span>
+    <button type="button" data-page="${state.page + 1}" ${state.page === pageCount ? "disabled" : ""}>下一頁</button>`;
+  for (const button of target.querySelectorAll("[data-page]")) {
+    button.addEventListener("click", () => {
+      state.page = Number(button.dataset.page);
+      syncListUrl();
+      renderBonds();
+      document.querySelector("#bond-market-heading").focus?.();
+    });
+  }
+}
+
+function syncListUrl({ push = false } = {}) {
+  const params = new URLSearchParams();
+  const query = document.querySelector("#bond-search").value.trim();
+  const preset = document.querySelector("#bond-preset").value;
+  if (query) params.set("q", query);
+  if (preset !== "all") params.set("preset", preset);
+  params.set("sort", state.sortKey);
+  params.set("direction", state.sortDirection);
+  params.set("page", String(state.page));
+  const url = `${location.pathname}?${params}`;
+  history[push ? "pushState" : "replaceState"](null, "", url);
+}
+
+function openBond(code) {
+  const params = new URLSearchParams(location.search);
+  params.set("bond", code);
+  history.pushState(null, "", `${location.pathname}?${params}`);
+  renderRoute();
 }
 
 function matchesPreset(view, preset) {
@@ -237,20 +320,37 @@ function matchesPreset(view, preset) {
   return true;
 }
 
-function renderHashRoute() {
-  const match = /^#bond=(.+)$/.exec(location.hash);
+function renderRoute() {
+  const code = new URLSearchParams(location.search).get("bond");
   const target = document.querySelector("#bond-workbench");
-  if (!match) {
+  const list = document.querySelector("#bond-list-view");
+  if (!code) {
     target.hidden = true;
     target.innerHTML = "";
+    list.hidden = false;
+    renderBonds();
     return;
   }
-  const code = decodeURIComponent(match[1]);
   const view = state.views.find((candidate) => candidate.bondCode === code);
-  if (!view) return;
+  if (!view) {
+    target.hidden = false;
+    list.hidden = true;
+    target.innerHTML = `<p class="empty-cell">找不到代碼 ${escapeHtml(code)} 的可轉債資料。</p><button class="close-workbench" type="button">返回可轉債總表</button>`;
+    target.querySelector(".close-workbench").addEventListener("click", closeDetail);
+    return;
+  }
   renderWorkbench(view);
   target.hidden = false;
-  target.scrollIntoView({ block: "start" });
+  list.hidden = true;
+  target.focus?.();
+}
+
+function closeDetail() {
+  const params = new URLSearchParams(location.search);
+  params.delete("bond");
+  history.pushState(null, "", `${location.pathname}?${params}`);
+  initializeFromUrl();
+  renderRoute();
 }
 
 function renderWorkbench(view) {
@@ -263,7 +363,7 @@ function renderWorkbench(view) {
   target.innerHTML = `
     <header class="workbench-head">
       <div><p class="section-number">${escapeHtml(view.bondCode)} / BOND WORKBENCH</p><h2>${escapeHtml(view.bondName)}</h2><p>${escapeHtml(term["機構名稱"] ?? view.issuerCode)}</p></div>
-      <button class="close-workbench" type="button" aria-label="關閉單檔詳細資料">關閉 ×</button>
+      <button class="close-workbench" type="button" aria-label="返回可轉債總表">← 返回總表</button>
     </header>
     <section aria-label="${workbenchSections[0]}" class="workbench-summary">
       ${summaryMetric("CB 收盤", view.cbClose, view.cbPriceDate)}
@@ -315,22 +415,8 @@ function renderWorkbench(view) {
         ${conversion?.officialDetailUrl ? `<a href="${escapeHtml(conversion.officialDetailUrl)}" target="_blank" rel="noopener noreferrer">發行資料明細</a>` : ""}
         <a href="https://www.tpex.org.tw/zh-tw/bond/info/statistics-cb/day-quotes.html" target="_blank" rel="noopener noreferrer">可轉債行情查詢</a>
       </div></section>
-      ${panel(workbenchSections[7], [
-        ["條款資料", "證券櫃檯買賣中心 11406"],
-        ["CB 行情", "證券櫃檯買賣中心盤後查詢"],
-        ["股票收盤", "證券交易所／證券櫃檯買賣中心"],
-        ["轉換價", "公開資訊觀測站發行資料"],
-        ["擷取版本", state.manifest?.market?.generatedAt ?? state.manifest?.generatedAt],
-      ])}
     </div>`;
-  target.querySelector(".close-workbench").addEventListener("click", () => {
-    window.history.replaceState(
-      null,
-      "",
-      location.pathname + location.search + "#bonds",
-    );
-    target.hidden = true;
-  });
+  target.querySelector(".close-workbench").addEventListener("click", closeDetail);
   const drawSelectedHistory = (range) => {
     drawHistoryChart(historyPoints, range);
     target.querySelectorAll("[data-history-range]").forEach((button) => {
@@ -450,28 +536,6 @@ function drawHistoryChart(points, range) {
   caption.innerHTML = `${series.map(({ label, color }) =>
     `<span class="history-legend"><i style="--legend-color:${escapeHtml(color)}"></i>${label}</span>`
   ).join("")}<span>共 ${visible.length} 個共同交易日；缺漏日期不插值。</span>`;
-}
-
-function renderEmerging() {
-  document.querySelector("#emerging-table-body").innerHTML = state.revenue.length
-    ? state.revenue.slice(0, 120).map((row) => `<tr>
-      <td>${escapeHtml(row["公司代號"])}</td><td>${escapeHtml(row["公司名稱"])}</td>
-      <td>${escapeHtml(row["產業別"])}</td><td>${formatMoney(row["營業收入-當月營收"])}</td>
-      <td>${row["營業收入-去年同月增減(%)"] === "" ? "—" : signedRate(row["營業收入-去年同月增減(%)"])}</td>
-      <td>${formatDate(row["資料年月"])}</td></tr>`).join("")
-    : '<tr><td colspan="6">資料暫缺</td></tr>';
-}
-
-function renderIpo() {
-  document.querySelector("#ipo-table-body").innerHTML = state.ipo.length
-    ? state.ipo.slice(0, 160).map((row) => `<tr>
-      <td>${escapeHtml(`${row["公司代號"] ?? ""} ${row["公司簡稱"] ?? ""}`)}</td>
-      <td>${formatDate(row["申請日期"])}</td>
-      <td>${formatDate(row["上市審議委員會審議日期"])}</td>
-      <td>${formatDate(row["交易所董事會通過上市日期"])}</td>
-      <td>${formatDate(row["上市契約報請主管機關備查(主管機關核准)日期"])}</td>
-      <td>${formatDate(row["股票上市買賣日期"])}</td></tr>`).join("")
-    : '<tr><td colspan="6">資料暫缺</td></tr>';
 }
 
 function panel(title, entries) {
@@ -594,5 +658,3 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
-void labels;

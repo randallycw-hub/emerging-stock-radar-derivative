@@ -552,6 +552,59 @@ a { color: inherit; }
   .bond-card-grid, .source-grid, .workbench-panel dl { grid-template-columns: 1fr; }
 }
 
+.bond-table th button {
+  width: 100%;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bond-table th button:focus-visible {
+  outline: 3px solid var(--violet);
+  outline-offset: 4px;
+}
+
+.mobile-sort-control,
+.sort-direction {
+  display: none;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.pagination button,
+.sort-direction {
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  padding: 0.65rem 0.9rem;
+  color: var(--ink);
+  background: var(--panel);
+  font: inherit;
+  font-weight: 750;
+}
+
+.pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .mobile-sort-control,
+  .sort-direction {
+    display: grid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { transition: none !important; }

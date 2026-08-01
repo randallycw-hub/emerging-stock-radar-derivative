@@ -39,15 +39,77 @@
       <h1>可轉債盤後資訊</h1>
       <p>整理可轉債條款、盤後行情與同日估值結果。</p>
     </header>
-    <section id="bond-market-root" class="page-placeholder" data-page-root="bonds" aria-labelledby="bond-market-heading">
-      <p class="section-number">MARKET WORKSPACE</p>
-      <h2 id="bond-market-heading">可轉債市場資料</h2>
-      <p>市場表格、篩選與個券詳情將由可轉債頁面模組載入。</p>
+    <section id="bond-market-root" class="ledger-section" data-page-root="bonds" aria-labelledby="bond-market-heading">
+      <header class="section-heading">
+        <div><p class="section-number">MARKET WORKSPACE</p><h2 id="bond-market-heading">可轉債市場資料</h2></div>
+        <p id="bond-update-status" class="update-status" aria-live="polite">盤後資料讀取中</p>
+      </header>
+
+      <div id="bond-list-view">
+        <form class="filters" id="bond-filters" aria-label="可轉債篩選">
+          <label class="search-field">
+            <span>搜尋</span>
+            <input id="bond-search" name="q" type="search" placeholder="債券代碼、名稱、發行人或股票代碼">
+          </label>
+          <label>
+            <span>條件</span>
+            <select id="bond-preset" name="preset">
+              <option value="all">全部可轉債</option>
+              <option value="low-price">CB 收盤低於 100</option>
+              <option value="low-premium">溢價率低於 5%</option>
+              <option value="near-parity">轉換價值 95–105</option>
+              <option value="maturity">一年內到期</option>
+              <option value="put">90 天內賣回</option>
+              <option value="no-trade">當日無成交</option>
+              <option value="missing">資料缺漏</option>
+            </select>
+          </label>
+          <label class="mobile-sort-control">
+            <span>排序欄位</span>
+            <select id="bond-sort-field" name="sort">
+              <option value="bondCode">CB 代碼／名稱</option>
+              <option value="cbClose">CB 收盤價</option>
+              <option value="stockClose">股票收盤價</option>
+              <option value="currentConversionPrice">目前轉換價</option>
+              <option value="conversionValue">轉換價值</option>
+              <option value="premiumRate">轉換溢價率</option>
+              <option value="cbTradeUnits">CB 成交量</option>
+              <option value="outstandingAmount">流通餘額</option>
+              <option value="daysToMaturity">到期／賣回事件</option>
+            </select>
+          </label>
+          <button id="bond-sort-direction" class="sort-direction" type="button" aria-label="切換排序方向" data-direction="asc">低到高 ↑</button>
+          <output id="bond-result-count" aria-live="polite">—</output>
+        </form>
+        <p class="table-hint">點選欄位名稱即可一鍵切換排序，再次點選可切換高低方向。</p>
+
+        <div class="bond-table-shell">
+          <table class="bond-table">
+            <thead><tr>
+              <th aria-sort="none"><button type="button" data-sort-key="bondCode" data-sort-type="text">CB 代碼／名稱 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="cbClose" data-sort-type="number">CB 收盤價 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="stockClose" data-sort-type="number">股票收盤價 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="currentConversionPrice" data-sort-type="number">目前轉換價 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="conversionValue" data-sort-type="number">轉換價值 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="premiumRate" data-sort-type="number">轉換溢價率 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="cbTradeUnits" data-sort-type="number">CB 成交量 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="outstandingAmount" data-sort-type="number">流通餘額 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="daysToMaturity" data-sort-type="number">到期／賣回事件 <span aria-hidden="true"></span></button></th>
+            </tr></thead>
+            <tbody id="bond-table-body"><tr><td colspan="9" class="empty-cell">盤後資料讀取中</td></tr></tbody>
+          </table>
+        </div>
+        <div id="bond-card-list" class="bond-card-list" aria-live="polite"></div>
+        <nav id="bond-pagination" class="pagination" aria-label="可轉債分頁"></nav>
+      </div>
+
+      <section id="bond-workbench" class="workbench" hidden aria-live="polite"></section>
       <p class="data-error" data-page-error hidden role="status"></p>
     </section>
   </main>
 
-  <footer class="footer">市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer>
+  <footer class="footer">市場資訊台 · <a href="./methodology.html">資料來源與計算方法</a> · 僅整理公開資訊，不構成投資建議。</footer>
   <script type="module" src="./assets/site-shell.js"></script>
+  <script type="module" src="./assets/bonds-page.js"></script>
 </body>
 </html>
