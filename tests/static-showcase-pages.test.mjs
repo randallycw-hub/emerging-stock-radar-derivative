@@ -3,20 +3,19 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const showcaseRoot = new URL("../static-showcase/", import.meta.url);
-const pageFiles = [
+const primaryPageFiles = [
   ["index.html", "首頁"],
   ["bonds.html", "可轉債"],
   ["emerging.html", "興櫃市場"],
   ["ipo.html", "IPO 行程"],
-  ["methodology.html", "資料方法"],
 ];
 
 async function readShowcaseFile(path) {
   return readFile(new URL(path, showcaseRoot), "utf8");
 }
 
-for (const [currentFile, pageName] of pageFiles) {
-  test(`${pageName}具備共用五頁導覽與無障礙頁面骨架`, async () => {
+for (const [currentFile, pageName] of primaryPageFiles) {
+  test(`${pageName}具備共用四頁導覽與無障礙頁面骨架`, async () => {
     const html = await readShowcaseFile(currentFile);
 
     assert.match(html, /<html\s+lang="zh-Hant"/);
@@ -28,9 +27,11 @@ for (const [currentFile, pageName] of pageFiles) {
     assert.match(html, /<nav[^>]+id="primary-navigation"[^>]+aria-label="主要導覽"/);
     assert.match(html, /<button[^>]+id="theme-toggle"[^>]+aria-label="切換深淺色模式"/);
 
-    for (const [linkedFile] of pageFiles) {
+    for (const [linkedFile] of primaryPageFiles) {
       assert.match(html, new RegExp(`href="\\./${linkedFile}"`));
     }
+
+    assert.doesNotMatch(html, /href="\.\/methodology\.html"/);
 
     assert.match(
       html,
@@ -40,14 +41,22 @@ for (const [currentFile, pageName] of pageFiles) {
   });
 }
 
-test("首頁只提供四個市場入口與最後成功更新狀態", async () => {
+test("資料方法直接頁保留主要導覽但不列出自己", async () => {
+  const html = await readShowcaseFile("methodology.html");
+  for (const [linkedFile] of primaryPageFiles) {
+    assert.match(html, new RegExp(`href="\\./${linkedFile}"`));
+  }
+  assert.doesNotMatch(html, /href="\.\/methodology\.html"/);
+});
+
+test("首頁只提供三個市場入口與最後成功更新狀態", async () => {
   const home = await readShowcaseFile("index.html");
 
   assert.match(home, /<h1[^>]*>可轉債與興櫃盤後資訊<\/h1>/);
   assert.match(home, /href="\.\/bonds\.html"/);
   assert.match(home, /href="\.\/emerging\.html"/);
   assert.match(home, /href="\.\/ipo\.html"/);
-  assert.match(home, /href="\.\/methodology\.html"/);
+  assert.doesNotMatch(home, /href="\.\/methodology\.html"/);
   assert.match(home, /id="last-successful-update"/);
   assert.doesNotMatch(home, />384<|>343<|>354<|資料日期/);
   assert.doesNotMatch(home, /<table\b/);

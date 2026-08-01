@@ -19,7 +19,6 @@ export default function Homepage() {
           <Link href="/bonds">可轉債契約</Link>
           <Link href="/radar">事件雷達</Link>
           <Link href="/ipo">上市進度</Link>
-          <Link href="/methodology">方法與來源</Link>
         </nav>
       </header>
 
@@ -29,8 +28,8 @@ export default function Homepage() {
           <h1 id="public-home-title">把公開資料，整理成<br /><em>可以核對的脈絡。</em></h1>
           <p className="public-home-lede">興櫃公司、可轉債與上市櫃進度，從登錄來源逐批驗證，只有完整發布的資料才會進入公開首頁。</p>
           <div className="public-home-actions">
-            <Link className="public-home-button primary" href="/methodology">查看資料方法</Link>
-            <Link className="public-home-button secondary" href="/radar">瀏覽研究頁</Link>
+            <Link className="public-home-button primary" href="/radar">查看興櫃資訊</Link>
+            <Link className="public-home-button secondary" href="/ipo">查看 IPO 行程</Link>
           </div>
         </div>
         <div className="public-home-hero-note">
@@ -63,7 +62,6 @@ export default function Homepage() {
         <div className="public-home-source-list">
           <div><span className="source-status pending" aria-hidden="true" /><strong>資料端點</strong><small>已登錄、待最新批次驗證</small></div>
           <div><span className="source-status pending" aria-hidden="true" /><strong>發布快照</strong><small>等待三類資料同批完成</small></div>
-          <Link href="/methodology">查看來源與驗證方法 <span aria-hidden="true">→</span></Link>
         </div>
       </section>
 

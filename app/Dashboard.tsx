@@ -270,7 +270,6 @@ export default function Dashboard({ initialTab = "market" }: { initialTab?: Tab 
               <b>興債觀測網</b>
               <nav>
                 <Link href="/about">關於本站</Link>
-                <Link href="/methodology">資料方法</Link>
                 <Link href="/disclaimer">免責聲明</Link>
                 <Link href="/privacy">隱私權政策</Link>
               </nav>

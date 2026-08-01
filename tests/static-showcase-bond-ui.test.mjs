@@ -24,7 +24,6 @@ test("bond page exposes the complete sortable CB workbench", async () => {
     "流通餘額",
     "到期／賣回事件",
     "一鍵切換排序",
-    "資料方法",
   ]) {
     assert.match(bondsHtml + js, new RegExp(label));
   }
@@ -49,7 +48,7 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(bondsHtml, /id="bond-workbench"/);
   assert.match(bondsHtml, /assets\/site-shell\.js/);
   assert.match(bondsHtml, /assets\/bonds-page\.js/);
-  assert.match(bondsHtml, /href="\.\/methodology\.html"/);
+  assert.doesNotMatch(bondsHtml, /href="\.\/methodology\.html"/);
   assert.match(bondsHtml, /aria-label="可轉債分頁"/);
   assert.match(js, /URLSearchParams/);
   assert.match(js, /bond/);
