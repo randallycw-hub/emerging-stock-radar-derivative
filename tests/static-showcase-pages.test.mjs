@@ -95,3 +95,53 @@ test("共用格式與安全讀取工具提供可預期的顯示結果", async ()
   assert.equal(target.hidden, false);
   assert.match(target.textContent, /資料暫時無法讀取/);
 });
+
+test("深淺色主題具備完整語意色彩與鍵盤互動狀態", async () => {
+  const css = await readShowcaseFile("assets/app.css");
+  for (const token of [
+    "--page",
+    "--surface",
+    "--text",
+    "--muted",
+    "--border",
+    "--accent",
+    "--positive",
+    "--negative",
+    "--focus",
+  ]) {
+    assert.match(css, new RegExp(`${token}:\\s*#[0-9a-f]{6}`, "i"));
+  }
+  assert.match(css, /\[data-theme="dark"\][\s\S]*--focus:/);
+  assert.match(css, /button:hover/);
+  assert.match(css, /:focus-visible/);
+  assert.match(css, /button:disabled/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)/);
+  assert.match(css, /\.site-header\[data-nav-open\]\s+\.primary-navigation\s*\{\s*display:\s*flex/);
+  assert.match(css, /\.home-modules,\s*\n\s*\.methodology-grid\s*\{\s*grid-template-columns:\s*1fr/);
+  assert.doesNotMatch(css, /--(?:page|surface|accent):\s*#(?:0[0-9a-f]|1[0-9a-f]|2[0-9a-f])(?:[4-9a-f][0-9a-f]){2}/i);
+
+  for (const [foreground, background] of [
+    ["#241f22", "#fffaf0"],
+    ["#655f62", "#fffaf0"],
+    ["#8b412d", "#fffaf0"],
+    ["#624d78", "#fffaf0"],
+    ["#f7f1e9", "#211f23"],
+    ["#b8adb1", "#211f23"],
+    ["#f0a080", "#211f23"],
+    ["#c4abe0", "#211f23"],
+  ]) {
+    assert.ok(contrastRatio(foreground, background) >= 4.5);
+  }
+});
+
+function contrastRatio(foreground, background) {
+  const luminance = (hex) => {
+    const channels = [1, 3, 5].map((index) => Number.parseInt(hex.slice(index, index + 2), 16) / 255);
+    const [red, green, blue] = channels.map((channel) => channel <= 0.03928
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+  };
+  const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  return (values[0] + 0.05) / (values[1] + 0.05);
+}

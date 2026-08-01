@@ -60,8 +60,11 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
   assert.match(css, /market-breadth/);
   assert.match(css, /ranking-grid/);
   assert.match(css, /market-table/);
+  assert.match(js, /marketCardHtml/);
+  for (const mobileLabel of ["最高／最低", "成交股數", "估算成交金額（盤後）", "資料日期"]) {
+    assert.match(js, new RegExp(mobileLabel));
+  }
 
   assert.doesNotMatch(html, /即時|最新價|買進價|賣出價|買進量|賣出量|WebSocket|自動更新/);
   assert.doesNotMatch(html, /興櫃[^<]{0,12}收盤價|興櫃收盤價/);
 });
-
