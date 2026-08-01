@@ -11,6 +11,7 @@ function row(overrides = {}) {
     companyCode: "1260",
     companyName: "台灣虎航",
     previousAveragePrice: "25.29",
+    lastTradedPrice: "25.2",
     dailyAveragePrice: "25.45",
     dailyHighPrice: "26.5",
     dailyLowPrice: "25.2",
@@ -35,6 +36,7 @@ test("builds an exact company-code industry join and deterministic post-market v
     companyCode: "1260",
     companyName: "台灣虎航",
     industryName: "航運業",
+    lastTradedPrice: "25.2",
     dailyAveragePrice: "25.45",
     previousAveragePrice: "25.29",
     dailyHighPrice: "26.5",
@@ -64,6 +66,7 @@ test("calculates from parser-accepted grouped numeric source strings without cha
   const [view] = buildEmergingMarketViews({
     marketRows: [row({
       previousAveragePrice: "1,000.00",
+      lastTradedPrice: "1,000.30",
       dailyAveragePrice: "1,000.25",
       dailyHighPrice: "1,001.50",
       dailyLowPrice: "1,000.01",
@@ -75,6 +78,7 @@ test("calculates from parser-accepted grouped numeric source strings without cha
   assert.deepEqual(
     {
       previousAveragePrice: view.previousAveragePrice,
+      lastTradedPrice: view.lastTradedPrice,
       dailyAveragePrice: view.dailyAveragePrice,
       transactionVolume: view.transactionVolume,
       averageChange: view.averageChange,
@@ -83,6 +87,7 @@ test("calculates from parser-accepted grouped numeric source strings without cha
     },
     {
       previousAveragePrice: "1,000.00",
+      lastTradedPrice: "1,000.30",
       dailyAveragePrice: "1,000.25",
       transactionVolume: "22,001",
       averageChange: "0.25",

@@ -64,6 +64,7 @@ function buildView(
     companyCode: row.companyCode,
     companyName: row.companyName,
     industryName: industries.get(row.companyCode) ?? null,
+    lastTradedPrice: row.lastTradedPrice,
     dailyAveragePrice: row.dailyAveragePrice,
     previousAveragePrice: row.previousAveragePrice,
     dailyHighPrice: row.dailyHighPrice,

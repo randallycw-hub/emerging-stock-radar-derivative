@@ -591,6 +591,7 @@ export const EmergingMarketViewSchema = schema<EmergingMarketView>(
       "companyCode",
       "companyName",
       "industryName",
+      "lastTradedPrice",
       "dailyAveragePrice",
       "previousAveragePrice",
       "dailyHighPrice",
@@ -603,6 +604,10 @@ export const EmergingMarketViewSchema = schema<EmergingMarketView>(
       "applyingDate",
       "applyingStatus",
     ], "EmergingMarketView");
+    const lastTradedPrice = nullableNonNegativeGroupedDecimal(
+      input.lastTradedPrice,
+      "EmergingMarketView.lastTradedPrice",
+    );
     const dailyAveragePrice = nullableNonNegativeGroupedDecimal(
       input.dailyAveragePrice,
       "EmergingMarketView.dailyAveragePrice",
@@ -649,6 +654,7 @@ export const EmergingMarketViewSchema = schema<EmergingMarketView>(
       companyCode: requiredString(input.companyCode, "EmergingMarketView.companyCode"),
       companyName: requiredString(input.companyName, "EmergingMarketView.companyName"),
       industryName: nullableString(input.industryName, "EmergingMarketView.industryName"),
+      lastTradedPrice,
       dailyAveragePrice,
       previousAveragePrice,
       dailyHighPrice: nullableNonNegativeGroupedDecimal(input.dailyHighPrice, "EmergingMarketView.dailyHighPrice"),

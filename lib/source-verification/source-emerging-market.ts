@@ -6,6 +6,7 @@ export type EmergingMarketSourceRow = {
   companyCode: string;
   companyName: string;
   previousAveragePrice: string | null;
+  lastTradedPrice: string | null;
   dailyAveragePrice: string | null;
   dailyHighPrice: string | null;
   dailyLowPrice: string | null;
@@ -38,6 +39,7 @@ export function parseEmergingMarketSource(
       companyCode,
       companyName: requiredString(source.CompanyName, "CompanyName"),
       previousAveragePrice: optionalNumeric(source.PreviousAveragePrice, "PreviousAveragePrice"),
+      lastTradedPrice: optionalNumeric(source.LatestPrice, "LatestPrice"),
       dailyAveragePrice: optionalNumeric(source.Average, "Average"),
       dailyHighPrice: optionalNumeric(source.Highest, "Highest"),
       dailyLowPrice: optionalNumeric(source.Lowest, "Lowest"),

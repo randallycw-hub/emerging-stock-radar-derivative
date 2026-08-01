@@ -166,7 +166,7 @@ test("retains allowed end-of-day and contractual price semantics", async () => {
   assert.doesNotMatch(allowed, /\bclosePrice\b/);
 });
 
-test("emerging market parser cannot publish forbidden quote fields", () => {
+test("emerging market parser publishes the approved final trade but no bid or ask fields", () => {
   const [row] = parseEmergingMarketSource([{
     Date: "1150730",
     Time: "140006",
@@ -195,6 +195,7 @@ test("emerging market parser cannot publish forbidden quote fields", () => {
     "dailyAveragePrice",
     "dailyHighPrice",
     "dailyLowPrice",
+    "lastTradedPrice",
     "previousAveragePrice",
     "publishedTime",
     "tradingDate",

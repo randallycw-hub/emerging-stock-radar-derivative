@@ -309,6 +309,7 @@ test("emerging market views validate public fields and unavailable derivations",
     companyCode: "1260",
     companyName: "台灣虎航",
     industryName: "航運業",
+    lastTradedPrice: "25.2",
     dailyAveragePrice: "25.45",
     previousAveragePrice: "25.29",
     dailyHighPrice: "26.5",
@@ -329,6 +330,10 @@ test("emerging market views validate public fields and unavailable derivations",
   assert.throws(
     () => EmergingMarketViewSchema.parse({ ...base, companyCode: "" }),
     /companyCode/,
+  );
+  assert.throws(
+    () => EmergingMarketViewSchema.parse({ ...base, lastTradedPrice: "2.52e1" }),
+    /lastTradedPrice/,
   );
   assert.throws(
     () => EmergingMarketViewSchema.parse({ ...base, dailyAveragePrice: "2.5e1" }),

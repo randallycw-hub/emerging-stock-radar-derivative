@@ -104,6 +104,7 @@ export interface EmergingMarketView {
   companyCode: string;
   companyName: string;
   industryName: string | null;
+  lastTradedPrice: string | null;
   dailyAveragePrice: string | null;
   previousAveragePrice: string | null;
   dailyHighPrice: string | null;

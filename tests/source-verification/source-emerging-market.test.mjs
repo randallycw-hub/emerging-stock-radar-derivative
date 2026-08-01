@@ -38,6 +38,7 @@ test("parses only approved emerging end-of-day fields", async () => {
     companyCode: "1260",
     companyName: "富味鄉",
     previousAveragePrice: "25.29",
+    lastTradedPrice: "25.2",
     dailyAveragePrice: "25.45",
     dailyHighPrice: "26.5",
     dailyLowPrice: "25.2",
@@ -45,7 +46,6 @@ test("parses only approved emerging end-of-day fields", async () => {
     applyingDate: null,
     applyingStatus: null,
   });
-  assert.equal("latestPrice" in row, false);
   assert.equal("buyingPrice" in row, false);
   assert.equal("sellingPrice" in row, false);
 });
@@ -64,6 +64,7 @@ test("rejects duplicate company codes on the same trading date", () => {
 test("converts blank, dash, and non-finite numeric source values to null", () => {
   const [row] = parseEmergingMarketSource([sourceRow({
     PreviousAveragePrice: " ",
+    LatestPrice: "NaN",
     Average: "-",
     Highest: "Infinity",
     Lowest: "NaN",
@@ -72,6 +73,7 @@ test("converts blank, dash, and non-finite numeric source values to null", () =>
   assert.deepEqual(
     {
       previousAveragePrice: row.previousAveragePrice,
+      lastTradedPrice: row.lastTradedPrice,
       dailyAveragePrice: row.dailyAveragePrice,
       dailyHighPrice: row.dailyHighPrice,
       dailyLowPrice: row.dailyLowPrice,
@@ -79,6 +81,7 @@ test("converts blank, dash, and non-finite numeric source values to null", () =>
     },
     {
       previousAveragePrice: null,
+      lastTradedPrice: null,
       dailyAveragePrice: null,
       dailyHighPrice: null,
       dailyLowPrice: null,

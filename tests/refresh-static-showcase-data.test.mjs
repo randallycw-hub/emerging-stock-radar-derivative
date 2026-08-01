@@ -91,9 +91,9 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
     assert.equal(snapshot.sourceId, "tpex_esb_latest_statistics");
     assert.equal(snapshot.records[0].companyCode, "1260");
     assert.equal(snapshot.records[0].industryName, "食品工業");
+    assert.equal(snapshot.records[0].lastTradedPrice, "25.2");
     assert.ok(snapshot.records.every((record) => record.tradingDate === snapshot.tradingDate));
     assert.equal(new Set(snapshot.records.map((record) => record.companyCode)).size, snapshot.records.length);
-    assert.equal("LatestPrice" in snapshot.records[0], false);
     assert.equal("BuyingPrice" in snapshot.records[0], false);
 
     const manifest = JSON.parse(await readFile(join(generationRoot, "manifest.json"), "utf8"));
