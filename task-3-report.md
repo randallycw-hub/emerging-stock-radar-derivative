@@ -10,11 +10,11 @@ The snapshot consumes only the normalized first-party source row interfaces deli
 
 - Aggregates records exclusively by `(companyCode, market)`; names never drive matching.
 - Combines application, listing evidence, auction, and public-offering rows.
-- Emits official schedule events and deduplicates each one by `(companyCode, market, kind, date)`, retaining all contributing source record IDs.
+- Emits official schedule events and deduplicates each one by `(companyCode, market, kind, date)`, retaining all contributing source record IDs. A withdrawal or delay note sets the record status but does not emit an event: the source does not provide its occurrence date.
 - Produces deterministic ordering: records by company code and market; events by date and kind; source IDs lexically.
 - Derives stages `A`–`D`, `listed`, and the explicit exceptional states `withdrawn`, `delayed`, and `cancelled`.
-- Treats any conflicting non-empty value for a shared field as a hard `IPO_SOURCE_CONFLICT:<field>` error.
-- Preserves missing underwriting values as `null`; no fallback price is fabricated.
+- Treats any conflicting non-empty value for a shared field as a hard `IPO_SOURCE_CONFLICT:<field>` error. Duplicate auction/public-offering rows can fill each other's `null` or empty fields without conflict.
+- Preserves missing underwriting values as `null`; no fallback price is fabricated. `applicationDate` is nullable, so listing-only, auction-only, and public-offering-only records never contain a fabricated empty-string date.
 - Calculates Taipei calendar-day distance from validated ISO dates without timezone-dependent local-date parsing.
 
 ## TDD evidence
@@ -22,6 +22,7 @@ The snapshot consumes only the normalized first-party source row interfaces deli
 1. Added the snapshot test file before implementation.
 2. Ran `node --test tests/ipo-events-snapshot.test.mjs` and observed the expected `ERR_MODULE_NOT_FOUND` for the absent module.
 3. Added the minimal snapshot implementation and reran the focused tests successfully.
+4. Review fixes added failing tests for non-inferred exception dates, null-field completion across duplicate official rows, and nullable application dates before the implementation was changed.
 
 ## Verification
 
@@ -29,7 +30,7 @@ Commands were run with `UV_THREADPOOL_SIZE=2`:
 
 ```text
 node --test tests/ipo-events-snapshot.test.mjs tests/source-verification/source-ipo-events.test.mjs
-6 passed, 0 failed
+9 passed, 0 failed
 
 npm.cmd run typecheck
 tsc --noEmit exited 0

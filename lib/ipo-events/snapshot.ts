@@ -46,7 +46,7 @@ export interface IpoTimelineRecord {
   market: IpoMarket;
   stage: IpoStage;
   exceptionStatus: "withdrawn" | "delayed" | "cancelled" | null;
-  applicationDate: string;
+  applicationDate: string | null;
   reviewDate: string | null;
   boardDate: string | null;
   contractDate: string | null;
@@ -109,7 +109,6 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     const exception = exceptionFromNote(row.note);
     if (exception) {
       mergeExceptionStatus(record, exception);
-      addEvent(record, exception, row.applicationDate, row.sourceRecordId);
     }
   }
 
@@ -200,7 +199,7 @@ function getRecord(records: Map<string, MutableRecord>, companyCode: string, com
     market,
     stage: "A",
     exceptionStatus: null,
-    applicationDate: "",
+    applicationDate: null,
     reviewDate: null,
     boardDate: null,
     contractDate: null,
@@ -218,9 +217,9 @@ function getRecord(records: Map<string, MutableRecord>, companyCode: string, com
 }
 
 function mergeRecordValue(record: MutableRecord, field: MergeableRecordField, value: string | null): void {
-  if (value === null || value === "") return;
+  if (isMissingValue(value)) return;
   const existing = record[field];
-  if (existing !== null && existing !== "" && existing !== value) throw new TypeError(`IPO_SOURCE_CONFLICT:${field}`);
+  if (!isMissingValue(existing) && existing !== value) throw new TypeError(`IPO_SOURCE_CONFLICT:${field}`);
   record[field] = value;
 }
 
@@ -233,7 +232,10 @@ function mergeSourceRow(record: MutableRecord, field: "auction" | "publicOfferin
   }
   for (const [key, value] of Object.entries(row)) {
     if (key === "sourceRecordId") continue;
-    if ((existing as unknown as Record<string, unknown>)[key] !== value) throw new TypeError(`IPO_SOURCE_CONFLICT:${key}`);
+    const merged = existing as unknown as Record<string, unknown>;
+    const current = merged[key];
+    if (isMissingValue(current) && !isMissingValue(value)) merged[key] = value;
+    else if (!isMissingValue(current) && !isMissingValue(value) && current !== value) throw new TypeError(`IPO_SOURCE_CONFLICT:${key}`);
   }
 }
 
@@ -264,6 +266,10 @@ function exceptionFromNote(note: string): "withdrawn" | "delayed" | null {
   if (/撤銷|撤回/.test(note)) return "withdrawn";
   if (/延期|延後/.test(note)) return "delayed";
   return null;
+}
+
+function isMissingValue(value: unknown): value is null | "" {
+  return value === null || value === "";
 }
 
 function compareEvents(left: IpoEvent, right: IpoEvent): number {

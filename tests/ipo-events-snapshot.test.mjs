@@ -110,6 +110,118 @@ test("preserves explicit exception states and null missing underwriting prices",
   assert.equal(cancelled.records[0].finalUnderwritingPrice, null);
 });
 
+test("does not invent a withdrawal or delay event date from an application date", () => {
+  const withdrawn = buildIpoEventSnapshot(snapshotInput({
+    tpexListings: [],
+    tpexApplications: [{ ...application, note: "已撤銷申請" }],
+  }));
+  const delayed = buildIpoEventSnapshot(snapshotInput({
+    tpexListings: [],
+    tpexApplications: [{ ...application, note: "延期處理" }],
+  }));
+
+  assert.equal(withdrawn.records[0].stage, "withdrawn");
+  assert.equal(delayed.records[0].stage, "delayed");
+  assert.equal(withdrawn.records[0].events.some((event) => event.kind === "withdrawn"), false);
+  assert.equal(delayed.records[0].events.some((event) => event.kind === "delayed"), false);
+});
+
+test("fills missing auction and public-offering fields from duplicate official rows", () => {
+  const auction = {
+    companyCode: "7819",
+    companyName: "測試公司",
+    market: "上櫃",
+    bidStartDate: "2026-08-02",
+    bidEndDate: "2026-08-03",
+    auctionOpenDate: "2026-08-04",
+    listingDate: null,
+    minimumBidPrice: null,
+    finalUnderwritingPrice: null,
+    underwriter: "",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:7819:2026-08-04:a",
+  };
+  const publicOffering = {
+    companyCode: "7819",
+    companyName: "測試公司",
+    market: "上櫃",
+    subscriptionStartDate: "2026-08-05",
+    subscriptionEndDate: "2026-08-06",
+    drawDate: "2026-08-07",
+    listingDate: null,
+    provisionalUnderwritingPrice: null,
+    finalUnderwritingPrice: null,
+    underwriter: "",
+    cancelled: false,
+    sourceRecordId: "TWSE:public:7819:2026-08-07:a",
+  };
+  const record = buildIpoEventSnapshot(snapshotInput({
+    tpexListings: [],
+    auctions: [auction, {
+      ...auction,
+      minimumBidPrice: "42.8",
+      finalUnderwritingPrice: "50",
+      underwriter: "測試承銷商",
+      sourceRecordId: "TWSE:auction:7819:2026-08-04:b",
+    }],
+    publicOfferings: [publicOffering, {
+      ...publicOffering,
+      provisionalUnderwritingPrice: "48",
+      finalUnderwritingPrice: "50",
+      underwriter: "測試承銷商",
+      sourceRecordId: "TWSE:public:7819:2026-08-07:b",
+    }],
+  })).records[0];
+
+  assert.equal(record.auction.minimumBidPrice, "42.8");
+  assert.equal(record.publicOffering.provisionalUnderwritingPrice, "48");
+  assert.equal(record.finalUnderwritingPrice, "50");
+  assert.deepEqual(
+    record.events.find((event) => event.kind === "auction_open").sourceRecordIds,
+    ["TWSE:auction:7819:2026-08-04:a", "TWSE:auction:7819:2026-08-04:b"],
+  );
+});
+
+test("represents a missing application date as null for listing, auction, and public-offering-only records", () => {
+  const listingOnly = { ...listing, companyCode: "7001", sourceRecordId: "TPEx:ipo-no-limit:7001:2026-08-05" };
+  const auctionOnly = {
+    companyCode: "7002",
+    companyName: "競拍公司",
+    market: "上櫃",
+    bidStartDate: "2026-08-02",
+    bidEndDate: "2026-08-03",
+    auctionOpenDate: "2026-08-04",
+    listingDate: null,
+    minimumBidPrice: null,
+    finalUnderwritingPrice: null,
+    underwriter: "",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:7002:2026-08-04",
+  };
+  const publicOfferingOnly = {
+    companyCode: "7003",
+    companyName: "申購公司",
+    market: "上櫃",
+    subscriptionStartDate: "2026-08-05",
+    subscriptionEndDate: "2026-08-06",
+    drawDate: "2026-08-07",
+    listingDate: null,
+    provisionalUnderwritingPrice: null,
+    finalUnderwritingPrice: null,
+    underwriter: "",
+    cancelled: false,
+    sourceRecordId: "TWSE:public:7003:2026-08-07",
+  };
+  const records = buildIpoEventSnapshot(snapshotInput({
+    tpexApplications: [],
+    tpexListings: [listingOnly],
+    auctions: [auctionOnly],
+    publicOfferings: [publicOfferingOnly],
+  })).records;
+
+  assert.deepEqual(records.map((record) => record.applicationDate), [null, null, null]);
+});
+
 test("does not merge records with the same code in different markets", () => {
   const snapshot = buildIpoEventSnapshot(snapshotInput({
     tpexListings: [],
