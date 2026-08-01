@@ -53,6 +53,20 @@ test("official IPO source parsers normalize primary-source events without market
   const convertibleBondOnly = structuredClone(auction);
   convertibleBondOnly.data = [convertibleBondOnly.data[1]];
   assert.equal(parseTwseAuctionSource(convertibleBondOnly).length, 0);
+
+  const innovationBoardTransferAuction = structuredClone(auction);
+  innovationBoardTransferAuction.data = [innovationBoardTransferAuction.data[1]];
+  innovationBoardTransferAuction.data[0][2] = "創新板轉列測試";
+  innovationBoardTransferAuction.data[0][3] = "7777";
+  innovationBoardTransferAuction.data[0][5] = "創新板轉列上櫃";
+  assert.equal(parseTwseAuctionSource(innovationBoardTransferAuction)[0].market, "上櫃");
+
+  const innovationBoardTransferPublicOffering = structuredClone(publicForm);
+  innovationBoardTransferPublicOffering.data = [innovationBoardTransferPublicOffering.data[2]];
+  innovationBoardTransferPublicOffering.data[0][2] = "創新板轉列測試";
+  innovationBoardTransferPublicOffering.data[0][3] = "7777";
+  innovationBoardTransferPublicOffering.data[0][4] = "創新板轉列上櫃";
+  assert.equal(parseTwsePublicOfferingSource(innovationBoardTransferPublicOffering)[0].market, "上櫃");
 });
 
 test("official IPO source parsers reject schema shifts and malformed official values", async () => {

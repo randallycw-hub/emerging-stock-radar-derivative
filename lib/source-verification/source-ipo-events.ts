@@ -208,6 +208,7 @@ function auctionMarket(issuingMarket: string, issuanceType: string): IpoMarket |
   if (issuingMarket === "集中交易市場" && issuanceType === "初上市") return "上市";
   if (issuingMarket === "創新板" && issuanceType === "創新板初上市") return "創新板";
   if (issuingMarket === "櫃檯買賣" && issuanceType === "初上櫃") return "上櫃";
+  if ((issuingMarket === "創新板" || issuingMarket === "櫃檯買賣") && issuanceType === "創新板轉列上櫃") return "上櫃";
   return null;
 }
 
@@ -215,6 +216,7 @@ function publicOfferingMarket(issuanceType: string): IpoMarket | null {
   if (issuanceType === "初上市") return "上市";
   if (issuanceType === "創新板初上市") return "創新板";
   if (issuanceType === "初上櫃") return "上櫃";
+  if (issuanceType === "創新板轉列上櫃") return "上櫃";
   return null;
 }
 
