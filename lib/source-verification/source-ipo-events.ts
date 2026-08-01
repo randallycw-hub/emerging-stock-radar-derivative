@@ -113,7 +113,7 @@ export function parseTpexApplicantSource(payload: unknown): IpoApplicationSource
 export function parseTpexIpoListingSource(payload: unknown): IpoListingEvidenceRow[] {
   return requireRows(payload, "TPEx IPO no-limit", TPEX_IPO_NO_LIMIT_FIELDS).map((row) => {
     const companyCode = requiredCompanyCode(row.SecuritiesCompanyCode, "companyCode");
-    const listingDate = requiredOfficialDate(row.Date, "listingDate");
+    const listingDate = requiredOfficialDate(row.StartDateForStabilizationOperation, "listingDate");
     return {
       companyCode,
       companyName: requiredText(row.CompanyName, "companyName"),
@@ -186,6 +186,7 @@ function requireTwseTable<T extends readonly string[]>(payload: unknown, source:
   const table = requireRecord(payload, `${source} payload`);
   assertAllowedTableKeys(table, source);
   if (!Array.isArray(table.fields) || !Array.isArray(table.data)) throw new IpoSourceValidationError(`${source} schema must contain fields and data arrays`);
+  if ("total" in table && table.total !== table.data.length) throw new IpoSourceValidationError(`${source}.total must equal data.length`);
   if (table.fields.length !== fields.length || table.fields.some((field, index) => field !== fields[index])) {
     throw new IpoSourceValidationError(`${source} field schema does not match the official response`);
   }
@@ -197,11 +198,17 @@ function requireTwseTable<T extends readonly string[]>(payload: unknown, source:
 }
 
 function assertAllowedTableKeys(value: Record<string, unknown>, source: string): void {
-  const allowed = new Set(["stat", "date", "title", "fields", "data"]);
+  const allowed = new Set(["stat", "date", "title", "fields", "data", "notes", "total"]);
   for (const key of Object.keys(value)) if (!allowed.has(key)) throw new IpoSourceValidationError(`${source} has unknown key: ${key}`);
   if ("stat" in value && value.stat !== "OK") throw new IpoSourceValidationError(`${source} status is not OK`);
   if ("date" in value && typeof value.date !== "string" && typeof value.date !== "number") throw new IpoSourceValidationError(`${source}.date must be a string or number`);
   if ("title" in value && typeof value.title !== "string") throw new IpoSourceValidationError(`${source}.title must be a string`);
+  if ("notes" in value && (!Array.isArray(value.notes) || value.notes.some((note) => typeof note !== "string"))) {
+    throw new IpoSourceValidationError(`${source}.notes must be a string array`);
+  }
+  if ("total" in value && (!Number.isInteger(value.total) || (value.total as number) < 0)) {
+    throw new IpoSourceValidationError(`${source}.total must be a non-negative integer`);
+  }
 }
 
 function auctionMarket(issuingMarket: string, issuanceType: string): IpoMarket | null {

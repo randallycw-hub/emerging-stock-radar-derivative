@@ -41,6 +41,27 @@ const SOURCE_FIELDS = [
   "underwritingPrice", "note",
 ] as const satisfies readonly SourceField[];
 
+const REVIEWED_CHRONOLOGY_ANOMALIES = [
+  {
+    sourceRecordId: "TWSE:6280:0931230",
+    applicationDate: "0931230",
+    listingReviewDate: "0930907",
+    boardApprovalDate: "0930921",
+    listingContractApprovalOrFilingDate: "0931001",
+    listingDate: "0931228",
+    reason: "Official historical row has pre-application review milestones; reviewed 2026-08-02.",
+  },
+  {
+    sourceRecordId: "TWSE:2453:0890831",
+    applicationDate: "0890831",
+    listingReviewDate: "0890929",
+    boardApprovalDate: "0891017",
+    listingContractApprovalOrFilingDate: "0890115",
+    listingDate: "0900522",
+    reason: "Official historical row has a pre-application contract milestone; reviewed 2026-08-02.",
+  },
+] as const;
+
 export class Source11586ValidationError extends TypeError {
   constructor(message: string) { super(message); this.name = "Source11586ValidationError"; }
 }
@@ -100,12 +121,13 @@ export function normalize11586Application(row: Source11586Row): NormalizedListin
     listingContractApprovalOrFilingDate: optionalDate(row.listingContractApprovalOrFilingDate, "listingContractApprovalOrFilingDate"),
     listingDate: optionalDate(row.listingDate, "listingDate"),
   };
+  const underwriters = row.underwriters.trim() === "" ? [] : row.underwriters.split("|").map((value) => requiredText(value, "underwriters"));
+  const applicationCapitalThousandsTwd = optionalDecimal(row.applicationCapitalThousandsTwd, "applicationCapitalThousandsTwd") ?? "";
   let previous = applicationDate;
   for (const [name, date] of Object.entries(dates)) {
     if (date !== undefined && date < previous) throw new Source11586ValidationError(`${name} violates application chronology`);
     if (date !== undefined) previous = date;
   }
-  const underwriters = row.underwriters.trim() === "" ? [] : row.underwriters.split("|").map((value) => requiredText(value, "underwriters"));
   return {
     sourceDatasetId: "11586",
     sourceRecordId,
@@ -113,7 +135,7 @@ export function normalize11586Application(row: Source11586Row): NormalizedListin
     companyName,
     applicationDate,
     chairmanName: optionalText(row.chairmanName) ?? "",
-    applicationCapitalThousandsTwd: optionalDecimal(row.applicationCapitalThousandsTwd, "applicationCapitalThousandsTwd") ?? "",
+    applicationCapitalThousandsTwd,
     ...dates,
     underwriters,
     note: row.note.trim(),
@@ -140,8 +162,31 @@ function parseRows(values: readonly unknown[], name: string): Source11586Row[] {
     }
     return record as unknown as Source11586Row;
   });
-  assertUnique11586Applications(rows.map(normalize11586Application));
-  return rows;
+  const acceptedRows: Source11586Row[] = [];
+  const normalizedRows: NormalizedListingApplication11586[] = [];
+  for (const row of rows) {
+    try {
+      normalizedRows.push(normalize11586Application(row));
+      acceptedRows.push(row);
+    } catch (error) {
+      if (!(error instanceof Source11586ValidationError)
+        || !error.message.endsWith("violates application chronology")
+        || !isReviewedChronologyAnomaly(row)) throw error;
+    }
+  }
+  assertUnique11586Applications(normalizedRows);
+  return acceptedRows;
+}
+
+function isReviewedChronologyAnomaly(row: Source11586Row): boolean {
+  return REVIEWED_CHRONOLOGY_ANOMALIES.some((anomaly) => (
+    row.sourceRecordId === anomaly.sourceRecordId
+    && row.applicationDate === anomaly.applicationDate
+    && row.listingReviewDate === anomaly.listingReviewDate
+    && row.boardApprovalDate === anomaly.boardApprovalDate
+    && row.listingContractApprovalOrFilingDate === anomaly.listingContractApprovalOrFilingDate
+    && row.listingDate === anomaly.listingDate
+  ));
 }
 
 function fields(rows: readonly Source11586Row[]): Set<SourceField> {

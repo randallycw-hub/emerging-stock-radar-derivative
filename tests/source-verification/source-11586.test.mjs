@@ -78,6 +78,40 @@ test("11586 accepts blank optional dates and rejects impossible chronology", () 
   assert.throws(() => normalize11586Application({ ...blank, listingDate: "2025-12-01" }), /chronology|listingDate/);
 });
 
+test("11586 isolates only the two reviewed historical chronology anomalies", () => {
+  const reviewedAnomalies = [
+    make11586Row({
+      sourceRecordId: "TWSE:6280:0931230",
+      companyCode: "6280",
+      applicationDate: "0931230",
+      listingReviewDate: "0930907",
+      boardApprovalDate: "0930921",
+      listingContractApprovalOrFilingDate: "0931001",
+      listingDate: "0931228",
+    }),
+    make11586Row({
+      sourceRecordId: "TWSE:2453:0890831",
+      companyCode: "2453",
+      applicationDate: "0890831",
+      listingReviewDate: "0890929",
+      boardApprovalDate: "0891017",
+      listingContractApprovalOrFilingDate: "0890115",
+      listingDate: "0900522",
+    }),
+  ];
+  const ordinary = make11586Row({ sourceRecordId: "TWSE:9999:1150105" });
+
+  assert.deepEqual(parse11586Json([...reviewedAnomalies, ordinary]), [ordinary]);
+  assert.throws(
+    () => parse11586Json([{ ...reviewedAnomalies[0], listingReviewDate: "0930908" }, ordinary]),
+    /chronology/,
+  );
+  assert.throws(
+    () => parse11586Json([{ ...reviewedAnomalies[1], listingContractApprovalOrFilingDate: "0890116" }, ordinary]),
+    /chronology/,
+  );
+});
+
 test("11586 rejects duplicate application identity and unknown fields", () => {
   const row = {
     sourceRecordId: "TWSE:1234",
@@ -125,3 +159,22 @@ test("11586 evidence records the live endpoint field-shift risk without upgradin
   assert.match(evidence, /field-shift|misalignment/i);
   assert.match(evidence, /VERIFIED_FOR_IMPLEMENTATION/);
 });
+
+function make11586Row(patch = {}) {
+  return {
+    sourceRecordId: "TWSE:9999:1150105",
+    companyCode: "9999",
+    companyName: "歷史資料測試",
+    applicationDate: "1150105",
+    chairmanName: "",
+    applicationCapitalThousandsTwd: "",
+    listingReviewDate: "",
+    boardApprovalDate: "",
+    listingContractApprovalOrFilingDate: "",
+    listingDate: "",
+    underwriters: "",
+    underwritingPrice: "",
+    note: "",
+    ...patch,
+  };
+}

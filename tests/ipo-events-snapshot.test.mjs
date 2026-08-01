@@ -273,3 +273,384 @@ test("does not merge records with the same code in different markets", () => {
 
   assert.deepEqual(snapshot.records.map((record) => record.market), ["上市", "上櫃"]);
 });
+
+test("selects the latest application attempt without leaking an older attempt", () => {
+  const oldAttempt = {
+    ...application,
+    companyCode: "1623",
+    companyName: "測試再申請公司",
+    applicationDate: "2024-12-24",
+    reviewDate: "2025-01-10",
+    boardDate: "2025-01-20",
+    contractDate: "2025-01-30",
+    listingDate: null,
+    note: "已撤銷申請",
+    sourceRecordId: "TWSE:1623:1131224",
+  };
+  const latestAttempt = {
+    ...oldAttempt,
+    applicationDate: "2025-09-30",
+    reviewDate: null,
+    boardDate: null,
+    contractDate: null,
+    note: "",
+    sourceRecordId: "TWSE:1623:1140930",
+  };
+
+  const [record] = buildIpoEventSnapshot(snapshotInput({
+    tpexApplications: [latestAttempt, oldAttempt],
+    tpexListings: [],
+  })).records;
+
+  assert.equal(record.applicationDate, "2025-09-30");
+  assert.equal(record.stage, "A");
+  assert.equal(record.exceptionStatus, null);
+  assert.equal(record.reviewDate, null);
+  assert.deepEqual(record.events, [{
+    companyCode: "1623",
+    market: "上櫃",
+    kind: "application_submitted",
+    date: "2025-09-30",
+    label: "申請送件",
+    sourceRecordIds: ["TWSE:1623:1140930"],
+  }]);
+});
+
+test("rejects conflicting non-empty fields within the same latest application date", () => {
+  const latestAttempt = {
+    ...application,
+    companyCode: "1623",
+    companyName: "測試再申請公司",
+    applicationDate: "2025-09-30",
+    reviewDate: "2025-10-10",
+    boardDate: null,
+    contractDate: null,
+    listingDate: null,
+    note: "科技事業",
+    sourceRecordId: "TWSE:1623:1140930:a",
+  };
+
+  assert.throws(
+    () => buildIpoEventSnapshot(snapshotInput({
+      tpexApplications: [latestAttempt, {
+        ...latestAttempt,
+        reviewDate: "2025-10-11",
+        sourceRecordId: "TWSE:1623:1140930:b",
+      }],
+      tpexListings: [],
+    })),
+    /IPO_SOURCE_CONFLICT:reviewDate/,
+  );
+  assert.throws(
+    () => buildIpoEventSnapshot(snapshotInput({
+      tpexApplications: [latestAttempt, {
+        ...latestAttempt,
+        note: "延期處理",
+        sourceRecordId: "TWSE:1623:1140930:c",
+      }],
+      tpexListings: [],
+    })),
+    /IPO_SOURCE_CONFLICT:note/,
+  );
+});
+
+test("does not attach pre-application evidence to a newer application attempt", () => {
+  const latestAttempt = {
+    ...application,
+    companyCode: "1623",
+    companyName: "測試再申請公司",
+    applicationDate: "2025-09-30",
+    reviewDate: null,
+    boardDate: null,
+    contractDate: null,
+    listingDate: null,
+    sourceRecordId: "TWSE:1623:1140930",
+  };
+  const staleListing = {
+    ...listing,
+    companyCode: "1623",
+    companyName: "測試再申請公司",
+    listingDate: "2025-08-20",
+    sourceRecordId: "TPEx:ipo-no-limit:1623:2025-08-20",
+  };
+  const staleAuction = {
+    companyCode: "1623",
+    companyName: "測試再申請公司",
+    market: "上櫃",
+    bidStartDate: "2025-08-01",
+    bidEndDate: "2025-08-02",
+    auctionOpenDate: "2025-08-04",
+    listingDate: "2025-08-20",
+    minimumBidPrice: "42.8",
+    finalUnderwritingPrice: "50",
+    underwriter: "舊承銷商",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:1623:2025-08-04",
+  };
+  const stalePublicOffering = {
+    companyCode: "1623",
+    companyName: "測試再申請公司",
+    market: "上櫃",
+    subscriptionStartDate: "2025-08-05",
+    subscriptionEndDate: "2025-08-06",
+    drawDate: "2025-08-07",
+    listingDate: "2025-08-20",
+    provisionalUnderwritingPrice: "50",
+    finalUnderwritingPrice: "50",
+    underwriter: "舊承銷商",
+    cancelled: false,
+    sourceRecordId: "TWSE:public:1623:2025-08-07",
+  };
+
+  const [record] = buildIpoEventSnapshot(snapshotInput({
+    tpexApplications: [latestAttempt],
+    tpexListings: [staleListing],
+    auctions: [staleAuction],
+    publicOfferings: [stalePublicOffering],
+  })).records;
+
+  assert.equal(record.stage, "A");
+  assert.equal(record.listingDate, null);
+  assert.equal(record.auction, null);
+  assert.equal(record.publicOffering, null);
+  assert.equal(record.finalUnderwritingPrice, null);
+  assert.deepEqual(record.events.map((event) => event.sourceRecordIds), [[latestAttempt.sourceRecordId]]);
+});
+
+test("selects the latest auction and public-offering flows without leaking cancelled history", () => {
+  const currentAuction = {
+    companyCode: "7814",
+    companyName: "海昌生技",
+    market: "上櫃",
+    bidStartDate: "2026-06-30",
+    bidEndDate: "2026-07-02",
+    auctionOpenDate: "2026-07-06",
+    listingDate: "2026-07-16",
+    minimumBidPrice: "25",
+    finalUnderwritingPrice: "28.4700",
+    underwriter: "永豐金",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:7814:2026-07-06",
+  };
+  const oldAuction = {
+    ...currentAuction,
+    bidStartDate: "2026-06-10",
+    bidEndDate: "2026-06-12",
+    auctionOpenDate: "2026-06-16",
+    listingDate: "2026-06-26",
+    minimumBidPrice: "26.67",
+    finalUnderwritingPrice: "0",
+    cancelled: true,
+    sourceRecordId: "TWSE:auction:7814:2026-06-16",
+  };
+  const currentPublicOffering = {
+    companyCode: "7814",
+    companyName: "海昌生技",
+    market: "上櫃",
+    subscriptionStartDate: "2026-07-03",
+    subscriptionEndDate: "2026-07-07",
+    drawDate: "2026-07-09",
+    listingDate: "2026-07-16",
+    provisionalUnderwritingPrice: "32",
+    finalUnderwritingPrice: "28.47",
+    underwriter: "永豐金",
+    cancelled: false,
+    sourceRecordId: "TWSE:public-offering:7814:2026-07-09",
+  };
+  const oldPublicOffering = {
+    ...currentPublicOffering,
+    subscriptionStartDate: "2026-06-15",
+    subscriptionEndDate: "2026-06-17",
+    drawDate: "2026-06-22",
+    listingDate: "2026-06-26",
+    finalUnderwritingPrice: null,
+    cancelled: true,
+    sourceRecordId: "TWSE:public-offering:7814:2026-06-22",
+  };
+  const currentApplication = {
+    ...application,
+    companyCode: "7814",
+    companyName: "海昌生技",
+    listingDate: "2026-07-16",
+    underwriter: "永豐金",
+    sourceRecordId: "TPEx:7814:2025-12-15",
+  };
+
+  const [record] = buildIpoEventSnapshot(snapshotInput({
+    tpexApplications: [currentApplication],
+    tpexListings: [],
+    auctions: [currentAuction, oldAuction],
+    publicOfferings: [currentPublicOffering, oldPublicOffering],
+  })).records;
+
+  assert.equal(record.exceptionStatus, null);
+  assert.equal(record.auction.sourceRecordId, currentAuction.sourceRecordId);
+  assert.equal(record.publicOffering.sourceRecordId, currentPublicOffering.sourceRecordId);
+  assert.equal(record.events.some((event) => event.date === "2026-06-26"), false);
+});
+
+test("aggregates exact code and market evidence without fuzzy company-name matching", () => {
+  const applicationVariant = {
+    ...application,
+    companyCode: "6423",
+    companyName: "億而得-創",
+    applicationDate: "2025-10-16",
+    listingDate: "2026-01-22",
+    underwriter: "兆豐",
+    sourceRecordId: "TPEx:6423:2025-10-16",
+  };
+  const auctionVariant = {
+    companyCode: "6423",
+    companyName: "億而得",
+    market: "上櫃",
+    bidStartDate: "2026-01-07",
+    bidEndDate: "2026-01-09",
+    auctionOpenDate: "2026-01-13",
+    listingDate: "2026-01-22",
+    minimumBidPrice: "50",
+    finalUnderwritingPrice: "60.0000",
+    underwriter: "兆豐證券",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:6423:2026-01-13",
+  };
+
+  const [record] = buildIpoEventSnapshot(snapshotInput({
+    tpexApplications: [applicationVariant],
+    tpexListings: [],
+    auctions: [auctionVariant],
+  })).records;
+
+  assert.equal(record.companyName, "億而得-創");
+  assert.equal(record.underwriter, "兆豐");
+  assert.equal(record.auction.sourceRecordId, auctionVariant.sourceRecordId);
+});
+
+test("accepts numerically equal official underwriting prices without rewriting them", () => {
+  const auctionWithPrice = {
+    companyCode: "7819",
+    companyName: "測試公司",
+    market: "上櫃",
+    bidStartDate: "2026-08-02",
+    bidEndDate: "2026-08-03",
+    auctionOpenDate: "2026-08-04",
+    listingDate: "2026-08-05",
+    minimumBidPrice: "42.8",
+    finalUnderwritingPrice: "50.0000",
+    underwriter: "測試承銷商",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:7819:2026-08-04",
+  };
+  const publicOfferingWithPrice = {
+    companyCode: "7819",
+    companyName: "測試公司",
+    market: "上櫃",
+    subscriptionStartDate: "2026-08-05",
+    subscriptionEndDate: "2026-08-06",
+    drawDate: "2026-08-07",
+    listingDate: "2026-08-05",
+    provisionalUnderwritingPrice: "50",
+    finalUnderwritingPrice: "50",
+    underwriter: "測試承銷商",
+    cancelled: false,
+    sourceRecordId: "TWSE:public:7819:2026-08-07",
+  };
+
+  const [record] = buildIpoEventSnapshot(snapshotInput({
+    tpexListings: [{ ...listing, finalUnderwritingPrice: "50.00" }],
+    auctions: [auctionWithPrice, {
+      ...auctionWithPrice,
+      minimumBidPrice: "42.80",
+      finalUnderwritingPrice: "50",
+      sourceRecordId: "TWSE:auction:7819:2026-08-04:b",
+    }],
+    publicOfferings: [publicOfferingWithPrice, {
+      ...publicOfferingWithPrice,
+      provisionalUnderwritingPrice: "50.00",
+      finalUnderwritingPrice: "50.000",
+      sourceRecordId: "TWSE:public:7819:2026-08-07:b",
+    }],
+  })).records;
+
+  assert.equal(record.finalUnderwritingPrice, "50.00");
+  assert.equal(record.auction.minimumBidPrice, "42.8");
+  assert.equal(record.publicOffering.provisionalUnderwritingPrice, "50");
+});
+
+test("fails closed on downstream identity text conflicts when no application exists", () => {
+  const auctionOnly = {
+    companyCode: "7001",
+    companyName: "證據名稱甲",
+    market: "上櫃",
+    bidStartDate: "2026-08-01",
+    bidEndDate: "2026-08-02",
+    auctionOpenDate: "2026-08-03",
+    listingDate: "2026-08-10",
+    minimumBidPrice: null,
+    finalUnderwritingPrice: null,
+    underwriter: "承銷商甲",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:7001:2026-08-03",
+  };
+  const publicOnly = {
+    companyCode: "7001",
+    companyName: "證據名稱乙",
+    market: "上櫃",
+    subscriptionStartDate: "2026-08-04",
+    subscriptionEndDate: "2026-08-05",
+    drawDate: "2026-08-06",
+    listingDate: "2026-08-10",
+    provisionalUnderwritingPrice: null,
+    finalUnderwritingPrice: null,
+    underwriter: "承銷商甲",
+    cancelled: false,
+    sourceRecordId: "TWSE:public:7001:2026-08-06",
+  };
+
+  assert.throws(
+    () => buildIpoEventSnapshot(snapshotInput({
+      tpexApplications: [],
+      tpexListings: [],
+      auctions: [auctionOnly],
+      publicOfferings: [publicOnly],
+    })),
+    /IPO_SOURCE_CONFLICT:companyName/,
+  );
+  assert.throws(
+    () => buildIpoEventSnapshot(snapshotInput({
+      tpexApplications: [],
+      tpexListings: [],
+      auctions: [auctionOnly],
+      publicOfferings: [{ ...publicOnly, companyName: auctionOnly.companyName, underwriter: "承銷商乙" }],
+    })),
+    /IPO_SOURCE_CONFLICT:underwriter/,
+  );
+});
+
+test("fails closed on downstream underwriter conflicts when the application has no underwriter", () => {
+  const listingUnderwriter = { ...listing, underwriter: "承銷商甲" };
+  const auctionUnderwriter = {
+    companyCode: application.companyCode,
+    companyName: application.companyName,
+    market: application.market,
+    bidStartDate: "2026-08-02",
+    bidEndDate: "2026-08-03",
+    auctionOpenDate: "2026-08-04",
+    listingDate: application.listingDate,
+    minimumBidPrice: null,
+    finalUnderwritingPrice: listing.finalUnderwritingPrice,
+    underwriter: "承銷商乙",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:7819:2026-08-04",
+  };
+
+  for (const missingUnderwriter of ["", "—"]) {
+    assert.throws(
+      () => buildIpoEventSnapshot(snapshotInput({
+        tpexApplications: [{ ...application, underwriter: missingUnderwriter }],
+        tpexListings: [listingUnderwriter],
+        auctions: [auctionUnderwriter],
+      })),
+      /IPO_SOURCE_CONFLICT:underwriter/,
+    );
+  }
+});

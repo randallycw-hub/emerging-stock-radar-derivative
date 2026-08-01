@@ -92,8 +92,9 @@ const eventLabels: Record<IpoEventKind, string> = {
 
 export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEventSnapshot {
   const records = new Map<string, MutableRecord>();
+  const applicationUnderwriterKeys = new Set<string>();
 
-  for (const row of [...input.twseApplications, ...input.tpexApplications]) {
+  for (const row of selectLatestApplicationAttempts([...input.twseApplications, ...input.tpexApplications])) {
     const record = getRecord(records, row.companyCode, row.companyName, row.market);
     mergeRecordValue(record, "applicationDate", row.applicationDate);
     mergeRecordValue(record, "reviewDate", row.reviewDate);
@@ -101,6 +102,7 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     mergeRecordValue(record, "contractDate", row.contractDate);
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "underwriter", row.underwriter);
+    if (!isMissingValue(row.underwriter)) applicationUnderwriterKeys.add(recordKey(row.companyCode, row.market));
     addEvent(record, "application_submitted", row.applicationDate, row.sourceRecordId);
     addEventIfPresent(record, "review_completed", row.reviewDate, row.sourceRecordId);
     addEventIfPresent(record, "board_approved", row.boardDate, row.sourceRecordId);
@@ -113,19 +115,21 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
   }
 
   for (const row of input.tpexListings) {
-    const record = getRecord(records, row.companyCode, row.companyName, row.market);
+    const record = getEvidenceRecord(records, row.companyCode, row.companyName, row.market);
+    if (!isEvidenceForCurrentApplication(record, row.listingDate)) continue;
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "finalUnderwritingPrice", row.finalUnderwritingPrice);
-    mergeRecordValue(record, "underwriter", row.underwriter);
+    mergeEvidenceText(record, "underwriter", row.underwriter, applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)));
     addEvent(record, "listing_date", row.listingDate, row.sourceRecordId);
   }
 
-  for (const row of input.auctions) {
-    const record = getRecord(records, row.companyCode, row.companyName, row.market);
+  for (const row of selectLatestSourceFlows(input.auctions, (row) => row.auctionOpenDate)) {
+    const record = getEvidenceRecord(records, row.companyCode, row.companyName, row.market);
+    if (!isEvidenceForCurrentApplication(record, row.auctionOpenDate)) continue;
     mergeSourceRow(record, "auction", row);
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "finalUnderwritingPrice", row.finalUnderwritingPrice);
-    mergeRecordValue(record, "underwriter", row.underwriter);
+    mergeEvidenceText(record, "underwriter", row.underwriter, applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)));
     addEvent(record, "auction_bid_start", row.bidStartDate, row.sourceRecordId);
     addEvent(record, "auction_bid_end", row.bidEndDate, row.sourceRecordId);
     addEvent(record, "auction_open", row.auctionOpenDate, row.sourceRecordId);
@@ -135,13 +139,14 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     }
   }
 
-  for (const row of input.publicOfferings) {
-    const record = getRecord(records, row.companyCode, row.companyName, row.market);
+  for (const row of selectLatestSourceFlows(input.publicOfferings, (row) => row.drawDate)) {
+    const record = getEvidenceRecord(records, row.companyCode, row.companyName, row.market);
+    if (!isEvidenceForCurrentApplication(record, row.drawDate)) continue;
     mergeSourceRow(record, "publicOffering", row);
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "provisionalUnderwritingPrice", row.provisionalUnderwritingPrice);
     mergeRecordValue(record, "finalUnderwritingPrice", row.finalUnderwritingPrice);
-    mergeRecordValue(record, "underwriter", row.underwriter);
+    mergeEvidenceText(record, "underwriter", row.underwriter, applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)));
     addEvent(record, "public_subscription_start", row.subscriptionStartDate, row.sourceRecordId);
     addEvent(record, "public_subscription_end", row.subscriptionEndDate, row.sourceRecordId);
     addEvent(record, "public_draw", row.drawDate, row.sourceRecordId);
@@ -170,6 +175,48 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
   };
 }
 
+function selectLatestApplicationAttempts(rows: readonly IpoApplicationSourceRow[]): IpoApplicationSourceRow[] {
+  const latestByCompanyMarket = new Map<string, IpoApplicationSourceRow[]>();
+  for (const row of rows) {
+    const key = `${row.companyCode}\u0000${row.market}`;
+    const current = latestByCompanyMarket.get(key);
+    if (!current || row.applicationDate > current[0].applicationDate) {
+      latestByCompanyMarket.set(key, [row]);
+    } else if (row.applicationDate === current[0].applicationDate) {
+      current.push(row);
+    }
+  }
+  const selected = [...latestByCompanyMarket.values()];
+  for (const attempts of selected) assertCompatibleApplicationNotes(attempts);
+  return selected.flat();
+}
+
+function assertCompatibleApplicationNotes(rows: readonly IpoApplicationSourceRow[]): void {
+  let note = "";
+  for (const row of rows) {
+    if (row.note === "") continue;
+    if (note !== "" && note !== row.note) throw new TypeError("IPO_SOURCE_CONFLICT:note");
+    note = row.note;
+  }
+}
+
+function selectLatestSourceFlows<T extends { companyCode: string; market: IpoMarket }>(
+  rows: readonly T[],
+  date: (row: T) => string,
+): T[] {
+  const latestByCompanyMarket = new Map<string, T[]>();
+  for (const row of rows) {
+    const key = `${row.companyCode}\u0000${row.market}`;
+    const current = latestByCompanyMarket.get(key);
+    if (!current || date(row) > date(current[0])) {
+      latestByCompanyMarket.set(key, [row]);
+    } else if (date(row) === date(current[0])) {
+      current.push(row);
+    }
+  }
+  return [...latestByCompanyMarket.values()].flat();
+}
+
 export function deriveIpoStage(record: IpoTimelineRecord, today: string): IpoStage {
   if (record.exceptionStatus) return record.exceptionStatus;
   if (record.listingDate && record.listingDate <= today) return "listed";
@@ -185,7 +232,7 @@ export function taipeiCalendarDistance(today: string, eventDate: string): number
 }
 
 function getRecord(records: Map<string, MutableRecord>, companyCode: string, companyName: string, market: IpoMarket): MutableRecord {
-  const key = `${companyCode}\u0000${market}`;
+  const key = recordKey(companyCode, market);
   const existing = records.get(key);
   if (existing) {
     mergeRecordValue(existing, "companyName", companyName);
@@ -214,11 +261,45 @@ function getRecord(records: Map<string, MutableRecord>, companyCode: string, com
   return record;
 }
 
+function recordKey(companyCode: string, market: IpoMarket): string {
+  return `${companyCode}\u0000${market}`;
+}
+
+function getEvidenceRecord(
+  records: Map<string, MutableRecord>,
+  companyCode: string,
+  companyName: string,
+  market: IpoMarket,
+): MutableRecord {
+  const existing = records.get(recordKey(companyCode, market));
+  if (!existing) return getRecord(records, companyCode, companyName, market);
+  if (existing.applicationDate === "—") mergeRecordValue(existing, "companyName", companyName);
+  return existing;
+}
+
+function isEvidenceForCurrentApplication(record: MutableRecord, evidenceDate: string): boolean {
+  return record.applicationDate === "—" || evidenceDate >= record.applicationDate;
+}
+
 function mergeRecordValue(record: MutableRecord, field: MergeableRecordField, value: string | null): void {
   if (isMissingValue(value)) return;
   const existing = record[field];
-  if (!isMissingValue(existing) && existing !== value) throw new TypeError(`IPO_SOURCE_CONFLICT:${field}`);
+  if (!isMissingValue(existing) && existing !== value) {
+    if ((field === "provisionalUnderwritingPrice" || field === "finalUnderwritingPrice")
+      && equivalentDecimal(existing, value)) return;
+    throw new TypeError(`IPO_SOURCE_CONFLICT:${field}`);
+  }
   record[field] = value;
+}
+
+function mergeEvidenceText(
+  record: MutableRecord,
+  field: "underwriter",
+  value: string,
+  hasCanonicalApplicationValue: boolean,
+): void {
+  if (!hasCanonicalApplicationValue) mergeRecordValue(record, field, value);
+  else if (!isMissingValue(value) && isMissingValue(record[field])) record[field] = value;
 }
 
 function mergeSourceRow(record: MutableRecord, field: "auction" | "publicOffering", row: IpoAuctionSourceRow | IpoPublicOfferingSourceRow): void {
@@ -233,8 +314,15 @@ function mergeSourceRow(record: MutableRecord, field: "auction" | "publicOfferin
     const merged = existing as unknown as Record<string, unknown>;
     const current = merged[key];
     if (isMissingValue(current) && !isMissingValue(value)) merged[key] = value;
-    else if (!isMissingValue(current) && !isMissingValue(value) && current !== value) throw new TypeError(`IPO_SOURCE_CONFLICT:${key}`);
+    else if (!isMissingValue(current) && !isMissingValue(value) && current !== value) {
+      if (isPriceField(key) && typeof current === "string" && typeof value === "string" && equivalentDecimal(current, value)) continue;
+      throw new TypeError(`IPO_SOURCE_CONFLICT:${key}`);
+    }
   }
+}
+
+function isPriceField(field: string): boolean {
+  return field === "minimumBidPrice" || field === "provisionalUnderwritingPrice" || field === "finalUnderwritingPrice";
 }
 
 function mergeExceptionStatus(record: MutableRecord, value: NonNullable<IpoTimelineRecord["exceptionStatus"]>): void {
@@ -268,6 +356,18 @@ function exceptionFromNote(note: string): "withdrawn" | "delayed" | null {
 
 function isMissingValue(value: unknown): value is null | "" | "—" {
   return value === null || value === "" || value === "—";
+}
+
+function equivalentDecimal(left: string, right: string): boolean {
+  const normalize = (value: string): string | null => {
+    if (!/^\d+(?:\.\d+)?$/.test(value)) return null;
+    const [integer, fraction = ""] = value.split(".");
+    const normalizedInteger = integer.replace(/^0+(?=\d)/, "");
+    const normalizedFraction = fraction.replace(/0+$/, "");
+    return normalizedFraction === "" ? normalizedInteger : `${normalizedInteger}.${normalizedFraction}`;
+  };
+  const normalizedLeft = normalize(left);
+  return normalizedLeft !== null && normalizedLeft === normalize(right);
 }
 
 function compareEvents(left: IpoEvent, right: IpoEvent): number {

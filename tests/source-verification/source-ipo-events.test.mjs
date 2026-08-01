@@ -39,10 +39,10 @@ test("official IPO source parsers normalize primary-source events without market
     companyCode: "6945",
     companyName: "圓祥生技",
     market: "上櫃",
-    listingDate: "2026-06-08",
+    listingDate: "2026-06-05",
     finalUnderwritingPrice: "105.40",
     underwriter: "9800 元大",
-    sourceRecordId: "TPEx:ipo-no-limit:6945:2026-06-08",
+    sourceRecordId: "TPEx:ipo-no-limit:6945:2026-06-05",
   });
   assert.equal(parseTwseAuctionSource(auction)[0].minimumBidPrice, "42.8");
   assert.equal(parseTwseAuctionSource(auction)[0].finalUnderwritingPrice, "50.5000");
@@ -90,4 +90,24 @@ test("official IPO source parsers reject schema shifts and malformed official va
   const shiftedApplicant = structuredClone(applicants);
   shiftedApplicant[0].Unexpected = "x";
   assert.throws(() => parseTpexApplicantSource(shiftedApplicant), /unknown/i);
+});
+
+test("TWSE table parsers accept only strictly validated live metadata", async () => {
+  const [auctionFixture, publicFormFixture] = await Promise.all([
+    fixture("twse-auction.json"),
+    fixture("twse-public-form.json"),
+  ]);
+  const auction = { ...auctionFixture, notes: ["公告說明"], total: auctionFixture.data.length };
+  const publicForm = { ...publicFormFixture, notes: [], total: publicFormFixture.data.length };
+
+  assert.equal(parseTwseAuctionSource(auction).length, 1);
+  assert.equal(parseTwsePublicOfferingSource(publicForm).length, 2);
+
+  for (const notes of ["公告說明", ["公告說明", 1], null]) {
+    assert.throws(() => parseTwseAuctionSource({ ...auction, notes }), /notes/);
+  }
+  for (const total of [-1, 1.5, "2", auction.data.length - 1]) {
+    assert.throws(() => parseTwseAuctionSource({ ...auction, total }), /total/);
+  }
+  assert.throws(() => parseTwsePublicOfferingSource({ ...publicForm, unexpected: true }), /unknown key/);
 });
