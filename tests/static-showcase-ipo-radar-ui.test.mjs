@@ -48,3 +48,11 @@ test("IPO 雷達頁不內嵌測試公司或假資料", async () => {
   const [html, js] = await Promise.all([readFile(htmlPath, "utf8"), readFile(pagePath, "utf8")]);
   assert.doesNotMatch(`${html}\n${js}`, /測試公司|假資料/);
 });
+
+test("IPO 雷達在行動卡片區保留空狀態並尊重減少動態效果", async () => {
+  const js = await readFile(pagePath, "utf8");
+
+  assert.match(js, /#ipo-radar-card-list"\)\.innerHTML = visible\.length \? visible\.map\(cardHtml\)\.join\(""\) : emptyCard\(\)/);
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.match(js, /behavior: matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches \? "auto" : "smooth"/);
+});

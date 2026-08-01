@@ -38,3 +38,9 @@ exit 0
 ## Concerns
 
 Task 8 remains responsible for the shared site navigation and the dedicated radar CSS refinements specified in the overall plan. This task uses the existing responsive table/card and theme primitives without changing those cross-page files.
+
+## Follow-up quality correction
+
+- The mobile-only card list now renders the same concise empty-state feedback as the desktop table when filtering returns no records.
+- Stage-filter focus scrolling now checks `prefers-reduced-motion` and uses non-animated scrolling for users who request reduced motion.
+- Added the regression test before the implementation change; it failed against the original controller, then passed together with the focused UI suite, lint, and typecheck.

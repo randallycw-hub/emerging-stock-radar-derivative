@@ -122,7 +122,10 @@ function applyStage(stage) {
   syncUrl();
   applyStateToControls();
   render();
-  document.querySelector("#ipo-radar-filters").scrollIntoView({ behavior: "smooth", block: "start" });
+  document.querySelector("#ipo-radar-filters").scrollIntoView({
+    behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    block: "start",
+  });
 }
 
 function render() {
@@ -134,7 +137,7 @@ function render() {
   const visible = sorted.slice((state.page - 1) * size, state.page * size);
   document.querySelector("#ipo-radar-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
   document.querySelector("#ipo-radar-table-body").innerHTML = visible.length ? visible.map(tableRowHtml).join("") : emptyRow();
-  document.querySelector("#ipo-radar-card-list").innerHTML = visible.map(cardHtml).join("");
+  document.querySelector("#ipo-radar-card-list").innerHTML = visible.length ? visible.map(cardHtml).join("") : emptyCard();
   document.querySelector("[data-radar-data-date]").textContent = formatDate(state.dataDate);
   renderSummary();
   renderUpcoming();
@@ -320,6 +323,7 @@ function positiveInteger(value) { return Math.max(1, Number.parseInt(value ?? "1
 function pageSize() { return matchMedia("(max-width: 900px)").matches ? 25 : 50; }
 function daysLabel(days) { return Number.isFinite(days) ? `${days > 0 ? "+" : ""}${formatNumber(days)} 天` : "—"; }
 function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="5" class="empty-cell">${message}</td></tr>`; }
+function emptyCard(message = "沒有符合條件的資料") { return `<p class="empty-cell">${message}</p>`; }
 function selectExistingValue(selector, value) { const select = document.querySelector(selector); select.value = [...select.options].some((option) => option.value === value) ? value : "all"; }
 function companyLink(row) { return `<a href="./ipo.html?q=${encodeURIComponent(row.companyCode)}">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</a>`; }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]); }
