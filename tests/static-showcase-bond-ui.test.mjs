@@ -4,9 +4,10 @@ import test from "node:test";
 
 const root = new URL("../static-showcase/", import.meta.url);
 
-test("static showcase exposes the complete CB trading workspace", async () => {
-  const [html, js, css] = await Promise.all([
+test("static showcase preserves the CB implementation while moving its entry point", async () => {
+  const [html, bondsHtml, js, css] = await Promise.all([
     readFile(new URL("index.html", root), "utf8"),
+    readFile(new URL("bonds.html", root), "utf8"),
     readFile(new URL("assets/app.js", root), "utf8"),
     readFile(new URL("assets/app.css", root), "utf8"),
   ]);
@@ -39,7 +40,9 @@ test("static showcase exposes the complete CB trading workspace", async () => {
     assert.match(js, new RegExp(section));
   }
   assert.match(html, /assets\/app\.css/);
-  assert.match(html, /assets\/app\.js/);
+  assert.doesNotMatch(html, /assets\/app\.js/);
+  assert.match(bondsHtml, /id="bond-market-root"/);
+  assert.match(bondsHtml, /assets\/site-shell\.js/);
   assert.match(html, /aria-label="切換深淺色模式"/);
   assert.match(css, /--clay:\s*#b96849/);
   assert.match(css, /--clay-ink:\s*#8b412d/);

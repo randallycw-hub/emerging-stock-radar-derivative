@@ -3,143 +3,82 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="可轉債、興櫃與 IPO 公開資料工作台">
-  <title>興債觀測網｜市場資料工作台</title>
-  <script>
-    try {
-      document.documentElement.dataset.theme =
-        localStorage.getItem("market-theme") === "dark" ? "dark" : "light";
-    } catch {}
-  </script>
+  <meta name="description" content="可轉債、興櫃與 IPO 盤後市場資訊入口">
+  <title>可轉債與興櫃盤後資訊</title>
   <link rel="stylesheet" href="./assets/app.css">
 </head>
-<body>
-  <header class="masthead">
-    <div class="brand-block">
-      <p class="kicker">TAIWAN CONVERTIBLE BOND LEDGER</p>
-      <h1>興債觀測網</h1>
-      <p>可轉債、興櫃與 IPO 的盤後資料工作台</p>
-    </div>
-    <div class="mast-actions">
-      <p id="update-status" class="update-status" aria-live="polite">資料讀取中</p>
-      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式">
-        <span aria-hidden="true">◐</span><span>深淺模式</span>
+<body data-page="home">
+  <a class="skip-link" href="#main-content">跳到主要內容</a>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="site-mark" href="./index.html" aria-label="可轉債與興櫃盤後資訊首頁">
+        <span>POST-CLOSE</span>
+        <strong>市場資訊台</strong>
+      </a>
+      <button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+        <span aria-hidden="true">☰</span>
+        <span>選單</span>
+      </button>
+      <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽">
+        <a data-page-link="home" href="./index.html" aria-current="page">首頁</a>
+        <a data-page-link="bonds" href="./bonds.html">可轉債</a>
+        <a data-page-link="emerging" href="./emerging.html">興櫃市場</a>
+        <a data-page-link="ipo" href="./ipo.html">IPO 行程</a>
+        <a data-page-link="methodology" href="./methodology.html">資料方法</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false">
+        <span aria-hidden="true">◐</span>
+        <span data-theme-label>深色模式</span>
       </button>
     </div>
   </header>
 
-  <div class="shell">
-    <nav class="rail" aria-label="頁面導覽">
-      <a class="active" href="#overview"><span>01</span>市場總覽</a>
-      <a href="#bonds"><span>02</span>可轉債總表</a>
-      <a href="#emerging"><span>03</span>興櫃資料</a>
-      <a href="#ipo"><span>04</span>IPO 時程</a>
-      <a href="#sources"><span>05</span>資料來源</a>
-    </nav>
+  <main id="main-content" class="page-content" tabindex="-1">
+    <section class="home-hero" aria-labelledby="home-title">
+      <p class="kicker">TAIWAN POST-CLOSE MARKET DESK</p>
+      <h1 id="home-title">可轉債與興櫃盤後資訊</h1>
+      <p>集中查看可轉債、興櫃市場與 IPO 公開資訊，並清楚標示計算方法與更新狀態。</p>
+    </section>
 
-    <main class="content" id="overview">
-      <section class="lead">
-        <div>
-          <p class="kicker">AFTER-CLOSE MARKET DESK</p>
-          <h2>把分散的發債條件與盤後價格，排成可核對的交易視野。</h2>
-        </div>
-        <p>每個價格保留自己的資料日；只有同一估值日的資料才計算轉換價值與溢價率。</p>
-      </section>
+    <section class="home-modules" aria-label="市場資訊入口">
+      <a class="market-module market-module--clay" href="./bonds.html">
+        <span class="market-module__number">01</span>
+        <p>CONVERTIBLE BONDS</p>
+        <h2>可轉債盤後</h2>
+        <span>前往市場頁 <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="market-module market-module--violet" href="./emerging.html">
+        <span class="market-module__number">02</span>
+        <p>EMERGING MARKET</p>
+        <h2>興櫃市場</h2>
+        <span>前往市場頁 <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="market-module" href="./ipo.html">
+        <span class="market-module__number">03</span>
+        <p>IPO CALENDAR</p>
+        <h2>IPO 行程</h2>
+        <span>查看公開時程 <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="market-module" href="./methodology.html">
+        <span class="market-module__number">04</span>
+        <p>DATA METHODOLOGY</p>
+        <h2>資料方法</h2>
+        <span>了解計算原則 <span aria-hidden="true">→</span></span>
+      </a>
+    </section>
 
-      <section class="summary-strip" aria-label="資料摘要">
-        <article><span>可轉債</span><strong id="summary-bonds">—</strong><small>已列入總表</small></article>
-        <article><span>具價格資料</span><strong id="summary-priced">—</strong><small>CB 收盤可用</small></article>
-        <article><span>興櫃公司</span><strong id="summary-emerging">—</strong><small>月營收涵蓋</small></article>
-        <article><span>資料日期</span><strong id="summary-date">—</strong><small>最近發布版本</small></article>
-      </section>
+    <section class="update-panel" aria-labelledby="update-heading">
+      <div>
+        <p class="kicker">DATA UPDATE</p>
+        <h2 id="update-heading">最近一次成功更新</h2>
+      </div>
+      <p id="last-successful-update" class="update-status" aria-live="polite">更新資訊讀取中</p>
+    </section>
+  </main>
 
-      <section class="ledger-section" id="bonds">
-        <header class="section-heading">
-          <div><p class="section-number">02 / CONVERTIBLE BONDS</p><h2>可轉債盤後總表</h2></div>
-          <p>九組核心資訊在桌面版一次展開；點選任一列查看契約與資料日期。</p>
-        </header>
-
-        <form class="filters" id="bond-filters" aria-label="可轉債篩選">
-          <label class="search-field">
-            <span>搜尋</span>
-            <input id="bond-search" type="search" placeholder="債券代碼、名稱、發行人或股票代碼">
-          </label>
-          <label>
-            <span>條件</span>
-            <select id="bond-preset">
-              <option value="all">全部可轉債</option>
-              <option value="low-price">CB 收盤低於 100</option>
-              <option value="low-premium">溢價率低於 5%</option>
-              <option value="near-parity">轉換價值 95–105</option>
-              <option value="maturity">一年內到期</option>
-              <option value="put">90 天內賣回</option>
-              <option value="no-trade">當日無成交</option>
-              <option value="missing">資料缺漏</option>
-            </select>
-          </label>
-          <output id="bond-result-count">—</output>
-        </form>
-
-        <div class="bond-table-shell">
-          <table class="bond-table">
-            <thead><tr>
-              <th>CB 代碼／名稱</th>
-              <th>CB 收盤價</th>
-              <th>股票收盤價</th>
-              <th>目前轉換價</th>
-              <th>轉換價值</th>
-              <th>轉換溢價率</th>
-              <th>CB 成交量</th>
-              <th>流通餘額</th>
-              <th>到期／賣回事件</th>
-            </tr></thead>
-            <tbody id="bond-table-body">
-              <tr><td colspan="9" class="empty-cell">盤後資料讀取中</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div id="bond-card-list" class="bond-card-list" aria-live="polite"></div>
-      </section>
-
-      <section id="bond-workbench" class="workbench" hidden aria-live="polite"></section>
-
-      <section class="ledger-section" id="emerging">
-        <header class="section-heading">
-          <div><p class="section-number">03 / EMERGING</p><h2>興櫃營收視野</h2></div>
-          <p>保留出表日期與資料年月；未納入盤中行情。</p>
-        </header>
-        <div class="secondary-table-shell"><table class="secondary-table">
-          <thead><tr><th>代號</th><th>公司</th><th>產業</th><th>當月營收</th><th>年增率</th><th>資料年月</th></tr></thead>
-          <tbody id="emerging-table-body"><tr><td colspan="6">資料讀取中</td></tr></tbody>
-        </table></div>
-      </section>
-
-      <section class="ledger-section" id="ipo">
-        <header class="section-heading">
-          <div><p class="section-number">04 / IPO CALENDAR</p><h2>IPO 公開時程</h2></div>
-          <p>依申請、審議、董事會與掛牌節點排列。</p>
-        </header>
-        <div class="secondary-table-shell"><table class="secondary-table">
-          <thead><tr><th>代號／公司</th><th>申請日</th><th>審議日</th><th>董事會通過</th><th>契約備查</th><th>掛牌日</th></tr></thead>
-          <tbody id="ipo-table-body"><tr><td colspan="6">資料讀取中</td></tr></tbody>
-        </table></div>
-      </section>
-
-      <section class="source-section" id="sources">
-        <p class="section-number">05 / SOURCE NOTES</p>
-        <h2>資料來源與計算邊界</h2>
-        <div class="source-grid">
-          <p><strong>可轉債條款</strong><span>證券櫃檯買賣中心 11406</span></p>
-          <p><strong>盤後收盤</strong><span>證券交易所與證券櫃檯買賣中心</span></p>
-          <p><strong>轉換價</strong><span>公開資訊觀測站發行資料</span></p>
-          <p><strong>估值規則</strong><span>不同日期不顯示一般同日溢價</span></p>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <footer class="footer">興債觀測網 · 僅整理公開資訊，不構成投資建議。</footer>
+  <footer class="footer">市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer>
   <script src="./data/runtime.js?v=d8e5aa9336d0"></script>
-  <script type="module" src="./assets/app.js"></script>
+  <script type="module" src="./assets/site-shell.js"></script>
+  <script type="module" src="./assets/home-page.js"></script>
 </body>
 </html>
