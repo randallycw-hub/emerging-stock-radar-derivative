@@ -1,9 +1,6 @@
 import { createHash } from "node:crypto";
 import {
-  access,
   appendFile,
-  copyFile,
-  cp,
   mkdir,
   mkdtemp,
   readFile,
@@ -36,8 +33,6 @@ export const OFFICIAL_SHOWCASE_SOURCES = {
 };
 
 const DATA_DIRECTORY = "static-showcase/data";
-const RUNTIME_PATH = `${DATA_DIRECTORY}/runtime.js`;
-const INDEX_PATH = "static-showcase/index.html";
 
 export function buildRuntimeBootstrap() {
   return [
@@ -74,13 +69,14 @@ export async function fetchOfficialCsvWithRetry(
   url,
   fetchImpl = fetch,
   {
-    maxAttempts = 3,
+    maxAttempts = 5,
     sleep = (milliseconds) =>
       new Promise((resolve) => setTimeout(resolve, milliseconds)),
   } = {},
 ) {
   let lastError;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    let retryDelayMs = 250;
     try {
       const response = await fetchImpl(url, {
         headers: { Accept: "text/csv, application/json, application/octet-stream" },
@@ -107,8 +103,9 @@ export async function fetchOfficialCsvWithRetry(
     } catch (error) {
       lastError = error;
       if (attempt === maxAttempts) throw error;
+      retryDelayMs = 2_000;
     }
-    await sleep(250 * 2 ** (attempt - 1));
+    await sleep(retryDelayMs * 2 ** (attempt - 1));
   }
   throw lastError ?? new Error("official CSV request failed");
 }
@@ -263,6 +260,7 @@ export async function refreshStaticShowcase({
     const marketResult = await marketBuilder({
       outputDir: stagingDataDirectory,
       bonds: bondInputsFrom11406Rows(datasets["11406"]),
+      asOfDate: emergingSnapshot.tradingDate,
       collectImpl: async (options) => {
         const store = await openMarketCheckpoint({ date: options.date });
         return fetchCurrentOfficialMarketData({
@@ -288,13 +286,6 @@ export async function refreshStaticShowcase({
     );
     await verifyStagedEmergingSnapshot(stagingDataDirectory);
 
-    const publishedNames = [
-      ...Object.keys(datasets).map((datasetId) => `${datasetId}.json`),
-      "emerging-market.json",
-      "manifest.json",
-      "runtime.json",
-      ...(marketResult.files ?? []),
-    ];
     await mkdir(join(DATA_DIRECTORY, "generations"), { recursive: true });
     await rename(stagingDataDirectory, join(DATA_DIRECTORY, generation));
     const pointerStage = join(stagingRoot, "current.json");
@@ -383,50 +374,6 @@ async function verifyStagedEmergingSnapshot(stagingDataDirectory) {
   const runtime = JSON.parse(await readFile(join(stagingDataDirectory, "runtime.json"), "utf8"));
   if (runtime.generation === undefined || runtime.emergingMarketUrl !== manifest.emergingMarketUrl) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_RUNTIME");
-  }
-}
-
-async function copyDirectoryIfExists(source, target) {
-  if (await pathExists(source)) {
-    await cp(source, target, { recursive: true });
-  }
-}
-
-async function publishAtomically(entries) {
-  const existing = [];
-  const backupDirectory = await mkdtemp(join(dirname(entries[0].target), ".showcase-backup-"));
-  try {
-    for (const [index, entry] of entries.entries()) {
-      if (await pathExists(entry.target)) {
-        const backup = join(backupDirectory, String(index));
-        await copyFile(entry.target, backup);
-        existing.push([entry.target, backup]);
-      }
-    }
-    for (const entry of entries) {
-      await rename(entry.source, entry.target);
-    }
-  } catch (error) {
-    for (const entry of entries) {
-      const backup = existing.find(([target]) => target === entry.target)?.[1];
-      if (backup !== undefined) {
-        await copyFile(backup, entry.target);
-      } else {
-        await rm(entry.target, { force: true });
-      }
-    }
-    throw error;
-  } finally {
-    await rm(backupDirectory, { recursive: true, force: true });
-  }
-}
-
-async function pathExists(path) {
-  try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
   }
 }
 

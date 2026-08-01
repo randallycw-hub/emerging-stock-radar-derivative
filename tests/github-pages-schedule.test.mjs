@@ -37,9 +37,11 @@ test("GitHub Pages retries after close and contains no Worker relay", async () =
   );
 });
 
-test("tracked showcase contains no emerging-market fixture or active generation pointer", async () => {
+test("tracked showcase excludes fixtures while generated snapshots stay ignored", async () => {
   await assert.rejects(access("static-showcase/data/emerging-market.json"), /ENOENT/);
-  await assert.rejects(access("static-showcase/data/current.json"), /ENOENT/);
+  const gitignore = await readFile(".gitignore", "utf8");
+  assert.match(gitignore, /^\/static-showcase\/data\/current\.json$/m);
+  assert.match(gitignore, /^\/static-showcase\/data\/generations\/$/m);
 });
 
 test("scheduled retry skips only a verified snapshot for the Taipei date", () => {

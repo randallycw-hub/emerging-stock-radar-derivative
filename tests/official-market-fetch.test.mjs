@@ -97,7 +97,7 @@ test("fetchMopsDetail retries when the official response body is interrupted", a
   assert.deepEqual(calls, [url, url]);
 });
 
-test("fetchMopsConversionPrice retries a temporary HTML page without fields", async () => {
+test("fetchMopsConversionPrice patiently retries temporary HTML pages without fields", async () => {
   const entry = {
     bondCode: "35221",
     issuerCode: "3522",
@@ -112,7 +112,7 @@ test("fetchMopsConversionPrice retries a temporary HTML page without fields", as
     async (url) => {
       calls.push(String(url));
       return new Response(
-        calls.length === 1 ? "<html>系統忙碌</html>" : detail,
+        calls.length < 4 ? "<html>系統忙碌</html>" : detail,
         {
           status: 200,
           headers: { "content-type": "text/html; charset=utf-8" },
@@ -125,8 +125,13 @@ test("fetchMopsConversionPrice retries a temporary HTML page without fields", as
   );
 
   assert.equal(result.currentConversionPrice, "18.2");
-  assert.deepEqual(calls, [entry.officialDetailUrl, entry.officialDetailUrl]);
-  assert.deepEqual(delays, [250]);
+  assert.deepEqual(calls, [
+    entry.officialDetailUrl,
+    entry.officialDetailUrl,
+    entry.officialDetailUrl,
+    entry.officialDetailUrl,
+  ]);
+  assert.deepEqual(delays, [2_000, 4_000, 8_000]);
 });
 
 test("collects only requested official CB, stock and conversion records", async () => {
@@ -232,6 +237,60 @@ test("collects only requested official CB, stock and conversion records", async 
     false,
   );
   assert.deepEqual(delays, []);
+});
+
+test("omits a requested TPEx issuer when the official row has no closing value", async () => {
+  const values = {
+    quote: await fixture("tpex-cb-quote.json"),
+    twse: await fixture("twse-stock-close.json"),
+    tpex: JSON.stringify([
+      ...JSON.parse(await fixture("tpex-stock-close.json")),
+      {
+        Date: "1150731",
+        SecuritiesCompanyCode: "3587",
+        CompanyName: "閎康",
+        Close: " ---",
+        Change: "--- ",
+        Open: "---",
+        High: "---",
+        Low: "---",
+        Average: "---",
+        TradingShares: "0",
+        TransactionAmount: "0",
+        TransactionNumber: "0",
+        LatestBidPrice: "---",
+        LatesAskPrice: "---",
+        Capitals: "0",
+        NextReferencePrice: "---",
+        NextLimitUp: "---",
+        NextLimitDown: "---",
+      },
+    ]),
+    conversion: await fixture("tpex-conversion-index.json"),
+    detail: await fixture("mops-bond-detail.html"),
+  };
+  const fakeFetch = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/bond/cbDayQry")) return jsonResponse(values.quote);
+    if (target.endsWith("/exchangeReport/STOCK_DAY_ALL")) return jsonResponse(values.twse);
+    if (target.endsWith("/tpex_mainboard_daily_close_quotes")) return jsonResponse(values.tpex);
+    if (target.endsWith("/bond/convSearch")) return jsonResponse(values.conversion);
+    if (target.startsWith("https://mopsov.twse.com.tw/mops/web/t120sg01?")) {
+      return new Response(values.detail, { status: 200, headers: { "content-type": "text/html; charset=utf-8" } });
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+
+  const result = await fetchCurrentOfficialMarketData({
+    bondCodes: ["35221"],
+    issuerCodes: ["2330", "3522", "3587"],
+    date: "2026-07-31",
+    fetchImpl: fakeFetch,
+    sleepImpl: async () => {},
+    perRequestDelayMs: 0,
+  });
+
+  assert.deepEqual(result.stockCloses.map((row) => row.companyCode).sort(), ["2330", "3522"]);
 });
 
 test("normalizes the three verified monthly history contracts", async () => {

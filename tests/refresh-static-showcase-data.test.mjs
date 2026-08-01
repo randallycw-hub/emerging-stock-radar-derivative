@@ -51,6 +51,7 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
     let activeRequests = 0;
     let maximumConcurrency = 0;
     const requested = [];
+    let marketAsOfDate;
 
     await refreshStaticShowcase({
       now: new Date("2026-07-30T06:00:06.000Z"),
@@ -64,14 +65,18 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
           .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
         return new Response(sourceTexts[datasetId], { status: 200 });
       },
-      marketBuilder: async ({ manifestBase }) => ({
-        manifest: { ...manifestBase, market: { status: "verified" } },
-        report: { validation: "passed" },
-      }),
+      marketBuilder: async ({ manifestBase, asOfDate }) => {
+        marketAsOfDate = asOfDate;
+        return {
+          manifest: { ...manifestBase, market: { status: "verified" } },
+          report: { validation: "passed" },
+        };
+      },
     });
 
     assert.equal(requested.filter((url) => url === OFFICIAL_SHOWCASE_SOURCES.emergingMarket).length, 1);
     assert.ok(maximumConcurrency <= 2);
+    assert.equal(marketAsOfDate, "2026-07-30");
 
     const pointer = JSON.parse(await readFile(join(root, "static-showcase/data/current.json"), "utf8"));
     const generationRoot = join(root, "static-showcase/data", pointer.generation);
@@ -165,7 +170,11 @@ test("重新產生 runtime 時只寫入正式資料網址，不嵌入呈現程�
 test("正式 CSV 遇到暫時 DNS 或伺服器錯誤時只重試相同網址", async () => {
   const url = OFFICIAL_SHOWCASE_SOURCES["94025"];
   const requested = [];
+  const delays = [];
+  const dnsError = new TypeError("fetch failed");
+  dnsError.cause = { code: "ENOTFOUND" };
   const responses = [
+    dnsError,
     {
       ok: true,
       status: 200,
@@ -187,12 +196,13 @@ test("正式 CSV 遇到暫時 DNS 或伺服器錯誤時只重試相同網址", a
       if (next instanceof Error) throw next;
       return next;
     },
-    { sleep: async () => {} },
+    { sleep: async (milliseconds) => delays.push(milliseconds) },
   );
 
   assert.equal(response.status, 200);
   assert.equal(new TextDecoder().decode(response.bytes), "欄位\n資料");
-  assert.deepEqual(requested, [url, url]);
+  assert.deepEqual(requested, [url, url, url]);
+  assert.deepEqual(delays, [2_000, 4_000]);
 });
 
 test("runtime 快取標記可重複執行且仍拒絕缺少標記的 HTML", () => {

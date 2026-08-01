@@ -35,6 +35,8 @@ const CB_QUOTE_FIELDS = [
 ];
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 const MAX_ATTEMPTS = 3;
+const MOPS_PARSE_MAX_ATTEMPTS = 5;
+const MOPS_PARSE_RETRY_DELAY_MS = 2_000;
 
 export async function fetchMopsDetail(
   officialDetailUrl,
@@ -59,7 +61,7 @@ export async function fetchMopsConversionPrice(
   fetchImpl = fetch,
   sleepImpl = sleep,
 ) {
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+  for (let attempt = 1; attempt <= MOPS_PARSE_MAX_ATTEMPTS; attempt += 1) {
     try {
       return parseMopsConversionPrice(
         await fetchMopsDetail(entry.officialDetailUrl, fetchImpl),
@@ -70,13 +72,13 @@ export async function fetchMopsConversionPrice(
         error instanceof TypeError
         && error.message === "missing MOPS conversion field"
       );
-      if (!retryableMissingFields || attempt === MAX_ATTEMPTS) {
+      if (!retryableMissingFields || attempt === MOPS_PARSE_MAX_ATTEMPTS) {
         throw new Error(
           `MOPS_CONVERSION_PARSE_FAILED:${entry.bondCode}:${entry.officialDetailUrl}`,
           { cause: error },
         );
       }
-      await sleepImpl(250 * 2 ** (attempt - 1));
+      await sleepImpl(MOPS_PARSE_RETRY_DELAY_MS * 2 ** (attempt - 1));
     }
   }
   throw new Error(`MOPS_CONVERSION_PARSE_FAILED:${entry.bondCode}`);
@@ -119,6 +121,7 @@ export async function fetchCurrentOfficialMarketData({
       .map(normalizeTwseStockClose),
     ...tpexPayload
       .filter((row) => issuerSet.has(recordCode(row, "SecuritiesCompanyCode")))
+      .filter(hasPublishedTpexClose)
       .map(normalizeTpexStockClose),
   ];
 
@@ -464,6 +467,18 @@ function recordCode(value, key) {
     return "";
   }
   return value[key].trim().toUpperCase();
+}
+
+function hasPublishedTpexClose(row) {
+  return !(
+    row !== null
+    && typeof row === "object"
+    && !Array.isArray(row)
+    && typeof row.Close === "string"
+    && typeof row.Change === "string"
+    && row.Close.trim() === "---"
+    && row.Change.trim() === "---"
+  );
 }
 
 function uniqueCodes(values, pattern, name) {

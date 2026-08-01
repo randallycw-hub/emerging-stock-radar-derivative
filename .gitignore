@@ -44,3 +44,5 @@ next-env.d.ts
 /.cache/
 /.worktrees/
 /.superpowers/
+/static-showcase/data/current.json
+/static-showcase/data/generations/

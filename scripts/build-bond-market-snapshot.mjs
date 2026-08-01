@@ -32,12 +32,16 @@ export async function buildBondMarketSnapshot({
   collectImpl = fetchCurrentOfficialMarketData,
   now = () => new Date(),
   manifestBase,
+  asOfDate: requestedAsOfDate,
 } = {}) {
   const generatedDate = now();
   if (!(generatedDate instanceof Date) || !Number.isFinite(generatedDate.valueOf())) {
     throw new TypeError("now must return a valid Date");
   }
-  const asOfDate = taipeiDate(generatedDate);
+  if (requestedAsOfDate !== undefined && !isIsoDate(requestedAsOfDate)) {
+    throw new TypeError("asOfDate must be an ISO date");
+  }
+  const asOfDate = requestedAsOfDate ?? taipeiDate(generatedDate);
   const bondInputs = bonds ?? await loadBondInputs(outputDir);
   if (!Array.isArray(bondInputs)) throw new TypeError("bonds must be an array");
   const bondCodes = bondInputs.map((bond) => bond.bondCode);
