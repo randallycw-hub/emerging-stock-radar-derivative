@@ -3,6 +3,7 @@ import { sortRows } from "./table-sort.js";
 
 const pointerUrl = new URL("../data/current.json", import.meta.url);
 const errorTarget = document.querySelector("[data-page-error]");
+const marketSortKeys = new Set([...document.querySelectorAll("[data-market-sort]")].map((button) => button.dataset.marketSort));
 const state = {
   market: [],
   monthlyRevenue: [],
@@ -58,7 +59,8 @@ function initializeFromUrl() {
   state.industry = params.get("industry") ?? "all";
   state.application = params.get("application") ?? "all";
   state.marketDirection = params.get("direction") ?? "all";
-  state.sortKey = params.get("sort") ?? "companyCode";
+  const sortKey = params.get("sort");
+  state.sortKey = marketSortKeys.has(sortKey) ? sortKey : "companyCode";
   state.sortDirection = params.get("directionSort") === "desc" ? "desc" : "asc";
   state.revenueSortKey = params.get("revenueSort") ?? "companyCode";
   state.revenueSortDirection = params.get("revenueDirectionSort") === "desc" ? "desc" : "asc";
