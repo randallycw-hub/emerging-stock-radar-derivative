@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { getBasicRows } from "../lib/company.ts";
+import { listApprovedIpoResources, listApprovedResources } from "../lib/pipeline/source-registry.ts";
 import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
 import { getTrackerData } from "../lib/tracker.mjs";
 
@@ -12,24 +13,17 @@ const root = new URL("../", import.meta.url);
 const file = relativePath => readFile(new URL(relativePath, root), "utf8");
 const productionRoots = ["app", "lib", "worker", "db", "scripts", "public"];
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".mjs"]);
+const approvedResources = listApprovedResources();
 const approvedEndpoints = new Set([
-  "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
-  "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
-  "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
-  "https://mopsfin.twse.com.tw/opendata/t187ap03_P.csv",
   "https://www.tpex.org.tw/openapi/v1/bond_ISSBD5_data",
   "https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics",
   "https://www.tpex.org.tw/openapi/v1/t187ap05_R",
-  "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies",
   "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_R",
-  "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit",
   "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry",
   "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL",
   "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes",
   "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
   "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
-  "https://www.twse.com.tw/announcement/auction?response=json&yy=",
-  "https://www.twse.com.tw/announcement/publicForm?response=json&yy=",
   "https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock",
 ]);
 
@@ -53,7 +47,16 @@ function assertOnlyApprovedExternalUrls(urls) {
   const violations = urls.filter(value => {
     const url = new URL(value);
     if (url.hostname === "localhost" || url.hostname.endsWith(".local")) return false;
-    return !approvedEndpoints.has(value);
+    return !approvedEndpoints.has(value) && !approvedResources.some(resource => {
+      if (!resource.annualQuery) return resource.exactUrl === value;
+      if (value === resource.exactUrl) return true;
+      if (value === `${resource.exactUrl}&${resource.annualQuery.parameter}=`) return true;
+      const approved = new URL(resource.exactUrl);
+      const candidate = new URL(value);
+      const year = candidate.searchParams.get(resource.annualQuery.parameter);
+      candidate.searchParams.delete(resource.annualQuery.parameter);
+      return /^\d{4}$/.test(year ?? "") && candidate.href === approved.href;
+    });
   });
   assert.deepEqual([...new Set(violations)], []);
 }
@@ -64,12 +67,10 @@ test("all production source roots contain only Source Registry APPROVED external
   assertOnlyApprovedExternalUrls(sources.flatMap(externalUrlLiterals));
 });
 
-test("allows only the three reviewed IPO refresh source literals", () => {
-  assert.doesNotThrow(() => assertOnlyApprovedExternalUrls([
-    "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit",
-    "https://www.twse.com.tw/announcement/auction?response=json&yy=",
-    "https://www.twse.com.tw/announcement/publicForm?response=json&yy=",
-  ]));
+test("derives every reviewed IPO refresh source from registry policy", () => {
+  const urls = listApprovedIpoResources(2026).map(resource => resource.exactUrl);
+  assert.equal(urls.length, 5);
+  assert.doesNotThrow(() => assertOnlyApprovedExternalUrls(urls));
 });
 
 test("rejects representative PENDING, REJECTED, and unregistered external URLs", () => {

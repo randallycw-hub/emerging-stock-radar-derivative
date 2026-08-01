@@ -193,6 +193,10 @@ Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, La
 | `11406-csv` | `APPROVED_FOR_PRODUCTION` | 可轉債發行條款主檔；只用核准欄位 |
 | `94025-csv` | `APPROVED_FOR_PRODUCTION` | 興櫃公司月營收與產業別補充 |
 | `11586-csv` | `APPROVED_FOR_PRODUCTION` | 申請上市公開時程；排除價格與個資欄位 |
+| TPEx `tpex_esb_applicant_companies` | `APPROVED_FOR_PRODUCTION` | IPO 事件的上櫃申請、審議、契約、掛牌、主辦承銷商與備註 |
+| TPEx `tpex_ipo_no_limit` | `APPROVED_FOR_PRODUCTION` | IPO 事件的上櫃掛牌、承銷價與主辦承銷商核對證據 |
+| TWSE `announcement/auction?response=json&yy=YYYY` | `APPROVED_FOR_PRODUCTION` | 指定西元年度 IPO 競拍時程、價格、取消狀態與主辦承銷商 |
+| TWSE `announcement/publicForm?response=json&yy=YYYY` | `APPROVED_FOR_PRODUCTION` | 指定西元年度 IPO 公開申購時程、價格、取消狀態與主辦承銷商 |
 | TPEx `cbDayQry` | `APPROVED_FOR_PRODUCTION` | 每檔可轉債盤後成交資料 |
 | TWSE `STOCK_DAY_ALL` | `APPROVED_FOR_PRODUCTION` | 上市標的股票盤後收盤 |
 | TPEx `tpex_mainboard_daily_close_quotes` | `APPROVED_FOR_PRODUCTION` | 上櫃標的股票盤後收盤 |
@@ -201,3 +205,5 @@ Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, La
 | TPEx `tpex_esb_latest_statistics` | `APPROVED_FOR_PRODUCTION` | 當日成交均價、高低價、成交量等盤後白名單欄位 |
 
 正式快照 smoke 結果：11406 415 列、94025 354 列、11586 697 列、興櫃盤後 359 家、可轉債 385 檔、轉換價 384 筆；市場資料日期一致為 2026-07-31。未核准 OpenAPI、`bond_cb_daily`、第三方網站、即時價、買賣價量與自動 fallback 仍維持禁止。任何 schema、授權、主機或用途變更都會撤回本核准並停止切換 generation pointer。
+
+IPO 事件用途補充：`11586-csv` 在 IPO 事件快照中另明確核准 `underwriters` 與 `note`，以及公司識別與正式申請里程碑欄位；`underwritingPrice`、`chairmanName` 與資本額不得由此用途發布。上述五個 IPO resource 的核准 identity、精確 URL（年度端點的唯一變數僅為四位數 `yy`）、Content-Type 與可用欄位，以 `lib/pipeline/source-registry.ts` 的 `ipoEventPolicy` 為可執行政策；Phase 1 quarantine 必須由該 registry 導出，不另存一份 IPO URL 白名單。

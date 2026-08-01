@@ -10,3 +10,11 @@ test("Sites build packages the reviewed D1 migrations", async () => {
   assert.match(viteConfig, /migrations_dir/);
   assert.match(source, /resolve\(root, "dist", "\.openai"\)/);
 });
+
+test("Sites build packages the forward-only IPO refresh lease migration byte-for-byte", async () => {
+  const [source, packaged] = await Promise.all([
+    readFile(new URL("../migrations/0006_ipo_event_refresh_state.sql", import.meta.url), "utf8"),
+    readFile(new URL("../dist/.openai/migrations/0006_ipo_event_refresh_state.sql", import.meta.url), "utf8"),
+  ]);
+  assert.equal(packaged, source);
+});

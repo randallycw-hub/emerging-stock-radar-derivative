@@ -10,6 +10,7 @@ const allMigrations = async () => {
     sql("0004_listing_application_completeness.sql"),
     sql("0005_bond_contract_completeness.sql"),
     sql("0005_ipo_event_snapshots.sql"),
+    sql("0006_ipo_event_refresh_state.sql"),
   ]);
   return migrations.join("\n").toLowerCase();
 };
@@ -42,5 +43,15 @@ test("IPO snapshot migration stores the verified snapshot and its atomic pointer
   assert.match(migration, /CREATE TABLE ipo_event_snapshot_pointer/);
   assert.match(migration, /FOREIGN KEY.*ipo_event_snapshots/is);
   assert.match(migration, /CREATE INDEX idx_ipo_event_snapshots_data_date/);
+});
+test("forward-only IPO refresh migration stores the global lease and cooldown state", async () => {
+  const migrationNames = await readdir(new URL("../../migrations/", import.meta.url));
+  assert.ok(migrationNames.includes("0006_ipo_event_refresh_state.sql"));
+  const migration = await sql("0006_ipo_event_refresh_state.sql");
+  assert.match(migration, /CREATE TABLE ipo_event_refresh_state/);
+  assert.match(migration, /lease_owner TEXT/);
+  assert.match(migration, /lease_expires_at TEXT/);
+  assert.match(migration, /last_attempt_at TEXT/);
+  assert.match(migration, /last_success_at TEXT/);
 });
 test("schema excludes prohibited market and generic payload surfaces", async () => { const all = await allMigrations(); for (const word of ["stock_price","bid_price","ask_price","volume","premium_discount","conversion_value","theoretical_price","arbitrage","recommendation","generic_records"]) assert.doesNotMatch(all, new RegExp(word)); });

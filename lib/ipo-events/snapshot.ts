@@ -1,4 +1,5 @@
 import { isIsoDate } from "../domain/dates.ts";
+import { getApprovedIpoResource, type IpoManifestSourceId } from "../pipeline/source-registry.ts";
 import type {
   IpoApplicationSourceRow,
   IpoAuctionSourceRow,
@@ -90,6 +91,17 @@ const eventLabels: Record<IpoEventKind, string> = {
   cancelled: "取消",
 };
 
+const ipoMarkets = new Set<IpoMarket>(["上市", "創新板", "上櫃"]);
+const ipoStages = new Set<IpoStage>(["A", "B", "C", "D", "listed", "withdrawn", "delayed", "cancelled"]);
+const ipoEventKinds = new Set<IpoEventKind>(Object.keys(eventLabels) as IpoEventKind[]);
+const ipoManifestSourceIds = new Set<IpoManifestSourceId>([
+  "twse-applications",
+  "tpex-applications",
+  "tpex-ipo-listings",
+  "twse-auctions",
+  "twse-public-offerings",
+]);
+
 export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEventSnapshot {
   const records = new Map<string, MutableRecord>();
   const applicationUnderwriterKeys = new Set<string>();
@@ -119,7 +131,11 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     if (!isEvidenceForCurrentApplication(record, row.listingDate)) continue;
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "finalUnderwritingPrice", row.finalUnderwritingPrice);
-    mergeEvidenceText(record, "underwriter", row.underwriter, applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)));
+    mergeListingUnderwriter(
+      record,
+      row.underwriter,
+      applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)),
+    );
     addEvent(record, "listing_date", row.listingDate, row.sourceRecordId);
   }
 
@@ -129,7 +145,7 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     mergeSourceRow(record, "auction", row);
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "finalUnderwritingPrice", row.finalUnderwritingPrice);
-    mergeEvidenceText(record, "underwriter", row.underwriter, applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)));
+    mergeRecordValue(record, "underwriter", row.underwriter);
     addEvent(record, "auction_bid_start", row.bidStartDate, row.sourceRecordId);
     addEvent(record, "auction_bid_end", row.bidEndDate, row.sourceRecordId);
     addEvent(record, "auction_open", row.auctionOpenDate, row.sourceRecordId);
@@ -146,7 +162,7 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "provisionalUnderwritingPrice", row.provisionalUnderwritingPrice);
     mergeRecordValue(record, "finalUnderwritingPrice", row.finalUnderwritingPrice);
-    mergeEvidenceText(record, "underwriter", row.underwriter, applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)));
+    mergeRecordValue(record, "underwriter", row.underwriter);
     addEvent(record, "public_subscription_start", row.subscriptionStartDate, row.sourceRecordId);
     addEvent(record, "public_subscription_end", row.subscriptionEndDate, row.sourceRecordId);
     addEvent(record, "public_draw", row.drawDate, row.sourceRecordId);
@@ -166,13 +182,218 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     .map((record) => ({ ...record, stage: deriveIpoStage(record, input.dataDate) }))
     .sort((left, right) => left.companyCode.localeCompare(right.companyCode) || left.market.localeCompare(right.market));
 
-  return {
+  const snapshot: IpoEventSnapshot = {
     schemaVersion: 1,
     dataDate: input.dataDate,
     generatedAt: input.generatedAt,
     sourceManifest: input.sourceManifest.map((entry) => ({ ...entry })),
     records: sortedRecords,
   };
+  assertIpoEventSnapshot(snapshot);
+  return snapshot;
+}
+
+export function assertIpoEventSnapshot(value: unknown): asserts value is IpoEventSnapshot {
+  const snapshot = exactObject(
+    value,
+    ["schemaVersion", "dataDate", "generatedAt", "sourceManifest", "records"],
+    "IPO snapshot",
+  );
+  if (snapshot.schemaVersion !== 1) throw snapshotError("schemaVersion must be 1");
+  if (typeof snapshot.dataDate !== "string" || !isIsoDate(snapshot.dataDate)) {
+    throw snapshotError("dataDate must be a valid YYYY-MM-DD date");
+  }
+  if (!isIsoDateTime(snapshot.generatedAt)) throw snapshotError("generatedAt must be a valid ISO instant");
+  if (!Array.isArray(snapshot.sourceManifest) || snapshot.sourceManifest.length !== ipoManifestSourceIds.size) {
+    throw snapshotError("sourceManifest must contain all five sources");
+  }
+  const manifestIds = new Set<IpoManifestSourceId>();
+  const year = Number(snapshot.dataDate.slice(0, 4));
+  for (const value of snapshot.sourceManifest) {
+    const entry = exactObject(
+      value,
+      ["sourceId", "sourceUrl", "downloadedAt", "sha256", "rawBytes", "rowCount"],
+      "IPO snapshot sourceManifest entry",
+    );
+    if (typeof entry.sourceId !== "string" || !ipoManifestSourceIds.has(entry.sourceId as IpoManifestSourceId)) {
+      throw snapshotError("sourceManifest has an unknown sourceId");
+    }
+    const sourceId = entry.sourceId as IpoManifestSourceId;
+    if (manifestIds.has(sourceId)) throw snapshotError("sourceManifest has a duplicate sourceId");
+    manifestIds.add(sourceId);
+    const resource = getApprovedIpoResource(sourceId, year);
+    if (entry.sourceUrl !== resource.exactUrl) throw snapshotError("sourceManifest sourceUrl is not approved");
+    if (!isIsoDateTime(entry.downloadedAt)) throw snapshotError("sourceManifest downloadedAt must be a valid ISO instant");
+    if (typeof entry.sha256 !== "string" || !/^sha256:[a-f0-9]{64}$/.test(entry.sha256)) {
+      throw snapshotError("sourceManifest sha256 is invalid");
+    }
+    if (!isPositiveInteger(entry.rawBytes)) throw snapshotError("sourceManifest rawBytes must be a positive integer");
+    if (!isPositiveInteger(entry.rowCount)) throw snapshotError("sourceManifest rowCount must be a positive integer");
+  }
+  if ([...ipoManifestSourceIds].some((sourceId) => !manifestIds.has(sourceId))) {
+    throw snapshotError("sourceManifest is missing a required sourceId");
+  }
+  if (!Array.isArray(snapshot.records)) throw snapshotError("records must be an array");
+  const recordIds = new Set<string>();
+  for (const value of snapshot.records) assertTimelineRecord(value, recordIds);
+}
+
+function assertTimelineRecord(value: unknown, recordIds: Set<string>): void {
+  const record = exactObject(value, [
+    "companyCode", "companyName", "market", "stage", "exceptionStatus", "applicationDate",
+    "reviewDate", "boardDate", "contractDate", "listingDate", "auction", "publicOffering",
+    "provisionalUnderwritingPrice", "finalUnderwritingPrice", "underwriter", "events",
+  ], "IPO snapshot record");
+  const companyCode = requiredCompanyCode(record.companyCode, "record.companyCode");
+  requiredText(record.companyName, "record.companyName");
+  const market = requiredMarket(record.market, "record.market");
+  if (typeof record.stage !== "string" || !ipoStages.has(record.stage as IpoStage)) throw snapshotError("record.stage is invalid");
+  if (record.exceptionStatus !== null && !["withdrawn", "delayed", "cancelled"].includes(String(record.exceptionStatus))) {
+    throw snapshotError("record.exceptionStatus is invalid");
+  }
+  if (record.applicationDate !== "—") requiredDate(record.applicationDate, "record.applicationDate");
+  for (const field of ["reviewDate", "boardDate", "contractDate", "listingDate"] as const) {
+    nullableDate(record[field], `record.${field}`);
+  }
+  nullableDecimal(record.provisionalUnderwritingPrice, "record.provisionalUnderwritingPrice");
+  nullableDecimal(record.finalUnderwritingPrice, "record.finalUnderwritingPrice");
+  if (typeof record.underwriter !== "string") throw snapshotError("record.underwriter must be a string");
+  if (record.auction !== null) assertAuction(record.auction, companyCode, market);
+  if (record.publicOffering !== null) assertPublicOffering(record.publicOffering, companyCode, market);
+  if (!Array.isArray(record.events)) throw snapshotError("record.events must be an array");
+  for (const event of record.events) assertEvent(event, companyCode, market);
+  const identity = `${companyCode}\u0000${market}`;
+  if (recordIds.has(identity)) throw snapshotError("records contain a duplicate company/market identity");
+  recordIds.add(identity);
+}
+
+function assertAuction(value: unknown, companyCode: string, market: IpoMarket): void {
+  const row = exactObject(value, [
+    "companyCode", "companyName", "market", "bidStartDate", "bidEndDate", "auctionOpenDate",
+    "listingDate", "minimumBidPrice", "finalUnderwritingPrice", "underwriter", "cancelled", "sourceRecordId",
+  ], "IPO snapshot auction");
+  assertEvidenceIdentity(row, companyCode, market, "auction");
+  requiredText(row.companyName, "auction.companyName");
+  for (const field of ["bidStartDate", "bidEndDate", "auctionOpenDate"] as const) requiredDate(row[field], `auction.${field}`);
+  nullableDate(row.listingDate, "auction.listingDate");
+  nullableDecimal(row.minimumBidPrice, "auction.minimumBidPrice");
+  nullableDecimal(row.finalUnderwritingPrice, "auction.finalUnderwritingPrice");
+  if (typeof row.underwriter !== "string") throw snapshotError("auction.underwriter must be a string");
+  if (typeof row.cancelled !== "boolean") throw snapshotError("auction.cancelled must be a boolean");
+  requiredText(row.sourceRecordId, "auction.sourceRecordId");
+}
+
+function assertPublicOffering(value: unknown, companyCode: string, market: IpoMarket): void {
+  const row = exactObject(value, [
+    "companyCode", "companyName", "market", "subscriptionStartDate", "subscriptionEndDate", "drawDate",
+    "listingDate", "provisionalUnderwritingPrice", "finalUnderwritingPrice", "underwriter", "cancelled", "sourceRecordId",
+  ], "IPO snapshot publicOffering");
+  assertEvidenceIdentity(row, companyCode, market, "publicOffering");
+  requiredText(row.companyName, "publicOffering.companyName");
+  for (const field of ["subscriptionStartDate", "subscriptionEndDate", "drawDate"] as const) requiredDate(row[field], `publicOffering.${field}`);
+  nullableDate(row.listingDate, "publicOffering.listingDate");
+  nullableDecimal(row.provisionalUnderwritingPrice, "publicOffering.provisionalUnderwritingPrice");
+  nullableDecimal(row.finalUnderwritingPrice, "publicOffering.finalUnderwritingPrice");
+  if (typeof row.underwriter !== "string") throw snapshotError("publicOffering.underwriter must be a string");
+  if (typeof row.cancelled !== "boolean") throw snapshotError("publicOffering.cancelled must be a boolean");
+  requiredText(row.sourceRecordId, "publicOffering.sourceRecordId");
+}
+
+function assertEvidenceIdentity(
+  row: Record<string, unknown>,
+  companyCode: string,
+  market: IpoMarket,
+  name: string,
+): void {
+  if (requiredCompanyCode(row.companyCode, `${name}.companyCode`) !== companyCode) throw snapshotError(`${name}.companyCode does not match record`);
+  if (requiredMarket(row.market, `${name}.market`) !== market) throw snapshotError(`${name}.market does not match record`);
+}
+
+function assertEvent(value: unknown, companyCode: string, market: IpoMarket): void {
+  const event = exactObject(
+    value,
+    ["companyCode", "market", "kind", "date", "label", "sourceRecordIds"],
+    "IPO snapshot event",
+  );
+  if (requiredCompanyCode(event.companyCode, "event.companyCode") !== companyCode) throw snapshotError("event.companyCode does not match record");
+  if (requiredMarket(event.market, "event.market") !== market) throw snapshotError("event.market does not match record");
+  if (typeof event.kind !== "string" || !ipoEventKinds.has(event.kind as IpoEventKind)) throw snapshotError("event.kind is invalid");
+  requiredDate(event.date, "event.date");
+  requiredText(event.label, "event.label");
+  if (!Array.isArray(event.sourceRecordIds) || event.sourceRecordIds.length === 0) {
+    throw snapshotError("event.sourceRecordIds must be a non-empty array");
+  }
+  const sourceRecordIds = new Set<string>();
+  for (const sourceRecordId of event.sourceRecordIds) {
+    const text = requiredText(sourceRecordId, "event.sourceRecordIds entry");
+    if (sourceRecordIds.has(text)) throw snapshotError("event.sourceRecordIds contains a duplicate");
+    sourceRecordIds.add(text);
+  }
+}
+
+function exactObject(value: unknown, keys: readonly string[], name: string): Record<string, unknown> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) throw snapshotError(`${name} must be an object`);
+  const record = value as Record<string, unknown>;
+  const actual = Object.keys(record);
+  if (actual.length !== keys.length || actual.some((key) => !keys.includes(key))) {
+    throw snapshotError(`${name} has unknown or missing fields`);
+  }
+  return record;
+}
+
+function requiredText(value: unknown, name: string): string {
+  if (typeof value !== "string" || value.trim() === "") throw snapshotError(`${name} must be a non-empty string`);
+  return value;
+}
+
+function requiredCompanyCode(value: unknown, name: string): string {
+  const text = requiredText(value, name);
+  if (!/^\d{4}$/.test(text)) throw snapshotError(`${name} must be a four-digit company code`);
+  return text;
+}
+
+function requiredMarket(value: unknown, name: string): IpoMarket {
+  if (typeof value !== "string" || !ipoMarkets.has(value as IpoMarket)) throw snapshotError(`${name} is invalid`);
+  return value as IpoMarket;
+}
+
+function requiredDate(value: unknown, name: string): string {
+  if (typeof value !== "string" || !isIsoDate(value)) throw snapshotError(`${name} must be a valid YYYY-MM-DD date`);
+  return value;
+}
+
+function nullableDate(value: unknown, name: string): void {
+  if (value !== null) requiredDate(value, name);
+}
+
+function nullableDecimal(value: unknown, name: string): void {
+  if (value !== null && (typeof value !== "string" || !/^\d+(?:\.\d+)?$/.test(value))) {
+    throw snapshotError(`${name} must be a non-negative decimal or null`);
+  }
+}
+
+function isIsoDateTime(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,3})?(Z|([+-])(\d{2}):(\d{2}))$/.exec(value);
+  if (!match || !isIsoDate(match[1])) return false;
+  const hour = Number(match[2]);
+  const minute = Number(match[3]);
+  const second = Number(match[4]);
+  if (hour > 23 || minute > 59 || second > 59) return false;
+  if (match[5] !== "Z") {
+    const offsetHour = Number(match[7]);
+    const offsetMinute = Number(match[8]);
+    if (offsetHour > 14 || offsetMinute > 59 || (offsetHour === 14 && offsetMinute !== 0)) return false;
+  }
+  return !Number.isNaN(Date.parse(value));
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) > 0;
+}
+
+function snapshotError(message: string): TypeError {
+  return new TypeError(`IPO snapshot ${message}`);
 }
 
 function selectLatestApplicationAttempts(rows: readonly IpoApplicationSourceRow[]): IpoApplicationSourceRow[] {
@@ -292,14 +513,13 @@ function mergeRecordValue(record: MutableRecord, field: MergeableRecordField, va
   record[field] = value;
 }
 
-function mergeEvidenceText(
+function mergeListingUnderwriter(
   record: MutableRecord,
-  field: "underwriter",
   value: string,
-  hasCanonicalApplicationValue: boolean,
+  hasApplicationUnderwriter: boolean,
 ): void {
-  if (!hasCanonicalApplicationValue) mergeRecordValue(record, field, value);
-  else if (!isMissingValue(value) && isMissingValue(record[field])) record[field] = value;
+  if (!hasApplicationUnderwriter) mergeRecordValue(record, "underwriter", value);
+  else if (!isMissingValue(value) && isMissingValue(record.underwriter)) record.underwriter = value;
 }
 
 function mergeSourceRow(record: MutableRecord, field: "auction" | "publicOffering", row: IpoAuctionSourceRow | IpoPublicOfferingSourceRow): void {

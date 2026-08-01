@@ -1,5 +1,10 @@
 import { normalize11586Application, parse11586Csv } from "../source-verification/source-11586.ts";
 import {
+  assertExactResourceUrl,
+  getApprovedIpoResource,
+  type ApprovedIpoResource,
+} from "../pipeline/source-registry.ts";
+import {
   parseTpexApplicantSource,
   parseTpexIpoListingSource,
   parseTwseAuctionSource,
@@ -8,8 +13,6 @@ import {
 import type { IpoSnapshotRepository } from "./repository.ts";
 import { buildIpoEventSnapshot, type IpoEventSnapshot, type IpoSourceManifestEntry } from "./snapshot.ts";
 
-const MAX_SOURCE_BYTES = 8_000_000;
-const SOURCE_TIMEOUT_MS = 20_000;
 const MAX_ATTEMPTS = 3;
 const FRESH_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600";
 const STALE_CACHE_CONTROL = "public, max-age=60";
@@ -24,17 +27,13 @@ interface RefreshOptions {
 interface IpoEventsResponseOptions extends RefreshOptions {
   repository: IpoSnapshotRepository;
   headers?: HeadersInit;
+  refreshRequested?: boolean;
 }
 
 type SourceId = IpoSourceManifestEntry["sourceId"];
+let inFlightRefresh: Promise<IpoEventSnapshot> | null = null;
 
-const sourceUrls = (year: number) => ({
-  twseApplications: "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
-  tpexApplications: "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies",
-  tpexIpoListings: "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit",
-  twseAuctions: `https://www.twse.com.tw/announcement/auction?response=json&yy=${year}`,
-  twsePublicOfferings: `https://www.twse.com.tw/announcement/publicForm?response=json&yy=${year}`,
-});
+class IpoRefreshLeaseUnavailableError extends Error {}
 
 export function shouldRefreshIpoSnapshot({ now, current }: { now: Date; current: IpoEventSnapshot | null }): boolean {
   if (!current) return true;
@@ -44,10 +43,16 @@ export function shouldRefreshIpoSnapshot({ now, current }: { now: Date; current:
 
 export async function refreshOfficialIpoSnapshot({ fetchImpl, now }: RefreshOptions): Promise<IpoEventSnapshot> {
   const taipei = taipeiDateTime(now);
-  const urls = sourceUrls(taipei.year);
+  const resources = {
+    twseApplications: getApprovedIpoResource("twse-applications", taipei.year),
+    tpexApplications: getApprovedIpoResource("tpex-applications", taipei.year),
+    tpexIpoListings: getApprovedIpoResource("tpex-ipo-listings", taipei.year),
+    twseAuctions: getApprovedIpoResource("twse-auctions", taipei.year),
+    twsePublicOfferings: getApprovedIpoResource("twse-public-offerings", taipei.year),
+  };
   const downloadedAt = `${taipei.date}T${pad(taipei.hour)}:${pad(taipei.minute)}:${pad(taipei.second)}+08:00`;
 
-  const twseApplications = await loadRequiredSource("twse-applications", urls.twseApplications, fetchImpl, downloadedAt, (bytes) => {
+  const twseApplications = await loadRequiredSource("twse-applications", resources.twseApplications, fetchImpl, downloadedAt, (bytes) => {
     const rows = parse11586Csv(decodeUtf8(bytes));
     return rows.map((row) => {
       const normalized = normalize11586Application(row);
@@ -66,10 +71,10 @@ export async function refreshOfficialIpoSnapshot({ fetchImpl, now }: RefreshOpti
       };
     });
   });
-  const tpexApplications = await loadRequiredSource("tpex-applications", urls.tpexApplications, fetchImpl, downloadedAt, (bytes) => parseTpexApplicantSource(parseJson(bytes)));
-  const tpexListings = await loadRequiredSource("tpex-ipo-listings", urls.tpexIpoListings, fetchImpl, downloadedAt, (bytes) => parseTpexIpoListingSource(parseJson(bytes)));
-  const auctions = await loadRequiredSource("twse-auctions", urls.twseAuctions, fetchImpl, downloadedAt, (bytes) => parseTwseAuctionSource(parseJson(bytes)));
-  const publicOfferings = await loadRequiredSource("twse-public-offerings", urls.twsePublicOfferings, fetchImpl, downloadedAt, (bytes) => parseTwsePublicOfferingSource(parseJson(bytes)));
+  const tpexApplications = await loadRequiredSource("tpex-applications", resources.tpexApplications, fetchImpl, downloadedAt, (bytes) => parseTpexApplicantSource(parseJson(bytes)));
+  const tpexListings = await loadRequiredSource("tpex-ipo-listings", resources.tpexIpoListings, fetchImpl, downloadedAt, (bytes) => parseTpexIpoListingSource(parseJson(bytes)));
+  const auctions = await loadRequiredSource("twse-auctions", resources.twseAuctions, fetchImpl, downloadedAt, (bytes) => parseTwseAuctionSource(parseJson(bytes)));
+  const publicOfferings = await loadRequiredSource("twse-public-offerings", resources.twsePublicOfferings, fetchImpl, downloadedAt, (bytes) => parseTwsePublicOfferingSource(parseJson(bytes)));
 
   return buildIpoEventSnapshot({
     twseApplications: twseApplications.rows,
@@ -89,44 +94,77 @@ export async function refreshOfficialIpoSnapshot({ fetchImpl, now }: RefreshOpti
   });
 }
 
-export async function getIpoEventsResponse({ repository, fetchImpl, now, headers }: IpoEventsResponseOptions): Promise<Response> {
+export async function getIpoEventsResponse({
+  repository,
+  fetchImpl,
+  now,
+  headers,
+  refreshRequested = false,
+}: IpoEventsResponseOptions): Promise<Response> {
   let current: IpoEventSnapshot | null;
   try {
     current = await repository.readCurrent();
   } catch {
-    return jsonResponse({ status: "source_unavailable" }, 503, "no-store", headers);
+    if (!refreshRequested) return retryableUnavailableResponse(headers);
+    current = null;
   }
 
-  if (!shouldRefreshIpoSnapshot({ now, current })) {
-    return jsonResponse(current, 200, FRESH_CACHE_CONTROL, headers);
-  }
+  if (!refreshRequested) return current
+    ? jsonResponse(current, 200, FRESH_CACHE_CONTROL, headers)
+    : retryableUnavailableResponse(headers);
+
+  if (!shouldRefreshIpoSnapshot({ now, current })) return jsonResponse(current, 200, FRESH_CACHE_CONTROL, headers);
 
   try {
-    const next = await refreshOfficialIpoSnapshot({ fetchImpl, now });
-    await repository.publish(next);
+    const next = await refreshWithSingleFlight({ repository, fetchImpl, now });
     return jsonResponse(next, 200, FRESH_CACHE_CONTROL, headers);
   } catch {
     if (current) return jsonResponse({ ...current, stale: true }, 200, STALE_CACHE_CONTROL, headers);
-    return jsonResponse({ status: "source_unavailable" }, 503, "no-store", headers);
+    return retryableUnavailableResponse(headers);
+  }
+}
+
+async function refreshWithSingleFlight(options: IpoEventsResponseOptions): Promise<IpoEventSnapshot> {
+  const pending = inFlightRefresh ?? (inFlightRefresh = refreshWithLease(options));
+  try {
+    return await pending;
+  } finally {
+    if (inFlightRefresh === pending) inFlightRefresh = null;
+  }
+}
+
+async function refreshWithLease({ repository, fetchImpl, now }: IpoEventsResponseOptions): Promise<IpoEventSnapshot> {
+  const ownerToken = crypto.randomUUID();
+  const acquired = await repository.tryAcquireRefreshLease({ ownerToken, now });
+  if (!acquired) throw new IpoRefreshLeaseUnavailableError();
+  let succeeded = false;
+  try {
+    const next = await refreshOfficialIpoSnapshot({ fetchImpl, now });
+    await repository.publish(next);
+    succeeded = true;
+    return next;
+  } finally {
+    await repository.completeRefreshAttempt({ ownerToken, completedAt: new Date(), succeeded });
   }
 }
 
 async function loadRequiredSource<T>(
   sourceId: SourceId,
-  sourceUrl: string,
+  resource: ApprovedIpoResource,
   fetchImpl: FetchImplementation,
   downloadedAt: string,
   parse: (bytes: Uint8Array) => T[],
 ): Promise<{ rows: T[]; manifest: IpoSourceManifestEntry }> {
   try {
-    const bytes = await fetchSourceBytes(sourceUrl, fetchImpl);
+    if (resource.ipoEventPolicy.manifestSourceId !== sourceId) throw new TypeError("IPO source registry identity mismatch");
+    const bytes = await fetchSourceBytes(resource, fetchImpl);
     const rows = parse(bytes);
     if (rows.length === 0) throw new TypeError("required source has no rows");
     return {
       rows,
       manifest: {
         sourceId,
-        sourceUrl,
+        sourceUrl: resource.exactUrl,
         downloadedAt,
         sha256: `sha256:${await sha256(bytes)}`,
         rawBytes: bytes.byteLength,
@@ -138,15 +176,24 @@ async function loadRequiredSource<T>(
   }
 }
 
-async function fetchSourceBytes(url: string, fetchImpl: FetchImplementation): Promise<Uint8Array> {
+async function fetchSourceBytes(resource: ApprovedIpoResource, fetchImpl: FetchImplementation): Promise<Uint8Array> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), SOURCE_TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), resource.timeoutMs);
     try {
-      const response = await fetchImpl(url, { signal: controller.signal });
+      const response = await fetchImpl(resource.exactUrl, {
+        signal: controller.signal,
+        redirect: "manual",
+        headers: { accept: resource.allowedContentTypes.join(",") },
+      });
+      if (response.status >= 300 && response.status < 400) throw new TypeError("source redirect is not allowed");
       if (!response.ok) throw new TypeError(`HTTP_${response.status}`);
-      return await readResponseBytes(response);
+      if (response.redirected) throw new TypeError("source redirect is not allowed");
+      assertExactResourceUrl(resource, response.url || resource.exactUrl);
+      const contentType = canonicalContentType(response.headers.get("content-type"));
+      if (!resource.allowedContentTypes.includes(contentType)) throw new TypeError("source Content-Type is not approved");
+      return await readResponseBytes(response, resource.maxResponseBytes);
     } catch (error) {
       lastError = error;
       if (attempt < MAX_ATTEMPTS) await delay(100 * attempt);
@@ -157,14 +204,14 @@ async function fetchSourceBytes(url: string, fetchImpl: FetchImplementation): Pr
   throw lastError;
 }
 
-async function readResponseBytes(response: Response): Promise<Uint8Array> {
+async function readResponseBytes(response: Response, maxResponseBytes: number): Promise<Uint8Array> {
   const contentLength = response.headers.get("content-length");
-  if (contentLength && (!/^\d+$/.test(contentLength) || Number(contentLength) > MAX_SOURCE_BYTES)) {
+  if (contentLength && (!/^\d+$/.test(contentLength) || Number(contentLength) > maxResponseBytes)) {
     throw new TypeError("source exceeds maximum size");
   }
   if (!response.body) {
     const bytes = new Uint8Array(await response.arrayBuffer());
-    if (bytes.byteLength === 0 || bytes.byteLength > MAX_SOURCE_BYTES) throw new TypeError("invalid source size");
+    if (bytes.byteLength === 0 || bytes.byteLength > maxResponseBytes) throw new TypeError("invalid source size");
     return bytes;
   }
   const reader = response.body.getReader();
@@ -175,7 +222,7 @@ async function readResponseBytes(response: Response): Promise<Uint8Array> {
       const { done, value } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > MAX_SOURCE_BYTES) throw new TypeError("source exceeds maximum size");
+      if (size > maxResponseBytes) throw new TypeError("source exceeds maximum size");
       chunks.push(value);
     }
   } finally {
@@ -189,6 +236,10 @@ async function readResponseBytes(response: Response): Promise<Uint8Array> {
     offset += chunk.byteLength;
   }
   return bytes;
+}
+
+function canonicalContentType(value: string | null): string {
+  return (value ?? "").split(";", 1)[0].trim().toLowerCase();
 }
 
 function decodeUtf8(bytes: Uint8Array): string {
@@ -228,6 +279,10 @@ function jsonResponse(payload: unknown, status: number, cacheControl: string, he
   const resultHeaders = new Headers(headers);
   resultHeaders.set("Cache-Control", cacheControl);
   return Response.json(payload, { status, headers: resultHeaders });
+}
+
+function retryableUnavailableResponse(headers?: HeadersInit): Response {
+  return jsonResponse({ status: "refresh_retryable", retryable: true }, 503, "no-store", headers);
 }
 
 function delay(milliseconds: number): Promise<void> {

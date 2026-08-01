@@ -6,7 +6,7 @@ import { createIpoSnapshotRepository } from "@/lib/ipo-events/repository";
 export const runtime = "edge";
 export const OPTIONS = publicApiOptions;
 
-export async function GET() {
+export async function GET(request: Request) {
   if (!env.PIPELINE_DB) {
     return Response.json(
       { status: "source_unavailable" },
@@ -18,5 +18,6 @@ export async function GET() {
     fetchImpl: fetch,
     now: new Date(),
     headers: publicApiHeaders(),
+    refreshRequested: new URL(request.url).searchParams.get("refresh") === "1",
   });
 }

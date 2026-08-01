@@ -6,14 +6,15 @@ import {
   taipeiCalendarDistance,
 } from "../lib/ipo-events/snapshot.ts";
 
-const sourceManifest = [{
-  sourceId: "tpex-applications",
-  sourceUrl: "https://example.test/tpex-applications",
-  downloadedAt: "2026-08-01T22:00:00+08:00",
-  sha256: "sha256:abc",
-  rawBytes: 1,
-  rowCount: 1,
-}];
+const downloadedAt = "2026-08-01T22:00:00+08:00";
+const sha256 = `sha256:${"0".repeat(64)}`;
+const sourceManifest = [
+  { sourceId: "twse-applications", sourceUrl: "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data", downloadedAt, sha256, rawBytes: 1, rowCount: 1 },
+  { sourceId: "tpex-applications", sourceUrl: "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies", downloadedAt, sha256, rawBytes: 1, rowCount: 1 },
+  { sourceId: "tpex-ipo-listings", sourceUrl: "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit", downloadedAt, sha256, rawBytes: 1, rowCount: 1 },
+  { sourceId: "twse-auctions", sourceUrl: "https://www.twse.com.tw/announcement/auction?response=json&yy=2026", downloadedAt, sha256, rawBytes: 1, rowCount: 1 },
+  { sourceId: "twse-public-offerings", sourceUrl: "https://www.twse.com.tw/announcement/publicForm?response=json&yy=2026", downloadedAt, sha256, rawBytes: 1, rowCount: 1 },
+];
 
 const application = {
   companyCode: "7819",
@@ -70,6 +71,21 @@ test("aggregates a company into sorted, deduplicated official IPO events", () =>
     ["TPEx:7819:2026-04-01", "TPEx:ipo-no-limit:7819:2026-08-05"],
   );
   assert.equal(taipeiCalendarDistance("2026-08-01", "2026-08-05"), 4);
+});
+
+test("snapshot construction rejects invalid snapshot dates and incomplete source manifests", () => {
+  assert.throws(
+    () => buildIpoEventSnapshot(snapshotInput({ dataDate: "zzzz" })),
+    /IPO snapshot/,
+  );
+  assert.throws(
+    () => buildIpoEventSnapshot(snapshotInput({ generatedAt: "x" })),
+    /IPO snapshot/,
+  );
+  assert.throws(
+    () => buildIpoEventSnapshot(snapshotInput({ sourceManifest: sourceManifest.slice(0, 4) })),
+    /IPO snapshot/,
+  );
 });
 
 test("rejects conflicting verified values instead of choosing a source", () => {
@@ -509,7 +525,7 @@ test("aggregates exact code and market evidence without fuzzy company-name match
     listingDate: "2026-01-22",
     minimumBidPrice: "50",
     finalUnderwritingPrice: "60.0000",
-    underwriter: "兆豐證券",
+    underwriter: "兆豐",
     cancelled: false,
     sourceRecordId: "TWSE:auction:6423:2026-01-13",
   };
@@ -523,6 +539,53 @@ test("aggregates exact code and market evidence without fuzzy company-name match
   assert.equal(record.companyName, "億而得-創");
   assert.equal(record.underwriter, "兆豐");
   assert.equal(record.auction.sourceRecordId, auctionVariant.sourceRecordId);
+});
+
+test("fails closed when application, auction, or public-offering underwriters conflict", () => {
+  const baseApplication = {
+    ...application,
+    listingDate: null,
+    underwriter: "承銷商甲",
+  };
+  const baseAuction = {
+    companyCode: application.companyCode,
+    companyName: application.companyName,
+    market: application.market,
+    bidStartDate: "2026-08-02",
+    bidEndDate: "2026-08-03",
+    auctionOpenDate: "2026-08-04",
+    listingDate: null,
+    minimumBidPrice: null,
+    finalUnderwritingPrice: null,
+    underwriter: "承銷商甲",
+    cancelled: false,
+    sourceRecordId: "TWSE:auction:7819:2026-08-04",
+  };
+  const basePublicOffering = {
+    companyCode: application.companyCode,
+    companyName: application.companyName,
+    market: application.market,
+    subscriptionStartDate: "2026-08-05",
+    subscriptionEndDate: "2026-08-06",
+    drawDate: "2026-08-07",
+    listingDate: null,
+    provisionalUnderwritingPrice: null,
+    finalUnderwritingPrice: null,
+    underwriter: "承銷商甲",
+    cancelled: false,
+    sourceRecordId: "TWSE:public:7819:2026-08-07",
+  };
+
+  for (const patch of [
+    { tpexApplications: [baseApplication], auctions: [{ ...baseAuction, underwriter: "承銷商乙" }], publicOfferings: [] },
+    { tpexApplications: [baseApplication], auctions: [], publicOfferings: [{ ...basePublicOffering, underwriter: "承銷商乙" }] },
+    { tpexApplications: [], auctions: [baseAuction], publicOfferings: [{ ...basePublicOffering, underwriter: "承銷商乙" }] },
+  ]) {
+    assert.throws(
+      () => buildIpoEventSnapshot(snapshotInput({ tpexListings: [], ...patch })),
+      /IPO_SOURCE_CONFLICT:underwriter/,
+    );
+  }
 });
 
 test("accepts numerically equal official underwriting prices without rewriting them", () => {
