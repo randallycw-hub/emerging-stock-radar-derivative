@@ -14,7 +14,6 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
 
   for (const label of [
     "最後成交價（盤後）",
-    "當日成交均價（盤後）",
     "公司家數",
     "有效樣本",
     "上漲／下跌／持平",
@@ -59,7 +58,11 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
   assert.match(js, /estimatedTransactionAmount/);
   assert.match(js, /row\.lastTradedPrice/);
   assert.match(html, /data-market-sort="lastTradedPrice"/);
-  assert.match(js, /emptyRow\(11/);
+  assert.doesNotMatch(html, /當日成交均價（盤後）/);
+  assert.doesNotMatch(html, /data-market-sort="dailyAveragePrice"/);
+  assert.doesNotMatch(js, /<dt>當日成交均價（盤後）<\/dt>/);
+  assert.match(js, /emptyRow\(10/);
+  assert.match(html, /盤後資料讀取中/);
   assert.match(js, /monthlyRevenue/);
   assert.match(css, /market-breadth/);
   assert.match(css, /ranking-grid/);

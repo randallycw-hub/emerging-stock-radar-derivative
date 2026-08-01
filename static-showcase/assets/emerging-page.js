@@ -196,7 +196,7 @@ function renderMarketTable() {
   state.page = Math.min(state.page, pages);
   const visible = sorted.slice((state.page - 1) * size, state.page * size);
   document.querySelector("#emerging-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
-  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(11);
+  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(10);
   document.querySelector("#emerging-card-list").innerHTML = visible.map(marketCardHtml).join("");
   renderPagination("#emerging-pagination", state.page, pages, (page) => {
     state.page = page;
@@ -248,7 +248,6 @@ function marketRowHtml(row) {
     <th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th>
     <td>${escapeHtml(row.industryName ?? "未分類")}</td>
     <td>${formatNumber(row.lastTradedPrice, { maximumFractionDigits: 2 })}</td>
-    <td>${formatNumber(row.dailyAveragePrice, { maximumFractionDigits: 2 })}</td>
     <td class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}<small>${formatPercent(row.averageChangePercent)}</small></td>
     <td>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}</td>
     <td>${formatNumber(row.dailyLowPrice, { maximumFractionDigits: 2 })}</td>
@@ -262,7 +261,6 @@ function marketRowHtml(row) {
 function marketCardHtml(row) {
   return `<article class="market-card" id="card-${escapeHtml(row.companyCode)}"><header><strong>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</strong><span>${escapeHtml(row.industryName ?? "未分類")}</span></header><dl>
     <div><dt>最後成交價（盤後）</dt><dd>${formatNumber(row.lastTradedPrice, { maximumFractionDigits: 2 })}</dd></div>
-    <div><dt>當日成交均價（盤後）</dt><dd>${formatNumber(row.dailyAveragePrice, { maximumFractionDigits: 2 })}</dd></div>
     <div><dt>均價漲跌</dt><dd class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}／${formatPercent(row.averageChangePercent)}</dd></div>
     <div><dt>最高／最低</dt><dd>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}／${formatNumber(row.dailyLowPrice, { maximumFractionDigits: 2 })}</dd></div>
     <div><dt>成交股數</dt><dd>${formatNumber(row.transactionVolume)}</dd></div>
@@ -368,7 +366,7 @@ function normalizeRevenueRow(row) {
 
 function showUnavailable() {
   document.querySelector("#emerging-update-status").textContent = "盤後市場資料尚未發布";
-  document.querySelector("#emerging-table-body").innerHTML = emptyRow(11, "目前沒有可顯示的盤後市場資料");
+  document.querySelector("#emerging-table-body").innerHTML = emptyRow(10, "目前沒有可顯示的盤後市場資料");
   document.querySelector("#emerging-revenue-body").innerHTML = emptyRow(8, "目前沒有可顯示的月營收資料");
 }
 
