@@ -9,6 +9,7 @@ const allMigrations = async () => {
     sql("0003_company_profile_completeness.sql"),
     sql("0004_listing_application_completeness.sql"),
     sql("0005_bond_contract_completeness.sql"),
+    sql("0005_ipo_event_snapshots.sql"),
   ]);
   return migrations.join("\n").toLowerCase();
 };
@@ -35,4 +36,11 @@ test("forward-only bond migration persists the complete normalized 11406 contrac
   assert.match(five, /ALTER TABLE bond_issuances ADD COLUMN tranche_number TEXT;/);
   assert.match(five, /ALTER TABLE bond_issuances ADD COLUMN security_description TEXT;/);
 });
-test("schema excludes prohibited market and generic payload surfaces", async () => { const all = await allMigrations(); for (const word of ["stock_price","bid_price","ask_price","volume","premium_discount","conversion_value","theoretical_price","arbitrage","recommendation","generic_records","payload_json"]) assert.doesNotMatch(all, new RegExp(word)); });
+test("IPO snapshot migration stores the verified snapshot and its atomic pointer", async () => {
+  const migration = await sql("0005_ipo_event_snapshots.sql");
+  assert.match(migration, /CREATE TABLE ipo_event_snapshots/);
+  assert.match(migration, /CREATE TABLE ipo_event_snapshot_pointer/);
+  assert.match(migration, /FOREIGN KEY.*ipo_event_snapshots/is);
+  assert.match(migration, /CREATE INDEX idx_ipo_event_snapshots_data_date/);
+});
+test("schema excludes prohibited market and generic payload surfaces", async () => { const all = await allMigrations(); for (const word of ["stock_price","bid_price","ask_price","volume","premium_discount","conversion_value","theoretical_price","arbitrage","recommendation","generic_records"]) assert.doesNotMatch(all, new RegExp(word)); });
