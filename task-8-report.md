@@ -15,7 +15,8 @@
 - `npm.cmd run lint`: passed.
 - `npm.cmd run typecheck`: passed.
 - `npm.cmd run build`: passed.
-- Full `npm.cmd test`: 379 passed, 2 failed. One was corrected in the subsequent targeted run (`methodology-entry-visibility.test.mjs`). The remaining failure is pre-existing outside Task 8: `phase1-1-source-quarantine.test.mjs` has an outdated approved-URL allowlist for three first-party IPO source literals already used by `lib/ipo-events/refresh.ts`. Task 8 neither adds nor changes those sources.
+- Cross-task verification repaired the quarantine allowlist with exactly three already-reviewed first-party IPO literals (no wildcard or host-wide exception). The narrow quarantine suite passes 9/9.
+- Full `npm.cmd test`: 382 passed, 0 failed.
 
 ## Scope notes
 

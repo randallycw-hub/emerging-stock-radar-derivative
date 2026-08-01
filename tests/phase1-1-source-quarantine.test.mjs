@@ -22,11 +22,14 @@ const approvedEndpoints = new Set([
   "https://www.tpex.org.tw/openapi/v1/t187ap05_R",
   "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies",
   "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_R",
+  "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit",
   "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry",
   "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL",
   "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes",
   "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
   "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
+  "https://www.twse.com.tw/announcement/auction?response=json&yy=",
+  "https://www.twse.com.tw/announcement/publicForm?response=json&yy=",
   "https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock",
 ]);
 
@@ -59,6 +62,14 @@ test("all production source roots contain only Source Registry APPROVED external
   const productionFiles = (await Promise.all(productionRoots.map(filesUnder))).flat();
   const sources = await Promise.all(productionFiles.map(file));
   assertOnlyApprovedExternalUrls(sources.flatMap(externalUrlLiterals));
+});
+
+test("allows only the three reviewed IPO refresh source literals", () => {
+  assert.doesNotThrow(() => assertOnlyApprovedExternalUrls([
+    "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit",
+    "https://www.twse.com.tw/announcement/auction?response=json&yy=",
+    "https://www.twse.com.tw/announcement/publicForm?response=json&yy=",
+  ]));
 });
 
 test("rejects representative PENDING, REJECTED, and unregistered external URLs", () => {
