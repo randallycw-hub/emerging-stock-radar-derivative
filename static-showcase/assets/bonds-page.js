@@ -181,7 +181,11 @@ function renderBonds() {
   const rows = sortRows(filtered, {
     key: state.sortKey,
     direction: state.sortDirection,
-    type: state.sortKey === "bondCode" || state.sortKey === "bondName" ? "text" : "number",
+    type: state.sortKey === "bondCode"
+      || state.sortKey === "bondName"
+      || state.sortKey === "maturityDate"
+      ? "text"
+      : "number",
   });
   const size = pageSize();
   const pages = Math.max(1, Math.ceil(rows.length / size));
@@ -191,7 +195,7 @@ function renderBonds() {
   setText("#bond-result-count", `${rows.length} 檔 · 第 ${state.page}/${pages} 頁`);
   document.querySelector("#bond-table-body").innerHTML = visible.length
     ? visible.map(renderBondRow).join("")
-    : '<tr><td colspan="9" class="empty-cell">沒有符合條件的可轉債</td></tr>';
+    : '<tr><td colspan="10" class="empty-cell">沒有符合條件的可轉債</td></tr>';
   document.querySelector("#bond-card-list").innerHTML = visible.length
     ? visible.map(renderBondCard).join("")
     : '<p class="empty-cell">沒有符合條件的可轉債</p>';
@@ -211,7 +215,8 @@ function renderBondRow(view) {
     <td>${priceMetric(view.conversionValue, view.valuationDate, "估值日", "metric-violet")}</td>
     <td>${rateMetric(view.premiumRate, view.valuationDate, reason)}</td>
     <td>${metric(formatNumber(view.cbTradeUnits), view.cbTradeUnits === "0" ? "當日無成交" : "交易單位")}</td>
-    <td>${metric(formatMoney(view.outstandingAmount), view.outstandingReductionRate === null ? "資料暫缺" : `流通減少 ${signedRate(view.outstandingReductionRate)}`)}</td>
+    <td>${metric(formatMoney(view.outstandingAmount), view.outstandingAmount === null ? "資料暫缺" : view.outstandingReductionRate === null ? "官方目前餘額" : `流通減少 ${signedRate(view.outstandingReductionRate)}`)}</td>
+    <td>${metric(view.maturityDate, "契約到期日")}</td>
     <td>${eventMetric(view)}</td>
   </tr>`;
 }
@@ -220,11 +225,13 @@ function renderBondCard(view) {
   return `<button class="bond-card" type="button" data-bond-code="${escapeHtml(view.bondCode)}">
     <header><strong>${escapeHtml(view.bondCode)} · ${escapeHtml(view.bondName)}</strong><span>${view.staleCbPrice ? "非當日成交" : ""}</span></header>
     <span class="bond-card-grid">
-      ${cardMetric("CB 收盤", valueOrDash(view.cbClose), view.cbPriceDate)}
+      ${cardMetric("CB 收盤價（盤後）", valueOrDash(view.cbClose), view.cbPriceDate)}
       ${cardMetric("股票收盤", valueOrDash(view.stockClose), view.stockPriceDate)}
       ${cardMetric("目前轉換價", valueOrDash(view.currentConversionPrice), view.conversionPriceEffectiveDate)}
       ${cardMetric("轉換價值", valueOrDash(view.conversionValue), view.valuationDate)}
       ${cardMetric("轉換溢價率", view.premiumRate === null ? "—" : signedRate(view.premiumRate), view.valuationDate)}
+      ${cardMetric("流通餘額", formatMoney(view.outstandingAmount), "官方目前餘額")}
+      ${cardMetric("到期日", view.maturityDate, `距到期 ${view.daysToMaturity} 天`)}
       ${cardMetric("最近事件", eventLabel(view), eventDate(view))}
     </span>
   </button>`;
@@ -366,7 +373,7 @@ function renderWorkbench(view) {
       <button class="close-workbench" type="button" aria-label="返回可轉債總表">← 返回總表</button>
     </header>
     <section aria-label="${workbenchSections[0]}" class="workbench-summary">
-      ${summaryMetric("CB 收盤", view.cbClose, view.cbPriceDate)}
+      ${summaryMetric("CB 收盤價（盤後）", view.cbClose, view.cbPriceDate)}
       ${summaryMetric("股票收盤", view.stockClose, view.stockPriceDate)}
       ${summaryMetric("目前轉換價", view.currentConversionPrice, view.conversionPriceEffectiveDate)}
       ${summaryMetric("轉換價值", view.conversionValue, view.valuationDate)}
@@ -394,6 +401,7 @@ function renderWorkbench(view) {
         ["目前轉換價", view.currentConversionPrice],
         ["發行總額", formatMoney(term["發行總額"])],
         ["流通餘額", formatMoney(view.outstandingAmount)],
+        ["餘額單位", "官方目前餘額（原始面額）"],
         ["流通減少率", view.outstandingReductionRate === null ? null : signedRate(view.outstandingReductionRate)],
       ])}
       ${panel(workbenchSections[4], [
@@ -403,6 +411,7 @@ function renderWorkbench(view) {
         ["最近賣回", view.nextPutDate],
         ["轉換截止", formatDate(term["迄"])],
         ["到期日", view.maturityDate],
+        ["距到期", view.daysToMaturity === null ? null : `${view.daysToMaturity} 天`],
       ])}
       ${panel(workbenchSections[5], [
         ["票面利率", term["票面利率"] ? `${term["票面利率"]}%` : null],

@@ -68,14 +68,15 @@
             <span>排序欄位</span>
             <select id="bond-sort-field" name="sort">
               <option value="bondCode">CB 代碼／名稱</option>
-              <option value="cbClose">CB 收盤價</option>
+              <option value="cbClose">CB 收盤價（盤後）</option>
               <option value="stockClose">股票收盤價</option>
               <option value="currentConversionPrice">目前轉換價</option>
               <option value="conversionValue">轉換價值</option>
               <option value="premiumRate">轉換溢價率</option>
               <option value="cbTradeUnits">CB 成交量</option>
               <option value="outstandingAmount">流通餘額</option>
-              <option value="daysToMaturity">到期／賣回事件</option>
+              <option value="maturityDate">到期日</option>
+              <option value="daysToMaturity">距到期／賣回</option>
             </select>
           </label>
           <button id="bond-sort-direction" class="sort-direction" type="button" aria-label="切換排序方向" data-direction="asc">低到高 ↑</button>
@@ -87,16 +88,17 @@
           <table class="bond-table">
             <thead><tr>
               <th aria-sort="none"><button type="button" data-sort-key="bondCode" data-sort-type="text">CB 代碼／名稱 <span aria-hidden="true"></span></button></th>
-              <th aria-sort="none"><button type="button" data-sort-key="cbClose" data-sort-type="number">CB 收盤價 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="cbClose" data-sort-type="number">CB 收盤價（盤後） <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-sort-key="stockClose" data-sort-type="number">股票收盤價 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-sort-key="currentConversionPrice" data-sort-type="number">目前轉換價 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-sort-key="conversionValue" data-sort-type="number">轉換價值 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-sort-key="premiumRate" data-sort-type="number">轉換溢價率 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-sort-key="cbTradeUnits" data-sort-type="number">CB 成交量 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-sort-key="outstandingAmount" data-sort-type="number">流通餘額 <span aria-hidden="true"></span></button></th>
-              <th aria-sort="none"><button type="button" data-sort-key="daysToMaturity" data-sort-type="number">到期／賣回事件 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="maturityDate" data-sort-type="text">到期日 <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-sort-key="daysToMaturity" data-sort-type="number">距到期／賣回 <span aria-hidden="true"></span></button></th>
             </tr></thead>
-            <tbody id="bond-table-body"><tr><td colspan="9" class="empty-cell">盤後資料讀取中</td></tr></tbody>
+            <tbody id="bond-table-body"><tr><td colspan="10" class="empty-cell">盤後資料讀取中</td></tr></tbody>
           </table>
         </div>
         <div id="bond-card-list" class="bond-card-list" aria-live="polite"></div>

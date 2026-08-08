@@ -15,14 +15,15 @@ test("bond page exposes the complete sortable CB workbench", async () => {
 
   for (const label of [
     "CB 代碼／名稱",
-    "CB 收盤價",
+    "CB 收盤價（盤後）",
     "股票收盤價",
     "目前轉換價",
     "轉換價值",
     "轉換溢價率",
     "CB 成交量",
     "流通餘額",
-    "到期／賣回事件",
+    "到期日",
+    "距到期／賣回",
     "一鍵切換排序",
   ]) {
     assert.match(bondsHtml + js, new RegExp(label));
@@ -51,6 +52,12 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.doesNotMatch(bondsHtml, /href="\.\/methodology\.html"/);
   assert.match(bondsHtml, /aria-label="可轉債分頁"/);
   assert.match(js, /URLSearchParams/);
+  assert.match(js, /maturityDate/);
+  assert.match(js, /daysToMaturity/);
+  assert.match(js, /cbPriceDate/);
+  assert.match(js, /官方目前餘額/);
+  assert.match(js, /共同估值日/);
+  assert.match(js, /value === null \|\| value === undefined/);
   assert.match(js, /bond/);
   assert.match(js, /sort/);
   assert.match(js, /direction/);
