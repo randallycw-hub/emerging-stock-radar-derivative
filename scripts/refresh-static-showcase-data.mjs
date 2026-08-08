@@ -23,6 +23,7 @@ import {
   buildBondMarketSnapshot,
 } from "./build-bond-market-snapshot.mjs";
 import { fetchCurrentOfficialMarketData } from "./lib/official-market-fetch.mjs";
+import { buildStaticIpoSnapshot } from "./static-ipo-fallback.mjs";
 
 export const OFFICIAL_SHOWCASE_SOURCES = {
   "94025": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
@@ -52,6 +53,7 @@ function buildGenerationRuntime(generation) {
     generation,
     manifestUrl: `${base}/manifest.json`,
     emergingMarketUrl: `${base}/emerging-market.json`,
+    ipoEventsUrl: `${base}/ipo-events.json`,
     datasets: {
       "94025": `${base}/94025.json`, "11406": `${base}/11406.json`, "11586": `${base}/11586.json`,
       bondMarket: `${base}/bond-market-view.json`, conversionPrices: `${base}/conversion-prices.json`, bondHistory: `${base}/bond-market-history.json`,
@@ -185,6 +187,9 @@ export async function refreshStaticShowcase({
   const datasets = {};
   const datasetTexts = {};
   const manifestDatasets = [];
+  const tpexIpoApplicationSnapshot = await readFile("lib/tpex-applicant-snapshot.json", "utf8")
+    .then((text) => JSON.parse(text))
+    .catch(() => []);
 
   for (const [datasetId, sourceUrl] of Object.entries(OFFICIAL_SHOWCASE_SOURCES)) {
     if (datasetId === "emergingMarket") continue;
@@ -273,6 +278,16 @@ export async function refreshStaticShowcase({
     await writeFile(
       join(stagingDataDirectory, "emerging-market.json"),
       `${JSON.stringify(emergingSnapshot, null, 2)}\n`,
+      "utf8",
+    );
+    await writeFile(
+      join(stagingDataDirectory, "ipo-events.json"),
+      `${JSON.stringify(buildStaticIpoSnapshot({
+        twseRows: datasets["11586"],
+        tpexRows: tpexIpoApplicationSnapshot,
+        dataDate: emergingSnapshot.tradingDate,
+        generatedAt: now.toISOString(),
+      }), null, 2)}\n`,
       "utf8",
     );
 

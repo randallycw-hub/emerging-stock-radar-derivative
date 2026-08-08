@@ -9,5 +9,6 @@
     "bondMarket": "./data/generations/d9560508d9dceb87/bond-market-view.json",
     "conversionPrices": "./data/generations/d9560508d9dceb87/conversion-prices.json",
     "bondHistory": "./data/generations/d9560508d9dceb87/bond-market-history.json"
-  }
+  },
+  "ipoEventsUrl": "./data/generations/d9560508d9dceb87/ipo-events.json"
 }
