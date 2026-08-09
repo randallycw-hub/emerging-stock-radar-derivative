@@ -14,6 +14,7 @@ export type SupplementalSourceState = "fresh" | "stale" | "unavailable";
 type SupplementalSourceStatus = {
   state: SupplementalSourceState;
   dataDate: string | null;
+  periodYear: number | null;
 };
 
 export type CbSupplementalSnapshot = {
@@ -40,7 +41,7 @@ const SNAPSHOT_KEYS = [
   "sources",
 ] as const;
 const SOURCE_NAMES = ["institution", "redemption", "underwriting"] as const;
-const SOURCE_STATUS_KEYS = ["state", "dataDate"] as const;
+const SOURCE_STATUS_KEYS = ["state", "dataDate", "periodYear"] as const;
 const INSTITUTION_SNAPSHOT_KEYS = [
   "tradingDate",
   "tradingUnitFaceValueTwd",
@@ -141,6 +142,11 @@ function buildInstitutionSection(
 } {
   if (current !== undefined) {
     const daily = validateInstitutionDaily(current);
+    const periodYear = Number(daily.tradingDate.slice(0, 4));
+    const previousPeriodYear = previous?.sources.institution.periodYear;
+    if (previousPeriodYear !== undefined && previousPeriodYear !== null && periodYear < previousPeriodYear) {
+      throw new TypeError("institution periodYear must not move backward");
+    }
     const previousDataDate = previous?.sources.institution.dataDate;
     if (
       previousDataDate !== undefined
@@ -153,20 +159,24 @@ function buildInstitutionSection(
     return {
       unitFaceValueTwd: "100000",
       history,
-      source: { state: "fresh", dataDate: daily.tradingDate },
+      source: {
+        state: "fresh",
+        dataDate: daily.tradingDate,
+        periodYear,
+      },
     };
   }
   if (previous !== undefined && previous.sources.institution.state !== "unavailable") {
     return {
       unitFaceValueTwd: "100000",
       history: cloneInstitutionHistory(previous.institutionHistory),
-      source: { state: "stale", dataDate: previous.sources.institution.dataDate },
+      source: { ...previous.sources.institution, state: "stale" },
     };
   }
   return {
     unitFaceValueTwd: null,
     history: {},
-    source: { state: "unavailable", dataDate: null },
+    source: { state: "unavailable", dataDate: null, periodYear: null },
   };
 }
 
@@ -177,32 +187,41 @@ function buildRedemptionSection(
 ): { records: CbRedemptionEvent[]; source: SupplementalSourceStatus } {
   const redemptionYear = validateOptionalRedemptionYear(currentYear);
   if (current !== undefined) {
+    if (redemptionYear === undefined) {
+      throw new TypeError("redemptionYear is required for every current redemption result");
+    }
     const records = validateRedemptions(current);
     const recordYears = new Set(records.map((record) => Number(record.announcementDate.slice(0, 4))));
     if (recordYears.size > 1) {
       throw new TypeError("redemption records must belong to one year");
     }
     const recordYear = recordYears.values().next().value as number | undefined;
-    if (redemptionYear !== undefined && recordYear !== undefined && redemptionYear !== recordYear) {
+    if (recordYear !== undefined && redemptionYear !== recordYear) {
       throw new TypeError("redemptionYear does not match records");
     }
-    const periodYear = redemptionYear ?? recordYear;
+    const periodYear = redemptionYear;
     const dataDate = records.length === 0
       ? null
       : records.map((record) => record.announcementDate).sort().at(-1) ?? null;
-    const previousDataDate = previous?.sources.redemption.dataDate;
-    if (previousDataDate !== undefined && previousDataDate !== null) {
-      if (periodYear === undefined) {
-        throw new TypeError("redemptionYear is required for an empty result with previous data");
-      }
-      const previousYear = Number(previousDataDate.slice(0, 4));
-      if (periodYear < previousYear) {
+    const previousSource = previous?.sources.redemption;
+    if (previousSource !== undefined && previousSource.periodYear !== null) {
+      if (periodYear < previousSource.periodYear) {
         throw new TypeError("redemption year must not move backward");
       }
-      if (dataDate === null && periodYear <= previousYear) {
-        throw new TypeError("empty redemption result must be a newer-year rollover");
+      if (
+        periodYear === previousSource.periodYear
+        && dataDate === null
+        && previous !== undefined
+        && previous.redemptions.length !== 0
+      ) {
+        throw new TypeError("empty redemption result must be a newer-year rollover and must not erase records within a period");
       }
-      if (dataDate !== null && periodYear === previousYear && dataDate < previousDataDate) {
+      if (
+        periodYear === previousSource.periodYear
+        && dataDate !== null
+        && previousSource.dataDate !== null
+        && dataDate < previousSource.dataDate
+      ) {
         throw new TypeError("redemption dataDate must not move backward within a year");
       }
     }
@@ -211,6 +230,7 @@ function buildRedemptionSection(
       source: {
         state: "fresh",
         dataDate,
+        periodYear,
       },
     };
   }
@@ -220,10 +240,13 @@ function buildRedemptionSection(
   if (previous !== undefined && previous.sources.redemption.state !== "unavailable") {
     return {
       records: previous.redemptions.map(cloneRedemption),
-      source: { state: "stale", dataDate: previous.sources.redemption.dataDate },
+      source: { ...previous.sources.redemption, state: "stale" },
     };
   }
-  return { records: [], source: { state: "unavailable", dataDate: null } };
+  return {
+    records: [],
+    source: { state: "unavailable", dataDate: null, periodYear: null },
+  };
 }
 
 function validateOptionalRedemptionYear(value: number | undefined): number | undefined {
@@ -244,16 +267,25 @@ function buildUnderwritingSection(
     const dataDate = records.length === 0
       ? null
       : records.map((record) => record.filedDate).sort().at(-1) ?? null;
-    const previousDataDate = previous?.sources.underwriting.dataDate;
-    if (previousDataDate !== undefined && previousDataDate !== null) {
-      const previousPeriodYear = Number(previousDataDate.slice(0, 4));
-      if (periodYear < previousPeriodYear) {
+    const previousSource = previous?.sources.underwriting;
+    if (previousSource !== undefined && previousSource.periodYear !== null) {
+      if (periodYear < previousSource.periodYear) {
         throw new TypeError("underwriting period must not move backward");
       }
-      if (dataDate === null && periodYear <= previousPeriodYear) {
-        throw new TypeError("empty underwriting result must be a newer-period rollover");
+      if (
+        periodYear === previousSource.periodYear
+        && dataDate === null
+        && previous !== undefined
+        && previous.underwritingCases.length !== 0
+      ) {
+        throw new TypeError("empty underwriting result must not erase records within a period");
       }
-      if (dataDate !== null && periodYear === previousPeriodYear && dataDate < previousDataDate) {
+      if (
+        periodYear === previousSource.periodYear
+        && dataDate !== null
+        && previousSource.dataDate !== null
+        && dataDate < previousSource.dataDate
+      ) {
         throw new TypeError("underwriting dataDate must not move backward within a period");
       }
     }
@@ -262,16 +294,20 @@ function buildUnderwritingSection(
       source: {
         state: "fresh",
         dataDate,
+        periodYear,
       },
     };
   }
   if (previous !== undefined && previous.sources.underwriting.state !== "unavailable") {
     return {
       records: previous.underwritingCases.map(cloneUnderwritingCase),
-      source: { state: "stale", dataDate: previous.sources.underwriting.dataDate },
+      source: { ...previous.sources.underwriting, state: "stale" },
     };
   }
-  return { records: [], source: { state: "unavailable", dataDate: null } };
+  return {
+    records: [],
+    source: { state: "unavailable", dataDate: null, periodYear: null },
+  };
 }
 
 function validatePreviousSnapshot(value: CbSupplementalSnapshot): CbSupplementalSnapshot {
@@ -295,18 +331,8 @@ function validatePreviousSnapshot(value: CbSupplementalSnapshot): CbSupplemental
   };
 
   validatePreviousInstitutionState(snapshot.unitFaceValueTwd, history, sources.institution);
-  validatePreviousDatedSection(
-    "redemption",
-    redemptions.map((record) => record.announcementDate),
-    sources.redemption,
-    isIsoDate,
-  );
-  validatePreviousDatedSection(
-    "underwriting",
-    underwritingCases.map((record) => record.filedDate),
-    sources.underwriting,
-    isSlashDate,
-  );
+  validatePreviousRedemptionState(redemptions, sources.redemption);
+  validatePreviousUnderwritingState(underwritingCases, sources.underwriting);
 
   return {
     schemaVersion: 1,
@@ -325,13 +351,21 @@ function validatePreviousInstitutionState(
   source: SupplementalSourceStatus,
 ): void {
   if (source.state === "unavailable") {
-    if (source.dataDate !== null || unit !== null || Object.keys(history).length !== 0) {
+    if (
+      source.dataDate !== null
+      || source.periodYear !== null
+      || unit !== null
+      || Object.keys(history).length !== 0
+    ) {
       throw new TypeError("previous unavailable institution section must be empty");
     }
     return;
   }
   if (unit !== "100000" || typeof source.dataDate !== "string" || !isIsoDate(source.dataDate)) {
     throw new TypeError("previous institution dataDate or unit is invalid");
+  }
+  if (source.periodYear !== Number(source.dataDate.slice(0, 4))) {
+    throw new TypeError("previous institution periodYear does not match its dataDate");
   }
   if (Object.values(history).some((trades) =>
     trades.some((trade) => trade.tradingDate > source.dataDate!)
@@ -340,28 +374,67 @@ function validatePreviousInstitutionState(
   }
 }
 
-function validatePreviousDatedSection(
-  name: "redemption" | "underwriting",
-  dates: string[],
+function validatePreviousRedemptionState(
+  records: readonly CbRedemptionEvent[],
   source: SupplementalSourceStatus,
-  dateValidator: (value: string) => boolean,
 ): void {
   if (source.state === "unavailable") {
-    if (source.dataDate !== null || dates.length !== 0) {
-      throw new TypeError(`previous unavailable ${name} section must be empty`);
+    if (source.dataDate !== null || source.periodYear !== null || records.length !== 0) {
+      throw new TypeError("previous unavailable redemption section must be empty");
     }
     return;
   }
+  if (source.periodYear === null) {
+    throw new TypeError("previous redemption periodYear is invalid");
+  }
+  const dates = records.map((record) => record.announcementDate);
   if (dates.length === 0) {
-    if (source.dataDate !== null) throw new TypeError(`previous ${name} dataDate must be null`);
+    if (source.dataDate !== null) throw new TypeError("previous redemption dataDate must be null");
     return;
   }
   if (
     typeof source.dataDate !== "string"
-    || !dateValidator(source.dataDate)
+    || !isIsoDate(source.dataDate)
     || source.dataDate !== [...dates].sort().at(-1)
   ) {
-    throw new TypeError(`previous ${name} dataDate does not match its records`);
+    throw new TypeError("previous redemption dataDate does not match its records");
+  }
+  if (dates.some((date) => Number(date.slice(0, 4)) !== source.periodYear)) {
+    throw new TypeError("previous redemption periodYear does not match its records");
+  }
+}
+
+function validatePreviousUnderwritingState(
+  records: readonly CbUnderwritingCase[],
+  source: SupplementalSourceStatus,
+): void {
+  if (source.state === "unavailable") {
+    if (source.dataDate !== null || source.periodYear !== null || records.length !== 0) {
+      throw new TypeError("previous unavailable underwriting section must be empty");
+    }
+    return;
+  }
+  if (source.periodYear === null) {
+    throw new TypeError("previous underwriting periodYear is invalid");
+  }
+  const periodYear = source.periodYear;
+  const dates = records.map((record) => record.filedDate);
+  if (dates.length === 0) {
+    if (source.dataDate !== null) throw new TypeError("previous underwriting dataDate must be null");
+    return;
+  }
+  if (
+    typeof source.dataDate !== "string"
+    || !isSlashDate(source.dataDate)
+    || source.dataDate !== [...dates].sort().at(-1)
+  ) {
+    throw new TypeError("previous underwriting dataDate does not match its records");
+  }
+  if (dates.some((date) => {
+    const year = Number(date.slice(0, 4));
+    return year !== periodYear && year !== periodYear - 1;
+  })) {
+    throw new TypeError("previous underwriting periodYear does not match its records");
   }
 }
 
@@ -374,7 +447,17 @@ function validateSourceStatus(value: unknown, name: string): SupplementalSourceS
   if (source.dataDate !== null && typeof source.dataDate !== "string") {
     throw new TypeError(`previous ${name} dataDate is invalid`);
   }
-  return { state: source.state, dataDate: source.dataDate };
+  if (
+    source.periodYear !== null
+    && (!Number.isInteger(source.periodYear) || (source.periodYear as number) < 1)
+  ) {
+    throw new TypeError(`previous ${name} periodYear is invalid`);
+  }
+  return {
+    state: source.state,
+    dataDate: source.dataDate,
+    periodYear: source.periodYear as number | null,
+  };
 }
 
 function validateInstitutionDaily(value: CbInstitutionDailySnapshot): {

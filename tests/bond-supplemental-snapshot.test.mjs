@@ -27,6 +27,7 @@ test("merges one institution day and retains the newest 60 trading days", () => 
   assert.equal(next.institutionHistory["54642"].at(-1).tradingDate, "2026-08-07");
   assert.equal(next.sources.institution.state, "fresh");
   assert.equal(next.sources.institution.dataDate, "2026-08-07");
+  assert.equal(next.sources.institution.periodYear, 2026);
 });
 
 test("de-duplicates an identical institution trade for the same bond and date", () => {
@@ -139,9 +140,9 @@ test("reuses each verified previous section as stale without retaining mutable a
   const next = buildCbSupplementalSnapshot({ generatedAt, institution, previous });
 
   assert.deepEqual(next.sources, {
-    institution: { state: "fresh", dataDate: "2026-08-07" },
-    redemption: { state: "stale", dataDate: "2026-08-04" },
-    underwriting: { state: "stale", dataDate: "2026/01/02" },
+    institution: { state: "fresh", dataDate: "2026-08-07", periodYear: 2026 },
+    redemption: { state: "stale", dataDate: "2026-08-04", periodYear: 2026 },
+    underwriting: { state: "stale", dataDate: "2026/01/02", periodYear: 2026 },
   });
   assert.notStrictEqual(next.institutionHistory["54642"], previous.institutionHistory["54642"]);
   assert.notStrictEqual(next.redemptions, previous.redemptions);
@@ -176,18 +177,33 @@ test("fresh redemption and underwriting replace their sections and use their max
   const next = buildCbSupplementalSnapshot({
     generatedAt,
     redemptions,
+    redemptionYear: 2026,
     underwriting,
     previous,
   });
 
   assert.equal(next.redemptions.length, 2);
   assert.equal(next.underwritingCases.length, 2);
-  assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: "2026-08-06" });
-  assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: "2026/08/08" });
+  assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: "2026-08-06", periodYear: 2026 });
+  assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: "2026/08/08", periodYear: 2026 });
   assert.equal(next.sources.institution.state, "stale");
 });
 
 test("enforces redemption period and data-date monotonicity", async (t) => {
+  await t.test("every current result requires an explicit period", () => {
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        redemptions: [redemptionEvent("2026-08-01", "31311")],
+      }),
+      /redemptionYear is required/,
+    );
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, redemptions: [] }),
+      /redemptionYear is required/,
+    );
+  });
+
   await t.test("same-year rollback", () => {
     const previous = previousSnapshot();
     assert.throws(
@@ -233,7 +249,7 @@ test("enforces redemption period and data-date monotonicity", async (t) => {
       redemptionYear: 2027,
       previous,
     });
-    assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: "2027-01-02" });
+    assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: "2027-01-02", periodYear: 2027 });
   });
 
   await t.test("empty result with prior records requires a period", () => {
@@ -266,11 +282,122 @@ test("enforces redemption period and data-date monotonicity", async (t) => {
       previous,
     });
     assert.deepEqual(next.redemptions, []);
-    assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: null });
+    assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: null, periodYear: 2027 });
+  });
+
+  await t.test("persisted empty 2027 rejects empty 2026", () => {
+    const previous = previousSnapshot({
+      redemptions: [],
+      redemptionDataDate: null,
+      redemptionPeriodYear: 2027,
+    });
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        redemptions: [],
+        redemptionYear: 2026,
+        previous,
+      }),
+      /redemption year must not move backward/,
+    );
+  });
+
+  await t.test("persisted empty 2027 rejects nonempty 2026", () => {
+    const previous = previousSnapshot({
+      redemptions: [],
+      redemptionDataDate: null,
+      redemptionPeriodYear: 2027,
+    });
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        redemptions: [redemptionEvent("2026-08-01", "31311")],
+        redemptionYear: 2026,
+        previous,
+      }),
+      /redemption year must not move backward/,
+    );
+  });
+
+  await t.test("persisted empty redemption accepts a forward empty rollover", () => {
+    const previous = previousSnapshot({
+      redemptions: [],
+      redemptionDataDate: null,
+      redemptionPeriodYear: 2026,
+    });
+    const next = buildCbSupplementalSnapshot({
+      generatedAt,
+      redemptions: [],
+      redemptionYear: 2027,
+      previous,
+    });
+    assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: null, periodYear: 2027 });
   });
 });
 
 test("enforces underwriting period and data-date monotonicity", async (t) => {
+  await t.test("carry-over-only ROC115 rejects an empty ROC115 result", () => {
+    const previous = previousSnapshot({
+      underwritingCases: [underwritingCase("2025/12/26", "115003")],
+      underwritingDataDate: "2025/12/26",
+      underwritingPeriodYear: 2026,
+    });
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        underwriting: underwritingSnapshot(115, []),
+        previous,
+      }),
+      /empty underwriting result must not erase records within a period/,
+    );
+  });
+
+  await t.test("carry-over-only ROC115 rejects a regressed ROC115 date", () => {
+    const previous = previousSnapshot({
+      underwritingCases: [underwritingCase("2025/12/26", "115003")],
+      underwritingDataDate: "2025/12/26",
+      underwritingPeriodYear: 2026,
+    });
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        underwriting: underwritingSnapshot(115, [underwritingCase("2025/12/25", "115002")]),
+        previous,
+      }),
+      /underwriting dataDate must not move backward within a period/,
+    );
+  });
+
+  await t.test("persisted empty ROC116 rejects empty ROC115", () => {
+    const previous = previousSnapshot({
+      underwritingCases: [],
+      underwritingDataDate: null,
+      underwritingPeriodYear: 2027,
+    });
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        underwriting: underwritingSnapshot(115, []),
+        previous,
+      }),
+      /underwriting period must not move backward/,
+    );
+  });
+
+  await t.test("persisted empty ROC115 accepts empty ROC116", () => {
+    const previous = previousSnapshot({
+      underwritingCases: [],
+      underwritingDataDate: null,
+      underwritingPeriodYear: 2026,
+    });
+    const next = buildCbSupplementalSnapshot({
+      generatedAt,
+      underwriting: underwritingSnapshot(116, []),
+      previous,
+    });
+    assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: null, periodYear: 2027 });
+  });
+
   await t.test("same-period rollback", () => {
     const previous = previousSnapshot();
     assert.throws(
@@ -302,7 +429,7 @@ test("enforces underwriting period and data-date monotonicity", async (t) => {
       underwriting: underwritingSnapshot(116, [underwritingCase("2026/01/01", "116001")]),
       previous,
     });
-    assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: "2026/01/01" });
+    assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: "2026/01/01", periodYear: 2027 });
   });
 
   await t.test("same-period empty result cannot erase newer evidence", () => {
@@ -313,7 +440,7 @@ test("enforces underwriting period and data-date monotonicity", async (t) => {
         underwriting: underwritingSnapshot(115, []),
         previous,
       }),
-      /empty underwriting result must be a newer-period rollover/,
+      /empty underwriting result must not erase records within a period/,
     );
   });
 
@@ -325,7 +452,7 @@ test("enforces underwriting period and data-date monotonicity", async (t) => {
       previous,
     });
     assert.deepEqual(next.underwritingCases, []);
-    assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: null });
+    assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: null, periodYear: 2027 });
   });
 });
 
@@ -333,21 +460,22 @@ test("legal fresh empty sections have null data dates and become stale empty sec
   const fresh = buildCbSupplementalSnapshot({
     generatedAt,
     redemptions: [],
+    redemptionYear: 2026,
     underwriting: {
       rocYear: 115,
       notice: "本公告系統僅供參考，相關資料以正式刊登報紙之公告內容為準。",
       records: [],
     },
   });
-  assert.deepEqual(fresh.sources.redemption, { state: "fresh", dataDate: null });
-  assert.deepEqual(fresh.sources.underwriting, { state: "fresh", dataDate: null });
+  assert.deepEqual(fresh.sources.redemption, { state: "fresh", dataDate: null, periodYear: 2026 });
+  assert.deepEqual(fresh.sources.underwriting, { state: "fresh", dataDate: null, periodYear: 2026 });
 
   const stale = buildCbSupplementalSnapshot({
     generatedAt: "2026-08-10T10:00:00.000Z",
     previous: fresh,
   });
-  assert.deepEqual(stale.sources.redemption, { state: "stale", dataDate: null });
-  assert.deepEqual(stale.sources.underwriting, { state: "stale", dataDate: null });
+  assert.deepEqual(stale.sources.redemption, { state: "stale", dataDate: null, periodYear: 2026 });
+  assert.deepEqual(stale.sources.underwriting, { state: "stale", dataDate: null, periodYear: 2026 });
   assert.deepEqual(stale.redemptions, []);
   assert.deepEqual(stale.underwritingCases, []);
 });
@@ -360,9 +488,9 @@ test("no current or verified previous data produces unavailable empty sections",
   assert.deepEqual(next.redemptions, []);
   assert.deepEqual(next.underwritingCases, []);
   assert.deepEqual(next.sources, {
-    institution: { state: "unavailable", dataDate: null },
-    redemption: { state: "unavailable", dataDate: null },
-    underwriting: { state: "unavailable", dataDate: null },
+    institution: { state: "unavailable", dataDate: null, periodYear: null },
+    redemption: { state: "unavailable", dataDate: null, periodYear: null },
+    underwriting: { state: "unavailable", dataDate: null, periodYear: null },
   });
 });
 
@@ -437,6 +565,51 @@ test("binds previous redemption issuer identity to bond and subject", async (t) 
   });
 });
 
+test("validates persisted source period identity before reuse", async (t) => {
+  await t.test("periodYear is an exact required source-status key", () => {
+    const previous = previousSnapshot();
+    delete previous.sources.redemption.periodYear;
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, previous }),
+      /previous redemption source keys/,
+    );
+  });
+
+  await t.test("institution period matches its source date", () => {
+    const previous = previousSnapshot({ institutionPeriodYear: 2025 });
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, previous }),
+      /previous institution periodYear/,
+    );
+  });
+
+  await t.test("redemption records match their persisted period", () => {
+    const previous = previousSnapshot({ redemptionPeriodYear: 2025 });
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, previous }),
+      /previous redemption periodYear/,
+    );
+  });
+
+  await t.test("underwriting rows remain inside their persisted page window", () => {
+    const previous = previousSnapshot({ underwritingPeriodYear: 2025 });
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, previous }),
+      /previous underwriting periodYear/,
+    );
+  });
+
+  await t.test("unavailable status has a null period", () => {
+    const previous = previousSnapshot();
+    previous.redemptions = [];
+    previous.sources.redemption = { state: "unavailable", dataDate: null, periodYear: 2026 };
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, previous }),
+      /previous unavailable redemption section must be empty/,
+    );
+  });
+});
+
 test("validates the complete previous snapshot before reusing any section", async (t) => {
   const current = {
     institution: {
@@ -445,6 +618,7 @@ test("validates the complete previous snapshot before reusing any section", asyn
       records: [institutionTrade("61876", "2026-08-07")],
     },
     redemptions: [],
+    redemptionYear: 2026,
     underwriting: {
       rocYear: 115,
       notice: "本公告系統僅供參考，相關資料以正式刊登報紙之公告內容為準。",
@@ -506,15 +680,28 @@ function previousSnapshot(overrides = {}) {
     institutionHistory: overrides.institutionHistory ?? {
       "54642": [institutionTrade("54642", "2026-08-06")],
     },
-    redemptions: [redemptionEvent("2026-08-04", "31312")],
-    underwritingCases: [underwritingCase("2026/01/02", "115012")],
+    redemptions: overrides.redemptions ?? [redemptionEvent("2026-08-04", "31312")],
+    underwritingCases: overrides.underwritingCases ?? [underwritingCase("2026/01/02", "115012")],
     sources: {
       institution: {
         state: "fresh",
         dataDate: overrides.institutionDataDate ?? "2026-08-06",
+        periodYear: overrides.institutionPeriodYear ?? 2026,
       },
-      redemption: { state: "fresh", dataDate: "2026-08-04" },
-      underwriting: { state: "fresh", dataDate: "2026/01/02" },
+      redemption: {
+        state: "fresh",
+        dataDate: overrides.redemptionDataDate === undefined
+          ? "2026-08-04"
+          : overrides.redemptionDataDate,
+        periodYear: overrides.redemptionPeriodYear ?? 2026,
+      },
+      underwriting: {
+        state: "fresh",
+        dataDate: overrides.underwritingDataDate === undefined
+          ? "2026/01/02"
+          : overrides.underwritingDataDate,
+        periodYear: overrides.underwritingPeriodYear ?? 2026,
+      },
     },
   };
 }
