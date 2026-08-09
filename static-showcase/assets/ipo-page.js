@@ -11,6 +11,7 @@ const sortTypes = { companyCode: "text", stage: "number", eventDate: "text", dis
 
 initializeFromUrl();
 bindControls();
+bindStagePanels();
 await loadData();
 
 async function loadData() {
@@ -68,6 +69,30 @@ function bindControls() {
   window.addEventListener("popstate", () => { initializeFromUrl(); applyStateToControls(); render(); });
 }
 
+function bindStagePanels() {
+  for (const panel of document.querySelectorAll("[data-ipo-stage-count]")) {
+    const activate = () => {
+      const stage = panel.dataset.stage;
+      state.stage = stage === "board" ? "B" : stage;
+      state.page = 1;
+      syncUrl();
+      applyStateToControls();
+      render();
+      document.querySelector("#ipo-filters").scrollIntoView({
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start",
+      });
+    };
+    panel.addEventListener("click", activate);
+    panel.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
+    });
+  }
+}
+
 function render() {
   const filteredEvents = filteredEventEntries(state.rows, state);
   const filtered = uniqueRows(filteredEvents);
@@ -81,8 +106,21 @@ function render() {
   document.querySelector("#ipo-card-list").innerHTML = visible.length ? visible.map(cardHtml).join("") : emptyCard();
   renderMonthView(filteredEvents);
   renderUpcoming(filteredEvents);
+  renderStageSummary();
   renderPagination(pages);
   updateSortControls();
+}
+
+function renderStageSummary() {
+  const counts = { A: 0, B: 0, board: 0, C: 0, D: 0 };
+  for (const row of state.rows) {
+    const stage = row.stage === "B" && row.events.some((event) => /董事會/.test(event.label)) ? "board" : row.stage;
+    if (Object.hasOwn(counts, stage)) counts[stage] += 1;
+  }
+  for (const [stage, count] of Object.entries(counts)) {
+    const target = document.querySelector(`[data-ipo-stage-count="${stage}"] b`);
+    if (target) target.textContent = formatNumber(count);
+  }
 }
 
 function filteredEventEntries(rows, filters) {
@@ -117,7 +155,11 @@ function renderMonthView(entries) {
 }
 
 function tableRowHtml(row) {
-  return `<tr><th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th><td>${escapeHtml(row.market)}</td><td><span class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.distanceDays)}</td><td>${escapeHtml(pricingStatus(row))}</td><td>${escapeHtml(auctionStatus(row))}</td><td>${formatDate(row.listingDate)}</td></tr>`;
+    return `<tr><th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th><td>${escapeHtml(row.market)}</td><td><span class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.distanceDays)}</td><td>${escapeHtml(pricingStatus(row))}</td><td>${escapeHtml(auctionStatus(row))}</td><td>${formatDate(row.listingDate)}</td><td>${timelineSummary(row)}</td></tr>`;
+  }
+
+function timelineSummary(row) {
+  return row.events.length ? row.events.map((event) => `${escapeHtml(event.label)} ${formatDate(event.date)}`).join(" · ") : "待公告";
 }
 
 function cardHtml(row) {
@@ -154,7 +196,7 @@ function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""
 function positiveInteger(value) { return Math.max(1, Number.parseInt(value ?? "1", 10) || 1); }
 function pageSize() { return matchMedia("(max-width: 900px)").matches ? 25 : 50; }
 function daysLabel(days) { return Number.isFinite(days) ? `${days > 0 ? "+" : ""}${formatNumber(days)} 天` : "—"; }
-function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="9" class="empty-cell">${message}</td></tr>`; }
+  function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="10" class="empty-cell">${message}</td></tr>`; }
 function emptyCard(message = "沒有符合條件的資料") { return `<p class="empty-cell">${message}</p>`; }
 function selectExistingValue(selector, value) { const select = document.querySelector(selector); select.value = [...select.options].some((option) => option.value === value) ? value : "all"; }
 function unique(values) { return [...new Set(values.filter(Boolean))].sort((left, right) => left.localeCompare(right, "zh-Hant")); }

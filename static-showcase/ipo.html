@@ -7,7 +7,7 @@
   <title>IPO 時程｜盤後市場資訊</title>
   <link rel="stylesheet" href="./assets/app.css">
 </head>
-<body data-page="ipo">
+<body data-page="ipo" class="ipo-dashboard-page">
   <a class="skip-link" href="#main-content">跳到主要內容</a>
   <header class="site-header"><div class="site-header__inner">
     <a class="site-mark" href="./index.html" aria-label="可轉債與興櫃盤後資訊首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a>
@@ -18,18 +18,18 @@
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
   </div></header>
 
-  <main id="main-content" class="page-content" tabindex="-1">
+  <main id="main-content" class="page-content ipo-dashboard-page-content" tabindex="-1">
     <header class="page-heading"><p class="kicker">IPO CALENDAR</p><h1>IPO 時程</h1><p>以已公告的正式事件，查看公司目前進度與後續關鍵日期。</p></header>
 
-    <section id="ipo-calendar-root" class="ledger-section" data-page-root="ipo" aria-labelledby="ipo-calendar-heading">
-      <header class="section-heading"><div><p class="section-number">CALENDAR DESK</p><h2 id="ipo-calendar-heading">完整時程</h2></div><p id="ipo-update-status" class="update-status" aria-live="polite">資料讀取中</p></header>
+    <section id="ipo-calendar-root" class="ledger-section ipo-dashboard" data-page-root="ipo" data-ipo-dashboard="calendar" aria-labelledby="ipo-calendar-heading">
+      <header class="section-heading"><div><p class="section-number">CALENDAR DESK / VERIFIED SNAPSHOT</p><h2 id="ipo-calendar-heading">完整時程</h2></div><p id="ipo-update-status" class="update-status" data-ipo-data-status aria-live="polite">資料讀取中</p></header>
 
-      <ol id="ipo-stage-flow" class="ipo-stage-flow" aria-label="IPO 五階段流程">
-        <li data-stage="A"><span>01</span><strong>送件待審</strong><small>等待審議</small></li>
-        <li data-stage="B"><span>02</span><strong>審議後</strong><small>等待董事會</small></li>
-        <li data-stage="board"><span>03</span><strong>董事會後</strong><small>等待契約</small></li>
-        <li data-stage="C"><span>04</span><strong>契約後</strong><small>等待公開時程</small></li>
-        <li data-stage="D"><span>05</span><strong>競拍／買賣</strong><small>明確交易日期</small></li>
+      <ol id="ipo-stage-flow" class="ipo-stage-flow ipo-dashboard-summary" data-ipo-summary aria-label="IPO 五階段流程">
+        <li data-stage="A" data-ipo-stage-count="A" role="button" tabindex="0"><span>01</span><strong>送件待審</strong><small>等待審議</small><b>—</b></li>
+        <li data-stage="B" data-ipo-stage-count="B" role="button" tabindex="0"><span>02</span><strong>審議後</strong><small>等待董事會</small><b>—</b></li>
+        <li data-stage="board" data-ipo-stage-count="board" role="button" tabindex="0"><span>03</span><strong>董事會後</strong><small>等待契約</small><b>—</b></li>
+        <li data-stage="C" data-ipo-stage-count="C" role="button" tabindex="0"><span>04</span><strong>契約後</strong><small>等待公開時程</small><b>—</b></li>
+        <li data-stage="D" data-ipo-stage-count="D" role="button" tabindex="0"><span>05</span><strong>競拍／買賣</strong><small>明確交易日期</small><b>—</b></li>
       </ol>
 
       <section class="ipo-upcoming" aria-labelledby="ipo-upcoming-heading"><header class="subsection-heading"><div><p class="section-number">NEXT ON RECORD</p><h3 id="ipo-upcoming-heading">未來關鍵事件</h3></div></header><div id="ipo-upcoming-grid" class="ranking-grid ipo-upcoming-grid" aria-live="polite"></div></section>
@@ -47,7 +47,7 @@
 
       <div class="view-tabs" role="tablist" aria-label="IPO 時程檢視方式"><button type="button" role="tab" id="ipo-list-tab" data-ipo-view="list" aria-selected="true" aria-controls="ipo-list-view">清單檢視</button><button type="button" role="tab" id="ipo-month-tab" data-ipo-view="month" aria-selected="false" aria-controls="ipo-month-view">月份檢視</button></div>
       <section id="ipo-list-view" role="tabpanel" aria-labelledby="ipo-list-tab">
-      <div class="ipo-table-shell ipo-timeline-table-shell"><table class="ipo-table ipo-timeline-table"><thead><tr>
+      <div class="ipo-table-shell ipo-timeline-table-shell ipo-dashboard-table" data-ipo-table><table class="ipo-table ipo-timeline-table"><thead><tr>
         <th aria-sort="none"><button type="button" data-ipo-sort="companyCode">公司 <span aria-hidden="true"></span></button></th>
         <th>市場</th>
         <th aria-sort="none"><button type="button" data-ipo-sort="stage">目前階段 <span aria-hidden="true"></span></button></th>
@@ -56,8 +56,9 @@
         <th aria-sort="none"><button type="button" data-ipo-sort="distanceDays">距今天 <span aria-hidden="true"></span></button></th>
         <th>定價狀態</th><th aria-sort="none"><button type="button" data-ipo-sort="auctionOpenDate">競拍進度 <span aria-hidden="true"></span></button></th>
         <th aria-sort="none"><button type="button" data-ipo-sort="listingDate">上市／上櫃買賣日 <span aria-hidden="true"></span></button></th>
-      </tr></thead><tbody id="ipo-table-body"><tr><td colspan="9" class="empty-cell">IPO 時程讀取中</td></tr></tbody></table></div>
-      <div id="ipo-card-list" class="ipo-card-list" aria-live="polite"></div>
+        <th>完整事件日期</th>
+      </tr></thead><tbody id="ipo-table-body"><tr><td colspan="10" class="empty-cell">IPO 時程讀取中</td></tr></tbody></table></div>
+      <div id="ipo-card-list" class="ipo-card-list" data-ipo-responsive-cards aria-live="polite"></div>
       <nav id="ipo-pagination" class="pagination" aria-label="IPO 時程分頁"></nav>
       </section>
       <section id="ipo-month-view" class="ipo-month-view" role="tabpanel" aria-labelledby="ipo-month-tab" hidden aria-live="polite"></section>
