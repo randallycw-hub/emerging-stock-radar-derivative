@@ -249,3 +249,19 @@ Parser 邊界：僅接受上述 TPEx POST resource 的 `Daily` payload；root/ta
 Attribution: `財團法人中華民國證券櫃檯買賣中心｜三大法人日交易資訊`，附交易日與本站擷取時間。
 
 Resource status: `VERIFIED_FOR_IMPLEMENTATION`。這不是已暫停的 `bond_cb_daily` resource；後者仍禁止 ingest 或 fallback。
+
+## 可轉債補充來源正式核准 amendment（2026-08-09）
+
+本 amendment 依專案擁有人指示與 controller 的 2026-08-09 read-only live captures，將下列三個已完成 strict parser、exact request、bounded response、attribution 與 failure-isolation 覆核的精確 resource 提升為 `APPROVED_FOR_PRODUCTION`。本 amendment 僅覆寫前述各 resource amendment 的「尚未核准 runtime fetch／production」限制，不擴張其 parser contract、資料語意或用途。
+
+| 精確 resource | 最終狀態 | production 限定用途 |
+| --- | --- | --- |
+| `POST https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade` | `APPROVED_FOR_PRODUCTION` | 僅建立可轉債三大法人盤後歷史；交易日與五至六碼債券代號必須精確一致 |
+| `POST https://www.tpex.org.tw/www/zh-tw/bond/redeem` | `APPROVED_FOR_PRODUCTION` | 僅建立已驗證的贖回／終止櫃檯買賣警示事件 |
+| `GET https://web.twsa.org.tw/edoc2/default.aspx` | `APPROVED_FOR_PRODUCTION` | 僅作新可轉債承銷雷達的次要補充；永遠不是契約真相 |
+
+兩個 TPEx POST 必須分別使用已驗證的 exact form body：`newCb3itrade` 為 `{ date: "YYYY/MM/DD", type: "Daily", id: "", response: "json" }`，`redeem` 為 `{ date: "YYYY", id: "", response: "json" }`。TWSA 僅允許上述 exact GET。每個 JSON response 上限為 500,000 bytes，HTML response 上限為 1,000,000 bytes；HTTP status、redirect、Content-Type、size、JSON 或 parser schema 失敗只拒絕該 named source。
+
+目前來源失敗時，只能複製前一份經完整驗證且無 mutable alias 的對應區段，明確標示為 `stale` 並保留原 `dataDate`；不得冒充 fresh、改寫日期或把舊資料當作新的來源事實。沒有合法 current 或 previous 區段時必須標示 `unavailable`。
+
+所有 redirect、替代 URL、自動 fallback、Yahoo／券商／第三方來源、即時資料、買賣建議與擴張用途仍禁止。`edoc2` 不得推論可轉債代號、發行金額、轉換價格或掛牌日期；這些欄位仍須由 TPEx／MOPS 的 exact-code 契約證據確認。本 amendment 不核准 UI、公開發布或將承銷公告提升為契約真相。
