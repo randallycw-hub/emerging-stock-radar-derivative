@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const htmlPath = new URL("../static-showcase/ipo-radar.html", import.meta.url);
+const calendarHtmlPath = new URL("../static-showcase/ipo.html", import.meta.url);
 const pagePath = new URL("../static-showcase/assets/ipo-radar-page.js", import.meta.url);
 const dataPath = new URL("../static-showcase/assets/ipo-data.js", import.meta.url);
 
@@ -71,4 +72,20 @@ test("IPO loader falls back to the published static snapshot when the API is una
     "/market-site/data/generations/test/runtime.json",
     "/market-site/data/generations/test/ipo-events.json",
   ]);
+});
+
+test("IPO pages expose the shared dashboard panel contract", async () => {
+  const [radarHtml, calendarHtml] = await Promise.all([
+    readFile(htmlPath, "utf8"),
+    readFile(calendarHtmlPath, "utf8"),
+  ]);
+  for (const [name, html] of [["radar", radarHtml], ["calendar", calendarHtml]]) {
+    assert.match(html, /data-ipo-dashboard/, name);
+    assert.match(html, /data-ipo-summary/, name);
+    assert.match(html, /data-ipo-data-status/, name);
+    assert.match(html, /data-ipo-responsive-cards/, name);
+    assert.match(html, /aria-sort="none"/, name);
+  }
+  assert.match(calendarHtml, /data-ipo-stage-count/);
+  assert.match(radarHtml, /data-ipo-stage-filter/);
 });

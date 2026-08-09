@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access } from "node:fs/promises";
 import test from "node:test";
 
 import { triggerIpoRefresh } from "../scripts/trigger-ipo-refresh.mjs";
@@ -7,16 +7,8 @@ import { createValidIpoSnapshot } from "./helpers/ipo-snapshot.mjs";
 
 const now = new Date("2026-08-01T14:30:00.000Z");
 
-test("daily refresh workflow wakes the public IPO endpoint once at 22:30 Taipei time", async () => {
-  const workflow = await readFile(".github/workflows/refresh-public-site.yml", "utf8");
-
-  assert.match(workflow, /name:\s*Refresh public IPO data/);
-  assert.match(workflow, /cron:\s*["']30 14 \* \* \*["']/);
-  assert.match(workflow, /timeout-minutes:\s*5/);
-  assert.match(workflow, /UV_THREADPOOL_SIZE:\s*["']2["']/);
-  assert.match(workflow, /IPO_REFRESH_URL:\s*["']https:\/\/emerging-stock-radar-derivative-20260720\.chiayu333\.chatgpt\.site\/api\/ipo-events["']/);
-  assert.match(workflow, /node scripts\/trigger-ipo-refresh\.mjs/);
-  assert.doesNotMatch(workflow, /deploy-pages|upload-pages-artifact|pages:\s*write|id-token:\s*write|cloudflare|workers\.dev|relay/i);
+test("obsolete Cloudflare refresh workflow stays removed", async () => {
+  await assert.rejects(access(".github/workflows/refresh-public-site.yml"), { code: "ENOENT" });
 });
 
 test("IPO refresh accepts only a complete non-stale Taipei-today snapshot and adds refresh=1", async () => {
