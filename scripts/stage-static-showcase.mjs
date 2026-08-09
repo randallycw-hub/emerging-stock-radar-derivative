@@ -1,6 +1,10 @@
+import { createHash } from "node:crypto";
 import { cp, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+
+import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
+import { verifyIssuerResearchViewConsistency } from "./build-bond-market-snapshot.mjs";
 
 export async function stageStaticShowcase({
   source = "static-showcase",
@@ -44,6 +48,13 @@ export async function stageStaticShowcase({
     "datasets.conversionPrices": `${base}/conversion-prices.json`,
     "datasets.bondHistory": `${base}/bond-market-history.json`,
   };
+  const declaresIssuerResearch = manifest.market.files?.some(
+    (file) => file?.name === "cb-issuer-research.json",
+  ) === true;
+  if (declaresIssuerResearch) {
+    requiredArtifacts["datasets.cbIssuerResearch"] =
+      `${base}/cb-issuer-research.json`;
+  }
   if (manifest.emergingMarketUrl !== requiredArtifacts.emergingMarketUrl) {
     throw new Error("active generation required dataset artifacts are missing or invalid");
   }
@@ -59,8 +70,66 @@ export async function stageStaticShowcase({
       "active generation required dataset artifacts are missing or invalid",
     );
   }
+  if (declaresIssuerResearch) {
+    await verifyDeclaredIssuerResearch({ source, manifest, runtime, base });
+  }
   await rm(destination, { recursive: true, force: true });
   await cp(source, destination, { recursive: true, force: true });
+}
+
+async function verifyDeclaredIssuerResearch({ source, manifest, runtime, base }) {
+  const issuerEntries = manifest.market.files.filter(
+    (file) => file?.name === "cb-issuer-research.json",
+  );
+  const viewEntries = manifest.market.files.filter(
+    (file) => file?.name === "bond-market-view.json",
+  );
+  if (issuerEntries.length !== 1 || viewEntries.length !== 1) {
+    throw new Error("active generation issuer research manifest is invalid");
+  }
+  const issuerEntry = validateFileEntry(issuerEntries[0], "cb-issuer-research.json");
+  const viewEntry = validateFileEntry(viewEntries[0], "bond-market-view.json");
+  const researchText = await readFile(
+    join(source, `${base}/cb-issuer-research.json`.replace(/^\.\//, "")),
+    "utf8",
+  );
+  const viewsText = await readFile(
+    join(source, `${base}/bond-market-view.json`.replace(/^\.\//, "")),
+    "utf8",
+  );
+  if (
+    sha256Text(researchText) !== issuerEntry.sha256
+    || sha256Text(viewsText) !== viewEntry.sha256
+  ) {
+    throw new Error("active generation issuer research hash is invalid");
+  }
+  const snapshot = parseCbIssuerResearchSnapshot(JSON.parse(researchText));
+  const views = JSON.parse(viewsText);
+  if (
+    snapshot.records.length !== issuerEntry.recordCount
+    || !Array.isArray(views)
+    || views.length !== viewEntry.recordCount
+    || runtime.datasets?.cbIssuerResearch !== `${base}/cb-issuer-research.json`
+  ) {
+    throw new Error("active generation issuer research artifact is invalid");
+  }
+  verifyIssuerResearchViewConsistency(snapshot, views);
+}
+
+function validateFileEntry(entry, expectedName) {
+  if (
+    entry?.name !== expectedName
+    || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
+    || !Number.isInteger(entry.recordCount)
+    || entry.recordCount < 0
+  ) {
+    throw new Error("active generation issuer research manifest is invalid");
+  }
+  return entry;
+}
+
+function sha256Text(text) {
+  return `sha256:${createHash("sha256").update(text, "utf8").digest("hex")}`;
 }
 
 async function readJson(path, message) {

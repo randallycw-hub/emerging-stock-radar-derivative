@@ -10,6 +10,7 @@ import {
   buildRuntimeBootstrap,
   fetchOfficialCsvWithRetry,
   readPublishedBondHistory,
+  readPublishedCbIssuerResearch,
   refreshStaticShowcase,
   updateRuntimeCacheKey,
 } from "../scripts/refresh-static-showcase-data.mjs";
@@ -67,12 +68,13 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
           .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
         return new Response(sourceTexts[datasetId], { status: 200 });
       },
-      marketBuilder: async ({ manifestBase, asOfDate }) => {
+      marketBuilder: async ({ manifestBase, asOfDate, outputDir }) => {
         marketAsOfDate = asOfDate;
-        return {
-          manifest: { ...manifestBase, market: { status: "verified" } },
-          report: { validation: "passed" },
-        };
+        return writeIssuerResearchCandidate({
+          outputDir,
+          manifestBase,
+          generatedAt: "2026-07-30T06:00:06.000Z",
+        });
       },
     });
 
@@ -112,6 +114,15 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
     const runtime = JSON.parse(await readFile(join(generationRoot, "runtime.json"), "utf8"));
     assert.equal(runtime.generation, pointer.generation);
     assert.equal(runtime.manifestUrl, `./data/${pointer.generation}/manifest.json`);
+    assert.equal(
+      runtime.datasets.cbIssuerResearch,
+      `./data/${pointer.generation}/cb-issuer-research.json`,
+    );
+    const issuerResearch = JSON.parse(await readFile(
+      join(generationRoot, "cb-issuer-research.json"),
+      "utf8",
+    ));
+    assert.equal(issuerResearch.records[0].issuerCode, "1260");
   });
 });
 
@@ -129,6 +140,30 @@ test("refresh reads the prior generation bond history before staging a replaceme
   await writeFile(join(generation, "bond-market-history.json"), JSON.stringify(history), "utf8");
 
   assert.deepEqual(await readPublishedBondHistory(dataRoot), history);
+});
+
+test("prior generation fails closed when its manifest declares a missing issuer snapshot", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-prior-research-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    "utf8",
+  );
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({
+      market: { files: [{ name: "cb-issuer-research.json" }] },
+    }),
+    "utf8",
+  );
+
+  await assert.rejects(
+    readPublishedCbIssuerResearch(dataRoot),
+    /missing prior CB issuer research/i,
+  );
 });
 
 test("refresh merges a restored CI history cache with the committed generation", async () => {
@@ -167,15 +202,60 @@ test("refresh leaves the prior generation untouched when publication fails befor
   await withTemporaryShowcase(async (root) => {
     await seedPriorGeneration(root);
     const beforePointer = await readFile(join(root, "static-showcase/data/current.json"), "utf8");
-    const beforeManifest = await readFile(join(root, "static-showcase/data/generations/old/manifest.json"), "utf8");
+    const beforeManifest = await readFile(join(root, "static-showcase/data/generations/abcdef/manifest.json"), "utf8");
     await assert.rejects(refreshStaticShowcase({
       fetchImpl: async () => new Response("ignored", { status: 500 }),
       marketBuilder: async () => assert.fail("must not publish"),
     }));
     assert.equal(await readFile(join(root, "static-showcase/data/current.json"), "utf8"), beforePointer);
-    assert.equal(await readFile(join(root, "static-showcase/data/generations/old/manifest.json"), "utf8"), beforeManifest);
+    assert.equal(await readFile(join(root, "static-showcase/data/generations/abcdef/manifest.json"), "utf8"), beforeManifest);
   });
 });
+
+for (const failureMode of ["hash", "manifest", "cross-file"]) {
+  test(`research ${failureMode} failure after candidate write leaves pointer and prior generation unchanged`, async () => {
+    await withTemporaryShowcase(async (root) => {
+      await seedPriorGeneration(root);
+      const pointerPath = join(root, "static-showcase/data/current.json");
+      const priorResearchPath = join(
+        root,
+        "static-showcase/data/generations/abcdef/cb-issuer-research.json",
+      );
+      const beforePointer = await readFile(pointerPath, "utf8");
+      const beforeResearch = await readFile(priorResearchPath, "utf8");
+      const sourceTexts = {
+        "94025": await fixtureText("source-verification/94025/csv-minimal.csv"),
+        "11406": "bondCode\n",
+        "11586": "companyCode\n1260\n",
+        emergingMarket: await fixtureText(
+          "source-verification/emerging-market/tpex-esb-latest-statistics.json",
+        ),
+      };
+
+      await assert.rejects(
+        refreshStaticShowcase({
+          now: new Date("2026-07-30T06:00:06.000Z"),
+          fetchImpl: async (url) => {
+            const datasetId = Object.entries(OFFICIAL_SHOWCASE_SOURCES)
+              .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
+            return new Response(sourceTexts[datasetId], { status: 200 });
+          },
+          marketBuilder: async ({ outputDir, manifestBase }) =>
+            writeIssuerResearchCandidate({
+              outputDir,
+              manifestBase,
+              generatedAt: "2026-07-30T06:00:06.000Z",
+              failureMode,
+            }),
+        }),
+        /VALIDATION_FAILED/,
+      );
+
+      assert.equal(await readFile(pointerPath, "utf8"), beforePointer);
+      assert.equal(await readFile(priorResearchPath, "utf8"), beforeResearch);
+    });
+  });
+}
 
 test("refresh fails closed and preserves prior files when emerging-market validation fails", async () => {
   await withTemporaryShowcase(async (root) => {
@@ -285,6 +365,100 @@ async function fixtureText(path) {
   return readFile(new URL(`./fixtures/${path}`, import.meta.url), "utf8");
 }
 
+async function writeIssuerResearchCandidate({
+  outputDir,
+  manifestBase,
+  generatedAt,
+  failureMode,
+}) {
+  const snapshot = issuerResearchSnapshot(generatedAt);
+  const compact = {
+    market: "listed",
+    industryName: "食品工業",
+    revenueMonth: "2026-06",
+    sourcePublishedOn: "2026-07-17",
+    revenueUnit: "仟元",
+    currentMonthRevenue: "100",
+    monthOverMonthPercent: "1",
+    yearOverYearPercent: "2",
+    cumulativeRevenue: "600",
+    cumulativeYearOverYearPercent: "3",
+  };
+  const researchText = `${JSON.stringify(snapshot, null, 2)}\n`;
+  const viewsText = `${JSON.stringify([{
+    bondCode: "12601",
+    issuerCode: "1260",
+    issuerResearch: failureMode === "cross-file" ? null : compact,
+  }], null, 2)}\n`;
+  await writeFile(join(outputDir, "cb-issuer-research.json"), researchText, "utf8");
+  await writeFile(join(outputDir, "bond-market-view.json"), viewsText, "utf8");
+  const files = [
+    {
+      name: "cb-issuer-research.json",
+      sha256: sha256Text(researchText),
+      recordCount: 1,
+    },
+    {
+      name: "bond-market-view.json",
+      sha256: sha256Text(viewsText),
+      recordCount: 1,
+    },
+  ];
+  if (failureMode === "hash") {
+    await writeFile(
+      join(outputDir, "cb-issuer-research.json"),
+      `${researchText.trimEnd()} \n`,
+      "utf8",
+    );
+  }
+  if (failureMode === "manifest") files.pop();
+  return {
+    manifest: {
+      ...manifestBase,
+      market: {
+        status: "verified",
+        dataDate: "2026-07-30",
+        files,
+      },
+    },
+    report: { validation: "passed" },
+  };
+}
+
+function issuerResearchSnapshot(generatedAt = "2026-07-29T06:00:06.000Z") {
+  return {
+    schemaVersion: 1,
+    generatedAt,
+    records: [{
+      issuerCode: "1260",
+      issuerName: "富味鄉",
+      market: "listed",
+      industryName: "食品工業",
+      revenueMonth: "2026-06",
+      sourcePublishedOn: "2026-07-17",
+      revenueUnit: "仟元",
+      currentMonthRevenue: "100",
+      monthOverMonthPercent: "1",
+      yearOverYearPercent: "2",
+      cumulativeRevenue: "600",
+      cumulativeYearOverYearPercent: "3",
+    }],
+    sources: {
+      listed: {
+        status: "current",
+        dataDate: "2026-07-17",
+        fetchedAt: generatedAt,
+      },
+      otc: { status: "unavailable", dataDate: null, fetchedAt: null },
+    },
+    diagnostics: [],
+  };
+}
+
+function sha256Text(text) {
+  return `sha256:${createHash("sha256").update(text, "utf8").digest("hex")}`;
+}
+
 async function withTemporaryShowcase(run) {
   const root = await mkdtemp(join(tmpdir(), "showcase-refresh-"));
   const originalDirectory = process.cwd();
@@ -304,9 +478,18 @@ async function withTemporaryShowcase(run) {
 }
 
 async function seedPriorGeneration(root) {
-  const generation = join(root, "static-showcase/data/generations/old");
+  const generation = join(root, "static-showcase/data/generations/abcdef");
   await mkdir(generation, { recursive: true });
-  await writeFile(join(generation, "manifest.json"), "old-manifest", "utf8");
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({ market: { status: "verified", files: [] } }),
+    "utf8",
+  );
   await writeFile(join(generation, "runtime.json"), "old-runtime", "utf8");
-  await writeFile(join(root, "static-showcase/data/current.json"), JSON.stringify({ generation: "generations/old" }), "utf8");
+  await writeFile(
+    join(generation, "cb-issuer-research.json"),
+    `${JSON.stringify(issuerResearchSnapshot())}\n`,
+    "utf8",
+  );
+  await writeFile(join(root, "static-showcase/data/current.json"), JSON.stringify({ generation: "generations/abcdef" }), "utf8");
 }

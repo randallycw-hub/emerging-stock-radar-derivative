@@ -17,11 +17,40 @@ import {
 const bond = {
   bondCode: "35221",
   issuerCode: "3522",
+  issuerName: "御嵿",
   shortName: "御嵿一",
   maturityDate: "2028-07-29",
   issueAmount: "500000000",
   outstandingAmount: "400000000",
   putDates: ["2027-08-30"],
+};
+
+const previousIssuerResearch = {
+  schemaVersion: 1,
+  generatedAt: "2026-07-29T12:30:00.000Z",
+  records: [{
+    issuerCode: "3522",
+    issuerName: "御嵿",
+    market: "listed",
+    industryName: "觀光餐旅",
+    revenueMonth: "2026-06",
+    sourcePublishedOn: "2026-07-17",
+    revenueUnit: "仟元",
+    currentMonthRevenue: "100",
+    monthOverMonthPercent: "1",
+    yearOverYearPercent: "2",
+    cumulativeRevenue: "600",
+    cumulativeYearOverYearPercent: "3",
+  }],
+  sources: {
+    listed: {
+      status: "current",
+      dataDate: "2026-07-17",
+      fetchedAt: "2026-07-29T12:30:00.000Z",
+    },
+    otc: { status: "unavailable", dataDate: null, fetchedAt: null },
+  },
+  diagnostics: [],
 };
 const validCollectedMarketData = {
   requestedDate: "2026-07-30",
@@ -79,10 +108,25 @@ async function makePublishedDirectory() {
   return outputDir;
 }
 
+async function offlineIssuerResearchSourceResults() {
+  const listed = await readFile(new URL(
+    "./fixtures/source-verification/cb-issuer-research/listed-minimal.csv",
+    import.meta.url,
+  ), "utf8");
+  return {
+    listed: {
+      status: "fulfilled",
+      value: listed.replace('"1101","台泥"', '"3522","御嵿"'),
+    },
+    otc: { status: "rejected", reason: new Error("offline OTC unavailable") },
+  };
+}
+
 test("maps official 11406 dates, put dates and amount units exactly", () => {
   assert.deepEqual(bondInputsFrom11406Rows([{
     債券代碼: "35221",
     機構代碼: "3522",
+    機構名稱: "御嵿",
     債券簡稱: "御嵿一",
     到期日期: "1170729",
     發行總額: "2仟元",
@@ -91,12 +135,104 @@ test("maps official 11406 dates, put dates and amount units exactly", () => {
   }]), [{
     bondCode: "35221",
     issuerCode: "3522",
+    issuerName: "御嵿",
     shortName: "御嵿一",
     maturityDate: "2028-07-29",
     issueAmount: "2000",
     outstandingAmount: "1500",
     putDates: ["2026-08-30", "2027-08-30"],
   }]);
+});
+
+test("production issuer research refuses both network calls until both registry resources are approved", async () => {
+  const { settleProductionCbIssuerResearchSources } = await import(
+    "../scripts/build-bond-market-snapshot.mjs"
+  );
+  let fetchCalls = 0;
+  const result = await settleProductionCbIssuerResearchSources({
+    fetchSourcesImpl: async () => {
+      fetchCalls += 1;
+      return offlineIssuerResearchSourceResults();
+    },
+  });
+
+  assert.equal(fetchCalls, 0);
+  assert.equal(result.listed.status, "rejected");
+  assert.equal(result.otc.status, "rejected");
+  assert.match(String(result.listed.reason), /not approved for production/i);
+});
+
+test("publishes one validated issuer snapshot, compact joined views, hashes, and no raw notes", async () => {
+  const outputDir = await makePublishedDirectory();
+  const result = await buildBondMarketSnapshot({
+    outputDir,
+    bonds: [bond, { ...bond, bondCode: "35222", shortName: "御嵿二" }],
+    collectImpl: async () => validCollectedMarketData,
+    offlineIssuerResearchSourceResults: await offlineIssuerResearchSourceResults(),
+    now: () => new Date("2026-08-09T12:30:00.000Z"),
+  });
+
+  assert.ok(result.files.includes("cb-issuer-research.json"));
+  const researchText = await readFile(join(outputDir, "cb-issuer-research.json"), "utf8");
+  const research = JSON.parse(researchText);
+  assert.equal(research.records.length, 1);
+  assert.equal(research.records[0].issuerCode, "3522");
+  assert.equal(research.sources.listed.status, "current");
+  assert.equal(research.sources.otc.status, "unavailable");
+  assert.equal(researchText.includes("備註"), false);
+  assert.equal(researchText.includes("offline OTC unavailable"), false);
+  assert.equal(researchText.includes("t187ap05_L.csv"), false);
+  assert.deepEqual(result.views.map((view) => view.issuerResearch?.industryName), [
+    "水泥工業",
+    "水泥工業",
+  ]);
+  assert.notStrictEqual(result.views[0].issuerResearch, result.views[1].issuerResearch);
+  const entry = result.manifest.market.files.find(
+    (file) => file.name === "cb-issuer-research.json",
+  );
+  assert.match(entry.sha256, /^sha256:[0-9a-f]{64}$/);
+  assert.equal(entry.recordCount, 1);
+});
+
+test("validates the entire prior issuer snapshot before market collection or stale reuse", async () => {
+  const outputDir = await makePublishedDirectory();
+  await writeFile(
+    join(outputDir, "cb-issuer-research.json"),
+    `${JSON.stringify({ ...previousIssuerResearch, schemaVersion: 2 })}\n`,
+  );
+  let marketCalls = 0;
+
+  await assert.rejects(
+    buildBondMarketSnapshot({
+      outputDir,
+      bonds: [bond],
+      collectImpl: async () => {
+        marketCalls += 1;
+        return validCollectedMarketData;
+      },
+      offlineIssuerResearchSourceResults: await offlineIssuerResearchSourceResults(),
+      now: () => new Date("2026-08-09T12:30:00.000Z"),
+    }),
+    /schemaVersion/i,
+  );
+  assert.equal(marketCalls, 0);
+});
+
+test("production default stages unavailable rather than current research while registry is unapproved", async () => {
+  const outputDir = await makePublishedDirectory();
+  const result = await buildBondMarketSnapshot({
+    outputDir,
+    bonds: [bond],
+    collectImpl: async () => validCollectedMarketData,
+    now: () => new Date("2026-08-09T12:30:00.000Z"),
+  });
+
+  assert.deepEqual(result.issuerResearch.sources, {
+    listed: { status: "unavailable", dataDate: null, fetchedAt: null },
+    otc: { status: "unavailable", dataDate: null, fetchedAt: null },
+  });
+  assert.equal(result.issuerResearch.records.length, 0);
+  assert.equal(result.views[0].issuerResearch, null);
 });
 
 test("excludes only explicitly private unlisted 11406 bonds without hiding malformed public codes", () => {
@@ -165,10 +301,16 @@ test("a failed candidate leaves every published market file unchanged", async ()
     "cb-quotes.json",
     "stock-closes.json",
     "conversion-prices.json",
+    "cb-issuer-research.json",
     "bond-market-view.json",
   ];
   for (const name of names) {
-    await writeFile(join(outputDir, name), `{"previous":"${name}"}\n`);
+    await writeFile(
+      join(outputDir, name),
+      name === "cb-issuer-research.json"
+        ? `${JSON.stringify(previousIssuerResearch)}\n`
+        : `{"previous":"${name}"}\n`,
+    );
   }
   const before = Object.fromEntries(await Promise.all(
     ["manifest.json", ...names].map(async (name) => [
@@ -217,7 +359,7 @@ test("a valid candidate publishes verified files and appends exact-date history"
   });
 
   assert.equal(result.status, "published");
-  assert.equal(result.files.length, 5);
+  assert.equal(result.files.length, 6);
   assert.equal(result.manifest.market.generatedAt, "2026-07-30T12:30:00.000Z");
   assert.equal(result.manifest.market.status, "verified");
   assert.equal(result.manifest.market.requestedDate, "2026-07-30");

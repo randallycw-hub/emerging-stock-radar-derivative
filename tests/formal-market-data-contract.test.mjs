@@ -23,3 +23,29 @@ test("格式化器對缺值使用破折號", async () => {
   assert.equal(formatAmount(undefined), "—");
   assert.equal(formatDateOrDash(""), "—");
 });
+
+test("正式 generation runtime only exposes compact CB issuer research artifact", async () => {
+  const { buildGenerationRuntime } = await import(
+    "../scripts/refresh-static-showcase-data.mjs"
+  );
+  const runtime = buildGenerationRuntime("generations/abc123", {
+    market: {
+      files: [{
+        name: "cb-issuer-research.json",
+        sha256: `sha256:${"a".repeat(64)}`,
+        recordCount: 1,
+      }],
+    },
+  });
+
+  assert.equal(
+    runtime.datasets.cbIssuerResearch,
+    "./data/generations/abc123/cb-issuer-research.json",
+  );
+  const serialized = JSON.stringify(runtime);
+  assert.equal(serialized.includes("t187ap05_L.csv"), false);
+  assert.equal(serialized.includes("t187ap05_O.csv"), false);
+  assert.equal(serialized.includes("備註"), false);
+  assert.equal(Object.hasOwn(runtime.datasets, "listedMonthlyRevenueCsv"), false);
+  assert.equal(Object.hasOwn(runtime.datasets, "otcMonthlyRevenueCsv"), false);
+});

@@ -18,6 +18,21 @@ const bond = {
   putDates: ["2026-08-30", "2027-08-30"],
 };
 
+const issuerResearch = {
+  issuerCode: "3522",
+  issuerName: "御嵿",
+  market: "otc",
+  industryName: "觀光餐旅",
+  revenueMonth: "2026-07",
+  sourcePublishedOn: "2026-08-08",
+  revenueUnit: "仟元",
+  currentMonthRevenue: "123456",
+  monthOverMonthPercent: "1.25",
+  yearOverYearPercent: "2.5",
+  cumulativeRevenue: "765432",
+  cumulativeYearOverYearPercent: "3.75",
+};
+
 function quote(tradingDate, close, patch = {}) {
   return {
     bondCode: "35221",
@@ -70,6 +85,65 @@ function fixture(overrides = {}) {
     ...overrides,
   };
 }
+
+test("joins the compact public research subset by exact issuer code only", () => {
+  const [view] = buildBondMarketViews(fixture({
+    issuerResearch: [
+      { ...issuerResearch, issuerName: "a deliberately unrelated presentation name" },
+      { ...issuerResearch, issuerCode: "03522", issuerName: "御嵿" },
+    ],
+  }));
+
+  assert.deepEqual(view.issuerResearch, {
+    market: "otc",
+    industryName: "觀光餐旅",
+    revenueMonth: "2026-07",
+    sourcePublishedOn: "2026-08-08",
+    revenueUnit: "仟元",
+    currentMonthRevenue: "123456",
+    monthOverMonthPercent: "1.25",
+    yearOverYearPercent: "2.5",
+    cumulativeRevenue: "765432",
+    cumulativeYearOverYearPercent: "3.75",
+  });
+  assert.equal("issuerCode" in view.issuerResearch, false);
+  assert.equal("issuerName" in view.issuerResearch, false);
+});
+
+test("returns null when no exact research issuer code exists", () => {
+  const [view] = buildBondMarketViews(fixture({
+    issuerResearch: [{ ...issuerResearch, issuerCode: "03522" }],
+  }));
+
+  assert.equal(view.issuerResearch, null);
+});
+
+test("rejects duplicate and name-only research before building the issuer map", () => {
+  assert.throws(
+    () => buildBondMarketViews(fixture({
+      issuerResearch: [issuerResearch, structuredClone(issuerResearch)],
+    })),
+    /duplicate issuer research code/i,
+  );
+  const nameOnlyResearch = { ...issuerResearch };
+  delete nameOnlyResearch.issuerCode;
+  assert.throws(
+    () => buildBondMarketViews(fixture({ issuerResearch: [nameOnlyResearch] })),
+    /issuer research issuerCode/i,
+  );
+});
+
+test("clones public research independently for every bond of one issuer", () => {
+  const secondBond = { ...bond, bondCode: "35222", shortName: "御嵿二" };
+  const views = buildBondMarketViews(fixture({
+    bonds: [bond, secondBond],
+    issuerResearch: [issuerResearch],
+  }));
+
+  assert.deepEqual(views[0].issuerResearch, views[1].issuerResearch);
+  assert.notStrictEqual(views[0].issuerResearch, views[1].issuerResearch);
+  assert.notStrictEqual(views[0].issuerResearch, issuerResearch);
+});
 
 test("decimal helpers round deterministically without floating point", () => {
   assert.equal(divideDecimal("38.25", "35.1", 8), "1.08974359");

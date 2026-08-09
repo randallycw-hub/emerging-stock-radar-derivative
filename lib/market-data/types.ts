@@ -35,10 +35,24 @@ export type ConversionPriceVersion = {
   officialDetailUrl: string;
 };
 
+export type BondIssuerResearchView = {
+  market: "listed" | "otc";
+  industryName: string;
+  revenueMonth: string;
+  sourcePublishedOn: string;
+  revenueUnit: "仟元";
+  currentMonthRevenue: string;
+  monthOverMonthPercent: string | null;
+  yearOverYearPercent: string | null;
+  cumulativeRevenue: string | null;
+  cumulativeYearOverYearPercent: string | null;
+};
+
 export type BondMarketView = {
   bondCode: string;
   issuerCode: string;
   bondName: string;
+  issuerResearch: BondIssuerResearchView | null;
   cbClose: string | null;
   cbPriceDate: string | null;
   cbTradeUnits: string;

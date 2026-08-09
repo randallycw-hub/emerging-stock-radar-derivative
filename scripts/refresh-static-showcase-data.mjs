@@ -15,12 +15,14 @@ import { pathToFileURL } from "node:url";
 import { isIsoDate } from "../lib/domain/dates.ts";
 import { EmergingMarketViewSchema } from "../lib/domain/schema.ts";
 import { buildEmergingMarketViews } from "../lib/market-data/emerging-market-view.ts";
+import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCsv } from "../lib/source-verification/csv.ts";
 import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
 import { normalize94025Row, parse94025Csv } from "../lib/source-verification/source-94025.ts";
 import {
   bondInputsFrom11406Rows,
   buildBondMarketSnapshot,
+  verifyIssuerResearchViewConsistency,
 } from "./build-bond-market-snapshot.mjs";
 import { fetchCurrentOfficialMarketData } from "./lib/official-market-fetch.mjs";
 import { buildStaticIpoSnapshot } from "./static-ipo-fallback.mjs";
@@ -47,8 +49,11 @@ export function buildRuntimeBootstrap() {
   ].join("");
 }
 
-function buildGenerationRuntime(generation) {
+export function buildGenerationRuntime(generation, manifest) {
   const base = `./data/${generation}`;
+  const declaresIssuerResearch = manifest?.market?.files?.some(
+    (file) => file?.name === "cb-issuer-research.json",
+  ) === true;
   return {
     generation,
     manifestUrl: `${base}/manifest.json`,
@@ -57,6 +62,9 @@ function buildGenerationRuntime(generation) {
     datasets: {
       "94025": `${base}/94025.json`, "11406": `${base}/11406.json`, "11586": `${base}/11586.json`,
       bondMarket: `${base}/bond-market-view.json`, conversionPrices: `${base}/conversion-prices.json`, bondHistory: `${base}/bond-market-history.json`,
+      ...(declaresIssuerResearch
+        ? { cbIssuerResearch: `${base}/cb-issuer-research.json` }
+        : {}),
     },
   };
 }
@@ -179,11 +187,17 @@ export async function openMarketCheckpoint({
   };
 }
 
+// The offline settled-results option is forwarded only to the pure candidate
+// builder; the CLI omits it, so production source access still uses its gate.
 export async function refreshStaticShowcase({
   fetchImpl = fetch,
   now = new Date(),
   marketBuilder = buildBondMarketSnapshot,
+  offlineIssuerResearchSourceResults,
 } = {}) {
+  const previousIssuerResearch = await readPublishedCbIssuerResearch(
+    DATA_DIRECTORY,
+  );
   const datasets = {};
   const datasetTexts = {};
   const manifestDatasets = [];
@@ -306,6 +320,10 @@ export async function refreshStaticShowcase({
       },
       now: () => now,
       manifestBase: baseManifest,
+      previousIssuerResearch,
+      ...(offlineIssuerResearchSourceResults === undefined
+        ? {}
+        : { offlineIssuerResearchSourceResults }),
     });
     const manifest = marketResult.manifest;
     await writeFile(
@@ -315,10 +333,10 @@ export async function refreshStaticShowcase({
     );
     await writeFile(
       join(stagingDataDirectory, "runtime.json"),
-      `${JSON.stringify(buildGenerationRuntime(generation), null, 2)}\n`,
+      `${JSON.stringify(buildGenerationRuntime(generation, manifest), null, 2)}\n`,
       "utf8",
     );
-    await verifyStagedEmergingSnapshot(stagingDataDirectory);
+    await verifyStagedGeneration(stagingDataDirectory);
     await mkdir(dirname(PUBLISHED_HISTORY_CACHE), { recursive: true });
     await copyFile(
       join(stagingDataDirectory, "bond-market-history.json"),
@@ -389,6 +407,48 @@ export async function readPublishedBondHistory(
     || left.date.localeCompare(right.date));
 }
 
+export async function readPublishedCbIssuerResearch(
+  dataDirectory = DATA_DIRECTORY,
+) {
+  let pointer;
+  try {
+    pointer = JSON.parse(await readFile(join(dataDirectory, "current.json"), "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw error;
+  }
+  if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
+    throw new Error("INVALID_CURRENT_GENERATION_POINTER");
+  }
+  try {
+    const value = JSON.parse(await readFile(
+      join(dataDirectory, pointer.generation, "cb-issuer-research.json"),
+      "utf8",
+    ));
+    return parseCbIssuerResearchSnapshot(value);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      let manifest;
+      try {
+        manifest = JSON.parse(await readFile(
+          join(dataDirectory, pointer.generation, "manifest.json"),
+          "utf8",
+        ));
+      } catch (manifestError) {
+        if (manifestError?.code === "ENOENT") return undefined;
+        throw manifestError;
+      }
+      if (manifest?.market?.files?.some(
+        (file) => file?.name === "cb-issuer-research.json",
+      )) {
+        throw new Error("missing prior CB issuer research snapshot");
+      }
+      return undefined;
+    }
+    throw error;
+  }
+}
+
 async function readHistoryFile(path) {
   const history = JSON.parse(await readFile(path, "utf8"));
   if (!Array.isArray(history)) throw new Error("INVALID_PUBLISHED_BOND_HISTORY");
@@ -434,7 +494,7 @@ function buildEmergingMarketSnapshot({ marketRows, companyRows }) {
   };
 }
 
-async function verifyStagedEmergingSnapshot(stagingDataDirectory) {
+async function verifyStagedGeneration(stagingDataDirectory) {
   const snapshot = JSON.parse(await readFile(
     join(stagingDataDirectory, "emerging-market.json"),
     "utf8",
@@ -463,6 +523,69 @@ async function verifyStagedEmergingSnapshot(stagingDataDirectory) {
   if (runtime.generation === undefined || runtime.emergingMarketUrl !== manifest.emergingMarketUrl) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_RUNTIME");
   }
+  const marketFiles = manifest?.market?.files;
+  const issuerResearchEntries = Array.isArray(marketFiles)
+    ? marketFiles.filter((file) => file?.name === "cb-issuer-research.json")
+    : [];
+  if (issuerResearchEntries.length === 0) return;
+  const viewEntries = marketFiles.filter(
+    (file) => file?.name === "bond-market-view.json",
+  );
+  if (issuerResearchEntries.length !== 1 || viewEntries.length !== 1) {
+    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_MANIFEST");
+  }
+  const issuerEntry = validateGenerationFileEntry(
+    issuerResearchEntries[0],
+    "cb-issuer-research.json",
+  );
+  const viewEntry = validateGenerationFileEntry(
+    viewEntries[0],
+    "bond-market-view.json",
+  );
+  const researchText = await readFile(
+    join(stagingDataDirectory, "cb-issuer-research.json"),
+    "utf8",
+  );
+  const viewsText = await readFile(
+    join(stagingDataDirectory, "bond-market-view.json"),
+    "utf8",
+  );
+  if (
+    sha256Text(researchText) !== issuerEntry.sha256
+    || sha256Text(viewsText) !== viewEntry.sha256
+  ) {
+    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_HASH");
+  }
+  const issuerResearch = parseCbIssuerResearchSnapshot(JSON.parse(researchText));
+  const views = JSON.parse(viewsText);
+  if (
+    issuerResearch.records.length !== issuerEntry.recordCount
+    || !Array.isArray(views)
+    || views.length !== viewEntry.recordCount
+  ) {
+    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_COUNT");
+  }
+  const expectedResearchUrl = `./data/${runtime.generation}/cb-issuer-research.json`;
+  if (runtime.datasets?.cbIssuerResearch !== expectedResearchUrl) {
+    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_RUNTIME");
+  }
+  verifyIssuerResearchViewConsistency(issuerResearch, views);
+}
+
+function validateGenerationFileEntry(entry, expectedName) {
+  if (
+    entry?.name !== expectedName
+    || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
+    || !Number.isInteger(entry.recordCount)
+    || entry.recordCount < 0
+  ) {
+    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_MANIFEST");
+  }
+  return entry;
+}
+
+function sha256Text(text) {
+  return `sha256:${createHash("sha256").update(text, "utf8").digest("hex")}`;
 }
 
 function taipeiDate(date) {

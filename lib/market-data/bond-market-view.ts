@@ -1,6 +1,8 @@
 import { isIsoDate } from "../domain/dates.ts";
+import type { CbIssuerResearchRecord } from "./cb-issuer-research.ts";
 import { divideDecimal, multiplyDecimal, subtractDecimal } from "./decimal.ts";
 import type {
+  BondIssuerResearchView,
   BondMarketView,
   CbQuote,
   ConversionPriceVersion,
@@ -23,6 +25,7 @@ export function buildBondMarketViews(input: {
   cbQuotes: readonly CbQuote[];
   stockCloses: readonly StockClose[];
   conversionPrices: readonly ConversionPriceVersion[];
+  issuerResearch?: readonly CbIssuerResearchRecord[];
 }): readonly BondMarketView[] {
   if (!isIsoDate(input.asOfDate)) {
     throw new TypeError("asOfDate must be a valid ISO date");
@@ -50,8 +53,9 @@ export function buildBondMarketViews(input: {
     ),
     "duplicate conversion price version",
   );
+  const issuerResearchByCode = buildIssuerResearchMap(input.issuerResearch ?? []);
 
-  return bonds.map((bond) => buildView(bond, input));
+  return bonds.map((bond) => buildView(bond, input, issuerResearchByCode));
 }
 
 function buildView(
@@ -62,6 +66,7 @@ function buildView(
     stockCloses: readonly StockClose[];
     conversionPrices: readonly ConversionPriceVersion[];
   },
+  issuerResearchByCode: ReadonlyMap<string, CbIssuerResearchRecord>,
 ): BondMarketView {
   const cbQuotes = input.cbQuotes
     .filter((quote) =>
@@ -157,6 +162,9 @@ function buildView(
     bondCode: bond.bondCode,
     issuerCode: bond.issuerCode,
     bondName: bond.bondName,
+    issuerResearch: clonePublicIssuerResearch(
+      issuerResearchByCode.get(bond.issuerCode),
+    ),
     cbClose: latestCb?.close ?? null,
     cbPriceDate: latestCb?.tradingDate ?? null,
     cbTradeUnits: latestCb?.tradingUnits ?? "0",
@@ -179,6 +187,47 @@ function buildView(
       : differenceCalendarDays(input.asOfDate, nextPutDate),
     staleCbPrice: latestCb !== undefined && latestCb.tradingDate !== input.asOfDate,
     missingReasons,
+  };
+}
+
+function buildIssuerResearchMap(
+  records: readonly CbIssuerResearchRecord[],
+): ReadonlyMap<string, CbIssuerResearchRecord> {
+  if (!Array.isArray(records)) {
+    throw new TypeError("issuer research must be an array");
+  }
+  const codes = records.map((record, index) => {
+    if (record === null || typeof record !== "object" || Array.isArray(record)) {
+      throw new TypeError(`issuer research record ${index} must be an object`);
+    }
+    if (
+      typeof record.issuerCode !== "string"
+      || record.issuerCode === ""
+      || record.issuerCode !== record.issuerCode.trim()
+    ) {
+      throw new TypeError(`issuer research issuerCode ${index} is invalid`);
+    }
+    return record.issuerCode;
+  });
+  assertUnique(codes, "duplicate issuer research code");
+  return new Map(records.map((record) => [record.issuerCode, record]));
+}
+
+function clonePublicIssuerResearch(
+  record: CbIssuerResearchRecord | undefined,
+): BondIssuerResearchView | null {
+  if (record === undefined) return null;
+  return {
+    market: record.market,
+    industryName: record.industryName,
+    revenueMonth: record.revenueMonth,
+    sourcePublishedOn: record.sourcePublishedOn,
+    revenueUnit: record.revenueUnit,
+    currentMonthRevenue: record.currentMonthRevenue,
+    monthOverMonthPercent: record.monthOverMonthPercent,
+    yearOverYearPercent: record.yearOverYearPercent,
+    cumulativeRevenue: record.cumulativeRevenue,
+    cumulativeYearOverYearPercent: record.cumulativeYearOverYearPercent,
   };
 }
 
