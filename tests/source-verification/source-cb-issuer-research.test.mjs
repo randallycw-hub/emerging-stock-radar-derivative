@@ -402,6 +402,12 @@ test("rejects only the invalid market response without retries or alternate URLs
     ["Content-Type", () => sourceResponse(otcBody, otcUrl, {
       contentType: "application/json",
     })],
+    ["registry-disallowed application/csv", () => sourceResponse(otcBody, otcUrl, {
+      contentType: "application/csv",
+    })],
+    ["registry-disallowed application/vnd.ms-excel", () => sourceResponse(otcBody, otcUrl, {
+      contentType: "application/vnd.ms-excel",
+    })],
     ["response bytes", () => sourceResponse(new Uint8Array(2_000_001), otcUrl)],
     ["UTF-8", () => sourceResponse(new Uint8Array([0xc3, 0x28]), otcUrl)],
     ["strict CSV schema", () => sourceResponse("companyCode,name\n1240,test\n", otcUrl)],

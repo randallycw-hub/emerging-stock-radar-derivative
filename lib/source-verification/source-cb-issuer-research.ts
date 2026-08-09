@@ -1,11 +1,7 @@
 import { parseMonthlyRevenueCsv } from "./source-94025.ts";
 
 const MAX_RESPONSE_BYTES = 2_000_000;
-const CSV_CONTENT_TYPES = new Set([
-  "application/csv",
-  "application/vnd.ms-excel",
-  "text/csv",
-]);
+const APPROVED_CSV_MEDIA_TYPE = "text/csv";
 
 const listedPolicy = Object.freeze({
   sourceId: "data-gov-18420-listed-monthly-revenue",
@@ -102,8 +98,8 @@ async function fetchCbIssuerResearchSource(
     ?.split(";", 1)[0]
     .trim()
     .toLowerCase();
-  if (contentType === undefined || !CSV_CONTENT_TYPES.has(contentType)) {
-    throw new TypeError(`${policy.market} monthly revenue response Content-Type must be CSV-compatible`);
+  if (contentType !== APPROVED_CSV_MEDIA_TYPE) {
+    throw new TypeError(`${policy.market} monthly revenue response Content-Type must be text/csv`);
   }
 
   const bytes = await readBoundedResponseBody(response, policy.market);

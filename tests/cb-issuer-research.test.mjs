@@ -391,6 +391,40 @@ test("keeps issuer codes opaque while rejecting empty identities and conflicting
   }
 });
 
+test("parser requires records and diagnostics to be exact dense array containers", async (context) => {
+  const cases = [
+    ["records non-enumerable key", (value) => {
+      Object.defineProperty(value.records, "hidden", { value: true });
+    }],
+    ["records symbol key", (value) => {
+      value.records[Symbol("hidden")] = true;
+    }],
+    ["records sparse hole", (value) => {
+      delete value.records[0];
+    }],
+    ["diagnostics non-enumerable key", (value) => {
+      Object.defineProperty(value.diagnostics, "hidden", { value: true });
+    }],
+    ["diagnostics symbol key", (value) => {
+      value.diagnostics[Symbol("hidden")] = true;
+    }],
+    ["diagnostics sparse hole", (value) => {
+      delete value.diagnostics[0];
+    }],
+  ];
+
+  for (const [name, mutate] of cases) {
+    await context.test(name, () => {
+      const value = previousSnapshot();
+      mutate(value);
+      assert.throws(
+        () => parseCbIssuerResearchSnapshot(value),
+        /must be an exact dense array/,
+      );
+    });
+  }
+});
+
 test("parser rejects every malformed envelope boundary", async (context) => {
   const cases = [
     ["snapshot keys", (value) => { value.extra = true; }],

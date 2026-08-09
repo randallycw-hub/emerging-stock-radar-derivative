@@ -299,9 +299,9 @@ function projectCurrentRecord(
 }
 
 function validateRecords(value: unknown): CbIssuerResearchRecord[] {
-  if (!Array.isArray(value)) throw new TypeError("CB issuer research records must be an array");
+  const records = requireExactDenseArray(value, "CB issuer research records");
   const codes = new Set<string>();
-  return value.map((candidate, index) => {
+  return records.map((candidate, index) => {
     const record = requireRecord(candidate, `CB issuer research record ${index}`);
     assertExactKeys(record, RECORD_KEYS, `CB issuer research record ${index}`);
     const issuerCode = readIssuerCode(record.issuerCode, `record ${index} issuerCode`);
@@ -429,10 +429,10 @@ function validateDiagnostics(
   value: unknown,
   records: readonly CbIssuerResearchRecord[],
 ): CbIssuerResearchDiagnostic[] {
-  if (!Array.isArray(value)) throw new TypeError("CB issuer research diagnostics must be an array");
+  const diagnostics = requireExactDenseArray(value, "CB issuer research diagnostics");
   const outputCodes = new Set(records.map(({ issuerCode }) => issuerCode));
   const diagnosticCodes = new Set<string>();
-  return value.map((candidate, index) => {
+  return diagnostics.map((candidate, index) => {
     const diagnostic = requireRecord(candidate, `CB issuer research diagnostic ${index}`);
     assertExactKeys(diagnostic, DIAGNOSTIC_KEYS, `CB issuer research diagnostic ${index}`);
     const issuerCode = readIssuerCode(diagnostic.issuerCode, `diagnostic ${index} issuerCode`);
@@ -503,6 +503,23 @@ function assertTimestamp(value: unknown, name: string): asserts value is string 
 function compareText(left: string, right: string): -1 | 0 | 1 {
   if (left === right) return 0;
   return left < right ? -1 : 1;
+}
+
+function requireExactDenseArray(value: unknown, name: string): unknown[] {
+  if (!Array.isArray(value)) throw new TypeError(`${name} must be an exact dense array`);
+  const ownKeys = Reflect.ownKeys(value);
+  if (
+    ownKeys.length !== value.length + 1
+    || ownKeys.some((key) => typeof key !== "string")
+  ) {
+    throw new TypeError(`${name} must be an exact dense array`);
+  }
+  for (let index = 0; index < value.length; index += 1) {
+    if (!Object.hasOwn(value, String(index))) {
+      throw new TypeError(`${name} must be an exact dense array`);
+    }
+  }
+  return value;
 }
 
 function assertExactKeys(
