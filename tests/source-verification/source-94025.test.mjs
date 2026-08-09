@@ -400,6 +400,32 @@ test("94025 numeric normalization rejects negatives for revenue and malformed or
   }
 });
 
+for (const [field, value] of [
+  ["previousMonthRevenue", "-13x"],
+  ["priorYearMonthRevenue", "-Infinity"],
+  ["priorYearCumulativeRevenue", "-not-a-decimal"],
+]) {
+  test(`94025 rejects malformed minus-prefixed ${field}`, () => {
+    assert.throws(
+      () => normalize94025Row(synthetic94025Row({ [field]: value })),
+      new RegExp(`${field}.*supported decimal`),
+    );
+  });
+}
+
+test("94025 omits syntactically valid negative comparative revenue snapshots", () => {
+  for (const [field, value] of [
+    ["previousMonthRevenue", "-13"],
+    ["priorYearMonthRevenue", "－13.50"],
+    ["priorYearCumulativeRevenue", "-0.25"],
+  ]) {
+    assert.equal(
+      normalize94025Row(synthetic94025Row({ [field]: value }))[field],
+      undefined,
+    );
+  }
+});
+
 test("94025 required source fields reject empty, whitespace and placeholders", () => {
   for (const field of [
     "sourcePublishedOn",

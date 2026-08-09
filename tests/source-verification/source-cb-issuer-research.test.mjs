@@ -69,6 +69,8 @@ test("reviewed listed and OTC fixtures retain exact evidence and computed integr
 
   const expected = {
     listed: {
+      sourceId: "data-gov-18420-listed-monthly-revenue",
+      market: "listed",
       metadataPageUrl: "https://data.gov.tw/dataset/18420",
       requestedUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv",
       finalUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv",
@@ -78,9 +80,14 @@ test("reviewed listed and OTC fixtures retain exact evidence and computed integr
       sourceResponseSha256: "sha256:3a344cdfa953daf6c13171dd433e6e756a948e2a25bd7fd2426eef6739aa4915",
       sourceRowCount: 1082,
       fixtureSha256: "7e0bb95bc7d830ea563dfb71a2b9cd77a0d78fa179e26d9c832a9ad72a781f19",
-      selectedCodes: ["1101", "1102"],
+      selectedRowIdentities: [
+        { sourcePublishedOn: "1150717", yearMonth: "11506", companyCode: "1101" },
+        { sourcePublishedOn: "1150717", yearMonth: "11506", companyCode: "1102" },
+      ],
     },
     otc: {
+      sourceId: "data-gov-56510-otc-monthly-revenue",
+      market: "otc",
       metadataPageUrl: "https://data.gov.tw/dataset/56510",
       requestedUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv",
       finalUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv",
@@ -90,7 +97,10 @@ test("reviewed listed and OTC fixtures retain exact evidence and computed integr
       sourceResponseSha256: "sha256:4d6f3c6c4691efe6472850c7a1773500ce77447210d96dcec9295439d08a1801",
       sourceRowCount: 891,
       fixtureSha256: "d72711731a25a54508dd09ca51310ad9048ff1a3d66cf3a8b5bc6625e2895d80",
-      selectedCodes: ["1240", "1259"],
+      selectedRowIdentities: [
+        { sourcePublishedOn: "1150717", yearMonth: "11506", companyCode: "1240" },
+        { sourcePublishedOn: "1150717", yearMonth: "11506", companyCode: "1259" },
+      ],
     },
   };
 
@@ -102,6 +112,8 @@ test("reviewed listed and OTC fixtures retain exact evidence and computed integr
     const wanted = expected[market];
 
     assert.deepEqual(reviewedHeaders, text.split(/\r?\n/, 1)[0].split(","));
+    assert.equal(resource.sourceId, wanted.sourceId);
+    assert.equal(resource.market, wanted.market);
     assert.equal(resource.method, "GET");
     assert.equal(resource.metadataPageUrl, wanted.metadataPageUrl);
     assert.equal(resource.requestedUrl, wanted.requestedUrl);
@@ -115,12 +127,16 @@ test("reviewed listed and OTC fixtures retain exact evidence and computed integr
     assert.equal(resource.fixtureSha256, `sha256:${wanted.fixtureSha256}`);
     assert.equal(sha256(bytes), wanted.fixtureSha256);
     assert.deepEqual(
-      resource.selectedRowIdentities.map((identity) => identity.companyCode),
-      wanted.selectedCodes,
+      resource.selectedRowIdentities,
+      wanted.selectedRowIdentities,
     );
     assert.deepEqual(
-      rows.map((row) => row["公司代號"]),
-      wanted.selectedCodes,
+      rows.map((row) => ({
+        sourcePublishedOn: row["出表日期"],
+        yearMonth: row["資料年月"],
+        companyCode: row["公司代號"],
+      })),
+      wanted.selectedRowIdentities,
     );
   }
 });

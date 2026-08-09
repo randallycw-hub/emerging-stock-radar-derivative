@@ -428,8 +428,13 @@ function optionalRevenueSnapshot(value: string, name: string): string | undefine
   try {
     return optionalRevenue(value, name);
   } catch (error) {
-    if (error instanceof Source94025ValidationError && /non-negative/.test(error.message) && /^[-－]/.test(value.trim())) {
-      return undefined;
+    if (error instanceof Source94025ValidationError && /non-negative/.test(error.message)) {
+      const signedValue = normalizeOptionalDecimal(value, {
+        signed: true,
+        percent: false,
+        name,
+      });
+      if (signedValue?.startsWith("-")) return undefined;
     }
     throw error;
   }
