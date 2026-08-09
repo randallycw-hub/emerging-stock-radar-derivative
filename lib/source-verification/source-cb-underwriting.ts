@@ -45,10 +45,9 @@ export function parseCbUnderwritingHtml(html: string): CbUnderwritingSnapshot {
   }
 
   const documentHtml = stripScriptsAndStyles(html);
-  assertVerifiedNotice(documentHtml);
-
   const rocYear = parseRocYear(documentHtml);
   const tableHtml = findResultTable(documentHtml);
+  assertVerifiedNotice(documentHtml);
   const rows = extractRows(tableHtml);
   if (rows.length < 1) {
     throw new TypeError("CB underwriting result table must contain a header row");
@@ -79,8 +78,12 @@ function parseRocYear(html: string): number {
 }
 
 function assertVerifiedNotice(html: string): void {
-  const notice = /<body\b[^>]*>\s*<p\b[^>]*>([\s\S]*?)<\/p\s*>\s*<table\b/i.exec(html);
-  if (!notice || toText(notice[1]) !== NOTICE) {
+  const notice = /<body\b[^>]*>\s*<p\b[^>]*>([\s\S]*?)<\/p\s*>\s*<table\b([^>]*)>/i.exec(html);
+  if (
+    !notice
+    || toText(notice[1]) !== NOTICE
+    || !hasExactId(notice[2], RESULT_TABLE_ID)
+  ) {
     throw new TypeError("CB underwriting notice does not match the verified contract");
   }
 }

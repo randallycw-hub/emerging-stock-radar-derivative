@@ -77,3 +77,12 @@ test("fails closed on page-title and notice-structure drift", () => {
     /notice/,
   );
 });
+
+test("fails closed when a decoy table intervenes between the notice and result table", () => {
+  const withDecoyTable = fixtureHtml.replace(
+    "</p>\n    <table id=\"ctl00_cphMain_gvResult\"",
+    "</p>\n    <table id=\"decoy\"></table>\n    <table id=\"ctl00_cphMain_gvResult\"",
+  );
+
+  assert.throws(() => parseCbUnderwritingHtml(withDecoyTable), /notice/);
+});
