@@ -12,6 +12,7 @@ import {
 import {
   assertCbIssuerResearchSourceRequest,
   CB_ISSUER_RESEARCH_SOURCE_POLICIES,
+  fetchCbIssuerResearchSources,
 } from "../../lib/source-verification/source-cb-issuer-research.ts";
 
 const fixtureDirectory = new URL(
@@ -335,4 +336,96 @@ test("shared parser fails closed on header drift, duplicate identities, invalid 
     ),
     /empty listed CSV.*at least one row/,
   );
+});
+
+function sourceResponse(body, url, options = {}) {
+  const response = new Response(body, {
+    status: options.status ?? 200,
+    headers: {
+      "content-type": options.contentType ?? "text/csv; charset=utf-8",
+    },
+  });
+  Object.defineProperties(response, {
+    redirected: { value: options.redirected ?? false },
+    url: { value: options.finalUrl ?? url },
+  });
+  return response;
+}
+
+test("fetches exactly both reviewed CSV sources concurrently with bounded GET requests", async () => {
+  const [listedBody, otcBody] = await Promise.all([
+    fixture("listed-minimal.csv"),
+    fixture("otc-minimal.csv"),
+  ]);
+  const bodies = new Map([
+    [CB_ISSUER_RESEARCH_SOURCE_POLICIES.listed.url, `\uFEFF${listedBody}`],
+    [CB_ISSUER_RESEARCH_SOURCE_POLICIES.otc.url, otcBody],
+  ]);
+  const calls = [];
+  let inFlight = 0;
+  let maximumInFlight = 0;
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, init });
+    inFlight += 1;
+    maximumInFlight = Math.max(maximumInFlight, inFlight);
+    await new Promise((resolve) => setImmediate(resolve));
+    inFlight -= 1;
+    return sourceResponse(bodies.get(url), url);
+  };
+
+  const result = await fetchCbIssuerResearchSources({ fetchImpl });
+
+  assert.deepEqual(calls, Object.values(CB_ISSUER_RESEARCH_SOURCE_POLICIES).map((policy) => ({
+    url: policy.url,
+    init: { method: "GET", redirect: "manual" },
+  })));
+  assert.equal(maximumInFlight, 2);
+  assert.deepEqual(result, {
+    listed: { status: "fulfilled", value: listedBody },
+    otc: { status: "fulfilled", value: otcBody },
+  });
+});
+
+test("rejects only the invalid market response without retries or alternate URLs", async (context) => {
+  const listedBody = await fixture("listed-minimal.csv");
+  const otcBody = await fixture("otc-minimal.csv");
+  const otcUrl = CB_ISSUER_RESEARCH_SOURCE_POLICIES.otc.url;
+  const invalidResponses = [
+    ["HTTP status", () => sourceResponse(otcBody, otcUrl, { status: 503 })],
+    ["redirect", () => sourceResponse(otcBody, otcUrl, {
+      redirected: true,
+      finalUrl: `${otcUrl}?redirected=true`,
+    })],
+    ["final URL", () => sourceResponse(otcBody, otcUrl, {
+      finalUrl: CB_ISSUER_RESEARCH_SOURCE_POLICIES.listed.url,
+    })],
+    ["Content-Type", () => sourceResponse(otcBody, otcUrl, {
+      contentType: "application/json",
+    })],
+    ["response bytes", () => sourceResponse(new Uint8Array(2_000_001), otcUrl)],
+    ["UTF-8", () => sourceResponse(new Uint8Array([0xc3, 0x28]), otcUrl)],
+    ["strict CSV schema", () => sourceResponse("companyCode,name\n1240,test\n", otcUrl)],
+  ];
+
+  for (const [name, invalidResponse] of invalidResponses) {
+    await context.test(name, async () => {
+      const calls = [];
+      const fetchImpl = async (url, init) => {
+        calls.push({ url, init });
+        if (url === CB_ISSUER_RESEARCH_SOURCE_POLICIES.listed.url) {
+          return sourceResponse(listedBody, url);
+        }
+        return invalidResponse();
+      };
+
+      const result = await fetchCbIssuerResearchSources({ fetchImpl });
+
+      assert.equal(result.listed.status, "fulfilled");
+      assert.equal(result.otc.status, "rejected");
+      assert.deepEqual(calls.map(({ url }) => url), [
+        CB_ISSUER_RESEARCH_SOURCE_POLICIES.listed.url,
+        CB_ISSUER_RESEARCH_SOURCE_POLICIES.otc.url,
+      ]);
+    });
+  }
 });
