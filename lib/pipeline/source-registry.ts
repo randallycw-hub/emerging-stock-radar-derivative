@@ -3,6 +3,8 @@ export type PipelineSourceId =
   | "94025"
   | "11586"
   | "28567"
+  | "data-gov-18420-listed-monthly-revenue"
+  | "data-gov-56510-otc-monthly-revenue"
   | "tpex-applications"
   | "tpex-ipo-listings"
   | "twse-auctions"
@@ -45,6 +47,8 @@ export type ApprovedIpoResource = ApprovedResource & { ipoEventPolicy: IpoEventP
 const resources: readonly ApprovedResource[] = [
   { sourceId: "11406", resourceId: "11406-csv", exactUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv", protocol: "https:", hostname: "www.tpex.org.tw", pathname: "/storage/bond_publish/ISSBD5_data.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 8_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_csv" },
   { sourceId: "94025", resourceId: "94025-csv", exactUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv", protocol: "https:", hostname: "mopsfin.twse.com.tw", pathname: "/opendata/t187ap05_R.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 8_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_csv" },
+  { sourceId: "data-gov-18420-listed-monthly-revenue", resourceId: "data-gov-18420-listed-monthly-revenue-csv", exactUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv", protocol: "https:", hostname: "mopsfin.twse.com.tw", pathname: "/opendata/t187ap05_L.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 2_000_000, timeoutMs: 30_000, approvalStatus: "VERIFIED_FOR_IMPLEMENTATION", usageRole: "primary_csv" },
+  { sourceId: "data-gov-56510-otc-monthly-revenue", resourceId: "data-gov-56510-otc-monthly-revenue-csv", exactUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv", protocol: "https:", hostname: "mopsfin.twse.com.tw", pathname: "/opendata/t187ap05_O.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 2_000_000, timeoutMs: 30_000, approvalStatus: "VERIFIED_FOR_IMPLEMENTATION", usageRole: "primary_csv" },
   {
     sourceId: "11586",
     resourceId: "11586-csv",

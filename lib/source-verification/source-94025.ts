@@ -83,10 +83,17 @@ const PLAIN_DECIMAL = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
 const GROUPED_DECIMAL = /^(?:[1-9]\d{0,2})(?:,\d{3})+(?:\.\d+)?$/;
 
 export function parse94025Csv(text: string): Source94025Row[] {
+  return parseMonthlyRevenueCsv(text, "94025 CSV");
+}
+
+export function parseMonthlyRevenueCsv(
+  text: string,
+  sourceName: string,
+): Source94025Row[] {
   if (typeof text !== "string") {
-    throw new Source94025ValidationError("94025 CSV must be a string");
+    throw new Source94025ValidationError(`${sourceName} must be a string`);
   }
-  return parseAliasedDataset(parseCsv(text), "94025 CSV");
+  return parseAliasedDataset(parseCsv(text), sourceName);
 }
 
 export function parse94025Json(value: unknown): Source94025Row[] {

@@ -14,6 +14,7 @@ import {
   normalize94025Percent,
   normalize94025Revenue,
   normalize94025Row,
+  parseMonthlyRevenueCsv,
   parse94025Csv,
   parse94025Json,
 } from "../../lib/source-verification/source-94025.ts";
@@ -43,6 +44,15 @@ async function fixtureBytes(name) {
 async function fixtureText(name) {
   return readFile(new URL(name, fixtureDirectory), "utf8");
 }
+
+test("94025 CSV API remains an exact wrapper around the shared monthly revenue parser", async () => {
+  const text = await fixtureText("csv-minimal.csv");
+
+  assert.deepEqual(
+    parse94025Csv(text),
+    parseMonthlyRevenueCsv(text, "94025 CSV"),
+  );
+});
 
 // Every row returned here is synthetic test-only data, never an official fixture record.
 function synthetic94025Row(patch = {}) {

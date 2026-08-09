@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "cb-issuer-research-source-evidence-v1",
+  "verificationStatus": "VERIFIED_FOR_IMPLEMENTATION",
+  "controllerEvidenceRecordedBefore": "2026-08-09T09:56:01.6338243Z",
+  "retrievalTiming": "Both read-only responses were captured immediately before controllerEvidenceRecordedBefore; no more precise retrieval timestamp was supplied.",
+  "providerName": "金融監督管理委員會證券期貨局",
+  "licenseEvidence": {
+    "name": "政府資料開放授權條款-第1版",
+    "version": "OGL 1.0",
+    "freeUse": true
+  },
+  "resources": {
+    "listed": {
+      "sourceId": "data-gov-18420-listed-monthly-revenue",
+      "market": "listed",
+      "metadataPageUrl": "https://data.gov.tw/dataset/18420",
+      "method": "GET",
+      "requestedUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv",
+      "finalUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv",
+      "httpStatus": 200,
+      "httpContentType": "text/csv",
+      "sourceResponseBytes": 203061,
+      "sourceResponseSha256": "sha256:3a344cdfa953daf6c13171dd433e6e756a948e2a25bd7fd2426eef6739aa4915",
+      "sourceRowCount": 1082,
+      "fixtureFile": "listed-minimal.csv",
+      "fixtureSha256": "sha256:7e0bb95bc7d830ea563dfb71a2b9cd77a0d78fa179e26d9c832a9ad72a781f19",
+      "fixtureRowCount": 2,
+      "selectedRowIdentities": [
+        { "sourcePublishedOn": "1150717", "yearMonth": "11506", "companyCode": "1101" },
+        { "sourcePublishedOn": "1150717", "yearMonth": "11506", "companyCode": "1102" }
+      ]
+    },
+    "otc": {
+      "sourceId": "data-gov-56510-otc-monthly-revenue",
+      "market": "otc",
+      "metadataPageUrl": "https://data.gov.tw/dataset/56510",
+      "method": "GET",
+      "requestedUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv",
+      "finalUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv",
+      "httpStatus": 200,
+      "httpContentType": "text/csv",
+      "sourceResponseBytes": 164863,
+      "sourceResponseSha256": "sha256:4d6f3c6c4691efe6472850c7a1773500ce77447210d96dcec9295439d08a1801",
+      "sourceRowCount": 891,
+      "fixtureFile": "otc-minimal.csv",
+      "fixtureSha256": "sha256:d72711731a25a54508dd09ca51310ad9048ff1a3d66cf3a8b5bc6625e2895d80",
+      "fixtureRowCount": 2,
+      "selectedRowIdentities": [
+        { "sourcePublishedOn": "1150717", "yearMonth": "11506", "companyCode": "1240" },
+        { "sourcePublishedOn": "1150717", "yearMonth": "11506", "companyCode": "1259" }
+      ]
+    }
+  }
+}
