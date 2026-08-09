@@ -31,7 +31,6 @@ test("refresh preserves prior files when the TPEx snapshot request fails", async
           }
           return new Response("header\n", { status: 200 });
         },
-        marketBuilder: async () => assert.fail("market builder must not run after a failed TPEx request"),
       }),
       /emergingMarket: HTTP_503/,
     );
@@ -66,89 +65,117 @@ test("refresh rejects the removed offline source option before fetch or pointer 
   });
 });
 
-test("refresh publishes a schema-validated emerging-market snapshot from one TPEx response", async () => {
+test("production refresh rejects marketBuilder before fetch or pointer mutation", async () => {
+  const workspacePointerPath = join(process.cwd(), "static-showcase/data/current.json");
+  const workspacePointerBefore = await readFile(workspacePointerPath, "utf8");
   await withTemporaryShowcase(async (root) => {
-    const sourceTexts = {
-      "94025": await fixtureText("source-verification/94025/csv-minimal.csv"),
-      "11406": "bondCode\n",
-      "11586": "companyCode\n1260\n",
-      emergingMarket: await fixtureText(
-        "source-verification/emerging-market/tpex-esb-latest-statistics.json",
-      ),
-    };
-    let activeRequests = 0;
-    let maximumConcurrency = 0;
-    const requested = [];
-    let marketAsOfDate;
+    await seedPriorGeneration(root);
+    const pointerPath = join(root, "static-showcase/data/current.json");
+    const beforePointer = await readFile(pointerPath, "utf8");
+    let fetchCalls = 0;
 
-    await refreshStaticShowcase({
-      now: new Date("2026-07-30T06:00:06.000Z"),
-      fetchImpl: async (url) => {
-        requested.push(String(url));
-        activeRequests += 1;
-        maximumConcurrency = Math.max(maximumConcurrency, activeRequests);
-        await Promise.resolve();
-        activeRequests -= 1;
-        const datasetId = Object.entries(OFFICIAL_SHOWCASE_SOURCES)
-          .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
-        return new Response(sourceTexts[datasetId], { status: 200 });
-      },
-      marketBuilder: async ({ manifestBase, asOfDate, outputDir }) => {
-        marketAsOfDate = asOfDate;
-        return writeIssuerResearchCandidate({
-          outputDir,
-          manifestBase,
-          generatedAt: "2026-07-30T06:00:06.000Z",
-        });
-      },
-    });
-
-    assert.equal(requested.filter((url) => url === OFFICIAL_SHOWCASE_SOURCES.emergingMarket).length, 1);
-    assert.ok(maximumConcurrency <= 2);
-    assert.equal(marketAsOfDate, "2026-07-30");
-
-    const pointer = JSON.parse(await readFile(join(root, "static-showcase/data/current.json"), "utf8"));
-    const generationRoot = join(root, "static-showcase/data", pointer.generation);
-    const snapshot = JSON.parse(await readFile(join(generationRoot, "emerging-market.json"), "utf8"));
-    assert.deepEqual(Object.keys(snapshot).sort(), [
-      "publishedAt", "records", "schemaVersion", "sourceId", "tradingDate",
-    ]);
-    assert.equal(snapshot.tradingDate, "2026-07-30");
-    assert.equal(snapshot.publishedAt, "2026-07-30T14:00:06+08:00");
-    assert.equal(snapshot.sourceId, "tpex_esb_latest_statistics");
-    assert.equal(snapshot.records[0].companyCode, "1260");
-    assert.equal(snapshot.records[0].industryName, "食品工業");
-    assert.equal(snapshot.records[0].lastTradedPrice, "25.2");
-    assert.ok(snapshot.records.every((record) => record.tradingDate === snapshot.tradingDate));
-    assert.equal(new Set(snapshot.records.map((record) => record.companyCode)).size, snapshot.records.length);
-    assert.equal("BuyingPrice" in snapshot.records[0], false);
-
-    const manifest = JSON.parse(await readFile(join(generationRoot, "manifest.json"), "utf8"));
-    assert.equal(manifest.emergingMarketUrl, `./data/${pointer.generation}/emerging-market.json`);
-    assert.deepEqual(
-      manifest.datasets.find((dataset) => dataset.datasetId === "emergingMarket"),
-      {
-        datasetId: "emergingMarket",
-        sourceUrl: OFFICIAL_SHOWCASE_SOURCES.emergingMarket,
-        downloadedAt: "2026-07-30",
-        sha256: `sha256:${createHash("sha256").update(sourceTexts.emergingMarket).digest("hex")}`,
-        rawBytes: Buffer.byteLength(sourceTexts.emergingMarket),
-        rowCount: 1,
-      },
+    await assert.rejects(
+      refreshStaticShowcase({
+        marketBuilder: async () => assert.fail("injected builder must not run"),
+        fetchImpl: async () => {
+          fetchCalls += 1;
+          return new Response("must not fetch", { status: 500 });
+        },
+      }),
+      /marketBuilder.*not supported/i,
     );
-    const runtime = JSON.parse(await readFile(join(generationRoot, "runtime.json"), "utf8"));
-    assert.equal(runtime.generation, pointer.generation);
-    assert.equal(runtime.manifestUrl, `./data/${pointer.generation}/manifest.json`);
-    assert.equal(
-      runtime.datasets.cbIssuerResearch,
-      `./data/${pointer.generation}/cb-issuer-research.json`,
-    );
-    const issuerResearch = JSON.parse(await readFile(
-      join(generationRoot, "cb-issuer-research.json"),
-      "utf8",
-    ));
-    assert.equal(issuerResearch.records[0].issuerCode, "1260");
+    assert.equal(fetchCalls, 0);
+    assert.equal(await readFile(pointerPath, "utf8"), beforePointer);
   });
+  assert.equal(await readFile(workspacePointerPath, "utf8"), workspacePointerBefore);
+});
+
+test("refresh publishes a schema-validated emerging-market snapshot from one TPEx response", async () => {
+  const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
+    "../scripts/refresh-static-showcase-data.mjs"
+  );
+  const workspacePointerPath = join(process.cwd(), "static-showcase/data/current.json");
+  const workspacePointerBefore = await readFile(workspacePointerPath, "utf8");
+  const sourceTexts = {
+    "94025": await fixtureText("source-verification/94025/csv-minimal.csv"),
+    "11406": "bondCode\n",
+    "11586": "companyCode\n1260\n",
+    emergingMarket: await fixtureText(
+      "source-verification/emerging-market/tpex-esb-latest-statistics.json",
+    ),
+  };
+  let activeRequests = 0;
+  let maximumConcurrency = 0;
+  const requested = [];
+  let marketAsOfDate;
+
+  const outcome = await runIsolatedRefreshStaticShowcaseTestHarness({
+    now: new Date("2026-07-30T06:00:06.000Z"),
+    fetchImpl: async (url) => {
+      requested.push(String(url));
+      activeRequests += 1;
+      maximumConcurrency = Math.max(maximumConcurrency, activeRequests);
+      await Promise.resolve();
+      activeRequests -= 1;
+      const datasetId = Object.entries(OFFICIAL_SHOWCASE_SOURCES)
+        .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
+      return new Response(sourceTexts[datasetId], { status: 200 });
+    },
+    marketBuilder: async ({ manifestBase, asOfDate, outputDir }) => {
+      marketAsOfDate = asOfDate;
+      return writeIssuerResearchCandidate({
+        outputDir,
+        manifestBase,
+        generatedAt: "2026-07-30T06:00:06.000Z",
+      });
+    },
+  });
+
+  assert.equal(outcome.status, "fulfilled");
+  assert.equal(requested.filter((url) => url === OFFICIAL_SHOWCASE_SOURCES.emergingMarket).length, 1);
+  assert.ok(maximumConcurrency <= 2);
+  assert.equal(marketAsOfDate, "2026-07-30");
+  assert.equal(await readFile(workspacePointerPath, "utf8"), workspacePointerBefore);
+
+  const pointer = JSON.parse(outcome.artifacts.after.pointerText);
+  const snapshot = JSON.parse(outcome.artifacts.active["emerging-market.json"]);
+  assert.deepEqual(Object.keys(snapshot).sort(), [
+    "publishedAt", "records", "schemaVersion", "sourceId", "tradingDate",
+  ]);
+  assert.equal(snapshot.tradingDate, "2026-07-30");
+  assert.equal(snapshot.publishedAt, "2026-07-30T14:00:06+08:00");
+  assert.equal(snapshot.sourceId, "tpex_esb_latest_statistics");
+  assert.equal(snapshot.records[0].companyCode, "1260");
+  assert.equal(snapshot.records[0].industryName, "食品工業");
+  assert.equal(snapshot.records[0].lastTradedPrice, "25.2");
+  assert.ok(snapshot.records.every((record) => record.tradingDate === snapshot.tradingDate));
+  assert.equal(new Set(snapshot.records.map((record) => record.companyCode)).size, snapshot.records.length);
+  assert.equal("BuyingPrice" in snapshot.records[0], false);
+
+  const manifest = JSON.parse(outcome.artifacts.active["manifest.json"]);
+  assert.equal(manifest.emergingMarketUrl, `./data/${pointer.generation}/emerging-market.json`);
+  assert.deepEqual(
+    manifest.datasets.find((dataset) => dataset.datasetId === "emergingMarket"),
+    {
+      datasetId: "emergingMarket",
+      sourceUrl: OFFICIAL_SHOWCASE_SOURCES.emergingMarket,
+      downloadedAt: "2026-07-30",
+      sha256: `sha256:${createHash("sha256").update(sourceTexts.emergingMarket).digest("hex")}`,
+      rawBytes: Buffer.byteLength(sourceTexts.emergingMarket),
+      rowCount: 1,
+    },
+  );
+  const runtime = JSON.parse(outcome.artifacts.active["runtime.json"]);
+  assert.equal(runtime.generation, pointer.generation);
+  assert.equal(runtime.manifestUrl, `./data/${pointer.generation}/manifest.json`);
+  assert.equal(
+    runtime.datasets.cbIssuerResearch,
+    `./data/${pointer.generation}/cb-issuer-research.json`,
+  );
+  const issuerResearch = JSON.parse(
+    outcome.artifacts.active["cb-issuer-research.json"],
+  );
+  assert.equal(issuerResearch.records[0].issuerCode, "1260");
 });
 
 test("refresh reads the prior generation bond history before staging a replacement", async () => {
@@ -230,7 +257,6 @@ test("refresh leaves the prior generation untouched when publication fails befor
     const beforeManifest = await readFile(join(root, "static-showcase/data/generations/abcdef/manifest.json"), "utf8");
     await assert.rejects(refreshStaticShowcase({
       fetchImpl: async () => new Response("ignored", { status: 500 }),
-      marketBuilder: async () => assert.fail("must not publish"),
     }));
     assert.equal(await readFile(join(root, "static-showcase/data/current.json"), "utf8"), beforePointer);
     assert.equal(await readFile(join(root, "static-showcase/data/generations/abcdef/manifest.json"), "utf8"), beforeManifest);
@@ -239,46 +265,41 @@ test("refresh leaves the prior generation untouched when publication fails befor
 
 for (const failureMode of ["hash", "manifest", "cross-file"]) {
   test(`research ${failureMode} failure after candidate write leaves pointer and prior generation unchanged`, async () => {
-    await withTemporaryShowcase(async (root) => {
-      await seedPriorGeneration(root);
-      const pointerPath = join(root, "static-showcase/data/current.json");
-      const priorResearchPath = join(
-        root,
-        "static-showcase/data/generations/abcdef/cb-issuer-research.json",
-      );
-      const beforePointer = await readFile(pointerPath, "utf8");
-      const beforeResearch = await readFile(priorResearchPath, "utf8");
-      const sourceTexts = {
-        "94025": await fixtureText("source-verification/94025/csv-minimal.csv"),
-        "11406": "bondCode\n",
-        "11586": "companyCode\n1260\n",
-        emergingMarket: await fixtureText(
-          "source-verification/emerging-market/tpex-esb-latest-statistics.json",
-        ),
-      };
+    const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
+      "../scripts/refresh-static-showcase-data.mjs"
+    );
+    const sourceTexts = {
+      "94025": await fixtureText("source-verification/94025/csv-minimal.csv"),
+      "11406": "bondCode\n",
+      "11586": "companyCode\n1260\n",
+      emergingMarket: await fixtureText(
+        "source-verification/emerging-market/tpex-esb-latest-statistics.json",
+      ),
+    };
 
-      await assert.rejects(
-        refreshStaticShowcase({
-          now: new Date("2026-07-30T06:00:06.000Z"),
-          fetchImpl: async (url) => {
-            const datasetId = Object.entries(OFFICIAL_SHOWCASE_SOURCES)
-              .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
-            return new Response(sourceTexts[datasetId], { status: 200 });
-          },
-          marketBuilder: async ({ outputDir, manifestBase }) =>
-            writeIssuerResearchCandidate({
-              outputDir,
-              manifestBase,
-              generatedAt: "2026-07-30T06:00:06.000Z",
-              failureMode,
-            }),
+    const outcome = await runIsolatedRefreshStaticShowcaseTestHarness({
+      now: new Date("2026-07-30T06:00:06.000Z"),
+      fetchImpl: async (url) => {
+        const datasetId = Object.entries(OFFICIAL_SHOWCASE_SOURCES)
+          .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
+        return new Response(sourceTexts[datasetId], { status: 200 });
+      },
+      marketBuilder: async ({ outputDir, manifestBase }) =>
+        writeIssuerResearchCandidate({
+          outputDir,
+          manifestBase,
+          generatedAt: "2026-07-30T06:00:06.000Z",
+          failureMode,
         }),
-        /VALIDATION_FAILED/,
-      );
-
-      assert.equal(await readFile(pointerPath, "utf8"), beforePointer);
-      assert.equal(await readFile(priorResearchPath, "utf8"), beforeResearch);
     });
+
+    assert.equal(outcome.status, "rejected");
+    assert.match(String(outcome.error), /VALIDATION_FAILED/);
+    assert.equal(outcome.artifacts.after.pointerText, outcome.artifacts.before.pointerText);
+    assert.equal(
+      outcome.artifacts.after.priorResearchText,
+      outcome.artifacts.before.priorResearchText,
+    );
   });
 }
 
@@ -301,9 +322,6 @@ test("refresh fails closed and preserves prior files when emerging-market valida
           }
           return new Response("header\nvalue\n", { status: 200 });
         },
-        marketBuilder: async ({ manifestBase }) => ({
-          manifest: { ...manifestBase, market: { status: "verified" } }, report: { validation: "passed" },
-        }),
       }),
       /emerging market payload must be an array/,
     );

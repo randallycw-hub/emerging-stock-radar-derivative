@@ -9,6 +9,7 @@ import {
   rm,
   writeFile,
 } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -188,12 +189,19 @@ export async function openMarketCheckpoint({
 }
 
 export async function refreshStaticShowcase(options = {}) {
-  assertPublicOptions(options, ["fetchImpl", "now", "marketBuilder"], "refreshStaticShowcase");
+  assertPublicOptions(options, ["fetchImpl", "now"], "refreshStaticShowcase");
   const {
     fetchImpl = fetch,
     now = new Date(),
-    marketBuilder = buildBondMarketSnapshot,
   } = options;
+  return refreshStaticShowcaseCandidate({
+    fetchImpl,
+    now,
+    marketBuilder: buildBondMarketSnapshot,
+  });
+}
+
+async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder }) {
   const previousIssuerResearch = await readPublishedCbIssuerResearch(
     DATA_DIRECTORY,
   );
@@ -357,6 +365,153 @@ export async function refreshStaticShowcase(options = {}) {
     };
   } finally {
     await rm(stagingRoot, { recursive: true, force: true });
+  }
+}
+
+export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) {
+  assertPublicOptions(
+    options,
+    ["fetchImpl", "now", "marketBuilder"],
+    "runIsolatedRefreshStaticShowcaseTestHarness",
+  );
+  const {
+    fetchImpl,
+    now = new Date(),
+    marketBuilder,
+  } = options;
+  if (typeof fetchImpl !== "function") {
+    throw new TypeError("isolated refresh fetchImpl must be a function");
+  }
+  if (typeof marketBuilder !== "function") {
+    throw new TypeError("isolated refresh marketBuilder must be a function");
+  }
+
+  const root = await mkdtemp(join(tmpdir(), "isolated-showcase-refresh-"));
+  const originalDirectory = process.cwd();
+  let directoryChanged = false;
+  try {
+    await seedIsolatedHarnessRoot(root);
+    const before = await captureIsolatedArtifacts(root);
+    let status = "fulfilled";
+    let value;
+    let error;
+    process.chdir(root);
+    directoryChanged = true;
+    try {
+      value = await refreshStaticShowcaseCandidate({
+        fetchImpl,
+        now,
+        marketBuilder,
+      });
+    } catch (caught) {
+      status = "rejected";
+      error = caught;
+    } finally {
+      process.chdir(originalDirectory);
+      directoryChanged = false;
+    }
+    const after = await captureIsolatedArtifacts(root);
+    return {
+      status,
+      ...(status === "fulfilled" ? { value } : { error }),
+      artifacts: {
+        before,
+        after,
+        active: await captureActiveGeneration(root, after.pointerText),
+      },
+    };
+  } finally {
+    if (directoryChanged) process.chdir(originalDirectory);
+    await rm(root, { recursive: true, force: true });
+  }
+}
+
+async function seedIsolatedHarnessRoot(root) {
+  const dataRoot = join(root, "static-showcase", "data");
+  const priorGeneration = join(dataRoot, "generations", "abcdef");
+  await mkdir(priorGeneration, { recursive: true });
+  await writeFile(
+    join(root, "static-showcase", "index.html"),
+    '<script src="./data/runtime.js?v=prior"></script>',
+    "utf8",
+  );
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      generation: "generations/abcdef",
+      runtimeUrl: "./data/generations/abcdef/runtime.json",
+    }),
+    "utf8",
+  );
+  await writeFile(
+    join(priorGeneration, "manifest.json"),
+    JSON.stringify({ market: { status: "verified", files: [] } }),
+    "utf8",
+  );
+  await writeFile(join(priorGeneration, "runtime.json"), "prior runtime", "utf8");
+  await writeFile(
+    join(priorGeneration, "cb-issuer-research.json"),
+    `${JSON.stringify({
+      schemaVersion: 1,
+      generatedAt: "2026-07-29T06:00:06.000Z",
+      records: [],
+      sources: {
+        listed: { status: "unavailable", dataDate: null, fetchedAt: null },
+        otc: { status: "unavailable", dataDate: null, fetchedAt: null },
+      },
+      diagnostics: [],
+    })}\n`,
+    "utf8",
+  );
+}
+
+async function captureIsolatedArtifacts(root) {
+  return {
+    pointerText: await readOptionalText(
+      join(root, "static-showcase", "data", "current.json"),
+    ),
+    priorResearchText: await readOptionalText(join(
+      root,
+      "static-showcase",
+      "data",
+      "generations",
+      "abcdef",
+      "cb-issuer-research.json",
+    )),
+  };
+}
+
+async function captureActiveGeneration(root, pointerText) {
+  if (pointerText === undefined) return {};
+  let pointer;
+  try {
+    pointer = JSON.parse(pointerText);
+  } catch {
+    return {};
+  }
+  if (!/^generations\/[a-f0-9]+$/i.test(pointer?.generation ?? "")) return {};
+  const generationRoot = join(
+    root,
+    "static-showcase",
+    "data",
+    ...pointer.generation.split("/"),
+  );
+  return Object.fromEntries(await Promise.all([
+    "cb-issuer-research.json",
+    "bond-market-view.json",
+    "emerging-market.json",
+    "manifest.json",
+    "runtime.json",
+  ].map(async (name) => [name, await readOptionalText(join(generationRoot, name))])));
+}
+
+async function readOptionalText(path) {
+  try {
+    return await readFile(path, "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw error;
   }
 }
 
