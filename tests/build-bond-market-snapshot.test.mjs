@@ -9,10 +9,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import {
+import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
+import * as snapshotBuilder from "../scripts/build-bond-market-snapshot.mjs";
+
+const {
   bondInputsFrom11406Rows,
   buildBondMarketSnapshot,
-} from "../scripts/build-bond-market-snapshot.mjs";
+} = snapshotBuilder;
 
 const bond = {
   bondCode: "35221",
@@ -162,18 +165,14 @@ test("production issuer research refuses both network calls until both registry 
   assert.match(String(result.listed.reason), /not approved for production/i);
 });
 
-test("publishes one validated issuer snapshot, compact joined views, hashes, and no raw notes", async () => {
-  const outputDir = await makePublishedDirectory();
-  const result = await buildBondMarketSnapshot({
-    outputDir,
-    bonds: [bond, { ...bond, bondCode: "35222", shortName: "御嵿二" }],
-    collectImpl: async () => validCollectedMarketData,
-    offlineIssuerResearchSourceResults: await offlineIssuerResearchSourceResults(),
-    now: () => new Date("2026-08-09T12:30:00.000Z"),
+test("pure issuer-research candidate helper validates settled CSVs without publishing", async () => {
+  const candidate = snapshotBuilder.buildCbIssuerResearchCandidate({
+    generatedAt: "2026-08-09T12:30:00.000Z",
+    issuers: [{ issuerCode: "3522", issuerName: "御嵿" }],
+    sourceResults: await offlineIssuerResearchSourceResults(),
   });
 
-  assert.ok(result.files.includes("cb-issuer-research.json"));
-  const researchText = await readFile(join(outputDir, "cb-issuer-research.json"), "utf8");
+  const researchText = candidate.artifact.text;
   const research = JSON.parse(researchText);
   assert.equal(research.records.length, 1);
   assert.equal(research.records[0].issuerCode, "3522");
@@ -182,16 +181,51 @@ test("publishes one validated issuer snapshot, compact joined views, hashes, and
   assert.equal(researchText.includes("備註"), false);
   assert.equal(researchText.includes("offline OTC unavailable"), false);
   assert.equal(researchText.includes("t187ap05_L.csv"), false);
-  assert.deepEqual(result.views.map((view) => view.issuerResearch?.industryName), [
+  assert.deepEqual(candidate.snapshot, research);
+  assert.equal(candidate.viewRecords, candidate.snapshot.records);
+  assert.equal(candidate.artifact.name, "cb-issuer-research.json");
+  assert.match(candidate.artifact.sha256, /^sha256:[0-9a-f]{64}$/);
+  assert.equal(candidate.artifact.recordCount, 1);
+
+  const views = buildBondMarketViews({
+    asOfDate: "2026-08-09",
+    bonds: [bond, { ...bond, bondCode: "35222", shortName: "御嵿二" }],
+    cbQuotes: [],
+    stockCloses: [],
+    conversionPrices: [],
+    issuerResearch: candidate.viewRecords,
+  });
+  assert.deepEqual(views.map((view) => view.issuerResearch?.industryName), [
     "水泥工業",
     "水泥工業",
   ]);
-  assert.notStrictEqual(result.views[0].issuerResearch, result.views[1].issuerResearch);
-  const entry = result.manifest.market.files.find(
-    (file) => file.name === "cb-issuer-research.json",
+  assert.notStrictEqual(views[0].issuerResearch, views[1].issuerResearch);
+});
+
+test("removed offline source option cannot publish current research while unapproved", async () => {
+  const outputDir = await makePublishedDirectory();
+  await writeFile(
+    join(outputDir, "cb-issuer-research.json"),
+    `${JSON.stringify(previousIssuerResearch)}\n`,
   );
-  assert.match(entry.sha256, /^sha256:[0-9a-f]{64}$/);
-  assert.equal(entry.recordCount, 1);
+  const before = await readFile(join(outputDir, "cb-issuer-research.json"), "utf8");
+  let marketCalls = 0;
+
+  await assert.rejects(
+    buildBondMarketSnapshot({
+      outputDir,
+      bonds: [bond],
+      collectImpl: async () => {
+        marketCalls += 1;
+        return validCollectedMarketData;
+      },
+      offlineIssuerResearchSourceResults: await offlineIssuerResearchSourceResults(),
+      now: () => new Date("2026-08-09T12:30:00.000Z"),
+    }),
+    /offlineIssuerResearchSourceResults.*not supported/i,
+  );
+  assert.equal(marketCalls, 0);
+  assert.equal(await readFile(join(outputDir, "cb-issuer-research.json"), "utf8"), before);
 });
 
 test("validates the entire prior issuer snapshot before market collection or stale reuse", async () => {
@@ -210,7 +244,6 @@ test("validates the entire prior issuer snapshot before market collection or sta
         marketCalls += 1;
         return validCollectedMarketData;
       },
-      offlineIssuerResearchSourceResults: await offlineIssuerResearchSourceResults(),
       now: () => new Date("2026-08-09T12:30:00.000Z"),
     }),
     /schemaVersion/i,

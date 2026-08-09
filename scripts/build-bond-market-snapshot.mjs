@@ -47,19 +47,25 @@ const CB_ISSUER_RESEARCH_RESOURCES = [
   },
 ];
 
-// `offlineIssuerResearchSourceResults` is an explicit pure-generation seam for
-// offline tests. The CLI/default path never supplies it and always goes through
-// the central-registry production gate below.
-export async function buildBondMarketSnapshot({
-  outputDir = "static-showcase/data",
-  bonds,
-  collectImpl = fetchCurrentOfficialMarketData,
-  now = () => new Date(),
-  manifestBase,
-  asOfDate: requestedAsOfDate,
-  previousIssuerResearch,
-  offlineIssuerResearchSourceResults,
-} = {}) {
+export async function buildBondMarketSnapshot(options = {}) {
+  assertPublicOptions(options, [
+    "outputDir",
+    "bonds",
+    "collectImpl",
+    "now",
+    "manifestBase",
+    "asOfDate",
+    "previousIssuerResearch",
+  ], "buildBondMarketSnapshot");
+  const {
+    outputDir = "static-showcase/data",
+    bonds,
+    collectImpl = fetchCurrentOfficialMarketData,
+    now = () => new Date(),
+    manifestBase,
+    asOfDate: requestedAsOfDate,
+    previousIssuerResearch,
+  } = options;
   const generatedDate = now();
   if (!(generatedDate instanceof Date) || !Number.isFinite(generatedDate.valueOf())) {
     throw new TypeError("now must return a valid Date");
@@ -73,17 +79,15 @@ export async function buildBondMarketSnapshot({
   const validatedPreviousIssuerResearch = previousIssuerResearch === undefined
     ? await readPreviousIssuerResearch(outputDir)
     : parseCbIssuerResearchSnapshot(previousIssuerResearch);
-  const issuerResearchSources = offlineIssuerResearchSourceResults === undefined
-    ? await settleProductionCbIssuerResearchSources()
-    : validateOfflineIssuerResearchSourceResults(offlineIssuerResearchSourceResults);
-  const issuerResearch = buildCbIssuerResearchSnapshot({
+  const issuerResearchCandidate = buildCbIssuerResearchCandidate({
     generatedAt: generatedDate.toISOString(),
     issuers: issuerInputsFromBonds(bondInputs),
-    ...issuerResearchSources,
+    sourceResults: await settleProductionCbIssuerResearchSources(),
     ...(validatedPreviousIssuerResearch === undefined
       ? {}
       : { previous: validatedPreviousIssuerResearch }),
   });
+  const issuerResearch = issuerResearchCandidate.snapshot;
   const bondCodes = bondInputs.map((bond) => bond.bondCode);
   const issuerCodes = [...new Set(bondInputs.map((bond) => bond.issuerCode))];
   const collected = await collectImpl({
@@ -133,7 +137,9 @@ export async function buildBondMarketSnapshot({
     };
     const files = [];
     for (const [name, key] of MARKET_FILE_ENTRIES) {
-      const text = `${JSON.stringify(documents[key], null, 2)}\n`;
+      const text = key === "issuerResearch"
+        ? issuerResearchCandidate.artifact.text
+        : `${JSON.stringify(documents[key], null, 2)}\n`;
       await writeFile(join(stagingDir, name), text, "utf8");
       files.push({
         name,
@@ -222,6 +228,32 @@ export async function settleProductionCbIssuerResearchSources({
   return validateSettledIssuerResearchSources(await fetchSourcesImpl());
 }
 
+export function buildCbIssuerResearchCandidate({
+  generatedAt,
+  issuers,
+  sourceResults,
+  previous,
+} = {}) {
+  const settled = validateSettledIssuerResearchSources(sourceResults);
+  const snapshot = buildCbIssuerResearchSnapshot({
+    generatedAt,
+    issuers,
+    ...settled,
+    ...(previous === undefined ? {} : { previous }),
+  });
+  const text = `${JSON.stringify(snapshot, null, 2)}\n`;
+  return Object.freeze({
+    snapshot,
+    artifact: Object.freeze({
+      name: "cb-issuer-research.json",
+      text,
+      sha256: sha256(text),
+      recordCount: snapshot.records.length,
+    }),
+    viewRecords: snapshot.records,
+  });
+}
+
 function productionIssuerResearchApprovalError() {
   try {
     for (const { policy, resourceId } of CB_ISSUER_RESEARCH_RESOURCES) {
@@ -237,10 +269,6 @@ function productionIssuerResearchApprovalError() {
   } catch {
     return new Error("CB issuer research sources are not approved for production");
   }
-}
-
-function validateOfflineIssuerResearchSourceResults(value) {
-  return validateSettledIssuerResearchSources(value, "offline issuer research source results");
 }
 
 function validateSettledIssuerResearchSources(
@@ -259,6 +287,17 @@ function validateSettledIssuerResearchSources(
     listed: validateSettledResult(value.listed, `${name}.listed`),
     otc: validateSettledResult(value.otc, `${name}.otc`),
   };
+}
+
+function assertPublicOptions(value, allowed, name) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${name} options must be an object`);
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== "string" || !allowed.includes(key)) {
+      throw new TypeError(`${String(key)} is not supported by ${name}`);
+    }
+  }
 }
 
 function validateSettledResult(value, name) {

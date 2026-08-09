@@ -1,5 +1,8 @@
 import { isIsoDate } from "../domain/dates.ts";
-import type { CbIssuerResearchRecord } from "./cb-issuer-research.ts";
+import {
+  parseCbIssuerResearchRecords,
+  type CbIssuerResearchRecord,
+} from "./cb-issuer-research.ts";
 import { divideDecimal, multiplyDecimal, subtractDecimal } from "./decimal.ts";
 import type {
   BondIssuerResearchView,
@@ -53,7 +56,9 @@ export function buildBondMarketViews(input: {
     ),
     "duplicate conversion price version",
   );
-  const issuerResearchByCode = buildIssuerResearchMap(input.issuerResearch ?? []);
+  const issuerResearchByCode = buildIssuerResearchMap(
+    parseCbIssuerResearchRecords(input.issuerResearch ?? []),
+  );
 
   return bonds.map((bond) => buildView(bond, input, issuerResearchByCode));
 }
@@ -193,23 +198,6 @@ function buildView(
 function buildIssuerResearchMap(
   records: readonly CbIssuerResearchRecord[],
 ): ReadonlyMap<string, CbIssuerResearchRecord> {
-  if (!Array.isArray(records)) {
-    throw new TypeError("issuer research must be an array");
-  }
-  const codes = records.map((record, index) => {
-    if (record === null || typeof record !== "object" || Array.isArray(record)) {
-      throw new TypeError(`issuer research record ${index} must be an object`);
-    }
-    if (
-      typeof record.issuerCode !== "string"
-      || record.issuerCode === ""
-      || record.issuerCode !== record.issuerCode.trim()
-    ) {
-      throw new TypeError(`issuer research issuerCode ${index} is invalid`);
-    }
-    return record.issuerCode;
-  });
-  assertUnique(codes, "duplicate issuer research code");
   return new Map(records.map((record) => [record.issuerCode, record]));
 }
 

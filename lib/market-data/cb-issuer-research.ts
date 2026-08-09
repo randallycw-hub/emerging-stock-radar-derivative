@@ -167,7 +167,7 @@ export function parseCbIssuerResearchSnapshot(value: unknown): CbIssuerResearchS
   }
   assertTimestamp(snapshot.generatedAt, "CB issuer research snapshot generatedAt");
 
-  const records = validateRecords(snapshot.records);
+  const records = parseCbIssuerResearchRecords(snapshot.records);
   const sourcesValue = requireRecord(snapshot.sources, "CB issuer research snapshot sources");
   assertExactKeys(sourcesValue, SOURCE_NAMES, "CB issuer research snapshot sources");
   const sources = {
@@ -184,6 +184,12 @@ export function parseCbIssuerResearchSnapshot(value: unknown): CbIssuerResearchS
     sources,
     diagnostics,
   });
+}
+
+export function parseCbIssuerResearchRecords(
+  value: unknown,
+): readonly CbIssuerResearchRecord[] {
+  return deepFreeze(validateRecords(value));
 }
 
 function buildMarketProjection(

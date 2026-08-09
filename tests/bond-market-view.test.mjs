@@ -123,14 +123,37 @@ test("rejects duplicate and name-only research before building the issuer map", 
     () => buildBondMarketViews(fixture({
       issuerResearch: [issuerResearch, structuredClone(issuerResearch)],
     })),
-    /duplicate issuer research code/i,
+    /duplicate.*issuer research code/i,
   );
   const nameOnlyResearch = { ...issuerResearch };
   delete nameOnlyResearch.issuerCode;
   assert.throws(
     () => buildBondMarketViews(fixture({ issuerResearch: [nameOnlyResearch] })),
-    /issuer research issuerCode/i,
+    /issuer research record.*keys/i,
   );
+});
+
+test("reuses the strict issuer research record schema before joining views", async (context) => {
+  const cases = [
+    ["reviewer malformed decimal", { currentMonthRevenue: "01" }],
+    ["unknown raw-note key", { noteText: "raw note must not escape" }],
+    ["invalid market", { market: "listed-or-otc" }],
+    ["invalid revenue month", { revenueMonth: "2026-13" }],
+    ["impossible source date", { sourcePublishedOn: "2026-02-30" }],
+    ["invalid revenue unit", { revenueUnit: "元" }],
+    ["invalid nullable decimal", { monthOverMonthPercent: undefined }],
+  ];
+
+  for (const [name, patch] of cases) {
+    await context.test(name, () => {
+      assert.throws(
+        () => buildBondMarketViews(fixture({
+          issuerResearch: [{ ...issuerResearch, ...patch }],
+        })),
+        TypeError,
+      );
+    });
+  }
 });
 
 test("clones public research independently for every bond of one issuer", () => {

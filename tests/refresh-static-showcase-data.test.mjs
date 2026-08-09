@@ -41,6 +41,31 @@ test("refresh preserves prior files when the TPEx snapshot request fails", async
   });
 });
 
+test("refresh rejects the removed offline source option before fetch or pointer mutation", async () => {
+  await withTemporaryShowcase(async (root) => {
+    await seedPriorGeneration(root);
+    const pointerPath = join(root, "static-showcase/data/current.json");
+    const beforePointer = await readFile(pointerPath, "utf8");
+    let fetchCalls = 0;
+
+    await assert.rejects(
+      refreshStaticShowcase({
+        offlineIssuerResearchSourceResults: {
+          listed: { status: "fulfilled", value: "injected,current,csv" },
+          otc: { status: "rejected", reason: new Error("offline") },
+        },
+        fetchImpl: async () => {
+          fetchCalls += 1;
+          return new Response("must not fetch", { status: 500 });
+        },
+      }),
+      /offlineIssuerResearchSourceResults.*not supported/i,
+    );
+    assert.equal(fetchCalls, 0);
+    assert.equal(await readFile(pointerPath, "utf8"), beforePointer);
+  });
+});
+
 test("refresh publishes a schema-validated emerging-market snapshot from one TPEx response", async () => {
   await withTemporaryShowcase(async (root) => {
     const sourceTexts = {

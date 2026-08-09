@@ -187,14 +187,13 @@ export async function openMarketCheckpoint({
   };
 }
 
-// The offline settled-results option is forwarded only to the pure candidate
-// builder; the CLI omits it, so production source access still uses its gate.
-export async function refreshStaticShowcase({
-  fetchImpl = fetch,
-  now = new Date(),
-  marketBuilder = buildBondMarketSnapshot,
-  offlineIssuerResearchSourceResults,
-} = {}) {
+export async function refreshStaticShowcase(options = {}) {
+  assertPublicOptions(options, ["fetchImpl", "now", "marketBuilder"], "refreshStaticShowcase");
+  const {
+    fetchImpl = fetch,
+    now = new Date(),
+    marketBuilder = buildBondMarketSnapshot,
+  } = options;
   const previousIssuerResearch = await readPublishedCbIssuerResearch(
     DATA_DIRECTORY,
   );
@@ -321,9 +320,6 @@ export async function refreshStaticShowcase({
       now: () => now,
       manifestBase: baseManifest,
       previousIssuerResearch,
-      ...(offlineIssuerResearchSourceResults === undefined
-        ? {}
-        : { offlineIssuerResearchSourceResults }),
     });
     const manifest = marketResult.manifest;
     await writeFile(
@@ -361,6 +357,17 @@ export async function refreshStaticShowcase({
     };
   } finally {
     await rm(stagingRoot, { recursive: true, force: true });
+  }
+}
+
+function assertPublicOptions(value, allowed, name) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${name} options must be an object`);
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== "string" || !allowed.includes(key)) {
+      throw new TypeError(`${String(key)} is not supported by ${name}`);
+    }
   }
 }
 

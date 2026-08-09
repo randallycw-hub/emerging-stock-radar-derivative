@@ -1,10 +1,73 @@
 import { createHash } from "node:crypto";
-import { cp, readFile, rm } from "node:fs/promises";
-import { join } from "node:path";
+import {
+  copyFile,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+} from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { verifyIssuerResearchViewConsistency } from "./build-bond-market-snapshot.mjs";
+
+const ROOT_FILES = new Set([
+  ".nojekyll",
+  "bonds.html",
+  "emerging.html",
+  "index.html",
+  "ipo-radar.html",
+  "ipo.html",
+  "methodology.html",
+]);
+const ASSET_FILES = new Set([
+  "app.css",
+  "bonds-page.js",
+  "emerging-page.js",
+  "home-page.js",
+  "ipo-data.js",
+  "ipo-page.js",
+  "ipo-radar-page.js",
+  "site-shell.js",
+  "table-sort.js",
+]);
+const DATA_ROOT_FILES = new Set([
+  "11406.json",
+  "11586.json",
+  "94025.json",
+  "bond-market-history.json",
+  "bond-market-view.json",
+  "cb-quotes.json",
+  "conversion-prices.json",
+  "current.json",
+  "manifest.json",
+  "runtime.js",
+  "stock-closes.json",
+]);
+const GENERATION_FILES = new Set([
+  "11406.json",
+  "11586.json",
+  "94025.json",
+  "bond-market-history.json",
+  "bond-market-view.json",
+  "cb-issuer-research.json",
+  "cb-quotes.json",
+  "conversion-prices.json",
+  "emerging-market.json",
+  "ipo-events.json",
+  "manifest.json",
+  "runtime.json",
+  "stock-closes.json",
+]);
+const BASE_DATASET_FILES = {
+  "94025": "94025.json",
+  "11406": "11406.json",
+  "11586": "11586.json",
+  bondMarket: "bond-market-view.json",
+  conversionPrices: "conversion-prices.json",
+  bondHistory: "bond-market-history.json",
+};
 
 export async function stageStaticShowcase({
   source = "static-showcase",
@@ -29,7 +92,9 @@ export async function stageStaticShowcase({
     runtime?.generation !== pointer.generation
     || runtime?.manifestUrl !== `./data/${pointer.generation}/manifest.json`
   ) {
-    throw new Error("active generation runtime is missing or invalid");
+    throw new Error(
+      "active generation required dataset artifacts or runtime datasets are missing or invalid",
+    );
   }
   const manifest = await readJson(
     join(source, runtime.manifestUrl.replace(/^\.\//, "")),
@@ -39,32 +104,17 @@ export async function stageStaticShowcase({
     throw new Error("active generation manifest is missing or invalid");
   }
   const base = `./data/${pointer.generation}`;
-  const requiredArtifacts = {
-    emergingMarketUrl: `${base}/emerging-market.json`,
-    "datasets.94025": `${base}/94025.json`,
-    "datasets.11406": `${base}/11406.json`,
-    "datasets.11586": `${base}/11586.json`,
-    "datasets.bondMarket": `${base}/bond-market-view.json`,
-    "datasets.conversionPrices": `${base}/conversion-prices.json`,
-    "datasets.bondHistory": `${base}/bond-market-history.json`,
-  };
   const declaresIssuerResearch = manifest.market.files?.some(
     (file) => file?.name === "cb-issuer-research.json",
   ) === true;
-  if (declaresIssuerResearch) {
-    requiredArtifacts["datasets.cbIssuerResearch"] =
-      `${base}/cb-issuer-research.json`;
-  }
-  if (manifest.emergingMarketUrl !== requiredArtifacts.emergingMarketUrl) {
+  const expectedDatasets = expectedRuntimeDatasets(base, declaresIssuerResearch);
+  validateRuntime(runtime, pointer.generation, expectedDatasets);
+  if (manifest.emergingMarketUrl !== `${base}/emerging-market.json`) {
     throw new Error("active generation required dataset artifacts are missing or invalid");
   }
-  for (const [key, expectedUrl] of Object.entries(requiredArtifacts)) {
-    const actualUrl = key === "emergingMarketUrl"
-      ? runtime.emergingMarketUrl
-      : runtime.datasets?.[key.slice("datasets.".length)];
-    if (actualUrl !== expectedUrl) {
-      throw new Error("active generation required dataset artifacts are missing or invalid");
-    }
+  const requiredUrls = [runtime.emergingMarketUrl, ...Object.values(expectedDatasets)];
+  if (runtime.ipoEventsUrl !== undefined) requiredUrls.push(runtime.ipoEventsUrl);
+  for (const expectedUrl of requiredUrls) {
     await readJson(
       join(source, expectedUrl.replace(/^\.\//, "")),
       "active generation required dataset artifacts are missing or invalid",
@@ -73,8 +123,186 @@ export async function stageStaticShowcase({
   if (declaresIssuerResearch) {
     await verifyDeclaredIssuerResearch({ source, manifest, runtime, base });
   }
+  const approvedFiles = await collectApprovedSourceFiles(source, pointer.generation);
   await rm(destination, { recursive: true, force: true });
-  await cp(source, destination, { recursive: true, force: true });
+  for (const relativePath of approvedFiles) {
+    const target = join(destination, ...relativePath.split("/"));
+    await mkdir(dirname(target), { recursive: true });
+    await copyFile(join(source, ...relativePath.split("/")), target);
+  }
+}
+
+function expectedRuntimeDatasets(base, declaresIssuerResearch) {
+  return Object.fromEntries([
+    ...Object.entries(BASE_DATASET_FILES).map(([key, name]) => [key, `${base}/${name}`]),
+    ...(declaresIssuerResearch
+      ? [["cbIssuerResearch", `${base}/cb-issuer-research.json`]]
+      : []),
+  ]);
+}
+
+function validateRuntime(runtime, generation, expectedDatasets) {
+  if (
+    runtime === null
+    || typeof runtime !== "object"
+    || Array.isArray(runtime)
+    || runtime.generation !== generation
+    || runtime.manifestUrl !== `./data/${generation}/manifest.json`
+    || runtime.emergingMarketUrl !== `./data/${generation}/emerging-market.json`
+    || (
+      runtime.ipoEventsUrl !== undefined
+      && runtime.ipoEventsUrl !== `./data/${generation}/ipo-events.json`
+    )
+  ) {
+    throw new Error(
+      "active generation required dataset artifacts or runtime datasets are missing or invalid",
+    );
+  }
+  const runtimeKeys = Object.keys(runtime).sort();
+  const expectedRuntimeKeys = [
+    "datasets",
+    "emergingMarketUrl",
+    "generation",
+    "manifestUrl",
+    ...(runtime.ipoEventsUrl === undefined ? [] : ["ipoEventsUrl"]),
+  ].sort();
+  if (!equalStringArrays(runtimeKeys, expectedRuntimeKeys)) {
+    throw new Error("active generation runtime is missing or invalid");
+  }
+  if (
+    runtime.datasets === null
+    || typeof runtime.datasets !== "object"
+    || Array.isArray(runtime.datasets)
+    || !equalStringArrays(
+      Object.keys(runtime.datasets).sort(),
+      Object.keys(expectedDatasets).sort(),
+    )
+    || Object.entries(expectedDatasets).some(
+      ([key, path]) => runtime.datasets[key] !== path,
+    )
+  ) {
+    throw new Error(
+      "active generation required dataset artifacts or runtime datasets are missing or invalid",
+    );
+  }
+}
+
+function equalStringArrays(left, right) {
+  return left.length === right.length
+    && left.every((value, index) => value === right[index]);
+}
+
+async function collectApprovedSourceFiles(source, activeGeneration) {
+  const files = [];
+  await collectExactDirectory({
+    absolutePath: source,
+    relativePath: "",
+    allowedFiles: ROOT_FILES,
+    allowedDirectories: new Set(["assets", "data"]),
+    files,
+  });
+
+  if (await directoryExists(join(source, "assets"))) {
+    await collectExactDirectory({
+      absolutePath: join(source, "assets"),
+      relativePath: "assets",
+      allowedFiles: ASSET_FILES,
+      allowedDirectories: new Set(),
+      files,
+    });
+  }
+  await collectExactDirectory({
+    absolutePath: join(source, "data"),
+    relativePath: "data",
+    allowedFiles: DATA_ROOT_FILES,
+    allowedDirectories: new Set(["generations"]),
+    files,
+  });
+  const generationsPath = join(source, "data", "generations");
+  const generations = await readdir(generationsPath, { withFileTypes: true });
+  for (const entry of generations) {
+    if (!entry.isDirectory() || !/^[a-f0-9]+$/i.test(entry.name)) {
+      throw new Error(`static showcase source path is not approved: data/generations/${entry.name}`);
+    }
+    const relativeGeneration = `data/generations/${entry.name}`;
+    const generationFiles = await collectExactDirectory({
+      absolutePath: join(generationsPath, entry.name),
+      relativePath: relativeGeneration,
+      allowedFiles: GENERATION_FILES,
+      allowedDirectories: new Set(),
+      files,
+    });
+    const hasResearch = generationFiles.has("cb-issuer-research.json");
+    const manifestPath = join(generationsPath, entry.name, "manifest.json");
+    const manifest = await readOptionalJson(manifestPath);
+    const declaresResearch = manifest?.market?.files?.some(
+      (file) => file?.name === "cb-issuer-research.json",
+    ) === true;
+    if (hasResearch !== declaresResearch) {
+      throw new Error(`static showcase source path is not approved: ${relativeGeneration}/cb-issuer-research.json`);
+    }
+    const runtimePath = join(generationsPath, entry.name, "runtime.json");
+    const runtime = await readOptionalJson(runtimePath);
+    if (runtime !== undefined) {
+      const generation = `generations/${entry.name}`;
+      validateRuntime(
+        runtime,
+        generation,
+        expectedRuntimeDatasets(`./data/${generation}`, declaresResearch),
+      );
+      if (declaresResearch && generation !== activeGeneration) {
+        await verifyDeclaredIssuerResearch({
+          source,
+          manifest,
+          runtime,
+          base: `./data/${generation}`,
+        });
+      }
+    } else if (declaresResearch) {
+      throw new Error(`static showcase source path is not approved: ${relativeGeneration}/runtime.json`);
+    }
+  }
+  return files.sort();
+}
+
+async function collectExactDirectory({
+  absolutePath,
+  relativePath,
+  allowedFiles,
+  allowedDirectories,
+  files,
+}) {
+  const entries = await readdir(absolutePath, { withFileTypes: true });
+  const localFiles = new Set();
+  for (const entry of entries) {
+    const path = relativePath === "" ? entry.name : `${relativePath}/${entry.name}`;
+    if (entry.isFile() && allowedFiles.has(entry.name)) {
+      files.push(path);
+      localFiles.add(entry.name);
+      continue;
+    }
+    if (entry.isDirectory() && allowedDirectories.has(entry.name)) continue;
+    throw new Error(`static showcase source path is not approved: ${path}`);
+  }
+  return localFiles;
+}
+
+async function directoryExists(path) {
+  try {
+    return (await readdir(path)).length >= 0;
+  } catch (error) {
+    if (error?.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+async function readOptionalJson(path) {
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw new Error(`static showcase source path is not approved: ${path}`);
+  }
 }
 
 async function verifyDeclaredIssuerResearch({ source, manifest, runtime, base }) {

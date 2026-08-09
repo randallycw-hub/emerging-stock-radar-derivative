@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildCbIssuerResearchSnapshot,
+  parseCbIssuerResearchRecords,
   parseCbIssuerResearchSnapshot,
 } from "../lib/market-data/cb-issuer-research.ts";
 
@@ -111,6 +112,30 @@ function previousSnapshot(overrides = {}) {
     ...overrides,
   };
 }
+
+test("record-list parser is the strict frozen defensive boundary reused by consumers", () => {
+  const input = [researchRecord()];
+  const records = parseCbIssuerResearchRecords(input);
+
+  input[0].industryName = "mutated input";
+  assert.notEqual(records[0].industryName, "mutated input");
+  assert.equal(Object.isFrozen(records), true);
+  assert.equal(Object.isFrozen(records[0]), true);
+  assert.throws(
+    () => parseCbIssuerResearchRecords([{
+      ...researchRecord(),
+      currentMonthRevenue: "01",
+    }]),
+    /currentMonthRevenue/,
+  );
+  assert.throws(
+    () => parseCbIssuerResearchRecords([{
+      ...researchRecord(),
+      noteText: "raw note must not escape",
+    }]),
+    /keys.*exact schema/,
+  );
+});
 
 test("projects only deduplicated exact current issuers with newest rows and stable public values", () => {
   const snapshot = buildCbIssuerResearchSnapshot({

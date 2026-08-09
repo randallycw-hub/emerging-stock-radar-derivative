@@ -7,6 +7,8 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import test from "node:test";
 
+import { stageStaticShowcase } from "../scripts/stage-static-showcase.mjs";
+
 const execFileAsync = promisify(execFile);
 
 test("Sites staging copies the complete static showcase including the active generation", async () => {
@@ -104,6 +106,81 @@ test("Sites staging rejects a runtime that omits required dataset artifacts", as
       join(root, "destination"),
     ]),
     /required dataset artifacts/i,
+  );
+});
+
+test("Sites staging rejects an extra runtime dataset and raw CSV before touching destination", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-runtime-extra-"));
+  const source = join(root, "source");
+  const destination = join(root, "destination");
+  await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+  const runtimePath = join(source, "data/generations/abc123/runtime.json");
+  const runtime = JSON.parse(await readFile(runtimePath, "utf8"));
+  runtime.datasets.rawMonthlyRevenue =
+    "./data/generations/abc123/raw-monthly-revenue.csv";
+  await writeFile(runtimePath, `${JSON.stringify(runtime)}\n`, "utf8");
+  await writeFile(
+    join(source, "data/generations/abc123/raw-monthly-revenue.csv"),
+    "備註,source URL,rejection\nprivate,https://example.invalid,failed\n",
+    "utf8",
+  );
+  await mkdir(destination, { recursive: true });
+  await writeFile(join(destination, "sentinel.txt"), "prior destination", "utf8");
+
+  await assert.rejects(
+    stageStaticShowcase({ source, destination }),
+    /runtime datasets|source path/i,
+  );
+  assert.equal(
+    await readFile(join(destination, "sentinel.txt"), "utf8"),
+    "prior destination",
+  );
+});
+
+test("Sites staging rejects every unknown generation evidence file", async (context) => {
+  for (const name of [
+    "raw.csv",
+    "research-notes.txt",
+    "source-url.json",
+    "rejections.json",
+    "unknown-artifact.json",
+  ]) {
+    await context.test(name, async () => {
+      const root = await mkdtemp(join(tmpdir(), "showcase-stage-unknown-file-"));
+      const source = join(root, "source");
+      await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+      await writeFile(
+        join(source, "data/generations/abc123", name),
+        "private evidence",
+        "utf8",
+      );
+      await assert.rejects(
+        stageStaticShowcase({ source, destination: join(root, "destination") }),
+        /source path/i,
+      );
+    });
+  }
+});
+
+test("Sites staging preserves allowed legacy root data and multiple hex generations", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-legacy-"));
+  const source = join(root, "source");
+  const destination = join(root, "destination");
+  await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+  await writeFile(join(source, "data/94025.json"), "[]\n", "utf8");
+  await mkdir(join(source, "data/generations/deadbeef"), { recursive: true });
+  await writeFile(
+    join(source, "data/generations/deadbeef/94025.json"),
+    "[]\n",
+    "utf8",
+  );
+
+  await stageStaticShowcase({ source, destination });
+
+  assert.equal(await readFile(join(destination, "data/94025.json"), "utf8"), "[]\n");
+  assert.equal(
+    await readFile(join(destination, "data/generations/deadbeef/94025.json"), "utf8"),
+    "[]\n",
   );
 });
 
