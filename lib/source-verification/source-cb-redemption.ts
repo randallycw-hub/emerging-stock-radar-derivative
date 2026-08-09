@@ -14,6 +14,7 @@ const TABLE_FIELDS = ["title", "data", "fields", "totalCount"] as const;
 const REDEMPTION_FIELDS = ["公司代號", "公司名稱", "申報日期", "主旨", "內容"] as const;
 const TABLE_TITLE = "轉換公司債行使贖回權公告";
 const SUBJECT_PATTERN = /簡稱[：:]\s*([^，,)]+)[，,]\s*代碼[：:]\s*(\d{5,6})\).*?訂於(\d{3})年(\d{2})月(\d{2})日終止櫃檯買賣/;
+const DETAIL_QUERY_PARAMETERS = ["TYPEK", "co_id", "date1", "seq_no", "pub_class", "firstin"] as const;
 
 export function parseCbRedemptionAnnouncements(payload: unknown): readonly CbRedemptionEvent[] {
   const root = requireRecord(payload, "CB redemption root");
@@ -120,6 +121,7 @@ function assertDetailUrl(value: string, issuerCode: string, announcementDate: st
   if (url.username !== "" || url.password !== "") {
     throw new TypeError("CB redemption detail URL must not contain credentials");
   }
+  assertExactDetailQuery(url.searchParams);
   if (url.searchParams.get("co_id") !== issuerCode) {
     throw new TypeError("CB redemption detail URL issuer code does not match the row issuer");
   }
@@ -133,6 +135,9 @@ function parseAnnualRootDate(value: unknown): string {
     throw new TypeError("CB redemption root date must be an annual YYYY0101 date");
   }
   const year = value.slice(0, 4);
+  if (year === "0000") {
+    throw new TypeError("CB redemption root date must not use a zero year");
+  }
   if (!isIsoDate(`${year}-01-01`)) {
     throw new TypeError("CB redemption root date must be a valid annual date");
   }
@@ -144,11 +149,27 @@ function parseRocDate(value: string, name: string): string {
   if (!match) {
     throw new TypeError(`CB redemption ${name} must be a ROC date`);
   }
+  if (match[1] === "000") {
+    throw new TypeError(`CB redemption ${name} must not use a zero year`);
+  }
   const isoDate = `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
   if (!isIsoDate(isoDate)) {
     throw new TypeError(`CB redemption ${name} must be a valid ROC date`);
   }
   return isoDate;
+}
+
+function assertExactDetailQuery(searchParams: URLSearchParams): void {
+  for (const [parameter] of searchParams) {
+    if (!DETAIL_QUERY_PARAMETERS.includes(parameter as typeof DETAIL_QUERY_PARAMETERS[number])) {
+      throw new TypeError(`CB redemption detail URL query contains an unexpected parameter: ${parameter}`);
+    }
+  }
+  for (const parameter of DETAIL_QUERY_PARAMETERS) {
+    if (searchParams.getAll(parameter).length !== 1) {
+      throw new TypeError(`CB redemption detail URL query parameter must appear exactly once: ${parameter}`);
+    }
+  }
 }
 
 function isIsoDate(value: string): boolean {

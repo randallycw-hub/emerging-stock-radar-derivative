@@ -33,6 +33,28 @@ function withUrlDateConflict(fixture) {
   return copy;
 }
 
+function withRepeatedUrlParameter(fixture, parameter, value) {
+  const copy = structuredClone(fixture);
+  copy.tables[0].data[0][4] += `&${parameter}=${value}`;
+  return copy;
+}
+
+function withUnexpectedUrlParameter(fixture) {
+  return withRepeatedUrlParameter(fixture, "unexpected", "value");
+}
+
+function withZeroAnnualYear(fixture) {
+  const copy = structuredClone(fixture);
+  copy.date = "00000101";
+  return copy;
+}
+
+function withZeroRocAnnouncementYear(fixture) {
+  const copy = structuredClone(fixture);
+  copy.tables[0].data[0][2] = "000/08/04";
+  return copy;
+}
+
 function withMissingDelistingDate(fixture) {
   const copy = structuredClone(fixture);
   copy.tables[0].data[0][3] = copy.tables[0].data[0][3].replace("訂於115年09月21日終止櫃檯買賣", "訂於115年09月21日");
@@ -68,6 +90,27 @@ test("rejects issuer, date, URL and subject conflicts", async () => {
   assert.throws(() => parseCbRedemptionAnnouncements(withHttpUrl(fixture)), /detail URL/);
   assert.throws(() => parseCbRedemptionAnnouncements(withUrlDateConflict(fixture)), /announcement date/);
   assert.throws(() => parseCbRedemptionAnnouncements(withMissingDelistingDate(fixture)), /delisting date/);
+});
+
+test("rejects duplicate and unrecognized MOPS detail URL parameters", async () => {
+  const fixture = await jsonFixture("year-minimal.json");
+
+  assert.throws(
+    () => parseCbRedemptionAnnouncements(withRepeatedUrlParameter(fixture, "co_id", "9999")),
+    /detail URL query/,
+  );
+  assert.throws(
+    () => parseCbRedemptionAnnouncements(withRepeatedUrlParameter(fixture, "date1", "20260805")),
+    /detail URL query/,
+  );
+  assert.throws(() => parseCbRedemptionAnnouncements(withUnexpectedUrlParameter(fixture)), /detail URL query/);
+});
+
+test("rejects zero annual and ROC date years", async () => {
+  const fixture = await jsonFixture("year-minimal.json");
+
+  assert.throws(() => parseCbRedemptionAnnouncements(withZeroAnnualYear(fixture)), /zero year/);
+  assert.throws(() => parseCbRedemptionAnnouncements(withZeroRocAnnouncementYear(fixture)), /zero year/);
 });
 
 test("rejects schema drift and duplicate CB announcement keys", async () => {
