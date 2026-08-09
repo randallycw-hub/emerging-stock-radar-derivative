@@ -207,3 +207,17 @@ Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, La
 正式快照 smoke 結果：11406 415 列、94025 354 列、11586 697 列、興櫃盤後 359 家、可轉債 385 檔、轉換價 384 筆；市場資料日期一致為 2026-07-31。未核准 OpenAPI、`bond_cb_daily`、第三方網站、即時價、買賣價量與自動 fallback 仍維持禁止。任何 schema、授權、主機或用途變更都會撤回本核准並停止切換 generation pointer。
 
 IPO 事件用途補充：`11586-csv` 在 IPO 事件快照中另明確核准 `underwriters` 與 `note`，以及公司識別與正式申請里程碑欄位；`underwritingPrice`、`chairmanName` 與資本額不得由此用途發布。上述五個 IPO resource 的核准 identity、精確 URL（年度端點的唯一變數僅為四位數 `yy`）、Content-Type 與可用欄位，以 `lib/pipeline/source-registry.ts` 的 `ipoEventPolicy` 為可執行政策；Phase 1 quarantine 必須由該 registry 導出，不另存一份 IPO URL 白名單。
+
+## TPEx 三大法人日交易資訊 resource-level amendment（2026-08-09）
+
+Resource: `POST https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade`
+
+Form body 必須完全為 `{ date: "YYYY/MM/DD", type: "Daily", id: "", response: "json" }`；未觀察到 API key。此 resource 是每一交易日一份的可轉債三大法人交易資料，2026-08-07 經人工覆核取得 HTTP 200、`application/json;charset=UTF-8` 與 157 列回應；來源證據與最小 fixture 的 metadata 保存於 `tests/fixtures/source-verification/cb-institution/metadata.json`，完整 live response 不納入 production bundle。
+
+已驗證欄位順序為：代號、名稱、外資及陸資買／賣／淨買張數、投信買／賣／淨買張數、自營商買／賣／淨買張數、三大法人買賣超張數。回應標題明示轉（交）換及附認股權公司債以面額新台幣十萬元為一成交單位。
+
+Parser 邊界：僅接受上述 TPEx POST resource 的 `Daily` payload；root/table key、單一 table、欄位位置、ROC／西元交易日、五至六碼債券代號、整數 cell、列數、代號唯一性及各法人淨額／合計淨額算術都必須通過。schema drift 或算術不一致時拒絕 payload；不得使用 Yahoo、券商、第三方或任何 fallback。
+
+Attribution: `財團法人中華民國證券櫃檯買賣中心｜三大法人日交易資訊`，附交易日與本站擷取時間。
+
+Resource status: `VERIFIED_FOR_IMPLEMENTATION`。這不是已暫停的 `bond_cb_daily` resource；後者仍禁止 ingest 或 fallback。
