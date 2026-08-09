@@ -187,6 +187,18 @@ The `內容` detail URL must be HTTPS with host `mopsov.twse.com.tw`, path `/mop
 
 Allowed use is alert-only: validated redemption and delisting events can enter the CB event-review queue, but must not publish a trading decision, use a third-party source, or fall back to another resource. On HTTP, payload, schema, date, subject, URL, or duplicate-key failure, reject the response, retain failure evidence, and raise a source-drift alert; do not retry through a fallback or use stale data as a replacement.
 
+## TWSA underwriting announcements resource-level amendment (2026-08-09)
+
+Resource: `GET https://web.twsa.org.tw/edoc2/default.aspx`
+
+Status: `VERIFIED_FOR_IMPLEMENTATION`
+
+The current-year HTML contract has page title `115年－承銷公告`, notice `本公告系統僅供參考，相關資料以正式刊登報紙之公告內容為準。`, and one result table identified by `ctl00_cphMain_gvResult`. The verified table has exactly 11 positional headers: `序號`, `申報日期`, `主辦承銷商`, `案件名稱`, `方式`, `發行性質`, `發行種類`, `配售方式一`, `配售方式二`, `案件狀態`, and `公告檔`.
+
+Evidence captured by the controller at `2026-08-09T08:11:09.7686345Z`: HTTP 200, `text/html; charset=utf-8`, 299346 response bytes, and raw-response SHA-256 `b17dfc15a0a1e26fb0c5190248119f2b0af1494f112102ae322e2e281f5bd647`. The offline fixture retains three structural rows and performs no live fetch.
+
+This secondary source is limited to new-CB radar enrichment: accept only `發行性質` `公司債` with `發行種類` `有擔保轉換公司債` or `無擔保轉換公司債`. It must not infer a CB code, issue amount, conversion price, or listing date. It is not contract truth and cannot become contract truth without later exact-code confirmation from TPEx and/or MOPS. No fallback, third-party source, UI, runtime fetch, publication, or `APPROVED_FOR_PRODUCTION` status is authorized. On notice, title, table, header, or row-width drift, reject the response and raise a source-drift alert.
+
 ## 興櫃盤後行情 resource-level manual amendment（2026-07-30）
 
 Resource: GET https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics

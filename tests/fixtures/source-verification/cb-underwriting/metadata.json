@@ -1,0 +1,37 @@
+{
+  "sourceId": "twsa-cb-underwriting-announcements",
+  "schemaVersion": "twsa-edoc2-html-v1",
+  "fixtureVersion": "official-minimal-v1",
+  "resourceUrl": "https://web.twsa.org.tw/edoc2/default.aspx",
+  "method": "GET",
+  "capturedAt": "2026-08-09T08:11:09.7686345Z",
+  "httpStatus": 200,
+  "httpContentType": "text/html; charset=utf-8",
+  "sourceResponseBytes": 299346,
+  "sourceResponseSha256": "sha256:b17dfc15a0a1e26fb0c5190248119f2b0af1494f112102ae322e2e281f5bd647",
+  "sourcePageTitle": "115年－承銷公告",
+  "sourceTableId": "ctl00_cphMain_gvResult",
+  "sourceHeaders": [
+    "序號",
+    "申報日期",
+    "主辦承銷商",
+    "案件名稱",
+    "方式",
+    "發行性質",
+    "發行種類",
+    "配售方式一",
+    "配售方式二",
+    "案件狀態",
+    "公告檔"
+  ],
+  "fixtureRowCount": 3,
+  "notice": "本公告系統僅供參考，相關資料以正式刊登報紙之公告內容為準。",
+  "samplingMethod": "Three non-personal-data rows retained from the controller-captured current-year response; this offline fixture performs no live fetch.",
+  "privacyReview": {
+    "containsPersonalData": false,
+    "excludedFields": [],
+    "minimized": true,
+    "deidentified": false,
+    "rationale": "The retained rows contain only corporate underwriting announcement fields required to verify the HTML structure and CB filter."
+  }
+}
