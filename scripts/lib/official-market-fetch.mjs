@@ -72,13 +72,25 @@ export async function fetchCbSupplementalSources({
       supplementalPostOptions(institutionBody),
       fetchImpl,
       JSON_RESPONSE_MAX_BYTES,
-    ).then(parseCbInstitutionDaily),
+    ).then((payload) => {
+      const parsed = parseCbInstitutionDaily(payload);
+      if (parsed.tradingDate !== date) {
+        throw new TypeError("SUPPLEMENTAL_INSTITUTION_DATE_MISMATCH");
+      }
+      return parsed;
+    }),
     fetchJsonWithRetry(
       TPEX_CB_REDEMPTION,
       supplementalPostOptions(redemptionBody),
       fetchImpl,
       JSON_RESPONSE_MAX_BYTES,
-    ).then(parseCbRedemptionAnnouncements),
+    ).then((payload) => {
+      const parsed = parseCbRedemptionAnnouncements(payload);
+      if (payload.date !== `${date.slice(0, 4)}0101`) {
+        throw new TypeError("SUPPLEMENTAL_REDEMPTION_YEAR_MISMATCH");
+      }
+      return parsed;
+    }),
     fetchTextWithRetry(
       TWSA_CB_UNDERWRITING,
       {
@@ -92,7 +104,13 @@ export async function fetchCbSupplementalSources({
       fetchImpl,
       "text/html",
       HTML_RESPONSE_MAX_BYTES,
-    ).then(parseCbUnderwritingHtml),
+    ).then((html) => {
+      const parsed = parseCbUnderwritingHtml(html);
+      if (parsed.rocYear + 1911 !== Number(date.slice(0, 4))) {
+        throw new TypeError("SUPPLEMENTAL_UNDERWRITING_YEAR_MISMATCH");
+      }
+      return parsed;
+    }),
   ];
   const [institution, redemption, underwriting] = await Promise.allSettled(requests);
   return { institution, redemption, underwriting };

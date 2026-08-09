@@ -472,6 +472,76 @@ test("supplemental fetches only the three exact resources and parses their verif
   assert.equal(result.underwriting.value.records[0].guaranteeType, "unsecured");
 });
 
+test("supplemental binds each parsed response to the requested collection period", async (t) => {
+  const institution2026 = await fixtureFromSource("cb-institution/daily-minimal.json");
+  const redemption2026 = await fixtureFromSource("cb-redemption/year-minimal.json");
+  const underwriting2026 = await fixtureFromSource("cb-underwriting/current-year-minimal.html");
+  const redemption2026Empty = emptyRedemptionFixture(redemption2026, 2026);
+
+  await t.test("institution date mismatch rejects only institution", async () => {
+    const result = await fetchCbSupplementalSources({
+      date: "2026-08-08",
+      fetchImpl: supplementalFixtureFetch({
+        institution: institution2026,
+        redemption: redemption2026,
+        underwriting: underwriting2026,
+      }),
+    });
+
+    assert.equal(result.institution.status, "rejected");
+    assert.match(result.institution.reason.message, /SUPPLEMENTAL_INSTITUTION_DATE_MISMATCH/);
+    assert.equal(result.redemption.status, "fulfilled");
+    assert.equal(result.underwriting.status, "fulfilled");
+  });
+
+  await t.test("empty redemption root year mismatch rejects only redemption", async () => {
+    const result = await fetchCbSupplementalSources({
+      date: "2026-08-07",
+      fetchImpl: supplementalFixtureFetch({
+        institution: institution2026,
+        redemption: emptyRedemptionFixture(redemption2026, 2025),
+        underwriting: underwriting2026,
+      }),
+    });
+
+    assert.equal(result.institution.status, "fulfilled");
+    assert.equal(result.redemption.status, "rejected");
+    assert.match(result.redemption.reason.message, /SUPPLEMENTAL_REDEMPTION_YEAR_MISMATCH/);
+    assert.equal(result.underwriting.status, "fulfilled");
+  });
+
+  await t.test("underwriting page year mismatch rejects only underwriting", async () => {
+    const result = await fetchCbSupplementalSources({
+      date: "2025-08-07",
+      fetchImpl: supplementalFixtureFetch({
+        institution: institutionFixtureForDate(institution2026, "2025-08-07"),
+        redemption: emptyRedemptionFixture(redemption2026, 2025),
+        underwriting: underwriting2026,
+      }),
+    });
+
+    assert.equal(result.institution.status, "fulfilled");
+    assert.equal(result.redemption.status, "fulfilled");
+    assert.equal(result.underwriting.status, "rejected");
+    assert.match(result.underwriting.reason.message, /SUPPLEMENTAL_UNDERWRITING_YEAR_MISMATCH/);
+  });
+
+  await t.test("internally valid 2026 sources all reject for a 2027 request", async () => {
+    const result = await fetchCbSupplementalSources({
+      date: "2027-08-07",
+      fetchImpl: supplementalFixtureFetch({
+        institution: institution2026,
+        redemption: redemption2026Empty,
+        underwriting: underwriting2026,
+      }),
+    });
+
+    assert.equal(result.institution.status, "rejected");
+    assert.equal(result.redemption.status, "rejected");
+    assert.equal(result.underwriting.status, "rejected");
+  });
+});
+
 test("supplemental sources settle independently when underwriting remains unavailable", async () => {
   const institution = await fixtureFromSource("cb-institution/daily-minimal.json");
   const redemption = await fixtureFromSource("cb-redemption/year-minimal.json");
@@ -648,4 +718,35 @@ function jsonResponse(text) {
 
 async function fixtureFromSource(name) {
   return readFile(new URL(`fixtures/source-verification/${name}`, import.meta.url), "utf8");
+}
+
+function supplementalFixtureFetch({ institution, redemption, underwriting }) {
+  return async (url) => {
+    const target = String(url);
+    if (target.endsWith("/newCb3itrade")) return jsonResponse(institution);
+    if (target.endsWith("/redeem")) return jsonResponse(redemption);
+    if (target === "https://web.twsa.org.tw/edoc2/default.aspx") {
+      return new Response(underwriting, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+}
+
+function emptyRedemptionFixture(text, year) {
+  const payload = JSON.parse(text);
+  payload.date = `${year}0101`;
+  payload.tables[0].data = [];
+  payload.tables[0].totalCount = 0;
+  return JSON.stringify(payload);
+}
+
+function institutionFixtureForDate(text, date) {
+  const payload = JSON.parse(text);
+  const rocYear = Number(date.slice(0, 4)) - 1911;
+  payload.date = date.replaceAll("-", "");
+  payload.tables[0].date = `${rocYear}/${date.slice(5, 7)}/${date.slice(8, 10)}`;
+  return JSON.stringify(payload);
 }

@@ -21,6 +21,27 @@ function withIssuerConflict(fixture) {
   return copy;
 }
 
+function withCoordinatedIssuerConflict(fixture) {
+  const copy = structuredClone(fixture);
+  copy.tables[0].data[0][0] = "9999";
+  const url = new URL(copy.tables[0].data[0][4]);
+  url.searchParams.set("co_id", "9999");
+  copy.tables[0].data[0][4] = url.toString();
+  return copy;
+}
+
+function withIssuerNameConflict(fixture) {
+  const copy = structuredClone(fixture);
+  copy.tables[0].data[0][1] = "錯誤公司";
+  return copy;
+}
+
+function withSixDigitBondCode(fixture) {
+  const copy = structuredClone(fixture);
+  copy.tables[0].data[0][3] = copy.tables[0].data[0][3].replace("31312", "313112");
+  return copy;
+}
+
 function withHttpUrl(fixture) {
   const copy = structuredClone(fixture);
   copy.tables[0].data[0][4] = copy.tables[0].data[0][4].replace("https://", "http://");
@@ -41,6 +62,14 @@ function withRepeatedUrlParameter(fixture, parameter, value) {
 
 function withUnexpectedUrlParameter(fixture) {
   return withRepeatedUrlParameter(fixture, "unexpected", "value");
+}
+
+function withUrlMutation(fixture, mutate) {
+  const copy = structuredClone(fixture);
+  const url = new URL(copy.tables[0].data[0][4]);
+  mutate(url);
+  copy.tables[0].data[0][4] = url.toString();
+  return copy;
 }
 
 function withZeroAnnualYear(fixture) {
@@ -92,6 +121,31 @@ test("rejects issuer, date, URL and subject conflicts", async () => {
   assert.throws(() => parseCbRedemptionAnnouncements(withMissingDelistingDate(fixture)), /delisting date/);
 });
 
+test("binds the row issuer to its bond code and subject announcement prefix", async (t) => {
+  const fixture = await jsonFixture("year-minimal.json");
+
+  await t.test("coordinated issuer and co_id mutation", () => {
+    assert.throws(
+      () => parseCbRedemptionAnnouncements(withCoordinatedIssuerConflict(fixture)),
+      /issuer.*bond code/,
+    );
+  });
+
+  await t.test("issuer name missing from announcement prefix", () => {
+    assert.throws(
+      () => parseCbRedemptionAnnouncements(withIssuerNameConflict(fixture)),
+      /issuer name.*subject/,
+    );
+  });
+
+  await t.test("six-digit bond code with two suffix digits remains valid", () => {
+    assert.equal(
+      parseCbRedemptionAnnouncements(withSixDigitBondCode(fixture))[0].bondCode,
+      "313112",
+    );
+  });
+});
+
 test("rejects duplicate and unrecognized MOPS detail URL parameters", async () => {
   const fixture = await jsonFixture("year-minimal.json");
 
@@ -104,6 +158,27 @@ test("rejects duplicate and unrecognized MOPS detail URL parameters", async () =
     /detail URL query/,
   );
   assert.throws(() => parseCbRedemptionAnnouncements(withUnexpectedUrlParameter(fixture)), /detail URL query/);
+});
+
+test("rejects off-contract MOPS detail URL values and fragments", async (t) => {
+  const fixture = await jsonFixture("year-minimal.json");
+  const cases = [
+    ["fragment", (url) => { url.hash = "review"; }],
+    ["TYPEK", (url) => { url.searchParams.set("TYPEK", "listed"); }],
+    ["zero seq_no", (url) => { url.searchParams.set("seq_no", "0"); }],
+    ["non-integer seq_no", (url) => { url.searchParams.set("seq_no", "2.5"); }],
+    ["pub_class", (url) => { url.searchParams.set("pub_class", "1"); }],
+    ["firstin", (url) => { url.searchParams.set("firstin", "0"); }],
+  ];
+
+  for (const [name, mutate] of cases) {
+    await t.test(name, () => {
+      assert.throws(
+        () => parseCbRedemptionAnnouncements(withUrlMutation(fixture, mutate)),
+        /detail URL/,
+      );
+    });
+  }
 });
 
 test("rejects zero annual and ROC date years", async () => {

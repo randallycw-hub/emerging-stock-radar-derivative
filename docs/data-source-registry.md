@@ -262,6 +262,6 @@ Resource status: `VERIFIED_FOR_IMPLEMENTATION`。這不是已暫停的 `bond_cb_
 
 兩個 TPEx POST 必須分別使用已驗證的 exact form body：`newCb3itrade` 為 `{ date: "YYYY/MM/DD", type: "Daily", id: "", response: "json" }`，`redeem` 為 `{ date: "YYYY", id: "", response: "json" }`。TWSA 僅允許上述 exact GET。每個 JSON response 上限為 500,000 bytes，HTML response 上限為 1,000,000 bytes；HTTP status、redirect、Content-Type、size、JSON 或 parser schema 失敗只拒絕該 named source。
 
-目前來源失敗時，只能複製前一份經完整驗證且無 mutable alias 的對應區段，明確標示為 `stale` 並保留原 `dataDate`；不得冒充 fresh、改寫日期或把舊資料當作新的來源事實。沒有合法 current 或 previous 區段時必須標示 `unavailable`。
+目前來源失敗時，只能複製前一份經完整驗證且無 mutable alias 的對應區段，明確標示為 `stale` 並保留原 `dataDate`；不得冒充 fresh、改寫日期或把舊資料當作新的來源事實。這項 2026-08-09 production 核准僅就上述「完整驗證 previous snapshot 區段」明確取代前述不得以 stale replacement 的文字；未經完整驗證的舊資料、來源替換、替代 URL 與 fallback 仍一律禁止。沒有合法 current 或 previous 區段時必須標示 `unavailable`。
 
 所有 redirect、替代 URL、自動 fallback、Yahoo／券商／第三方來源、即時資料、買賣建議與擴張用途仍禁止。`edoc2` 不得推論可轉債代號、發行金額、轉換價格或掛牌日期；這些欄位仍須由 TPEx／MOPS 的 exact-code 契約證據確認。本 amendment 不核准 UI、公開發布或將承銷公告提升為契約真相。

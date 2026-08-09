@@ -56,7 +56,9 @@ export function parseCbUnderwritingHtml(html: string): CbUnderwritingSnapshot {
   const headers = extractCells(rows[0]);
   assertExactHeaders(headers);
 
-  const records = rows.slice(1).map((row, index) => parseCaseRow(extractCells(row), index));
+  const records = rows.slice(1).map((row, index) =>
+    parseCaseRow(extractCells(row), index, rocYear)
+  );
   return { rocYear, notice: NOTICE, records: records.filter((record): record is CbUnderwritingCase => record !== null) };
 }
 
@@ -125,7 +127,11 @@ function assertExactHeaders(headers: readonly string[]): void {
   }
 }
 
-function parseCaseRow(cells: readonly string[], index: number): CbUnderwritingCase | null {
+function parseCaseRow(
+  cells: readonly string[],
+  index: number,
+  rocYear: number,
+): CbUnderwritingCase | null {
   if (cells.length !== HEADERS.length) {
     throw new TypeError(`CB underwriting row ${index + 1} must contain 11 fields`);
   }
@@ -144,6 +150,7 @@ function parseCaseRow(cells: readonly string[], index: number): CbUnderwritingCa
   ] = cells;
   assertRequiredCell(referenceNumber, "reference number", index);
   assertRequiredCell(filedDate, "filed date", index);
+  assertFiledDate(filedDate, rocYear, index);
   assertRequiredCell(leadUnderwriter, "lead underwriter", index);
   assertRequiredCell(issuerName, "issuer name", index);
   assertRequiredCell(caseStatus, "case status", index);
@@ -162,6 +169,23 @@ function parseCaseRow(cells: readonly string[], index: number): CbUnderwritingCa
     placementMethods: [primaryPlacementMethod, secondaryPlacementMethod].filter((method) => method !== ""),
     caseStatus,
   };
+}
+
+function assertFiledDate(value: string, rocYear: number, index: number): void {
+  const match = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(value);
+  if (match === null) {
+    throw new TypeError(`CB underwriting row ${index + 1} filed date must be YYYY/MM/DD`);
+  }
+  const isoDate = `${match[1]}-${match[2]}-${match[3]}`;
+  const date = new Date(`${isoDate}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== isoDate) {
+    throw new TypeError(`CB underwriting row ${index + 1} filed date must be a valid Gregorian date`);
+  }
+  const pageYear = rocYear + 1911;
+  const filedYear = Number(match[1]);
+  if (filedYear !== pageYear && filedYear !== pageYear - 1) {
+    throw new TypeError(`CB underwriting row ${index + 1} filed date is outside the verified carry-over window`);
+  }
 }
 
 function assertRequiredCell(value: string, name: string, index: number): void {

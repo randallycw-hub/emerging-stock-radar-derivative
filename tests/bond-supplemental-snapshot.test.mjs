@@ -187,6 +187,148 @@ test("fresh redemption and underwriting replace their sections and use their max
   assert.equal(next.sources.institution.state, "stale");
 });
 
+test("enforces redemption period and data-date monotonicity", async (t) => {
+  await t.test("same-year rollback", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        redemptions: [redemptionEvent("2026-08-01", "31311")],
+        redemptionYear: 2026,
+        previous,
+      }),
+      /redemption dataDate must not move backward within a year/,
+    );
+  });
+
+  await t.test("older year", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        redemptions: [redemptionEvent("2025-12-01", "31311")],
+        redemptionYear: 2025,
+        previous,
+      }),
+      /redemption year must not move backward/,
+    );
+  });
+
+  await t.test("period must match nonempty records", () => {
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        redemptions: [redemptionEvent("2026-08-01", "31311")],
+        redemptionYear: 2027,
+      }),
+      /redemptionYear does not match records/,
+    );
+  });
+
+  await t.test("next-year rollover", () => {
+    const previous = previousSnapshot();
+    const next = buildCbSupplementalSnapshot({
+      generatedAt,
+      redemptions: [redemptionEvent("2027-01-02", "31311", "2027-09-21")],
+      redemptionYear: 2027,
+      previous,
+    });
+    assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: "2027-01-02" });
+  });
+
+  await t.test("empty result with prior records requires a period", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, redemptions: [], previous }),
+      /redemptionYear is required/,
+    );
+  });
+
+  await t.test("same-year empty result cannot erase newer evidence", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        redemptions: [],
+        redemptionYear: 2026,
+        previous,
+      }),
+      /empty redemption result must be a newer-year rollover/,
+    );
+  });
+
+  await t.test("empty next-year rollover", () => {
+    const previous = previousSnapshot();
+    const next = buildCbSupplementalSnapshot({
+      generatedAt,
+      redemptions: [],
+      redemptionYear: 2027,
+      previous,
+    });
+    assert.deepEqual(next.redemptions, []);
+    assert.deepEqual(next.sources.redemption, { state: "fresh", dataDate: null });
+  });
+});
+
+test("enforces underwriting period and data-date monotonicity", async (t) => {
+  await t.test("same-period rollback", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        underwriting: underwritingSnapshot(115, [underwritingCase("2025/12/26", "115003")]),
+        previous,
+      }),
+      /underwriting dataDate must not move backward within a period/,
+    );
+  });
+
+  await t.test("older period", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        underwriting: underwritingSnapshot(114, [underwritingCase("2025/12/31", "114099")]),
+        previous,
+      }),
+      /underwriting period must not move backward/,
+    );
+  });
+
+  await t.test("next-period rollover", () => {
+    const previous = previousSnapshot();
+    const next = buildCbSupplementalSnapshot({
+      generatedAt,
+      underwriting: underwritingSnapshot(116, [underwritingCase("2026/01/01", "116001")]),
+      previous,
+    });
+    assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: "2026/01/01" });
+  });
+
+  await t.test("same-period empty result cannot erase newer evidence", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt,
+        underwriting: underwritingSnapshot(115, []),
+        previous,
+      }),
+      /empty underwriting result must be a newer-period rollover/,
+    );
+  });
+
+  await t.test("empty next-period rollover", () => {
+    const previous = previousSnapshot();
+    const next = buildCbSupplementalSnapshot({
+      generatedAt,
+      underwriting: underwritingSnapshot(116, []),
+      previous,
+    });
+    assert.deepEqual(next.underwritingCases, []);
+    assert.deepEqual(next.sources.underwriting, { state: "fresh", dataDate: null });
+  });
+});
+
 test("legal fresh empty sections have null data dates and become stale empty sections later", () => {
   const fresh = buildCbSupplementalSnapshot({
     generatedAt,
@@ -244,6 +386,53 @@ test("requires generatedAt to advance beyond the previous snapshot", async (t) =
         previous,
       }),
       /generatedAt must be later than previous generatedAt/,
+    );
+  });
+});
+
+test("rejects off-contract redemption URLs in a previous snapshot", async (t) => {
+  const cases = [
+    ["fragment", (url) => { url.hash = "review"; }],
+    ["TYPEK", (url) => { url.searchParams.set("TYPEK", "listed"); }],
+    ["zero seq_no", (url) => { url.searchParams.set("seq_no", "0"); }],
+    ["non-integer seq_no", (url) => { url.searchParams.set("seq_no", "2.5"); }],
+    ["pub_class", (url) => { url.searchParams.set("pub_class", "1"); }],
+    ["firstin", (url) => { url.searchParams.set("firstin", "0"); }],
+  ];
+
+  for (const [name, mutate] of cases) {
+    await t.test(name, () => {
+      const previous = previousSnapshot();
+      const url = new URL(previous.redemptions[0].detailUrl);
+      mutate(url);
+      previous.redemptions[0].detailUrl = url.toString();
+      assert.throws(
+        () => buildCbSupplementalSnapshot({ generatedAt, previous }),
+        /redemption detailUrl/,
+      );
+    });
+  }
+});
+
+test("binds previous redemption issuer identity to bond and subject", async (t) => {
+  await t.test("coordinated issuer and co_id mutation", () => {
+    const previous = previousSnapshot();
+    previous.redemptions[0].issuerCode = "9999";
+    const url = new URL(previous.redemptions[0].detailUrl);
+    url.searchParams.set("co_id", "9999");
+    previous.redemptions[0].detailUrl = url.toString();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, previous }),
+      /redemption issuerCode.*bondCode/,
+    );
+  });
+
+  await t.test("issuer name missing from announcement prefix", () => {
+    const previous = previousSnapshot();
+    previous.redemptions[0].issuerName = "錯誤公司";
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, previous }),
+      /redemption subject.*issuerName/,
     );
   });
 });
@@ -348,17 +537,26 @@ function institutionTrade(bondCode, tradingDate, dealerBuyUnits = "4") {
   };
 }
 
-function redemptionEvent(announcementDate, bondCode) {
+function redemptionEvent(announcementDate, bondCode, delistingDate = "2026-09-21") {
   const bondName = bondCode === "31311" ? "弘塑一" : "弘塑二";
+  const delistingRocYear = Number(delistingDate.slice(0, 4)) - 1911;
   return {
     issuerCode: "3131",
     issuerName: "弘塑",
     bondCode,
     bondName,
     announcementDate,
-    delistingDate: "2026-09-21",
-    subject: `公告弘塑股份有限公司國內轉換公司債(簡稱：${bondName}，代碼：${bondCode})發行公司行使債券贖回權暨訂於115年09月21日終止櫃檯買賣等相關事宜。`,
+    delistingDate,
+    subject: `公告弘塑股份有限公司國內轉換公司債(簡稱：${bondName}，代碼：${bondCode})發行公司行使債券贖回權暨訂於${delistingRocYear}年${delistingDate.slice(5, 7)}月${delistingDate.slice(8, 10)}日終止櫃檯買賣等相關事宜。`,
     detailUrl: `https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3131&date1=${announcementDate.replaceAll("-", "")}&seq_no=1&pub_class=0&firstin=1`,
+  };
+}
+
+function underwritingSnapshot(rocYear, records) {
+  return {
+    rocYear,
+    notice: "本公告系統僅供參考，相關資料以正式刊登報紙之公告內容為準。",
+    records,
   };
 }
 

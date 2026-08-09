@@ -97,6 +97,7 @@ export function buildCbSupplementalSnapshot(input: {
   generatedAt: string;
   institution?: CbInstitutionDailySnapshot;
   redemptions?: readonly CbRedemptionEvent[];
+  redemptionYear?: number;
   underwriting?: CbUnderwritingSnapshot;
   previous?: CbSupplementalSnapshot;
 }): CbSupplementalSnapshot {
@@ -112,7 +113,7 @@ export function buildCbSupplementalSnapshot(input: {
   }
 
   const institution = buildInstitutionSection(input.institution, previous);
-  const redemption = buildRedemptionSection(input.redemptions, previous);
+  const redemption = buildRedemptionSection(input.redemptions, input.redemptionYear, previous);
   const underwriting = buildUnderwritingSection(input.underwriting, previous);
 
   return deepFreeze({
@@ -171,19 +172,50 @@ function buildInstitutionSection(
 
 function buildRedemptionSection(
   current: readonly CbRedemptionEvent[] | undefined,
+  currentYear: number | undefined,
   previous: CbSupplementalSnapshot | undefined,
 ): { records: CbRedemptionEvent[]; source: SupplementalSourceStatus } {
+  const redemptionYear = validateOptionalRedemptionYear(currentYear);
   if (current !== undefined) {
     const records = validateRedemptions(current);
+    const recordYears = new Set(records.map((record) => Number(record.announcementDate.slice(0, 4))));
+    if (recordYears.size > 1) {
+      throw new TypeError("redemption records must belong to one year");
+    }
+    const recordYear = recordYears.values().next().value as number | undefined;
+    if (redemptionYear !== undefined && recordYear !== undefined && redemptionYear !== recordYear) {
+      throw new TypeError("redemptionYear does not match records");
+    }
+    const periodYear = redemptionYear ?? recordYear;
+    const dataDate = records.length === 0
+      ? null
+      : records.map((record) => record.announcementDate).sort().at(-1) ?? null;
+    const previousDataDate = previous?.sources.redemption.dataDate;
+    if (previousDataDate !== undefined && previousDataDate !== null) {
+      if (periodYear === undefined) {
+        throw new TypeError("redemptionYear is required for an empty result with previous data");
+      }
+      const previousYear = Number(previousDataDate.slice(0, 4));
+      if (periodYear < previousYear) {
+        throw new TypeError("redemption year must not move backward");
+      }
+      if (dataDate === null && periodYear <= previousYear) {
+        throw new TypeError("empty redemption result must be a newer-year rollover");
+      }
+      if (dataDate !== null && periodYear === previousYear && dataDate < previousDataDate) {
+        throw new TypeError("redemption dataDate must not move backward within a year");
+      }
+    }
     return {
       records,
       source: {
         state: "fresh",
-        dataDate: records.length === 0
-          ? null
-          : records.map((record) => record.announcementDate).sort().at(-1) ?? null,
+        dataDate,
       },
     };
+  }
+  if (redemptionYear !== undefined) {
+    throw new TypeError("redemptionYear requires a current redemption result");
   }
   if (previous !== undefined && previous.sources.redemption.state !== "unavailable") {
     return {
@@ -194,19 +226,42 @@ function buildRedemptionSection(
   return { records: [], source: { state: "unavailable", dataDate: null } };
 }
 
+function validateOptionalRedemptionYear(value: number | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  if (!Number.isInteger(value) || value < 1) {
+    throw new TypeError("redemptionYear is invalid");
+  }
+  return value;
+}
+
 function buildUnderwritingSection(
   current: CbUnderwritingSnapshot | undefined,
   previous: CbSupplementalSnapshot | undefined,
 ): { records: CbUnderwritingCase[]; source: SupplementalSourceStatus } {
   if (current !== undefined) {
-    const records = validateUnderwritingSnapshot(current);
+    const { rocYear, records } = validateUnderwritingSnapshot(current);
+    const periodYear = rocYear + 1911;
+    const dataDate = records.length === 0
+      ? null
+      : records.map((record) => record.filedDate).sort().at(-1) ?? null;
+    const previousDataDate = previous?.sources.underwriting.dataDate;
+    if (previousDataDate !== undefined && previousDataDate !== null) {
+      const previousPeriodYear = Number(previousDataDate.slice(0, 4));
+      if (periodYear < previousPeriodYear) {
+        throw new TypeError("underwriting period must not move backward");
+      }
+      if (dataDate === null && periodYear <= previousPeriodYear) {
+        throw new TypeError("empty underwriting result must be a newer-period rollover");
+      }
+      if (dataDate !== null && periodYear === previousPeriodYear && dataDate < previousDataDate) {
+        throw new TypeError("underwriting dataDate must not move backward within a period");
+      }
+    }
     return {
       records,
       source: {
         state: "fresh",
-        dataDate: records.length === 0
-          ? null
-          : records.map((record) => record.filedDate).sort().at(-1) ?? null,
+        dataDate,
       },
     };
   }
@@ -480,12 +535,17 @@ function validateRedemption(value: unknown): CbRedemptionEvent {
   assertStringPattern(event.issuerCode, /^\d{4}$/, "redemption issuerCode");
   assertNonemptyString(event.issuerName, "redemption issuerName");
   assertStringPattern(event.bondCode, /^\d{5,6}$/, "redemption bondCode");
+  const bondSuffix = event.bondCode.slice(event.issuerCode.length);
+  if (!event.bondCode.startsWith(event.issuerCode) || !/^\d{1,2}$/.test(bondSuffix)) {
+    throw new TypeError("redemption issuerCode does not match bondCode");
+  }
   assertNonemptyString(event.bondName, "redemption bondName");
   assertIsoDate(event.announcementDate, "redemption announcementDate");
   assertIsoDate(event.delistingDate, "redemption delistingDate");
   assertNonemptyString(event.subject, "redemption subject");
   assertRedemptionSubject(
     event.subject,
+    event.issuerName,
     event.bondName,
     event.bondCode,
     event.delistingDate,
@@ -508,6 +568,7 @@ function assertRedemptionUrl(value: unknown, issuerCode: unknown, announcementDa
     || url.pathname !== "/mops/web/ajax_t120sb23"
     || url.username !== ""
     || url.password !== ""
+    || url.hash !== ""
   ) {
     throw new TypeError("redemption detailUrl does not match its event");
   }
@@ -524,7 +585,11 @@ function assertRedemptionUrl(value: unknown, issuerCode: unknown, announcementDa
     throw new TypeError("redemption detailUrl query parameters do not match the verified contract");
   }
   if (
-    url.searchParams.get("co_id") !== issuerCode
+    url.searchParams.get("TYPEK") !== "otc"
+    || !/^[1-9]\d*$/.test(url.searchParams.get("seq_no") ?? "")
+    || url.searchParams.get("pub_class") !== "0"
+    || url.searchParams.get("firstin") !== "1"
+    || url.searchParams.get("co_id") !== issuerCode
     || url.searchParams.get("date1") !== String(announcementDate).replaceAll("-", "")
   ) {
     throw new TypeError("redemption detailUrl does not match its event");
@@ -533,10 +598,14 @@ function assertRedemptionUrl(value: unknown, issuerCode: unknown, announcementDa
 
 function assertRedemptionSubject(
   value: string,
+  issuerName: unknown,
   bondName: unknown,
   bondCode: unknown,
   delistingDate: unknown,
 ): void {
+  if (typeof issuerName !== "string" || !value.startsWith(`公告${issuerName}`)) {
+    throw new TypeError("redemption subject does not match issuerName announcement prefix");
+  }
   const match = REDEMPTION_SUBJECT_PATTERN.exec(value);
   if (match === null) throw new TypeError("redemption subject does not match the verified contract");
   const subjectDelistingDate = `${Number(match[3]) + 1911}-${match[4]}-${match[5]}`;
@@ -554,7 +623,10 @@ function cloneRedemption(value: CbRedemptionEvent): CbRedemptionEvent {
   return { ...value };
 }
 
-function validateUnderwritingSnapshot(value: CbUnderwritingSnapshot): CbUnderwritingCase[] {
+function validateUnderwritingSnapshot(value: CbUnderwritingSnapshot): {
+  rocYear: number;
+  records: CbUnderwritingCase[];
+} {
   const snapshot = requireRecord(value, "underwriting snapshot");
   assertExactKeys(snapshot, UNDERWRITING_SNAPSHOT_KEYS, "underwriting snapshot");
   if (!Number.isInteger(snapshot.rocYear) || (snapshot.rocYear as number) < 1) {
@@ -563,7 +635,16 @@ function validateUnderwritingSnapshot(value: CbUnderwritingSnapshot): CbUnderwri
   if (snapshot.notice !== UNDERWRITING_NOTICE) {
     throw new TypeError("underwriting notice is invalid");
   }
-  return validateUnderwritingCases(snapshot.records);
+  const rocYear = snapshot.rocYear as number;
+  const pageYear = rocYear + 1911;
+  const records = validateUnderwritingCases(snapshot.records);
+  if (records.some((record) => {
+    const filedYear = Number(record.filedDate.slice(0, 4));
+    return filedYear !== pageYear && filedYear !== pageYear - 1;
+  })) {
+    throw new TypeError("underwriting filedDate is outside the page carry-over window");
+  }
+  return { rocYear, records };
 }
 
 function validateUnderwritingCases(value: unknown): CbUnderwritingCase[] {

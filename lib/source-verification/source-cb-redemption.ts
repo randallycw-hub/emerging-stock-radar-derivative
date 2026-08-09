@@ -84,6 +84,13 @@ function parseRow(row: unknown, index: number, announcementYear: string): CbRede
     throw new TypeError("CB redemption subject is missing a valid delisting date");
   }
   const [, bondName, bondCode, rocDelistingYear, delistingMonth, delistingDay] = subjectMatch;
+  const bondSuffix = bondCode.slice(issuerCode.length);
+  if (!bondCode.startsWith(issuerCode) || !/^\d{1,2}$/.test(bondSuffix)) {
+    throw new TypeError("CB redemption issuer does not match the extracted bond code");
+  }
+  if (!subject.startsWith(`公告${issuerName}`)) {
+    throw new TypeError("CB redemption issuer name does not match the subject announcement prefix");
+  }
   const delistingDate = parseRocDate(
     `${rocDelistingYear}/${delistingMonth}/${delistingDay}`,
     "delisting date",
@@ -118,10 +125,18 @@ function assertDetailUrl(value: string, issuerCode: string, announcementDate: st
   if (url.pathname !== "/mops/web/ajax_t120sb23") {
     throw new TypeError("CB redemption detail URL path does not match the verified MOPS detail path");
   }
-  if (url.username !== "" || url.password !== "") {
-    throw new TypeError("CB redemption detail URL must not contain credentials");
+  if (url.username !== "" || url.password !== "" || url.hash !== "") {
+    throw new TypeError("CB redemption detail URL must not contain credentials or a fragment");
   }
   assertExactDetailQuery(url.searchParams);
+  if (
+    url.searchParams.get("TYPEK") !== "otc"
+    || !/^[1-9]\d*$/.test(url.searchParams.get("seq_no") ?? "")
+    || url.searchParams.get("pub_class") !== "0"
+    || url.searchParams.get("firstin") !== "1"
+  ) {
+    throw new TypeError("CB redemption detail URL query values do not match the verified contract");
+  }
   if (url.searchParams.get("co_id") !== issuerCode) {
     throw new TypeError("CB redemption detail URL issuer code does not match the row issuer");
   }

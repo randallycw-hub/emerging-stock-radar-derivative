@@ -40,6 +40,26 @@ test("filters only domestic convertible-bond underwriting cases", () => {
   ]);
 });
 
+test("validates Gregorian filed dates within the verified carry-over window", async (t) => {
+  await t.test("accepts the previous Gregorian year", () => {
+    assert.equal(parseCbUnderwritingHtml(fixtureHtml).records[0].filedDate, "2025/12/26");
+  });
+
+  const rejectedDates = [
+    ["invalid date", "2025/02/30"],
+    ["too-old year", "2024/12/26"],
+    ["future year", "2027/12/26"],
+  ];
+  for (const [name, filedDate] of rejectedDates) {
+    await t.test(name, () => {
+      assert.throws(
+        () => parseCbUnderwritingHtml(fixtureHtml.replaceAll("2025/12/26", filedDate)),
+        /filed date/,
+      );
+    });
+  }
+});
+
 test("fails closed on notice, result table, header, or row-width drift", () => {
   assert.throws(
     () => parseCbUnderwritingHtml(fixtureHtml.replace("本公告系統僅供參考", "")),
