@@ -12,6 +12,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { types } from "node:util";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
 import { EmergingMarketViewSchema } from "../lib/domain/schema.ts";
@@ -369,26 +370,34 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder })
 }
 
 export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) {
-  assertPublicOptions(
-    options,
-    ["fetchImpl", "now", "marketBuilder"],
-    "runIsolatedRefreshStaticShowcaseTestHarness",
-  );
   const {
-    fetchImpl,
-    now = new Date(),
-    marketBuilder,
-  } = options;
-  if (typeof fetchImpl !== "function") {
-    throw new TypeError("isolated refresh fetchImpl must be a function");
+    scenario,
+    now: nowText = "2026-07-30T06:00:06.000Z",
+  } = parseIsolatedHarnessOptions(options);
+  if (!new Set(["success", "hash", "manifest", "cross-file"]).has(scenario)) {
+    throw new TypeError(
+      "isolated refresh scenario must be one of success, hash, manifest, cross-file",
+    );
   }
-  if (typeof marketBuilder !== "function") {
-    throw new TypeError("isolated refresh marketBuilder must be a function");
+  if (
+    typeof nowText !== "string"
+    || !Number.isFinite(Date.parse(nowText))
+    || new Date(nowText).toISOString() !== nowText
+  ) {
+    throw new TypeError("isolated refresh now must be a canonical ISO timestamp string");
   }
 
+  const fixtureTexts = await loadIsolatedHarnessFixtures();
+  const now = new Date(nowText);
   const root = await mkdtemp(join(tmpdir(), "isolated-showcase-refresh-"));
   const originalDirectory = process.cwd();
   let directoryChanged = false;
+  const observations = {
+    requestedUrls: [],
+    activeRequests: 0,
+    maximumConcurrency: 0,
+    marketAsOfDate: null,
+  };
   try {
     await seedIsolatedHarnessRoot(root);
     const before = await captureIsolatedArtifacts(root);
@@ -399,9 +408,34 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     directoryChanged = true;
     try {
       value = await refreshStaticShowcaseCandidate({
-        fetchImpl,
+        fetchImpl: async (url) => {
+          observations.requestedUrls.push(String(url));
+          observations.activeRequests += 1;
+          observations.maximumConcurrency = Math.max(
+            observations.maximumConcurrency,
+            observations.activeRequests,
+          );
+          try {
+            const datasetId = Object.entries(OFFICIAL_SHOWCASE_SOURCES)
+              .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
+            if (datasetId === undefined) {
+              throw new TypeError("isolated harness received an unknown source URL");
+            }
+            return new Response(fixtureTexts[datasetId], { status: 200 });
+          } finally {
+            observations.activeRequests -= 1;
+          }
+        },
         now,
-        marketBuilder,
+        marketBuilder: async ({ outputDir, manifestBase, asOfDate }) => {
+          observations.marketAsOfDate = asOfDate;
+          return buildIsolatedMarketCandidate({
+            outputDir,
+            manifestBase,
+            generatedAt: nowText,
+            scenario,
+          });
+        },
       });
     } catch (caught) {
       status = "rejected";
@@ -414,6 +448,11 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     return {
       status,
       ...(status === "fulfilled" ? { value } : { error }),
+      observations: {
+        requestedUrls: [...observations.requestedUrls],
+        maximumConcurrency: observations.maximumConcurrency,
+        marketAsOfDate: observations.marketAsOfDate,
+      },
       artifacts: {
         before,
         after,
@@ -424,6 +463,140 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     if (directoryChanged) process.chdir(originalDirectory);
     await rm(root, { recursive: true, force: true });
   }
+}
+
+function parseIsolatedHarnessOptions(value) {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || types.isProxy(value)
+    || (
+      Object.getPrototypeOf(value) !== Object.prototype
+      && Object.getPrototypeOf(value) !== null
+    )
+  ) {
+    throw new TypeError("isolated refresh options must be a plain data object");
+  }
+  const output = {};
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== "string" || !["scenario", "now"].includes(key)) {
+      throw new TypeError(
+        `${String(key)} is not supported by runIsolatedRefreshStaticShowcaseTestHarness`,
+      );
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) {
+      throw new TypeError("isolated refresh options must use plain data properties");
+    }
+    output[key] = descriptor.value;
+  }
+  return output;
+}
+
+async function loadIsolatedHarnessFixtures() {
+  return {
+    "94025": await readFile(new URL(
+      "../tests/fixtures/source-verification/94025/csv-minimal.csv",
+      import.meta.url,
+    ), "utf8"),
+    "11406": "bondCode\n",
+    "11586": "companyCode\n1260\n",
+    emergingMarket: await readFile(new URL(
+      "../tests/fixtures/source-verification/emerging-market/tpex-esb-latest-statistics.json",
+      import.meta.url,
+    ), "utf8"),
+  };
+}
+
+async function buildIsolatedMarketCandidate({
+  outputDir,
+  manifestBase,
+  generatedAt,
+  scenario,
+}) {
+  const snapshot = isolatedIssuerResearchSnapshot(generatedAt);
+  const compact = {
+    market: "listed",
+    industryName: "食品工業",
+    revenueMonth: "2026-06",
+    sourcePublishedOn: "2026-07-17",
+    revenueUnit: "仟元",
+    currentMonthRevenue: "100",
+    monthOverMonthPercent: "1",
+    yearOverYearPercent: "2",
+    cumulativeRevenue: "600",
+    cumulativeYearOverYearPercent: "3",
+  };
+  const researchText = `${JSON.stringify(snapshot, null, 2)}\n`;
+  const viewsText = `${JSON.stringify([{
+    bondCode: "12601",
+    issuerCode: "1260",
+    issuerResearch: scenario === "cross-file" ? null : compact,
+  }], null, 2)}\n`;
+  await writeFile(join(outputDir, "cb-issuer-research.json"), researchText, "utf8");
+  await writeFile(join(outputDir, "bond-market-view.json"), viewsText, "utf8");
+  const files = [
+    {
+      name: "cb-issuer-research.json",
+      sha256: sha256Text(researchText),
+      recordCount: 1,
+    },
+    {
+      name: "bond-market-view.json",
+      sha256: sha256Text(viewsText),
+      recordCount: 1,
+    },
+  ];
+  if (scenario === "hash") {
+    await writeFile(
+      join(outputDir, "cb-issuer-research.json"),
+      `${researchText.trimEnd()} \n`,
+      "utf8",
+    );
+  }
+  if (scenario === "manifest") files.pop();
+  return {
+    manifest: {
+      ...manifestBase,
+      market: {
+        status: "verified",
+        dataDate: "2026-07-30",
+        files,
+      },
+    },
+    report: { validation: "passed" },
+  };
+}
+
+function isolatedIssuerResearchSnapshot(generatedAt) {
+  return {
+    schemaVersion: 1,
+    generatedAt,
+    records: [{
+      issuerCode: "1260",
+      issuerName: "富味鄉",
+      market: "listed",
+      industryName: "食品工業",
+      revenueMonth: "2026-06",
+      sourcePublishedOn: "2026-07-17",
+      revenueUnit: "仟元",
+      currentMonthRevenue: "100",
+      monthOverMonthPercent: "1",
+      yearOverYearPercent: "2",
+      cumulativeRevenue: "600",
+      cumulativeYearOverYearPercent: "3",
+    }],
+    sources: {
+      listed: {
+        status: "current",
+        dataDate: "2026-07-17",
+        fetchedAt: generatedAt,
+      },
+      otc: { status: "unavailable", dataDate: null, fetchedAt: null },
+    },
+    diagnostics: [],
+  };
 }
 
 async function seedIsolatedHarnessRoot(root) {
