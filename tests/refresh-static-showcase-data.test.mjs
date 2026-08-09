@@ -192,6 +192,66 @@ test("isolated harness rejects accessor options without executing them", async (
   assert.equal(getterCalls, 0);
 });
 
+test("isolated harness keeps concurrent candidates inside their own roots during cwd flips", async () => {
+  const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
+    "../scripts/refresh-static-showcase-data.mjs"
+  );
+  const originalDirectory = process.cwd();
+  const fakeWorkspace = await mkdtemp(join(tmpdir(), "showcase-cwd-flip-"));
+  await seedPriorGeneration(fakeWorkspace);
+  const fakePointerPath = join(fakeWorkspace, "static-showcase/data/current.json");
+  const fakePointerBefore = await readFile(fakePointerPath, "utf8");
+  const listHarnessRoots = async () => (await readdir(tmpdir()))
+    .filter((name) => name.startsWith("isolated-showcase-refresh-"))
+    .sort();
+  const harnessRootsBefore = await listHarnessRoots();
+  let keepFakeCwd = true;
+  let results;
+  let directoryAfterHarness;
+
+  try {
+    const runs = [
+      runIsolatedRefreshStaticShowcaseTestHarness({
+        scenario: "success",
+        now: "2026-07-30T06:00:06.000Z",
+      }),
+      runIsolatedRefreshStaticShowcaseTestHarness({
+        scenario: "hash",
+        now: "2026-07-30T06:00:07.000Z",
+      }),
+    ];
+    process.chdir(fakeWorkspace);
+    const cwdEnforcer = (async () => {
+      while (keepFakeCwd) {
+        if (process.cwd() !== fakeWorkspace) process.chdir(fakeWorkspace);
+        await new Promise((resolve) => setImmediate(resolve));
+      }
+    })();
+    results = await Promise.allSettled(runs);
+    keepFakeCwd = false;
+    await cwdEnforcer;
+    directoryAfterHarness = process.cwd();
+  } finally {
+    keepFakeCwd = false;
+    process.chdir(originalDirectory);
+  }
+
+  try {
+    assert.equal(directoryAfterHarness, fakeWorkspace);
+    assert.equal(await readFile(fakePointerPath, "utf8"), fakePointerBefore);
+    assert.deepEqual(await listHarnessRoots(), harnessRootsBefore);
+    assert.deepEqual(results.map((result) => result.status), ["fulfilled", "fulfilled"]);
+    const [success, hash] = results.map((result) => result.value);
+    assert.equal(success.status, "fulfilled");
+    assert.notEqual(success.artifacts.after.pointerText, success.artifacts.before.pointerText);
+    assert.equal(hash.status, "rejected");
+    assert.equal(hash.artifacts.after.pointerText, hash.artifacts.before.pointerText);
+  } finally {
+    await rm(fakeWorkspace, { recursive: true, force: true });
+  }
+  assert.equal(process.cwd(), originalDirectory);
+});
+
 test("refresh publishes a schema-validated emerging-market snapshot from one TPEx response", async () => {
   const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
     "../scripts/refresh-static-showcase-data.mjs"

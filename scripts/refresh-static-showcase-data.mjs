@@ -10,7 +10,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { types } from "node:util";
 
@@ -39,7 +39,6 @@ export const OFFICIAL_SHOWCASE_SOURCES = {
 };
 
 const DATA_DIRECTORY = "static-showcase/data";
-const PUBLISHED_HISTORY_CACHE = ".cache/published-history/bond-market-history.json";
 
 export function buildRuntimeBootstrap() {
   return [
@@ -195,21 +194,26 @@ export async function refreshStaticShowcase(options = {}) {
     fetchImpl = fetch,
     now = new Date(),
   } = options;
+  const paths = createRefreshPathBundle(process.cwd());
   return refreshStaticShowcaseCandidate({
     fetchImpl,
     now,
     marketBuilder: buildBondMarketSnapshot,
+    paths,
   });
 }
 
-async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder }) {
+async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, paths }) {
   const previousIssuerResearch = await readPublishedCbIssuerResearch(
-    DATA_DIRECTORY,
+    paths.dataDirectory,
   );
   const datasets = {};
   const datasetTexts = {};
   const manifestDatasets = [];
-  const tpexIpoApplicationSnapshot = await readFile("lib/tpex-applicant-snapshot.json", "utf8")
+  const tpexIpoApplicationSnapshot = await readFile(
+    paths.tpexIpoApplicationSnapshotPath,
+    "utf8",
+  )
     .then((text) => JSON.parse(text))
     .catch(() => []);
 
@@ -276,13 +280,13 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder })
     emergingMarketUrl: `./data/${generation}/emerging-market.json`,
   };
 
-  const stagingRoot = await mkdtemp(join(dirname(DATA_DIRECTORY), ".showcase-"));
+  const stagingRoot = await mkdtemp(join(dirname(paths.dataDirectory), ".showcase-"));
   const stagingDataDirectory = join(stagingRoot, "data");
   try {
     await mkdir(stagingDataDirectory, { recursive: true });
     const previousHistory = await readPublishedBondHistory(
-      DATA_DIRECTORY,
-      PUBLISHED_HISTORY_CACHE,
+      paths.dataDirectory,
+      paths.publishedHistoryCachePath,
     );
     await writeFile(
       join(stagingDataDirectory, "bond-market-history.json"),
@@ -318,7 +322,10 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder })
       bonds: bondInputsFrom11406Rows(datasets["11406"]),
       asOfDate: emergingSnapshot.tradingDate,
       collectImpl: async (options) => {
-        const store = await openMarketCheckpoint({ date: options.date });
+        const store = await openMarketCheckpoint({
+          date: options.date,
+          directory: paths.marketCheckpointDirectory,
+        });
         return fetchCurrentOfficialMarketData({
           ...options,
           fetchImpl,
@@ -342,17 +349,17 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder })
       "utf8",
     );
     await verifyStagedGeneration(stagingDataDirectory);
-    await mkdir(dirname(PUBLISHED_HISTORY_CACHE), { recursive: true });
+    await mkdir(dirname(paths.publishedHistoryCachePath), { recursive: true });
     await copyFile(
       join(stagingDataDirectory, "bond-market-history.json"),
-      PUBLISHED_HISTORY_CACHE,
+      paths.publishedHistoryCachePath,
     );
 
-    await mkdir(join(DATA_DIRECTORY, "generations"), { recursive: true });
-    await rename(stagingDataDirectory, join(DATA_DIRECTORY, generation));
+    await mkdir(join(paths.dataDirectory, "generations"), { recursive: true });
+    await rename(stagingDataDirectory, join(paths.dataDirectory, generation));
     const pointerStage = join(stagingRoot, "current.json");
     await writeFile(pointerStage, `${JSON.stringify({ schemaVersion: 1, generation, runtimeUrl: `./data/${generation}/runtime.json` })}\n`, "utf8");
-    await rename(pointerStage, join(DATA_DIRECTORY, "current.json"));
+    await rename(pointerStage, join(paths.dataDirectory, "current.json"));
 
     return {
       manifest,
@@ -390,8 +397,7 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
   const fixtureTexts = await loadIsolatedHarnessFixtures();
   const now = new Date(nowText);
   const root = await mkdtemp(join(tmpdir(), "isolated-showcase-refresh-"));
-  const originalDirectory = process.cwd();
-  let directoryChanged = false;
+  const paths = createRefreshPathBundle(root);
   const observations = {
     requestedUrls: [],
     activeRequests: 0,
@@ -399,13 +405,11 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     marketAsOfDate: null,
   };
   try {
-    await seedIsolatedHarnessRoot(root);
-    const before = await captureIsolatedArtifacts(root);
+    await seedIsolatedHarnessRoot(paths);
+    const before = await captureIsolatedArtifacts(paths);
     let status = "fulfilled";
     let value;
     let error;
-    process.chdir(root);
-    directoryChanged = true;
     try {
       value = await refreshStaticShowcaseCandidate({
         fetchImpl: async (url) => {
@@ -427,6 +431,7 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
           }
         },
         now,
+        paths,
         marketBuilder: async ({ outputDir, manifestBase, asOfDate }) => {
           observations.marketAsOfDate = asOfDate;
           return buildIsolatedMarketCandidate({
@@ -440,11 +445,8 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     } catch (caught) {
       status = "rejected";
       error = caught;
-    } finally {
-      process.chdir(originalDirectory);
-      directoryChanged = false;
     }
-    const after = await captureIsolatedArtifacts(root);
+    const after = await captureIsolatedArtifacts(paths);
     return {
       status,
       ...(status === "fulfilled" ? { value } : { error }),
@@ -456,13 +458,32 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
       artifacts: {
         before,
         after,
-        active: await captureActiveGeneration(root, after.pointerText),
+        active: await captureActiveGeneration(paths, after.pointerText),
       },
     };
   } finally {
-    if (directoryChanged) process.chdir(originalDirectory);
     await rm(root, { recursive: true, force: true });
   }
+}
+
+function createRefreshPathBundle(workspaceRoot) {
+  const absoluteRoot = resolve(workspaceRoot);
+  return Object.freeze({
+    dataDirectory: join(absoluteRoot, "static-showcase", "data"),
+    staticIndexPath: join(absoluteRoot, "static-showcase", "index.html"),
+    tpexIpoApplicationSnapshotPath: join(
+      absoluteRoot,
+      "lib",
+      "tpex-applicant-snapshot.json",
+    ),
+    publishedHistoryCachePath: join(
+      absoluteRoot,
+      ".cache",
+      "published-history",
+      "bond-market-history.json",
+    ),
+    marketCheckpointDirectory: join(absoluteRoot, ".cache", "official-market"),
+  });
 }
 
 function parseIsolatedHarnessOptions(value) {
@@ -599,17 +620,16 @@ function isolatedIssuerResearchSnapshot(generatedAt) {
   };
 }
 
-async function seedIsolatedHarnessRoot(root) {
-  const dataRoot = join(root, "static-showcase", "data");
-  const priorGeneration = join(dataRoot, "generations", "abcdef");
+async function seedIsolatedHarnessRoot(paths) {
+  const priorGeneration = join(paths.dataDirectory, "generations", "abcdef");
   await mkdir(priorGeneration, { recursive: true });
   await writeFile(
-    join(root, "static-showcase", "index.html"),
+    paths.staticIndexPath,
     '<script src="./data/runtime.js?v=prior"></script>',
     "utf8",
   );
   await writeFile(
-    join(dataRoot, "current.json"),
+    join(paths.dataDirectory, "current.json"),
     JSON.stringify({
       schemaVersion: 1,
       generation: "generations/abcdef",
@@ -639,15 +659,13 @@ async function seedIsolatedHarnessRoot(root) {
   );
 }
 
-async function captureIsolatedArtifacts(root) {
+async function captureIsolatedArtifacts(paths) {
   return {
     pointerText: await readOptionalText(
-      join(root, "static-showcase", "data", "current.json"),
+      join(paths.dataDirectory, "current.json"),
     ),
     priorResearchText: await readOptionalText(join(
-      root,
-      "static-showcase",
-      "data",
+      paths.dataDirectory,
       "generations",
       "abcdef",
       "cb-issuer-research.json",
@@ -655,7 +673,7 @@ async function captureIsolatedArtifacts(root) {
   };
 }
 
-async function captureActiveGeneration(root, pointerText) {
+async function captureActiveGeneration(paths, pointerText) {
   if (pointerText === undefined) return {};
   let pointer;
   try {
@@ -665,9 +683,7 @@ async function captureActiveGeneration(root, pointerText) {
   }
   if (!/^generations\/[a-f0-9]+$/i.test(pointer?.generation ?? "")) return {};
   const generationRoot = join(
-    root,
-    "static-showcase",
-    "data",
+    paths.dataDirectory,
     ...pointer.generation.split("/"),
   );
   return Object.fromEntries(await Promise.all([
