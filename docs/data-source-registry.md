@@ -171,6 +171,22 @@ Evidence references:
 
 This amendment does not grant production approval and does not authorize an adapter, scheduler, runtime fetch, API, page, or remote resource.
 
+## TPEx convertible-bond redemption announcements resource-level amendment (2026-08-09)
+
+Resource: `POST https://www.tpex.org.tw/www/zh-tw/bond/redeem`
+
+Status: `VERIFIED_FOR_IMPLEMENTATION`
+
+Annual form body: `{ date: "YYYY", id: "", response: "json" }`.
+
+Verified root contract: `date`, `tables`, `stat`; the annual 2026 response root date is `20260101` and `stat` is `ok`. The response contains exactly one table titled `轉換公司債行使贖回權公告`, with exact positional fields `公司代號`, `公司名稱`, `申報日期`, `主旨`, and `內容`.
+
+Evidence captured by the controller at `2026-08-09T07:47:30.7428457Z`: HTTP 200, `application/json;charset=UTF-8`, 34 source rows, and raw-response SHA-256 `05e19631e1c73ab3aa83ede258891c1057634cd5e04634a7d7e3d205d800b282`. The offline fixture preserves two exact rows only; it is not a live-fetch substitute.
+
+The `內容` detail URL must be HTTPS with host `mopsov.twse.com.tw`, path `/mops/web/ajax_t120sb23`, no credentials, `co_id` equal to the source issuer code, and `date1` equal to the normalized announcement date. The linked MOPS detail URL is a validation boundary only; this amendment does not authorize fetching it.
+
+Allowed use is alert-only: validated redemption and delisting events can enter the CB event-review queue, but must not publish a trading decision, use a third-party source, or fall back to another resource. On HTTP, payload, schema, date, subject, URL, or duplicate-key failure, reject the response, retain failure evidence, and raise a source-drift alert; do not retry through a fallback or use stale data as a replacement.
+
 ## 興櫃盤後行情 resource-level manual amendment（2026-07-30）
 
 Resource: GET https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics
