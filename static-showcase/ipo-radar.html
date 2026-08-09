@@ -7,7 +7,7 @@
   <title>IPO 進度雷達｜盤後市場資訊</title>
   <link rel="stylesheet" href="./assets/app.css">
 </head>
-<body data-page="ipo-radar">
+<body data-page="ipo-radar" class="ipo-dashboard-page">
   <a class="skip-link" href="#main-content">跳到主要內容</a>
   <header class="site-header"><div class="site-header__inner">
     <a class="site-mark" href="./index.html" aria-label="可轉債與興櫃盤後資訊首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a>
@@ -18,13 +18,13 @@
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
   </div></header>
 
-  <main id="main-content" class="page-content" tabindex="-1">
+  <main id="main-content" class="page-content ipo-dashboard-page-content" tabindex="-1">
     <header class="page-heading"><p class="kicker">IPO PROGRESS RADAR</p><h1>IPO 進度雷達</h1><p>聚焦近期正式事件與公開進度，快速掌握公司目前所在階段。</p></header>
 
-    <section id="ipo-radar-root" class="ledger-section" data-page-root="ipo-radar" aria-labelledby="ipo-radar-heading">
-      <header class="section-heading"><div><p class="section-number">EVENT DESK</p><h2 id="ipo-radar-heading">IPO 進度總覽</h2></div><p id="ipo-radar-update-status" class="update-status" aria-live="polite">資料讀取中</p></header>
+    <section id="ipo-radar-root" class="ledger-section ipo-dashboard" data-page-root="ipo-radar" data-ipo-dashboard="radar" aria-labelledby="ipo-radar-heading">
+      <header class="section-heading"><div><p class="section-number">EVENT DESK / VERIFIED SNAPSHOT</p><h2 id="ipo-radar-heading">IPO 進度總覽</h2></div><p id="ipo-radar-update-status" class="update-status" data-ipo-data-status aria-live="polite">資料讀取中</p></header>
 
-      <div id="ipo-radar-summary" class="ipo-radar-summary" aria-label="IPO 事件概況">
+      <div id="ipo-radar-summary" class="ipo-radar-summary ipo-dashboard-summary" data-ipo-summary aria-label="IPO 事件概況">
         <button type="button" data-radar-summary="AB" aria-label="篩選送件與審議事件"><span>送件／審議</span><strong data-radar-summary-count="AB">—</strong></button>
         <button type="button" data-radar-summary="C" aria-label="篩選契約與時程事件"><span>契約／時程</span><strong data-radar-summary-count="C">—</strong></button>
         <button type="button" data-radar-summary="D" aria-label="篩選定價與掛牌事件"><span>定價／掛牌</span><strong data-radar-summary-count="D">—</strong></button>
@@ -33,8 +33,8 @@
 
       <section class="ipo-upcoming" aria-labelledby="ipo-upcoming-heading"><header class="section-heading"><div><p class="section-number">NEXT ON RECORD</p><h2 id="ipo-upcoming-heading">近期重要事件</h2></div></header><div id="ipo-upcoming-grid" class="ranking-grid ipo-upcoming-grid" aria-live="polite"></div></section>
 
-      <div class="ipo-stage-flow" aria-label="IPO 階段篩選">
-        <button type="button" data-radar-stage="A">A 送件觀察</button><button type="button" data-radar-stage="B">B 審議進程</button><button type="button" data-radar-stage="C">C 契約／時程</button><button type="button" data-radar-stage="D">D 定價／掛牌</button>
+      <div class="ipo-stage-flow ipo-dashboard-stage-filter" aria-label="IPO 階段篩選">
+        <button type="button" data-radar-stage="A" data-ipo-stage-filter="A">A 送件觀察</button><button type="button" data-radar-stage="B" data-ipo-stage-filter="B">B 審議進程</button><button type="button" data-radar-stage="C" data-ipo-stage-filter="C">C 契約／時程</button><button type="button" data-radar-stage="D" data-ipo-stage-filter="D">D 定價／掛牌</button>
       </div>
 
       <form id="ipo-radar-filters" class="filters ipo-filters" aria-label="IPO 進度雷達篩選">
@@ -46,14 +46,16 @@
         <output id="ipo-radar-result-count" aria-live="polite">—</output>
       </form>
 
-      <div class="ipo-table-shell"><table class="ipo-table"><thead><tr>
+      <div class="ipo-table-shell ipo-dashboard-table" data-ipo-table><table class="ipo-table"><thead><tr>
         <th aria-sort="none"><button type="button" data-radar-sort="company">公司／市場 <span aria-hidden="true"></span></button></th>
         <th aria-sort="none"><button type="button" data-radar-sort="stage">目前進度 <span aria-hidden="true"></span></button></th>
         <th>最近事件</th>
         <th aria-sort="none"><button type="button" data-radar-sort="eventDate">事件日期 <span aria-hidden="true"></span></button></th>
         <th aria-sort="none"><button type="button" data-radar-sort="days">距今天數 <span aria-hidden="true"></span></button></th>
-      </tr></thead><tbody id="ipo-radar-table-body"><tr><td colspan="5" class="empty-cell">IPO 進度雷達讀取中</td></tr></tbody></table></div>
-      <div id="ipo-radar-card-list" class="ipo-card-list" aria-live="polite"></div>
+        <th>定價狀態</th>
+        <th>資料日期</th>
+      </tr></thead><tbody id="ipo-radar-table-body"><tr><td colspan="7" class="empty-cell">IPO 進度雷達讀取中</td></tr></tbody></table></div>
+      <div id="ipo-radar-card-list" class="ipo-card-list" data-ipo-responsive-cards aria-live="polite"></div>
       <nav id="ipo-radar-pagination" class="pagination" aria-label="IPO 進度雷達分頁"></nav>
       <p class="data-error" data-page-error hidden role="status"></p>
     </section>

@@ -181,7 +181,7 @@ function renderUpcoming() {
 }
 
 function tableRowHtml(row) {
-  return `<tr><th scope="row">${companyLink(row)}<small>${escapeHtml(row.market)}</small></th><td><span class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.daysFromToday)}</td></tr>`;
+    return `<tr><th scope="row">${companyLink(row)}<small>${escapeHtml(row.market)}</small></th><td><span class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.daysFromToday)}</td><td>${escapeHtml(row.pricingStatus)}</td><td>${formatDate(state.dataDate)}</td></tr>`;
 }
 
 function cardHtml(row) {
@@ -238,6 +238,7 @@ function normalizeRecord(record) {
     companyName: String(record.companyName ?? "").trim(),
     market: String(record.market ?? "其他").trim(),
     stage: stageLabels[record.stage] ? record.stage : "A",
+    pricingStatus: record.finalUnderwritingPrice ? "已定價" : record.provisionalUnderwritingPrice ? "暫定價" : "待公告",
     events,
     primaryEventDate: primary?.date ?? null,
     primaryEventLabel: primary?.label ?? "—",
@@ -322,7 +323,7 @@ function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""
 function positiveInteger(value) { return Math.max(1, Number.parseInt(value ?? "1", 10) || 1); }
 function pageSize() { return matchMedia("(max-width: 900px)").matches ? 25 : 50; }
 function daysLabel(days) { return Number.isFinite(days) ? `${days > 0 ? "+" : ""}${formatNumber(days)} 天` : "—"; }
-function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="5" class="empty-cell">${message}</td></tr>`; }
+function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="7" class="empty-cell">${message}</td></tr>`; }
 function emptyCard(message = "沒有符合條件的資料") { return `<p class="empty-cell">${message}</p>`; }
 function selectExistingValue(selector, value) { const select = document.querySelector(selector); select.value = [...select.options].some((option) => option.value === value) ? value : "all"; }
 function companyLink(row) { return `<a href="./ipo.html?q=${encodeURIComponent(row.companyCode)}">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</a>`; }
