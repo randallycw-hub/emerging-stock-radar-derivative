@@ -58,3 +58,22 @@ test("fails closed on notice, result table, header, or row-width drift", () => {
     /row 1.*11 fields/,
   );
 });
+
+test("fails closed on page-title and notice-structure drift", () => {
+  assert.throws(
+    () => parseCbUnderwritingHtml(fixtureHtml.replace("115年－承銷公告", "114年－承銷公告")),
+    /page title/,
+  );
+  assert.throws(
+    () => parseCbUnderwritingHtml(fixtureHtml.replace("<p>本公告系統", "<p>前綴本公告系統")),
+    /notice/,
+  );
+  assert.throws(
+    () => parseCbUnderwritingHtml(fixtureHtml.replace("。</p>", "。後綴</p>")),
+    /notice/,
+  );
+  assert.throws(
+    () => parseCbUnderwritingHtml(fixtureHtml.replace("<p>本公告系統", "<div>本公告系統").replace("。</p>", "。</div>")),
+    /notice/,
+  );
+});

@@ -15,6 +15,7 @@ export type CbUnderwritingSnapshot = {
 };
 
 const NOTICE = "本公告系統僅供參考，相關資料以正式刊登報紙之公告內容為準。";
+const PAGE_TITLE = "115年－承銷公告";
 const RESULT_TABLE_ID = "ctl00_cphMain_gvResult";
 const HEADERS = [
   "序號",
@@ -44,9 +45,7 @@ export function parseCbUnderwritingHtml(html: string): CbUnderwritingSnapshot {
   }
 
   const documentHtml = stripScriptsAndStyles(html);
-  if (!toText(documentHtml).includes(NOTICE)) {
-    throw new TypeError("CB underwriting notice does not match the verified contract");
-  }
+  assertVerifiedNotice(documentHtml);
 
   const rocYear = parseRocYear(documentHtml);
   const tableHtml = findResultTable(documentHtml);
@@ -73,11 +72,17 @@ function parseRocYear(html: string): number {
   if (!title) {
     throw new TypeError("CB underwriting page title is missing");
   }
-  const match = /^(\d{3})年－承銷公告$/.exec(toText(title[1]));
-  if (!match || match[1] === "000") {
+  if (toText(title[1]) !== PAGE_TITLE) {
     throw new TypeError("CB underwriting page title does not match the verified contract");
   }
-  return Number(match[1]);
+  return 115;
+}
+
+function assertVerifiedNotice(html: string): void {
+  const notice = /<body\b[^>]*>\s*<p\b[^>]*>([\s\S]*?)<\/p\s*>\s*<table\b/i.exec(html);
+  if (!notice || toText(notice[1]) !== NOTICE) {
+    throw new TypeError("CB underwriting notice does not match the verified contract");
+  }
 }
 
 function findResultTable(html: string): string {
