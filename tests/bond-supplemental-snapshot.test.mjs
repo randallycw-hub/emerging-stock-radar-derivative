@@ -47,6 +47,41 @@ test("de-duplicates an identical institution trade for the same bond and date", 
   assert.equal(next.institutionHistory["54642"][0].tradingDate, "2026-08-07");
 });
 
+test("rejects an institution day older than retained institution evidence", async (t) => {
+  await t.test("retained history", () => {
+    const previous = previousSnapshot({
+      institutionHistory: {
+        "54642": [institutionTrade("54642", "2026-08-07")],
+      },
+      institutionDataDate: "2026-08-07",
+    });
+    const institution = {
+      tradingDate: "2026-08-06",
+      tradingUnitFaceValueTwd: "100000",
+      records: [institutionTrade("54642", "2026-08-06")],
+    };
+
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, institution, previous }),
+      /institution tradingDate must not precede previous institution dataDate/,
+    );
+  });
+
+  await t.test("newer previous source date after an empty day", () => {
+    const previous = previousSnapshot({ institutionDataDate: "2026-08-07" });
+    const institution = {
+      tradingDate: "2026-08-06",
+      tradingUnitFaceValueTwd: "100000",
+      records: [institutionTrade("54642", "2026-08-06")],
+    };
+
+    assert.throws(
+      () => buildCbSupplementalSnapshot({ generatedAt, institution, previous }),
+      /institution tradingDate must not precede previous institution dataDate/,
+    );
+  });
+});
+
 test("rejects conflicting institution duplicates and key or date mismatches", async (t) => {
   await t.test("conflicting duplicate", () => {
     const previous = previousSnapshot({
@@ -186,6 +221,30 @@ test("no current or verified previous data produces unavailable empty sections",
     institution: { state: "unavailable", dataDate: null },
     redemption: { state: "unavailable", dataDate: null },
     underwriting: { state: "unavailable", dataDate: null },
+  });
+});
+
+test("requires generatedAt to advance beyond the previous snapshot", async (t) => {
+  await t.test("equal instant", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt: "2026-08-08T18:00:00.000+08:00",
+        previous,
+      }),
+      /generatedAt must be later than previous generatedAt/,
+    );
+  });
+
+  await t.test("older instant", () => {
+    const previous = previousSnapshot();
+    assert.throws(
+      () => buildCbSupplementalSnapshot({
+        generatedAt: "2026-08-08T09:59:59.999Z",
+        previous,
+      }),
+      /generatedAt must be later than previous generatedAt/,
+    );
   });
 });
 

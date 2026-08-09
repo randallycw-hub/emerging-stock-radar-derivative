@@ -104,6 +104,12 @@ export function buildCbSupplementalSnapshot(input: {
   const previous = input.previous === undefined
     ? undefined
     : validatePreviousSnapshot(input.previous);
+  if (
+    previous !== undefined
+    && Date.parse(input.generatedAt) <= Date.parse(previous.generatedAt)
+  ) {
+    throw new TypeError("generatedAt must be later than previous generatedAt");
+  }
 
   const institution = buildInstitutionSection(input.institution, previous);
   const redemption = buildRedemptionSection(input.redemptions, previous);
@@ -134,6 +140,14 @@ function buildInstitutionSection(
 } {
   if (current !== undefined) {
     const daily = validateInstitutionDaily(current);
+    const previousDataDate = previous?.sources.institution.dataDate;
+    if (
+      previousDataDate !== undefined
+      && previousDataDate !== null
+      && daily.tradingDate < previousDataDate
+    ) {
+      throw new TypeError("institution tradingDate must not precede previous institution dataDate");
+    }
     const history = mergeInstitutionHistory(previous?.institutionHistory ?? {}, daily.records);
     return {
       unitFaceValueTwd: "100000",
