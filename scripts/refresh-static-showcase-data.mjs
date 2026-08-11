@@ -17,6 +17,7 @@ import { types } from "node:util";
 import { isIsoDate } from "../lib/domain/dates.ts";
 import { EmergingMarketViewSchema } from "../lib/domain/schema.ts";
 import { buildEmergingMarketViews } from "../lib/market-data/emerging-market-view.ts";
+import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCsv } from "../lib/source-verification/csv.ts";
 import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
@@ -25,6 +26,7 @@ import {
   bondInputsFrom11406Rows,
   buildBondMarketSnapshot,
   verifyIssuerResearchViewConsistency,
+  verifySupplementalViewConsistency,
 } from "./build-bond-market-snapshot.mjs";
 import { fetchCurrentOfficialMarketData } from "./lib/official-market-fetch.mjs";
 import { buildStaticIpoSnapshot } from "./static-ipo-fallback.mjs";
@@ -55,6 +57,9 @@ export function buildGenerationRuntime(generation, manifest) {
   const declaresIssuerResearch = manifest?.market?.files?.some(
     (file) => file?.name === "cb-issuer-research.json",
   ) === true;
+  const declaresBondSupplemental = manifest?.market?.files?.some(
+    (file) => file?.name === "bond-supplemental.json",
+  ) === true;
   return {
     generation,
     manifestUrl: `${base}/manifest.json`,
@@ -65,6 +70,9 @@ export function buildGenerationRuntime(generation, manifest) {
       bondMarket: `${base}/bond-market-view.json`, conversionPrices: `${base}/conversion-prices.json`, bondHistory: `${base}/bond-market-history.json`,
       ...(declaresIssuerResearch
         ? { cbIssuerResearch: `${base}/cb-issuer-research.json` }
+        : {}),
+      ...(declaresBondSupplemental
+        ? { bondSupplemental: `${base}/bond-supplemental.json` }
         : {}),
     },
   };
@@ -204,6 +212,9 @@ export async function refreshStaticShowcase(options = {}) {
 }
 
 async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, paths }) {
+  const previousSupplemental = await readPublishedCbSupplemental(
+    paths.dataDirectory,
+  );
   const previousIssuerResearch = await readPublishedCbIssuerResearch(
     paths.dataDirectory,
   );
@@ -293,6 +304,13 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, p
       `${JSON.stringify(previousHistory, null, 2)}\n`,
       "utf8",
     );
+    if (previousSupplemental !== undefined) {
+      await writeFile(
+        join(stagingDataDirectory, "bond-supplemental.json"),
+        `${JSON.stringify(previousSupplemental, null, 2)}\n`,
+        "utf8",
+      );
+    }
 
     for (const [datasetId, rows] of Object.entries(datasets)) {
       await writeFile(
@@ -381,9 +399,9 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     scenario,
     now: nowText = "2026-07-30T06:00:06.000Z",
   } = parseIsolatedHarnessOptions(options);
-  if (!new Set(["success", "hash", "manifest", "cross-file"]).has(scenario)) {
+  if (!new Set(["success", "hash", "manifest", "cross-file", "supplemental"]).has(scenario)) {
     throw new TypeError(
-      "isolated refresh scenario must be one of success, hash, manifest, cross-file",
+      "isolated refresh scenario must be one of success, hash, manifest, cross-file, supplemental",
     );
   }
   if (
@@ -550,18 +568,34 @@ async function buildIsolatedMarketCandidate({
     cumulativeYearOverYearPercent: "3",
   };
   const researchText = `${JSON.stringify(snapshot, null, 2)}\n`;
+  const supplemental = isolatedSupplementalSnapshot(generatedAt);
+  const supplementalText = `${JSON.stringify(supplemental, null, 2)}\n`;
   const viewsText = `${JSON.stringify([{
     bondCode: "12601",
     issuerCode: "1260",
     issuerResearch: scenario === "cross-file" ? null : compact,
+    remainingUnits: null,
+    remainingRatio: null,
+    dailyTurnoverRate: null,
+    institutionDataDate: null,
+    institutionNetUnits: null,
+    institutionNet5dUnits: null,
+    institutionNet20dUnits: null,
+    redemptionEvent: null,
   }], null, 2)}\n`;
   await writeFile(join(outputDir, "cb-issuer-research.json"), researchText, "utf8");
+  await writeFile(join(outputDir, "bond-supplemental.json"), supplementalText, "utf8");
   await writeFile(join(outputDir, "bond-market-view.json"), viewsText, "utf8");
   const files = [
     {
       name: "cb-issuer-research.json",
       sha256: sha256Text(researchText),
       recordCount: 1,
+    },
+    {
+      name: "bond-supplemental.json",
+      sha256: sha256Text(supplementalText),
+      recordCount: 0,
     },
     {
       name: "bond-market-view.json",
@@ -576,6 +610,13 @@ async function buildIsolatedMarketCandidate({
       "utf8",
     );
   }
+  if (scenario === "supplemental") {
+    await writeFile(
+      join(outputDir, "bond-supplemental.json"),
+      `${JSON.stringify({ ...supplemental, schemaVersion: 2 }, null, 2)}\n`,
+      "utf8",
+    );
+  }
   if (scenario === "manifest") files.pop();
   return {
     manifest: {
@@ -583,10 +624,28 @@ async function buildIsolatedMarketCandidate({
       market: {
         status: "verified",
         dataDate: "2026-07-30",
+        requestedDate: "2026-07-30",
+        supplementalSources: supplemental.sources,
         files,
       },
     },
     report: { validation: "passed" },
+  };
+}
+
+function isolatedSupplementalSnapshot(generatedAt) {
+  return {
+    schemaVersion: 1,
+    generatedAt,
+    unitFaceValueTwd: null,
+    institutionHistory: {},
+    redemptions: [],
+    underwritingCases: [],
+    sources: {
+      institution: { state: "unavailable", dataDate: null, periodYear: null },
+      redemption: { state: "unavailable", dataDate: null, periodYear: null },
+      underwriting: { state: "unavailable", dataDate: null, periodYear: null },
+    },
   };
 }
 
@@ -657,6 +716,11 @@ async function seedIsolatedHarnessRoot(paths) {
     })}\n`,
     "utf8",
   );
+  await writeFile(
+    join(priorGeneration, "bond-supplemental.json"),
+    `${JSON.stringify(isolatedSupplementalSnapshot("2026-07-29T06:00:06.000Z"))}\n`,
+    "utf8",
+  );
 }
 
 async function captureIsolatedArtifacts(paths) {
@@ -669,6 +733,12 @@ async function captureIsolatedArtifacts(paths) {
       "generations",
       "abcdef",
       "cb-issuer-research.json",
+    )),
+    priorSupplementalText: await readOptionalText(join(
+      paths.dataDirectory,
+      "generations",
+      "abcdef",
+      "bond-supplemental.json",
     )),
   };
 }
@@ -688,6 +758,7 @@ async function captureActiveGeneration(paths, pointerText) {
   );
   return Object.fromEntries(await Promise.all([
     "cb-issuer-research.json",
+    "bond-supplemental.json",
     "bond-market-view.json",
     "emerging-market.json",
     "manifest.json",
@@ -800,6 +871,48 @@ export async function readPublishedCbIssuerResearch(
   }
 }
 
+export async function readPublishedCbSupplemental(
+  dataDirectory = DATA_DIRECTORY,
+) {
+  let pointer;
+  try {
+    pointer = JSON.parse(await readFile(join(dataDirectory, "current.json"), "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw error;
+  }
+  if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
+    throw new Error("INVALID_CURRENT_GENERATION_POINTER");
+  }
+  try {
+    const value = JSON.parse(await readFile(
+      join(dataDirectory, pointer.generation, "bond-supplemental.json"),
+      "utf8",
+    ));
+    return parseCbSupplementalSnapshot(value);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      let manifest;
+      try {
+        manifest = JSON.parse(await readFile(
+          join(dataDirectory, pointer.generation, "manifest.json"),
+          "utf8",
+        ));
+      } catch (manifestError) {
+        if (manifestError?.code === "ENOENT") return undefined;
+        throw manifestError;
+      }
+      if (manifest?.market?.files?.some(
+        (file) => file?.name === "bond-supplemental.json",
+      )) {
+        throw new Error("missing prior CB supplemental snapshot");
+      }
+      return undefined;
+    }
+    throw new TypeError(`prior CB supplemental snapshot is invalid: ${error.message}`);
+  }
+}
+
 async function readHistoryFile(path) {
   const history = JSON.parse(await readFile(path, "utf8"));
   if (!Array.isArray(history)) throw new Error("INVALID_PUBLISHED_BOND_HISTORY");
@@ -878,61 +991,114 @@ async function verifyStagedGeneration(stagingDataDirectory) {
   const issuerResearchEntries = Array.isArray(marketFiles)
     ? marketFiles.filter((file) => file?.name === "cb-issuer-research.json")
     : [];
-  if (issuerResearchEntries.length === 0) return;
-  const viewEntries = marketFiles.filter(
+  const supplementalEntries = Array.isArray(marketFiles)
+    ? marketFiles.filter((file) => file?.name === "bond-supplemental.json")
+    : [];
+  const viewEntries = Array.isArray(marketFiles) ? marketFiles.filter(
     (file) => file?.name === "bond-market-view.json",
-  );
-  if (issuerResearchEntries.length !== 1 || viewEntries.length !== 1) {
-    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_MANIFEST");
+  ) : [];
+  if (issuerResearchEntries.length === 0 && supplementalEntries.length === 0) return;
+  if (viewEntries.length !== 1) {
+    throw new Error("VALIDATION_FAILED:MARKET_VIEW_MANIFEST");
   }
-  const issuerEntry = validateGenerationFileEntry(
-    issuerResearchEntries[0],
-    "cb-issuer-research.json",
-  );
   const viewEntry = validateGenerationFileEntry(
     viewEntries[0],
     "bond-market-view.json",
-  );
-  const researchText = await readFile(
-    join(stagingDataDirectory, "cb-issuer-research.json"),
-    "utf8",
+    "MARKET_VIEW",
   );
   const viewsText = await readFile(
     join(stagingDataDirectory, "bond-market-view.json"),
     "utf8",
   );
-  if (
-    sha256Text(researchText) !== issuerEntry.sha256
-    || sha256Text(viewsText) !== viewEntry.sha256
-  ) {
-    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_HASH");
-  }
-  const issuerResearch = parseCbIssuerResearchSnapshot(JSON.parse(researchText));
   const views = JSON.parse(viewsText);
   if (
-    issuerResearch.records.length !== issuerEntry.recordCount
+    sha256Text(viewsText) !== viewEntry.sha256
     || !Array.isArray(views)
     || views.length !== viewEntry.recordCount
   ) {
-    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_COUNT");
+    throw new Error("VALIDATION_FAILED:MARKET_VIEW_ARTIFACT");
   }
-  const expectedResearchUrl = `./data/${runtime.generation}/cb-issuer-research.json`;
-  if (runtime.datasets?.cbIssuerResearch !== expectedResearchUrl) {
-    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_RUNTIME");
+
+  if (issuerResearchEntries.length > 0) {
+    if (issuerResearchEntries.length !== 1) {
+      throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_MANIFEST");
+    }
+    const issuerEntry = validateGenerationFileEntry(
+      issuerResearchEntries[0],
+      "cb-issuer-research.json",
+      "ISSUER_RESEARCH",
+    );
+    const researchText = await readFile(
+      join(stagingDataDirectory, "cb-issuer-research.json"),
+      "utf8",
+    );
+    if (sha256Text(researchText) !== issuerEntry.sha256) {
+      throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_HASH");
+    }
+    const issuerResearch = parseCbIssuerResearchSnapshot(JSON.parse(researchText));
+    if (issuerResearch.records.length !== issuerEntry.recordCount) {
+      throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_COUNT");
+    }
+    const expectedResearchUrl = `./data/${runtime.generation}/cb-issuer-research.json`;
+    if (runtime.datasets?.cbIssuerResearch !== expectedResearchUrl) {
+      throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_RUNTIME");
+    }
+    verifyIssuerResearchViewConsistency(issuerResearch, views);
   }
-  verifyIssuerResearchViewConsistency(issuerResearch, views);
+
+  if (supplementalEntries.length > 0) {
+    if (supplementalEntries.length !== 1) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_MANIFEST");
+    }
+    const supplementalEntry = validateGenerationFileEntry(
+      supplementalEntries[0],
+      "bond-supplemental.json",
+      "SUPPLEMENTAL",
+    );
+    const supplementalText = await readFile(
+      join(stagingDataDirectory, "bond-supplemental.json"),
+      "utf8",
+    );
+    if (sha256Text(supplementalText) !== supplementalEntry.sha256) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_HASH");
+    }
+    const supplemental = parseCbSupplementalSnapshot(JSON.parse(supplementalText));
+    if (countSupplementalRecords(supplemental) !== supplementalEntry.recordCount) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_COUNT");
+    }
+    if (
+      runtime.datasets?.bondSupplemental
+        !== `./data/${runtime.generation}/bond-supplemental.json`
+      || JSON.stringify(manifest.market.supplementalSources)
+        !== JSON.stringify(supplemental.sources)
+    ) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_RUNTIME");
+    }
+    verifySupplementalViewConsistency(
+      supplemental,
+      views,
+      manifest.market.requestedDate,
+    );
+  }
 }
 
-function validateGenerationFileEntry(entry, expectedName) {
+function validateGenerationFileEntry(entry, expectedName, code) {
   if (
     entry?.name !== expectedName
     || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
     || !Number.isInteger(entry.recordCount)
     || entry.recordCount < 0
   ) {
-    throw new Error("VALIDATION_FAILED:ISSUER_RESEARCH_MANIFEST");
+    throw new Error(`VALIDATION_FAILED:${code}_MANIFEST`);
   }
   return entry;
+}
+
+function countSupplementalRecords(snapshot) {
+  return Object.values(snapshot.institutionHistory)
+    .reduce((count, records) => count + records.length, 0)
+    + snapshot.redemptions.length
+    + snapshot.underwritingCases.length;
 }
 
 function sha256Text(text) {

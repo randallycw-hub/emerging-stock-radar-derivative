@@ -38,6 +38,10 @@ export type CbInstitutionSummary = {
   net20dUnits: string | null;
 };
 
+export function parseCbSupplementalSnapshot(value: unknown): CbSupplementalSnapshot {
+  return deepFreeze(validatePreviousSnapshot(value as CbSupplementalSnapshot));
+}
+
 const SNAPSHOT_KEYS = [
   "schemaVersion",
   "generatedAt",
@@ -112,7 +116,7 @@ export function buildCbSupplementalSnapshot(input: {
   assertGeneratedAt(input.generatedAt);
   const previous = input.previous === undefined
     ? undefined
-    : validatePreviousSnapshot(input.previous);
+    : parseCbSupplementalSnapshot(input.previous);
   if (
     previous !== undefined
     && Date.parse(input.generatedAt) <= Date.parse(previous.generatedAt)
@@ -154,7 +158,7 @@ export function summarizeCbInstitution(
     });
   }
 
-  const validated = validatePreviousSnapshot(snapshot);
+  const validated = parseCbSupplementalSnapshot(snapshot);
   const records = [...(validated.institutionHistory[bondCode] ?? [])]
     .filter((record) => record.tradingDate <= asOfDate)
     .sort((left, right) => right.tradingDate.localeCompare(left.tradingDate));
@@ -175,7 +179,7 @@ export function currentCbRedemption(
   assertDerivedQuery(bondCode, asOfDate);
   if (snapshot === undefined) return null;
 
-  const event = validatePreviousSnapshot(snapshot).redemptions
+  const event = parseCbSupplementalSnapshot(snapshot).redemptions
     .filter((candidate) =>
       candidate.bondCode === bondCode
       && candidate.announcementDate <= asOfDate
@@ -544,7 +548,7 @@ function validateInstitutionDaily(value: CbInstitutionDailySnapshot): {
   if (snapshot.tradingUnitFaceValueTwd !== "100000") {
     throw new TypeError("institution trading unit is invalid");
   }
-  if (!Array.isArray(snapshot.records)) throw new TypeError("institution records must be an array");
+  assertDenseArray(snapshot.records, "institution records");
   const seenCodes = new Set<string>();
   const records = snapshot.records.map((record) => {
     const normalized = validateInstitutionTrade(record);
@@ -569,6 +573,7 @@ function validateInstitutionHistory(value: unknown): Record<string, CbInstitutio
     if (!Array.isArray(trades) || trades.length > 60) {
       throw new TypeError(`institution history ${bondCode} must contain at most 60 trades`);
     }
+    assertDenseArray(trades, `institution history ${bondCode}`);
     const seenDates = new Set<string>();
     const normalized = trades.map((trade) => {
       const record = validateInstitutionTrade(trade);
@@ -673,7 +678,7 @@ function sameInstitutionTrade(left: CbInstitutionTrade, right: CbInstitutionTrad
 }
 
 function validateRedemptions(value: unknown): CbRedemptionEvent[] {
-  if (!Array.isArray(value)) throw new TypeError("redemptions must be an array");
+  assertDenseArray(value, "redemptions");
   const seen = new Set<string>();
   return value.map((event) => {
     const normalized = validateRedemption(event);
@@ -806,7 +811,7 @@ function validateUnderwritingSnapshot(value: CbUnderwritingSnapshot): {
 }
 
 function validateUnderwritingCases(value: unknown): CbUnderwritingCase[] {
-  if (!Array.isArray(value)) throw new TypeError("underwriting cases must be an array");
+  assertDenseArray(value, "underwriting cases");
   return value.map((entry) => {
     const record = requireRecord(entry, "underwriting case");
     assertExactKeys(record, UNDERWRITING_CASE_KEYS, "underwriting case");
@@ -819,7 +824,10 @@ function validateUnderwritingCases(value: unknown): CbUnderwritingCase[] {
     if (record.guaranteeType !== "secured" && record.guaranteeType !== "unsecured") {
       throw new TypeError("underwriting guaranteeType is invalid");
     }
-    if (!Array.isArray(record.placementMethods) || !record.placementMethods.every((method) => typeof method === "string" && method !== "")) {
+    assertDenseArray(record.placementMethods, "underwriting placementMethods");
+    if (!record.placementMethods.every(
+      (method): method is string => typeof method === "string" && method !== "",
+    )) {
       throw new TypeError("underwriting placementMethods are invalid");
     }
     assertNonemptyString(record.caseStatus, "underwriting caseStatus");
@@ -867,12 +875,30 @@ function assertExactKeys(
   expected: readonly string[],
   name: string,
 ): void {
-  const keys = Object.keys(record);
+  const keys = Reflect.ownKeys(record);
   if (
     keys.length !== expected.length
-    || !keys.every((key) => expected.includes(key))
+    || !keys.every((key) => (
+      typeof key === "string"
+      && expected.includes(key)
+      && Object.prototype.propertyIsEnumerable.call(record, key)
+    ))
   ) {
     throw new TypeError(`${name} keys do not match the verified contract`);
+  }
+}
+
+function assertDenseArray(value: unknown, name: string): asserts value is unknown[] {
+  if (!Array.isArray(value)) throw new TypeError(`${name} must be a dense array`);
+  const ownKeys = Reflect.ownKeys(value);
+  if (
+    ownKeys.length !== value.length + 1
+    || !ownKeys.includes("length")
+    || !Array.from({ length: value.length }, (_, index) => String(index)).every(
+      (key) => Object.prototype.propertyIsEnumerable.call(value, key),
+    )
+  ) {
+    throw new TypeError(`${name} must be a dense array`);
   }
 }
 

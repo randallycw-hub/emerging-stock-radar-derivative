@@ -184,6 +184,49 @@ test("Sites staging preserves allowed legacy root data and multiple hex generati
   );
 });
 
+test("Sites staging copies a declared validated CB supplemental artifact", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-supplemental-"));
+  const source = join(root, "source");
+  const destination = join(root, "destination");
+  await seedDeclaredIssuerResearchGeneration(source, {
+    includeRuntimeKey: true,
+    includeSupplemental: true,
+  });
+
+  await stageStaticShowcase({ source, destination });
+
+  assert.deepEqual(
+    JSON.parse(await readFile(
+      join(destination, "data/generations/abc123/bond-supplemental.json"),
+      "utf8",
+    )),
+    emptySupplementalSnapshot,
+  );
+  const runtime = JSON.parse(await readFile(
+    join(destination, "data/generations/abc123/runtime.json"),
+    "utf8",
+  ));
+  assert.equal(
+    runtime.datasets.bondSupplemental,
+    "./data/generations/abc123/bond-supplemental.json",
+  );
+});
+
+test("Sites staging rejects declared CB supplemental without its exact runtime dataset key", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-supplemental-runtime-"));
+  const source = join(root, "source");
+  await seedDeclaredIssuerResearchGeneration(source, {
+    includeRuntimeKey: true,
+    includeSupplemental: true,
+    includeSupplementalRuntimeKey: false,
+  });
+
+  await assert.rejects(
+    stageStaticShowcase({ source, destination: join(root, "destination") }),
+    /supplemental|required dataset artifacts|runtime datasets/i,
+  );
+});
+
 test("Sites staging copies a manifest-declared issuer research artifact", async () => {
   const root = await mkdtemp(join(tmpdir(), "showcase-stage-research-"));
   const source = join(root, "source");
@@ -247,7 +290,28 @@ const emptyIssuerResearchSnapshot = {
   diagnostics: [],
 };
 
-async function seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey }) {
+const emptySupplementalSnapshot = {
+  schemaVersion: 1,
+  generatedAt: "2026-07-31T06:00:00.000Z",
+  unitFaceValueTwd: null,
+  institutionHistory: {},
+  redemptions: [],
+  underwritingCases: [],
+  sources: {
+    institution: { state: "unavailable", dataDate: null, periodYear: null },
+    redemption: { state: "unavailable", dataDate: null, periodYear: null },
+    underwriting: { state: "unavailable", dataDate: null, periodYear: null },
+  },
+};
+
+async function seedDeclaredIssuerResearchGeneration(
+  source,
+  {
+    includeRuntimeKey,
+    includeSupplemental = false,
+    includeSupplementalRuntimeKey = includeSupplemental,
+  },
+) {
   const generation = join(source, "data", "generations", "abc123");
   await mkdir(generation, { recursive: true });
   await writeFile(join(source, "index.html"), "正式首頁", "utf8");
@@ -258,14 +322,23 @@ async function seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey 
   );
   const researchText = `${JSON.stringify(emptyIssuerResearchSnapshot, null, 2)}\n`;
   const viewsText = "[]\n";
+  const supplementalText = `${JSON.stringify(emptySupplementalSnapshot, null, 2)}\n`;
   await writeFile(join(generation, "cb-issuer-research.json"), researchText, "utf8");
   await writeFile(join(generation, "bond-market-view.json"), viewsText, "utf8");
+  if (includeSupplemental) {
+    await writeFile(
+      join(generation, "bond-supplemental.json"),
+      supplementalText,
+      "utf8",
+    );
+  }
   await writeFile(
     join(generation, "manifest.json"),
     `${JSON.stringify({
       market: {
         status: "verified",
         dataDate: "2026-07-31",
+        ...(includeSupplemental ? { requestedDate: "2026-07-31" } : {}),
         files: [
           {
             name: "cb-issuer-research.json",
@@ -277,7 +350,15 @@ async function seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey 
             sha256: sha256Text(viewsText),
             recordCount: 0,
           },
+          ...(includeSupplemental ? [{
+            name: "bond-supplemental.json",
+            sha256: sha256Text(supplementalText),
+            recordCount: 0,
+          }] : []),
         ],
+        ...(includeSupplemental
+          ? { supplementalSources: emptySupplementalSnapshot.sources }
+          : {}),
       },
       emergingMarketUrl: "./data/generations/abc123/emerging-market.json",
     })}\n`,
@@ -292,6 +373,9 @@ async function seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey 
     bondHistory: "./data/generations/abc123/bond-market-history.json",
     ...(includeRuntimeKey
       ? { cbIssuerResearch: "./data/generations/abc123/cb-issuer-research.json" }
+      : {}),
+    ...(includeSupplementalRuntimeKey
+      ? { bondSupplemental: "./data/generations/abc123/bond-supplemental.json" }
       : {}),
   };
   await writeFile(

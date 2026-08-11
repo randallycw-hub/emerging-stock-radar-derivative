@@ -4,10 +4,60 @@ import test from "node:test";
 import {
   buildCbSupplementalSnapshot,
   currentCbRedemption,
+  parseCbSupplementalSnapshot,
   summarizeCbInstitution,
 } from "../lib/market-data/bond-supplemental.ts";
 
 const generatedAt = "2026-08-09T10:00:00.000Z";
+
+test("parses a complete supplemental snapshot into a defensive frozen clone", () => {
+  const input = previousSnapshot();
+  const parsed = parseCbSupplementalSnapshot(input);
+
+  assert.deepEqual(parsed, input);
+  assert.notStrictEqual(parsed, input);
+  assert.notStrictEqual(parsed.institutionHistory, input.institutionHistory);
+  assert.notStrictEqual(parsed.redemptions[0], input.redemptions[0]);
+  assert.notStrictEqual(
+    parsed.underwritingCases[0].placementMethods,
+    input.underwritingCases[0].placementMethods,
+  );
+  assert.ok(Object.isFrozen(parsed));
+  assert.ok(Object.isFrozen(parsed.institutionHistory["54642"]));
+  assert.ok(Object.isFrozen(parsed.underwritingCases[0].placementMethods));
+
+  input.institutionHistory["54642"][0].bondName = "mutated";
+  assert.notEqual(parsed.institutionHistory["54642"][0].bondName, "mutated");
+});
+
+test("supplemental parser rejects hidden, symbol and sparse off-contract data", async (t) => {
+  await t.test("hidden root key", () => {
+    const input = previousSnapshot();
+    Object.defineProperty(input, "hidden", { value: true, enumerable: false });
+    assert.throws(() => parseCbSupplementalSnapshot(input), /keys.*contract/i);
+  });
+
+  await t.test("symbol source-status key", () => {
+    const input = previousSnapshot();
+    input.sources.institution[Symbol("hidden")] = true;
+    assert.throws(() => parseCbSupplementalSnapshot(input), /keys.*contract/i);
+  });
+
+  for (const [name, mutate] of [
+    ["institution history", (input) => { input.institutionHistory["54642"] = new Array(1); }],
+    ["redemptions", (input) => { input.redemptions = new Array(1); }],
+    ["underwriting cases", (input) => { input.underwritingCases = new Array(1); }],
+    ["placement methods", (input) => {
+      input.underwritingCases[0].placementMethods = new Array(1);
+    }],
+  ]) {
+    await t.test(`sparse ${name}`, () => {
+      const input = previousSnapshot();
+      mutate(input);
+      assert.throws(() => parseCbSupplementalSnapshot(input), /dense array/i);
+    });
+  }
+});
 
 test("uses the newest 1, 5 and 20 actual trading records at or before asOfDate", () => {
   const totals = [

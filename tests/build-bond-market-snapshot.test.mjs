@@ -10,6 +10,10 @@ import { join } from "node:path";
 import test from "node:test";
 
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
+import { buildCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
+import { parseCbInstitutionDaily } from "../lib/source-verification/source-cb-institution.ts";
+import { parseCbRedemptionAnnouncements } from "../lib/source-verification/source-cb-redemption.ts";
+import { parseCbUnderwritingHtml } from "../lib/source-verification/source-cb-underwriting.ts";
 import {
   CB_ISSUER_RESEARCH_SOURCE_POLICIES,
   fetchCbIssuerResearchSources,
@@ -145,8 +149,8 @@ async function withBlockedFetch(run) {
   }
 }
 
-async function withOfflineIssuerResearchFetch(run) {
-  const [listedFixture, otcFixture] = await Promise.all([
+async function withOfflineProductionFetch(run, { failUnderwriting = false } = {}) {
+  const [listed, otc, institution, redemption, underwriting] = await Promise.all([
     readFile(new URL(
       "./fixtures/source-verification/cb-issuer-research/listed-minimal.csv",
       import.meta.url,
@@ -155,41 +159,99 @@ async function withOfflineIssuerResearchFetch(run) {
       "./fixtures/source-verification/cb-issuer-research/otc-minimal.csv",
       import.meta.url,
     ), "utf8"),
+    readFile(new URL(
+      "./fixtures/source-verification/cb-institution/daily-minimal.json",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "./fixtures/source-verification/cb-redemption/year-minimal.json",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "./fixtures/source-verification/cb-underwriting/current-year-minimal.html",
+      import.meta.url,
+    ), "utf8"),
   ]);
-  const bodies = new Map([
+  const issuerBodies = new Map([
     [
       CB_ISSUER_RESEARCH_SOURCE_POLICIES.listed.url,
-      listedFixture.replace(/"1101","[^"]+"/, `"3522","${bond.issuerName}"`),
+      listed.replace(/"1101","[^"]+"/, `"3522","${bond.issuerName}"`),
     ],
-    [CB_ISSUER_RESEARCH_SOURCE_POLICIES.otc.url, otcFixture],
+    [CB_ISSUER_RESEARCH_SOURCE_POLICIES.otc.url, otc],
   ]);
   const calls = [];
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (url, init) => {
-    if (typeof url !== "string" || !bodies.has(url)) {
-      throw new Error(`unexpected network request: ${String(url)}`);
+  globalThis.fetch = async (url, init = {}) => {
+    const target = String(url);
+    calls.push(target);
+    if (issuerBodies.has(target)) {
+      const response = new Response(issuerBodies.get(target), {
+        status: 200,
+        headers: { "content-type": "text/csv; charset=utf-8" },
+      });
+      Object.defineProperties(response, {
+        redirected: { value: false },
+        url: { value: target },
+      });
+      return response;
     }
-    assert.deepEqual(init, { method: "GET", redirect: "manual" });
-    calls.push(url);
-    const response = new Response(bodies.get(url), {
-      status: 200,
-      headers: { "content-type": "text/csv; charset=utf-8" },
-    });
-    Object.defineProperties(response, {
-      redirected: { value: false },
-      url: { value: url },
-    });
-    return response;
+    if (target.endsWith("/newCb3itrade")) {
+      return new Response(institution, {
+        status: 200,
+        headers: { "content-type": "application/json;charset=UTF-8" },
+      });
+    }
+    if (target.endsWith("/redeem")) {
+      return new Response(redemption, {
+        status: 200,
+        headers: { "content-type": "application/json;charset=UTF-8" },
+      });
+    }
+    if (target === "https://web.twsa.org.tw/edoc2/default.aspx") {
+      if (failUnderwriting) return new Response("unavailable", { status: 503 });
+      return new Response(underwriting, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
+    throw new Error(`unexpected network request: ${target}:${init.method ?? "GET"}`);
   };
   try {
     return await run();
   } finally {
     globalThis.fetch = originalFetch;
-    assert.deepEqual(
-      calls,
-      Object.values(CB_ISSUER_RESEARCH_SOURCE_POLICIES).map((policy) => policy.url),
-    );
+    assert.deepEqual(calls, [
+      ...Object.values(CB_ISSUER_RESEARCH_SOURCE_POLICIES).map((policy) => policy.url),
+      "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
+      "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+      ...Array(failUnderwriting ? 3 : 1)
+        .fill("https://web.twsa.org.tw/edoc2/default.aspx"),
+    ]);
   }
+}
+
+async function previousSupplementalFromFixtures() {
+  const [institution, redemption, underwriting] = await Promise.all([
+    readFile(new URL(
+      "./fixtures/source-verification/cb-institution/daily-minimal.json",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "./fixtures/source-verification/cb-redemption/year-minimal.json",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "./fixtures/source-verification/cb-underwriting/current-year-minimal.html",
+      import.meta.url,
+    ), "utf8"),
+  ]);
+  return buildCbSupplementalSnapshot({
+    generatedAt: "2026-08-08T12:30:00.000Z",
+    institution: parseCbInstitutionDaily(JSON.parse(institution)),
+    redemptions: parseCbRedemptionAnnouncements(JSON.parse(redemption)),
+    redemptionYear: 2026,
+    underwriting: parseCbUnderwritingHtml(underwriting),
+  });
 }
 
 test("maps official 11406 dates, put dates and amount units exactly", () => {
@@ -329,6 +391,38 @@ test("pure issuer-research candidate helper validates settled CSVs without publi
   assert.notStrictEqual(views[0].issuerResearch, views[1].issuerResearch);
 });
 
+test("supplemental cross-file verification keeps ratio independent of face-value availability", () => {
+  const supplemental = {
+    schemaVersion: 1,
+    generatedAt: "2026-08-09T12:30:00.000Z",
+    unitFaceValueTwd: null,
+    institutionHistory: {},
+    redemptions: [],
+    underwritingCases: [],
+    sources: {
+      institution: { state: "unavailable", dataDate: null, periodYear: null },
+      redemption: { state: "unavailable", dataDate: null, periodYear: null },
+      underwriting: { state: "unavailable", dataDate: null, periodYear: null },
+    },
+  };
+  const views = buildBondMarketViews({
+    asOfDate: "2026-07-30",
+    bonds: [bond],
+    cbQuotes: [],
+    stockCloses: [],
+    conversionPrices: [],
+    supplemental,
+  });
+
+  assert.equal(views[0].remainingUnits, null);
+  assert.equal(views[0].remainingRatio, "80");
+  assert.doesNotThrow(() => snapshotBuilder.verifySupplementalViewConsistency(
+    supplemental,
+    views,
+    "2026-07-30",
+  ));
+});
+
 test("removed offline source option cannot publish current research while unapproved", async () => {
   const outputDir = await makePublishedDirectory();
   await writeFile(
@@ -378,9 +472,42 @@ test("validates the entire prior issuer snapshot before market collection or sta
   assert.equal(marketCalls, 0);
 });
 
+test("validates the entire prior supplemental snapshot before any fetch or market collection", async () => {
+  const outputDir = await makePublishedDirectory();
+  await writeFile(
+    join(outputDir, "bond-supplemental.json"),
+    `${JSON.stringify({ schemaVersion: 2 })}\n`,
+  );
+  const originalFetch = globalThis.fetch;
+  let fetchCalls = 0;
+  let marketCalls = 0;
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    throw new Error("network must not run before prior supplemental validation");
+  };
+  try {
+    await assert.rejects(
+      () => buildBondMarketSnapshot({
+        outputDir,
+        bonds: [bond],
+        collectImpl: async () => {
+          marketCalls += 1;
+          return validCollectedMarketData;
+        },
+        now: () => new Date("2026-08-09T12:30:00.000Z"),
+      }),
+      /supplemental|schemaVersion/i,
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.equal(fetchCalls, 0);
+  assert.equal(marketCalls, 0);
+});
+
 test("production default consumes approved sources through exact offline responses", async () => {
   const outputDir = await makePublishedDirectory();
-  const result = await withOfflineIssuerResearchFetch(() => buildBondMarketSnapshot({
+  const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
     outputDir,
     bonds: [bond],
     collectImpl: async () => validCollectedMarketData,
@@ -402,6 +529,73 @@ test("production default consumes approved sources through exact offline respons
   assert.equal(result.issuerResearch.records.length, 1);
   assert.equal(result.issuerResearch.records[0].issuerCode, "3522");
   assert.notEqual(result.views[0].issuerResearch, null);
+});
+
+test("publishes a validated CB supplemental artifact and enriches the same candidate views", async () => {
+  const outputDir = await makePublishedDirectory();
+  const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
+    outputDir,
+    bonds: [bond],
+    collectImpl: async () => ({
+      ...validCollectedMarketData,
+      requestedDate: "2026-08-07",
+    }),
+    asOfDate: "2026-08-07",
+    now: () => new Date("2026-08-09T12:30:00.000Z"),
+  }));
+
+  assert.ok(result.files.includes("bond-supplemental.json"));
+  const stored = JSON.parse(
+    await readFile(join(outputDir, "bond-supplemental.json"), "utf8"),
+  );
+  assert.deepEqual(stored, result.supplemental);
+  assert.equal(stored.schemaVersion, 1);
+  assert.deepEqual(
+    Object.values(stored.sources).map((source) => source.state),
+    ["fresh", "fresh", "fresh"],
+  );
+  assert.equal(result.views[0].remainingUnits, "4000");
+  assert.deepEqual(result.manifest.market.supplementalSources, stored.sources);
+  const entry = result.manifest.market.files.find(
+    (file) => file.name === "bond-supplemental.json",
+  );
+  assert.equal(entry.recordCount, 6);
+  assert.match(entry.sha256, /^sha256:[0-9a-f]{64}$/);
+});
+
+test("reuses only the validated previous supplemental section whose source is unavailable", async () => {
+  const outputDir = await makePublishedDirectory();
+  const previous = await previousSupplementalFromFixtures();
+  await writeFile(
+    join(outputDir, "bond-supplemental.json"),
+    `${JSON.stringify(previous, null, 2)}\n`,
+  );
+
+  const result = await withOfflineProductionFetch(
+    () => buildBondMarketSnapshot({
+      outputDir,
+      bonds: [bond],
+      collectImpl: async () => ({
+        ...validCollectedMarketData,
+        requestedDate: "2026-08-07",
+      }),
+      asOfDate: "2026-08-07",
+      now: () => new Date("2026-08-09T12:30:00.000Z"),
+    }),
+    { failUnderwriting: true },
+  );
+
+  assert.equal(result.supplemental.sources.institution.state, "fresh");
+  assert.equal(result.supplemental.sources.redemption.state, "fresh");
+  assert.equal(result.supplemental.sources.underwriting.state, "stale");
+  assert.deepEqual(
+    result.supplemental.underwritingCases,
+    previous.underwritingCases,
+  );
+  assert.notStrictEqual(
+    result.supplemental.underwritingCases,
+    previous.underwritingCases,
+  );
 });
 
 test("excludes only explicitly private unlisted 11406 bonds without hiding malformed public codes", () => {
@@ -489,7 +683,7 @@ test("a failed candidate leaves every published market file unchanged", async ()
   ));
 
   await assert.rejects(
-    () => withOfflineIssuerResearchFetch(() => buildBondMarketSnapshot({
+    () => withOfflineProductionFetch(() => buildBondMarketSnapshot({
       outputDir,
       bonds: [bond],
       collectImpl: async () => ({
@@ -520,7 +714,7 @@ test("a valid candidate publishes verified files and appends exact-date history"
       premiumRate: "-3.24",
     }])}\n`,
   );
-  const result = await withOfflineIssuerResearchFetch(() => buildBondMarketSnapshot({
+  const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
     outputDir,
     bonds: [bond],
     collectImpl: async () => validCollectedMarketData,
@@ -528,7 +722,7 @@ test("a valid candidate publishes verified files and appends exact-date history"
   }));
 
   assert.equal(result.status, "published");
-  assert.equal(result.files.length, 6);
+  assert.equal(result.files.length, 7);
   assert.equal(result.manifest.market.generatedAt, "2026-07-30T12:30:00.000Z");
   assert.equal(result.manifest.market.status, "verified");
   assert.equal(result.manifest.market.requestedDate, "2026-07-30");

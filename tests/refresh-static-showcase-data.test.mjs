@@ -11,6 +11,7 @@ import {
   fetchOfficialCsvWithRetry,
   readPublishedBondHistory,
   readPublishedCbIssuerResearch,
+  readPublishedCbSupplemental,
   refreshStaticShowcase,
   updateRuntimeCacheKey,
 } from "../scripts/refresh-static-showcase-data.mjs";
@@ -332,10 +333,19 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
     runtime.datasets.cbIssuerResearch,
     `./data/${pointer.generation}/cb-issuer-research.json`,
   );
+  assert.equal(
+    runtime.datasets.bondSupplemental,
+    `./data/${pointer.generation}/bond-supplemental.json`,
+  );
   const issuerResearch = JSON.parse(
     outcome.artifacts.active["cb-issuer-research.json"],
   );
   assert.equal(issuerResearch.records[0].issuerCode, "1260");
+  const supplemental = JSON.parse(
+    outcome.artifacts.active["bond-supplemental.json"],
+  );
+  assert.equal(supplemental.schemaVersion, 1);
+  assert.deepEqual(manifest.market.supplementalSources, supplemental.sources);
 });
 
 test("refresh reads the prior generation bond history before staging a replacement", async () => {
@@ -376,6 +386,58 @@ test("prior generation fails closed when its manifest declares a missing issuer 
     readPublishedCbIssuerResearch(dataRoot),
     /missing prior CB issuer research/i,
   );
+});
+
+test("prior generation fails closed when its manifest declares a missing CB supplemental snapshot", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-prior-supplemental-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    "utf8",
+  );
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({
+      market: { files: [{ name: "bond-supplemental.json" }] },
+    }),
+    "utf8",
+  );
+
+  await assert.rejects(
+    readPublishedCbSupplemental(dataRoot),
+    /missing prior CB supplemental/i,
+  );
+});
+
+test("refresh validates the complete prior CB supplemental snapshot before any fetch", async () => {
+  await withTemporaryShowcase(async (root) => {
+    await seedPriorGeneration(root);
+    const dataDirectory = join(root, "static-showcase/data");
+    const generation = join(dataDirectory, "generations/abcdef");
+    const pointerPath = join(dataDirectory, "current.json");
+    const beforePointer = await readFile(pointerPath, "utf8");
+    await writeFile(
+      join(generation, "bond-supplemental.json"),
+      '{"schemaVersion":1,"unexpected":true}\n',
+      "utf8",
+    );
+    let fetchCalls = 0;
+
+    await assert.rejects(
+      withBlockedGlobalFetch(() => refreshStaticShowcase({
+        fetchImpl: async () => {
+          fetchCalls += 1;
+          return new Response("must not fetch", { status: 500 });
+        },
+      })),
+      /prior CB supplemental snapshot is invalid/i,
+    );
+    assert.equal(fetchCalls, 0);
+    assert.equal(await readFile(pointerPath, "utf8"), beforePointer);
+  });
 });
 
 test("refresh merges a restored CI history cache with the committed generation", async () => {
@@ -423,7 +485,7 @@ test("refresh leaves the prior generation untouched when publication fails befor
   });
 });
 
-for (const failureMode of ["hash", "manifest", "cross-file"]) {
+for (const failureMode of ["hash", "manifest", "cross-file", "supplemental"]) {
   test(`research ${failureMode} failure after candidate write leaves pointer and prior generation unchanged`, async () => {
     const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
       "../scripts/refresh-static-showcase-data.mjs"
@@ -440,6 +502,10 @@ for (const failureMode of ["hash", "manifest", "cross-file"]) {
     assert.equal(
       outcome.artifacts.after.priorResearchText,
       outcome.artifacts.before.priorResearchText,
+    );
+    assert.equal(
+      outcome.artifacts.after.priorSupplementalText,
+      outcome.artifacts.before.priorSupplementalText,
     );
   });
 }

@@ -25,9 +25,6 @@ const approvedEndpoints = new Set([
   "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
   "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
   "https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock",
-  "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
-  "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
-  "https://web.twsa.org.tw/edoc2/default.aspx",
 ]);
 
 async function filesUnder(relativePath) {

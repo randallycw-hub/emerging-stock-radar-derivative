@@ -10,7 +10,11 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
-import { verifyIssuerResearchViewConsistency } from "./build-bond-market-snapshot.mjs";
+import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
+import {
+  verifyIssuerResearchViewConsistency,
+  verifySupplementalViewConsistency,
+} from "./build-bond-market-snapshot.mjs";
 
 const ROOT_FILES = new Set([
   ".nojekyll",
@@ -51,6 +55,7 @@ const GENERATION_FILES = new Set([
   "94025.json",
   "bond-market-history.json",
   "bond-market-view.json",
+  "bond-supplemental.json",
   "cb-issuer-research.json",
   "cb-quotes.json",
   "conversion-prices.json",
@@ -107,7 +112,14 @@ export async function stageStaticShowcase({
   const declaresIssuerResearch = manifest.market.files?.some(
     (file) => file?.name === "cb-issuer-research.json",
   ) === true;
-  const expectedDatasets = expectedRuntimeDatasets(base, declaresIssuerResearch);
+  const declaresSupplemental = manifest.market.files?.some(
+    (file) => file?.name === "bond-supplemental.json",
+  ) === true;
+  const expectedDatasets = expectedRuntimeDatasets(
+    base,
+    declaresIssuerResearch,
+    declaresSupplemental,
+  );
   validateRuntime(runtime, pointer.generation, expectedDatasets);
   if (manifest.emergingMarketUrl !== `${base}/emerging-market.json`) {
     throw new Error("active generation required dataset artifacts are missing or invalid");
@@ -123,6 +135,9 @@ export async function stageStaticShowcase({
   if (declaresIssuerResearch) {
     await verifyDeclaredIssuerResearch({ source, manifest, runtime, base });
   }
+  if (declaresSupplemental) {
+    await verifyDeclaredSupplemental({ source, manifest, runtime, base });
+  }
   const approvedFiles = await collectApprovedSourceFiles(source, pointer.generation);
   await rm(destination, { recursive: true, force: true });
   for (const relativePath of approvedFiles) {
@@ -132,11 +147,18 @@ export async function stageStaticShowcase({
   }
 }
 
-function expectedRuntimeDatasets(base, declaresIssuerResearch) {
+function expectedRuntimeDatasets(
+  base,
+  declaresIssuerResearch,
+  declaresSupplemental,
+) {
   return Object.fromEntries([
     ...Object.entries(BASE_DATASET_FILES).map(([key, name]) => [key, `${base}/${name}`]),
     ...(declaresIssuerResearch
       ? [["cbIssuerResearch", `${base}/cb-issuer-research.json`]]
+      : []),
+    ...(declaresSupplemental
+      ? [["bondSupplemental", `${base}/bond-supplemental.json`]]
       : []),
   ]);
 }
@@ -233,13 +255,20 @@ async function collectApprovedSourceFiles(source, activeGeneration) {
       files,
     });
     const hasResearch = generationFiles.has("cb-issuer-research.json");
+    const hasSupplemental = generationFiles.has("bond-supplemental.json");
     const manifestPath = join(generationsPath, entry.name, "manifest.json");
     const manifest = await readOptionalJson(manifestPath);
     const declaresResearch = manifest?.market?.files?.some(
       (file) => file?.name === "cb-issuer-research.json",
     ) === true;
+    const declaresSupplemental = manifest?.market?.files?.some(
+      (file) => file?.name === "bond-supplemental.json",
+    ) === true;
     if (hasResearch !== declaresResearch) {
       throw new Error(`static showcase source path is not approved: ${relativeGeneration}/cb-issuer-research.json`);
+    }
+    if (hasSupplemental !== declaresSupplemental) {
+      throw new Error(`static showcase source path is not approved: ${relativeGeneration}/bond-supplemental.json`);
     }
     const runtimePath = join(generationsPath, entry.name, "runtime.json");
     const runtime = await readOptionalJson(runtimePath);
@@ -248,7 +277,11 @@ async function collectApprovedSourceFiles(source, activeGeneration) {
       validateRuntime(
         runtime,
         generation,
-        expectedRuntimeDatasets(`./data/${generation}`, declaresResearch),
+        expectedRuntimeDatasets(
+          `./data/${generation}`,
+          declaresResearch,
+          declaresSupplemental,
+        ),
       );
       if (declaresResearch && generation !== activeGeneration) {
         await verifyDeclaredIssuerResearch({
@@ -258,7 +291,15 @@ async function collectApprovedSourceFiles(source, activeGeneration) {
           base: `./data/${generation}`,
         });
       }
-    } else if (declaresResearch) {
+      if (declaresSupplemental && generation !== activeGeneration) {
+        await verifyDeclaredSupplemental({
+          source,
+          manifest,
+          runtime,
+          base: `./data/${generation}`,
+        });
+      }
+    } else if (declaresResearch || declaresSupplemental) {
       throw new Error(`static showcase source path is not approved: ${relativeGeneration}/runtime.json`);
     }
   }
@@ -344,16 +385,91 @@ async function verifyDeclaredIssuerResearch({ source, manifest, runtime, base })
   verifyIssuerResearchViewConsistency(snapshot, views);
 }
 
-function validateFileEntry(entry, expectedName) {
+async function verifyDeclaredSupplemental({ source, manifest, runtime, base }) {
+  const supplementalEntries = manifest.market.files.filter(
+    (file) => file?.name === "bond-supplemental.json",
+  );
+  const viewEntries = manifest.market.files.filter(
+    (file) => file?.name === "bond-market-view.json",
+  );
+  if (supplementalEntries.length !== 1 || viewEntries.length !== 1) {
+    throw new Error("active generation CB supplemental manifest is invalid");
+  }
+  const supplementalEntry = validateFileEntry(
+    supplementalEntries[0],
+    "bond-supplemental.json",
+    "CB supplemental",
+  );
+  const viewEntry = validateFileEntry(
+    viewEntries[0],
+    "bond-market-view.json",
+    "CB supplemental",
+  );
+  const supplementalText = await readFile(
+    join(source, `${base}/bond-supplemental.json`.replace(/^\.\//, "")),
+    "utf8",
+  );
+  const viewsText = await readFile(
+    join(source, `${base}/bond-market-view.json`.replace(/^\.\//, "")),
+    "utf8",
+  );
+  if (
+    sha256Text(supplementalText) !== supplementalEntry.sha256
+    || sha256Text(viewsText) !== viewEntry.sha256
+  ) {
+    throw new Error("active generation CB supplemental hash is invalid");
+  }
+  const snapshot = parseCbSupplementalSnapshot(JSON.parse(supplementalText));
+  const views = JSON.parse(viewsText);
+  if (
+    countSupplementalRecords(snapshot) !== supplementalEntry.recordCount
+    || !Array.isArray(views)
+    || views.length !== viewEntry.recordCount
+    || runtime.datasets?.bondSupplemental !== `${base}/bond-supplemental.json`
+    || !equalJson(manifest.market.supplementalSources, snapshot.sources)
+  ) {
+    throw new Error("active generation CB supplemental artifact is invalid");
+  }
+  verifySupplementalViewConsistency(snapshot, views, manifest.market.requestedDate);
+}
+
+function validateFileEntry(entry, expectedName, label = "issuer research") {
   if (
     entry?.name !== expectedName
     || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
     || !Number.isInteger(entry.recordCount)
     || entry.recordCount < 0
   ) {
-    throw new Error("active generation issuer research manifest is invalid");
+    throw new Error(`active generation ${label} manifest is invalid`);
   }
   return entry;
+}
+
+function countSupplementalRecords(snapshot) {
+  return Object.values(snapshot.institutionHistory)
+    .reduce((count, records) => count + records.length, 0)
+    + snapshot.redemptions.length
+    + snapshot.underwritingCases.length;
+}
+
+function equalJson(left, right) {
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left)
+      && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => equalJson(value, right[index]));
+  }
+  if (
+    left === null
+    || right === null
+    || typeof left !== "object"
+    || typeof right !== "object"
+  ) return false;
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+  return equalStringArrays(leftKeys, rightKeys)
+    && leftKeys.every((key) => equalJson(left[key], right[key]));
 }
 
 function sha256Text(text) {
