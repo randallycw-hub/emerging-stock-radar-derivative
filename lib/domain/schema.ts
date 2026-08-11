@@ -482,7 +482,7 @@ export const MonthlyRevenueSchema = schema<MonthlyRevenue>("MonthlyRevenue", (va
   return {
     companyId: requiredString(input.companyId, "MonthlyRevenue.companyId"),
     yearMonth: input.yearMonth,
-    currentMonthRevenue: nonNegativeDecimal(
+    currentMonthRevenue: signedDecimal(
       input.currentMonthRevenue,
       "MonthlyRevenue.currentMonthRevenue",
     ),

@@ -348,7 +348,7 @@ function validateRecords(value: unknown): CbIssuerResearchRecord[] {
     if (record.revenueUnit !== "仟元") throw new TypeError(`record ${index} revenueUnit is invalid`);
     const currentMonthRevenue = readDecimal(
       record.currentMonthRevenue,
-      NON_NEGATIVE_DECIMAL,
+      SIGNED_DECIMAL,
       `record ${index} currentMonthRevenue`,
     );
     const monthOverMonthPercent = readNullableDecimal(

@@ -152,7 +152,7 @@ export function normalize94025Row(
       "yearMonth cannot be later than sourcePublishedOn month",
     );
   }
-  const currentMonthRevenue = requiredRevenue(
+  const currentMonthRevenue = requiredCurrentRevenue(
     row.currentMonthRevenue,
     "currentMonthRevenue",
   );
@@ -400,9 +400,9 @@ function requiredYearMonth(value: string): string {
   return result;
 }
 
-function requiredRevenue(value: string, name: string): string {
+function requiredCurrentRevenue(value: string, name: string): string {
   const normalized = normalizeOptionalDecimal(value, {
-    signed: false,
+    signed: true,
     percent: false,
     name,
   });

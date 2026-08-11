@@ -380,6 +380,37 @@ test("94025 optional decimals handle blanks, dashes, negative ratios, full-width
   }
 });
 
+test("94025 current-month revenue preserves signed official decimals canonically", () => {
+  assert.equal(
+    normalize94025Row(synthetic94025Row({
+      currentMonthRevenue: "-1,234.500",
+      cumulativeRevenue: "100",
+    })).currentMonthRevenue,
+    "-1234.5",
+  );
+  assert.equal(
+    normalize94025Row(synthetic94025Row({
+      currentMonthRevenue: "\uFF0D1,234.500",
+      cumulativeRevenue: "100",
+    })).currentMonthRevenue,
+    "-1234.5",
+  );
+  assert.equal(
+    normalize94025Row(synthetic94025Row({
+      currentMonthRevenue: "-0.00",
+      cumulativeRevenue: "0",
+    })).currentMonthRevenue,
+    "0",
+  );
+
+  for (const malformed of ["--1", "-01", "-\uFF0D1", "\u22121"]) {
+    assert.throws(
+      () => normalize94025Row(synthetic94025Row({ currentMonthRevenue: malformed })),
+      /currentMonthRevenue.*supported decimal/,
+    );
+  }
+});
+
 test("94025 numeric normalization rejects negatives for revenue and malformed or embedded forms", () => {
   assert.throws(() => normalize94025Revenue("-1"), /non-negative/);
   for (const value of [

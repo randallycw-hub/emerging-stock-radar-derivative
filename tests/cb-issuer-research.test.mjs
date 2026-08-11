@@ -138,6 +138,39 @@ test("record-list parser is the strict frozen defensive boundary reused by consu
   );
 });
 
+test("snapshot contract preserves signed current revenue without widening cumulative revenue", () => {
+  const [record] = parseCbIssuerResearchRecords([researchRecord({
+    currentMonthRevenue: "-1234.5",
+    cumulativeRevenue: "100",
+  })]);
+  assert.equal(record.currentMonthRevenue, "-1234.5");
+  assert.equal(record.cumulativeRevenue, "100");
+
+  assert.throws(
+    () => parseCbIssuerResearchRecords([researchRecord({ cumulativeRevenue: "-1" })]),
+    /cumulativeRevenue/,
+  );
+  assert.throws(
+    () => parseCbIssuerResearchRecords([researchRecord({
+      revenueMonth: "2026-01",
+      currentMonthRevenue: "-1",
+      cumulativeRevenue: "1",
+    })]),
+    /January.*cumulativeRevenue/,
+  );
+
+  const snapshot = buildCbIssuerResearchSnapshot({
+    generatedAt,
+    issuers: [{ issuerCode: "1101", issuerName: revenueRow().issuerName }],
+    listed: fulfilled([revenueRow({
+      currentMonthRevenue: "-1234.500",
+      cumulativeRevenue: "100",
+    })]),
+    otc: { status: "rejected", reason: new Error("offline") },
+  });
+  assert.equal(snapshot.records[0].currentMonthRevenue, "-1234.5");
+});
+
 test("projects only deduplicated exact current issuers with newest rows and stable public values", () => {
   const snapshot = buildCbIssuerResearchSnapshot({
     generatedAt,
