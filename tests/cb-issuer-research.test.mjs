@@ -567,17 +567,63 @@ test("requires generatedAt to advance beyond a completely validated previous sna
   );
 });
 
-test("keeps issuer codes opaque while rejecting empty identities", () => {
+test("requires exact four-digit issuer codes at every issuer research boundary", async (context) => {
+  for (const issuerCode of ["68731", "00009815", "ABCD"]) {
+    await context.test(`alias input ${issuerCode}`, () => {
+      assert.throws(
+        () => buildCbIssuerAliasIndex([{ issuerCode, issuerName: "Alias" }]),
+        /four ASCII digits/,
+      );
+    });
+  }
+
+  await context.test("current public record", () => {
+    assert.throws(
+      () => parseCbIssuerResearchRecords([
+        researchRecord({ issuerCode: "68731", issuerName: "Current" }),
+      ]),
+      /four ASCII digits/,
+    );
+  });
+
+  await context.test("prior stale record", () => {
+    assert.throws(
+      () => buildCbIssuerResearchSnapshot({
+        generatedAt: "2026-07-19T03:04:05.000Z",
+        issuers: [],
+        listed: { status: "rejected", reason: new Error("listed unavailable") },
+        otc: { status: "rejected", reason: new Error("OTC unavailable") },
+        previous: previousSnapshot({
+          records: [researchRecord({
+            issuerCode: "00009815",
+            issuerName: "Private unlisted identity",
+          })],
+          diagnostics: [],
+        }),
+      }),
+      /four ASCII digits/,
+    );
+  });
+
+  await context.test("persisted diagnostic", () => {
+    assert.throws(
+      () => parseCbIssuerResearchSnapshot(previousSnapshot({
+        records: [],
+        diagnostics: [{ issuerCode: "ABCD", reason: "MISSING_REVENUE" }],
+      })),
+      /four ASCII digits/,
+    );
+  });
+});
+
+test("rejects private unlisted-style codes that reach issuer projection", () => {
   const source = fulfilled([revenueRow()]);
-  const opaque = buildCbIssuerResearchSnapshot({
+  assert.throws(() => buildCbIssuerResearchSnapshot({
     generatedAt,
     issuers: [{ issuerCode: "00009815", issuerName: "未編債券發行人" }],
     listed: source,
     otc: fulfilled([revenueRow({ issuerCode: "9999", issuerName: "其他公司" })]),
-  });
-  assert.deepEqual(opaque.diagnostics, [
-    { issuerCode: "00009815", reason: "MISSING_REVENUE" },
-  ]);
+  }), /four ASCII digits/);
 
   for (const issuers of [
     [{ issuerCode: "", issuerName: "台泥" }],

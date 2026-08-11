@@ -90,7 +90,7 @@ test("joins the compact public research subset by exact issuer code only", () =>
   const [view] = buildBondMarketViews(fixture({
     issuerResearch: [
       { ...issuerResearch, issuerName: "a deliberately unrelated presentation name" },
-      { ...issuerResearch, issuerCode: "03522", issuerName: "御嵿" },
+      { ...issuerResearch, issuerCode: "9999", issuerName: "御嵿" },
     ],
   }));
 
@@ -112,7 +112,7 @@ test("joins the compact public research subset by exact issuer code only", () =>
 
 test("returns null when no exact research issuer code exists", () => {
   const [view] = buildBondMarketViews(fixture({
-    issuerResearch: [{ ...issuerResearch, issuerCode: "03522" }],
+    issuerResearch: [{ ...issuerResearch, issuerCode: "9999" }],
   }));
 
   assert.equal(view.issuerResearch, null);

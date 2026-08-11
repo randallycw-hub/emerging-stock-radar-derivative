@@ -487,8 +487,8 @@ function normalizeIssuerName(value: string): string {
 }
 
 function readIssuerCode(value: unknown, name: string): string {
-  if (typeof value !== "string" || value === "" || value !== value.trim()) {
-    throw new TypeError(`${name} is invalid`);
+  if (typeof value !== "string" || !/^\d{4}$/.test(value)) {
+    throw new TypeError(`${name} must be exactly four ASCII digits`);
   }
   return value;
 }
