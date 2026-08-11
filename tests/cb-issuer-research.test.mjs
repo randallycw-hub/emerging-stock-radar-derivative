@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  buildCbIssuerAliasIndex,
   buildCbIssuerResearchSnapshot,
   parseCbIssuerResearchRecords,
   parseCbIssuerResearchSnapshot,
@@ -221,6 +222,188 @@ test("projects only deduplicated exact current issuers with newest rows and stab
   assert.deepEqual(snapshot.diagnostics, []);
 });
 
+test("builds a deterministic immutable exact-code issuer alias index", () => {
+  const first = buildCbIssuerAliasIndex([
+    { issuerCode: "6873", issuerName: "泓德能源-創" },
+    { issuerCode: "6873", issuerName: " 泓德能源 " },
+    { issuerCode: "6873", issuerName: "泓德能源" },
+  ]);
+  const permuted = buildCbIssuerAliasIndex([
+    { issuerCode: "6873", issuerName: "泓德能源" },
+    { issuerCode: "6873", issuerName: "泓德能源-創" },
+  ]);
+
+  assert.deepEqual(first.entries, [{
+    issuerCode: "6873",
+    aliases: ["泓德能源", "泓德能源-創"],
+  }]);
+  assert.deepEqual(permuted.entries, first.entries);
+  assert.equal(first.matches("6873", "泓德能源"), true);
+  assert.equal(first.matches("6873", "泓德能源-創"), true);
+  assert.equal(first.matches("6873", "泓德能源股份有限公司"), false);
+  assert.equal(first.matches("6874", "泓德能源"), false);
+  assert.equal(first.matches("6873 ", "泓德能源"), false);
+  assert.equal(Object.isFrozen(first), true);
+  assert.equal(Object.isFrozen(first.entries), true);
+  assert.equal(Object.isFrozen(first.entries[0]), true);
+  assert.equal(Object.isFrozen(first.entries[0].aliases), true);
+});
+
+test("accepts the official 6873 hyphenated alias and publishes the current source name", () => {
+  const snapshot = buildCbIssuerResearchSnapshot({
+    generatedAt,
+    issuers: [
+      { issuerCode: "6873", issuerName: "泓德能源-創" },
+      { issuerCode: "6873", issuerName: "泓德能源" },
+    ],
+    listed: fulfilled([
+      revenueRow({ issuerCode: "6873", issuerName: "泓德能源-創" }),
+    ]),
+    otc: fulfilled([
+      revenueRow({ issuerCode: "9999", issuerName: "其他公司" }),
+    ]),
+  });
+
+  assert.deepEqual(snapshot.records.map(({ issuerCode, issuerName }) => ({
+    issuerCode,
+    issuerName,
+  })), [{ issuerCode: "6873", issuerName: "泓德能源-創" }]);
+  assert.deepEqual(snapshot.diagnostics, []);
+});
+
+test("accepts the official 6873 base alias and publishes the current source name", () => {
+  const snapshot = buildCbIssuerResearchSnapshot({
+    generatedAt,
+    issuers: [
+      { issuerCode: "6873", issuerName: "泓德能源-創" },
+      { issuerCode: "6873", issuerName: "泓德能源" },
+    ],
+    listed: fulfilled([
+      revenueRow({ issuerCode: "6873", issuerName: "泓德能源" }),
+    ]),
+    otc: fulfilled([
+      revenueRow({ issuerCode: "9999", issuerName: "其他公司" }),
+    ]),
+  });
+
+  assert.deepEqual(snapshot.records.map(({ issuerCode, issuerName }) => ({
+    issuerCode,
+    issuerName,
+  })), [{ issuerCode: "6873", issuerName: "泓德能源" }]);
+  assert.deepEqual(snapshot.diagnostics, []);
+});
+
+test("rejects an unmatched 6873 third name without suffix or fuzzy matching", () => {
+  const snapshot = buildCbIssuerResearchSnapshot({
+    generatedAt,
+    issuers: [
+      { issuerCode: "6873", issuerName: "泓德能源-創" },
+      { issuerCode: "6873", issuerName: "泓德能源" },
+    ],
+    listed: fulfilled([
+      revenueRow({ issuerCode: "6873", issuerName: "泓德能源股份有限公司" }),
+    ]),
+    otc: fulfilled([
+      revenueRow({ issuerCode: "9999", issuerName: "其他公司" }),
+    ]),
+  });
+
+  assert.deepEqual(snapshot.records, []);
+  assert.deepEqual(snapshot.diagnostics, [
+    { issuerCode: "6873", reason: "NAME_CONFLICT" },
+  ]);
+});
+
+test("keeps issuer snapshot output identical across alias input permutations", () => {
+  const sourceResults = {
+    listed: fulfilled([
+      revenueRow({ issuerCode: "6873", issuerName: "泓德能源" }),
+    ]),
+    otc: fulfilled([
+      revenueRow({ issuerCode: "9999", issuerName: "其他公司" }),
+    ]),
+  };
+  const first = buildCbIssuerResearchSnapshot({
+    generatedAt,
+    issuers: [
+      { issuerCode: "6873", issuerName: "泓德能源-創" },
+      { issuerCode: "6873", issuerName: "泓德能源" },
+      { issuerCode: "6873", issuerName: "泓德能源-創" },
+    ],
+    ...sourceResults,
+  });
+  const permuted = buildCbIssuerResearchSnapshot({
+    generatedAt,
+    issuers: [
+      { issuerCode: "6873", issuerName: "泓德能源" },
+      { issuerCode: "6873", issuerName: "泓德能源-創" },
+    ],
+    ...sourceResults,
+  });
+
+  assert.deepEqual(permuted, first);
+});
+
+test("retains a stale source name when it matches any current official alias", () => {
+  const staleRecord = researchRecord({
+    issuerCode: "6873",
+    issuerName: "泓德能源-創",
+  });
+  const previous = previousSnapshot({
+    records: [staleRecord],
+    sources: {
+      listed: { status: "current", dataDate: "2026-07-17", fetchedAt: generatedAt },
+      otc: { status: "unavailable", dataDate: null, fetchedAt: null },
+    },
+    diagnostics: [],
+  });
+  const next = buildCbIssuerResearchSnapshot({
+    generatedAt: "2026-07-19T03:04:05.000Z",
+    issuers: [
+      { issuerCode: "6873", issuerName: "泓德能源" },
+      { issuerCode: "6873", issuerName: "泓德能源-創" },
+    ],
+    listed: { status: "rejected", reason: new Error("listed unavailable") },
+    otc: { status: "rejected", reason: new Error("OTC unavailable") },
+    previous,
+  });
+
+  assert.deepEqual(next.records.map(({ issuerCode, issuerName }) => ({
+    issuerCode,
+    issuerName,
+  })), [{ issuerCode: "6873", issuerName: "泓德能源-創" }]);
+  assert.deepEqual(next.diagnostics, []);
+});
+
+test("rejects a stale source name that matches none of the current official aliases", () => {
+  const previous = previousSnapshot({
+    records: [researchRecord({
+      issuerCode: "6873",
+      issuerName: "泓德能源股份有限公司",
+    })],
+    sources: {
+      listed: { status: "current", dataDate: "2026-07-17", fetchedAt: generatedAt },
+      otc: { status: "unavailable", dataDate: null, fetchedAt: null },
+    },
+    diagnostics: [],
+  });
+  const next = buildCbIssuerResearchSnapshot({
+    generatedAt: "2026-07-19T03:04:05.000Z",
+    issuers: [
+      { issuerCode: "6873", issuerName: "泓德能源" },
+      { issuerCode: "6873", issuerName: "泓德能源-創" },
+    ],
+    listed: { status: "rejected", reason: new Error("listed unavailable") },
+    otc: { status: "rejected", reason: new Error("OTC unavailable") },
+    previous,
+  });
+
+  assert.deepEqual(next.records, []);
+  assert.deepEqual(next.diagnostics, [
+    { issuerCode: "6873", reason: "NAME_CONFLICT" },
+  ]);
+});
+
 test("uses only NFC and whitespace name agreement and stably diagnoses every excluded issuer", () => {
   const snapshot = buildCbIssuerResearchSnapshot({
     generatedAt,
@@ -242,7 +425,7 @@ test("uses only NFC and whitespace name agreement and stably diagnoses every exc
   });
 
   assert.deepEqual(snapshot.records.map(({ issuerCode, issuerName }) => ({ issuerCode, issuerName })), [
-    { issuerCode: "6666", issuerName: "Å 公司" },
+    { issuerCode: "6666", issuerName: "Å　 公司" },
   ]);
   assert.deepEqual(snapshot.diagnostics, [
     { issuerCode: "1111", reason: "CROSS_MARKET_CONFLICT" },
@@ -384,7 +567,7 @@ test("requires generatedAt to advance beyond a completely validated previous sna
   );
 });
 
-test("keeps issuer codes opaque while rejecting empty identities and conflicting duplicates", () => {
+test("keeps issuer codes opaque while rejecting empty identities", () => {
   const source = fulfilled([revenueRow()]);
   const opaque = buildCbIssuerResearchSnapshot({
     generatedAt,
@@ -399,10 +582,6 @@ test("keeps issuer codes opaque while rejecting empty identities and conflicting
   for (const issuers of [
     [{ issuerCode: "", issuerName: "台泥" }],
     [{ issuerCode: "1101", issuerName: "" }],
-    [
-      { issuerCode: "1101", issuerName: "台泥" },
-      { issuerCode: "1101", issuerName: "另一家公司" },
-    ],
   ]) {
     assert.throws(
       () => buildCbIssuerResearchSnapshot({

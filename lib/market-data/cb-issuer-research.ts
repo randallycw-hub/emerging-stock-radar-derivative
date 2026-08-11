@@ -50,6 +50,16 @@ type MarketProjection = {
   source: CbIssuerResearchSourceStatus;
 };
 
+export type CbIssuerAliasEntry = {
+  issuerCode: string;
+  aliases: readonly string[];
+};
+
+export type CbIssuerAliasIndex = {
+  entries: readonly CbIssuerAliasEntry[];
+  matches: (issuerCode: string, issuerName: string) => boolean;
+};
+
 const SNAPSHOT_KEYS = ["schemaVersion", "generatedAt", "records", "sources", "diagnostics"];
 const SOURCE_NAMES = ["listed", "otc"];
 const SOURCE_STATUS_KEYS = ["status", "dataDate", "fetchedAt"];
@@ -77,6 +87,35 @@ const DIAGNOSTIC_REASONS = new Set<CbIssuerResearchDiagnostic["reason"]>([
   "MISSING_REVENUE",
 ]);
 
+export function buildCbIssuerAliasIndex(
+  value: readonly { issuerCode: string; issuerName: string }[],
+): CbIssuerAliasIndex {
+  if (!Array.isArray(value)) throw new TypeError("issuers must be an array");
+  const aliasesByCode = new Map<string, Set<string>>();
+  for (const [index, candidate] of value.entries()) {
+    const issuer = requireRecord(candidate, `issuer ${index}`);
+    assertExactKeys(issuer, ISSUER_KEYS, `issuer ${index}`);
+    const issuerCode = readIssuerCode(issuer.issuerCode, `issuer ${index} issuerCode`);
+    const issuerName = normalizeIssuerName(
+      readNonemptyString(issuer.issuerName, `issuer ${index} issuerName`),
+    );
+    const aliases = aliasesByCode.get(issuerCode) ?? new Set<string>();
+    aliases.add(issuerName);
+    aliasesByCode.set(issuerCode, aliases);
+  }
+
+  const entries = [...aliasesByCode]
+    .map(([issuerCode, aliases]) => ({
+      issuerCode,
+      aliases: [...aliases].sort(compareText),
+    }))
+    .sort((left, right) => compareText(left.issuerCode, right.issuerCode));
+  const matches = (issuerCode: string, issuerName: string): boolean =>
+    aliasesByCode.get(issuerCode)?.has(normalizeIssuerName(issuerName)) ?? false;
+
+  return deepFreeze({ entries, matches: Object.freeze(matches) });
+}
+
 export function buildCbIssuerResearchSnapshot(input: {
   generatedAt: string;
   issuers: readonly { issuerCode: string; issuerName: string }[];
@@ -95,7 +134,7 @@ export function buildCbIssuerResearchSnapshot(input: {
     throw new TypeError("generatedAt must advance beyond the previous snapshot");
   }
 
-  const issuers = validateAndDeduplicateIssuers(input.issuers);
+  const issuerAliases = buildCbIssuerAliasIndex(input.issuers);
   const listed = buildMarketProjection(
     input.listed,
     "listed",
@@ -111,7 +150,7 @@ export function buildCbIssuerResearchSnapshot(input: {
   const records: CbIssuerResearchRecord[] = [];
   const diagnostics: CbIssuerResearchDiagnostic[] = [];
 
-  for (const issuer of issuers) {
+  for (const issuer of issuerAliases.entries) {
     const listedCurrent = listed.currentRows?.get(issuer.issuerCode);
     const otcCurrent = otc.currentRows?.get(issuer.issuerCode);
     if (listedCurrent !== undefined && otcCurrent !== undefined) {
@@ -128,7 +167,7 @@ export function buildCbIssuerResearchSnapshot(input: {
         : { market: "otc" as const, row: otcCurrent }
       : { market: "listed" as const, row: listedCurrent };
     if (current !== undefined) {
-      if (!issuerNamesAgree(current.row.companyName, issuer.issuerName)) {
+      if (!issuerAliases.matches(issuer.issuerCode, current.row.companyName)) {
         diagnostics.push({ issuerCode: issuer.issuerCode, reason: "NAME_CONFLICT" });
         continue;
       }
@@ -139,11 +178,11 @@ export function buildCbIssuerResearchSnapshot(input: {
     const stale = listed.staleRecords.get(issuer.issuerCode)
       ?? otc.staleRecords.get(issuer.issuerCode);
     if (stale !== undefined) {
-      if (!issuerNamesAgree(stale.issuerName, issuer.issuerName)) {
+      if (!issuerAliases.matches(issuer.issuerCode, stale.issuerName)) {
         diagnostics.push({ issuerCode: issuer.issuerCode, reason: "NAME_CONFLICT" });
         continue;
       }
-      records.push({ ...stale, issuerName: issuer.issuerName });
+      records.push({ ...stale });
       continue;
     }
 
@@ -264,33 +303,14 @@ function compareTuple(
   return 0;
 }
 
-function validateAndDeduplicateIssuers(
-  value: readonly { issuerCode: string; issuerName: string }[],
-): { issuerCode: string; issuerName: string }[] {
-  if (!Array.isArray(value)) throw new TypeError("issuers must be an array");
-  const issuers = new Map<string, { issuerCode: string; issuerName: string }>();
-  for (const [index, candidate] of value.entries()) {
-    const issuer = requireRecord(candidate, `issuer ${index}`);
-    assertExactKeys(issuer, ISSUER_KEYS, `issuer ${index}`);
-    const issuerCode = readIssuerCode(issuer.issuerCode, `issuer ${index} issuerCode`);
-    const issuerName = readNonemptyString(issuer.issuerName, `issuer ${index} issuerName`);
-    const existing = issuers.get(issuerCode);
-    if (existing !== undefined && !issuerNamesAgree(existing.issuerName, issuerName)) {
-      throw new TypeError(`issuer ${issuerCode} has conflicting names`);
-    }
-    if (existing === undefined) issuers.set(issuerCode, { issuerCode, issuerName });
-  }
-  return [...issuers.values()].sort((left, right) => compareText(left.issuerCode, right.issuerCode));
-}
-
 function projectCurrentRecord(
-  issuer: { issuerCode: string; issuerName: string },
+  issuer: { issuerCode: string },
   market: Market,
   row: NormalizedMonthlyRevenue94025,
 ): CbIssuerResearchRecord {
   return {
     issuerCode: issuer.issuerCode,
-    issuerName: issuer.issuerName,
+    issuerName: row.companyName,
     market,
     industryName: row.industryName,
     revenueMonth: row.yearMonth,
@@ -460,10 +480,6 @@ function validateDiagnostics(
       reason: diagnostic.reason as CbIssuerResearchDiagnostic["reason"],
     };
   });
-}
-
-function issuerNamesAgree(left: string, right: string): boolean {
-  return normalizeIssuerName(left) === normalizeIssuerName(right);
 }
 
 function normalizeIssuerName(value: string): string {
