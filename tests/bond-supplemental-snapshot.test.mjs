@@ -1,9 +1,215 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
+import {
+  buildCbSupplementalSnapshot,
+  currentCbRedemption,
+  summarizeCbInstitution,
+} from "../lib/market-data/bond-supplemental.ts";
 
 const generatedAt = "2026-08-09T10:00:00.000Z";
+
+test("uses the newest 1, 5 and 20 actual trading records at or before asOfDate", () => {
+  const totals = [
+    ...Array(5).fill("100"),
+    "23",
+    ...Array(14).fill("18"),
+    "19",
+    "19",
+    "19",
+    "19",
+    "69",
+  ];
+  const history = actualTradingDatesEnding("2026-08-07", totals.length)
+    .map((date, index) => institutionTradeWithTotal("54642", date, totals[index]));
+  history.push(institutionTradeWithTotal("54642", "2026-08-08", "999"));
+  const snapshot = previousSnapshot({
+    institutionHistory: { "54642": history },
+    institutionDataDate: "2026-08-08",
+  });
+  const before = structuredClone(snapshot);
+
+  const summary = summarizeCbInstitution(snapshot, "54642", "2026-08-07");
+
+  assert.deepEqual(summary, {
+    dataDate: "2026-08-07",
+    dailyNetUnits: "69",
+    net5dUnits: "145",
+    net20dUnits: "420",
+  });
+  assert.ok(Object.isFrozen(summary));
+  assert.deepEqual(snapshot, before);
+});
+
+test("does not label partial institution windows as complete", () => {
+  const dates = actualTradingDatesEnding("2026-08-07", 6);
+  const snapshot = previousSnapshot({
+    institutionHistory: {
+      "54642": dates.map((date, index) =>
+        institutionTradeWithTotal("54642", date, String(index + 1))),
+    },
+    institutionDataDate: "2026-08-07",
+  });
+
+  assert.deepEqual(summarizeCbInstitution(snapshot, "54642", dates[2]), {
+    dataDate: dates[2],
+    dailyNetUnits: "3",
+    net5dUnits: null,
+    net20dUnits: null,
+  });
+  assert.deepEqual(summarizeCbInstitution(snapshot, "54642", "2026-08-07"), {
+    dataDate: "2026-08-07",
+    dailyNetUnits: "6",
+    net5dUnits: "20",
+    net20dUnits: null,
+  });
+});
+
+test("institution summaries fail closed on noncanonical inputs and malformed snapshots", async (t) => {
+  const valid = previousSnapshot({
+    institutionHistory: {
+      "54642": [institutionTradeWithTotal("54642", "2026-08-07", "-12")],
+    },
+    institutionDataDate: "2026-08-07",
+  });
+
+  await t.test("exact bond code", () => {
+    assert.throws(() => summarizeCbInstitution(valid, "54642 ", "2026-08-07"), /bondCode/);
+    assert.deepEqual(summarizeCbInstitution(valid, "61876", "2026-08-07"), {
+      dataDate: null,
+      dailyNetUnits: null,
+      net5dUnits: null,
+      net20dUnits: null,
+    });
+  });
+  await t.test("canonical asOfDate", () => {
+    assert.throws(() => summarizeCbInstitution(valid, "54642", "2026-8-7"), /asOfDate/);
+    assert.throws(() => summarizeCbInstitution(valid, "54642", "2026-02-30"), /asOfDate/);
+  });
+  await t.test("duplicate trading date", () => {
+    const malformed = structuredClone(valid);
+    malformed.institutionHistory["54642"].push({ ...malformed.institutionHistory["54642"][0] });
+    assert.throws(
+      () => summarizeCbInstitution(malformed, "54642", "2026-08-07"),
+      /duplicate institution history date/,
+    );
+  });
+  await t.test("noncanonical history order", () => {
+    const malformed = previousSnapshot({
+      institutionHistory: {
+        "54642": [
+          institutionTradeWithTotal("54642", "2026-08-07", "1"),
+          institutionTradeWithTotal("54642", "2026-08-06", "2"),
+        ],
+      },
+      institutionDataDate: "2026-08-07",
+    });
+    assert.throws(
+      () => summarizeCbInstitution(malformed, "54642", "2026-08-07"),
+      /must be sorted ascending/,
+    );
+  });
+  await t.test("invalid record schema", () => {
+    const malformed = structuredClone(valid);
+    malformed.institutionHistory["54642"][0].unexpected = "field";
+    assert.throws(
+      () => summarizeCbInstitution(malformed, "54642", "2026-08-07"),
+      /keys do not match the verified contract/,
+    );
+  });
+});
+
+test("selects the newest announced redemption still active on asOfDate", () => {
+  const redemptions = [
+    redemptionEvent("2026-08-08", "31312", "2026-10-01"),
+    redemptionEvent("2026-08-01", "31312", "2026-09-30"),
+    redemptionEvent("2026-08-04", "31312", "2026-08-05"),
+    redemptionEvent("2026-08-06", "31312", "2026-09-21"),
+  ];
+  const snapshot = previousSnapshot({
+    redemptions,
+    redemptionDataDate: "2026-08-08",
+  });
+  const before = structuredClone(snapshot);
+
+  const event = currentCbRedemption(snapshot, "31312", "2026-08-07");
+
+  assert.equal(event?.announcementDate, "2026-08-06");
+  assert.equal(event?.delistingDate, "2026-09-21");
+  assert.notStrictEqual(event, redemptions[3]);
+  assert.ok(Object.isFrozen(event));
+  assert.throws(() => { event.bondName = "mutated"; }, TypeError);
+  assert.deepEqual(snapshot, before);
+});
+
+test("redemption activity includes both date boundaries and excludes expired or future events", () => {
+  const snapshot = previousSnapshot({
+    redemptions: [redemptionEvent("2026-08-06", "31312", "2026-09-21")],
+    redemptionDataDate: "2026-08-06",
+  });
+
+  assert.equal(currentCbRedemption(snapshot, "31312", "2026-08-06")?.bondCode, "31312");
+  assert.equal(currentCbRedemption(snapshot, "31312", "2026-09-21")?.bondCode, "31312");
+  assert.equal(currentCbRedemption(snapshot, "31312", "2026-08-05"), null);
+  assert.equal(currentCbRedemption(snapshot, "31312", "2026-09-22"), null);
+  assert.equal(currentCbRedemption(snapshot, "31311", "2026-08-07"), null);
+});
+
+test("redemption selection fails closed on duplicates, invalid dates and schema", async (t) => {
+  const valid = previousSnapshot({
+    redemptions: [redemptionEvent("2026-08-06", "31312", "2026-09-21")],
+    redemptionDataDate: "2026-08-06",
+  });
+
+  await t.test("query input", () => {
+    assert.throws(() => currentCbRedemption(valid, "31312 ", "2026-08-07"), /bondCode/);
+    assert.throws(() => currentCbRedemption(valid, "31312", "2026-8-7"), /asOfDate/);
+  });
+  await t.test("duplicate announcement", () => {
+    const malformed = structuredClone(valid);
+    malformed.redemptions.push({ ...malformed.redemptions[0] });
+    assert.throws(
+      () => currentCbRedemption(malformed, "31312", "2026-08-07"),
+      /duplicate redemption event/,
+    );
+  });
+  await t.test("invalid event date", () => {
+    const malformed = structuredClone(valid);
+    malformed.redemptions[0].delistingDate = "2026-02-30";
+    assert.throws(
+      () => currentCbRedemption(malformed, "31312", "2026-08-07"),
+      /redemption delistingDate/,
+    );
+  });
+  await t.test("announcement after delisting", () => {
+    const malformed = previousSnapshot({
+      redemptions: [redemptionEvent("2026-08-06", "31312", "2026-08-05")],
+      redemptionDataDate: "2026-08-06",
+    });
+    assert.throws(
+      () => currentCbRedemption(malformed, "31312", "2026-08-07"),
+      /announcementDate must not exceed delistingDate/,
+    );
+  });
+  await t.test("invalid event schema", () => {
+    const malformed = structuredClone(valid);
+    delete malformed.redemptions[0].subject;
+    assert.throws(
+      () => currentCbRedemption(malformed, "31312", "2026-08-07"),
+      /keys do not match the verified contract/,
+    );
+  });
+});
+
+test("undefined supplemental snapshot returns only null derived values", () => {
+  assert.deepEqual(summarizeCbInstitution(undefined, "54642", "2026-08-07"), {
+    dataDate: null,
+    dailyNetUnits: null,
+    net5dUnits: null,
+    net20dUnits: null,
+  });
+  assert.equal(currentCbRedemption(undefined, "31312", "2026-08-07"), null);
+});
 
 test("merges one institution day and retains the newest 60 trading days", () => {
   const history = Array.from({ length: 60 }, (_, index) => {
@@ -722,6 +928,38 @@ function institutionTrade(bondCode, tradingDate, dealerBuyUnits = "4") {
     dealerNetUnits: dealerBuyUnits,
     totalNetUnits: (65n + BigInt(dealerBuyUnits)).toString(),
   };
+}
+
+function institutionTradeWithTotal(bondCode, tradingDate, totalNetUnits) {
+  const total = BigInt(totalNetUnits);
+  const foreignBuyUnits = total >= 0n ? total.toString() : "0";
+  const foreignSellUnits = total < 0n ? (-total).toString() : "0";
+  return {
+    bondCode,
+    bondName: "霖宏二",
+    tradingDate,
+    foreignBuyUnits,
+    foreignSellUnits,
+    foreignNetUnits: total.toString(),
+    trustBuyUnits: "0",
+    trustSellUnits: "0",
+    trustNetUnits: "0",
+    dealerBuyUnits: "0",
+    dealerSellUnits: "0",
+    dealerNetUnits: "0",
+    totalNetUnits: total.toString(),
+  };
+}
+
+function actualTradingDatesEnding(endDate, count) {
+  const dates = [];
+  const date = new Date(`${endDate}T00:00:00.000Z`);
+  while (dates.length < count) {
+    const day = date.getUTCDay();
+    if (day !== 0 && day !== 6) dates.push(date.toISOString().slice(0, 10));
+    date.setUTCDate(date.getUTCDate() - 1);
+  }
+  return dates.reverse();
 }
 
 function redemptionEvent(announcementDate, bondCode, delistingDate = "2026-09-21") {

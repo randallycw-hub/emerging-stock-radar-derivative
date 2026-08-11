@@ -31,6 +31,13 @@ export type CbSupplementalSnapshot = {
   };
 };
 
+export type CbInstitutionSummary = {
+  dataDate: string | null;
+  dailyNetUnits: string | null;
+  net5dUnits: string | null;
+  net20dUnits: string | null;
+};
+
 const SNAPSHOT_KEYS = [
   "schemaVersion",
   "generatedAt",
@@ -130,6 +137,71 @@ export function buildCbSupplementalSnapshot(input: {
       underwriting: underwriting.source,
     },
   });
+}
+
+export function summarizeCbInstitution(
+  snapshot: CbSupplementalSnapshot | undefined,
+  bondCode: string,
+  asOfDate: string,
+): CbInstitutionSummary {
+  assertDerivedQuery(bondCode, asOfDate);
+  if (snapshot === undefined) {
+    return deepFreeze({
+      dataDate: null,
+      dailyNetUnits: null,
+      net5dUnits: null,
+      net20dUnits: null,
+    });
+  }
+
+  const validated = validatePreviousSnapshot(snapshot);
+  const records = [...(validated.institutionHistory[bondCode] ?? [])]
+    .filter((record) => record.tradingDate <= asOfDate)
+    .sort((left, right) => right.tradingDate.localeCompare(left.tradingDate));
+
+  return deepFreeze({
+    dataDate: records[0]?.tradingDate ?? null,
+    dailyNetUnits: sumInstitutionWindow(records, 1),
+    net5dUnits: sumInstitutionWindow(records, 5),
+    net20dUnits: sumInstitutionWindow(records, 20),
+  });
+}
+
+export function currentCbRedemption(
+  snapshot: CbSupplementalSnapshot | undefined,
+  bondCode: string,
+  asOfDate: string,
+): CbRedemptionEvent | null {
+  assertDerivedQuery(bondCode, asOfDate);
+  if (snapshot === undefined) return null;
+
+  const event = validatePreviousSnapshot(snapshot).redemptions
+    .filter((candidate) =>
+      candidate.bondCode === bondCode
+      && candidate.announcementDate <= asOfDate
+      && asOfDate <= candidate.delistingDate
+    )
+    .sort((left, right) => right.announcementDate.localeCompare(left.announcementDate))[0];
+  return event === undefined ? null : deepFreeze(cloneRedemption(event));
+}
+
+function assertDerivedQuery(bondCode: string, asOfDate: string): void {
+  if (typeof bondCode !== "string" || !/^\d{5,6}$/.test(bondCode)) {
+    throw new TypeError("bondCode must be an exact five- or six-digit CB code");
+  }
+  if (!isIsoDate(asOfDate)) {
+    throw new TypeError("asOfDate must be a canonical ISO date");
+  }
+}
+
+function sumInstitutionWindow(
+  records: readonly CbInstitutionTrade[],
+  length: number,
+): string | null {
+  if (records.length < length) return null;
+  return records.slice(0, length)
+    .reduce((sum, record) => sum + BigInt(record.totalNetUnits), BigInt(0))
+    .toString();
 }
 
 function buildInstitutionSection(
@@ -625,6 +697,9 @@ function validateRedemption(value: unknown): CbRedemptionEvent {
   assertNonemptyString(event.bondName, "redemption bondName");
   assertIsoDate(event.announcementDate, "redemption announcementDate");
   assertIsoDate(event.delistingDate, "redemption delistingDate");
+  if (event.announcementDate > event.delistingDate) {
+    throw new TypeError("redemption announcementDate must not exceed delistingDate");
+  }
   assertNonemptyString(event.subject, "redemption subject");
   assertRedemptionSubject(
     event.subject,
