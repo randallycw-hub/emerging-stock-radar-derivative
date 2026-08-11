@@ -1,3 +1,5 @@
+import type { CbRedemptionEvent } from "../source-verification/source-cb-redemption.ts";
+
 export type CbTradingMode = "equivalent" | "negotiated";
 
 export type CbQuote = {
@@ -66,11 +68,24 @@ export type BondMarketView = {
   conversionValue: string | null;
   premiumRate: string | null;
   outstandingAmount: string | null;
+  outstandingDataDate: string | null;
   outstandingReductionRate: string | null;
+  remainingUnits: string | null;
+  remainingRatio: string | null;
+  dailyTurnoverRate: string | null;
+  institutionDataDate: string | null;
+  institutionNetUnits: string | null;
+  institutionNet5dUnits: string | null;
+  institutionNet20dUnits: string | null;
+  redemptionEvent: CbRedemptionEvent | null;
   maturityDate: string;
   daysToMaturity: number;
   nextPutDate: string | null;
   daysToNextPut: number | null;
+  nextEventType: "redemption" | "put" | "maturity";
+  nextEventDate: string;
+  daysToNextEvent: number;
+  dataQuality: "complete" | "partial" | "date_mismatch";
   staleCbPrice: boolean;
   missingReasons: readonly string[];
 };

@@ -29,6 +29,7 @@ const bond = {
   maturityDate: "2028-07-29",
   issueAmount: "500000000",
   outstandingAmount: "400000000",
+  outstandingDataDate: "2026-07-30",
   putDates: ["2027-08-30"],
 };
 
@@ -200,6 +201,7 @@ test("maps official 11406 dates, put dates and amount units exactly", () => {
     到期日期: "1170729",
     發行總額: "2仟元",
     目前餘額: "1,500元",
+    資料日期: "1150730",
     賣回權日期: "115/08/30、1160830",
   }]), [{
     bondCode: "35221",
@@ -209,8 +211,39 @@ test("maps official 11406 dates, put dates and amount units exactly", () => {
     maturityDate: "2028-07-29",
     issueAmount: "2000",
     outstandingAmount: "1500",
+    outstandingDataDate: "2026-07-30",
     putDates: ["2026-08-30", "2027-08-30"],
   }]);
+});
+
+test("maps the English 11406 DataDate alias without blocking identity-only rows", () => {
+  const base = {
+    債券代碼: "35221",
+    機構代碼: "3522",
+    機構名稱: "御嵿",
+    債券簡稱: "御嵿一",
+    到期日期: "1170729",
+    發行總額: "2000000",
+    目前餘額: "1500000",
+    賣回權日期: "",
+  };
+  assert.equal(
+    bondInputsFrom11406Rows([{ ...base, DataDate: "20260730" }])[0]
+      .outstandingDataDate,
+    "2026-07-30",
+  );
+  assert.equal(
+    bondInputsFrom11406Rows([base])[0].outstandingDataDate,
+    null,
+  );
+  assert.throws(
+    () => bondInputsFrom11406Rows([{
+      ...base,
+      資料日期: "20260730",
+      DataDate: "20260731",
+    }]),
+    /data date|資料日期|DataDate/i,
+  );
 });
 
 test("production issuer research consumes both approved exact resources", async () => {

@@ -387,6 +387,11 @@ export function bondInputsFrom11406Rows(rows) {
       throw new TypeError(`11406 row ${index + 1} has invalid bond code`);
     }
     const putText = sourceText(row, "賣回權日期");
+    const outstandingDataDateText = optionalSourceAliasText(
+      row,
+      ["資料日期", "DataDate"],
+      index,
+    );
     return [{
       bondCode,
       issuerCode: requiredSourceText(row, "機構代碼", index),
@@ -404,6 +409,12 @@ export function bondInputsFrom11406Rows(rows) {
         requiredSourceText(row, "目前餘額", index),
         `11406 row ${index + 1} outstandingAmount`,
       ),
+      outstandingDataDate: outstandingDataDateText === ""
+        ? null
+        : officialDate(
+          outstandingDataDateText,
+          `11406 row ${index + 1} outstanding data date`,
+        ),
       putDates: putText === ""
         ? []
         : putText
@@ -614,6 +625,17 @@ function requiredSourceText(row, key, index) {
     throw new TypeError(`11406 row ${index + 1} requires ${key}`);
   }
   return value;
+}
+
+function optionalSourceAliasText(row, keys, index) {
+  const present = keys.filter((key) => key in row);
+  if (present.length === 0) return "";
+  if (present.length !== 1) {
+    throw new TypeError(
+      `11406 row ${index + 1} requires exactly one of ${keys.join("/")}`,
+    );
+  }
+  return sourceText(row, present[0]);
 }
 
 function officialDate(value, name) {
