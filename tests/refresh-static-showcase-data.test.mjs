@@ -15,6 +15,21 @@ import {
   updateRuntimeCacheKey,
 } from "../scripts/refresh-static-showcase-data.mjs";
 
+async function withBlockedGlobalFetch(run) {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    throw new Error(`unexpected global fetch: ${String(url)}`);
+  };
+  try {
+    return await run();
+  } finally {
+    globalThis.fetch = originalFetch;
+    assert.deepEqual(calls, []);
+  }
+}
+
 test("refresh preserves prior files when the TPEx snapshot request fails", async () => {
   await withTemporaryShowcase(async (root) => {
     const dataDirectory = join(root, "static-showcase/data");
@@ -23,7 +38,7 @@ test("refresh preserves prior files when the TPEx snapshot request fails", async
     const before = await Promise.all(paths.map(async (name) => [name, await readFile(join(dataDirectory, name), "utf8")]));
 
     await assert.rejects(
-      refreshStaticShowcase({
+      withBlockedGlobalFetch(() => refreshStaticShowcase({
         fetchImpl: async (url) => {
           if (String(url) === OFFICIAL_SHOWCASE_SOURCES.emergingMarket) return new Response("unavailable", { status: 503 });
           if (String(url) === OFFICIAL_SHOWCASE_SOURCES["94025"]) {
@@ -31,7 +46,7 @@ test("refresh preserves prior files when the TPEx snapshot request fails", async
           }
           return new Response("header\n", { status: 200 });
         },
-      }),
+      })),
       /emergingMarket: HTTP_503/,
     );
 
@@ -48,7 +63,7 @@ test("refresh rejects the removed offline source option before fetch or pointer 
     let fetchCalls = 0;
 
     await assert.rejects(
-      refreshStaticShowcase({
+      withBlockedGlobalFetch(() => refreshStaticShowcase({
         offlineIssuerResearchSourceResults: {
           listed: { status: "fulfilled", value: "injected,current,csv" },
           otc: { status: "rejected", reason: new Error("offline") },
@@ -57,7 +72,7 @@ test("refresh rejects the removed offline source option before fetch or pointer 
           fetchCalls += 1;
           return new Response("must not fetch", { status: 500 });
         },
-      }),
+      })),
       /offlineIssuerResearchSourceResults.*not supported/i,
     );
     assert.equal(fetchCalls, 0);
@@ -75,13 +90,13 @@ test("production refresh rejects marketBuilder before fetch or pointer mutation"
     let fetchCalls = 0;
 
     await assert.rejects(
-      refreshStaticShowcase({
+      withBlockedGlobalFetch(() => refreshStaticShowcase({
         marketBuilder: async () => assert.fail("injected builder must not run"),
         fetchImpl: async () => {
           fetchCalls += 1;
           return new Response("must not fetch", { status: 500 });
         },
-      }),
+      })),
       /marketBuilder.*not supported/i,
     );
     assert.equal(fetchCalls, 0);
@@ -400,9 +415,9 @@ test("refresh leaves the prior generation untouched when publication fails befor
     await seedPriorGeneration(root);
     const beforePointer = await readFile(join(root, "static-showcase/data/current.json"), "utf8");
     const beforeManifest = await readFile(join(root, "static-showcase/data/generations/abcdef/manifest.json"), "utf8");
-    await assert.rejects(refreshStaticShowcase({
+    await assert.rejects(withBlockedGlobalFetch(() => refreshStaticShowcase({
       fetchImpl: async () => new Response("ignored", { status: 500 }),
-    }));
+    })));
     assert.equal(await readFile(join(root, "static-showcase/data/current.json"), "utf8"), beforePointer);
     assert.equal(await readFile(join(root, "static-showcase/data/generations/abcdef/manifest.json"), "utf8"), beforeManifest);
   });
@@ -437,7 +452,7 @@ test("refresh fails closed and preserves prior files when emerging-market valida
     const before = await Promise.all(paths.map(async (name) => [name, await readFile(join(dataDirectory, name), "utf8")]));
 
     await assert.rejects(
-      refreshStaticShowcase({
+      withBlockedGlobalFetch(() => refreshStaticShowcase({
         fetchImpl: async (url) => {
           if (String(url) === OFFICIAL_SHOWCASE_SOURCES.emergingMarket) return new Response("{}", { status: 200 });
           if (String(url) === OFFICIAL_SHOWCASE_SOURCES["94025"]) {
@@ -448,7 +463,7 @@ test("refresh fails closed and preserves prior files when emerging-market valida
           }
           return new Response("header\nvalue\n", { status: 200 });
         },
-      }),
+      })),
       /emerging market payload must be an array/,
     );
 

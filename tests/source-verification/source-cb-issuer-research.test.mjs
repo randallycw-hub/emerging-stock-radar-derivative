@@ -160,7 +160,7 @@ test("listed and OTC policies are frozen to only the two reviewed CSV resources"
   assert.equal(Object.isFrozen(CB_ISSUER_RESEARCH_SOURCE_POLICIES.otc), true);
 });
 
-test("central registry quarantines both resources at implementation-only status", () => {
+test("central registry approves both independently verified production resources", () => {
   const resources = listApprovedResources();
   const expected = [
     {
@@ -173,7 +173,7 @@ test("central registry quarantines both resources at implementation-only status"
       allowedContentTypes: ["text/csv"],
       maxResponseBytes: 2_000_000,
       timeoutMs: 30_000,
-      approvalStatus: "VERIFIED_FOR_IMPLEMENTATION",
+      approvalStatus: "APPROVED_FOR_PRODUCTION",
       usageRole: "primary_csv",
     },
     {
@@ -186,7 +186,7 @@ test("central registry quarantines both resources at implementation-only status"
       allowedContentTypes: ["text/csv"],
       maxResponseBytes: 2_000_000,
       timeoutMs: 30_000,
-      approvalStatus: "VERIFIED_FOR_IMPLEMENTATION",
+      approvalStatus: "APPROVED_FOR_PRODUCTION",
       usageRole: "primary_csv",
     },
   ];
@@ -211,7 +211,7 @@ test("central registry quarantines both resources at implementation-only status"
     expected,
   );
   for (const resource of registered) {
-    assert.notEqual(resource.approvalStatus, "APPROVED_FOR_PRODUCTION");
+    assert.equal(resource.approvalStatus, "APPROVED_FOR_PRODUCTION");
   }
 });
 

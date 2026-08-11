@@ -183,6 +183,37 @@ Verified root contract: `date`, `tables`, `stat`; the annual 2026 response root 
 
 Evidence captured by the controller at `2026-08-09T07:47:30.7428457Z`: HTTP 200, `application/json;charset=UTF-8`, 34 source rows, and raw-response SHA-256 `05e19631e1c73ab3aa83ede258891c1057634cd5e04634a7d7e3d205d800b282`. The offline fixture preserves two exact rows only; it is not a live-fetch substitute.
 
+## CB issuer research monthly-revenue production approval amendment (2026-08-11)
+
+This amendment independently promotes only the two exact official CSV resources below after strict fixture verification, attribution review, failure-isolation tests, signed-current-revenue correction, and a passing one-shot final live smoke at `2026-08-11T05:41:43.350Z`.
+
+| Resource ID | Production status | Exact purpose |
+| --- | --- | --- |
+| `data-gov-18420-listed-monthly-revenue-csv` | `APPROVED_FOR_PRODUCTION` | Listed-company monthly revenue for exact-code active-CB issuer research |
+| `data-gov-56510-otc-monthly-revenue-csv` | `APPROVED_FOR_PRODUCTION` | OTC-company monthly revenue for exact-code active-CB issuer research |
+
+Exact resources and metadata:
+
+- `GET https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv`; metadata https://data.gov.tw/dataset/18420.
+- `GET https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv`; metadata https://data.gov.tw/dataset/56510.
+- Provider: Financial Supervisory Commission, Securities and Futures Bureau.
+- License: Taiwan Open Government Data License, version 1.0 (OGL 1.0); free with attribution obligations.
+
+The final live evidence is recorded in `docs/source-verification/cb-issuer-research-live-smoke.md`. Both resources returned exact final URLs, HTTP 200, `text/csv`, valid bounded UTF-8 bodies, the reviewed 14-field schema, plausible newest month/date, zero duplicate identities, complete per-resource exact-code/name evidence, no warnings, and independent PASS outcomes. The earlier pre-correction failure and the official signed current-month revenue correction remain part of the audit trail.
+
+Production boundaries:
+
+- Use exact four-digit issuer code as identity; official names are code-bound aliases only. Name-only, fuzzy, suffix-derived, or cross-code joins are forbidden.
+- Preserve official signed current-month revenue. Comparative and cumulative revenue keep their reviewed non-negative contracts.
+- A failed market remains stale or unavailable independently. It must never borrow records, status, or success from the other market.
+- Missing coverage and name conflicts remain explicit and must not infer listing, delisting, or any market-status event.
+- A cross-market same-code record is rejected by the snapshot builder as `CROSS_MARKET_CONFLICT`. The compact 2026-08-11 final evidence did not retain code sets and therefore does not claim a zero aggregate overlap count.
+- Every formal refresh must inspect runtime diagnostics; before website publication, each cross-market conflict must be excluded and surfaced explicitly.
+- No retry, redirect, alternate URL, OpenAPI fallback, Yahoo, third-party data, realtime field, raw response, source note, or browser automation is approved.
+- Product attribution must name the provider, dataset, OGL 1.0, source period/date, and retrieval time.
+
+No other resource status is changed by this amendment.
+
 The `內容` detail URL must be HTTPS with host `mopsov.twse.com.tw`, path `/mops/web/ajax_t120sb23`, no credentials, `co_id` equal to the source issuer code, and `date1` equal to the normalized announcement date. The linked MOPS detail URL is a validation boundary only; this amendment does not authorize fetching it.
 
 Allowed use is alert-only: validated redemption and delisting events can enter the CB event-review queue, but must not publish a trading decision, use a third-party source, or fall back to another resource. On HTTP, payload, schema, date, subject, URL, or duplicate-key failure, reject the response, retain failure evidence, and raise a source-drift alert; do not retry through a fallback or use stale data as a replacement.
