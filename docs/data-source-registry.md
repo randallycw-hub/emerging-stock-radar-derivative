@@ -183,6 +183,10 @@ Verified root contract: `date`, `tables`, `stat`; the annual 2026 response root 
 
 Evidence captured by the controller at `2026-08-09T07:47:30.7428457Z`: HTTP 200, `application/json;charset=UTF-8`, 34 source rows, and raw-response SHA-256 `05e19631e1c73ab3aa83ede258891c1057634cd5e04634a7d7e3d205d800b282`. The offline fixture preserves two exact rows only; it is not a live-fetch substitute.
 
+The `內容` detail URL must be HTTPS with host `mopsov.twse.com.tw`, path `/mops/web/ajax_t120sb23`, no credentials, `co_id` equal to the source issuer code, and `date1` equal to the normalized announcement date. The linked MOPS detail URL is a validation boundary only; this amendment does not authorize fetching it.
+
+Allowed use is alert-only: validated redemption and delisting events can enter the CB event-review queue, but must not publish a trading decision, use a third-party source, or fall back to another resource. On HTTP, payload, schema, date, subject, URL, or duplicate-key failure, reject the response, retain failure evidence, and raise a source-drift alert; do not retry through a fallback or use stale data as a replacement.
+
 ## CB issuer research monthly-revenue production approval amendment (2026-08-11)
 
 This amendment independently promotes only the two exact official CSV resources below after strict fixture verification, attribution review, failure-isolation tests, signed-current-revenue correction, and a passing one-shot final live smoke at `2026-08-11T05:41:43.350Z`.
@@ -213,10 +217,6 @@ Production boundaries:
 - Product attribution must name the provider, dataset, OGL 1.0, source period/date, and retrieval time.
 
 No other resource status is changed by this amendment.
-
-The `內容` detail URL must be HTTPS with host `mopsov.twse.com.tw`, path `/mops/web/ajax_t120sb23`, no credentials, `co_id` equal to the source issuer code, and `date1` equal to the normalized announcement date. The linked MOPS detail URL is a validation boundary only; this amendment does not authorize fetching it.
-
-Allowed use is alert-only: validated redemption and delisting events can enter the CB event-review queue, but must not publish a trading decision, use a third-party source, or fall back to another resource. On HTTP, payload, schema, date, subject, URL, or duplicate-key failure, reject the response, retain failure evidence, and raise a source-drift alert; do not retry through a fallback or use stale data as a replacement.
 
 ## TWSA underwriting announcements resource-level amendment (2026-08-09)
 
