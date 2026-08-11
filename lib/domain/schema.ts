@@ -180,6 +180,13 @@ function signedDecimal(value: unknown, path: string): string {
   return value;
 }
 
+function currentMonthRevenueDecimal(value: unknown, path: string): string {
+  if (typeof value !== "string" || !/^(?!-0(?:\.0+)?$)-?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value)) {
+    throw new DomainValidationError(`${path} must be a canonical signed plain decimal string`);
+  }
+  return value;
+}
+
 function optionalSignedDecimal(value: unknown, path: string): string | undefined {
   return value === undefined ? undefined : signedDecimal(value, path);
 }
@@ -482,7 +489,7 @@ export const MonthlyRevenueSchema = schema<MonthlyRevenue>("MonthlyRevenue", (va
   return {
     companyId: requiredString(input.companyId, "MonthlyRevenue.companyId"),
     yearMonth: input.yearMonth,
-    currentMonthRevenue: signedDecimal(
+    currentMonthRevenue: currentMonthRevenueDecimal(
       input.currentMonthRevenue,
       "MonthlyRevenue.currentMonthRevenue",
     ),

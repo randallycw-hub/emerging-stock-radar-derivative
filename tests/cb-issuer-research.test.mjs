@@ -144,12 +144,19 @@ test("snapshot contract preserves signed current revenue without widening cumula
     cumulativeRevenue: "100",
   })]);
   assert.equal(record.currentMonthRevenue, "-1234.5");
+  assert.equal(parseCbIssuerResearchRecords([researchRecord({ currentMonthRevenue: "-0.5" })])[0].currentMonthRevenue, "-0.5");
   assert.equal(record.cumulativeRevenue, "100");
 
   assert.throws(
     () => parseCbIssuerResearchRecords([researchRecord({ cumulativeRevenue: "-1" })]),
     /cumulativeRevenue/,
   );
+  for (const noncanonical of ["-0", "-0.0", "-0.00", "+5"]) {
+    assert.throws(
+      () => parseCbIssuerResearchRecords([researchRecord({ currentMonthRevenue: noncanonical })]),
+      /currentMonthRevenue/,
+    );
+  }
   assert.throws(
     () => parseCbIssuerResearchRecords([researchRecord({
       revenueMonth: "2026-01",

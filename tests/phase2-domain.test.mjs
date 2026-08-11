@@ -235,12 +235,13 @@ test("monthly current revenue accepts signed plain decimal strings", () => {
     sourceAttribution: officialAttribution,
   };
   assert.equal(MonthlyRevenueSchema.parse(base).currentMonthRevenue, "1200000.50");
+  assert.equal(MonthlyRevenueSchema.parse({ ...base, currentMonthRevenue: "-0.5" }).currentMonthRevenue, "-0.5");
   assert.equal(
     MonthlyRevenueSchema.parse({ ...base, currentMonthRevenue: "-1200000.5" })
       .currentMonthRevenue,
     "-1200000.5",
   );
-  for (const invalid of [1200000.5, Number.NaN, "1e6", "Infinity"]) {
+  for (const invalid of [1200000.5, Number.NaN, "1e6", "Infinity", "+5", "-0", "-0.0", "-0.00", "01", "-01"]) {
     assert.throws(
       () => MonthlyRevenueSchema.parse({ ...base, currentMonthRevenue: invalid }),
       DomainValidationError,

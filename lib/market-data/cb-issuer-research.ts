@@ -81,6 +81,7 @@ const DIAGNOSTIC_KEYS = ["issuerCode", "reason"];
 const ISSUER_KEYS = ["issuerCode", "issuerName"];
 const NON_NEGATIVE_DECIMAL = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
 const SIGNED_DECIMAL = /^-?(?:0|[1-9]\d*)(?:\.\d+)?$/;
+const CURRENT_MONTH_REVENUE_DECIMAL = /^(?!-0(?:\.0+)?$)-?(?:0|[1-9]\d*)(?:\.\d+)?$/;
 const DIAGNOSTIC_REASONS = new Set<CbIssuerResearchDiagnostic["reason"]>([
   "CROSS_MARKET_CONFLICT",
   "NAME_CONFLICT",
@@ -348,7 +349,7 @@ function validateRecords(value: unknown): CbIssuerResearchRecord[] {
     if (record.revenueUnit !== "仟元") throw new TypeError(`record ${index} revenueUnit is invalid`);
     const currentMonthRevenue = readDecimal(
       record.currentMonthRevenue,
-      SIGNED_DECIMAL,
+      CURRENT_MONTH_REVENUE_DECIMAL,
       `record ${index} currentMonthRevenue`,
     );
     const monthOverMonthPercent = readNullableDecimal(
