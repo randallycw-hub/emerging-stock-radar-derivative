@@ -304,12 +304,12 @@ test("projects supported 11406 terms in English without requiring unavailable te
     受託人: "彰化銀行",
   };
   const expected = {
-    bondCode: "35221", issuerCode: "3522", issuerName: "御嵿", shortName: "御嵿一",
+    bondCode: "35221", issuerCode: "3522", issuerName: "御嵿",
     bondName: "御嵿一", issueDate: "2023-12-18", listingDate: "2023-12-18",
     maturityDate: "2028-07-29", issueAmount: "2000000", outstandingAmount: "1500000",
     outstandingDataDate: "2026-07-30", initialConversionPrice: "40", conversionStartDate: "2024-03-19",
     conversionEndDate: "2028-07-29", putDates: ["2026-08-30"], putPrice: "101",
-    securedStatus: "2", underwriter: "兆豐證券", trustee: "彰化銀行",
+    securedStatus: "2", underwriter: "兆豐證券", trustee: "彰化銀行", unitFaceValueTwd: null,
   };
   assert.deepEqual(bondTermSummariesFrom11406Rows([row]), [expected]);
   assert.deepEqual(bondInputsFrom11406Rows([row]), pureBondInputsFrom11406Rows([row]));
@@ -317,11 +317,12 @@ test("projects supported 11406 terms in English without requiring unavailable te
     債券代碼: "35221", 機構代碼: "3522", 機構名稱: "御嵿", 債券簡稱: "御嵿一",
     到期日期: "1170729", 發行總額: "2000000", 目前餘額: "1500000", 賣回權日期: "",
   }])[0], {
-    bondCode: "35221", issuerCode: "3522", issuerName: "御嵿", shortName: "御嵿一",
+    bondCode: "35221", issuerCode: "3522", issuerName: "御嵿",
     bondName: "御嵿一", issueDate: null, listingDate: null, maturityDate: "2028-07-29",
     issueAmount: "2000000", outstandingAmount: "1500000", outstandingDataDate: null,
     initialConversionPrice: null, conversionStartDate: null, conversionEndDate: null,
     putDates: [], putPrice: null, securedStatus: null, underwriter: null, trustee: null,
+    unitFaceValueTwd: null,
   });
 });
 

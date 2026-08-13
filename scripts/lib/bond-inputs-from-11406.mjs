@@ -21,15 +21,14 @@ export function bondTermSummariesFrom11406Rows(rows) {
       .split(/[、,;；|\s]+/)
       .filter(Boolean)
       .map((date) => officialDate(date, `11406 row ${index + 1} putDate`));
-    const shortName = requiredSourceText(row, "債券簡稱", index);
+    const bondName = requiredSourceText(row, "債券簡稱", index);
     const optionalDate = (key, aliases = []) => optionalOfficialDate(row, key, index, aliases);
     const optionalAmount = (key) => optionalOfficialAmount(row, key, index);
     return [{
       bondCode,
       issuerCode: requiredSourceText(row, "機構代碼", index),
       issuerName: requiredSourceText(row, "機構名稱", index),
-      shortName,
-      bondName: shortName,
+      bondName,
       issueDate: optionalDate("發行日期"),
       listingDate: optionalDate("掛牌日期"),
       maturityDate: officialDate(
@@ -53,6 +52,7 @@ export function bondTermSummariesFrom11406Rows(rows) {
       securedStatus: optionalSourceText(row, "有無擔保"),
       underwriter: optionalSourceText(row, "承銷機構"),
       trustee: optionalSourceText(row, "受託人"),
+      unitFaceValueTwd: null,
     }];
   });
 }
@@ -102,7 +102,7 @@ export function bondInputsFrom11406Rows(rows) {
     bondCode: term.bondCode,
     issuerCode: term.issuerCode,
     issuerName: term.issuerName,
-    shortName: term.shortName,
+    shortName: term.bondName,
     maturityDate: term.maturityDate,
     issueAmount: term.issueAmount,
     outstandingAmount: term.outstandingAmount,

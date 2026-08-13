@@ -5,6 +5,7 @@ import {
   buildBondWorkbenchSnapshot,
   parseBondWorkbenchSnapshot,
 } from "../lib/market-data/bond-workbench.ts";
+import { bondTermSummariesFrom11406Rows } from "../scripts/lib/bond-inputs-from-11406.mjs";
 
 const generatedAt = "2026-08-13T01:00:00.000Z";
 const dataDate = "2026-08-12";
@@ -103,6 +104,20 @@ function event(bondCode, eventId = "put-1", patch = {}) {
   };
 }
 
+function redemptionEvent(patch = {}) {
+  return {
+    issuerCode: "3522",
+    issuerName: "御嵿",
+    bondCode: "35221",
+    bondName: "御嵿一",
+    announcementDate: "2026-08-01",
+    delistingDate: asOfDate,
+    subject: "公告御嵿股份有限公司國內轉換公司債",
+    detailUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3522&date1=20260801&seq_no=1&pub_class=0&firstin=1",
+    ...patch,
+  };
+}
+
 test("builds a sorted, defensive active snapshot keyed only by bond code", () => {
   const result = buildBondWorkbenchSnapshot(input({
     currentTerms: [term("35222"), term("35221")],
@@ -123,7 +138,7 @@ test("archives by verified redemption, maturity, zero balance, then complete ros
   const previous = buildBondWorkbenchSnapshot(input({
     currentTerms: [term("35221"), term("35222"), term("35223"), term("35224")],
     currentViews: [
-      view("35221", { redemptionEvent: { delistingDate: asOfDate } }),
+      view("35221", { redemptionEvent: redemptionEvent() }),
       view("35222"),
       view("35223"),
       view("35224"),
@@ -137,7 +152,7 @@ test("archives by verified redemption, maturity, zero balance, then complete ros
       term("35223", { outstandingAmount: "0" }),
     ],
     currentViews: [
-      view("35221", { redemptionEvent: { delistingDate: asOfDate } }),
+      view("35221", { redemptionEvent: redemptionEvent() }),
       view("35222", { maturityDate: "2026-08-12" }),
       view("35223", { outstandingAmount: "0" }),
     ],
@@ -150,6 +165,18 @@ test("archives by verified redemption, maturity, zero balance, then complete ros
     ["35224", "removed_from_official_roster"],
   ]);
   assert.ok(result.records.every((record) => record.status === "archived"));
+});
+
+test("archives every canonical decimal spelling of a zero outstanding balance", async (t) => {
+  for (const zero of ["0", "0.0", "0.00"]) {
+    await t.test(zero, () => {
+      const snapshot = buildBondWorkbenchSnapshot(input({
+        currentTerms: [term("35221", { outstandingAmount: zero })],
+        currentViews: [view("35221", { outstandingAmount: zero })],
+      }));
+      assert.equal(snapshot.records[0].archiveReason, "balance_exhausted");
+    });
+  }
 });
 
 test("keeps archived records archived and does not archive a zero-trade active record", () => {
@@ -191,6 +218,71 @@ test("rejects a malformed previous snapshot before it can be merged", () => {
     () => buildBondWorkbenchSnapshot(input({ previous })),
     /putDates/i,
   );
+});
+
+test("uses the full strict BondMarketView parser before accepting current or previous records", async (t) => {
+  const invalidFields = [
+    ["bondCode", "bad"], ["issuerCode", ""], ["bondName", ""],
+    ["cbClose", {}], ["cbPriceDate", "2026-02-30"], ["cbTradeUnits", "-1"],
+    ["stockClose", {}], ["stockPriceDate", "2026-02-30"],
+    ["currentConversionPrice", {}], ["conversionPriceEffectiveDate", "2026-02-30"],
+    ["valuationDate", "2026-02-30"], ["valuationCbClose", {}],
+    ["valuationStockClose", {}], ["conversionValue", {}], ["premiumRate", { unexpected: true }],
+    ["outstandingAmount", {}], ["outstandingDataDate", "2026-02-30"],
+    ["outstandingReductionRate", {}], ["remainingUnits", {}], ["remainingRatio", {}],
+    ["dailyTurnoverRate", {}], ["institutionDataDate", "2026-02-30"],
+    ["institutionNetUnits", {}], ["institutionNet5dUnits", {}], ["institutionNet20dUnits", {}],
+    ["redemptionEvent", {}], ["maturityDate", "2026-02-30"], ["daysToMaturity", 1.5],
+    ["nextPutDate", "2026-02-30"], ["daysToNextPut", 1.5], ["nextEventType", "unknown"],
+    ["nextEventDate", "2026-02-30"], ["daysToNextEvent", 1.5], ["dataQuality", "unknown"],
+    ["staleCbPrice", "false"], ["missingReasons", [1]],
+  ];
+  for (const [field, value] of invalidFields) {
+    await t.test(field, () => {
+      assert.throws(
+        () => buildBondWorkbenchSnapshot(input({ currentViews: [view("35221", { [field]: value })] })),
+        /current view/i,
+      );
+    });
+  }
+  for (const [name, value] of [
+    ["issuer research", { market: "otc" }],
+    ["issuer research decimal", {
+      market: "otc", industryName: "資訊服務", revenueMonth: "2026-07",
+      sourcePublishedOn: "2026-08-08", revenueUnit: "仟元", currentMonthRevenue: {},
+      monthOverMonthPercent: null, yearOverYearPercent: null, cumulativeRevenue: null,
+      cumulativeYearOverYearPercent: null,
+    }],
+    ["redemption event", {
+      issuerCode: "3522", issuerName: "御嵿", bondCode: "35221", bondName: "御嵿一",
+      announcementDate: "2026-08-01", delistingDate: "2026-08-12", subject: "公告",
+      detailUrl: {},
+    }],
+  ]) {
+    await t.test(name, () => {
+      assert.throws(
+        () => buildBondWorkbenchSnapshot(input({ currentViews: [view("35221", { issuerResearch: name.startsWith("issuer") ? value : null, redemptionEvent: name === "redemption event" ? value : null })] })),
+        /current view/i,
+      );
+    });
+  }
+  assert.throws(
+    () => buildBondWorkbenchSnapshot(input({
+      currentViews: [view("35221", { redemptionEvent: redemptionEvent({ bondCode: "35222" }) })],
+    })),
+    /redemptionEvent\.bondCode does not match view/i,
+  );
+  const previous = structuredClone(buildBondWorkbenchSnapshot(input()));
+  previous.records[0].view.premiumRate = { unexpected: true };
+  assert.throws(() => buildBondWorkbenchSnapshot(input({ previous })), /bond workbench record 0\.view\.premiumRate/i);
+});
+
+test("accepts 11406 term projections through the strict workbench term parser", () => {
+  const terms = bondTermSummariesFrom11406Rows([{
+    債券代碼: "35221", 機構代碼: "3522", 機構名稱: "御嵿", 債券簡稱: "御嵿一",
+    到期日期: "1170729", 發行總額: "2000000", 目前餘額: "1500000", 賣回權日期: "",
+  }]);
+  assert.doesNotThrow(() => buildBondWorkbenchSnapshot(input({ currentTerms: terms })));
 });
 
 test("joins workbench events to only their exact bond code", () => {
