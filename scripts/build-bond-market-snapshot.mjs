@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
+import { bondInputsFrom11406Rows } from "./lib/bond-inputs-from-11406.mjs";
 import { deriveBondRemainingMetrics } from "../lib/market-data/bond-derived-metrics.ts";
 import { buildHistoryPoints } from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
@@ -26,7 +27,6 @@ import {
   buildCbIssuerResearchSnapshot,
   parseCbIssuerResearchSnapshot,
 } from "../lib/market-data/cb-issuer-research.ts";
-import { multiplyDecimal } from "../lib/market-data/decimal.ts";
 import { getApprovedResource } from "../lib/pipeline/source-registry.ts";
 import {
   CB_ISSUER_RESEARCH_SOURCE_POLICIES,
@@ -471,69 +471,7 @@ function latestTradingDate(records) {
     .at(-1) ?? null;
 }
 
-export function bondInputsFrom11406Rows(rows) {
-  if (!Array.isArray(rows)) throw new TypeError("11406 rows must be an array");
-  return rows.flatMap((row, index) => {
-    if (row === null || typeof row !== "object" || Array.isArray(row)) {
-      throw new TypeError(`11406 row ${index + 1} must be an object`);
-    }
-    const bondCode = sourceText(row, "債券代碼");
-    if (bondCode === "") {
-      if (isExplicitPrivateUnlistedBond(row)) return [];
-      throw new TypeError(`11406 row ${index + 1} has missing bond code`);
-    }
-    if (!/^\d{5,6}$/.test(bondCode)) {
-      if (isExplicitPrivateUnlistedBond(row)) return [];
-      throw new TypeError(`11406 row ${index + 1} has invalid bond code`);
-    }
-    const putText = sourceText(row, "賣回權日期");
-    const outstandingDataDateText = optionalSourceAliasText(
-      row,
-      ["資料日期", "DataDate"],
-      index,
-    );
-    return [{
-      bondCode,
-      issuerCode: requiredSourceText(row, "機構代碼", index),
-      issuerName: requiredSourceText(row, "機構名稱", index),
-      shortName: requiredSourceText(row, "債券簡稱", index),
-      maturityDate: officialDate(
-        requiredSourceText(row, "到期日期", index),
-        `11406 row ${index + 1} maturityDate`,
-      ),
-      issueAmount: officialAmount(
-        requiredSourceText(row, "發行總額", index),
-        `11406 row ${index + 1} issueAmount`,
-      ),
-      outstandingAmount: officialAmount(
-        requiredSourceText(row, "目前餘額", index),
-        `11406 row ${index + 1} outstandingAmount`,
-      ),
-      outstandingDataDate: outstandingDataDateText === ""
-        ? null
-        : officialDate(
-          outstandingDataDateText,
-          `11406 row ${index + 1} outstanding data date`,
-        ),
-      putDates: putText === ""
-        ? []
-        : putText
-          .split(/[、,;；|\s]+/)
-          .filter(Boolean)
-          .map((date) => officialDate(
-            date,
-            `11406 row ${index + 1} putDate`,
-          )),
-    }];
-  });
-}
-
-function isExplicitPrivateUnlistedBond(row) {
-  return (
-    sourceText(row, "募集方式") === "8"
-    && sourceText(row, "上市櫃否") === "5"
-  );
-}
+export { bondInputsFrom11406Rows };
 
 function validateCandidate({ bondInputs, collected, views }) {
   const errors = [];
@@ -862,61 +800,6 @@ function isApprovedOfficialUrl(value) {
   }
 }
 
-function sourceText(row, key) {
-  if (!(key in row) || typeof row[key] !== "string") {
-    throw new TypeError(`11406 row is missing string field: ${key}`);
-  }
-  const text = row[key].trim();
-  return new Set(["-", "—", "－"]).has(text) ? "" : text;
-}
-
-function requiredSourceText(row, key, index) {
-  const value = sourceText(row, key);
-  if (value === "") {
-    throw new TypeError(`11406 row ${index + 1} requires ${key}`);
-  }
-  return value;
-}
-
-function optionalSourceAliasText(row, keys, index) {
-  const present = keys.filter((key) => key in row);
-  if (present.length === 0) return "";
-  if (present.length !== 1) {
-    throw new TypeError(
-      `11406 row ${index + 1} requires exactly one of ${keys.join("/")}`,
-    );
-  }
-  return sourceText(row, present[0]);
-}
-
-function officialDate(value, name) {
-  let iso;
-  let match;
-  if ((match = /^(\d{4})(\d{2})(\d{2})$/.exec(value))) {
-    iso = `${match[1]}-${match[2]}-${match[3]}`;
-  } else if ((match = /^(\d{3})(\d{2})(\d{2})$/.exec(value))) {
-    iso = `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
-  } else if ((match = /^(\d{3})\/(\d{2})\/(\d{2})$/.exec(value))) {
-    iso = `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
-  } else {
-    iso = value;
-  }
-  if (!isIsoDate(iso)) throw new TypeError(`${name} must be a valid date`);
-  return iso;
-}
-
-function officialAmount(value, name) {
-  const unitMatch = /^(.*?)(仟元|元)?$/.exec(value.replaceAll(",", ""));
-  if (!unitMatch) throw new TypeError(`${name} has an unsupported unit`);
-  const text = unitMatch[1];
-  if (!/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(text)) {
-    throw new TypeError(`${name} must be a non-negative decimal`);
-  }
-  const canonical = text.replace(/\.0+$/, "");
-  return unitMatch[2] === "仟元"
-    ? multiplyDecimal(canonical, "1000", 0)
-    : canonical;
-}
 
 async function readOptionalJson(path) {
   try {

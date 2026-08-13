@@ -99,3 +99,84 @@ export type BondMarketHistoryPoint = {
   conversionValue: string | null;
   premiumRate: string | null;
 };
+
+export type BondLifecycleStatus = "active" | "archived";
+export type BondArchiveReason =
+  | "matured"
+  | "redeemed"
+  | "balance_exhausted"
+  | "removed_from_official_roster";
+export type BondFieldState =
+  | "complete"
+  | "stale"
+  | "date_mismatch"
+  | "missing"
+  | "accumulating";
+
+export type BondTermSummary = {
+  bondCode: string;
+  issuerCode: string;
+  bondName: string;
+  issuerName: string;
+  issueDate: string | null;
+  listingDate: string | null;
+  maturityDate: string;
+  issueAmount: string | null;
+  outstandingAmount: string | null;
+  outstandingDataDate: string | null;
+  initialConversionPrice: string | null;
+  conversionStartDate: string | null;
+  conversionEndDate: string | null;
+  putDates: readonly string[];
+  putPrice: string | null;
+  securedStatus: string | null;
+  underwriter: string | null;
+  trustee: string | null;
+  unitFaceValueTwd: string | null;
+};
+
+export type BondWorkbenchEvent = {
+  bondCode: string;
+  eventId: string;
+  type:
+    | "conversion_adjustment"
+    | "conversion_suspension"
+    | "ex_dividend"
+    | "put"
+    | "redemption"
+    | "maturity"
+    | "listing"
+    | "delisting";
+  date: string;
+  title: string;
+  sourceId: string;
+  sourceUrl: string | null;
+};
+
+export type BondWorkbenchFieldStates = {
+  price: BondFieldState;
+  valuation: BondFieldState;
+  outstanding: BondFieldState;
+  institutions: BondFieldState;
+  company: BondFieldState;
+  events: BondFieldState;
+  history: BondFieldState;
+};
+
+export type BondWorkbenchRecord = {
+  bondCode: string;
+  status: BondLifecycleStatus;
+  archiveReason: BondArchiveReason | null;
+  archivedAt: string | null;
+  term: BondTermSummary;
+  view: BondMarketView;
+  events: readonly BondWorkbenchEvent[];
+  fieldStates: BondWorkbenchFieldStates;
+};
+
+export type BondWorkbenchSnapshot = {
+  schemaVersion: 1;
+  generatedAt: string;
+  dataDate: string;
+  records: readonly BondWorkbenchRecord[];
+};

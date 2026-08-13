@@ -19,6 +19,10 @@ import {
   fetchCbIssuerResearchSources,
 } from "../lib/source-verification/source-cb-issuer-research.ts";
 import * as snapshotBuilder from "../scripts/build-bond-market-snapshot.mjs";
+import {
+  bondInputsFrom11406Rows as pureBondInputsFrom11406Rows,
+  bondTermSummariesFrom11406Rows,
+} from "../scripts/lib/bond-inputs-from-11406.mjs";
 
 const {
   bondInputsFrom11406Rows,
@@ -276,6 +280,49 @@ test("maps official 11406 dates, put dates and amount units exactly", () => {
     outstandingDataDate: "2026-07-30",
     putDates: ["2026-08-30", "2027-08-30"],
   }]);
+});
+
+test("projects supported 11406 terms in English without requiring unavailable terms", () => {
+  const row = {
+    債券代碼: "35221",
+    機構代碼: "3522",
+    機構名稱: "御嵿",
+    債券簡稱: "御嵿一",
+    發行日期: "1121218",
+    掛牌日期: "1121218",
+    到期日期: "1170729",
+    發行總額: "2000000",
+    目前餘額: "1500000",
+    資料日期: "1150730",
+    發行時轉換價格: "40.0000",
+    轉換期間起: "1130319",
+    迄: "1170729",
+    賣回權日期: "1150830",
+    賣回權價格: "101.0000",
+    有無擔保: "2",
+    承銷機構: "兆豐證券",
+    受託人: "彰化銀行",
+  };
+  const expected = {
+    bondCode: "35221", issuerCode: "3522", issuerName: "御嵿", shortName: "御嵿一",
+    bondName: "御嵿一", issueDate: "2023-12-18", listingDate: "2023-12-18",
+    maturityDate: "2028-07-29", issueAmount: "2000000", outstandingAmount: "1500000",
+    outstandingDataDate: "2026-07-30", initialConversionPrice: "40", conversionStartDate: "2024-03-19",
+    conversionEndDate: "2028-07-29", putDates: ["2026-08-30"], putPrice: "101",
+    securedStatus: "2", underwriter: "兆豐證券", trustee: "彰化銀行",
+  };
+  assert.deepEqual(bondTermSummariesFrom11406Rows([row]), [expected]);
+  assert.deepEqual(bondInputsFrom11406Rows([row]), pureBondInputsFrom11406Rows([row]));
+  assert.deepEqual(bondTermSummariesFrom11406Rows([{
+    債券代碼: "35221", 機構代碼: "3522", 機構名稱: "御嵿", 債券簡稱: "御嵿一",
+    到期日期: "1170729", 發行總額: "2000000", 目前餘額: "1500000", 賣回權日期: "",
+  }])[0], {
+    bondCode: "35221", issuerCode: "3522", issuerName: "御嵿", shortName: "御嵿一",
+    bondName: "御嵿一", issueDate: null, listingDate: null, maturityDate: "2028-07-29",
+    issueAmount: "2000000", outstandingAmount: "1500000", outstandingDataDate: null,
+    initialConversionPrice: null, conversionStartDate: null, conversionEndDate: null,
+    putDates: [], putPrice: null, securedStatus: null, underwriter: null, trustee: null,
+  });
 });
 
 test("maps the English 11406 DataDate alias without blocking identity-only rows", () => {
