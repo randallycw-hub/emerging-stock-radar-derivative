@@ -28,6 +28,7 @@ import {
 const {
   bondInputsFrom11406Rows,
   buildBondMarketSnapshot,
+  summarizeWorkbenchSourceStates,
   verifyWorkbenchConsistency,
 } = snapshotBuilder;
 
@@ -1165,6 +1166,98 @@ test("workbench cross-file verification uses exact bond codes, history and sourc
       workbench: forgedAssessment,
     }),
     /WORKBENCH_HISTORY_ASSESSMENT/,
+  );
+});
+
+test("workbench verification recomputes lifecycle and every record field state", async () => {
+  const outputDir = await makePublishedDirectory();
+  const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
+    outputDir,
+    bonds: [bond],
+    collectImpl: async () => validCollectedMarketData,
+    now: () => new Date("2026-07-30T12:30:00.000Z"),
+  }));
+  const history = JSON.parse(await readFile(
+    join(outputDir, "bond-market-history.json"),
+    "utf8",
+  ));
+  const currentTerms = result.workbench.records.map((record) => record.term);
+  const common = {
+    terms: currentTerms,
+    views: result.views,
+    history,
+    supplemental: result.supplemental,
+    issuerResearch: result.issuerResearch,
+    requestedDate: result.manifest.market.requestedDate,
+    dataDate: result.manifest.market.dataDate,
+  };
+
+  const falselyArchived = structuredClone(result.workbench);
+  falselyArchived.records[0].status = "archived";
+  falselyArchived.records[0].archiveReason = "removed_from_official_roster";
+  falselyArchived.records[0].archivedAt = common.requestedDate;
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...common,
+      workbench: falselyArchived,
+      sourceStateSummary: summarizeWorkbenchSourceStates(falselyArchived),
+    }),
+    /WORKBENCH_CANDIDATE_MISMATCH/,
+  );
+
+  const noPriceView = {
+    ...result.views[0],
+    cbClose: null,
+    cbPriceDate: null,
+    cbTradeUnits: "0",
+    staleCbPrice: false,
+  };
+  const noPrice = buildBondWorkbenchSnapshot({
+    generatedAt: result.workbench.generatedAt,
+    dataDate: common.dataDate,
+    asOfDate: common.requestedDate,
+    currentTerms,
+    currentViews: [noPriceView],
+    currentEvents: [],
+  });
+  const falselyCompletePrice = structuredClone(noPrice);
+  falselyCompletePrice.records[0].fieldStates.price = "complete";
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...common,
+      workbench: falselyCompletePrice,
+      views: [noPriceView],
+      history: [],
+      sourceStateSummary: summarizeWorkbenchSourceStates(falselyCompletePrice),
+    }),
+    /WORKBENCH_CANDIDATE_MISMATCH/,
+  );
+
+  const secondTerm = { ...currentTerms[0], bondCode: "99999" };
+  const secondView = { ...noPriceView, bondCode: "99999" };
+  const twoBonds = buildBondWorkbenchSnapshot({
+    generatedAt: result.workbench.generatedAt,
+    dataDate: common.dataDate,
+    asOfDate: common.requestedDate,
+    currentTerms: [currentTerms[0], secondTerm],
+    currentViews: [result.views[0], secondView],
+    currentEvents: [],
+  });
+  const swappedStates = structuredClone(twoBonds);
+  [swappedStates.records[0].fieldStates, swappedStates.records[1].fieldStates] = [
+    swappedStates.records[1].fieldStates,
+    swappedStates.records[0].fieldStates,
+  ];
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...common,
+      workbench: swappedStates,
+      terms: [currentTerms[0], secondTerm],
+      views: [result.views[0], secondView],
+      history: [],
+      sourceStateSummary: summarizeWorkbenchSourceStates(swappedStates),
+    }),
+    /WORKBENCH_CANDIDATE_MISMATCH/,
   );
 });
 

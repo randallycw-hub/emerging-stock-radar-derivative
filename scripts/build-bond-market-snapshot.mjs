@@ -231,6 +231,7 @@ export async function buildBondMarketSnapshot(options = {}) {
       files.push({
         name,
         sha256: sha256(text),
+        rawBytes: Buffer.byteLength(text, "utf8"),
         recordCount: key === "issuerResearch"
           ? documents[key].records.length
           : key === "supplemental"
@@ -240,7 +241,6 @@ export async function buildBondMarketSnapshot(options = {}) {
               : documents[key].length,
         ...(key === "workbench"
           ? {
-            rawBytes: Buffer.byteLength(text, "utf8"),
             schemaVersion: workbench.schemaVersion,
             sourceStateSummary: workbenchSourceStateSummary,
           }
@@ -277,6 +277,7 @@ export async function buildBondMarketSnapshot(options = {}) {
       manifestText,
       bondInputs,
       currentTerms,
+      previousWorkbench,
     );
     await publishAtomically(
       stagingDir,
@@ -557,6 +558,7 @@ async function verifyStagedFiles(
   manifestText,
   bondInputs,
   currentTerms,
+  previousWorkbench,
 ) {
   let stagedIssuerResearch;
   let stagedSupplemental;
@@ -565,6 +567,9 @@ async function verifyStagedFiles(
   let stagedWorkbench;
   for (const file of files) {
     const text = await readFile(join(stagingDir, file.name), "utf8");
+    if (file.rawBytes !== Buffer.byteLength(text, "utf8")) {
+      throw new Error(`VALIDATION_FAILED:STAGED_BYTES_MISMATCH:${file.name}`);
+    }
     const parsed = JSON.parse(text);
     if (file.name === "cb-issuer-research.json") {
       stagedIssuerResearch = parseCbIssuerResearchSnapshot(parsed);
@@ -609,7 +614,9 @@ async function verifyStagedFiles(
     || manifestFiles.length !== files.length
     || files.some((file) => {
       const entry = manifestFiles.find((candidate) => candidate?.name === file.name);
-      return entry?.sha256 !== file.sha256 || entry?.recordCount !== file.recordCount;
+      return entry?.sha256 !== file.sha256
+        || entry?.rawBytes !== file.rawBytes
+        || entry?.recordCount !== file.recordCount;
     })
   ) {
     throw new Error("VALIDATION_FAILED:MARKET_MANIFEST_FILES");
@@ -640,6 +647,8 @@ async function verifyStagedFiles(
     requestedDate: manifest?.market?.requestedDate,
     dataDate: manifest?.market?.dataDate,
     sourceStateSummary: manifest?.market?.workbenchSourceStateSummary,
+    previous: previousWorkbench,
+    events: [],
   });
 }
 
@@ -653,6 +662,8 @@ export function verifyWorkbenchConsistency({
   requestedDate,
   dataDate,
   sourceStateSummary,
+  previous,
+  events = [],
 }) {
   const snapshot = parseBondWorkbenchSnapshot(workbench);
   const parsedHistory = parseBondMarketHistory(history);
@@ -675,37 +686,43 @@ export function verifyWorkbenchConsistency({
     throw new Error("VALIDATION_FAILED:WORKBENCH_CURRENT_BOND_CODES");
   }
   for (const [bondCode, term] of termsByCode) {
-    const record = recordsByCode.get(bondCode);
     const view = viewsByCode.get(bondCode);
     if (
-      record === undefined
-      || term.issuerCode !== view.issuerCode
+      term.issuerCode !== view.issuerCode
       || term.bondName !== view.bondName
-      || !equalPlainJson(record.term, term)
-      || !equalPlainJson(record.view, view)
     ) {
       throw new Error(`VALIDATION_FAILED:WORKBENCH_CURRENT_MISMATCH:${bondCode}`);
-    }
-  }
-  for (const record of snapshot.records) {
-    if (!termsByCode.has(record.bondCode) && record.status !== "archived") {
-      throw new Error(`VALIDATION_FAILED:WORKBENCH_ARCHIVE:${record.bondCode}`);
     }
   }
   if (parsedHistory.some((point) => !recordsByCode.has(point.bondCode))) {
     throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_BOND_CODE");
   }
-  const expectedAssessments = new Map(
-    buildCandidateAssessments(views, parsedHistory).map((entry) => [
-      entry.bondCode,
-      entry.assessment,
-    ]),
-  );
-  if (snapshot.records.some((record) => (
-    termsByCode.has(record.bondCode)
-    && !equalPlainJson(record.assessment, expectedAssessments.get(record.bondCode))
-  ))) {
-    throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_ASSESSMENT");
+  const expectedPrevious = previous ?? {
+    ...snapshot,
+    records: snapshot.records.filter((record) => !termsByCode.has(record.bondCode)),
+  };
+  const expected = buildBondWorkbenchSnapshot({
+    generatedAt: snapshot.generatedAt,
+    dataDate,
+    asOfDate: requestedDate,
+    currentTerms: terms,
+    currentViews: views,
+    currentEvents: events,
+    currentAssessments: buildCandidateAssessments(views, parsedHistory),
+    previous: expectedPrevious,
+  });
+  if (!equalPlainJson(snapshot, expected)) {
+    const expectedByCode = new Map(expected.records.map((record) => [
+      record.bondCode,
+      record,
+    ]));
+    if (snapshot.records.some((record) => (
+      termsByCode.has(record.bondCode)
+      && !equalPlainJson(record.assessment, expectedByCode.get(record.bondCode)?.assessment)
+    ))) {
+      throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_ASSESSMENT");
+    }
+    throw new Error("VALIDATION_FAILED:WORKBENCH_CANDIDATE_MISMATCH");
   }
   if (!equalPlainJson(
     sourceStateSummary,

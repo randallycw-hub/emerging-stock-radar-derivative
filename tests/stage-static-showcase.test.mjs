@@ -287,6 +287,34 @@ test("Sites staging copies only a manifest-declared validated bond workbench", a
   );
 });
 
+test("Sites staging verifies history and 11406 bytes against their manifest entries", async (context) => {
+  for (const name of ["bond-market-history.json", "11406.json"]) {
+    await context.test(name, async () => {
+      const root = await mkdtemp(join(tmpdir(), "showcase-stage-market-integrity-"));
+      const source = join(root, "source");
+      const destination = join(root, "destination");
+      await seedDeclaredIssuerResearchGeneration(source, {
+        includeRuntimeKey: true,
+        includeSupplemental: true,
+        includeWorkbench: true,
+      });
+      await mkdir(destination, { recursive: true });
+      await writeFile(join(destination, "sentinel.txt"), "prior", "utf8");
+      await writeFile(
+        join(source, "data/generations/abc123", name),
+        "[] \n",
+        "utf8",
+      );
+
+      await assert.rejects(
+        stageStaticShowcase({ source, destination }),
+        /history|11406|hash|bytes|manifest/i,
+      );
+      assert.equal(await readFile(join(destination, "sentinel.txt"), "utf8"), "prior");
+    });
+  }
+});
+
 test("Sites staging fails closed for declared-missing and undeclared-extra workbench files", async (context) => {
   await context.test("declared missing", async () => {
     const root = await mkdtemp(join(tmpdir(), "showcase-stage-workbench-missing-"));
@@ -481,6 +509,7 @@ async function seedDeclaredIssuerResearchGeneration(
   const viewsText = "[]\n";
   const supplementalText = `${JSON.stringify(emptySupplementalSnapshot, null, 2)}\n`;
   const workbenchText = `${JSON.stringify(emptyWorkbenchSnapshot, null, 2)}\n`;
+  const emptyArrayText = "[]\n";
   const workbenchSourceStateSummary = summarizeWorkbenchSourceStates(
     emptyWorkbenchSnapshot,
   );
@@ -530,6 +559,16 @@ async function seedDeclaredIssuerResearchGeneration(
             recordCount: 0,
             schemaVersion: 1,
             sourceStateSummary: workbenchSourceStateSummary,
+          }, {
+            name: "bond-market-history.json",
+            sha256: sha256Text(emptyArrayText),
+            rawBytes: Buffer.byteLength(emptyArrayText),
+            recordCount: 0,
+          }, {
+            name: "11406.json",
+            sha256: sha256Text(emptyArrayText),
+            rawBytes: Buffer.byteLength(emptyArrayText),
+            recordCount: 0,
           }] : []),
         ],
         ...(includeSupplemental

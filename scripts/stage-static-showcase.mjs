@@ -490,11 +490,19 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
   const supplementalEntries = manifest.market.files.filter(
     (file) => file?.name === "bond-supplemental.json",
   );
+  const historyEntries = manifest.market.files.filter(
+    (file) => file?.name === "bond-market-history.json",
+  );
+  const issuanceEntries = manifest.market.files.filter(
+    (file) => file?.name === "11406.json",
+  );
   if (
     workbenchEntries.length !== 1
     || viewEntries.length !== 1
     || issuerEntries.length !== 1
     || supplementalEntries.length !== 1
+    || historyEntries.length !== 1
+    || issuanceEntries.length !== 1
   ) {
     throw new Error("active generation bond workbench manifest is invalid");
   }
@@ -522,6 +530,31 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
   ) {
     throw new Error("active generation bond workbench artifact is invalid");
   }
+  const historyText = await readFile(
+    join(source, `${base}/bond-market-history.json`.replace(/^\.\//, "")),
+    "utf8",
+  );
+  const history = parseBondMarketHistory(JSON.parse(historyText));
+  verifyMarketEvidenceEntry(
+    historyEntries[0],
+    "bond-market-history.json",
+    historyText,
+    history.length,
+  );
+  const issuanceText = await readFile(
+    join(source, `${base}/11406.json`.replace(/^\.\//, "")),
+    "utf8",
+  );
+  const issuanceRows = JSON.parse(issuanceText);
+  if (!Array.isArray(issuanceRows)) {
+    throw new Error("active generation 11406 artifact is invalid");
+  }
+  verifyMarketEvidenceEntry(
+    issuanceEntries[0],
+    "11406.json",
+    issuanceText,
+    issuanceRows.length,
+  );
   const views = await readJson(
     join(source, `${base}/bond-market-view.json`.replace(/^\.\//, "")),
     "active generation bond workbench views are invalid",
@@ -534,17 +567,10 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
     join(source, `${base}/cb-issuer-research.json`.replace(/^\.\//, "")),
     "active generation bond workbench issuer research is invalid",
   ));
-  const terms = bondTermSummariesFrom11406Rows(await readJson(
-    join(source, `${base}/11406.json`.replace(/^\.\//, "")),
-    "active generation bond workbench terms are invalid",
-  )).map((term) => ({
+  const terms = bondTermSummariesFrom11406Rows(issuanceRows).map((term) => ({
     ...term,
     unitFaceValueTwd: supplemental.unitFaceValueTwd,
   }));
-  const history = parseBondMarketHistory(await readJson(
-    join(source, `${base}/bond-market-history.json`.replace(/^\.\//, "")),
-    "active generation bond workbench history is invalid",
-  ));
   verifyWorkbenchConsistency({
     workbench,
     terms,
@@ -556,6 +582,31 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
     dataDate: manifest.market.dataDate,
     sourceStateSummary: manifest.market.workbenchSourceStateSummary,
   });
+}
+
+function verifyMarketEvidenceEntry(entry, name, text, recordCount) {
+  if (
+    entry === null
+    || typeof entry !== "object"
+    || Array.isArray(entry)
+    || !equalStringArrays(Object.keys(entry).sort(), [
+      "name",
+      "rawBytes",
+      "recordCount",
+      "sha256",
+    ].sort())
+    || entry.name !== name
+    || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
+    || !Number.isInteger(entry.rawBytes)
+    || entry.rawBytes <= 0
+    || !Number.isInteger(entry.recordCount)
+    || entry.recordCount < 0
+    || entry.sha256 !== sha256Text(text)
+    || entry.rawBytes !== Buffer.byteLength(text, "utf8")
+    || entry.recordCount !== recordCount
+  ) {
+    throw new Error(`active generation ${name} manifest integrity is invalid`);
+  }
 }
 
 function validateWorkbenchFileEntry(entry) {

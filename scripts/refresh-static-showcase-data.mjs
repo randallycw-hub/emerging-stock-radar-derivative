@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import {
   appendFile,
-  copyFile,
   mkdir,
   mkdtemp,
   readFile,
@@ -226,18 +225,19 @@ export async function refreshStaticShowcase(options = {}) {
 }
 
 async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, paths }) {
-  const previousWorkbench = await readPublishedBondWorkbench(
-    paths.dataDirectory,
+  const activeGeneration = await readActiveGeneration(paths.dataDirectory);
+  const previousWorkbench = await readPublishedBondWorkbenchFromActive(
+    activeGeneration,
   );
-  const previousHistory = await readPublishedBondHistory(
-    paths.dataDirectory,
+  const previousHistory = await readPublishedBondHistoryFromActive(
+    activeGeneration,
     paths.publishedHistoryCachePath,
   );
-  const previousSupplemental = await readPublishedCbSupplemental(
-    paths.dataDirectory,
+  const previousSupplemental = await readPublishedCbSupplementalFromActive(
+    activeGeneration,
   );
-  const previousIssuerResearch = await readPublishedCbIssuerResearch(
-    paths.dataDirectory,
+  const previousIssuerResearch = await readPublishedCbIssuerResearchFromActive(
+    activeGeneration,
   );
   const datasets = {};
   const datasetTexts = {};
@@ -393,13 +393,7 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, p
       `${JSON.stringify(runtime, null, 2)}\n`,
       "utf8",
     );
-    await verifyStagedGeneration(stagingDataDirectory);
-    await mkdir(dirname(paths.publishedHistoryCachePath), { recursive: true });
-    await copyFile(
-      join(stagingDataDirectory, "bond-market-history.json"),
-      paths.publishedHistoryCachePath,
-    );
-
+    await verifyStagedGeneration(stagingDataDirectory, previousWorkbench);
     await mkdir(join(paths.dataDirectory, "generations"), { recursive: true });
     await rename(stagingDataDirectory, join(paths.dataDirectory, generation));
     const pointerStage = join(stagingRoot, "current.json");
@@ -435,9 +429,10 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     "supplemental-view",
     "workbench",
     "runtime",
+    "cache",
   ]).has(scenario)) {
     throw new TypeError(
-      "isolated refresh scenario must be one of success, hash, manifest, cross-file, supplemental, supplemental-view, workbench, runtime",
+      "isolated refresh scenario must be one of success, hash, manifest, cross-file, supplemental, supplemental-view, workbench, runtime, cache",
     );
   }
   if (
@@ -680,6 +675,20 @@ async function buildIsolatedMarketCandidate({
     );
   }
   if (scenario === "manifest") files.pop();
+  if (scenario === "cache") {
+    const generation = /^\.\/data\/(generations\/[a-f0-9]+)\/emerging-market\.json$/
+      .exec(manifestBase.emergingMarketUrl)?.[1];
+    if (generation === undefined) {
+      throw new TypeError("isolated cache scenario requires a canonical generation");
+    }
+    const occupiedGeneration = join(
+      dirname(dirname(outputDir)),
+      "data",
+      ...generation.split("/"),
+    );
+    await mkdir(occupiedGeneration, { recursive: true });
+    await writeFile(join(occupiedGeneration, "sentinel.txt"), "occupied", "utf8");
+  }
   return {
     manifest: {
       ...manifestBase,
@@ -880,6 +889,8 @@ async function seedIsolatedHarnessRoot(paths) {
     `${JSON.stringify(isolatedSupplementalSnapshot("2026-07-29T06:00:06.000Z"))}\n`,
     "utf8",
   );
+  await mkdir(dirname(paths.publishedHistoryCachePath), { recursive: true });
+  await writeFile(paths.publishedHistoryCachePath, "[]\n", "utf8");
 }
 
 async function captureIsolatedArtifacts(paths) {
@@ -905,6 +916,7 @@ async function captureIsolatedArtifacts(paths) {
       "abcdef",
       "bond-workbench.json",
     )),
+    cacheText: await readOptionalText(paths.publishedHistoryCachePath),
   };
 }
 
@@ -956,8 +968,14 @@ export async function readPublishedBondHistory(
   dataDirectory = DATA_DIRECTORY,
   cachePath,
 ) {
+  return readPublishedBondHistoryFromActive(
+    await readActiveGeneration(dataDirectory),
+    cachePath,
+  );
+}
+
+async function readPublishedBondHistoryFromActive(active, cachePath) {
   const histories = [];
-  const active = await readActiveGeneration(dataDirectory);
   if (active !== undefined) {
     try {
       const { text, value } = await readHistoryFile(
@@ -979,7 +997,7 @@ export async function readPublishedBondHistory(
   }
   if (cachePath) {
     try {
-      histories.push((await readHistoryFile(cachePath)).value);
+      histories.unshift((await readHistoryFile(cachePath)).value);
     } catch (error) {
       if (error?.code !== "ENOENT") throw error;
     }
@@ -1006,7 +1024,12 @@ export async function readPublishedBondHistory(
 export async function readPublishedCbIssuerResearch(
   dataDirectory = DATA_DIRECTORY,
 ) {
-  const active = await readActiveGeneration(dataDirectory);
+  return readPublishedCbIssuerResearchFromActive(
+    await readActiveGeneration(dataDirectory),
+  );
+}
+
+async function readPublishedCbIssuerResearchFromActive(active) {
   if (active === undefined) return undefined;
   try {
     const text = await readFile(join(active.root, "cb-issuer-research.json"), "utf8");
@@ -1032,7 +1055,12 @@ export async function readPublishedCbIssuerResearch(
 export async function readPublishedBondWorkbench(
   dataDirectory = DATA_DIRECTORY,
 ) {
-  const active = await readActiveGeneration(dataDirectory);
+  return readPublishedBondWorkbenchFromActive(
+    await readActiveGeneration(dataDirectory),
+  );
+}
+
+async function readPublishedBondWorkbenchFromActive(active) {
   if (active === undefined) return undefined;
   try {
     const text = await readFile(join(active.root, "bond-workbench.json"), "utf8");
@@ -1069,7 +1097,12 @@ export async function readPublishedBondWorkbench(
 export async function readPublishedCbSupplemental(
   dataDirectory = DATA_DIRECTORY,
 ) {
-  const active = await readActiveGeneration(dataDirectory);
+  return readPublishedCbSupplementalFromActive(
+    await readActiveGeneration(dataDirectory),
+  );
+}
+
+async function readPublishedCbSupplementalFromActive(active) {
   if (active === undefined) return undefined;
   try {
     const text = await readFile(join(active.root, "bond-supplemental.json"), "utf8");
@@ -1116,17 +1149,47 @@ async function readActiveGeneration(dataDirectory) {
     if (error?.code === "ENOENT") return undefined;
     throw error;
   }
-  if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
+  const expectedRuntimeUrl = `./data/${pointer?.generation}/runtime.json`;
+  if (
+    pointer === null
+    || typeof pointer !== "object"
+    || Array.isArray(pointer)
+    || !equalJson(Object.keys(pointer).sort(), [
+      "generation",
+      "runtimeUrl",
+      "schemaVersion",
+    ].sort())
+    || pointer.schemaVersion !== 1
+    || !/^generations\/[a-f0-9-]+$/i.test(pointer.generation ?? "")
+    || pointer.runtimeUrl !== expectedRuntimeUrl
+  ) {
     throw new Error("INVALID_CURRENT_GENERATION_POINTER");
   }
   const root = join(dataDirectory, pointer.generation);
+  let manifestText;
+  try {
+    manifestText = await readFile(join(root, "manifest.json"), "utf8");
+  } catch (error) {
+    throw new Error(`INVALID_ACTIVE_GENERATION_MANIFEST:${error.message}`);
+  }
   let manifest;
   try {
-    manifest = JSON.parse(await readFile(join(root, "manifest.json"), "utf8"));
+    manifest = JSON.parse(manifestText);
   } catch (error) {
-    if (error?.code !== "ENOENT") throw error;
+    throw new Error(`INVALID_ACTIVE_GENERATION_MANIFEST:${error.message}`);
   }
-  return { root, manifest };
+  if (
+    manifest === null
+    || typeof manifest !== "object"
+    || Array.isArray(manifest)
+    || manifest.market === null
+    || typeof manifest.market !== "object"
+    || Array.isArray(manifest.market)
+    || !Array.isArray(manifest.market.files)
+  ) {
+    throw new Error("INVALID_ACTIVE_GENERATION_MANIFEST:ENVELOPE");
+  }
+  return Object.freeze({ root, manifest });
 }
 
 function declaresFile(manifest, name) {
@@ -1141,6 +1204,8 @@ function validatePriorManifestFile(manifest, name, text, recordCount) {
     entries.length !== 1
     || entry?.sha256 !== sha256Text(text)
     || entry?.recordCount !== recordCount
+    || (Object.hasOwn(entry, "rawBytes")
+      && entry.rawBytes !== Buffer.byteLength(text, "utf8"))
   ) {
     throw new Error(`prior ${name} manifest integrity is invalid`);
   }
@@ -1186,7 +1251,7 @@ function buildEmergingMarketSnapshot({ marketRows, companyRows }) {
   };
 }
 
-async function verifyStagedGeneration(stagingDataDirectory) {
+async function verifyStagedGeneration(stagingDataDirectory, previousWorkbench) {
   const snapshot = JSON.parse(await readFile(
     join(stagingDataDirectory, "emerging-market.json"),
     "utf8",
@@ -1386,6 +1451,8 @@ async function verifyStagedGeneration(stagingDataDirectory) {
       requestedDate: manifest.market.requestedDate,
       dataDate: manifest.market.dataDate,
       sourceStateSummary: manifest.market.workbenchSourceStateSummary,
+      previous: previousWorkbench,
+      events: [],
     });
     if (JSON.stringify(workbenchEntry.sourceStateSummary)
       !== JSON.stringify(manifest.market.workbenchSourceStateSummary)) {

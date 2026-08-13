@@ -384,13 +384,47 @@ test("refresh reads the prior generation bond history before staging a replaceme
   await mkdir(generation, { recursive: true });
   await writeFile(
     join(dataRoot, "current.json"),
-    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
     "utf8",
   );
   await writeFile(join(generation, "bond-market-history.json"), JSON.stringify(history), "utf8");
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({ market: { status: "verified", files: [] } }),
+    "utf8",
+  );
 
   assert.deepEqual(await readPublishedBondHistory(dataRoot), history);
 });
+
+for (const manifestFailure of ["missing", "corrupt"]) {
+  test(`refresh fails before fetch when the active generation manifest is ${manifestFailure}`, async () => {
+    await withTemporaryShowcase(async (root) => {
+      await seedPriorGeneration(root);
+      const generation = join(root, "static-showcase/data/generations/abcdef");
+      const pointerPath = join(root, "static-showcase/data/current.json");
+      const beforePointer = await readFile(pointerPath, "utf8");
+      if (manifestFailure === "missing") {
+        await rm(join(generation, "manifest.json"));
+      } else {
+        await writeFile(join(generation, "manifest.json"), "{not-json", "utf8");
+      }
+      let fetchCalls = 0;
+
+      await assert.rejects(
+        withBlockedGlobalFetch(() => refreshStaticShowcase({
+          fetchImpl: async () => {
+            fetchCalls += 1;
+            return new Response("must not fetch", { status: 500 });
+          },
+        })),
+        /ACTIVE_GENERATION_MANIFEST|manifest/i,
+      );
+      assert.equal(fetchCalls, 0);
+      assert.equal(await readFile(pointerPath, "utf8"), beforePointer);
+    });
+  });
+}
 
 test("prior generation fails closed when its manifest declares a missing issuer snapshot", async () => {
   const root = await mkdtemp(join(tmpdir(), "showcase-prior-research-"));
@@ -399,7 +433,7 @@ test("prior generation fails closed when its manifest declares a missing issuer 
   await mkdir(generation, { recursive: true });
   await writeFile(
     join(dataRoot, "current.json"),
-    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
     "utf8",
   );
   await writeFile(
@@ -423,7 +457,7 @@ test("prior generation fails closed when its manifest declares a missing CB supp
   await mkdir(generation, { recursive: true });
   await writeFile(
     join(dataRoot, "current.json"),
-    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
     "utf8",
   );
   await writeFile(
@@ -447,7 +481,7 @@ test("prior workbench is optional only when the active manifest does not declare
   await mkdir(generation, { recursive: true });
   await writeFile(
     join(dataRoot, "current.json"),
-    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
     "utf8",
   );
   await writeFile(
@@ -570,7 +604,7 @@ test("prior declared workbench hash metadata is verified before reuse", async ()
   await mkdir(generation, { recursive: true });
   await writeFile(
     join(dataRoot, "current.json"),
-    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
     "utf8",
   );
   const workbench = {
@@ -632,12 +666,17 @@ test("refresh merges a restored CI history cache with the committed generation",
   await mkdir(join(root, ".cache", "published-history"), { recursive: true });
   await writeFile(
     join(dataRoot, "current.json"),
-    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
     "utf8",
   );
   await writeFile(
     join(generation, "bond-market-history.json"),
     JSON.stringify([historyPoint()]),
+    "utf8",
+  );
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({ market: { status: "verified", files: [] } }),
     "utf8",
   );
   await writeFile(
@@ -650,7 +689,7 @@ test("refresh merges a restored CI history cache with the committed generation",
   );
 
   assert.deepEqual(await readPublishedBondHistory(dataRoot, cachePath), [
-    historyPoint({ cbClose: "101" }),
+    historyPoint(),
     historyPoint({ date: "2026-07-31", cbClose: "102" }),
   ]);
 });
@@ -705,6 +744,25 @@ for (const failureMode of [
     );
   });
 }
+
+test("cache/rename failure leaves pointer, prior generation and cache bytes unchanged", async () => {
+  const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
+    "../scripts/refresh-static-showcase-data.mjs"
+  );
+  const outcome = await runIsolatedRefreshStaticShowcaseTestHarness({
+    scenario: "cache",
+    now: "2026-07-30T06:00:06.000Z",
+  });
+
+  assert.equal(outcome.status, "rejected");
+  assert.equal(outcome.artifacts.after.pointerText, outcome.artifacts.before.pointerText);
+  assert.equal(
+    outcome.artifacts.after.priorWorkbenchText,
+    outcome.artifacts.before.priorWorkbenchText,
+  );
+  assert.notEqual(outcome.artifacts.before.cacheText, undefined);
+  assert.equal(outcome.artifacts.after.cacheText, outcome.artifacts.before.cacheText);
+});
 
 test("refresh fails closed and preserves prior files when emerging-market validation fails", async () => {
   await withTemporaryShowcase(async (root) => {
@@ -873,5 +931,9 @@ async function seedPriorGeneration(root) {
     `${JSON.stringify(issuerResearchSnapshot())}\n`,
     "utf8",
   );
-  await writeFile(join(root, "static-showcase/data/current.json"), JSON.stringify({ generation: "generations/abcdef" }), "utf8");
+  await writeFile(join(root, "static-showcase/data/current.json"), JSON.stringify({
+    schemaVersion: 1,
+    generation: "generations/abcdef",
+    runtimeUrl: "./data/generations/abcdef/runtime.json",
+  }), "utf8");
 }
