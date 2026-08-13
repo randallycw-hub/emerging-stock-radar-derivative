@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { CB_RESEARCH_RULES, evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
@@ -91,6 +92,15 @@ function strategy(result, code) {
 function check(item, code) {
   return item.checks.find((entry) => entry.code === code);
 }
+
+test("constructs canonical checks directly without a legacy normalization path", async () => {
+  const source = await readFile(new URL("../lib/market-data/bond-strategy-assessment.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /canonicalizeAssessment|CANONICAL_CODES/);
+  const allCheckCalls = [...source.matchAll(/\bcheck\(/g)];
+  const literalCheckCalls = [...source.matchAll(/\bcheck\(\s*"([^"]+)"/g)];
+  assert.equal(allCheckCalls.length, literalCheckCalls.length + 1, "every check call must pass a canonical literal; the one remainder is the function declaration");
+  assert.deepEqual([...new Set(literalCheckCalls.map((match) => match[1]))].sort(), Object.keys(CB_RESEARCH_RULES.checks).sort());
+});
 
 test("evaluates all six independent dimensions at their published thresholds", () => {
   const favorable = assessment();
@@ -238,12 +248,12 @@ test("marks a present spread from a mismatched valuation date pending in its own
 
 test("covers the six named anonymized public-like research fixtures", async (context) => {
   const fixtures = [
-    ["聯電一（匿名化）", { cbClose: "131", premiumRate: "31" }, "price", "risk", "price_distance", "131", CB_RESEARCH_RULES.price.favorable],
-    ["金像電三（匿名化）", { cbClose: "115", premiumRate: "9" }, "price", "favorable", "price_distance", "115", CB_RESEARCH_RULES.price.favorable],
-    ["博智二（匿名化）", { cbClose: "116", premiumRate: "10.01" }, "premium", "watch", "premium_dimension", "10.01", CB_RESEARCH_RULES.premium.favorable],
-    ["偉詮電一（匿名化）", { daysToMaturity: 179 }, "days", "risk", "days_remaining", "179", CB_RESEARCH_RULES.days.favorable],
-    ["至上11（匿名化）", { cbPriceDate: "2026-08-11", valuationDate: "2026-08-11" }, "spread", "pending", "spread_dimension", "0.8", CB_RESEARCH_RULES.spread.favorable],
-    ["順德一（匿名化）", { cbTradeUnits: "0", premiumRate: "-0.01" }, "liquidity", "favorable", "daily_volume", "0", CB_RESEARCH_RULES.liquidity.favorable],
+    ["聯電一（匿名化）", { cbClose: "131", premiumRate: "31" }, "price", "risk", "price_distance", "131", CB_RESEARCH_RULES.checks.price_distance.threshold],
+    ["金像電三（匿名化）", { cbClose: "115", premiumRate: "9" }, "price", "favorable", "price_distance", "115", CB_RESEARCH_RULES.checks.price_distance.threshold],
+    ["博智二（匿名化）", { cbClose: "116", premiumRate: "10.01" }, "premium", "watch", "premium_dimension", "10.01", CB_RESEARCH_RULES.checks.premium_dimension.threshold],
+    ["偉詮電一（匿名化）", { daysToMaturity: 179 }, "days", "risk", "days_remaining", "179", CB_RESEARCH_RULES.checks.days_remaining.threshold],
+    ["至上11（匿名化）", { cbPriceDate: "2026-08-11", valuationDate: "2026-08-11" }, "spread", "pending", "spread_dimension", "0.8", CB_RESEARCH_RULES.checks.spread_dimension.threshold],
+    ["順德一（匿名化）", { cbTradeUnits: "0", premiumRate: "-0.01" }, "liquidity", "favorable", "daily_volume", "0", CB_RESEARCH_RULES.checks.daily_volume.threshold],
   ];
   for (const [label, patch, dimensionCode, dimensionState, checkCode, actual, threshold] of fixtures) {
     await context.test(label, () => {
@@ -265,26 +275,49 @@ test("deeply freezes assessment sections and checks", () => {
   assert.ok(Object.isFrozen(result.dimensions[0].checks[0]));
 });
 
-test("uses frozen shared rules for boolean labels and strategy thresholds", () => {
+test("uses frozen canonical check rules for boolean labels and strategy thresholds", () => {
   assert.ok(Object.isFrozen(CB_RESEARCH_RULES));
-  assert.ok(Object.isFrozen(CB_RESEARCH_RULES.arbitrage));
-  assert.throws(() => { CB_RESEARCH_RULES.arbitrage.borrowability = "changed"; }, TypeError);
+  assert.ok(Object.isFrozen(CB_RESEARCH_RULES.checks.borrowability));
+  assert.throws(() => { CB_RESEARCH_RULES.checks.borrowability.label = "changed"; }, TypeError);
   const result = assessment();
   const arbitrage = strategy(result, "arbitrage");
-  assert.equal(check(arbitrage, "borrowability").label, CB_RESEARCH_RULES.arbitrage.borrowabilityLabel);
-  assert.equal(check(arbitrage, "borrowability").threshold, CB_RESEARCH_RULES.arbitrage.borrowability);
+  assert.equal(check(arbitrage, "borrowability").label, CB_RESEARCH_RULES.checks.borrowability.label);
+  assert.equal(check(arbitrage, "borrowability").threshold, CB_RESEARCH_RULES.checks.borrowability.threshold);
   assert.equal(check(arbitrage, "conversion_not_suspended").label, CB_RESEARCH_RULES.checks.conversion_not_suspended.label);
   assert.equal(check(strategy(result, "dynamic_hedge"), "hedge_volatility").threshold, CB_RESEARCH_RULES.checks.hedge_volatility.threshold);
 });
 
-test("covers every canonical check rule with exact produced display text", () => {
-  const result = assessment();
-  const produced = [...result.dimensions, ...result.strategies].flatMap((section) => section.checks);
-  assert.deepEqual(Object.keys(CB_RESEARCH_RULES.checks).sort(), produced.map((item) => item.code).sort());
-  for (const item of produced) {
-    assert.equal(item.label, CB_RESEARCH_RULES.checks[item.code].label);
-    assert.equal(item.threshold, CB_RESEARCH_RULES.checks[item.code].threshold);
+test("covers every canonical rule from complete and pending fixtures with exact display text", () => {
+  const complete = assessment();
+  const pending = assessment({
+    view: view({ cbClose: null, daysToMaturity: Number.NaN, premiumRate: null, remainingRatio: null, dailyTurnoverRate: null }),
+    history: [],
+    spreadPercent: null,
+    spreadDataDate: null,
+    borrowability: "unknown",
+    conversionSuspended: null,
+    publicFinancials: {
+      ttmProfitState: "unknown",
+      revenueTrendState: "unknown",
+      psPercentile: null,
+      dataDate: null,
+      sourceId: null,
+    },
+  });
+  const coveredCodes = new Set();
+  for (const result of [complete, pending]) {
+    for (const section of [...result.dimensions, ...result.strategies]) {
+      assert.equal(new Set(section.checks.map((item) => item.code)).size, section.checks.length, section.code);
+      for (const item of section.checks) {
+        const rule = CB_RESEARCH_RULES.checks[item.code];
+        assert.ok(rule, item.code);
+        assert.equal(item.label, rule.label, item.code);
+        assert.equal(item.threshold, rule.threshold, item.code);
+        coveredCodes.add(item.code);
+      }
+    }
   }
+  assert.deepEqual([...coveredCodes].sort(), Object.keys(CB_RESEARCH_RULES.checks).sort());
 });
 
 test("zero trade is known while five- and twenty-day volume remain pending without Task 3 history", () => {

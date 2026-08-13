@@ -5,7 +5,7 @@ import {
   buildBondWorkbenchSnapshot,
   parseBondWorkbenchSnapshot,
 } from "../lib/market-data/bond-workbench.ts";
-import { evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
+import { CB_RESEARCH_RULES, evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
 import { bondTermSummariesFrom11406Rows } from "../scripts/lib/bond-inputs-from-11406.mjs";
 
 const generatedAt = "2026-08-13T01:00:00.000Z";
@@ -161,6 +161,24 @@ test("preserves a supplied strict assessment and rejects unmarked cross-date str
     })),
     /DATE_MISMATCH|assessment/i,
   );
+});
+
+test("round-trips canonical assessment display rules and rejects forged display text", () => {
+  const built = buildBondWorkbenchSnapshot(input());
+  const parsed = parseBondWorkbenchSnapshot(JSON.parse(JSON.stringify(built)));
+  assert.deepEqual(parsed, built);
+  for (const item of [...parsed.records[0].assessment.dimensions, ...parsed.records[0].assessment.strategies].flatMap((section) => section.checks)) {
+    assert.equal(item.label, CB_RESEARCH_RULES.checks[item.code].label);
+    assert.equal(item.threshold, CB_RESEARCH_RULES.checks[item.code].threshold);
+  }
+
+  const forgedLabel = structuredClone(built);
+  forgedLabel.records[0].assessment.dimensions[0].checks[0].label = "forged label";
+  assert.throws(() => parseBondWorkbenchSnapshot(forgedLabel), /label.*rule|assessment.*label/i);
+
+  const forgedThreshold = structuredClone(built);
+  forgedThreshold.records[0].assessment.strategies[0].checks[0].threshold = "forged threshold";
+  assert.throws(() => parseBondWorkbenchSnapshot(forgedThreshold), /threshold.*rule|assessment.*threshold/i);
 });
 
 test("rejects a decided public-financial assessment check without evidence", () => {

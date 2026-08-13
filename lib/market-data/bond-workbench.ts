@@ -217,10 +217,13 @@ function parseAssessmentCheck(value: unknown, name: string): import("./types.ts"
   assertExactKeys(check, ["code", "label", "state", "actual", "threshold", "dataDate", "sourceId", "missingReason"], name);
   if (typeof check.code !== "string" || !Object.keys(CB_RESEARCH_RULES.checks).includes(check.code)) throw new TypeError(`${name}.code is invalid`);
   if (check.state !== "met" && check.state !== "partial" && check.state !== "pending" && check.state !== "not_met") throw new TypeError(`${name}.state is invalid`);
+  const rule = CB_RESEARCH_RULES.checks[check.code as keyof typeof CB_RESEARCH_RULES.checks];
+  if (check.label !== rule.label) throw new TypeError(`${name}.label does not match canonical rule`);
+  if (check.threshold !== rule.threshold) throw new TypeError(`${name}.threshold does not match canonical rule`);
   const nullableText = (entry: unknown, field: string): string | null => entry === null ? null : readText(entry, field);
   return {
-    code: readText(check.code, `${name}.code`), label: readText(check.label, `${name}.label`), state: check.state,
-    actual: nullableText(check.actual, `${name}.actual`), threshold: readText(check.threshold, `${name}.threshold`),
+    code: readText(check.code, `${name}.code`), label: rule.label, state: check.state,
+    actual: nullableText(check.actual, `${name}.actual`), threshold: rule.threshold,
     dataDate: check.dataDate === null ? null : readDate(check.dataDate, `${name}.dataDate`), sourceId: nullableText(check.sourceId, `${name}.sourceId`), missingReason: nullableText(check.missingReason, `${name}.missingReason`),
   };
 }
