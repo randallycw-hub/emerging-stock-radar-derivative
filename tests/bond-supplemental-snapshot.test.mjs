@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   buildCbSupplementalSnapshot,
   currentCbRedemption,
+  parseCbRedemptionEvent,
   parseCbSupplementalSnapshot,
   summarizeCbInstitution,
 } from "../lib/market-data/bond-supplemental.ts";
@@ -28,6 +29,31 @@ test("parses a complete supplemental snapshot into a defensive frozen clone", ()
 
   input.institutionHistory["54642"][0].bondName = "mutated";
   assert.notEqual(parsed.institutionHistory["54642"][0].bondName, "mutated");
+});
+
+test("parses one verified redemption event as a defensive frozen clone", async (t) => {
+  const valid = redemptionEvent("2026-08-06", "31312");
+  const parsed = parseCbRedemptionEvent(valid);
+  assert.deepEqual(parsed, valid);
+  assert.notStrictEqual(parsed, valid);
+  assert.ok(Object.isFrozen(parsed));
+  valid.bondName = "mutated";
+  assert.equal(parsed.bondName, "弘塑二");
+
+  for (const [name, mutate] of [
+    ["forged host", (event) => { event.detailUrl = event.detailUrl.replace("mopsov.twse.com.tw", "forged.example"); }],
+    ["forged path", (event) => { event.detailUrl = event.detailUrl.replace("ajax_t120sb23", "forged"); }],
+    ["forged query", (event) => { event.detailUrl = event.detailUrl.replace("co_id=3131", "co_id=9999"); }],
+    ["forged subject", (event) => { event.subject = event.subject.replace("弘塑二", "偽造二"); }],
+    ["hidden key", (event) => { Object.defineProperty(event, "hidden", { value: true }); }],
+    ["symbol key", (event) => { event[Symbol("drift")] = true; }],
+  ]) {
+    await t.test(name, () => {
+      const forged = redemptionEvent("2026-08-06", "31312");
+      mutate(forged);
+      assert.throws(() => parseCbRedemptionEvent(forged), /redemption|detailUrl|subject|keys/i);
+    });
+  }
 });
 
 test("supplemental parser rejects hidden, symbol and sparse off-contract data", async (t) => {

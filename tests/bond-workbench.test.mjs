@@ -112,7 +112,7 @@ function redemptionEvent(patch = {}) {
     bondName: "御嵿一",
     announcementDate: "2026-08-01",
     delistingDate: asOfDate,
-    subject: "公告御嵿股份有限公司國內轉換公司債",
+    subject: "公告御嵿股份有限公司國內轉換公司債(簡稱：御嵿一，代碼：35221)發行公司行使債券贖回權暨訂於115年08月13日終止櫃檯買賣等相關事宜。",
     detailUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3522&date1=20260801&seq_no=1&pub_class=0&firstin=1",
     ...patch,
   };
@@ -165,6 +165,24 @@ test("archives by verified redemption, maturity, zero balance, then complete ros
     ["35224", "removed_from_official_roster"],
   ]);
   assert.ok(result.records.every((record) => record.status === "archived"));
+});
+
+test("rejects forged redemption evidence before it can archive a workbench record", async (t) => {
+  for (const [name, patch] of [
+    ["host", { detailUrl: redemptionEvent().detailUrl.replace("mopsov.twse.com.tw", "forged.example") }],
+    ["path", { detailUrl: redemptionEvent().detailUrl.replace("ajax_t120sb23", "forged") }],
+    ["query", { detailUrl: redemptionEvent().detailUrl.replace("co_id=3522", "co_id=9999") }],
+    ["subject", { subject: redemptionEvent().subject.replace("御嵿一", "偽造一") }],
+  ]) {
+    await t.test(name, () => {
+      assert.throws(
+        () => buildBondWorkbenchSnapshot(input({
+          currentViews: [view("35221", { redemptionEvent: redemptionEvent(patch) })],
+        })),
+        /redemption|detailUrl|subject/i,
+      );
+    });
+  }
 });
 
 test("archives every canonical decimal spelling of a zero outstanding balance", async (t) => {
@@ -268,7 +286,11 @@ test("uses the full strict BondMarketView parser before accepting current or pre
   }
   assert.throws(
     () => buildBondWorkbenchSnapshot(input({
-      currentViews: [view("35221", { redemptionEvent: redemptionEvent({ bondCode: "35222" }) })],
+      currentViews: [view("35221", { redemptionEvent: redemptionEvent({
+        bondCode: "35222",
+        bondName: "御嵿二",
+        subject: "公告御嵿股份有限公司國內轉換公司債(簡稱：御嵿二，代碼：35222)發行公司行使債券贖回權暨訂於115年08月13日終止櫃檯買賣等相關事宜。",
+      }) })],
     })),
     /redemptionEvent\.bondCode does not match view/i,
   );

@@ -1,4 +1,5 @@
 import { isIsoDate, isIsoDateTime, isYearMonth } from "../domain/dates.ts";
+import { parseCbRedemptionEvent } from "./bond-supplemental.ts";
 import type {
   BondArchiveReason,
   BondFieldState,
@@ -18,7 +19,6 @@ const EVENT_KEYS = ["bondCode", "eventId", "type", "date", "title", "sourceId", 
 const FIELD_STATE_KEYS = ["price", "valuation", "outstanding", "institutions", "company", "events", "history"];
 const VIEW_KEYS = ["bondCode", "issuerCode", "bondName", "issuerResearch", "cbClose", "cbPriceDate", "cbTradeUnits", "stockClose", "stockPriceDate", "currentConversionPrice", "conversionPriceEffectiveDate", "valuationDate", "valuationCbClose", "valuationStockClose", "conversionValue", "premiumRate", "outstandingAmount", "outstandingDataDate", "outstandingReductionRate", "remainingUnits", "remainingRatio", "dailyTurnoverRate", "institutionDataDate", "institutionNetUnits", "institutionNet5dUnits", "institutionNet20dUnits", "redemptionEvent", "maturityDate", "daysToMaturity", "nextPutDate", "daysToNextPut", "nextEventType", "nextEventDate", "daysToNextEvent", "dataQuality", "staleCbPrice", "missingReasons"];
 const ISSUER_RESEARCH_KEYS = ["market", "industryName", "revenueMonth", "sourcePublishedOn", "revenueUnit", "currentMonthRevenue", "monthOverMonthPercent", "yearOverYearPercent", "cumulativeRevenue", "cumulativeYearOverYearPercent"];
-const REDEMPTION_EVENT_KEYS = ["issuerCode", "issuerName", "bondCode", "bondName", "announcementDate", "delistingDate", "subject", "detailUrl"];
 const DECIMAL = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
 const SIGNED_DECIMAL = /^-?(?:0|[1-9]\d*)(?:\.\d+)?$/;
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/;
@@ -270,26 +270,11 @@ function parseIssuerResearch(value: unknown, name: string): BondMarketView["issu
 
 function parseRedemptionEvent(value: unknown, name: string): BondMarketView["redemptionEvent"] {
   if (value === null) return null;
-  const event = requireRecord(value, name);
-  assertExactKeys(event, REDEMPTION_EVENT_KEYS, name);
-  const issuerCode = readIssuerCode(event.issuerCode, `${name}.issuerCode`);
-  const bondCode = readBondCode(event.bondCode, `${name}.bondCode`);
-  if (!bondCode.startsWith(issuerCode) || !/^\d{1,2}$/.test(bondCode.slice(issuerCode.length))) {
-    throw new TypeError(`${name}.bondCode does not match issuerCode`);
+  try {
+    return parseCbRedemptionEvent(value);
+  } catch (error) {
+    throw new TypeError(`${name} is invalid: ${String(error)}`);
   }
-  const announcementDate = readDate(event.announcementDate, `${name}.announcementDate`);
-  const delistingDate = readDate(event.delistingDate, `${name}.delistingDate`);
-  if (announcementDate > delistingDate) throw new TypeError(`${name} dates are invalid`);
-  return {
-    issuerCode,
-    issuerName: readText(event.issuerName, `${name}.issuerName`),
-    bondCode,
-    bondName: readText(event.bondName, `${name}.bondName`),
-    announcementDate,
-    delistingDate,
-    subject: readText(event.subject, `${name}.subject`),
-    detailUrl: readHttpsUrl(event.detailUrl, `${name}.detailUrl`),
-  };
 }
 
 function parseEvents(value: unknown): BondWorkbenchEvent[] {
@@ -297,8 +282,20 @@ function parseEvents(value: unknown): BondWorkbenchEvent[] {
   const events = value.map((entry, index) => {
     const event = requireRecord(entry, `bond workbench event ${index}`);
     assertExactKeys(event, EVENT_KEYS, `bond workbench event ${index}`);
-    if (!EVENT_TYPES.has(event.type as BondWorkbenchEvent["type"])) throw new TypeError("bond workbench event type is invalid");
-    return { bondCode: readBondCode(event.bondCode, "bond workbench event bondCode"), eventId: readText(event.eventId, "bond workbench event eventId"), type: event.type as BondWorkbenchEvent["type"], date: readDate(event.date, "bond workbench event date"), title: readText(event.title, "bond workbench event title"), sourceId: readText(event.sourceId, "bond workbench event sourceId"), sourceUrl: event.sourceUrl === null ? null : readText(event.sourceUrl, "bond workbench event sourceUrl") };
+    if (!EVENT_TYPES.has(event.type as BondWorkbenchEvent["type"])) {
+      throw new TypeError("bond workbench event type is invalid");
+    }
+    return {
+      bondCode: readBondCode(event.bondCode, "bond workbench event bondCode"),
+      eventId: readText(event.eventId, "bond workbench event eventId"),
+      type: event.type as BondWorkbenchEvent["type"],
+      date: readDate(event.date, "bond workbench event date"),
+      title: readText(event.title, "bond workbench event title"),
+      sourceId: readText(event.sourceId, "bond workbench event sourceId"),
+      sourceUrl: event.sourceUrl === null
+        ? null
+        : readText(event.sourceUrl, "bond workbench event sourceUrl"),
+    };
   });
   if (new Set(events.map((event) => `${event.bondCode}\u001f${event.eventId}`)).size !== events.length) throw new TypeError("duplicate bond workbench event id");
   return events.sort((left, right) => left.bondCode.localeCompare(right.bondCode) || left.date.localeCompare(right.date) || left.eventId.localeCompare(right.eventId));
@@ -342,13 +339,6 @@ function readBondCode(value: unknown, name: string): string {
   const text = readText(value, name);
   if (!/^\d{5,6}$/.test(text)) throw new TypeError(`${name} is invalid`);
   return text;
-}
-
-function readIssuerCode(value: unknown, name: string): string {
-  if (typeof value !== "string" || !/^\d{4}$/.test(value)) {
-    throw new TypeError(`${name} is invalid`);
-  }
-  return value;
 }
 
 function readText(value: unknown, name: string): string {
@@ -444,20 +434,6 @@ function readMissingReasons(value: unknown, name: string): string[] {
 function readDates(value: unknown, name: string): string[] {
   assertDenseArray(value, name);
   return value.map((item, index) => readDate(item, `${name}[${index}]`));
-}
-
-function readHttpsUrl(value: unknown, name: string): string {
-  const text = readText(value, name);
-  let url: URL;
-  try {
-    url = new URL(text);
-  } catch {
-    throw new TypeError(`${name} is invalid`);
-  }
-  if (url.protocol !== "https:" || url.username !== "" || url.password !== "" || url.hash !== "") {
-    throw new TypeError(`${name} is invalid`);
-  }
-  return text;
 }
 
 function assertTimestamp(value: unknown, name: string): asserts value is string {

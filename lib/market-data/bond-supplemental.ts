@@ -42,6 +42,10 @@ export function parseCbSupplementalSnapshot(value: unknown): CbSupplementalSnaps
   return deepFreeze(validatePreviousSnapshot(value as CbSupplementalSnapshot));
 }
 
+export function parseCbRedemptionEvent(value: unknown): CbRedemptionEvent {
+  return deepFreeze({ ...validateRedemption(value) });
+}
+
 const SNAPSHOT_KEYS = [
   "schemaVersion",
   "generatedAt",
@@ -688,7 +692,7 @@ function validateRedemptions(value: unknown): CbRedemptionEvent[] {
   assertDenseArray(value, "redemptions");
   const seen = new Set<string>();
   return value.map((event) => {
-    const normalized = validateRedemption(event);
+    const normalized = parseCbRedemptionEvent(event);
     const key = `${normalized.bondCode}:${normalized.announcementDate}`;
     if (seen.has(key)) throw new TypeError(`duplicate redemption event: ${key}`);
     seen.add(key);
