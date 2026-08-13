@@ -13,7 +13,10 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
-import { bondInputsFrom11406Rows } from "./lib/bond-inputs-from-11406.mjs";
+import {
+  bondInputsFrom11406Rows,
+  bondTermSummariesFrom11406Rows,
+} from "./lib/bond-inputs-from-11406.mjs";
 import { deriveBondRemainingMetrics } from "../lib/market-data/bond-derived-metrics.ts";
 import {
   buildHistoryPoints,
@@ -21,6 +24,11 @@ import {
   parseBondMarketHistory,
 } from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
+import { evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
+import {
+  buildBondWorkbenchSnapshot,
+  parseBondWorkbenchSnapshot,
+} from "../lib/market-data/bond-workbench.ts";
 import {
   buildCbSupplementalSnapshot,
   currentCbRedemption,
@@ -49,6 +57,7 @@ const MARKET_FILE_ENTRIES = [
   ["cb-issuer-research.json", "issuerResearch"],
   ["bond-market-view.json", "views"],
   ["bond-market-history.json", "history"],
+  ["bond-workbench.json", "workbench"],
 ];
 
 const CB_ISSUER_RESEARCH_RESOURCES = [
@@ -107,8 +116,13 @@ export async function buildBondMarketSnapshot(options = {}) {
     throw new TypeError("asOfDate must be an ISO date");
   }
   const asOfDate = requestedAsOfDate ?? taipeiDate(generatedDate);
-  const bondInputs = bonds ?? await loadBondInputs(outputDir);
+  const sourceRows = bonds === undefined ? await loadBondRows(outputDir) : undefined;
+  const bondInputs = bonds ?? bondInputsFrom11406Rows(sourceRows);
   if (!Array.isArray(bondInputs)) throw new TypeError("bonds must be an array");
+  const baseTerms = sourceRows === undefined
+    ? termSummariesFromBondInputs(bondInputs)
+    : bondTermSummariesFrom11406Rows(sourceRows);
+  const previousWorkbench = await readPreviousWorkbench(outputDir);
   const previousHistory = await readPreviousHistory(outputDir);
   const previousSupplemental = await readPreviousSupplemental(outputDir);
   const validatedPreviousIssuerResearch = previousIssuerResearch === undefined
@@ -173,6 +187,29 @@ export async function buildBondMarketSnapshot(options = {}) {
     conversionPrices: collected.conversionPrices,
   });
   const history = mergeBondMarketHistory(previousHistory, currentHistory);
+  const latestCbPriceDate = latestTradingDate(collected.cbQuotes);
+  const latestStockPriceDate = latestTradingDate(collected.stockCloses);
+  const dataDate = [latestCbPriceDate, latestStockPriceDate]
+    .filter(Boolean)
+    .sort()[0] ?? null;
+  if (!isIsoDate(dataDate)) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_DATA_DATE");
+  }
+  const currentTerms = baseTerms.map((term) => ({
+    ...term,
+    unitFaceValueTwd: supplemental.unitFaceValueTwd,
+  }));
+  const workbench = buildBondWorkbenchSnapshot({
+    generatedAt: generatedDate.toISOString(),
+    dataDate,
+    asOfDate: collected.requestedDate ?? asOfDate,
+    currentTerms,
+    currentViews: views,
+    currentEvents: [],
+    currentAssessments: buildCandidateAssessments(views, history),
+    ...(previousWorkbench === undefined ? {} : { previous: previousWorkbench }),
+  });
+  const workbenchSourceStateSummary = summarizeWorkbenchSourceStates(workbench);
   const stagingDir = await mkdtemp(join(dirname(outputDir), ".cb-market-"));
   try {
     const documents = {
@@ -183,6 +220,7 @@ export async function buildBondMarketSnapshot(options = {}) {
       issuerResearch,
       views,
       history,
+      workbench,
     };
     const files = [];
     for (const [name, key] of MARKET_FILE_ENTRIES) {
@@ -197,7 +235,16 @@ export async function buildBondMarketSnapshot(options = {}) {
           ? documents[key].records.length
           : key === "supplemental"
             ? countSupplementalRecords(documents[key])
-            : documents[key].length,
+            : key === "workbench"
+              ? documents[key].records.length
+              : documents[key].length,
+        ...(key === "workbench"
+          ? {
+            rawBytes: Buffer.byteLength(text, "utf8"),
+            schemaVersion: workbench.schemaVersion,
+            sourceStateSummary: workbenchSourceStateSummary,
+          }
+          : {}),
       });
     }
 
@@ -208,11 +255,6 @@ export async function buildBondMarketSnapshot(options = {}) {
         generatedAt: asOfDate,
         datasets: [],
       };
-    const latestCbPriceDate = latestTradingDate(collected.cbQuotes);
-    const latestStockPriceDate = latestTradingDate(collected.stockCloses);
-    const dataDate = [latestCbPriceDate, latestStockPriceDate]
-      .filter(Boolean)
-      .sort()[0] ?? null;
     const manifest = {
       ...currentManifest,
       market: {
@@ -223,12 +265,19 @@ export async function buildBondMarketSnapshot(options = {}) {
         latestStockPriceDate,
         dataDate,
         supplementalSources: supplemental.sources,
+        workbenchSourceStateSummary,
         files,
       },
     };
     const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
     await writeFile(join(stagingDir, "manifest.json"), manifestText, "utf8");
-    await verifyStagedFiles(stagingDir, files, manifestText, bondInputs);
+    await verifyStagedFiles(
+      stagingDir,
+      files,
+      manifestText,
+      bondInputs,
+      currentTerms,
+    );
     await publishAtomically(
       stagingDir,
       outputDir,
@@ -242,6 +291,7 @@ export async function buildBondMarketSnapshot(options = {}) {
       supplemental,
       issuerResearch,
       views,
+      workbench,
       report: {
         generatedAt: generatedDate.toISOString(),
         requestedDate: collected.requestedDate ?? asOfDate,
@@ -256,6 +306,7 @@ export async function buildBondMarketSnapshot(options = {}) {
           supplemental: countSupplementalRecords(supplemental),
           issuerResearch: issuerResearch.records.length,
           views: views.length,
+          workbench: workbench.records.length,
           missingViews: views.filter((view) => view.missingReasons.length > 0).length,
         },
         sourceUrls: collected.sourceUrls ?? [],
@@ -426,6 +477,16 @@ async function readPreviousIssuerResearch(outputDir) {
   return value === undefined ? undefined : parseCbIssuerResearchSnapshot(value);
 }
 
+async function readPreviousWorkbench(outputDir) {
+  const value = await readOptionalJson(join(outputDir, "bond-workbench.json"));
+  if (value === undefined) return undefined;
+  try {
+    return parseBondWorkbenchSnapshot(value);
+  } catch (error) {
+    throw new TypeError(`previous bond workbench is invalid: ${error.message}`);
+  }
+}
+
 async function readPreviousSupplemental(outputDir) {
   const value = await readOptionalJson(join(outputDir, "bond-supplemental.json"));
   if (value === undefined) return undefined;
@@ -490,11 +551,18 @@ function validateCandidate({ bondInputs, collected, views }) {
   return errors;
 }
 
-async function verifyStagedFiles(stagingDir, files, manifestText, bondInputs) {
+async function verifyStagedFiles(
+  stagingDir,
+  files,
+  manifestText,
+  bondInputs,
+  currentTerms,
+) {
   let stagedIssuerResearch;
   let stagedSupplemental;
   let stagedHistory;
   let stagedViews;
+  let stagedWorkbench;
   for (const file of files) {
     const text = await readFile(join(stagingDir, file.name), "utf8");
     const parsed = JSON.parse(text);
@@ -512,6 +580,19 @@ async function verifyStagedFiles(stagingDir, files, manifestText, bondInputs) {
       stagedHistory = parseBondMarketHistory(parsed);
       if (stagedHistory.length !== file.recordCount) {
         throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
+      }
+    } else if (file.name === "bond-workbench.json") {
+      stagedWorkbench = parseBondWorkbenchSnapshot(parsed);
+      if (
+        stagedWorkbench.records.length !== file.recordCount
+        || file.rawBytes !== Buffer.byteLength(text, "utf8")
+        || file.schemaVersion !== stagedWorkbench.schemaVersion
+        || !equalPlainJson(
+          file.sourceStateSummary,
+          summarizeWorkbenchSourceStates(stagedWorkbench),
+        )
+      ) {
+        throw new Error(`VALIDATION_FAILED:STAGED_WORKBENCH_METADATA:${file.name}`);
       }
     } else if (!Array.isArray(parsed) || parsed.length !== file.recordCount) {
       throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
@@ -538,6 +619,7 @@ async function verifyStagedFiles(stagingDir, files, manifestText, bondInputs) {
     || stagedSupplemental === undefined
     || stagedHistory === undefined
     || stagedViews === undefined
+    || stagedWorkbench === undefined
   ) {
     throw new Error("VALIDATION_FAILED:MARKET_ARTIFACTS");
   }
@@ -548,6 +630,158 @@ async function verifyStagedFiles(stagingDir, files, manifestText, bondInputs) {
     manifest?.market?.requestedDate,
     bondInputs,
   );
+  verifyWorkbenchConsistency({
+    workbench: stagedWorkbench,
+    terms: currentTerms,
+    views: stagedViews,
+    history: stagedHistory,
+    supplemental: stagedSupplemental,
+    issuerResearch: stagedIssuerResearch,
+    requestedDate: manifest?.market?.requestedDate,
+    dataDate: manifest?.market?.dataDate,
+    sourceStateSummary: manifest?.market?.workbenchSourceStateSummary,
+  });
+}
+
+export function verifyWorkbenchConsistency({
+  workbench,
+  terms,
+  views,
+  history,
+  supplemental,
+  issuerResearch,
+  requestedDate,
+  dataDate,
+  sourceStateSummary,
+}) {
+  const snapshot = parseBondWorkbenchSnapshot(workbench);
+  const parsedHistory = parseBondMarketHistory(history);
+  if (
+    !Array.isArray(terms)
+    || !Array.isArray(views)
+    || !isIsoDate(requestedDate)
+    || !isIsoDate(dataDate)
+    || snapshot.dataDate !== dataDate
+  ) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_ENVELOPE");
+  }
+  const termsByCode = uniqueByBondCode(terms, "WORKBENCH_TERM");
+  const viewsByCode = uniqueByBondCode(views, "WORKBENCH_VIEW");
+  const recordsByCode = uniqueByBondCode(snapshot.records, "WORKBENCH_RECORD");
+  if (
+    termsByCode.size !== viewsByCode.size
+    || [...termsByCode.keys()].some((code) => !viewsByCode.has(code))
+  ) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_CURRENT_BOND_CODES");
+  }
+  for (const [bondCode, term] of termsByCode) {
+    const record = recordsByCode.get(bondCode);
+    const view = viewsByCode.get(bondCode);
+    if (
+      record === undefined
+      || term.issuerCode !== view.issuerCode
+      || term.bondName !== view.bondName
+      || !equalPlainJson(record.term, term)
+      || !equalPlainJson(record.view, view)
+    ) {
+      throw new Error(`VALIDATION_FAILED:WORKBENCH_CURRENT_MISMATCH:${bondCode}`);
+    }
+  }
+  for (const record of snapshot.records) {
+    if (!termsByCode.has(record.bondCode) && record.status !== "archived") {
+      throw new Error(`VALIDATION_FAILED:WORKBENCH_ARCHIVE:${record.bondCode}`);
+    }
+  }
+  if (parsedHistory.some((point) => !recordsByCode.has(point.bondCode))) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_BOND_CODE");
+  }
+  const expectedAssessments = new Map(
+    buildCandidateAssessments(views, parsedHistory).map((entry) => [
+      entry.bondCode,
+      entry.assessment,
+    ]),
+  );
+  if (snapshot.records.some((record) => (
+    termsByCode.has(record.bondCode)
+    && !equalPlainJson(record.assessment, expectedAssessments.get(record.bondCode))
+  ))) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_ASSESSMENT");
+  }
+  if (!equalPlainJson(
+    sourceStateSummary,
+    summarizeWorkbenchSourceStates(snapshot),
+  )) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_SOURCE_STATE");
+  }
+  verifyIssuerResearchViewConsistency(issuerResearch, views);
+  verifySupplementalViewConsistency(supplemental, views, requestedDate, terms);
+  return snapshot;
+}
+
+export function summarizeWorkbenchSourceStates(workbench) {
+  const snapshot = parseBondWorkbenchSnapshot(workbench);
+  const states = ["complete", "stale", "date_mismatch", "missing", "accumulating"];
+  const fields = [
+    "price",
+    "valuation",
+    "outstanding",
+    "institutions",
+    "company",
+    "events",
+    "history",
+  ];
+  return {
+    lifecycle: {
+      active: snapshot.records.filter((record) => record.status === "active").length,
+      archived: snapshot.records.filter((record) => record.status === "archived").length,
+    },
+    fields: Object.fromEntries(fields.map((field) => [
+      field,
+      Object.fromEntries(states.map((state) => [
+        state,
+        snapshot.records.filter((record) => record.fieldStates[field] === state).length,
+      ])),
+    ])),
+  };
+}
+
+function uniqueByBondCode(records, code) {
+  const output = new Map();
+  for (const record of records) {
+    if (
+      record === null
+      || typeof record !== "object"
+      || Array.isArray(record)
+      || typeof record.bondCode !== "string"
+      || !/^\d{5,6}$/.test(record.bondCode)
+      || output.has(record.bondCode)
+    ) {
+      throw new Error(`VALIDATION_FAILED:${code}_BOND_CODE`);
+    }
+    output.set(record.bondCode, record);
+  }
+  return output;
+}
+
+function buildCandidateAssessments(views, history) {
+  return views.map((view) => ({
+    bondCode: view.bondCode,
+    assessment: evaluateBondAssessment({
+      view,
+      history: history.filter((point) => point.bondCode === view.bondCode),
+      spreadPercent: null,
+      spreadDataDate: null,
+      borrowability: "unknown",
+      conversionSuspended: null,
+      publicFinancials: {
+        ttmProfitState: "unknown",
+        revenueTrendState: "unknown",
+        psPercentile: null,
+        dataDate: null,
+        sourceId: null,
+      },
+    }),
+  }));
 }
 
 export function verifyIssuerResearchViewConsistency(snapshot, views) {
@@ -724,18 +958,27 @@ function publicIssuerResearch(record) {
 }
 
 function equalPlainJson(left, right) {
-  if (left === null || right === null) return left === right;
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left)
+      && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => equalPlainJson(value, right[index]));
+  }
   if (
-    typeof left !== "object"
+    left === null
+    || right === null
+    || typeof left !== "object"
     || typeof right !== "object"
-    || Array.isArray(left)
-    || Array.isArray(right)
   ) return false;
   const leftKeys = Object.keys(left).sort();
   const rightKeys = Object.keys(right).sort();
   return (
     leftKeys.length === rightKeys.length
-    && leftKeys.every((key, index) => key === rightKeys[index] && left[key] === right[key])
+    && leftKeys.every((key, index) => (
+      key === rightKeys[index]
+      && equalPlainJson(left[key], right[key])
+    ))
   );
 }
 
@@ -768,9 +1011,37 @@ async function publishAtomically(stagingDir, outputDir, names) {
   }
 }
 
-async function loadBondInputs(outputDir) {
-  const rows = JSON.parse(await readFile(join(outputDir, "11406.json"), "utf8"));
-  return bondInputsFrom11406Rows(rows);
+async function loadBondRows(outputDir) {
+  return JSON.parse(await readFile(join(outputDir, "11406.json"), "utf8"));
+}
+
+function termSummariesFromBondInputs(bonds) {
+  return bonds.map((bond, index) => {
+    if (bond === null || typeof bond !== "object" || Array.isArray(bond)) {
+      throw new TypeError(`bond ${index} must be an object`);
+    }
+    return {
+      bondCode: bond.bondCode,
+      issuerCode: bond.issuerCode,
+      bondName: bond.shortName,
+      issuerName: bond.issuerName,
+      issueDate: null,
+      listingDate: null,
+      maturityDate: bond.maturityDate,
+      issueAmount: bond.issueAmount,
+      outstandingAmount: bond.outstandingAmount,
+      outstandingDataDate: bond.outstandingDataDate,
+      initialConversionPrice: null,
+      conversionStartDate: null,
+      conversionEndDate: null,
+      putDates: bond.putDates,
+      putPrice: null,
+      securedStatus: null,
+      underwriter: null,
+      trustee: null,
+      unitFaceValueTwd: null,
+    };
+  });
 }
 
 function isApprovedOfficialUrl(value) {
@@ -847,7 +1118,7 @@ if (entryUrl === import.meta.url) {
   const dryRun = process.env.CB_MARKET_DRY_RUN === "1";
   if (dryRun) {
     const outputDir = "static-showcase/data";
-    const bonds = await loadBondInputs(outputDir);
+    const bonds = bondInputsFrom11406Rows(await loadBondRows(outputDir));
     const collected = await fetchCurrentOfficialMarketData({
       bondCodes: bonds.map((bond) => bond.bondCode),
       issuerCodes: [...new Set(bonds.map((bond) => bond.issuerCode))],

@@ -10,6 +10,7 @@ import {
   buildRuntimeBootstrap,
   fetchOfficialCsvWithRetry,
   readPublishedBondHistory,
+  readPublishedBondWorkbench,
   readPublishedCbIssuerResearch,
   readPublishedCbSupplemental,
   refreshStaticShowcase,
@@ -29,6 +30,26 @@ async function withBlockedGlobalFetch(run) {
     globalThis.fetch = originalFetch;
     assert.deepEqual(calls, []);
   }
+}
+
+function historyPoint(patch = {}) {
+  return {
+    bondCode: "35221",
+    date: "2026-06-30",
+    cbOpen: null,
+    cbHigh: null,
+    cbLow: null,
+    cbClose: null,
+    cbAverage: null,
+    cbChange: null,
+    cbTradingUnits: null,
+    cbTurnover: null,
+    stockClose: null,
+    effectiveConversionPrice: null,
+    conversionValue: null,
+    premiumRate: null,
+    ...patch,
+  };
 }
 
 test("refresh preserves prior files when the TPEx snapshot request fails", async () => {
@@ -337,10 +358,17 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
     runtime.datasets.bondSupplemental,
     `./data/${pointer.generation}/bond-supplemental.json`,
   );
+  assert.equal(
+    runtime.datasets.bondWorkbench,
+    `./data/${pointer.generation}/bond-workbench.json`,
+  );
+  const workbench = JSON.parse(outcome.artifacts.active["bond-workbench.json"]);
+  assert.equal(workbench.schemaVersion, 1);
+  assert.equal(workbench.records[0].bondCode, "35221");
   const issuerResearch = JSON.parse(
     outcome.artifacts.active["cb-issuer-research.json"],
   );
-  assert.equal(issuerResearch.records[0].issuerCode, "1260");
+  assert.equal(issuerResearch.records[0].issuerCode, "3522");
   const supplemental = JSON.parse(
     outcome.artifacts.active["bond-supplemental.json"],
   );
@@ -352,7 +380,7 @@ test("refresh reads the prior generation bond history before staging a replaceme
   const root = await mkdtemp(join(tmpdir(), "showcase-history-"));
   const dataRoot = join(root, "data");
   const generation = join(dataRoot, "generations", "abcdef");
-  const history = [{ bondCode: "35221", date: "2026-06-30" }];
+  const history = [historyPoint()];
   await mkdir(generation, { recursive: true });
   await writeFile(
     join(dataRoot, "current.json"),
@@ -412,6 +440,34 @@ test("prior generation fails closed when its manifest declares a missing CB supp
   );
 });
 
+test("prior workbench is optional only when the active manifest does not declare it", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-prior-workbench-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    "utf8",
+  );
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({ market: { files: [] } }),
+    "utf8",
+  );
+  assert.equal(await readPublishedBondWorkbench(dataRoot), undefined);
+
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({ market: { files: [{ name: "bond-workbench.json" }] } }),
+    "utf8",
+  );
+  await assert.rejects(
+    readPublishedBondWorkbench(dataRoot),
+    /missing prior bond workbench/i,
+  );
+});
+
 test("refresh validates the complete prior CB supplemental snapshot before any fetch", async () => {
   await withTemporaryShowcase(async (root) => {
     await seedPriorGeneration(root);
@@ -440,6 +496,133 @@ test("refresh validates the complete prior CB supplemental snapshot before any f
   });
 });
 
+test("refresh validates the complete prior workbench before any fetch", async () => {
+  await withTemporaryShowcase(async (root) => {
+    await seedPriorGeneration(root);
+    const dataDirectory = join(root, "static-showcase/data");
+    const generation = join(dataDirectory, "generations/abcdef");
+    const pointerPath = join(dataDirectory, "current.json");
+    const beforePointer = await readFile(pointerPath, "utf8");
+    await writeFile(
+      join(generation, "manifest.json"),
+      JSON.stringify({
+        market: {
+          status: "verified",
+          files: [{ name: "bond-workbench.json" }],
+        },
+      }),
+      "utf8",
+    );
+    await writeFile(
+      join(generation, "bond-workbench.json"),
+      '{"schemaVersion":1,"unexpected":true}\n',
+      "utf8",
+    );
+    let fetchCalls = 0;
+
+    await assert.rejects(
+      withBlockedGlobalFetch(() => refreshStaticShowcase({
+        fetchImpl: async () => {
+          fetchCalls += 1;
+          return new Response("must not fetch", { status: 500 });
+        },
+      })),
+      /prior bond workbench snapshot is invalid/i,
+    );
+    assert.equal(fetchCalls, 0);
+    assert.equal(await readFile(pointerPath, "utf8"), beforePointer);
+  });
+});
+
+test("refresh fails before fetch when the active manifest declares missing history", async () => {
+  await withTemporaryShowcase(async (root) => {
+    await seedPriorGeneration(root);
+    const dataDirectory = join(root, "static-showcase/data");
+    const generation = join(dataDirectory, "generations/abcdef");
+    await writeFile(
+      join(generation, "manifest.json"),
+      JSON.stringify({
+        market: {
+          status: "verified",
+          files: [{ name: "bond-market-history.json" }],
+        },
+      }),
+      "utf8",
+    );
+    let fetchCalls = 0;
+    await assert.rejects(
+      withBlockedGlobalFetch(() => refreshStaticShowcase({
+        fetchImpl: async () => {
+          fetchCalls += 1;
+          return new Response("must not fetch", { status: 500 });
+        },
+      })),
+      /missing prior bond market history/i,
+    );
+    assert.equal(fetchCalls, 0);
+  });
+});
+
+test("prior declared workbench hash metadata is verified before reuse", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-prior-workbench-hash-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations/abcdef");
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef" }),
+    "utf8",
+  );
+  const workbench = {
+    schemaVersion: 1,
+    generatedAt: "2026-07-29T06:00:06.000Z",
+    dataDate: "2026-07-29",
+    records: [],
+  };
+  const text = `${JSON.stringify(workbench)}\n`;
+  await writeFile(join(generation, "bond-workbench.json"), text, "utf8");
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({
+      market: {
+        workbenchSourceStateSummary: {
+          lifecycle: { active: 0, archived: 0 },
+          fields: {},
+        },
+        files: [{
+          name: "bond-workbench.json",
+          sha256: `sha256:${"0".repeat(64)}`,
+          rawBytes: Buffer.byteLength(text),
+          recordCount: 0,
+          schemaVersion: 1,
+          sourceStateSummary: {
+            lifecycle: { active: 0, archived: 0 },
+            fields: {},
+          },
+        }],
+      },
+    }),
+    "utf8",
+  );
+  await assert.rejects(
+    readPublishedBondWorkbench(dataRoot),
+    /hash|manifest|integrity/i,
+  );
+});
+
+test("staged generation rejects an inexact runtime contract before pointer switch", async () => {
+  const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
+    "../scripts/refresh-static-showcase-data.mjs"
+  );
+  const outcome = await runIsolatedRefreshStaticShowcaseTestHarness({
+    scenario: "runtime",
+    now: "2026-07-30T06:00:06.000Z",
+  });
+  assert.equal(outcome.status, "rejected");
+  assert.match(String(outcome.error), /VALIDATION_FAILED.*RUNTIME/);
+  assert.equal(outcome.artifacts.after.pointerText, outcome.artifacts.before.pointerText);
+});
+
 test("refresh merges a restored CI history cache with the committed generation", async () => {
   const root = await mkdtemp(join(tmpdir(), "showcase-history-cache-"));
   const dataRoot = join(root, "data");
@@ -454,21 +637,21 @@ test("refresh merges a restored CI history cache with the committed generation",
   );
   await writeFile(
     join(generation, "bond-market-history.json"),
-    JSON.stringify([{ bondCode: "35221", date: "2026-06-30" }]),
+    JSON.stringify([historyPoint()]),
     "utf8",
   );
   await writeFile(
     cachePath,
     JSON.stringify([
-      { bondCode: "35221", date: "2026-06-30", cbClose: "101" },
-      { bondCode: "35221", date: "2026-07-31", cbClose: "102" },
+      historyPoint({ cbClose: "101" }),
+      historyPoint({ date: "2026-07-31", cbClose: "102" }),
     ]),
     "utf8",
   );
 
   assert.deepEqual(await readPublishedBondHistory(dataRoot, cachePath), [
-    { bondCode: "35221", date: "2026-06-30", cbClose: "101" },
-    { bondCode: "35221", date: "2026-07-31", cbClose: "102" },
+    historyPoint({ cbClose: "101" }),
+    historyPoint({ date: "2026-07-31", cbClose: "102" }),
   ]);
 });
 
@@ -491,6 +674,8 @@ for (const failureMode of [
   "cross-file",
   "supplemental",
   "supplemental-view",
+  "workbench",
+  "runtime",
 ]) {
   test(`research ${failureMode} failure after candidate write leaves pointer and prior generation unchanged`, async () => {
     const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
@@ -512,6 +697,11 @@ for (const failureMode of [
     assert.equal(
       outcome.artifacts.after.priorSupplementalText,
       outcome.artifacts.before.priorSupplementalText,
+    );
+    assert.notEqual(outcome.artifacts.before.priorWorkbenchText, undefined);
+    assert.equal(
+      outcome.artifacts.after.priorWorkbenchText,
+      outcome.artifacts.before.priorWorkbenchText,
     );
   });
 }

@@ -18,6 +18,11 @@ import { isIsoDate } from "../lib/domain/dates.ts";
 import { EmergingMarketViewSchema } from "../lib/domain/schema.ts";
 import { buildEmergingMarketViews } from "../lib/market-data/emerging-market-view.ts";
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
+import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
+import {
+  buildBondWorkbenchSnapshot,
+  parseBondWorkbenchSnapshot,
+} from "../lib/market-data/bond-workbench.ts";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCsv } from "../lib/source-verification/csv.ts";
 import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
@@ -25,9 +30,12 @@ import { normalize94025Row, parse94025Csv } from "../lib/source-verification/sou
 import {
   bondInputsFrom11406Rows,
   buildBondMarketSnapshot,
+  summarizeWorkbenchSourceStates,
   verifyIssuerResearchViewConsistency,
   verifySupplementalViewConsistency,
+  verifyWorkbenchConsistency,
 } from "./build-bond-market-snapshot.mjs";
+import { bondTermSummariesFrom11406Rows } from "./lib/bond-inputs-from-11406.mjs";
 import { fetchCurrentOfficialMarketData } from "./lib/official-market-fetch.mjs";
 import { buildStaticIpoSnapshot } from "./static-ipo-fallback.mjs";
 
@@ -60,6 +68,9 @@ export function buildGenerationRuntime(generation, manifest) {
   const declaresBondSupplemental = manifest?.market?.files?.some(
     (file) => file?.name === "bond-supplemental.json",
   ) === true;
+  const declaresBondWorkbench = manifest?.market?.files?.some(
+    (file) => file?.name === "bond-workbench.json",
+  ) === true;
   return {
     generation,
     manifestUrl: `${base}/manifest.json`,
@@ -73,6 +84,9 @@ export function buildGenerationRuntime(generation, manifest) {
         : {}),
       ...(declaresBondSupplemental
         ? { bondSupplemental: `${base}/bond-supplemental.json` }
+        : {}),
+      ...(declaresBondWorkbench
+        ? { bondWorkbench: `${base}/bond-workbench.json` }
         : {}),
     },
   };
@@ -212,6 +226,13 @@ export async function refreshStaticShowcase(options = {}) {
 }
 
 async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, paths }) {
+  const previousWorkbench = await readPublishedBondWorkbench(
+    paths.dataDirectory,
+  );
+  const previousHistory = await readPublishedBondHistory(
+    paths.dataDirectory,
+    paths.publishedHistoryCachePath,
+  );
   const previousSupplemental = await readPublishedCbSupplemental(
     paths.dataDirectory,
   );
@@ -295,10 +316,6 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, p
   const stagingDataDirectory = join(stagingRoot, "data");
   try {
     await mkdir(stagingDataDirectory, { recursive: true });
-    const previousHistory = await readPublishedBondHistory(
-      paths.dataDirectory,
-      paths.publishedHistoryCachePath,
-    );
     await writeFile(
       join(stagingDataDirectory, "bond-market-history.json"),
       `${JSON.stringify(previousHistory, null, 2)}\n`,
@@ -308,6 +325,13 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, p
       await writeFile(
         join(stagingDataDirectory, "bond-supplemental.json"),
         `${JSON.stringify(previousSupplemental, null, 2)}\n`,
+        "utf8",
+      );
+    }
+    if (previousWorkbench !== undefined) {
+      await writeFile(
+        join(stagingDataDirectory, "bond-workbench.json"),
+        `${JSON.stringify(previousWorkbench, null, 2)}\n`,
         "utf8",
       );
     }
@@ -337,7 +361,6 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, p
 
     const marketResult = await marketBuilder({
       outputDir: stagingDataDirectory,
-      bonds: bondInputsFrom11406Rows(datasets["11406"]),
       asOfDate: emergingSnapshot.tradingDate,
       collectImpl: async (options) => {
         const store = await openMarketCheckpoint({
@@ -361,9 +384,13 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, p
       `${JSON.stringify(manifest, null, 2)}\n`,
       "utf8",
     );
+    const runtime = buildGenerationRuntime(generation, manifest);
+    if (marketResult.runtimeScenario === "workbench-path") {
+      runtime.datasets.bondWorkbench = "./data/generations/deadbeef/bond-workbench.json";
+    }
     await writeFile(
       join(stagingDataDirectory, "runtime.json"),
-      `${JSON.stringify(buildGenerationRuntime(generation, manifest), null, 2)}\n`,
+      `${JSON.stringify(runtime, null, 2)}\n`,
       "utf8",
     );
     await verifyStagedGeneration(stagingDataDirectory);
@@ -406,9 +433,11 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     "cross-file",
     "supplemental",
     "supplemental-view",
+    "workbench",
+    "runtime",
   ]).has(scenario)) {
     throw new TypeError(
-      "isolated refresh scenario must be one of success, hash, manifest, cross-file, supplemental, supplemental-view",
+      "isolated refresh scenario must be one of success, hash, manifest, cross-file, supplemental, supplemental-view, workbench, runtime",
     );
   }
   if (
@@ -584,31 +613,26 @@ async function buildIsolatedMarketCandidate({
   const researchText = `${JSON.stringify(snapshot, null, 2)}\n`;
   const supplemental = isolatedSupplementalSnapshot(generatedAt);
   const supplementalText = `${JSON.stringify(supplemental, null, 2)}\n`;
-  const viewsText = `${JSON.stringify([{
-    bondCode: "35221",
-    issuerCode: "1260",
-    issuerResearch: scenario === "cross-file" ? null : compact,
-    cbTradeUnits: "0",
-    cbPriceDate: null,
-    outstandingAmount: "123100000",
-    outstandingDataDate: "2026-07-23",
-    remainingUnits: null,
-    remainingRatio: scenario === "supplemental-view" ? "82.08" : "82.07",
-    dailyTurnoverRate: null,
-    institutionDataDate: null,
-    institutionNetUnits: null,
-    institutionNet5dUnits: null,
-    institutionNet20dUnits: null,
-    redemptionEvent: null,
-    missingReasons: [
-      "NO_VERIFIED_FACE_VALUE",
-      "BALANCE_TRADE_DATE_MISMATCH",
-    ],
-    dataQuality: "date_mismatch",
-  }], null, 2)}\n`;
+  const view = isolatedWorkbenchView(compact, scenario);
+  const viewsText = `${JSON.stringify([view], null, 2)}\n`;
+  const [term] = bondTermSummariesFrom11406Rows(JSON.parse(await readFile(
+    join(outputDir, "11406.json"),
+    "utf8",
+  )));
+  const workbench = buildBondWorkbenchSnapshot({
+    generatedAt,
+    dataDate: "2026-07-30",
+    asOfDate: "2026-07-30",
+    currentTerms: [{ ...term, unitFaceValueTwd: supplemental.unitFaceValueTwd }],
+    currentViews: [view],
+    currentEvents: [],
+  });
+  const workbenchText = `${JSON.stringify(workbench, null, 2)}\n`;
+  const workbenchSourceStateSummary = summarizeWorkbenchSourceStates(workbench);
   await writeFile(join(outputDir, "cb-issuer-research.json"), researchText, "utf8");
   await writeFile(join(outputDir, "bond-supplemental.json"), supplementalText, "utf8");
   await writeFile(join(outputDir, "bond-market-view.json"), viewsText, "utf8");
+  await writeFile(join(outputDir, "bond-workbench.json"), workbenchText, "utf8");
   const files = [
     {
       name: "cb-issuer-research.json",
@@ -625,6 +649,14 @@ async function buildIsolatedMarketCandidate({
       sha256: sha256Text(viewsText),
       recordCount: 1,
     },
+    {
+      name: "bond-workbench.json",
+      sha256: sha256Text(workbenchText),
+      rawBytes: Buffer.byteLength(workbenchText),
+      recordCount: 1,
+      schemaVersion: 1,
+      sourceStateSummary: workbenchSourceStateSummary,
+    },
   ];
   if (scenario === "hash") {
     await writeFile(
@@ -640,6 +672,13 @@ async function buildIsolatedMarketCandidate({
       "utf8",
     );
   }
+  if (scenario === "workbench") {
+    await writeFile(
+      join(outputDir, "bond-workbench.json"),
+      `${JSON.stringify({ ...workbench, schemaVersion: 2 }, null, 2)}\n`,
+      "utf8",
+    );
+  }
   if (scenario === "manifest") files.pop();
   return {
     manifest: {
@@ -649,10 +688,81 @@ async function buildIsolatedMarketCandidate({
         dataDate: "2026-07-30",
         requestedDate: "2026-07-30",
         supplementalSources: supplemental.sources,
+        workbenchSourceStateSummary,
         files,
       },
     },
     report: { validation: "passed" },
+    ...(scenario === "runtime" ? { runtimeScenario: "workbench-path" } : {}),
+  };
+}
+
+function isolatedWorkbenchView(compact, scenario = "success") {
+  return {
+    bondCode: "35221",
+    issuerCode: "3522",
+    bondName: "御嵿一",
+    issuerResearch: scenario === "cross-file" ? null : compact,
+    cbClose: null,
+    cbPriceDate: null,
+    cbTradeUnits: "0",
+    stockClose: null,
+    stockPriceDate: null,
+    currentConversionPrice: null,
+    conversionPriceEffectiveDate: null,
+    valuationDate: null,
+    valuationCbClose: null,
+    valuationStockClose: null,
+    conversionValue: null,
+    premiumRate: null,
+    outstandingAmount: "123100000",
+    outstandingDataDate: "2026-07-23",
+    outstandingReductionRate: "17.93",
+    remainingUnits: null,
+    remainingRatio: scenario === "supplemental-view" ? "82.08" : "82.07",
+    dailyTurnoverRate: null,
+    institutionDataDate: null,
+    institutionNetUnits: null,
+    institutionNet5dUnits: null,
+    institutionNet20dUnits: null,
+    redemptionEvent: null,
+    maturityDate: "2026-12-18",
+    daysToMaturity: 141,
+    nextPutDate: null,
+    daysToNextPut: null,
+    nextEventType: "maturity",
+    nextEventDate: "2026-12-18",
+    daysToNextEvent: 141,
+    missingReasons: [
+      "NO_VERIFIED_FACE_VALUE",
+      "BALANCE_TRADE_DATE_MISMATCH",
+    ],
+    dataQuality: "date_mismatch",
+    staleCbPrice: false,
+  };
+}
+
+function isolatedWorkbenchTerm() {
+  return {
+    bondCode: "35221",
+    issuerCode: "3522",
+    issuerName: "御頂",
+    bondName: "御嵿一",
+    issueDate: "2023-12-18",
+    listingDate: "2023-12-18",
+    maturityDate: "2026-12-18",
+    issueAmount: "150000000",
+    outstandingAmount: "123100000",
+    outstandingDataDate: "2026-07-23",
+    initialConversionPrice: "19.5000",
+    conversionStartDate: "2024-03-19",
+    conversionEndDate: "2026-12-18",
+    putDates: ["2025-12-18"],
+    putPrice: "101.0025",
+    securedStatus: "1",
+    underwriter: "700T兆豐證券",
+    trustee: "彰化商業銀行股份有限公司信託部",
+    unitFaceValueTwd: null,
   };
 }
 
@@ -677,8 +787,8 @@ function isolatedIssuerResearchSnapshot(generatedAt) {
     schemaVersion: 1,
     generatedAt,
     records: [{
-      issuerCode: "1260",
-      issuerName: "富味鄉",
+      issuerCode: "3522",
+      issuerName: "御頂",
       market: "listed",
       industryName: "食品工業",
       revenueMonth: "2026-06",
@@ -719,11 +829,6 @@ async function seedIsolatedHarnessRoot(paths) {
     }),
     "utf8",
   );
-  await writeFile(
-    join(priorGeneration, "manifest.json"),
-    JSON.stringify({ market: { status: "verified", files: [] } }),
-    "utf8",
-  );
   await writeFile(join(priorGeneration, "runtime.json"), "prior runtime", "utf8");
   await writeFile(
     join(priorGeneration, "cb-issuer-research.json"),
@@ -737,6 +842,37 @@ async function seedIsolatedHarnessRoot(paths) {
       },
       diagnostics: [],
     })}\n`,
+    "utf8",
+  );
+  const priorWorkbench = buildBondWorkbenchSnapshot({
+    generatedAt: "2026-07-29T06:00:06.000Z",
+    dataDate: "2026-07-29",
+    asOfDate: "2026-07-29",
+    currentTerms: [isolatedWorkbenchTerm()],
+    currentViews: [isolatedWorkbenchView(null)],
+    currentEvents: [],
+  });
+  const priorWorkbenchText = `${JSON.stringify(priorWorkbench, null, 2)}\n`;
+  const priorWorkbenchSourceStateSummary = summarizeWorkbenchSourceStates(
+    priorWorkbench,
+  );
+  await writeFile(join(priorGeneration, "bond-workbench.json"), priorWorkbenchText, "utf8");
+  await writeFile(
+    join(priorGeneration, "manifest.json"),
+    JSON.stringify({
+      market: {
+        status: "verified",
+        workbenchSourceStateSummary: priorWorkbenchSourceStateSummary,
+        files: [{
+          name: "bond-workbench.json",
+          sha256: sha256Text(priorWorkbenchText),
+          rawBytes: Buffer.byteLength(priorWorkbenchText),
+          recordCount: priorWorkbench.records.length,
+          schemaVersion: priorWorkbench.schemaVersion,
+          sourceStateSummary: priorWorkbenchSourceStateSummary,
+        }],
+      },
+    }),
     "utf8",
   );
   await writeFile(
@@ -763,6 +899,12 @@ async function captureIsolatedArtifacts(paths) {
       "abcdef",
       "bond-supplemental.json",
     )),
+    priorWorkbenchText: await readOptionalText(join(
+      paths.dataDirectory,
+      "generations",
+      "abcdef",
+      "bond-workbench.json",
+    )),
   };
 }
 
@@ -783,6 +925,7 @@ async function captureActiveGeneration(paths, pointerText) {
     "cb-issuer-research.json",
     "bond-supplemental.json",
     "bond-market-view.json",
+    "bond-workbench.json",
     "emerging-market.json",
     "manifest.json",
     "runtime.json",
@@ -814,21 +957,29 @@ export async function readPublishedBondHistory(
   cachePath,
 ) {
   const histories = [];
-  try {
-    const pointerText = await readFile(join(dataDirectory, "current.json"), "utf8");
-    const pointer = JSON.parse(pointerText);
-    if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
-      throw new Error("INVALID_CURRENT_GENERATION_POINTER");
+  const active = await readActiveGeneration(dataDirectory);
+  if (active !== undefined) {
+    try {
+      const { text, value } = await readHistoryFile(
+        join(active.root, "bond-market-history.json"),
+      );
+      validatePriorManifestFile(
+        active.manifest,
+        "bond-market-history.json",
+        text,
+        value.length,
+      );
+      histories.push(value);
+    } catch (error) {
+      if (error?.code !== "ENOENT") throw error;
+      if (declaresFile(active.manifest, "bond-market-history.json")) {
+        throw new Error("missing prior bond market history snapshot");
+      }
     }
-    histories.push(await readHistoryFile(
-      join(dataDirectory, pointer.generation, "bond-market-history.json"),
-    ));
-  } catch (error) {
-    if (error?.code !== "ENOENT") throw error;
   }
   if (cachePath) {
     try {
-      histories.push(await readHistoryFile(cachePath));
+      histories.push((await readHistoryFile(cachePath)).value);
     } catch (error) {
       if (error?.code !== "ENOENT") throw error;
     }
@@ -855,37 +1006,21 @@ export async function readPublishedBondHistory(
 export async function readPublishedCbIssuerResearch(
   dataDirectory = DATA_DIRECTORY,
 ) {
-  let pointer;
+  const active = await readActiveGeneration(dataDirectory);
+  if (active === undefined) return undefined;
   try {
-    pointer = JSON.parse(await readFile(join(dataDirectory, "current.json"), "utf8"));
-  } catch (error) {
-    if (error?.code === "ENOENT") return undefined;
-    throw error;
-  }
-  if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
-    throw new Error("INVALID_CURRENT_GENERATION_POINTER");
-  }
-  try {
-    const value = JSON.parse(await readFile(
-      join(dataDirectory, pointer.generation, "cb-issuer-research.json"),
-      "utf8",
-    ));
-    return parseCbIssuerResearchSnapshot(value);
+    const text = await readFile(join(active.root, "cb-issuer-research.json"), "utf8");
+    const snapshot = parseCbIssuerResearchSnapshot(JSON.parse(text));
+    validatePriorManifestFile(
+      active.manifest,
+      "cb-issuer-research.json",
+      text,
+      snapshot.records.length,
+    );
+    return snapshot;
   } catch (error) {
     if (error?.code === "ENOENT") {
-      let manifest;
-      try {
-        manifest = JSON.parse(await readFile(
-          join(dataDirectory, pointer.generation, "manifest.json"),
-          "utf8",
-        ));
-      } catch (manifestError) {
-        if (manifestError?.code === "ENOENT") return undefined;
-        throw manifestError;
-      }
-      if (manifest?.market?.files?.some(
-        (file) => file?.name === "cb-issuer-research.json",
-      )) {
+      if (declaresFile(active.manifest, "cb-issuer-research.json")) {
         throw new Error("missing prior CB issuer research snapshot");
       }
       return undefined;
@@ -894,40 +1029,67 @@ export async function readPublishedCbIssuerResearch(
   }
 }
 
+export async function readPublishedBondWorkbench(
+  dataDirectory = DATA_DIRECTORY,
+) {
+  const active = await readActiveGeneration(dataDirectory);
+  if (active === undefined) return undefined;
+  try {
+    const text = await readFile(join(active.root, "bond-workbench.json"), "utf8");
+    const snapshot = parseBondWorkbenchSnapshot(JSON.parse(text));
+    const entry = validatePriorManifestFile(
+      active.manifest,
+      "bond-workbench.json",
+      text,
+      snapshot.records.length,
+    );
+    if (entry !== undefined && (
+      entry.rawBytes !== Buffer.byteLength(text, "utf8")
+      || entry.schemaVersion !== snapshot.schemaVersion
+      || !equalJson(entry.sourceStateSummary, summarizeWorkbenchSourceStates(snapshot))
+      || !equalJson(
+        active.manifest.market.workbenchSourceStateSummary,
+        entry.sourceStateSummary,
+      )
+    )) {
+      throw new Error("prior bond workbench manifest integrity is invalid");
+    }
+    return snapshot;
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      if (declaresFile(active.manifest, "bond-workbench.json")) {
+        throw new Error("missing prior bond workbench snapshot");
+      }
+      return undefined;
+    }
+    throw new TypeError(`prior bond workbench snapshot is invalid: ${error.message}`);
+  }
+}
+
 export async function readPublishedCbSupplemental(
   dataDirectory = DATA_DIRECTORY,
 ) {
-  let pointer;
+  const active = await readActiveGeneration(dataDirectory);
+  if (active === undefined) return undefined;
   try {
-    pointer = JSON.parse(await readFile(join(dataDirectory, "current.json"), "utf8"));
-  } catch (error) {
-    if (error?.code === "ENOENT") return undefined;
-    throw error;
-  }
-  if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
-    throw new Error("INVALID_CURRENT_GENERATION_POINTER");
-  }
-  try {
-    const value = JSON.parse(await readFile(
-      join(dataDirectory, pointer.generation, "bond-supplemental.json"),
-      "utf8",
-    ));
-    return parseCbSupplementalSnapshot(value);
+    const text = await readFile(join(active.root, "bond-supplemental.json"), "utf8");
+    const snapshot = parseCbSupplementalSnapshot(JSON.parse(text));
+    validatePriorManifestFile(
+      active.manifest,
+      "bond-supplemental.json",
+      text,
+      countSupplementalRecords(snapshot),
+    );
+    if (
+      declaresFile(active.manifest, "bond-supplemental.json")
+      && !equalJson(active.manifest.market.supplementalSources, snapshot.sources)
+    ) {
+      throw new Error("prior CB supplemental manifest integrity is invalid");
+    }
+    return snapshot;
   } catch (error) {
     if (error?.code === "ENOENT") {
-      let manifest;
-      try {
-        manifest = JSON.parse(await readFile(
-          join(dataDirectory, pointer.generation, "manifest.json"),
-          "utf8",
-        ));
-      } catch (manifestError) {
-        if (manifestError?.code === "ENOENT") return undefined;
-        throw manifestError;
-      }
-      if (manifest?.market?.files?.some(
-        (file) => file?.name === "bond-supplemental.json",
-      )) {
+      if (declaresFile(active.manifest, "bond-supplemental.json")) {
         throw new Error("missing prior CB supplemental snapshot");
       }
       return undefined;
@@ -937,9 +1099,52 @@ export async function readPublishedCbSupplemental(
 }
 
 async function readHistoryFile(path) {
-  const history = JSON.parse(await readFile(path, "utf8"));
-  if (!Array.isArray(history)) throw new Error("INVALID_PUBLISHED_BOND_HISTORY");
-  return history;
+  const text = await readFile(path, "utf8");
+  const history = JSON.parse(text);
+  try {
+    return { text, value: parseBondMarketHistory(history) };
+  } catch (error) {
+    throw new Error(`INVALID_PUBLISHED_BOND_HISTORY:${error.message}`);
+  }
+}
+
+async function readActiveGeneration(dataDirectory) {
+  let pointer;
+  try {
+    pointer = JSON.parse(await readFile(join(dataDirectory, "current.json"), "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw error;
+  }
+  if (!/^generations\/[a-f0-9-]+$/i.test(pointer?.generation ?? "")) {
+    throw new Error("INVALID_CURRENT_GENERATION_POINTER");
+  }
+  const root = join(dataDirectory, pointer.generation);
+  let manifest;
+  try {
+    manifest = JSON.parse(await readFile(join(root, "manifest.json"), "utf8"));
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
+  return { root, manifest };
+}
+
+function declaresFile(manifest, name) {
+  return manifest?.market?.files?.some((file) => file?.name === name) === true;
+}
+
+function validatePriorManifestFile(manifest, name, text, recordCount) {
+  if (!declaresFile(manifest, name)) return undefined;
+  const entries = manifest.market.files.filter((file) => file?.name === name);
+  const entry = entries[0];
+  if (
+    entries.length !== 1
+    || entry?.sha256 !== sha256Text(text)
+    || entry?.recordCount !== recordCount
+  ) {
+    throw new Error(`prior ${name} manifest integrity is invalid`);
+  }
+  return entry;
 }
 
 function newest94025CompanyRows(text) {
@@ -1003,11 +1208,15 @@ async function verifyStagedGeneration(stagingDataDirectory) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_INTEGRITY");
   }
   const manifest = JSON.parse(await readFile(join(stagingDataDirectory, "manifest.json"), "utf8"));
-  if (!/^\.\/data\/generations\/[a-f0-9]+\/emerging-market\.json$/.test(manifest.emergingMarketUrl)) {
+  const generationMatch = /^\.\/data\/(generations\/[a-f0-9]+)\/emerging-market\.json$/.exec(
+    manifest.emergingMarketUrl ?? "",
+  );
+  if (generationMatch === null) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_MANIFEST");
   }
   const runtime = JSON.parse(await readFile(join(stagingDataDirectory, "runtime.json"), "utf8"));
-  if (runtime.generation === undefined || runtime.emergingMarketUrl !== manifest.emergingMarketUrl) {
+  const expectedRuntime = buildGenerationRuntime(generationMatch[1], manifest);
+  if (!equalJson(runtime, expectedRuntime)) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_RUNTIME");
   }
   const marketFiles = manifest?.market?.files;
@@ -1020,7 +1229,17 @@ async function verifyStagedGeneration(stagingDataDirectory) {
   const viewEntries = Array.isArray(marketFiles) ? marketFiles.filter(
     (file) => file?.name === "bond-market-view.json",
   ) : [];
-  if (issuerResearchEntries.length === 0 && supplementalEntries.length === 0) return;
+  const workbenchEntries = Array.isArray(marketFiles) ? marketFiles.filter(
+    (file) => file?.name === "bond-workbench.json",
+  ) : [];
+  if (workbenchEntries.length !== 1) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_MANIFEST");
+  }
+  if (
+    issuerResearchEntries.length === 0
+    && supplementalEntries.length === 0
+    && workbenchEntries.length === 0
+  ) return;
   if (viewEntries.length !== 1) {
     throw new Error("VALIDATION_FAILED:MARKET_VIEW_MANIFEST");
   }
@@ -1107,6 +1326,101 @@ async function verifyStagedGeneration(stagingDataDirectory) {
       ))),
     );
   }
+
+  if (workbenchEntries.length > 0) {
+    if (
+      workbenchEntries.length !== 1
+      || issuerResearchEntries.length !== 1
+      || supplementalEntries.length !== 1
+    ) {
+      throw new Error("VALIDATION_FAILED:WORKBENCH_MANIFEST");
+    }
+    const workbenchEntry = validateWorkbenchGenerationFileEntry(
+      workbenchEntries[0],
+    );
+    const workbenchText = await readFile(
+      join(stagingDataDirectory, "bond-workbench.json"),
+      "utf8",
+    );
+    if (
+      sha256Text(workbenchText) !== workbenchEntry.sha256
+      || Buffer.byteLength(workbenchText, "utf8") !== workbenchEntry.rawBytes
+    ) {
+      throw new Error("VALIDATION_FAILED:WORKBENCH_HASH");
+    }
+    const workbench = parseBondWorkbenchSnapshot(JSON.parse(workbenchText));
+    if (
+      workbench.records.length !== workbenchEntry.recordCount
+      || workbench.schemaVersion !== workbenchEntry.schemaVersion
+      || runtime.datasets?.bondWorkbench
+        !== `./data/${runtime.generation}/bond-workbench.json`
+    ) {
+      throw new Error("VALIDATION_FAILED:WORKBENCH_RUNTIME");
+    }
+    const supplemental = parseCbSupplementalSnapshot(JSON.parse(await readFile(
+      join(stagingDataDirectory, "bond-supplemental.json"),
+      "utf8",
+    )));
+    const issuerResearch = parseCbIssuerResearchSnapshot(JSON.parse(await readFile(
+      join(stagingDataDirectory, "cb-issuer-research.json"),
+      "utf8",
+    )));
+    const terms = bondTermSummariesFrom11406Rows(JSON.parse(await readFile(
+      join(stagingDataDirectory, "11406.json"),
+      "utf8",
+    ))).map((term) => ({
+      ...term,
+      unitFaceValueTwd: supplemental.unitFaceValueTwd,
+    }));
+    const history = parseBondMarketHistory(JSON.parse(await readFile(
+      join(stagingDataDirectory, "bond-market-history.json"),
+      "utf8",
+    )));
+    verifyWorkbenchConsistency({
+      workbench,
+      terms,
+      views,
+      history,
+      supplemental,
+      issuerResearch,
+      requestedDate: manifest.market.requestedDate,
+      dataDate: manifest.market.dataDate,
+      sourceStateSummary: manifest.market.workbenchSourceStateSummary,
+    });
+    if (JSON.stringify(workbenchEntry.sourceStateSummary)
+      !== JSON.stringify(manifest.market.workbenchSourceStateSummary)) {
+      throw new Error("VALIDATION_FAILED:WORKBENCH_SOURCE_STATE");
+    }
+  }
+}
+
+function validateWorkbenchGenerationFileEntry(entry) {
+  if (
+    entry === null
+    || typeof entry !== "object"
+    || Array.isArray(entry)
+    || JSON.stringify(Object.keys(entry).sort()) !== JSON.stringify([
+      "name",
+      "rawBytes",
+      "recordCount",
+      "schemaVersion",
+      "sha256",
+      "sourceStateSummary",
+    ].sort())
+    || entry.name !== "bond-workbench.json"
+    || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
+    || !Number.isInteger(entry.rawBytes)
+    || entry.rawBytes <= 0
+    || !Number.isInteger(entry.recordCount)
+    || entry.recordCount < 0
+    || entry.schemaVersion !== 1
+    || entry.sourceStateSummary === null
+    || typeof entry.sourceStateSummary !== "object"
+    || Array.isArray(entry.sourceStateSummary)
+  ) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_MANIFEST");
+  }
+  return entry;
 }
 
 function validateGenerationFileEntry(entry, expectedName, code) {
@@ -1130,6 +1444,29 @@ function countSupplementalRecords(snapshot) {
 
 function sha256Text(text) {
   return `sha256:${createHash("sha256").update(text, "utf8").digest("hex")}`;
+}
+
+function equalJson(left, right) {
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left)
+      && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => equalJson(value, right[index]));
+  }
+  if (
+    left === null
+    || right === null
+    || typeof left !== "object"
+    || typeof right !== "object"
+  ) return false;
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((key, index) => (
+      key === rightKeys[index]
+      && equalJson(left[key], right[key])
+    ));
 }
 
 function taipeiDate(date) {

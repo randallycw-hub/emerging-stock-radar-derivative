@@ -11,11 +11,16 @@ import { pathToFileURL } from "node:url";
 
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
+import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
+import { parseBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
 import {
   bondInputsFrom11406Rows,
+  summarizeWorkbenchSourceStates,
   verifyIssuerResearchViewConsistency,
   verifySupplementalViewConsistency,
+  verifyWorkbenchConsistency,
 } from "./build-bond-market-snapshot.mjs";
+import { bondTermSummariesFrom11406Rows } from "./lib/bond-inputs-from-11406.mjs";
 
 const ROOT_FILES = new Set([
   ".nojekyll",
@@ -57,6 +62,7 @@ const GENERATION_FILES = new Set([
   "94025.json",
   "bond-market-history.json",
   "bond-market-view.json",
+  "bond-workbench.json",
   "bond-supplemental.json",
   "cb-issuer-research.json",
   "cb-quotes.json",
@@ -117,10 +123,14 @@ export async function stageStaticShowcase({
   const declaresSupplemental = manifest.market.files?.some(
     (file) => file?.name === "bond-supplemental.json",
   ) === true;
+  const declaresWorkbench = manifest.market.files?.some(
+    (file) => file?.name === "bond-workbench.json",
+  ) === true;
   const expectedDatasets = expectedRuntimeDatasets(
     base,
     declaresIssuerResearch,
     declaresSupplemental,
+    declaresWorkbench,
   );
   validateRuntime(runtime, pointer.generation, expectedDatasets);
   if (manifest.emergingMarketUrl !== `${base}/emerging-market.json`) {
@@ -140,6 +150,9 @@ export async function stageStaticShowcase({
   if (declaresSupplemental) {
     await verifyDeclaredSupplemental({ source, manifest, runtime, base });
   }
+  if (declaresWorkbench) {
+    await verifyDeclaredWorkbench({ source, manifest, runtime, base });
+  }
   const approvedFiles = await collectApprovedSourceFiles(source, pointer.generation);
   await rm(destination, { recursive: true, force: true });
   for (const relativePath of approvedFiles) {
@@ -153,6 +166,7 @@ function expectedRuntimeDatasets(
   base,
   declaresIssuerResearch,
   declaresSupplemental,
+  declaresWorkbench,
 ) {
   return Object.fromEntries([
     ...Object.entries(BASE_DATASET_FILES).map(([key, name]) => [key, `${base}/${name}`]),
@@ -161,6 +175,9 @@ function expectedRuntimeDatasets(
       : []),
     ...(declaresSupplemental
       ? [["bondSupplemental", `${base}/bond-supplemental.json`]]
+      : []),
+    ...(declaresWorkbench
+      ? [["bondWorkbench", `${base}/bond-workbench.json`]]
       : []),
   ]);
 }
@@ -258,6 +275,7 @@ async function collectApprovedSourceFiles(source, activeGeneration) {
     });
     const hasResearch = generationFiles.has("cb-issuer-research.json");
     const hasSupplemental = generationFiles.has("bond-supplemental.json");
+    const hasWorkbench = generationFiles.has("bond-workbench.json");
     const manifestPath = join(generationsPath, entry.name, "manifest.json");
     const manifest = await readOptionalJson(manifestPath);
     const declaresResearch = manifest?.market?.files?.some(
@@ -266,11 +284,17 @@ async function collectApprovedSourceFiles(source, activeGeneration) {
     const declaresSupplemental = manifest?.market?.files?.some(
       (file) => file?.name === "bond-supplemental.json",
     ) === true;
+    const declaresWorkbench = manifest?.market?.files?.some(
+      (file) => file?.name === "bond-workbench.json",
+    ) === true;
     if (hasResearch !== declaresResearch) {
       throw new Error(`static showcase source path is not approved: ${relativeGeneration}/cb-issuer-research.json`);
     }
     if (hasSupplemental !== declaresSupplemental) {
       throw new Error(`static showcase source path is not approved: ${relativeGeneration}/bond-supplemental.json`);
+    }
+    if (hasWorkbench !== declaresWorkbench) {
+      throw new Error(`static showcase source path is not approved: ${relativeGeneration}/bond-workbench.json`);
     }
     const runtimePath = join(generationsPath, entry.name, "runtime.json");
     const runtime = await readOptionalJson(runtimePath);
@@ -283,6 +307,7 @@ async function collectApprovedSourceFiles(source, activeGeneration) {
           `./data/${generation}`,
           declaresResearch,
           declaresSupplemental,
+          declaresWorkbench,
         ),
       );
       if (declaresResearch && generation !== activeGeneration) {
@@ -301,7 +326,15 @@ async function collectApprovedSourceFiles(source, activeGeneration) {
           base: `./data/${generation}`,
         });
       }
-    } else if (declaresResearch || declaresSupplemental) {
+      if (declaresWorkbench && generation !== activeGeneration) {
+        await verifyDeclaredWorkbench({
+          source,
+          manifest,
+          runtime,
+          base: `./data/${generation}`,
+        });
+      }
+    } else if (declaresResearch || declaresSupplemental || declaresWorkbench) {
       throw new Error(`static showcase source path is not approved: ${relativeGeneration}/runtime.json`);
     }
   }
@@ -442,6 +475,116 @@ async function verifyDeclaredSupplemental({ source, manifest, runtime, base }) {
     manifest.market.requestedDate,
     bondInputs,
   );
+}
+
+async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
+  const workbenchEntries = manifest.market.files.filter(
+    (file) => file?.name === "bond-workbench.json",
+  );
+  const viewEntries = manifest.market.files.filter(
+    (file) => file?.name === "bond-market-view.json",
+  );
+  const issuerEntries = manifest.market.files.filter(
+    (file) => file?.name === "cb-issuer-research.json",
+  );
+  const supplementalEntries = manifest.market.files.filter(
+    (file) => file?.name === "bond-supplemental.json",
+  );
+  if (
+    workbenchEntries.length !== 1
+    || viewEntries.length !== 1
+    || issuerEntries.length !== 1
+    || supplementalEntries.length !== 1
+  ) {
+    throw new Error("active generation bond workbench manifest is invalid");
+  }
+  const entry = validateWorkbenchFileEntry(workbenchEntries[0]);
+  const workbenchText = await readFile(
+    join(source, `${base}/bond-workbench.json`.replace(/^\.\//, "")),
+    "utf8",
+  );
+  if (
+    sha256Text(workbenchText) !== entry.sha256
+    || Buffer.byteLength(workbenchText, "utf8") !== entry.rawBytes
+  ) {
+    throw new Error("active generation bond workbench hash is invalid");
+  }
+  const workbench = parseBondWorkbenchSnapshot(JSON.parse(workbenchText));
+  if (
+    workbench.records.length !== entry.recordCount
+    || workbench.schemaVersion !== entry.schemaVersion
+    || runtime.datasets?.bondWorkbench !== `${base}/bond-workbench.json`
+    || !equalJson(entry.sourceStateSummary, manifest.market.workbenchSourceStateSummary)
+    || !equalJson(
+      entry.sourceStateSummary,
+      summarizeWorkbenchSourceStates(workbench),
+    )
+  ) {
+    throw new Error("active generation bond workbench artifact is invalid");
+  }
+  const views = await readJson(
+    join(source, `${base}/bond-market-view.json`.replace(/^\.\//, "")),
+    "active generation bond workbench views are invalid",
+  );
+  const supplemental = parseCbSupplementalSnapshot(await readJson(
+    join(source, `${base}/bond-supplemental.json`.replace(/^\.\//, "")),
+    "active generation bond workbench supplemental is invalid",
+  ));
+  const issuerResearch = parseCbIssuerResearchSnapshot(await readJson(
+    join(source, `${base}/cb-issuer-research.json`.replace(/^\.\//, "")),
+    "active generation bond workbench issuer research is invalid",
+  ));
+  const terms = bondTermSummariesFrom11406Rows(await readJson(
+    join(source, `${base}/11406.json`.replace(/^\.\//, "")),
+    "active generation bond workbench terms are invalid",
+  )).map((term) => ({
+    ...term,
+    unitFaceValueTwd: supplemental.unitFaceValueTwd,
+  }));
+  const history = parseBondMarketHistory(await readJson(
+    join(source, `${base}/bond-market-history.json`.replace(/^\.\//, "")),
+    "active generation bond workbench history is invalid",
+  ));
+  verifyWorkbenchConsistency({
+    workbench,
+    terms,
+    views,
+    history,
+    supplemental,
+    issuerResearch,
+    requestedDate: manifest.market.requestedDate,
+    dataDate: manifest.market.dataDate,
+    sourceStateSummary: manifest.market.workbenchSourceStateSummary,
+  });
+}
+
+function validateWorkbenchFileEntry(entry) {
+  if (
+    entry === null
+    || typeof entry !== "object"
+    || Array.isArray(entry)
+    || !equalStringArrays(Object.keys(entry).sort(), [
+      "name",
+      "rawBytes",
+      "recordCount",
+      "schemaVersion",
+      "sha256",
+      "sourceStateSummary",
+    ].sort())
+    || entry.name !== "bond-workbench.json"
+    || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
+    || !Number.isInteger(entry.rawBytes)
+    || entry.rawBytes <= 0
+    || !Number.isInteger(entry.recordCount)
+    || entry.recordCount < 0
+    || entry.schemaVersion !== 1
+    || entry.sourceStateSummary === null
+    || typeof entry.sourceStateSummary !== "object"
+    || Array.isArray(entry.sourceStateSummary)
+  ) {
+    throw new Error("active generation bond workbench manifest is invalid");
+  }
+  return entry;
 }
 
 function validateFileEntry(entry, expectedName, label = "issuer research") {

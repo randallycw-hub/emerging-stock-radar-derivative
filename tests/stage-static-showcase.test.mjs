@@ -1,13 +1,15 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import test from "node:test";
 
 import { stageStaticShowcase } from "../scripts/stage-static-showcase.mjs";
+import { buildBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
+import { summarizeWorkbenchSourceStates } from "../scripts/build-bond-market-snapshot.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -256,6 +258,121 @@ test("Sites staging rejects declared CB supplemental without its exact runtime d
   );
 });
 
+test("Sites staging copies only a manifest-declared validated bond workbench", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-workbench-"));
+  const source = join(root, "source");
+  const destination = join(root, "destination");
+  await seedDeclaredIssuerResearchGeneration(source, {
+    includeRuntimeKey: true,
+    includeSupplemental: true,
+    includeWorkbench: true,
+  });
+
+  await stageStaticShowcase({ source, destination });
+
+  const runtime = JSON.parse(await readFile(
+    join(destination, "data/generations/abc123/runtime.json"),
+    "utf8",
+  ));
+  assert.equal(
+    runtime.datasets.bondWorkbench,
+    "./data/generations/abc123/bond-workbench.json",
+  );
+  assert.deepEqual(
+    JSON.parse(await readFile(
+      join(destination, "data/generations/abc123/bond-workbench.json"),
+      "utf8",
+    )),
+    emptyWorkbenchSnapshot,
+  );
+});
+
+test("Sites staging fails closed for declared-missing and undeclared-extra workbench files", async (context) => {
+  await context.test("declared missing", async () => {
+    const root = await mkdtemp(join(tmpdir(), "showcase-stage-workbench-missing-"));
+    const source = join(root, "source");
+    await seedDeclaredIssuerResearchGeneration(source, {
+      includeRuntimeKey: true,
+      includeSupplemental: true,
+      includeWorkbench: true,
+    });
+    await rm(join(source, "data/generations/abc123/bond-workbench.json"));
+    await assert.rejects(
+      stageStaticShowcase({ source, destination: join(root, "destination") }),
+      /workbench|required dataset artifacts|source path/i,
+    );
+  });
+
+  await context.test("undeclared extra", async () => {
+    const root = await mkdtemp(join(tmpdir(), "showcase-stage-workbench-extra-"));
+    const source = join(root, "source");
+    await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+    await writeFile(
+      join(source, "data/generations/abc123/bond-workbench.json"),
+      `${JSON.stringify(emptyWorkbenchSnapshot)}\n`,
+      "utf8",
+    );
+    await assert.rejects(
+      stageStaticShowcase({ source, destination: join(root, "destination") }),
+      /workbench|source path/i,
+    );
+  });
+});
+
+test("Sites staging rejects a wrong bond workbench runtime path", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-workbench-runtime-"));
+  const source = join(root, "source");
+  await seedDeclaredIssuerResearchGeneration(source, {
+    includeRuntimeKey: true,
+    includeSupplemental: true,
+    includeWorkbench: true,
+  });
+  const runtimePath = join(source, "data/generations/abc123/runtime.json");
+  const runtime = JSON.parse(await readFile(runtimePath, "utf8"));
+  runtime.datasets.bondWorkbench = "./data/generations/deadbeef/bond-workbench.json";
+  await writeFile(runtimePath, `${JSON.stringify(runtime)}\n`, "utf8");
+
+  await assert.rejects(
+    stageStaticShowcase({ source, destination: join(root, "destination") }),
+    /workbench|required dataset artifacts|runtime datasets/i,
+  );
+});
+
+test("Sites staging verifies declared workbench artifacts in inactive generations", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-inactive-workbench-"));
+  const source = join(root, "source");
+  await seedDeclaredIssuerResearchGeneration(source, {
+    includeRuntimeKey: true,
+    includeSupplemental: true,
+    includeWorkbench: true,
+  });
+  const generations = join(source, "data/generations");
+  await cp(join(generations, "abc123"), join(generations, "deadbeef"), { recursive: true });
+  const inactiveRuntimePath = join(generations, "deadbeef/runtime.json");
+  const inactiveRuntime = JSON.parse(await readFile(inactiveRuntimePath, "utf8"));
+  const rewrittenRuntime = JSON.parse(
+    JSON.stringify(inactiveRuntime).replaceAll("abc123", "deadbeef"),
+  );
+  await writeFile(inactiveRuntimePath, `${JSON.stringify(rewrittenRuntime)}\n`, "utf8");
+  const inactiveManifestPath = join(generations, "deadbeef/manifest.json");
+  const inactiveManifest = JSON.parse(await readFile(inactiveManifestPath, "utf8"));
+  inactiveManifest.emergingMarketUrl = inactiveManifest.emergingMarketUrl.replace(
+    "abc123",
+    "deadbeef",
+  );
+  await writeFile(inactiveManifestPath, `${JSON.stringify(inactiveManifest)}\n`, "utf8");
+  await writeFile(
+    join(generations, "deadbeef/bond-workbench.json"),
+    `${JSON.stringify({ ...emptyWorkbenchSnapshot, schemaVersion: 2 })}\n`,
+    "utf8",
+  );
+
+  await assert.rejects(
+    stageStaticShowcase({ source, destination: join(root, "destination") }),
+    /workbench|schemaVersion|hash/i,
+  );
+});
+
 test("Sites staging copies a manifest-declared issuer research artifact", async () => {
   const root = await mkdtemp(join(tmpdir(), "showcase-stage-research-"));
   const source = join(root, "source");
@@ -333,12 +450,23 @@ const emptySupplementalSnapshot = {
   },
 };
 
+const emptyWorkbenchSnapshot = buildBondWorkbenchSnapshot({
+  generatedAt: "2026-07-31T06:00:00.000Z",
+  dataDate: "2026-07-31",
+  asOfDate: "2026-07-31",
+  currentTerms: [],
+  currentViews: [],
+  currentEvents: [],
+});
+
 async function seedDeclaredIssuerResearchGeneration(
   source,
   {
     includeRuntimeKey,
     includeSupplemental = false,
     includeSupplementalRuntimeKey = includeSupplemental,
+    includeWorkbench = false,
+    includeWorkbenchRuntimeKey = includeWorkbench,
   },
 ) {
   const generation = join(source, "data", "generations", "abc123");
@@ -352,12 +480,23 @@ async function seedDeclaredIssuerResearchGeneration(
   const researchText = `${JSON.stringify(emptyIssuerResearchSnapshot, null, 2)}\n`;
   const viewsText = "[]\n";
   const supplementalText = `${JSON.stringify(emptySupplementalSnapshot, null, 2)}\n`;
+  const workbenchText = `${JSON.stringify(emptyWorkbenchSnapshot, null, 2)}\n`;
+  const workbenchSourceStateSummary = summarizeWorkbenchSourceStates(
+    emptyWorkbenchSnapshot,
+  );
   await writeFile(join(generation, "cb-issuer-research.json"), researchText, "utf8");
   await writeFile(join(generation, "bond-market-view.json"), viewsText, "utf8");
   if (includeSupplemental) {
     await writeFile(
       join(generation, "bond-supplemental.json"),
       supplementalText,
+      "utf8",
+    );
+  }
+  if (includeWorkbench) {
+    await writeFile(
+      join(generation, "bond-workbench.json"),
+      workbenchText,
       "utf8",
     );
   }
@@ -384,10 +523,19 @@ async function seedDeclaredIssuerResearchGeneration(
             sha256: sha256Text(supplementalText),
             recordCount: 0,
           }] : []),
+          ...(includeWorkbench ? [{
+            name: "bond-workbench.json",
+            sha256: sha256Text(workbenchText),
+            rawBytes: Buffer.byteLength(workbenchText),
+            recordCount: 0,
+            schemaVersion: 1,
+            sourceStateSummary: workbenchSourceStateSummary,
+          }] : []),
         ],
         ...(includeSupplemental
           ? { supplementalSources: emptySupplementalSnapshot.sources }
           : {}),
+        ...(includeWorkbench ? { workbenchSourceStateSummary } : {}),
       },
       emergingMarketUrl: "./data/generations/abc123/emerging-market.json",
     })}\n`,
@@ -405,6 +553,9 @@ async function seedDeclaredIssuerResearchGeneration(
       : {}),
     ...(includeSupplementalRuntimeKey
       ? { bondSupplemental: "./data/generations/abc123/bond-supplemental.json" }
+      : {}),
+    ...(includeWorkbenchRuntimeKey
+      ? { bondWorkbench: "./data/generations/abc123/bond-workbench.json" }
       : {}),
   };
   await writeFile(

@@ -10,6 +10,7 @@ import { join } from "node:path";
 import test from "node:test";
 
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
+import { buildBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
 import { buildCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseCbInstitutionDaily } from "../lib/source-verification/source-cb-institution.ts";
 import { parseCbRedemptionAnnouncements } from "../lib/source-verification/source-cb-redemption.ts";
@@ -27,6 +28,7 @@ import {
 const {
   bondInputsFrom11406Rows,
   buildBondMarketSnapshot,
+  verifyWorkbenchConsistency,
 } = snapshotBuilder;
 
 const bond = {
@@ -108,6 +110,50 @@ const validCollectedMarketData = {
     "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
   ],
 };
+
+function workbenchTerm(source = bond) {
+  return {
+    bondCode: source.bondCode,
+    issuerCode: source.issuerCode,
+    bondName: source.shortName,
+    issuerName: source.issuerName,
+    issueDate: null,
+    listingDate: null,
+    maturityDate: source.maturityDate,
+    issueAmount: source.issueAmount,
+    outstandingAmount: source.outstandingAmount,
+    outstandingDataDate: source.outstandingDataDate,
+    initialConversionPrice: null,
+    conversionStartDate: null,
+    conversionEndDate: null,
+    putDates: source.putDates,
+    putPrice: null,
+    securedStatus: null,
+    underwriter: null,
+    trustee: null,
+    unitFaceValueTwd: null,
+  };
+}
+
+function workbenchView(source = bond) {
+  return buildBondMarketViews({
+    asOfDate: "2026-07-30",
+    bonds: [source],
+    cbQuotes: validCollectedMarketData.cbQuotes.map((quote) => ({
+      ...quote,
+      bondCode: source.bondCode,
+    })),
+    stockCloses: validCollectedMarketData.stockCloses.map((close) => ({
+      ...close,
+      companyCode: source.issuerCode,
+    })),
+    conversionPrices: validCollectedMarketData.conversionPrices.map((price) => ({
+      ...price,
+      bondCode: source.bondCode,
+      issuerCode: source.issuerCode,
+    })),
+  })[0];
+}
 
 async function makePublishedDirectory() {
   const root = await mkdtemp(join(tmpdir(), "cb-market-test-"));
@@ -906,7 +952,7 @@ test("a valid candidate publishes verified files and appends exact-date history"
   }));
 
   assert.equal(result.status, "published");
-  assert.equal(result.files.length, 7);
+  assert.equal(result.files.length, 8);
   assert.equal(result.manifest.market.generatedAt, "2026-07-30T12:30:00.000Z");
   assert.equal(result.manifest.market.status, "verified");
   assert.equal(result.manifest.market.requestedDate, "2026-07-30");
@@ -959,6 +1005,167 @@ test("rejects malformed prior history before market collection", async () => {
     /history.*keys|history.*contract/i,
   );
   assert.equal(marketCalls, 0);
+});
+
+test("validates the entire prior workbench before any fetch or market collection", async () => {
+  const outputDir = await makePublishedDirectory();
+  await writeFile(
+    join(outputDir, "bond-workbench.json"),
+    `${JSON.stringify({ schemaVersion: 2 })}\n`,
+  );
+  const originalFetch = globalThis.fetch;
+  let fetchCalls = 0;
+  let marketCalls = 0;
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    throw new Error("network must not run before prior workbench validation");
+  };
+  try {
+    await assert.rejects(
+      () => buildBondMarketSnapshot({
+        outputDir,
+        bonds: [bond],
+        collectImpl: async () => {
+          marketCalls += 1;
+          return validCollectedMarketData;
+        },
+        now: () => new Date("2026-08-09T12:30:00.000Z"),
+      }),
+      /workbench|schemaVersion/i,
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.equal(fetchCalls, 0);
+  assert.equal(marketCalls, 0);
+});
+
+test("publishes a verified workbench manifest entry and archives prior-only bond codes", async () => {
+  const outputDir = await makePublishedDirectory();
+  const removedBond = {
+    ...bond,
+    bondCode: "99999",
+    issuerCode: "9999",
+    issuerName: "舊公司",
+    shortName: "舊債一",
+  };
+  const previous = buildBondWorkbenchSnapshot({
+    generatedAt: "2026-07-29T12:30:00.000Z",
+    dataDate: "2026-07-29",
+    asOfDate: "2026-07-29",
+    currentTerms: [workbenchTerm(bond), workbenchTerm(removedBond)],
+    currentViews: [workbenchView(bond), workbenchView(removedBond)],
+    currentEvents: [],
+  });
+  await writeFile(
+    join(outputDir, "bond-workbench.json"),
+    `${JSON.stringify(previous, null, 2)}\n`,
+  );
+
+  const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
+    outputDir,
+    bonds: [bond],
+    collectImpl: async () => validCollectedMarketData,
+    now: () => new Date("2026-07-30T12:30:00.000Z"),
+  }));
+
+  assert.ok(result.files.includes("bond-workbench.json"));
+  const storedText = await readFile(join(outputDir, "bond-workbench.json"), "utf8");
+  const stored = JSON.parse(storedText);
+  assert.equal(stored.schemaVersion, 1);
+  assert.deepEqual(stored.records.map((record) => record.bondCode), ["35221", "99999"]);
+  assert.deepEqual(
+    stored.records.map((record) => [record.bondCode, record.status, record.archiveReason]),
+    [["35221", "active", null], ["99999", "archived", "removed_from_official_roster"]],
+  );
+  const entry = result.manifest.market.files.find(
+    (file) => file.name === "bond-workbench.json",
+  );
+  assert.equal(entry.rawBytes, Buffer.byteLength(storedText));
+  assert.equal(entry.recordCount, 2);
+  assert.equal(entry.schemaVersion, 1);
+  assert.match(entry.sha256, /^sha256:[0-9a-f]{64}$/);
+  assert.deepEqual(entry.sourceStateSummary.lifecycle, { active: 1, archived: 1 });
+  assert.deepEqual(entry.sourceStateSummary, result.manifest.market.workbenchSourceStateSummary);
+  assert.equal(result.workbench.records.length, 2);
+});
+
+test("workbench cross-file verification uses exact bond codes, history and source states", async () => {
+  const outputDir = await makePublishedDirectory();
+  const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
+    outputDir,
+    bonds: [bond],
+    collectImpl: async () => validCollectedMarketData,
+    now: () => new Date("2026-07-30T12:30:00.000Z"),
+  }));
+  const history = JSON.parse(await readFile(
+    join(outputDir, "bond-market-history.json"),
+    "utf8",
+  ));
+  const entry = result.manifest.market.files.find(
+    (file) => file.name === "bond-workbench.json",
+  );
+  const valid = {
+    workbench: result.workbench,
+    terms: result.workbench.records.map((record) => record.term),
+    views: result.views,
+    history,
+    supplemental: result.supplemental,
+    issuerResearch: result.issuerResearch,
+    requestedDate: result.manifest.market.requestedDate,
+    dataDate: result.manifest.market.dataDate,
+    sourceStateSummary: entry.sourceStateSummary,
+  };
+  assert.doesNotThrow(() => verifyWorkbenchConsistency(valid));
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      views: [{ ...valid.views[0], bondCode: "99999" }],
+    }),
+    /WORKBENCH_CURRENT_BOND_CODES|WORKBENCH_CURRENT_MISMATCH/,
+  );
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      terms: [{ ...valid.terms[0], issuerCode: "9999" }],
+    }),
+    /WORKBENCH_CURRENT_MISMATCH/,
+  );
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      history: [{ ...history[0], bondCode: "99999" }],
+    }),
+    /WORKBENCH_HISTORY_BOND_CODE/,
+  );
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      sourceStateSummary: {
+        ...entry.sourceStateSummary,
+        lifecycle: { active: 0, archived: 1 },
+      },
+    }),
+    /WORKBENCH_SOURCE_STATE/,
+  );
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      workbench: { ...result.workbench, schemaVersion: 2 },
+    }),
+    /schemaVersion/,
+  );
+  const forgedAssessment = structuredClone(result.workbench);
+  forgedAssessment.records[0].assessment.dimensions.find(
+    (dimension) => dimension.code === "liquidity",
+  ).state = "risk";
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      workbench: forgedAssessment,
+    }),
+    /WORKBENCH_HISTORY_ASSESSMENT/,
+  );
 });
 
 test("rejects a conflicting same-day history refresh without overwriting it", async () => {

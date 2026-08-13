@@ -38,6 +38,13 @@ test("正式 generation runtime only exposes compact CB issuer research artifact
         name: "bond-supplemental.json",
         sha256: `sha256:${"b".repeat(64)}`,
         recordCount: 3,
+      }, {
+        name: "bond-workbench.json",
+        sha256: `sha256:${"c".repeat(64)}`,
+        rawBytes: 100,
+        recordCount: 1,
+        schemaVersion: 1,
+        sourceStateSummary: {},
       }],
     },
   });
@@ -49,6 +56,10 @@ test("正式 generation runtime only exposes compact CB issuer research artifact
   assert.equal(
     runtime.datasets.bondSupplemental,
     "./data/generations/abc123/bond-supplemental.json",
+  );
+  assert.equal(
+    runtime.datasets.bondWorkbench,
+    "./data/generations/abc123/bond-workbench.json",
   );
   const serialized = JSON.stringify(runtime);
   assert.equal(serialized.includes("t187ap05_L.csv"), false);
