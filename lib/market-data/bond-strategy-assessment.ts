@@ -29,13 +29,13 @@ export const CB_RESEARCH_RULES = deepFreeze({
   premium: { label: "轉換溢價率", favorable: "<=10%", watch: ">10% && <=30%", favorableMax: "10", watchMax: "30" },
   remaining: { label: "轉換剩餘比例", favorable: ">=70%", watch: ">10% && <70%", favorableMin: "70", watchMin: "10" },
   spread: { label: "盤後價差", favorable: "<0.9%", watch: "0.9–2%", favorableMax: "0.9", watchMax: "2" },
-  liquidity: { label: "5 日均量", favorable: ">=50 張", watch: "10–49 張", risk: "<10 張", favorableMin: "50", watchMin: "10", display: "5 日均量：<10 風險、10–49 需留意、>=50 條件良好" },
-  stockBondRelative: { conversionValue: "70–120", conversionMin: "70", conversionMax: "120", premium: "<30%", premiumMax: "30", days: ">=365" },
-  maturityPut: { publicPutDate: "存在公開賣回日", price: "<100", priceMax: "100" },
+  liquidity: { label: "5 日均量", dailyLabel: "當日成交張數", turnoverLabel: "剩餘張數週轉率", turnover: "呈現公開數值", favorable: ">=50 張", watch: "10–49 張", risk: "<10 張", favorableMin: "50", watchMin: "10", display: "5 日均量：<10 風險、10–49 需留意、>=50 條件良好" },
+  stockBondRelative: { conversionValue: "70–120", conversionValueLabel: "轉換價值", conversionMin: "70", conversionMax: "120", premium: "<30%", premiumMax: "30", days: ">=365" },
+  maturityPut: { publicPutDate: "存在公開賣回日", publicPutDateLabel: "公開賣回日", price: "<100", priceLabel: "基準價格", priceMax: "100", creditLabel: "公開信用評等／TCRI", credit: "已取得可驗證公開資料" },
   equityRelative: { premium: ">30%", premiumMin: "30", profitable: "獲利", revenueUp: "上升", ps: "可驗證公開 PS 百分位" },
   stockEquivalent: { premium: "<2%", premiumMax: "2", spread: "<2%", spreadMax: "2" },
-  arbitrage: { premium: "<0%", premiumMax: "0", borrowability: "可融券", conversion: "未停止轉換", cost: "可驗證" },
-  dynamicHedge: { volatility: ">25%", days: ">=365", premium: "<2%" },
+  arbitrage: { premium: "<0%", premiumMax: "0", borrowability: "可融券", borrowabilityLabel: "融券可用性", conversion: "未停止轉換", conversionLabel: "停止轉換狀態", cost: "可驗證", costLabel: "交易成本（盤後價差）" },
+  dynamicHedge: { volatility: ">25%", volatilityLabel: "公開波動度", days: ">=365", premium: "<2%" },
 });
 
 export function evaluateBondAssessment(input: BondAssessmentInput): BondAssessment {
@@ -58,18 +58,18 @@ export function evaluateBondAssessment(input: BondAssessmentInput): BondAssessme
 
   const liquidityChecks = buildLiquidityChecks(input);
   const conversionValue = valuationDateMismatch
-    ? pendingCheck("conversion_value", "轉換價值", input.view.conversionValue, CB_RESEARCH_RULES.stockBondRelative.conversionValue, input.view.valuationDate, "derived_market_view", "DATE_MISMATCH")
-    : numericCheck("conversion_value", "轉換價值", input.view.conversionValue, CB_RESEARCH_RULES.stockBondRelative.conversionValue, input.view.valuationDate, "derived_market_view", (value) => compareDecimal(value, CB_RESEARCH_RULES.stockBondRelative.conversionMin) >= 0 && compareDecimal(value, CB_RESEARCH_RULES.stockBondRelative.conversionMax) <= 0);
+    ? pendingCheck("conversion_value", CB_RESEARCH_RULES.stockBondRelative.conversionValueLabel, input.view.conversionValue, CB_RESEARCH_RULES.stockBondRelative.conversionValue, input.view.valuationDate, "derived_market_view", "DATE_MISMATCH")
+    : numericCheck("conversion_value", CB_RESEARCH_RULES.stockBondRelative.conversionValueLabel, input.view.conversionValue, CB_RESEARCH_RULES.stockBondRelative.conversionValue, input.view.valuationDate, "derived_market_view", (value) => compareDecimal(value, CB_RESEARCH_RULES.stockBondRelative.conversionMin) >= 0 && compareDecimal(value, CB_RESEARCH_RULES.stockBondRelative.conversionMax) <= 0);
   const stockBondPremium = valuationDateMismatch
     ? pendingCheck("premium_rate", CB_RESEARCH_RULES.premium.label, input.view.premiumRate, CB_RESEARCH_RULES.stockBondRelative.premium, input.view.valuationDate, "derived_market_view", "DATE_MISMATCH")
     : numericCheck("premium_rate", CB_RESEARCH_RULES.premium.label, input.view.premiumRate, CB_RESEARCH_RULES.stockBondRelative.premium, input.view.valuationDate, "derived_market_view", (value) => compareDecimal(value, CB_RESEARCH_RULES.stockBondRelative.premiumMax) < 0);
   const stockBondDays = integerCheck("days_to_maturity", CB_RESEARCH_RULES.days.label, input.view.daysToMaturity, CB_RESEARCH_RULES.stockBondRelative.days, input.view.valuationDate, "approved_cb_terms", (value) => value >= CB_RESEARCH_RULES.days.favorableMin);
 
   const putDate = input.view.nextPutDate === null
-    ? pendingCheck("public_put_date", "公開賣回日", null, CB_RESEARCH_RULES.maturityPut.publicPutDate, null, "approved_cb_terms", "MISSING_PUT_DATE")
-    : metCheck("public_put_date", "公開賣回日", input.view.nextPutDate, CB_RESEARCH_RULES.maturityPut.publicPutDate, input.view.nextPutDate, "approved_cb_terms");
-  const putPrice = numericCheck("cb_price", "基準價格", input.view.cbClose, CB_RESEARCH_RULES.maturityPut.price, input.view.cbPriceDate, "approved_cb_market", (value) => compareDecimal(value, CB_RESEARCH_RULES.maturityPut.priceMax) < 0);
-  const credit = pendingCheck("public_credit_rating", "公開信用評等／TCRI", null, "已取得可驗證公開資料", null, null, "UNAVAILABLE_PUBLIC_SOURCE");
+    ? pendingCheck("public_put_date", CB_RESEARCH_RULES.maturityPut.publicPutDateLabel, null, CB_RESEARCH_RULES.maturityPut.publicPutDate, null, "approved_cb_terms", "MISSING_PUT_DATE")
+    : metCheck("public_put_date", CB_RESEARCH_RULES.maturityPut.publicPutDateLabel, input.view.nextPutDate, CB_RESEARCH_RULES.maturityPut.publicPutDate, input.view.nextPutDate, "approved_cb_terms");
+  const putPrice = numericCheck("cb_price", CB_RESEARCH_RULES.maturityPut.priceLabel, input.view.cbClose, CB_RESEARCH_RULES.maturityPut.price, input.view.cbPriceDate, "approved_cb_market", (value) => compareDecimal(value, CB_RESEARCH_RULES.maturityPut.priceMax) < 0);
+  const credit = pendingCheck("public_credit_rating", CB_RESEARCH_RULES.maturityPut.creditLabel, null, CB_RESEARCH_RULES.maturityPut.credit, null, null, "UNAVAILABLE_PUBLIC_SOURCE");
 
   const equityPremium = valuationDateMismatch
     ? pendingCheck("premium_rate", CB_RESEARCH_RULES.premium.label, input.view.premiumRate, CB_RESEARCH_RULES.equityRelative.premium, input.view.valuationDate, "derived_market_view", "DATE_MISMATCH")
@@ -101,22 +101,22 @@ export function evaluateBondAssessment(input: BondAssessmentInput): BondAssessme
     ? pendingCheck("premium_rate", CB_RESEARCH_RULES.premium.label, input.view.premiumRate, CB_RESEARCH_RULES.arbitrage.premium, input.view.valuationDate, "derived_market_view", "DATE_MISMATCH")
     : numericCheck("premium_rate", CB_RESEARCH_RULES.premium.label, input.view.premiumRate, CB_RESEARCH_RULES.arbitrage.premium, input.view.valuationDate, "derived_market_view", (value) => compareDecimal(value, CB_RESEARCH_RULES.arbitrage.premiumMax) < 0);
   const borrowability = input.borrowability === "unknown"
-    ? pendingCheck("borrowability", "融券可用性", null, "可融券", input.view.cbPriceDate, "approved_borrowability", "UNKNOWN_BORROWABILITY")
+    ? pendingCheck("borrowability", CB_RESEARCH_RULES.arbitrage.borrowabilityLabel, null, CB_RESEARCH_RULES.arbitrage.borrowability, input.view.cbPriceDate, "approved_borrowability", "UNKNOWN_BORROWABILITY")
     : input.borrowability === "available"
-      ? metCheck("borrowability", "融券可用性", "available", "可融券", input.view.cbPriceDate, "approved_borrowability")
-      : notMetCheck("borrowability", "融券可用性", "unavailable", "可融券", input.view.cbPriceDate, "approved_borrowability");
+      ? metCheck("borrowability", CB_RESEARCH_RULES.arbitrage.borrowabilityLabel, "available", CB_RESEARCH_RULES.arbitrage.borrowability, input.view.cbPriceDate, "approved_borrowability")
+      : notMetCheck("borrowability", CB_RESEARCH_RULES.arbitrage.borrowabilityLabel, "unavailable", CB_RESEARCH_RULES.arbitrage.borrowability, input.view.cbPriceDate, "approved_borrowability");
   const suspension = input.conversionSuspended === null
-    ? pendingCheck("conversion_suspended", "停止轉換狀態", null, "未停止轉換", input.view.cbPriceDate, "approved_conversion_events", "UNKNOWN_CONVERSION_STATUS")
+    ? pendingCheck("conversion_suspended", CB_RESEARCH_RULES.arbitrage.conversionLabel, null, CB_RESEARCH_RULES.arbitrage.conversion, input.view.cbPriceDate, "approved_conversion_events", "UNKNOWN_CONVERSION_STATUS")
     : input.conversionSuspended
-      ? notMetCheck("conversion_suspended", "停止轉換狀態", "suspended", "未停止轉換", input.view.cbPriceDate, "approved_conversion_events")
-      : metCheck("conversion_suspended", "停止轉換狀態", "active", "未停止轉換", input.view.cbPriceDate, "approved_conversion_events");
+      ? notMetCheck("conversion_suspended", CB_RESEARCH_RULES.arbitrage.conversionLabel, "suspended", CB_RESEARCH_RULES.arbitrage.conversion, input.view.cbPriceDate, "approved_conversion_events")
+      : metCheck("conversion_suspended", CB_RESEARCH_RULES.arbitrage.conversionLabel, "active", CB_RESEARCH_RULES.arbitrage.conversion, input.view.cbPriceDate, "approved_conversion_events");
   const arbitrageCost = sameDateCheck(input.spreadDataDate, input.view.valuationDate)
     ? input.spreadPercent === null
       ? pendingCheck("spread_percent", "交易成本（盤後價差）", null, "可驗證", input.spreadDataDate, "approved_post_trade_spread", "MISSING_SPREAD")
       : metCheck("spread_percent", "交易成本（盤後價差）", input.spreadPercent, "可驗證", input.spreadDataDate, "approved_post_trade_spread")
     : pendingCheck("spread_percent", "交易成本（盤後價差）", input.spreadPercent, "可驗證", input.spreadDataDate, "approved_post_trade_spread", "DATE_MISMATCH");
 
-  const volatility = pendingCheck("public_volatility", "公開波動度", null, ">25%", null, null, "MISSING_VOLATILITY");
+  const volatility = pendingCheck("public_volatility", CB_RESEARCH_RULES.dynamicHedge.volatilityLabel, null, CB_RESEARCH_RULES.dynamicHedge.volatility, null, null, "MISSING_VOLATILITY");
   const hedgeDays = integerCheck("days_to_maturity", CB_RESEARCH_RULES.days.label, input.view.daysToMaturity, CB_RESEARCH_RULES.dynamicHedge.days, input.view.valuationDate, "approved_cb_terms", (value) => value >= CB_RESEARCH_RULES.days.favorableMin);
   const hedgePremium = equivalentPremium;
 
@@ -141,7 +141,7 @@ export function evaluateBondAssessment(input: BondAssessmentInput): BondAssessme
 }
 
 function buildLiquidityChecks(input: BondAssessmentInput): AssessmentCheck[] {
-  const daily = numericCheck("daily_trade_units", "當日成交張數", input.view.cbTradeUnits, CB_RESEARCH_RULES.liquidity.favorable, input.view.cbPriceDate, "approved_cb_market", (value) => compareDecimal(value, CB_RESEARCH_RULES.liquidity.favorableMin) >= 0);
+  const daily = numericCheck("daily_trade_units", CB_RESEARCH_RULES.liquidity.dailyLabel, input.view.cbTradeUnits, CB_RESEARCH_RULES.liquidity.favorable, input.view.cbPriceDate, "approved_cb_market", (value) => compareDecimal(value, CB_RESEARCH_RULES.liquidity.favorableMin) >= 0);
   const volumeHistory = input.history
     .map((point) => ({ date: point.date, units: (point as BondMarketHistoryPoint & { cbTradingUnits?: unknown }).cbTradingUnits }))
     .filter((point): point is { date: string; units: string } => typeof point.units === "string" && NON_NEGATIVE_DECIMAL.test(point.units))

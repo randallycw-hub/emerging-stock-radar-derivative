@@ -191,7 +191,7 @@ function parseAssessment(value: unknown, name: string): BondAssessment {
         throw new TypeError(`${name} public financial check requires sourceId and dataDate`);
       }
       if (
-        (check.sourceId === "approved_post_trade_spread" || check.sourceId === "approved_public_financials")
+        (check.sourceId === "approved_post_trade_spread" || check.code === "ttm_profit" || check.code === "revenue_trend" || check.code === "ps_percentile")
         && check.dataDate !== null
         && strategy.checks.some((peer) => peer.code === "premium_rate" && peer.dataDate !== null && peer.dataDate !== check.dataDate)
         && (check.state !== "pending" || check.missingReason !== "DATE_MISMATCH")

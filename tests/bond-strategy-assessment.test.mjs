@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
+import { CB_RESEARCH_RULES, evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
 
 const dataDate = "2026-08-12";
 
@@ -238,18 +238,20 @@ test("marks a present spread from a mismatched valuation date pending in its own
 
 test("covers the six named anonymized public-like research fixtures", async (context) => {
   const fixtures = [
-    ["聯電一（匿名化）", { cbClose: "131", premiumRate: "31" }],
-    ["金像電三（匿名化）", { cbClose: "115", premiumRate: "9" }],
-    ["博智二（匿名化）", { cbClose: "116", premiumRate: "10.01" }],
-    ["偉詮電一（匿名化）", { daysToMaturity: 179 }],
-    ["至上11（匿名化）", { cbPriceDate: "2026-08-11", valuationDate: "2026-08-11" }],
-    ["順德一（匿名化）", { cbTradeUnits: "0", premiumRate: "-0.01" }],
+    ["聯電一（匿名化）", { cbClose: "131", premiumRate: "31" }, "price", "risk", "cb_price", "131", CB_RESEARCH_RULES.price.favorable],
+    ["金像電三（匿名化）", { cbClose: "115", premiumRate: "9" }, "price", "favorable", "cb_price", "115", CB_RESEARCH_RULES.price.favorable],
+    ["博智二（匿名化）", { cbClose: "116", premiumRate: "10.01" }, "premium", "watch", "premium_rate", "10.01", CB_RESEARCH_RULES.premium.favorable],
+    ["偉詮電一（匿名化）", { daysToMaturity: 179 }, "days", "risk", "days_to_maturity", "179", CB_RESEARCH_RULES.days.favorable],
+    ["至上11（匿名化）", { cbPriceDate: "2026-08-11", valuationDate: "2026-08-11" }, "spread", "pending", "spread_percent", "0.8", CB_RESEARCH_RULES.spread.favorable],
+    ["順德一（匿名化）", { cbTradeUnits: "0", premiumRate: "-0.01" }, "liquidity", "favorable", "daily_trade_units", "0", CB_RESEARCH_RULES.liquidity.favorable],
   ];
-  for (const [label, patch] of fixtures) {
+  for (const [label, patch, dimensionCode, dimensionState, checkCode, actual, threshold] of fixtures) {
     await context.test(label, () => {
       const result = assessment({ view: view(patch) });
-      assert.equal(result.dimensions.length, 6);
-      assert.equal(result.strategies.length, 6);
+      const item = dimension(result, dimensionCode);
+      assert.equal(item.state, dimensionState);
+      assert.equal(check(item, checkCode).actual, actual);
+      assert.equal(check(item, checkCode).threshold, threshold);
     });
   }
 });
@@ -261,4 +263,27 @@ test("deeply freezes assessment sections and checks", () => {
   assert.ok(Object.isFrozen(result.dimensions[0]));
   assert.ok(Object.isFrozen(result.dimensions[0].checks));
   assert.ok(Object.isFrozen(result.dimensions[0].checks[0]));
+});
+
+test("uses frozen shared rules for boolean labels and strategy thresholds", () => {
+  assert.ok(Object.isFrozen(CB_RESEARCH_RULES));
+  assert.ok(Object.isFrozen(CB_RESEARCH_RULES.arbitrage));
+  assert.throws(() => { CB_RESEARCH_RULES.arbitrage.borrowability = "changed"; }, TypeError);
+  const result = assessment();
+  const arbitrage = strategy(result, "arbitrage");
+  assert.equal(check(arbitrage, "borrowability").label, CB_RESEARCH_RULES.arbitrage.borrowabilityLabel);
+  assert.equal(check(arbitrage, "borrowability").threshold, CB_RESEARCH_RULES.arbitrage.borrowability);
+  assert.equal(check(arbitrage, "conversion_suspended").label, CB_RESEARCH_RULES.arbitrage.conversionLabel);
+  assert.equal(check(strategy(result, "dynamic_hedge"), "public_volatility").threshold, CB_RESEARCH_RULES.dynamicHedge.volatility);
+});
+
+test("zero trade is known while five- and twenty-day volume remain pending without Task 3 history", () => {
+  const result = assessment({ view: view({ cbTradeUnits: "0" }), history: [] });
+  const daily = check(dimension(result, "liquidity"), "daily_trade_units");
+  assert.equal(daily.actual, "0");
+  assert.equal(daily.state, "not_met");
+  assert.equal(daily.missingReason, null);
+  assert.equal(Number.isNaN(Number(daily.actual)), false);
+  assert.equal(check(dimension(result, "liquidity"), "average_5d_units").state, "pending");
+  assert.equal(check(dimension(result, "liquidity"), "average_20d_units").state, "pending");
 });

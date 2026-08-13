@@ -178,6 +178,22 @@ test("rejects a decided public-financial assessment check without evidence", () 
   );
 });
 
+test("enforces financial-date alignment for every verified source identifier", () => {
+  const verified = evaluateBondAssessment({
+    view: view(), history: [], spreadPercent: "0.8", spreadDataDate: dataDate,
+    borrowability: "available", conversionSuspended: false,
+    publicFinancials: { ttmProfitState: "profitable", revenueTrendState: "up", psPercentile: "50", dataDate, sourceId: "custom_verified_financials" },
+  });
+  assert.doesNotThrow(() => buildBondWorkbenchSnapshot(input({ currentAssessments: [{ bondCode: "35221", assessment: verified }] })));
+  const mismatched = structuredClone(verified);
+  const ttm = mismatched.strategies.find((item) => item.code === "equity_relative").checks.find((item) => item.code === "ttm_profit");
+  ttm.dataDate = "2026-08-11";
+  assert.throws(
+    () => buildBondWorkbenchSnapshot(input({ currentAssessments: [{ bondCode: "35221", assessment: mismatched }] })),
+    /DATE_MISMATCH|cross-date/i,
+  );
+});
+
 test("archives by verified redemption, maturity, zero balance, then complete roster removal", () => {
   const previous = buildBondWorkbenchSnapshot(input({
     currentTerms: [term("35221"), term("35222"), term("35223"), term("35224")],
