@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
+import { deriveBondRemainingMetrics } from "../lib/market-data/bond-derived-metrics.ts";
 import { buildHistoryPoints } from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
 import {
@@ -227,7 +228,7 @@ export async function buildBondMarketSnapshot(options = {}) {
     };
     const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
     await writeFile(join(stagingDir, "manifest.json"), manifestText, "utf8");
-    await verifyStagedFiles(stagingDir, files, manifestText);
+    await verifyStagedFiles(stagingDir, files, manifestText, bondInputs);
     await publishAtomically(
       stagingDir,
       outputDir,
@@ -562,7 +563,7 @@ function validateCandidate({ bondInputs, collected, views }) {
   return errors;
 }
 
-async function verifyStagedFiles(stagingDir, files, manifestText) {
+async function verifyStagedFiles(stagingDir, files, manifestText, bondInputs) {
   let stagedIssuerResearch;
   let stagedSupplemental;
   let stagedViews;
@@ -611,6 +612,7 @@ async function verifyStagedFiles(stagingDir, files, manifestText) {
     stagedSupplemental,
     stagedViews,
     manifest?.market?.requestedDate,
+    bondInputs,
   );
 }
 
@@ -637,11 +639,17 @@ export function verifyIssuerResearchViewConsistency(snapshot, views) {
   }
 }
 
-export function verifySupplementalViewConsistency(snapshot, views, asOfDate) {
+export function verifySupplementalViewConsistency(
+  snapshot,
+  views,
+  asOfDate,
+  bondInputs,
+) {
   const supplemental = parseCbSupplementalSnapshot(snapshot);
   if (!isIsoDate(asOfDate) || !Array.isArray(views)) {
     throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_VIEW_ENVELOPE");
   }
+  const issuanceByBondCode = verifiedIssuanceEvidence(bondInputs, views);
   for (const view of views) {
     if (
       view === null
@@ -665,17 +673,105 @@ export function verifySupplementalViewConsistency(snapshot, views, asOfDate) {
     const redemption = currentCbRedemption(supplemental, view.bondCode, asOfDate);
     const redemptionMatches =
       JSON.stringify(view.redemptionEvent) === JSON.stringify(redemption);
-    const unavailableUnitMatches = !(
-        supplemental.unitFaceValueTwd === null
-        && (
-          view.remainingUnits !== null
-          || view.dailyTurnoverRate !== null
-        )
-      );
-    if (!institutionFieldsMatch || !redemptionMatches || !unavailableUnitMatches) {
+    const issuance = issuanceByBondCode.get(view.bondCode);
+    let remainingMetrics;
+    try {
+      remainingMetrics = deriveBondRemainingMetrics({
+        issueAmount: issuance.issueAmount,
+        outstandingAmount: issuance.outstandingAmount,
+        outstandingDataDate: issuance.outstandingDataDate,
+        faceValueTwd: supplemental.unitFaceValueTwd,
+        cbTradeUnits: view.cbTradeUnits,
+        cbTradeDate: view.cbPriceDate,
+      });
+    } catch {
+      throw new Error(`VALIDATION_FAILED:SUPPLEMENTAL_VIEW_MISMATCH:${view.bondCode}`);
+    }
+    const derivedReasonsMatch = derivedMissingReasonsMatch(
+      view.missingReasons,
+      remainingMetrics.missingReasons,
+    );
+    const expectedQuality = remainingMetrics.missingReasons.includes(
+      "BALANCE_TRADE_DATE_MISMATCH",
+    )
+      ? "date_mismatch"
+      : view.missingReasons.length > 0
+        ? "partial"
+        : "complete";
+    const remainingFieldsMatch = (
+      view.outstandingAmount === issuance.outstandingAmount
+      && view.outstandingDataDate === issuance.outstandingDataDate
+      && view.remainingUnits === remainingMetrics.remainingUnits
+      && view.remainingRatio === remainingMetrics.remainingRatio
+      && view.dailyTurnoverRate === remainingMetrics.dailyTurnoverRate
+      && derivedReasonsMatch
+      && view.dataQuality === expectedQuality
+    );
+    if (!institutionFieldsMatch || !redemptionMatches || !remainingFieldsMatch) {
       throw new Error(`VALIDATION_FAILED:SUPPLEMENTAL_VIEW_MISMATCH:${view.bondCode}`);
     }
   }
+}
+
+const DERIVED_MISSING_REASONS = new Set([
+  "NO_VERIFIED_FACE_VALUE",
+  "OUTSTANDING_NOT_INTEGER",
+  "OUTSTANDING_NOT_DIVISIBLE",
+  "INVALID_ISSUE_AMOUNT",
+  "BALANCE_TRADE_DATE_MISMATCH",
+  "ZERO_REMAINING_UNITS",
+]);
+
+function verifiedIssuanceEvidence(bondInputs, views) {
+  if (!Array.isArray(bondInputs)) {
+    throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_ISSUANCE_EVIDENCE");
+  }
+  const evidence = new Map();
+  for (const bond of bondInputs) {
+    if (bond === null || typeof bond !== "object" || Array.isArray(bond)) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_ISSUANCE_EVIDENCE");
+    }
+    const { bondCode, issueAmount, outstandingAmount, outstandingDataDate } = bond;
+    if (
+      typeof bondCode !== "string"
+      || !/^\d{5,6}$/.test(bondCode)
+      || evidence.has(bondCode)
+      || !isOptionalCanonicalAmount(issueAmount)
+      || !isOptionalCanonicalAmount(outstandingAmount)
+      || !(
+        outstandingDataDate === null
+        || typeof outstandingDataDate === "string" && isIsoDate(outstandingDataDate)
+      )
+      || outstandingAmount !== null && outstandingDataDate === null
+    ) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_ISSUANCE_EVIDENCE");
+    }
+    evidence.set(bondCode, { issueAmount, outstandingAmount, outstandingDataDate });
+  }
+  const viewCodes = views.map((view) => view?.bondCode);
+  if (
+    evidence.size !== views.length
+    || new Set(viewCodes).size !== views.length
+    || viewCodes.some((bondCode) => !evidence.has(bondCode))
+  ) {
+    throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_ISSUANCE_EVIDENCE");
+  }
+  return evidence;
+}
+
+function isOptionalCanonicalAmount(value) {
+  return value === null
+    || typeof value === "string" && /^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value);
+}
+
+function derivedMissingReasonsMatch(actual, expected) {
+  if (!Array.isArray(actual) || actual.some((reason) => typeof reason !== "string")) {
+    return false;
+  }
+  const actualDerived = actual.filter((reason) => DERIVED_MISSING_REASONS.has(reason));
+  return new Set(actualDerived).size === actualDerived.length
+    && actualDerived.length === expected.length
+    && expected.every((reason) => actualDerived.includes(reason));
 }
 
 function publicIssuerResearch(record) {

@@ -12,6 +12,7 @@ import { pathToFileURL } from "node:url";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import {
+  bondInputsFrom11406Rows,
   verifyIssuerResearchViewConsistency,
   verifySupplementalViewConsistency,
 } from "./build-bond-market-snapshot.mjs";
@@ -430,7 +431,16 @@ async function verifyDeclaredSupplemental({ source, manifest, runtime, base }) {
   ) {
     throw new Error("active generation CB supplemental artifact is invalid");
   }
-  verifySupplementalViewConsistency(snapshot, views, manifest.market.requestedDate);
+  const bondInputs = bondInputsFrom11406Rows(await readJson(
+    join(source, `${base}/11406.json`.replace(/^\.\//, "")),
+    "active generation CB supplemental issuance evidence is invalid",
+  ));
+  verifySupplementalViewConsistency(
+    snapshot,
+    views,
+    manifest.market.requestedDate,
+    bondInputs,
+  );
 }
 
 function validateFileEntry(entry, expectedName, label = "issuer research") {

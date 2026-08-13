@@ -566,9 +566,16 @@ function validateInstitutionDaily(value: CbInstitutionDailySnapshot): {
 
 function validateInstitutionHistory(value: unknown): Record<string, CbInstitutionTrade[]> {
   const history = requireRecord(value, "institution history");
+  const historyKeys = Reflect.ownKeys(history);
+  if (historyKeys.some((key) => (
+    typeof key !== "string"
+    || !Object.prototype.propertyIsEnumerable.call(history, key)
+    || !/^\d{5,6}$/.test(key)
+  ))) {
+    throw new TypeError("institution history key is invalid");
+  }
   const result: Record<string, CbInstitutionTrade[]> = {};
-  for (const bondCode of Object.keys(history).sort()) {
-    if (!/^\d{5,6}$/.test(bondCode)) throw new TypeError("institution history bond code is invalid");
+  for (const bondCode of (historyKeys as string[]).sort()) {
     const trades = history[bondCode];
     if (!Array.isArray(trades) || trades.length > 60) {
       throw new TypeError(`institution history ${bondCode} must contain at most 60 trades`);

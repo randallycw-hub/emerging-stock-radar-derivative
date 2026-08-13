@@ -420,7 +420,136 @@ test("supplemental cross-file verification keeps ratio independent of face-value
     supplemental,
     views,
     "2026-07-30",
+    [bond],
   ));
+});
+
+test("supplemental cross-file verification rejects corrupted derived metrics and quality", async (t) => {
+  const supplemental = {
+    schemaVersion: 1,
+    generatedAt: "2026-08-09T12:30:00.000Z",
+    unitFaceValueTwd: "100000",
+    institutionHistory: {},
+    redemptions: [],
+    underwritingCases: [],
+    sources: {
+      institution: { state: "fresh", dataDate: "2026-07-30", periodYear: 2026 },
+      redemption: { state: "unavailable", dataDate: null, periodYear: null },
+      underwriting: { state: "unavailable", dataDate: null, periodYear: null },
+    },
+  };
+  const views = buildBondMarketViews({
+    asOfDate: "2026-07-30",
+    bonds: [bond],
+    cbQuotes: [{
+      ...validCollectedMarketData.cbQuotes[0],
+      tradingDate: "2026-07-30",
+    }],
+    stockCloses: [],
+    conversionPrices: [],
+    supplemental,
+  });
+  assert.deepEqual(
+    [views[0].remainingUnits, views[0].remainingRatio, views[0].dailyTurnoverRate],
+    ["4000", "80", "0.25"],
+  );
+
+  for (const [name, issuanceEvidence] of [
+    ["missing issuance evidence", []],
+    ["duplicate issuance evidence", [bond, bond]],
+    ["invalid issuance evidence", [{ ...bond, issueAmount: 1 }]],
+  ]) {
+    await t.test(name, () => {
+      assert.throws(
+        () => snapshotBuilder.verifySupplementalViewConsistency(
+          supplemental,
+          views,
+          "2026-07-30",
+          issuanceEvidence,
+        ),
+        /SUPPLEMENTAL_ISSUANCE_EVIDENCE/,
+      );
+    });
+  }
+
+  for (const [name, patch] of [
+    ["remaining units", { remainingUnits: "3999" }],
+    ["remaining ratio", { remainingRatio: "79.99" }],
+    ["daily turnover rate", { dailyTurnoverRate: "0.26" }],
+    ["extra derived reason", {
+      missingReasons: [...views[0].missingReasons, "ZERO_REMAINING_UNITS"],
+    }],
+    ["false date mismatch quality", { dataQuality: "date_mismatch" }],
+  ]) {
+    await t.test(name, () => {
+      const corrupted = [{ ...views[0], ...patch }];
+      assert.throws(
+        () => snapshotBuilder.verifySupplementalViewConsistency(
+          supplemental,
+          corrupted,
+          "2026-07-30",
+          [bond],
+        ),
+        /SUPPLEMENTAL_VIEW_MISMATCH/,
+      );
+    });
+  }
+
+  await t.test("missing required derived reason", () => {
+    const noFace = {
+      ...supplemental,
+      unitFaceValueTwd: null,
+      sources: {
+        ...supplemental.sources,
+        institution: { state: "unavailable", dataDate: null, periodYear: null },
+      },
+    };
+    const [noFaceView] = buildBondMarketViews({
+      asOfDate: "2026-07-30",
+      bonds: [bond],
+      cbQuotes: [{
+        ...validCollectedMarketData.cbQuotes[0],
+        tradingDate: "2026-07-30",
+      }],
+      stockCloses: [],
+      conversionPrices: [],
+      supplemental: noFace,
+    });
+    assert.throws(
+      () => snapshotBuilder.verifySupplementalViewConsistency(
+        noFace,
+        [{
+          ...noFaceView,
+          missingReasons: noFaceView.missingReasons.filter(
+            (reason) => reason !== "NO_VERIFIED_FACE_VALUE",
+          ),
+        }],
+        "2026-07-30",
+        [bond],
+      ),
+      /SUPPLEMENTAL_VIEW_MISMATCH/,
+    );
+  });
+
+  await t.test("balance date mismatch must use date mismatch quality", () => {
+    const [mismatchedView] = buildBondMarketViews({
+      asOfDate: "2026-07-30",
+      bonds: [bond],
+      cbQuotes: [validCollectedMarketData.cbQuotes[0]],
+      stockCloses: [],
+      conversionPrices: [],
+      supplemental,
+    });
+    assert.throws(
+      () => snapshotBuilder.verifySupplementalViewConsistency(
+        supplemental,
+        [{ ...mismatchedView, dataQuality: "partial" }],
+        "2026-07-30",
+        [bond],
+      ),
+      /SUPPLEMENTAL_VIEW_MISMATCH/,
+    );
+  });
 });
 
 test("removed offline source option cannot publish current research while unapproved", async () => {

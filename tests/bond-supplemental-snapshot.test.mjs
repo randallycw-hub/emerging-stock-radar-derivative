@@ -43,6 +43,27 @@ test("supplemental parser rejects hidden, symbol and sparse off-contract data", 
     assert.throws(() => parseCbSupplementalSnapshot(input), /keys.*contract/i);
   });
 
+  await t.test("hidden institution history key", () => {
+    const input = previousSnapshot();
+    Object.defineProperty(input.institutionHistory, "12345", {
+      value: [],
+      enumerable: false,
+    });
+    assert.throws(() => parseCbSupplementalSnapshot(input), /history.*key/i);
+  });
+
+  await t.test("symbol institution history key", () => {
+    const input = previousSnapshot();
+    input.institutionHistory[Symbol("hidden")] = [];
+    assert.throws(() => parseCbSupplementalSnapshot(input), /history.*key/i);
+  });
+
+  await t.test("invalid institution history key", () => {
+    const input = previousSnapshot();
+    input.institutionHistory.invalid = [];
+    assert.throws(() => parseCbSupplementalSnapshot(input), /history.*key/i);
+  });
+
   for (const [name, mutate] of [
     ["institution history", (input) => { input.institutionHistory["54642"] = new Array(1); }],
     ["redemptions", (input) => { input.redemptions = new Array(1); }],

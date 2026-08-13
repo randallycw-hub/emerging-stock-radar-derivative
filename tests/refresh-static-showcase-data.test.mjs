@@ -485,7 +485,13 @@ test("refresh leaves the prior generation untouched when publication fails befor
   });
 });
 
-for (const failureMode of ["hash", "manifest", "cross-file", "supplemental"]) {
+for (const failureMode of [
+  "hash",
+  "manifest",
+  "cross-file",
+  "supplemental",
+  "supplemental-view",
+]) {
   test(`research ${failureMode} failure after candidate write leaves pointer and prior generation unchanged`, async () => {
     const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
       "../scripts/refresh-static-showcase-data.mjs"

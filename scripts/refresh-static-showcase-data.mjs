@@ -399,9 +399,16 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     scenario,
     now: nowText = "2026-07-30T06:00:06.000Z",
   } = parseIsolatedHarnessOptions(options);
-  if (!new Set(["success", "hash", "manifest", "cross-file", "supplemental"]).has(scenario)) {
+  if (!new Set([
+    "success",
+    "hash",
+    "manifest",
+    "cross-file",
+    "supplemental",
+    "supplemental-view",
+  ]).has(scenario)) {
     throw new TypeError(
-      "isolated refresh scenario must be one of success, hash, manifest, cross-file, supplemental",
+      "isolated refresh scenario must be one of success, hash, manifest, cross-file, supplemental, supplemental-view",
     );
   }
   if (
@@ -534,12 +541,19 @@ function parseIsolatedHarnessOptions(value) {
 }
 
 async function loadIsolatedHarnessFixtures() {
+  const bondRows = await readFile(new URL(
+    "../tests/fixtures/source-verification/11406/csv-minimal.csv",
+    import.meta.url,
+  ), "utf8");
   return {
     "94025": await readFile(new URL(
       "../tests/fixtures/source-verification/94025/csv-minimal.csv",
       import.meta.url,
     ), "utf8"),
-    "11406": "bondCode\n",
+    "11406": bondRows
+      .split(/\r?\n/)
+      .filter((line, index) => index === 0 || line.includes('"35221"'))
+      .join("\n"),
     "11586": "companyCode\n1260\n",
     emergingMarket: await readFile(new URL(
       "../tests/fixtures/source-verification/emerging-market/tpex-esb-latest-statistics.json",
@@ -571,17 +585,26 @@ async function buildIsolatedMarketCandidate({
   const supplemental = isolatedSupplementalSnapshot(generatedAt);
   const supplementalText = `${JSON.stringify(supplemental, null, 2)}\n`;
   const viewsText = `${JSON.stringify([{
-    bondCode: "12601",
+    bondCode: "35221",
     issuerCode: "1260",
     issuerResearch: scenario === "cross-file" ? null : compact,
+    cbTradeUnits: "0",
+    cbPriceDate: null,
+    outstandingAmount: "123100000",
+    outstandingDataDate: "2026-07-23",
     remainingUnits: null,
-    remainingRatio: null,
+    remainingRatio: scenario === "supplemental-view" ? "82.08" : "82.07",
     dailyTurnoverRate: null,
     institutionDataDate: null,
     institutionNetUnits: null,
     institutionNet5dUnits: null,
     institutionNet20dUnits: null,
     redemptionEvent: null,
+    missingReasons: [
+      "NO_VERIFIED_FACE_VALUE",
+      "BALANCE_TRADE_DATE_MISMATCH",
+    ],
+    dataQuality: "date_mismatch",
   }], null, 2)}\n`;
   await writeFile(join(outputDir, "cb-issuer-research.json"), researchText, "utf8");
   await writeFile(join(outputDir, "bond-supplemental.json"), supplementalText, "utf8");
@@ -1078,6 +1101,10 @@ async function verifyStagedGeneration(stagingDataDirectory) {
       supplemental,
       views,
       manifest.market.requestedDate,
+      bondInputsFrom11406Rows(JSON.parse(await readFile(
+        join(stagingDataDirectory, "11406.json"),
+        "utf8",
+      ))),
     );
   }
 }
