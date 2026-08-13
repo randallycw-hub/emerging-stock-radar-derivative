@@ -884,7 +884,14 @@ test("a valid candidate publishes verified files and appends exact-date history"
     `${JSON.stringify([{
       bondCode: "35221",
       date: "2026-07-28",
+      cbOpen: "102",
+      cbHigh: "102",
+      cbLow: "102",
       cbClose: "102",
+      cbAverage: "102",
+      cbChange: "0",
+      cbTradingUnits: "1",
+      cbTurnover: "102000",
       stockClose: "37",
       effectiveConversionPrice: "35.1",
       conversionValue: "105.41",
@@ -929,4 +936,63 @@ test("a valid candidate publishes verified files and appends exact-date history"
     history.map((point) => point.date),
     ["2026-07-28", "2026-07-29"],
   );
+});
+
+test("rejects malformed prior history before market collection", async () => {
+  const outputDir = await makePublishedDirectory();
+  await writeFile(
+    join(outputDir, "bond-market-history.json"),
+    `${JSON.stringify([{ bondCode: "35221" }])}\n`,
+  );
+  let marketCalls = 0;
+
+  await assert.rejects(
+    () => withBlockedFetch(() => buildBondMarketSnapshot({
+      outputDir,
+      bonds: [bond],
+      collectImpl: async () => {
+        marketCalls += 1;
+        return validCollectedMarketData;
+      },
+      now: () => new Date("2026-07-30T12:30:00.000Z"),
+    })),
+    /history.*keys|history.*contract/i,
+  );
+  assert.equal(marketCalls, 0);
+});
+
+test("rejects a conflicting same-day history refresh without overwriting it", async () => {
+  const outputDir = await makePublishedDirectory();
+  const previous = [{
+    bondCode: "35221",
+    date: "2026-07-29",
+    cbOpen: "103.5",
+    cbHigh: "103.5",
+    cbLow: "103.5",
+    cbClose: "103.5",
+    cbAverage: "103.5",
+    cbChange: "0",
+    cbTradingUnits: "10",
+    cbTurnover: "1035000",
+    stockClose: "38.25",
+    effectiveConversionPrice: "35.1",
+    conversionValue: "108.97",
+    premiumRate: "-5.02",
+  }];
+  await writeFile(
+    join(outputDir, "bond-market-history.json"),
+    `${JSON.stringify(previous, null, 2)}\n`,
+  );
+  const before = await readFile(join(outputDir, "bond-market-history.json"), "utf8");
+
+  await assert.rejects(
+    () => withOfflineProductionFetch(() => buildBondMarketSnapshot({
+      outputDir,
+      bonds: [bond],
+      collectImpl: async () => validCollectedMarketData,
+      now: () => new Date("2026-07-30T12:30:00.000Z"),
+    })),
+    /history conflict|correction evidence/i,
+  );
+  assert.equal(await readFile(join(outputDir, "bond-market-history.json"), "utf8"), before);
 });

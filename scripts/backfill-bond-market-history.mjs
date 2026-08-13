@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   mkdtemp,
   readFile,
@@ -9,7 +10,11 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
-import { buildHistoryPoints } from "../lib/market-data/bond-market-history.ts";
+import {
+  buildHistoryPoints,
+  mergeBondMarketHistory,
+  parseBondMarketHistory,
+} from "../lib/market-data/bond-market-history.ts";
 import { bondInputsFrom11406Rows } from "./build-bond-market-snapshot.mjs";
 import {
   fetchCbMonthlyHistory,
@@ -24,11 +29,13 @@ export async function backfillBondMarketHistory({
   asOfDate = taipeiDate(new Date()),
 } = {}) {
   if (!isIsoDate(asOfDate)) throw new TypeError("asOfDate must be an ISO date");
-  const [rawBonds, conversionPrices, currentStockCloses] = await Promise.all([
+  const [rawBonds, conversionPrices, currentStockCloses, previousHistory] = await Promise.all([
     readJson(join(dataDirectory, "11406.json")),
     readJson(join(dataDirectory, "conversion-prices.json")),
     readJson(join(dataDirectory, "stock-closes.json")),
+    readOptionalJson(join(dataDirectory, "bond-market-history.json")),
   ]);
+  const verifiedPreviousHistory = parseBondMarketHistory(previousHistory ?? []);
   const bonds = bondInputsFrom11406Rows(rawBonds);
   const months = latestTwelveMonths(asOfDate);
   const issuerMarkets = selectIssuerMarkets(currentStockCloses);
@@ -57,21 +64,26 @@ export async function backfillBondMarketHistory({
       })
   );
 
-  const points = buildHistoryPoints({
+  const points = mergeBondMarketHistory(verifiedPreviousHistory, buildHistoryPoints({
     cbQuotes: cbGroups.flat(),
     stockCloses: stockGroups.flat(),
     conversionPrices,
-  });
+  }));
   const outputPath = join(dataDirectory, "bond-market-history.json");
   const stagingDirectory = await mkdtemp(
     join(dirname(outputPath), ".cb-history-"),
   );
   try {
     const candidatePath = join(stagingDirectory, "bond-market-history.json");
-    await writeFile(candidatePath, `${JSON.stringify(points, null, 2)}\n`, "utf8");
-    const candidate = JSON.parse(await readFile(candidatePath, "utf8"));
-    if (!Array.isArray(candidate) || candidate.length !== points.length) {
+    const expectedText = `${JSON.stringify(points, null, 2)}\n`;
+    await writeFile(candidatePath, expectedText, "utf8");
+    const candidateText = await readFile(candidatePath, "utf8");
+    const candidate = parseBondMarketHistory(JSON.parse(candidateText));
+    if (candidate.length !== points.length) {
       throw new Error("VALIDATION_FAILED:HISTORY_COUNT_MISMATCH");
+    }
+    if (sha256(candidateText) !== sha256(expectedText)) {
+      throw new Error("VALIDATION_FAILED:HISTORY_HASH_MISMATCH");
     }
     await rename(candidatePath, outputPath);
   } finally {
@@ -140,6 +152,19 @@ async function readJson(path) {
   return JSON.parse(await readFile(path, "utf8"));
 }
 
+async function readOptionalJson(path) {
+  try {
+    return await readJson(path);
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
+function sha256(text) {
+  return `sha256:${createHash("sha256").update(text, "utf8").digest("hex")}`;
+}
+
 function taipeiDate(date) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Taipei",
@@ -155,4 +180,3 @@ const entryUrl = process.argv[1]
 if (entryUrl === import.meta.url) {
   console.log(JSON.stringify(await backfillBondMarketHistory(), null, 2));
 }
-

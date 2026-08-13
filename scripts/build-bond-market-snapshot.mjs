@@ -15,7 +15,11 @@ import { pathToFileURL } from "node:url";
 import { isIsoDate } from "../lib/domain/dates.ts";
 import { bondInputsFrom11406Rows } from "./lib/bond-inputs-from-11406.mjs";
 import { deriveBondRemainingMetrics } from "../lib/market-data/bond-derived-metrics.ts";
-import { buildHistoryPoints } from "../lib/market-data/bond-market-history.ts";
+import {
+  buildHistoryPoints,
+  mergeBondMarketHistory,
+  parseBondMarketHistory,
+} from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
 import {
   buildCbSupplementalSnapshot,
@@ -105,6 +109,7 @@ export async function buildBondMarketSnapshot(options = {}) {
   const asOfDate = requestedAsOfDate ?? taipeiDate(generatedDate);
   const bondInputs = bonds ?? await loadBondInputs(outputDir);
   if (!Array.isArray(bondInputs)) throw new TypeError("bonds must be an array");
+  const previousHistory = await readPreviousHistory(outputDir);
   const previousSupplemental = await readPreviousSupplemental(outputDir);
   const validatedPreviousIssuerResearch = previousIssuerResearch === undefined
     ? await readPreviousIssuerResearch(outputDir)
@@ -162,17 +167,12 @@ export async function buildBondMarketSnapshot(options = {}) {
   }
 
   await mkdir(outputDir, { recursive: true });
-  const previousHistory =
-    await readOptionalJson(join(outputDir, "bond-market-history.json")) ?? [];
-  if (!Array.isArray(previousHistory)) {
-    throw new TypeError("bond market history must be an array");
-  }
   const currentHistory = buildHistoryPoints({
     cbQuotes: collected.cbQuotes,
     stockCloses: collected.stockCloses,
     conversionPrices: collected.conversionPrices,
   });
-  const history = mergeHistory(previousHistory, currentHistory);
+  const history = mergeBondMarketHistory(previousHistory, currentHistory);
   const stagingDir = await mkdtemp(join(dirname(outputDir), ".cb-market-"));
   try {
     const documents = {
@@ -436,31 +436,20 @@ async function readPreviousSupplemental(outputDir) {
   }
 }
 
+async function readPreviousHistory(outputDir) {
+  const value = await readOptionalJson(join(outputDir, "bond-market-history.json"));
+  try {
+    return parseBondMarketHistory(value ?? []);
+  } catch (error) {
+    throw new TypeError(`previous bond market history is invalid: ${error.message}`);
+  }
+}
+
 function countSupplementalRecords(snapshot) {
   return Object.values(snapshot.institutionHistory)
     .reduce((count, records) => count + records.length, 0)
     + snapshot.redemptions.length
     + snapshot.underwritingCases.length;
-}
-
-function mergeHistory(previous, current) {
-  const points = new Map();
-  for (const point of [...previous, ...current]) {
-    if (
-      point === null
-      || typeof point !== "object"
-      || !/^\d{5,6}$/.test(point.bondCode)
-      || !isIsoDate(point.date)
-    ) {
-      throw new TypeError("invalid bond market history point");
-    }
-    points.set(`${point.bondCode}\u001f${point.date}`, point);
-  }
-  return [...points.values()].sort(
-    (left, right) =>
-      left.date.localeCompare(right.date)
-      || left.bondCode.localeCompare(right.bondCode),
-  );
 }
 
 function latestTradingDate(records) {
@@ -504,6 +493,7 @@ function validateCandidate({ bondInputs, collected, views }) {
 async function verifyStagedFiles(stagingDir, files, manifestText, bondInputs) {
   let stagedIssuerResearch;
   let stagedSupplemental;
+  let stagedHistory;
   let stagedViews;
   for (const file of files) {
     const text = await readFile(join(stagingDir, file.name), "utf8");
@@ -516,6 +506,11 @@ async function verifyStagedFiles(stagingDir, files, manifestText, bondInputs) {
     } else if (file.name === "bond-supplemental.json") {
       stagedSupplemental = parseCbSupplementalSnapshot(parsed);
       if (countSupplementalRecords(stagedSupplemental) !== file.recordCount) {
+        throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
+      }
+    } else if (file.name === "bond-market-history.json") {
+      stagedHistory = parseBondMarketHistory(parsed);
+      if (stagedHistory.length !== file.recordCount) {
         throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
       }
     } else if (!Array.isArray(parsed) || parsed.length !== file.recordCount) {
@@ -541,6 +536,7 @@ async function verifyStagedFiles(stagingDir, files, manifestText, bondInputs) {
   if (
     stagedIssuerResearch === undefined
     || stagedSupplemental === undefined
+    || stagedHistory === undefined
     || stagedViews === undefined
   ) {
     throw new Error("VALIDATION_FAILED:MARKET_ARTIFACTS");

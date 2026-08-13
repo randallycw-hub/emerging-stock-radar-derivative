@@ -93,7 +93,14 @@ export type BondMarketView = {
 export type BondMarketHistoryPoint = {
   bondCode: string;
   date: string;
+  cbOpen: string | null;
+  cbHigh: string | null;
+  cbLow: string | null;
   cbClose: string | null;
+  cbAverage: string | null;
+  cbChange: string | null;
+  cbTradingUnits: string | null;
+  cbTurnover: string | null;
   stockClose: string | null;
   effectiveConversionPrice: string | null;
   conversionValue: string | null;
