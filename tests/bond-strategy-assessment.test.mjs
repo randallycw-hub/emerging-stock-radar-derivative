@@ -74,6 +74,7 @@ function assessment(patch = {}) {
       revenueTrendState: "up",
       psPercentile: "50",
       dataDate,
+      sourceId: "mops_public_financials",
     },
     ...patch,
   });
@@ -143,6 +144,7 @@ test("uses the neutral aggregate condition states without a total score", () => 
       revenueTrendState: "unknown",
       psPercentile: null,
       dataDate: null,
+      sourceId: null,
     },
   });
   assert.equal(strategy(result, "stock_bond_relative").state, "not_met");
@@ -162,6 +164,7 @@ test("marks mismatched cross-source strategy checks pending with DATE_MISMATCH",
       revenueTrendState: "up",
       psPercentile: "50",
       dataDate: "2026-08-11",
+      sourceId: "mops_public_financials",
     },
   });
   assert.deepEqual(check(strategy(result, "stock_equivalent"), "spread_percent"), {
@@ -184,4 +187,78 @@ test("does not expose investment instructions, positions, or hedge ratios in pub
     assert.equal(publicText.includes(prohibited), false, prohibited);
   }
   assert.equal(strategy(result, "arbitrage").code, "arbitrage");
+});
+
+test("uses exact decimal comparison at every published threshold", () => {
+  const priceEpsilon = assessment({ view: view({ cbClose: "115.0000000000000000000000001" }) });
+  assert.equal(dimension(priceEpsilon, "price").state, "watch");
+
+  const thresholds = assessment({
+    view: view({ premiumRate: "10.0000000000000000000000001", remainingRatio: "69.9999999999999999999999999" }),
+    spreadPercent: "0.9000000000000000000000001",
+  });
+  assert.equal(dimension(thresholds, "premium").state, "watch");
+  assert.equal(dimension(thresholds, "remaining").state, "watch");
+  assert.equal(dimension(thresholds, "spread").state, "watch");
+});
+
+test("uses exact BigInt totals for a five-day average near the liquidity boundary", () => {
+  const result = assessment({
+    history: history(20).map((point) => ({ ...point, cbTradingUnits: "49.999999999999999999999999999999" })),
+  });
+  const average = check(dimension(result, "liquidity"), "average_5d_units");
+  assert.equal(average.state, "not_met");
+  assert.equal(dimension(result, "liquidity").state, "watch");
+});
+
+test("keeps public financial checks pending without verifiable source evidence and data date", () => {
+  const result = assessment({
+    publicFinancials: {
+      ttmProfitState: "profitable",
+      revenueTrendState: "up",
+      psPercentile: "50",
+      dataDate: null,
+      sourceId: null,
+    },
+  });
+  const equity = strategy(result, "equity_relative");
+  for (const code of ["ttm_profit", "revenue_trend", "ps_percentile"]) {
+    const item = check(equity, code);
+    assert.equal(item.state, "pending", code);
+    assert.equal(item.sourceId, null, code);
+    assert.equal(item.missingReason, "UNVERIFIED_PUBLIC_FINANCIALS", code);
+  }
+});
+
+test("marks a present spread from a mismatched valuation date pending in its own dimension", () => {
+  const result = assessment({ spreadDataDate: "2026-08-11" });
+  assert.equal(dimension(result, "spread").state, "pending");
+  assert.equal(check(dimension(result, "spread"), "spread_percent").missingReason, "DATE_MISMATCH");
+});
+
+test("covers the six named anonymized public-like research fixtures", async (context) => {
+  const fixtures = [
+    ["聯電一（匿名化）", { cbClose: "131", premiumRate: "31" }],
+    ["金像電三（匿名化）", { cbClose: "115", premiumRate: "9" }],
+    ["博智二（匿名化）", { cbClose: "116", premiumRate: "10.01" }],
+    ["偉詮電一（匿名化）", { daysToMaturity: 179 }],
+    ["至上11（匿名化）", { cbPriceDate: "2026-08-11", valuationDate: "2026-08-11" }],
+    ["順德一（匿名化）", { cbTradeUnits: "0", premiumRate: "-0.01" }],
+  ];
+  for (const [label, patch] of fixtures) {
+    await context.test(label, () => {
+      const result = assessment({ view: view(patch) });
+      assert.equal(result.dimensions.length, 6);
+      assert.equal(result.strategies.length, 6);
+    });
+  }
+});
+
+test("deeply freezes assessment sections and checks", () => {
+  const result = assessment();
+  assert.ok(Object.isFrozen(result));
+  assert.ok(Object.isFrozen(result.dimensions));
+  assert.ok(Object.isFrozen(result.dimensions[0]));
+  assert.ok(Object.isFrozen(result.dimensions[0].checks));
+  assert.ok(Object.isFrozen(result.dimensions[0].checks[0]));
 });

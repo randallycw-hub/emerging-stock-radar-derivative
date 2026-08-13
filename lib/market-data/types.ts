@@ -114,6 +114,14 @@ export type AssessmentCheck = {
   missingReason: string | null;
 };
 
+export type BondPublicFinancials = {
+  ttmProfitState: "profitable" | "loss" | "unknown";
+  revenueTrendState: "up" | "down" | "unknown";
+  psPercentile: string | null;
+  dataDate: string | null;
+  sourceId: string | null;
+};
+
 export type BondAssessment = {
   dimensions: readonly {
     code: "price" | "days" | "premium" | "remaining" | "spread" | "liquidity";

@@ -141,7 +141,7 @@ test("preserves a supplied strict assessment and rejects unmarked cross-date str
   const verified = evaluateBondAssessment({
     view: view(), history: [], spreadPercent: "0.8", spreadDataDate: dataDate,
     borrowability: "available", conversionSuspended: false,
-    publicFinancials: { ttmProfitState: "unknown", revenueTrendState: "unknown", psPercentile: null, dataDate: null },
+    publicFinancials: { ttmProfitState: "unknown", revenueTrendState: "unknown", psPercentile: null, dataDate: null, sourceId: null },
   });
   const result = buildBondWorkbenchSnapshot(input({
     currentAssessments: [{ bondCode: "35221", assessment: verified }],
@@ -160,6 +160,21 @@ test("preserves a supplied strict assessment and rejects unmarked cross-date str
       currentAssessments: [{ bondCode: "35221", assessment: invalid }],
     })),
     /DATE_MISMATCH|assessment/i,
+  );
+});
+
+test("rejects a decided public-financial assessment check without evidence", () => {
+  const verified = evaluateBondAssessment({
+    view: view(), history: [], spreadPercent: "0.8", spreadDataDate: dataDate,
+    borrowability: "available", conversionSuspended: false,
+    publicFinancials: { ttmProfitState: "profitable", revenueTrendState: "up", psPercentile: "50", dataDate, sourceId: "mops_public_financials" },
+  });
+  const invalid = structuredClone(verified);
+  const ttm = invalid.strategies.find((item) => item.code === "equity_relative").checks.find((item) => item.code === "ttm_profit");
+  ttm.sourceId = null;
+  assert.throws(
+    () => buildBondWorkbenchSnapshot(input({ currentAssessments: [{ bondCode: "35221", assessment: invalid }] })),
+    /public financial.*sourceId/i,
   );
 });
 
