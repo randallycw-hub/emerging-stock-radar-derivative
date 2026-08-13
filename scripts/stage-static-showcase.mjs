@@ -28,6 +28,7 @@ const ROOT_FILES = new Set([
 ]);
 const ASSET_FILES = new Set([
   "app.css",
+  "bond-technical-analysis.js",
   "bonds-page.js",
   "emerging-page.js",
   "home-page.js",

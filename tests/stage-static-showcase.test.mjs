@@ -20,6 +20,11 @@ test("Sites staging copies the complete static showcase including the active gen
   await writeFile(join(source, "index.html"), "正式首頁", "utf8");
   await writeFile(join(source, "assets", "app.css"), "body{}", "utf8");
   await writeFile(
+    join(source, "assets", "bond-technical-analysis.js"),
+    "export const analysis = 'shared';\n",
+    "utf8",
+  );
+  await writeFile(
     join(source, "data", "current.json"),
     '{"schemaVersion":1,"generation":"generations/abc123","runtimeUrl":"./data/generations/abc123/runtime.json"}\n',
     "utf8",
@@ -58,6 +63,13 @@ test("Sites staging copies the complete static showcase including the active gen
 
   assert.equal(await readFile(join(destination, "index.html"), "utf8"), "正式首頁");
   assert.equal(await readFile(join(destination, "assets", "app.css"), "utf8"), "body{}");
+  assert.equal(
+    await readFile(
+      join(destination, "assets", "bond-technical-analysis.js"),
+      "utf8",
+    ),
+    "export const analysis = 'shared';\n",
+  );
   assert.deepEqual(
     JSON.parse(await readFile(join(destination, "data", "current.json"), "utf8")),
     {
@@ -75,6 +87,23 @@ test("Sites staging copies the complete static showcase including the active gen
       market: { status: "verified", dataDate: "2026-07-31" },
       emergingMarketUrl: "./data/generations/abc123/emerging-market.json",
     },
+  );
+});
+
+test("Sites staging still rejects an unknown presentation asset", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-unknown-asset-"));
+  const source = join(root, "source");
+  await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+  await mkdir(join(source, "assets"), { recursive: true });
+  await writeFile(
+    join(source, "assets", "unapproved-analysis.js"),
+    "export const unapproved = true;\n",
+    "utf8",
+  );
+
+  await assert.rejects(
+    stageStaticShowcase({ source, destination: join(root, "destination") }),
+    /source path is not approved: assets\/unapproved-analysis\.js/i,
   );
 });
 
