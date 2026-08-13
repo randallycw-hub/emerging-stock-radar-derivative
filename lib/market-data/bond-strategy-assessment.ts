@@ -24,6 +24,10 @@ const DECIMAL = /^-?(?:0|[1-9]\d*)(?:\.\d+)?$/;
 const NON_NEGATIVE_DECIMAL = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
 
 export const CB_RESEARCH_RULES = deepFreeze({
+  checks: {
+    price_distance: { label: "CB 盤後價格", threshold: "<=115" }, days_remaining: { label: "剩餘天數", threshold: ">=365" }, premium_dimension: { label: "轉換溢價率", threshold: "<=10%" }, remaining_ratio: { label: "轉換剩餘比例", threshold: ">=70%" }, spread_dimension: { label: "盤後價差", threshold: "<0.9%" }, daily_volume: { label: "當日成交張數", threshold: ">=50 張" }, average_volume_5d: { label: "5 日均量", threshold: "5 日均量：<10 風險、10–49 需留意、>=50 條件良好" }, average_volume_20d: { label: "20 日均量", threshold: "20 日均量：<10 風險、10–49 需留意、>=50 條件良好" }, remaining_turnover: { label: "剩餘張數週轉率", threshold: "呈現公開數值" },
+    relative_conversion_value: { label: "轉換價值", threshold: "70–120" }, relative_premium: { label: "轉換溢價率", threshold: "<30%" }, relative_days: { label: "剩餘天數", threshold: ">=365" }, put_date_available: { label: "公開賣回日", threshold: "存在公開賣回日" }, put_reference_price: { label: "基準價格", threshold: "<100" }, public_credit_rating: { label: "公開信用評等／TCRI", threshold: "已取得可驗證公開資料" }, equity_premium: { label: "轉換溢價率", threshold: ">30%" }, ttm_profit: { label: "TTM 獲利", threshold: "獲利" }, revenue_trend: { label: "營收趨勢", threshold: "上升" }, ps_percentile: { label: "PS 百分位", threshold: "可驗證公開 PS 百分位" }, equivalent_premium: { label: "轉換溢價率", threshold: "<2%" }, equivalent_spread: { label: "盤後價差", threshold: "<2%" }, arbitrage_discount: { label: "轉換溢價率", threshold: "<0%" }, borrowability: { label: "融券可用性", threshold: "可融券" }, conversion_not_suspended: { label: "停止轉換狀態", threshold: "未停止轉換" }, execution_costs: { label: "交易成本（盤後價差）", threshold: "可驗證" }, hedge_volatility: { label: "公開波動度", threshold: ">25%" }, hedge_days: { label: "剩餘天數", threshold: ">=365" }, hedge_premium: { label: "轉換溢價率", threshold: "<2%" }, hedge_borrowability: { label: "融券可用性", threshold: "可融券" }, hedge_conversion_not_suspended: { label: "停止轉換狀態", threshold: "未停止轉換" },
+  },
   price: { label: "CB 盤後價格", favorable: "<=115", watch: ">115 && <=130", favorableMax: "115", watchMax: "130" },
   days: { label: "剩餘天數", favorable: ">=365", watch: "180–364", favorableMin: 365, watchMin: 180 },
   premium: { label: "轉換溢價率", favorable: "<=10%", watch: ">10% && <=30%", favorableMax: "10", watchMax: "30" },
@@ -120,7 +124,7 @@ export function evaluateBondAssessment(input: BondAssessmentInput): BondAssessme
   const hedgeDays = integerCheck("days_to_maturity", CB_RESEARCH_RULES.days.label, input.view.daysToMaturity, CB_RESEARCH_RULES.dynamicHedge.days, input.view.valuationDate, "approved_cb_terms", (value) => value >= CB_RESEARCH_RULES.days.favorableMin);
   const hedgePremium = equivalentPremium;
 
-  return deepFreeze({
+  return deepFreeze(canonicalizeAssessment({
     dimensions: [
       { code: "price", state: dimensionState(input.view.cbClose, (value) => compareDecimal(value, CB_RESEARCH_RULES.price.favorableMax) <= 0, (value) => compareDecimal(value, CB_RESEARCH_RULES.price.watchMax) <= 0), checks: [price] },
       { code: "days", state: dimensionIntegerState(input.view.daysToMaturity, (value) => value >= CB_RESEARCH_RULES.days.favorableMin, (value) => value >= CB_RESEARCH_RULES.days.watchMin), checks: [days] },
@@ -137,7 +141,32 @@ export function evaluateBondAssessment(input: BondAssessmentInput): BondAssessme
       { code: "arbitrage", state: aggregate([discount, borrowability, suspension, arbitrageCost]), checks: [discount, borrowability, suspension, arbitrageCost] },
       { code: "dynamic_hedge", state: aggregate([volatility, hedgeDays, hedgePremium, borrowability, suspension]), checks: [volatility, hedgeDays, hedgePremium, borrowability, suspension] },
     ],
-  });
+  }));
+}
+
+const CANONICAL_CODES = {
+  dimensions: {
+    price: ["price_distance"], days: ["days_remaining"], premium: ["premium_dimension"], remaining: ["remaining_ratio"], spread: ["spread_dimension"],
+    liquidity: ["daily_volume", "average_volume_5d", "average_volume_20d", "remaining_turnover"],
+  },
+  strategies: {
+    stock_bond_relative: ["relative_conversion_value", "relative_premium", "relative_days"], maturity_put: ["put_date_available", "put_reference_price", "public_credit_rating"],
+    equity_relative: ["equity_premium", "ttm_profit", "revenue_trend", "ps_percentile"], stock_equivalent: ["equivalent_premium", "equivalent_spread"],
+    arbitrage: ["arbitrage_discount", "borrowability", "conversion_not_suspended", "execution_costs"], dynamic_hedge: ["hedge_volatility", "hedge_days", "hedge_premium", "hedge_borrowability", "hedge_conversion_not_suspended"],
+  },
+} as const;
+
+function canonicalizeAssessment(assessment: BondAssessment): BondAssessment {
+  const rules = CB_RESEARCH_RULES.checks as Record<string, { label: string; threshold: string }>;
+  const dimensions = assessment.dimensions.map((section) => ({
+    ...section,
+    checks: section.checks.map((check, index) => ({ ...check, code: CANONICAL_CODES.dimensions[section.code][index], label: rules[CANONICAL_CODES.dimensions[section.code][index]].label, threshold: rules[CANONICAL_CODES.dimensions[section.code][index]].threshold })),
+  }));
+  const strategies = assessment.strategies.map((section) => ({
+    ...section,
+    checks: section.checks.map((check, index) => ({ ...check, code: CANONICAL_CODES.strategies[section.code][index], label: rules[CANONICAL_CODES.strategies[section.code][index]].label, threshold: rules[CANONICAL_CODES.strategies[section.code][index]].threshold })),
+  }));
+  return { dimensions, strategies };
 }
 
 function buildLiquidityChecks(input: BondAssessmentInput): AssessmentCheck[] {

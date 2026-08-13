@@ -12,7 +12,7 @@ import type {
   BondWorkbenchRecord,
   BondWorkbenchSnapshot,
 } from "./types.ts";
-import { evaluateBondAssessment } from "./bond-strategy-assessment.ts";
+import { CB_RESEARCH_RULES, evaluateBondAssessment } from "./bond-strategy-assessment.ts";
 
 const SNAPSHOT_KEYS = ["schemaVersion", "generatedAt", "dataDate", "records"];
 const RECORD_KEYS = ["bondCode", "status", "archiveReason", "archivedAt", "term", "view", "events", "fieldStates", "assessment"];
@@ -191,9 +191,9 @@ function parseAssessment(value: unknown, name: string): BondAssessment {
         throw new TypeError(`${name} public financial check requires sourceId and dataDate`);
       }
       if (
-        (check.sourceId === "approved_post_trade_spread" || check.code === "ttm_profit" || check.code === "revenue_trend" || check.code === "ps_percentile")
+        (check.code === "equivalent_spread" || check.code === "execution_costs" || check.code === "ttm_profit" || check.code === "revenue_trend" || check.code === "ps_percentile")
         && check.dataDate !== null
-        && strategy.checks.some((peer) => peer.code === "premium_rate" && peer.dataDate !== null && peer.dataDate !== check.dataDate)
+        && strategy.checks.some((peer) => (peer.code === "equity_premium" || peer.code === "equivalent_premium" || peer.code === "arbitrage_discount") && peer.dataDate !== null && peer.dataDate !== check.dataDate)
         && (check.state !== "pending" || check.missingReason !== "DATE_MISMATCH")
       ) {
         throw new TypeError(`${name} cross-date strategy check must be pending with DATE_MISMATCH`);
@@ -215,6 +215,7 @@ function parseAssessmentSection(value: unknown, name: string, codes: readonly st
 function parseAssessmentCheck(value: unknown, name: string): import("./types.ts").AssessmentCheck {
   const check = requireRecord(value, name);
   assertExactKeys(check, ["code", "label", "state", "actual", "threshold", "dataDate", "sourceId", "missingReason"], name);
+  if (typeof check.code !== "string" || !Object.keys(CB_RESEARCH_RULES.checks).includes(check.code)) throw new TypeError(`${name}.code is invalid`);
   if (check.state !== "met" && check.state !== "partial" && check.state !== "pending" && check.state !== "not_met") throw new TypeError(`${name}.state is invalid`);
   const nullableText = (entry: unknown, field: string): string | null => entry === null ? null : readText(entry, field);
   return {

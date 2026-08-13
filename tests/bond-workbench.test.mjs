@@ -151,7 +151,7 @@ test("preserves a supplied strict assessment and rejects unmarked cross-date str
   const invalid = structuredClone(verified);
   const equivalentSpread = invalid.strategies
     .find((item) => item.code === "stock_equivalent")
-    .checks.find((item) => item.code === "spread_percent");
+    .checks.find((item) => item.code === "equivalent_spread");
   equivalentSpread.dataDate = "2026-08-11";
   equivalentSpread.state = "met";
   equivalentSpread.missingReason = null;
