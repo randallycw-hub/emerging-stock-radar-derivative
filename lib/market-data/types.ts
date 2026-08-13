@@ -100,6 +100,39 @@ export type BondMarketHistoryPoint = {
   premiumRate: string | null;
 };
 
+export type DimensionState = "favorable" | "watch" | "risk" | "pending";
+export type ConditionState = "met" | "partial" | "pending" | "not_met";
+
+export type AssessmentCheck = {
+  code: string;
+  label: string;
+  state: ConditionState;
+  actual: string | null;
+  threshold: string;
+  dataDate: string | null;
+  sourceId: string | null;
+  missingReason: string | null;
+};
+
+export type BondAssessment = {
+  dimensions: readonly {
+    code: "price" | "days" | "premium" | "remaining" | "spread" | "liquidity";
+    state: DimensionState;
+    checks: readonly AssessmentCheck[];
+  }[];
+  strategies: readonly {
+    code:
+      | "stock_bond_relative"
+      | "maturity_put"
+      | "equity_relative"
+      | "stock_equivalent"
+      | "arbitrage"
+      | "dynamic_hedge";
+    state: ConditionState;
+    checks: readonly AssessmentCheck[];
+  }[];
+};
+
 export type BondLifecycleStatus = "active" | "archived";
 export type BondArchiveReason =
   | "matured"
@@ -172,6 +205,7 @@ export type BondWorkbenchRecord = {
   view: BondMarketView;
   events: readonly BondWorkbenchEvent[];
   fieldStates: BondWorkbenchFieldStates;
+  assessment: BondAssessment;
 };
 
 export type BondWorkbenchSnapshot = {

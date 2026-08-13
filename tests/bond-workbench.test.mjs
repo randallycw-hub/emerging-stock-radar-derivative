@@ -5,6 +5,7 @@ import {
   buildBondWorkbenchSnapshot,
   parseBondWorkbenchSnapshot,
 } from "../lib/market-data/bond-workbench.ts";
+import { evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
 import { bondTermSummariesFrom11406Rows } from "../scripts/lib/bond-inputs-from-11406.mjs";
 
 const generatedAt = "2026-08-13T01:00:00.000Z";
@@ -128,10 +129,38 @@ test("builds a sorted, defensive active snapshot keyed only by bond code", () =>
   assert.deepEqual(result.records.map((record) => record.status), ["active", "active"]);
   assert.equal(result.records[0].fieldStates.price, "complete");
   assert.equal(result.records[0].fieldStates.history, "accumulating");
+  assert.equal(result.records[0].assessment.dimensions.length, 6);
+  assert.equal(result.records[0].assessment.strategies.length, 6);
   assert.ok(Object.isFrozen(result));
   assert.ok(Object.isFrozen(result.records));
   assert.ok(Object.isFrozen(result.records[0].term));
   assert.throws(() => { result.records[0].term.bondName = "mutated"; }, TypeError);
+});
+
+test("preserves a supplied strict assessment and rejects unmarked cross-date strategy checks", () => {
+  const verified = evaluateBondAssessment({
+    view: view(), history: [], spreadPercent: "0.8", spreadDataDate: dataDate,
+    borrowability: "available", conversionSuspended: false,
+    publicFinancials: { ttmProfitState: "unknown", revenueTrendState: "unknown", psPercentile: null, dataDate: null },
+  });
+  const result = buildBondWorkbenchSnapshot(input({
+    currentAssessments: [{ bondCode: "35221", assessment: verified }],
+  }));
+  assert.deepEqual(result.records[0].assessment, verified);
+
+  const invalid = structuredClone(verified);
+  const equivalentSpread = invalid.strategies
+    .find((item) => item.code === "stock_equivalent")
+    .checks.find((item) => item.code === "spread_percent");
+  equivalentSpread.dataDate = "2026-08-11";
+  equivalentSpread.state = "met";
+  equivalentSpread.missingReason = null;
+  assert.throws(
+    () => buildBondWorkbenchSnapshot(input({
+      currentAssessments: [{ bondCode: "35221", assessment: invalid }],
+    })),
+    /DATE_MISMATCH|assessment/i,
+  );
 });
 
 test("archives by verified redemption, maturity, zero balance, then complete roster removal", () => {

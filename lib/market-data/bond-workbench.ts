@@ -2,6 +2,7 @@ import { isIsoDate, isIsoDateTime, isYearMonth } from "../domain/dates.ts";
 import { parseCbRedemptionEvent } from "./bond-supplemental.ts";
 import type {
   BondArchiveReason,
+  BondAssessment,
   BondFieldState,
   BondLifecycleStatus,
   BondMarketView,
@@ -11,9 +12,10 @@ import type {
   BondWorkbenchRecord,
   BondWorkbenchSnapshot,
 } from "./types.ts";
+import { evaluateBondAssessment } from "./bond-strategy-assessment.ts";
 
 const SNAPSHOT_KEYS = ["schemaVersion", "generatedAt", "dataDate", "records"];
-const RECORD_KEYS = ["bondCode", "status", "archiveReason", "archivedAt", "term", "view", "events", "fieldStates"];
+const RECORD_KEYS = ["bondCode", "status", "archiveReason", "archivedAt", "term", "view", "events", "fieldStates", "assessment"];
 const TERM_KEYS = ["bondCode", "issuerCode", "bondName", "issuerName", "issueDate", "listingDate", "maturityDate", "issueAmount", "outstandingAmount", "outstandingDataDate", "initialConversionPrice", "conversionStartDate", "conversionEndDate", "putDates", "putPrice", "securedStatus", "underwriter", "trustee", "unitFaceValueTwd"];
 const EVENT_KEYS = ["bondCode", "eventId", "type", "date", "title", "sourceId", "sourceUrl"];
 const FIELD_STATE_KEYS = ["price", "valuation", "outstanding", "institutions", "company", "events", "history"];
@@ -44,10 +46,11 @@ export function buildBondWorkbenchSnapshot(input: {
   currentTerms: readonly BondTermSummary[];
   currentViews: readonly BondMarketView[];
   currentEvents: readonly BondWorkbenchEvent[];
+  currentAssessments?: readonly { bondCode: string; assessment: BondAssessment }[];
   previous?: BondWorkbenchSnapshot;
 }): BondWorkbenchSnapshot {
   const options = requireRecord(input, "bond workbench input");
-  assertExactKeys(options, ["generatedAt", "dataDate", "asOfDate", "currentTerms", "currentViews", "currentEvents", "previous"].filter((key) => key in options), "bond workbench input");
+  assertExactKeys(options, ["generatedAt", "dataDate", "asOfDate", "currentTerms", "currentViews", "currentEvents", "currentAssessments", "previous"].filter((key) => key in options), "bond workbench input");
   assertTimestamp(input.generatedAt, "generatedAt");
   assertDate(input.dataDate, "dataDate");
   assertDate(input.asOfDate, "asOfDate");
@@ -55,8 +58,11 @@ export function buildBondWorkbenchSnapshot(input: {
   const terms = parseTerms(input.currentTerms);
   const views = parseViews(input.currentViews);
   const events = parseEvents(input.currentEvents);
+  const assessments = parseAssessments(input.currentAssessments ?? [], "current assessments");
   const termsByCode = indexByCode(terms, "current terms");
   const viewsByCode = indexByCode(views, "current views");
+  const assessmentsByCode = indexByCode(assessments, "current assessments");
+  if ([...assessmentsByCode.keys()].some((code) => !viewsByCode.has(code))) throw new TypeError("assessment has unknown bond code");
   if (termsByCode.size !== viewsByCode.size || [...termsByCode.keys()].some((code) => !viewsByCode.has(code))) {
     throw new TypeError("current terms and views must have matching bond codes");
   }
@@ -88,6 +94,7 @@ export function buildBondWorkbenchSnapshot(input: {
       view: currentView,
       events: (eventsByCode.get(bondCode) ?? []).map(cloneEvent),
       fieldStates: buildFieldStates(currentView, input.dataDate, eventsByCode.get(bondCode) ?? []),
+      assessment: assessmentsByCode.get(bondCode)?.assessment ?? defaultAssessment(currentView),
     });
   }
   for (const prior of previous?.records ?? []) {
@@ -151,7 +158,70 @@ function parseRecord(value: unknown, name: string): BondWorkbenchRecord {
   if (term.bondCode !== bondCode || view.bondCode !== bondCode) throw new TypeError(`${name} bond code mismatch`);
   const events = parseEvents(record.events);
   if (events.some((event) => event.bondCode !== bondCode)) throw new TypeError(`${name} event bond code mismatch`);
-  return { bondCode, status, archiveReason: archiveReason as BondArchiveReason | null, archivedAt: record.archivedAt as string | null, term, view, events, fieldStates: parseFieldStates(record.fieldStates, `${name}.fieldStates`) };
+  return { bondCode, status, archiveReason: archiveReason as BondArchiveReason | null, archivedAt: record.archivedAt as string | null, term, view, events, fieldStates: parseFieldStates(record.fieldStates, `${name}.fieldStates`), assessment: parseAssessment(record.assessment, `${name}.assessment`) };
+}
+
+type AssessmentEntry = { bondCode: string; assessment: BondAssessment };
+
+function parseAssessments(value: unknown, name: string): AssessmentEntry[] {
+  assertDenseArray(value, name);
+  return value.map((entry, index) => {
+    const item = requireRecord(entry, `${name} ${index}`);
+    assertExactKeys(item, ["bondCode", "assessment"], `${name} ${index}`);
+    return { bondCode: readBondCode(item.bondCode, `${name} ${index}.bondCode`), assessment: parseAssessment(item.assessment, `${name} ${index}.assessment`) };
+  });
+}
+
+function parseAssessment(value: unknown, name: string): BondAssessment {
+  const assessment = requireRecord(value, name);
+  assertExactKeys(assessment, ["dimensions", "strategies"], name);
+  assertDenseArray(assessment.dimensions, `${name}.dimensions`);
+  assertDenseArray(assessment.strategies, `${name}.strategies`);
+  const dimensions = assessment.dimensions.map((item, index) => parseAssessmentSection(item, `${name}.dimensions[${index}]`, ["price", "days", "premium", "remaining", "spread", "liquidity"], ["favorable", "watch", "risk", "pending"]));
+  const strategies = assessment.strategies.map((item, index) => parseAssessmentSection(item, `${name}.strategies[${index}]`, ["stock_bond_relative", "maturity_put", "equity_relative", "stock_equivalent", "arbitrage", "dynamic_hedge"], ["met", "partial", "pending", "not_met"]));
+  if (dimensions.length !== 6 || new Set(dimensions.map((item) => item.code)).size !== 6) throw new TypeError(`${name}.dimensions must contain each dimension once`);
+  if (strategies.length !== 6 || new Set(strategies.map((item) => item.code)).size !== 6) throw new TypeError(`${name}.strategies must contain each strategy once`);
+  for (const strategy of strategies) {
+    for (const check of strategy.checks) {
+      if (
+        (check.sourceId === "approved_post_trade_spread" || check.sourceId === "approved_public_financials")
+        && check.dataDate !== null
+        && strategy.checks.some((peer) => peer.code === "premium_rate" && peer.dataDate !== null && peer.dataDate !== check.dataDate)
+        && (check.state !== "pending" || check.missingReason !== "DATE_MISMATCH")
+      ) {
+        throw new TypeError(`${name} cross-date strategy check must be pending with DATE_MISMATCH`);
+      }
+    }
+  }
+  return { dimensions: dimensions as BondAssessment["dimensions"], strategies: strategies as BondAssessment["strategies"] };
+}
+
+function parseAssessmentSection(value: unknown, name: string, codes: readonly string[], states: readonly string[]): { code: string; state: string; checks: readonly import("./types.ts").AssessmentCheck[] } {
+  const section = requireRecord(value, name);
+  assertExactKeys(section, ["code", "state", "checks"], name);
+  if (typeof section.code !== "string" || !codes.includes(section.code)) throw new TypeError(`${name}.code is invalid`);
+  if (typeof section.state !== "string" || !states.includes(section.state)) throw new TypeError(`${name}.state is invalid`);
+  assertDenseArray(section.checks, `${name}.checks`);
+  return { code: section.code, state: section.state, checks: section.checks.map((check, index) => parseAssessmentCheck(check, `${name}.checks[${index}]`)) };
+}
+
+function parseAssessmentCheck(value: unknown, name: string): import("./types.ts").AssessmentCheck {
+  const check = requireRecord(value, name);
+  assertExactKeys(check, ["code", "label", "state", "actual", "threshold", "dataDate", "sourceId", "missingReason"], name);
+  if (check.state !== "met" && check.state !== "partial" && check.state !== "pending" && check.state !== "not_met") throw new TypeError(`${name}.state is invalid`);
+  const nullableText = (entry: unknown, field: string): string | null => entry === null ? null : readText(entry, field);
+  return {
+    code: readText(check.code, `${name}.code`), label: readText(check.label, `${name}.label`), state: check.state,
+    actual: nullableText(check.actual, `${name}.actual`), threshold: readText(check.threshold, `${name}.threshold`),
+    dataDate: check.dataDate === null ? null : readDate(check.dataDate, `${name}.dataDate`), sourceId: nullableText(check.sourceId, `${name}.sourceId`), missingReason: nullableText(check.missingReason, `${name}.missingReason`),
+  };
+}
+
+function defaultAssessment(view: BondMarketView): BondAssessment {
+  return evaluateBondAssessment({
+    view, history: [], spreadPercent: null, spreadDataDate: null, borrowability: "unknown", conversionSuspended: null,
+    publicFinancials: { ttmProfitState: "unknown", revenueTrendState: "unknown", psPercentile: null, dataDate: null },
+  });
 }
 
 function parseTerms(value: unknown): BondTermSummary[] {
