@@ -73,16 +73,19 @@ const CB_ISSUER_RESEARCH_RESOURCES = [
 
 const CB_SUPPLEMENTAL_RESOURCES = [
   {
+    key: "institution",
     sourceId: "tpex-cb-institution-daily",
     resourceId: "tpex-cb-institution-daily-json",
     exactUrl: "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
   },
   {
+    key: "redemption",
     sourceId: "tpex-cb-redemption-announcements",
     resourceId: "tpex-cb-redemption-announcements-json",
     exactUrl: "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
   },
   {
+    key: "underwriting",
     sourceId: "twsa-cb-underwriting-announcements",
     resourceId: "twsa-cb-underwriting-announcements-html",
     exactUrl: "https://web.twsa.org.tw/edoc2/default.aspx",
@@ -130,14 +133,19 @@ export async function buildBondMarketSnapshot(options = {}) {
     : parseCbIssuerResearchSnapshot(previousIssuerResearch);
   const bondCodes = bondInputs.map((bond) => bond.bondCode);
   const issuerCodes = [...new Set(bondInputs.map((bond) => bond.issuerCode))];
+  const optionalSourceAuthorization = buildProductionCbOptionalSourceAuthorization();
   const collected = await collectImpl({
     bondCodes,
     issuerCodes,
     date: asOfDate,
+    optionalSourceAuthorization,
   });
   const issuerResearchSourceResults = collected.issuerResearchSourceResults === undefined
     ? await settleProductionCbIssuerResearchSources()
-    : resolveCollectedCbIssuerResearchSources(collected.issuerResearchSourceResults);
+    : resolveCollectedCbIssuerResearchSources(
+      collected.issuerResearchSourceResults,
+      optionalSourceAuthorization.issuerResearch,
+    );
   const issuerResearchCandidate = buildCbIssuerResearchCandidate({
     generatedAt: generatedDate.toISOString(),
     issuers: issuerInputsFromBonds(bondInputs),
@@ -150,6 +158,7 @@ export async function buildBondMarketSnapshot(options = {}) {
   const supplementalSourceResults = await settleProductionCbSupplementalSources(
     asOfDate,
     collected.supplementalSourceResults,
+    optionalSourceAuthorization.supplemental,
   );
   const supplemental = buildCbSupplementalSnapshot({
     generatedAt: generatedDate.toISOString(),
@@ -340,29 +349,49 @@ export async function settleProductionCbIssuerResearchSources({
   return validateSettledIssuerResearchSources(await fetchSourcesImpl());
 }
 
-function resolveCollectedCbIssuerResearchSources(sourceResults) {
-  const error = productionIssuerResearchApprovalError();
-  if (error !== undefined) {
-    return {
-      listed: { status: "rejected", reason: error },
-      otc: { status: "rejected", reason: error },
-    };
-  }
-  return validateSettledIssuerResearchSources(sourceResults);
+function resolveCollectedCbIssuerResearchSources(sourceResults, authorization) {
+  const settled = validateSettledIssuerResearchSources(sourceResults);
+  return {
+    listed: authorization.listed.approved
+      ? settled.listed
+      : rejectedAuthorization(authorization.listed),
+    otc: authorization.otc.approved
+      ? settled.otc
+      : rejectedAuthorization(authorization.otc),
+  };
 }
 
-async function settleProductionCbSupplementalSources(date, sourceResults) {
-  const error = productionCbSupplementalApprovalError();
-  if (error !== undefined) {
-    return {
-      institution: { status: "rejected", reason: error },
-      redemption: { status: "rejected", reason: error },
-      underwriting: { status: "rejected", reason: error },
-    };
+async function settleProductionCbSupplementalSources(date, sourceResults, authorization) {
+  if (sourceResults === undefined) {
+    const error = productionCbSupplementalApprovalError();
+    if (error !== undefined) {
+      return {
+        institution: { status: "rejected", reason: error },
+        redemption: { status: "rejected", reason: error },
+        underwriting: { status: "rejected", reason: error },
+      };
+    }
+    return fetchCbSupplementalSources({ date });
   }
-  return sourceResults === undefined
-    ? fetchCbSupplementalSources({ date })
-    : validateSettledSupplementalSources(sourceResults);
+  const settled = validateSettledSupplementalSources(sourceResults);
+  return {
+    institution: authorization.institution.approved
+      ? settled.institution
+      : rejectedAuthorization(authorization.institution),
+    redemption: authorization.redemption.approved
+      ? settled.redemption
+      : rejectedAuthorization(authorization.redemption),
+    underwriting: authorization.underwriting.approved
+      ? settled.underwriting
+      : rejectedAuthorization(authorization.underwriting),
+  };
+}
+
+function rejectedAuthorization(authorization) {
+  return {
+    status: "rejected",
+    reason: new Error(authorization.reason),
+  };
 }
 
 function validateSettledSupplementalSources(value) {
@@ -395,20 +424,54 @@ function validateOpaqueSettledResult(value, name) {
 }
 
 function productionCbSupplementalApprovalError() {
+  const authorization = buildProductionCbOptionalSourceAuthorization().supplemental;
+  return Object.values(authorization).every((item) => item.approved)
+    ? undefined
+    : new Error("CB supplemental sources are not approved for production");
+}
+
+function buildProductionCbOptionalSourceAuthorization() {
+  return Object.freeze({
+    issuerResearch: Object.freeze(Object.fromEntries(
+      CB_ISSUER_RESEARCH_RESOURCES.map(({ policy, resourceId }) => [
+        policy.market,
+        authorizeProductionResource({
+          sourceId: policy.sourceId,
+          resourceId,
+          exactUrl: policy.url,
+        }),
+      ]),
+    )),
+    supplemental: Object.freeze(Object.fromEntries(
+      CB_SUPPLEMENTAL_RESOURCES.map(({ key, ...policy }) => [
+        key,
+        authorizeProductionResource(policy),
+      ]),
+    )),
+  });
+}
+
+function authorizeProductionResource(policy) {
   try {
-    for (const policy of CB_SUPPLEMENTAL_RESOURCES) {
-      const resource = getApprovedResource(policy.sourceId, policy.resourceId);
-      if (
-        resource.approvalStatus !== "APPROVED_FOR_PRODUCTION"
-        || resource.exactUrl !== policy.exactUrl
-      ) {
-        return new Error("CB supplemental sources are not approved for production");
-      }
+    const resource = getApprovedResource(policy.sourceId, policy.resourceId);
+    if (
+      resource.approvalStatus === "APPROVED_FOR_PRODUCTION"
+      && resource.exactUrl === policy.exactUrl
+    ) {
+      return Object.freeze({
+        approved: true,
+        exactUrl: policy.exactUrl,
+        reason: null,
+      });
     }
-    return undefined;
   } catch {
-    return new Error("CB supplemental sources are not approved for production");
+    // A missing central registry record is the same fail-closed state as revocation.
   }
+  return Object.freeze({
+    approved: false,
+    exactUrl: policy.exactUrl,
+    reason: `OPTIONAL_RESOURCE_NOT_APPROVED:${policy.sourceId}/${policy.resourceId}`,
+  });
 }
 
 export function buildCbIssuerResearchCandidate({
@@ -438,20 +501,10 @@ export function buildCbIssuerResearchCandidate({
 }
 
 function productionIssuerResearchApprovalError() {
-  try {
-    for (const { policy, resourceId } of CB_ISSUER_RESEARCH_RESOURCES) {
-      const resource = getApprovedResource(policy.sourceId, resourceId);
-      if (
-        resource.approvalStatus !== "APPROVED_FOR_PRODUCTION"
-        || resource.exactUrl !== policy.url
-      ) {
-        return new Error("CB issuer research sources are not approved for production");
-      }
-    }
-    return undefined;
-  } catch {
-    return new Error("CB issuer research sources are not approved for production");
-  }
+  const authorization = buildProductionCbOptionalSourceAuthorization().issuerResearch;
+  return Object.values(authorization).every((item) => item.approved)
+    ? undefined
+    : new Error("CB issuer research sources are not approved for production");
 }
 
 function validateSettledIssuerResearchSources(

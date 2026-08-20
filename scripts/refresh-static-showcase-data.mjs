@@ -452,6 +452,10 @@ async function refreshStaticShowcaseCandidate({
             date: options.date,
             directory: paths.marketCheckpointDirectory,
           });
+          const optionalFetchImpl = createApprovedOptionalFetch(
+            marketFetchImpl,
+            options.optionalSourceAuthorization,
+          );
           const [market, issuerResearchSourceResults, supplementalSourceResults] =
             await Promise.all([
               fetchCurrentOfficialMarketData({
@@ -460,10 +464,10 @@ async function refreshStaticShowcaseCandidate({
                 checkpoint: store.checkpoint,
                 onCheckpoint: store.onCheckpoint,
               }),
-              fetchCbIssuerResearchSources({ fetchImpl: marketFetchImpl }),
+              fetchCbIssuerResearchSources({ fetchImpl: optionalFetchImpl }),
               fetchCbSupplementalSources({
                 date: options.date,
-                fetchImpl: marketFetchImpl,
+                fetchImpl: optionalFetchImpl,
               }),
             ]);
           return {
@@ -545,6 +549,7 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     "nightly-core-date-mismatch",
     "nightly-core-stock-date-mismatch",
     "nightly-optional-stale",
+    "nightly-optional-unapproved",
   ]).has(scenario)) {
     throw new TypeError(
       "isolated refresh scenario must be one of the supported fixed scenarios",
@@ -610,7 +615,7 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
         now,
         paths,
         marketBuilder: scenario.startsWith("nightly-")
-          ? buildBondMarketSnapshot
+          ? isolatedNightlyMarketBuilder(scenario)
           : async ({ outputDir, manifestBase, asOfDate }) => {
             observations.marketAsOfDate = asOfDate;
             return buildIsolatedMarketCandidate({
@@ -666,6 +671,29 @@ function createRefreshPathBundle(workspaceRoot) {
   });
 }
 
+function isolatedNightlyMarketBuilder(scenario) {
+  if (scenario !== "nightly-optional-unapproved") {
+    return buildBondMarketSnapshot;
+  }
+  return (options) => buildBondMarketSnapshot({
+    ...options,
+    collectImpl: (collectorOptions) => options.collectImpl({
+      ...collectorOptions,
+      optionalSourceAuthorization: {
+        ...collectorOptions.optionalSourceAuthorization,
+        issuerResearch: {
+          ...collectorOptions.optionalSourceAuthorization.issuerResearch,
+          listed: {
+            ...collectorOptions.optionalSourceAuthorization.issuerResearch.listed,
+            approved: false,
+            reason: "OPTIONAL_RESOURCE_NOT_APPROVED:isolated-revoked-listed",
+          },
+        },
+      },
+    }),
+  });
+}
+
 function verifyRosterCompleteness(rosterRows, censusEntries) {
   const rosterCodes = new Set(
     bondInputsFrom11406Rows(rosterRows).map((bond) => bond.bondCode),
@@ -681,6 +709,22 @@ function verifyRosterCompleteness(rosterRows, censusEntries) {
       `VALIDATION_FAILED:ROSTER_COMPLETENESS:MISSING_CENSUS_CODES:${missing.join(",")}`,
     );
   }
+}
+
+function createApprovedOptionalFetch(fetchImpl, authorization) {
+  const policies = [
+    ...Object.values(authorization?.issuerResearch ?? {}),
+    ...Object.values(authorization?.supplemental ?? {}),
+  ];
+  return async (url, init) => {
+    const policy = policies.find((item) => item?.exactUrl === String(url));
+    if (policy?.approved !== true) {
+      throw new Error(
+        policy?.reason ?? `OPTIONAL_RESOURCE_NOT_APPROVED:${String(url)}`,
+      );
+    }
+    return fetchImpl(url, init);
+  };
 }
 
 async function verifyRequiredCoreMarketDate({
@@ -1290,7 +1334,10 @@ async function seedIsolatedHarnessRoot(paths, scenario) {
     "utf8",
   );
   await writeFile(join(priorGeneration, "runtime.json"), "prior runtime", "utf8");
-  const priorIssuerResearch = scenario === "nightly-optional-stale"
+  const priorIssuerResearch = new Set([
+    "nightly-optional-stale",
+    "nightly-optional-unapproved",
+  ]).has(scenario)
     ? isolatedIssuerResearchSnapshot("2026-07-29T06:00:06.000Z")
     : {
       schemaVersion: 1,

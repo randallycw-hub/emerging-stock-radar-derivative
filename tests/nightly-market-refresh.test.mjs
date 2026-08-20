@@ -201,6 +201,29 @@ test("optional failures retain only their own stale snapshots", async () => {
   assert.deepEqual(stale.deploymentEffects, []);
 });
 
+test("a revoked optional resource is gated before the candidate-local request boundary", async () => {
+  const outcome = await runIsolatedNightlyMarketRefreshTestHarness({
+    date: "2026-07-29",
+    scenario: "optional-unapproved",
+  });
+
+  assert.equal(outcome.status, "fulfilled");
+  assert.equal(
+    outcome.observations.requestedUrls.includes(
+      "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv",
+    ),
+    false,
+  );
+  assert.equal(
+    outcome.observations.requestedUrls.includes(
+      "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv",
+    ),
+    true,
+  );
+  const research = JSON.parse(outcome.artifacts.active["cb-issuer-research.json"]);
+  assert.equal(research.sources.listed.status, "stale");
+});
+
 test("nightly approved fetch dependency cannot intercept unrelated concurrent fetches", async () => {
   let refreshSettled = false;
   const refresh = runIsolatedNightlyMarketRefreshTestHarness({

@@ -59,6 +59,7 @@ export async function runIsolatedNightlyMarketRefreshTestHarness(options = {}) {
     "core-date-mismatch",
     "core-stock-date-mismatch",
     "optional-stale",
+    "optional-unapproved",
   ]).has(scenario)) {
     throw new TypeError("scenario must be a supported fixed nightly scenario");
   }
