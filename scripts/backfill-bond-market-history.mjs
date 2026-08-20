@@ -33,9 +33,7 @@ const CORRECTION_KEYS = [
   "beforeHash",
   "afterHash",
 ];
-const OFFICIAL_CORRECTION_RESOURCES = new Map([
-  ["tpex-cb-day-query", "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry"],
-]);
+const OFFICIAL_CORRECTION_SOURCE_ID = "tpex-cb-day-query";
 const OFFICIAL_EVIDENCE_KEYS = [
   "sourceId",
   "resourceUrl",
@@ -62,7 +60,7 @@ export async function backfillBondMarketHistory(options = {}) {
   if (!isIsoDate(asOfDate)) throw new TypeError("asOfDate must be an ISO date");
   if (typeof fetchImpl !== "function") throw new TypeError("fetchImpl must be a function");
   if (correction !== undefined || officialEvidence !== undefined) {
-    validateCorrectionEvidence(correction, officialEvidence);
+    await validateCorrectionEvidence(correction, officialEvidence);
   }
   const [rawBonds, conversionPrices, currentStockCloses, previousHistory] = await Promise.all([
     readJson(join(dataDirectory, "11406.json")),
@@ -106,7 +104,7 @@ export async function backfillBondMarketHistory(options = {}) {
   });
   const corrected = correction === undefined
     ? undefined
-    : applyBondMarketHistoryCorrection({
+    : await applyBondMarketHistoryCorrection({
       previous: verifiedPreviousHistory,
       candidate: overlayHistory(verifiedPreviousHistory, currentPoints),
       correction,
@@ -158,15 +156,15 @@ export async function backfillBondMarketHistory(options = {}) {
   };
 }
 
-export function applyBondMarketHistoryCorrection(options = {}) {
+export async function applyBondMarketHistoryCorrection(options = {}) {
   assertExactOptions(
     options,
     ["previous", "candidate", "correction", "officialEvidence"],
     "applyBondMarketHistoryCorrection",
   );
   const { previous, candidate, correction, officialEvidence } = options;
-  const { manifest: evidence, capturedPoint, traceEvidence } =
-    validateCorrectionEvidence(correction, officialEvidence);
+  const { manifest: evidence, capturedQuotes, traceEvidence } =
+    await validateCorrectionEvidence(correction, officialEvidence);
   const previousHistory = parseBondMarketHistory(previous);
   const candidateHistory = parseBondMarketHistory(candidate);
   const identity = `${evidence.bondCode}\u001f${evidence.date}`;
@@ -174,9 +172,13 @@ export function applyBondMarketHistoryCorrection(options = {}) {
   const afterByIdentity = historyByIdentity(candidateHistory);
   const before = beforeByIdentity.get(identity);
   const after = afterByIdentity.get(identity);
+  const capturedPoint = before === undefined
+    ? undefined
+    : buildCapturedCorrectionPoint(before, capturedQuotes);
   if (
     before === undefined
     || after === undefined
+    || capturedPoint === undefined
     || pointSha256(before) !== evidence.beforeHash
     || pointSha256(after) !== evidence.afterHash
     || pointSha256(capturedPoint) !== evidence.afterHash
@@ -294,7 +296,7 @@ function validateCorrectionManifest(value) {
   if (!/^\d{5,6}$/.test(manifest.bondCode) || !isIsoDate(manifest.date)) {
     throw new TypeError("correction evidence target is invalid");
   }
-  if (!OFFICIAL_CORRECTION_RESOURCES.has(manifest.sourceId)) {
+  if (manifest.sourceId !== OFFICIAL_CORRECTION_SOURCE_ID) {
     throw new TypeError("correction evidence sourceId is not approved");
   }
   if (
@@ -312,18 +314,15 @@ function validateCorrectionManifest(value) {
   return Object.freeze(manifest);
 }
 
-function validateCorrectionEvidence(correction, officialEvidence) {
+async function validateCorrectionEvidence(correction, officialEvidence) {
   const manifest = validateCorrectionManifest(correction);
   const captured = requireExactDataRecord(
     officialEvidence,
     OFFICIAL_EVIDENCE_KEYS,
     "official correction evidence",
   );
-  const expectedUrl = OFFICIAL_CORRECTION_RESOURCES.get(captured.sourceId);
   if (
-    expectedUrl === undefined
-    || captured.resourceUrl !== expectedUrl
-    || captured.sourceId !== manifest.sourceId
+    captured.sourceId !== manifest.sourceId
     || captured.retrievedAt !== manifest.retrievedAt
     || captured.sha256 !== manifest.sha256
     || typeof captured.payload !== "string"
@@ -331,22 +330,43 @@ function validateCorrectionEvidence(correction, officialEvidence) {
   ) {
     throw new TypeError("official correction evidence does not match the approved capture");
   }
-  let capturedPoint;
+  let capturedQuotes;
   try {
-    capturedPoint = parseBondMarketHistory([JSON.parse(captured.payload)])[0];
+    capturedQuotes = await fetchCbMonthlyHistory({
+      bondCode: manifest.bondCode,
+      month: manifest.date.slice(0, 7),
+      fetchImpl: async (url, init = {}) => {
+        const body = init.body;
+        if (
+          captured.resourceUrl !== String(url)
+          || init.method !== "POST"
+          || !(body instanceof URLSearchParams)
+          || body.get("code") !== manifest.bondCode
+          || body.get("date") !== `${manifest.date.slice(0, 7).replaceAll("-", "/")}/01`
+          || body.get("response") !== "json"
+        ) {
+          throw new TypeError("captured resource does not match the approved CB parser request");
+        }
+        return new Response(captured.payload, {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      },
+    });
   } catch (error) {
-    throw new TypeError(`official correction evidence payload is invalid: ${error.message}`);
+    throw new TypeError(`official correction evidence raw content is invalid: ${error.message}`);
   }
-  if (
-    capturedPoint.bondCode !== manifest.bondCode
-    || capturedPoint.date !== manifest.date
-    || pointSha256(capturedPoint) !== manifest.afterHash
-  ) {
-    throw new TypeError("official correction evidence payload does not match the target");
+  const targetQuotes = capturedQuotes.filter((quote) => (
+    quote.bondCode === manifest.bondCode
+    && quote.tradingMode === "equivalent"
+    && quote.tradingDate === manifest.date
+  ));
+  if (targetQuotes.length !== 1) {
+    throw new TypeError("official correction evidence raw content does not contain one target quote");
   }
   return {
     manifest,
-    capturedPoint,
+    capturedQuotes: targetQuotes,
     traceEvidence: Object.freeze({
       sourceId: captured.sourceId,
       resourceUrl: captured.resourceUrl,
@@ -354,6 +374,38 @@ function validateCorrectionEvidence(correction, officialEvidence) {
       sha256: captured.sha256,
     }),
   };
+}
+
+function buildCapturedCorrectionPoint(before, capturedQuotes) {
+  const evidenceIssuerCode = "EVIDENCE";
+  const needsIssuerLink = (
+    before.stockClose !== null
+    || before.effectiveConversionPrice !== null
+  );
+  const points = buildHistoryPoints({
+    cbQuotes: capturedQuotes,
+    stockCloses: before.stockClose === null
+      ? []
+      : [{
+        companyCode: evidenceIssuerCode,
+        market: "listed",
+        tradingDate: before.date,
+        close: before.stockClose,
+      }],
+    conversionPrices: needsIssuerLink
+      ? [{
+        bondCode: before.bondCode,
+        issuerCode: evidenceIssuerCode,
+        effectiveDate: before.effectiveConversionPrice === null
+          ? "9999-12-31"
+          : before.date,
+        currentConversionPrice: before.effectiveConversionPrice ?? "1",
+      }]
+      : [],
+  });
+  return points.find((point) => (
+    point.bondCode === before.bondCode && point.date === before.date
+  ));
 }
 
 function requireExactDataRecord(value, expectedKeys, name) {

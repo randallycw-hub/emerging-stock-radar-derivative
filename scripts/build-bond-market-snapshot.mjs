@@ -128,16 +128,29 @@ export async function buildBondMarketSnapshot(options = {}) {
   const validatedPreviousIssuerResearch = previousIssuerResearch === undefined
     ? await readPreviousIssuerResearch(outputDir)
     : parseCbIssuerResearchSnapshot(previousIssuerResearch);
+  const bondCodes = bondInputs.map((bond) => bond.bondCode);
+  const issuerCodes = [...new Set(bondInputs.map((bond) => bond.issuerCode))];
+  const collected = await collectImpl({
+    bondCodes,
+    issuerCodes,
+    date: asOfDate,
+  });
+  const issuerResearchSourceResults = collected.issuerResearchSourceResults === undefined
+    ? await settleProductionCbIssuerResearchSources()
+    : resolveCollectedCbIssuerResearchSources(collected.issuerResearchSourceResults);
   const issuerResearchCandidate = buildCbIssuerResearchCandidate({
     generatedAt: generatedDate.toISOString(),
     issuers: issuerInputsFromBonds(bondInputs),
-    sourceResults: await settleProductionCbIssuerResearchSources(),
+    sourceResults: issuerResearchSourceResults,
     ...(validatedPreviousIssuerResearch === undefined
       ? {}
       : { previous: validatedPreviousIssuerResearch }),
   });
   const issuerResearch = issuerResearchCandidate.snapshot;
-  const supplementalSourceResults = await settleProductionCbSupplementalSources(asOfDate);
+  const supplementalSourceResults = await settleProductionCbSupplementalSources(
+    asOfDate,
+    collected.supplementalSourceResults,
+  );
   const supplemental = buildCbSupplementalSnapshot({
     generatedAt: generatedDate.toISOString(),
     ...(supplementalSourceResults.institution.status === "fulfilled"
@@ -153,13 +166,6 @@ export async function buildBondMarketSnapshot(options = {}) {
       ? { underwriting: supplementalSourceResults.underwriting.value }
       : {}),
     ...(previousSupplemental === undefined ? {} : { previous: previousSupplemental }),
-  });
-  const bondCodes = bondInputs.map((bond) => bond.bondCode);
-  const issuerCodes = [...new Set(bondInputs.map((bond) => bond.issuerCode))];
-  const collected = await collectImpl({
-    bondCodes,
-    issuerCodes,
-    date: asOfDate,
   });
   const views = buildBondMarketViews({
     asOfDate,
@@ -334,7 +340,18 @@ export async function settleProductionCbIssuerResearchSources({
   return validateSettledIssuerResearchSources(await fetchSourcesImpl());
 }
 
-async function settleProductionCbSupplementalSources(date) {
+function resolveCollectedCbIssuerResearchSources(sourceResults) {
+  const error = productionIssuerResearchApprovalError();
+  if (error !== undefined) {
+    return {
+      listed: { status: "rejected", reason: error },
+      otc: { status: "rejected", reason: error },
+    };
+  }
+  return validateSettledIssuerResearchSources(sourceResults);
+}
+
+async function settleProductionCbSupplementalSources(date, sourceResults) {
   const error = productionCbSupplementalApprovalError();
   if (error !== undefined) {
     return {
@@ -343,7 +360,38 @@ async function settleProductionCbSupplementalSources(date) {
       underwriting: { status: "rejected", reason: error },
     };
   }
-  return fetchCbSupplementalSources({ date });
+  return sourceResults === undefined
+    ? fetchCbSupplementalSources({ date })
+    : validateSettledSupplementalSources(sourceResults);
+}
+
+function validateSettledSupplementalSources(value) {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || !hasExactEnumerableKeys(value, ["institution", "redemption", "underwriting"])
+  ) {
+    throw new TypeError("CB supplemental source results must contain exact source results");
+  }
+  return {
+    institution: validateOpaqueSettledResult(value.institution, "institution"),
+    redemption: validateOpaqueSettledResult(value.redemption, "redemption"),
+    underwriting: validateOpaqueSettledResult(value.underwriting, "underwriting"),
+  };
+}
+
+function validateOpaqueSettledResult(value, name) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${name} must be a settled result`);
+  }
+  if (value.status === "fulfilled" && hasExactEnumerableKeys(value, ["status", "value"])) {
+    return { status: "fulfilled", value: value.value };
+  }
+  if (value.status === "rejected" && hasExactEnumerableKeys(value, ["status", "reason"])) {
+    return { status: "rejected", reason: value.reason };
+  }
+  throw new TypeError(`${name} must be an exact settled result`);
 }
 
 function productionCbSupplementalApprovalError() {

@@ -28,6 +28,7 @@ import {
 } from "../lib/market-data/bond-workbench.ts";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCsv } from "../lib/source-verification/csv.ts";
+import { fetchCbIssuerResearchSources } from "../lib/source-verification/source-cb-issuer-research.ts";
 import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
 import { parseConversionIndex } from "../lib/source-verification/source-cb-market.ts";
 import { normalize94025Row, parse94025Csv } from "../lib/source-verification/source-94025.ts";
@@ -40,7 +41,10 @@ import {
   verifyWorkbenchConsistency,
 } from "./build-bond-market-snapshot.mjs";
 import { bondTermSummariesFrom11406Rows } from "./lib/bond-inputs-from-11406.mjs";
-import { fetchCurrentOfficialMarketData } from "./lib/official-market-fetch.mjs";
+import {
+  fetchCbSupplementalSources,
+  fetchCurrentOfficialMarketData,
+} from "./lib/official-market-fetch.mjs";
 import { buildStaticIpoSnapshot } from "./static-ipo-fallback.mjs";
 
 export const OFFICIAL_SHOWCASE_SOURCES = {
@@ -55,7 +59,6 @@ export const OFFICIAL_SHOWCASE_SOURCES = {
 const DATA_DIRECTORY = "static-showcase/data";
 const OFFICIAL_ROSTER_CENSUS_SOURCE =
   "https://www.tpex.org.tw/www/zh-tw/bond/convSearch";
-let officialFetchBoundaryTail = Promise.resolve();
 
 export function buildRuntimeBootstrap() {
   return [
@@ -441,9 +444,7 @@ async function refreshStaticShowcaseCandidate({
       "utf8",
     );
 
-    const marketResult = await withOfficialFetchBoundary(
-      marketFetchImpl,
-      () => marketBuilder({
+    const marketResult = await marketBuilder({
         outputDir: stagingDataDirectory,
         asOfDate: expectedDataDate ?? emergingSnapshot.tradingDate,
         collectImpl: async (options) => {
@@ -451,18 +452,30 @@ async function refreshStaticShowcaseCandidate({
             date: options.date,
             directory: paths.marketCheckpointDirectory,
           });
-          return fetchCurrentOfficialMarketData({
-            ...options,
-            fetchImpl: marketFetchImpl,
-            checkpoint: store.checkpoint,
-            onCheckpoint: store.onCheckpoint,
-          });
+          const [market, issuerResearchSourceResults, supplementalSourceResults] =
+            await Promise.all([
+              fetchCurrentOfficialMarketData({
+                ...options,
+                fetchImpl: marketFetchImpl,
+                checkpoint: store.checkpoint,
+                onCheckpoint: store.onCheckpoint,
+              }),
+              fetchCbIssuerResearchSources({ fetchImpl: marketFetchImpl }),
+              fetchCbSupplementalSources({
+                date: options.date,
+                fetchImpl: marketFetchImpl,
+              }),
+            ]);
+          return {
+            ...market,
+            issuerResearchSourceResults,
+            supplementalSourceResults,
+          };
         },
         now: () => now,
         manifestBase: baseManifest,
         previousIssuerResearch,
-      }),
-    );
+      });
     if (expectedDataDate !== undefined) {
       await verifyRequiredCoreMarketDate({
         dataDirectory: stagingDataDirectory,
@@ -714,24 +727,6 @@ async function verifyRequiredCoreMarketDate({
     || market?.dataDate !== expectedDataDate
   ) {
     throw new Error("VALIDATION_FAILED:CORE_MARKET_DATE_MISMATCH");
-  }
-}
-
-async function withOfficialFetchBoundary(fetchImpl, run) {
-  if (fetchImpl === globalThis.fetch) return run();
-  const previous = officialFetchBoundaryTail;
-  let release;
-  officialFetchBoundaryTail = new Promise((resolve) => {
-    release = resolve;
-  });
-  await previous;
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = fetchImpl;
-  try {
-    return await run();
-  } finally {
-    globalThis.fetch = originalFetch;
-    release();
   }
 }
 

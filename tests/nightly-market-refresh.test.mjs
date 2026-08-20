@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { applyBondMarketHistoryCorrection } from "../scripts/backfill-bond-market-history.mjs";
@@ -8,6 +9,11 @@ import {
   parseNightlyMarketRefreshArgs,
   runIsolatedNightlyMarketRefreshTestHarness,
 } from "../scripts/run-nightly-market-refresh.mjs";
+
+const RAW_CB_QUOTE_EVIDENCE = await readFile(new URL(
+  "./fixtures/source-verification/cb-market/tpex-cb-quote.json",
+  import.meta.url,
+), "utf8");
 
 function historyPoint(patch = {}) {
   return {
@@ -38,7 +44,7 @@ function pointHash(point) {
 }
 
 function correctionBundle(before, after, manifestPatch = {}, evidencePatch = {}) {
-  const payload = JSON.stringify(after);
+  const payload = RAW_CB_QUOTE_EVIDENCE;
   const officialEvidence = {
     sourceId: "tpex-cb-day-query",
     resourceUrl: "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry",
@@ -195,8 +201,47 @@ test("optional failures retain only their own stale snapshots", async () => {
   assert.deepEqual(stale.deploymentEffects, []);
 });
 
-test("history correction requires exact official evidence and traces prior and new generations", () => {
-  const before = historyPoint();
+test("nightly approved fetch dependency cannot intercept unrelated concurrent fetches", async () => {
+  let refreshSettled = false;
+  const refresh = runIsolatedNightlyMarketRefreshTestHarness({
+    date: "2026-07-29",
+    scenario: "success",
+  }).finally(() => {
+    refreshSettled = true;
+  });
+  const unrelatedErrors = [];
+  let unrelatedAttempts = 0;
+  while (!refreshSettled && unrelatedErrors.length === 0) {
+    try {
+      const response = await fetch(
+        "data:application/json,%7B%22scope%22%3A%22unrelated%22%7D",
+      );
+      assert.deepEqual(await response.json(), { scope: "unrelated" });
+      unrelatedAttempts += 1;
+    } catch (error) {
+      unrelatedErrors.push(error);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  const outcome = await refresh;
+
+  assert.equal(outcome.status, "fulfilled");
+  assert.ok(unrelatedAttempts > 0);
+  assert.deepEqual(unrelatedErrors, []);
+});
+
+test("history correction requires raw parsed official evidence and traces generations", async () => {
+  const before = historyPoint({
+    cbOpen: "104",
+    cbHigh: "104",
+    cbLow: "104",
+    cbClose: "104",
+    cbAverage: "104",
+    cbChange: "2",
+    cbTurnover: "1040000",
+    conversionValue: "64.01",
+    premiumRate: "62.47",
+  });
   const unchanged = historyPoint({
     bondCode: "11011",
     date: "2026-07-28",
@@ -213,22 +258,12 @@ test("history correction requires exact official evidence and traces prior and n
     conversionValue: null,
     premiumRate: null,
   });
-  const after = historyPoint({
-    cbOpen: "104",
-    cbHigh: "104",
-    cbLow: "104",
-    cbClose: "104",
-    cbAverage: "104",
-    cbChange: "2",
-    cbTurnover: "1040000",
-    conversionValue: "64.01",
-    premiumRate: "62.47",
-  });
+  const after = historyPoint();
   const previous = [unchanged, before];
   const candidate = [unchanged, after];
   const { manifest, officialEvidence } = correctionBundle(before, after);
 
-  const result = applyBondMarketHistoryCorrection({
+  const result = await applyBondMarketHistoryCorrection({
     previous,
     candidate,
     correction: manifest,
@@ -261,8 +296,8 @@ test("history correction requires exact official evidence and traces prior and n
     ["extra evidence field", manifest, { ...officialEvidence, path: "capture.json" }],
   ];
   for (const [name, correction, evidence] of cases) {
-    assert.throws(
-      () => applyBondMarketHistoryCorrection({
+    await assert.rejects(
+      async () => applyBondMarketHistoryCorrection({
         previous,
         candidate,
         correction,
@@ -273,8 +308,8 @@ test("history correction requires exact official evidence and traces prior and n
     );
   }
 
-  assert.throws(
-    () => applyBondMarketHistoryCorrection({
+  await assert.rejects(
+    async () => applyBondMarketHistoryCorrection({
       previous,
       candidate: [
         { ...unchanged, cbTradingUnits: "1", cbTurnover: "100000" },
@@ -295,8 +330,8 @@ test("history correction requires exact official evidence and traces prior and n
       return manifest.sha256;
     },
   });
-  assert.throws(
-    () => applyBondMarketHistoryCorrection({
+  await assert.rejects(
+    async () => applyBondMarketHistoryCorrection({
       previous,
       candidate,
       correction: accessorEvidence,
@@ -305,4 +340,19 @@ test("history correction requires exact official evidence and traces prior and n
     /data-only correction evidence/i,
   );
   assert.equal(getterCalls, 0);
+
+  const selfSigned = correctionBundle(before, after, {}, {
+    payload: JSON.stringify(after),
+    sha256: sha256(JSON.stringify(after)),
+  });
+  selfSigned.manifest.sha256 = selfSigned.officialEvidence.sha256;
+  await assert.rejects(
+    async () => applyBondMarketHistoryCorrection({
+      previous,
+      candidate,
+      correction: selfSigned.manifest,
+      officialEvidence: selfSigned.officialEvidence,
+    }),
+    /official correction evidence/i,
+  );
 });

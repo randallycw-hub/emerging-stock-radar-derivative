@@ -87,11 +87,11 @@ HTTP 200 不代表同步成功。完整成功必須同時符合：
 - 授權待確認：不同步，顯示 `UNKNOWN`。
 - 來源停止：標 `UNAVAILABLE`，不切換 Yahoo、CBAS、券商或未批准來源。
 
-可轉債 nightly candidate 採原子切換。完整 11406 名冊、核心條款或核心 CB 行情任一必要來源失敗，核心 CB／股票資料日期不等於 runner 指定日期，或候選 schema/hash/count/cross-file 驗證失敗時，不建立新的有效 generation，也不切換 `current.json`；前一版 `current.json`、workbench 與 history 必須逐 byte 保持不變。測試使用固定資料情境，所有官方必要與 optional 請求都經同一個核准 fetch boundary；不提供可替換 market builder。optional 來源失敗只影響自身 stale/unavailable 狀態，不得掩蓋必要來源失敗。
+可轉債 nightly candidate 採原子切換。完整 11406 名冊、核心條款或核心 CB 行情任一必要來源失敗，核心 CB／股票資料日期不等於 runner 指定日期，或候選 schema/hash/count/cross-file 驗證失敗時，不建立新的有效 generation，也不切換 `current.json`；前一版 `current.json`、workbench 與 history 必須逐 byte 保持不變。測試使用固定資料情境，所有官方必要與 optional 請求都經同一個 candidate-local 核准 fetch dependency 傳入實際 market collector；不覆寫 process-global `fetch`，也不提供可替換 market builder。optional 來源失敗只影響自身 stale/unavailable 狀態，不得掩蓋必要來源失敗。
 
 ## 歷史更正與部署邊界
 
-一般 nightly 流程對 `bond-market-history.json` 僅 append 或同值冪等合併；同債券同日期若內容不同，一律拒絕，不得靜默覆寫。正式更正只能由獨立 backfill/correction 流程同時提供 exact data-only manifest 與獨立 captured official evidence record。manifest 欄位恰為 `bondCode`、`date`、`sourceId`、`retrievedAt`、`sha256`、`beforeHash`、`afterHash`；evidence 欄位恰為 `sourceId`、`resourceUrl`、`retrievedAt`、`sha256`、`payload`。系統驗證 source ID 與核准官方 URL、兩份紀錄的來源／擷取時間／hash 完全相同、`sha256(payload)`、payload 的單一目標 history point、指定舊值與新值 hash，且確認沒有改動其他既有 bond/date，才重建候選；回傳前後 generation hash 供稽核。自行以 manifest 值重算的 hash、callback、檔案路徑或額外欄位都不接受。
+一般 nightly 流程對 `bond-market-history.json` 僅 append 或同值冪等合併；同債券同日期若內容不同，一律拒絕，不得靜默覆寫。正式更正只能由獨立 backfill/correction 流程同時提供 exact data-only manifest 與獨立 captured official evidence record。manifest 欄位恰為 `bondCode`、`date`、`sourceId`、`retrievedAt`、`sha256`、`beforeHash`、`afterHash`；evidence 欄位恰為 `sourceId`、`resourceUrl`、`retrievedAt`、`sha256`、`payload`，其中 `payload` 必須是該 URL 擷取的原始 TPEx `cbDayQry` JSON。系統驗證兩份紀錄的來源／擷取時間／hash 完全相同及 `sha256(payload)`，再把 raw payload 送入既有核准 URL、request contract 與官方 CB 行情 parser；manifest 的 target／`afterHash` 必須等於 parser 產生並依未更正欄位重算的 history point，且不得改動其他既有 bond/date，才重建候選。把 normalized candidate 直接 `JSON.stringify` 後自行簽 hash 不接受；callback、檔案路徑或額外欄位也不接受。
 
 資料同步與 production hosting 是兩個責任邊界：本 repo 的 runner 最多完成已驗證靜態輸入與 pointer 切換；production build、發布、版本切換與回滾由另行授權的 hosting 排程負責。repo 不保存 hosting token 或 build-hook URL，runner 也不觸發外部部署。
 
