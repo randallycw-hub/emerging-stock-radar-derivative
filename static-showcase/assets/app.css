@@ -430,7 +430,7 @@ a { color: inherit; }
   margin-bottom: 12px;
   padding: 12px;
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(210px, .45fr) auto;
+  grid-template-columns: minmax(260px, 1fr) auto auto;
   gap: 10px;
   align-items: end;
   background: var(--violet-soft);
@@ -447,9 +447,12 @@ a { color: inherit; }
   color: var(--ink);
 }
 .filters output { min-width: 84px; padding: 10px; color: var(--ink); text-align: right; font-weight: 800; }
+.archive-toggle { align-self: center; color: var(--ink) !important; font-size: 13px !important; font-weight: 750; }
+.archive-toggle input { width: 18px; min-height: 18px; accent-color: var(--violet); vertical-align: middle; }
+#bond-clear-filter { min-height: 40px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink); cursor: pointer; }
 
 .bond-table-shell { width: 100%; overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
-.bond-table { width: 100%; min-width: 1220px; table-layout: fixed; border-collapse: collapse; font-size: clamp(11px, .82vw, 13px); }
+.bond-table { width: 100%; min-width: 1120px; table-layout: fixed; border-collapse: collapse; font-size: clamp(11px, .82vw, 13px); }
 .bond-table th {
   padding: 10px 7px;
   color: var(--clay-ink);
@@ -459,14 +462,8 @@ a { color: inherit; }
   font-size: 10px;
   letter-spacing: .02em;
 }
-.bond-table th:nth-child(1) { width: 15%; }
-.bond-table th:nth-child(2) { width: 10%; }
-.bond-table th:nth-child(3), .bond-table th:nth-child(4) { width: 9%; }
-.bond-table th:nth-child(5), .bond-table th:nth-child(6) { width: 9%; }
-.bond-table th:nth-child(7) { width: 8%; }
-.bond-table th:nth-child(8) { width: 11%; }
-.bond-table th:nth-child(9) { width: 10%; }
-.bond-table th:nth-child(10) { width: 10%; }
+.bond-table th:nth-child(1) { width: 16%; }
+.bond-table th:nth-child(n + 2) { width: 9.33%; }
 .bond-table td {
   padding: 11px 7px;
   vertical-align: top;
@@ -474,7 +471,7 @@ a { color: inherit; }
   overflow-wrap: anywhere;
 }
 .bond-table tr[data-bond-code] { cursor: pointer; }
-.bond-table tr[data-bond-code]:hover, .bond-table tr[data-bond-code]:focus { background: var(--clay-soft); }
+.bond-table tr[data-bond-code]:hover, .bond-table tr[data-bond-code]:focus { background: var(--clay-soft); outline: 3px solid var(--focus); outline-offset: -3px; }
 .bond-table th:first-child,
 .bond-table td:first-child { position: sticky; left: 0; z-index: 2; background: var(--panel); }
 .bond-table tr[data-bond-code]:hover td:first-child,

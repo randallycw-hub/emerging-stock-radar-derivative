@@ -1,4 +1,10 @@
-import { sortRows } from "./table-sort.js";
+import {
+  filterBondRecords,
+  paginateBondRecords,
+  parseBondListState,
+  serializeBondListState,
+  sortBondRecords,
+} from "./bond-list-page.js";
 
 const workbenchSections = [
   "交易摘要",
@@ -27,9 +33,10 @@ const state = {
   views: [],
   conversions: [],
   history: [],
-  sortKey: "bondCode",
+  sortKey: null,
   sortDirection: "asc",
   page: 1,
+  archived: false,
 };
 
 initializeFromUrl();
@@ -68,49 +75,47 @@ async function loadAndRender() {
 }
 
 function initializeFromUrl() {
-  const params = new URLSearchParams(location.search);
-  state.sortKey = params.get("sort") || "bondCode";
-  state.sortDirection = params.get("direction") === "desc" ? "desc" : "asc";
-  state.page = Math.max(1, Number.parseInt(params.get("page") || "1", 10) || 1);
-  document.querySelector("#bond-search").value = params.get("q") || "";
-  document.querySelector("#bond-preset").value = params.get("preset") || "all";
-  document.querySelector("#bond-sort-field").value = state.sortKey;
-  updateDirectionButton();
+  const listState = parseBondListState(location.search);
+  state.sortKey = new URLSearchParams(location.search).get("sort") || null;
+  state.sortDirection = listState.direction;
+  state.page = listState.page;
+  state.archived = listState.archived;
+  document.querySelector("#bond-search").value = listState.query;
+  document.querySelector("#bond-archive-toggle").checked = state.archived;
 }
 
 function bindFilters() {
-  for (const selector of ["#bond-search", "#bond-preset"]) {
-    document.querySelector(selector).addEventListener("input", () => {
-      state.page = 1;
-      syncListUrl();
-      renderBonds();
-    });
-  }
-  document.querySelector("#bond-sort-field").addEventListener("change", (event) => {
-    state.sortKey = event.target.value;
-    state.sortDirection = "desc";
+  document.querySelector("#bond-search").addEventListener("input", () => {
     state.page = 1;
-    updateDirectionButton();
     syncListUrl();
     renderBonds();
   });
-  document.querySelector("#bond-sort-direction").addEventListener("click", () => {
-    state.sortDirection = state.sortDirection === "desc" ? "asc" : "desc";
+  document.querySelector("#bond-archive-toggle").addEventListener("change", (event) => {
+    state.archived = event.target.checked;
     state.page = 1;
-    updateDirectionButton();
     syncListUrl();
     renderBonds();
+  });
+  document.querySelector("#bond-clear-filter").addEventListener("click", () => {
+    document.querySelector("#bond-search").value = "";
+    state.page = 1;
+    syncListUrl();
+    renderBonds();
+    document.querySelector("#bond-search").focus();
   });
   for (const button of document.querySelectorAll("[data-sort-key]")) {
     button.addEventListener("click", () => {
       const key = button.dataset.sortKey;
-      state.sortDirection = state.sortKey === key && state.sortDirection === "desc"
-        ? "asc"
-        : "desc";
-      state.sortKey = key;
+      if (state.sortKey !== key) {
+        state.sortKey = key;
+        state.sortDirection = "asc";
+      } else if (state.sortDirection === "asc") {
+        state.sortDirection = "desc";
+      } else {
+        state.sortKey = null;
+        state.sortDirection = "asc";
+      }
       state.page = 1;
-      document.querySelector("#bond-sort-field").value = key;
-      updateDirectionButton();
       syncListUrl();
       renderBonds();
     });
@@ -166,41 +171,27 @@ function fallbackBondViews(rows) {
 }
 
 function renderBonds() {
-  const query = document.querySelector("#bond-search").value.trim().toLowerCase();
-  const preset = document.querySelector("#bond-preset").value;
-  const filtered = state.views.filter((view) => {
-    const term = termFor(view.bondCode);
-    const haystack = [
-      view.bondCode,
-      view.bondName,
-      view.issuerCode,
-      term?.["機構名稱"],
-    ].join(" ").toLowerCase();
-    return haystack.includes(query) && matchesPreset(view, preset);
+  const prepared = state.views.map((view) => ({ ...view, issuerName: termFor(view.bondCode)?.["機構名稱"] ?? view.issuerName ?? view.issuerCode }));
+  const filtered = filterBondRecords(prepared, {
+    query: document.querySelector("#bond-search").value,
+    archived: state.archived,
   });
-  const rows = sortRows(filtered, {
-    key: state.sortKey,
-    direction: state.sortDirection,
-    type: state.sortKey === "bondCode"
-      || state.sortKey === "bondName"
-      || state.sortKey === "maturityDate"
-      ? "text"
-      : "number",
-  });
-  const size = pageSize();
-  const pages = Math.max(1, Math.ceil(rows.length / size));
-  state.page = Math.min(state.page, pages);
-  const visible = rows.slice((state.page - 1) * size, state.page * size);
+  const ordered = state.sortKey ? sortBondRecords(filtered, { key: state.sortKey, direction: state.sortDirection }) : filtered;
+  const pagination = paginateBondRecords(ordered, state.page);
+  state.page = pagination.page;
+  const visible = pagination.records;
+  const noResults = ordered.length === 0;
 
-  setText("#bond-result-count", `${rows.length} 檔 · 第 ${state.page}/${pages} 頁`);
+  setText("#bond-result-count", `${pagination.total} 檔 · 第 ${state.page}/${pagination.pageCount} 頁`);
+  document.querySelector("#bond-clear-filter").hidden = !noResults || !document.querySelector("#bond-search").value.trim();
   document.querySelector("#bond-table-body").innerHTML = visible.length
     ? visible.map(renderBondRow).join("")
-    : '<tr><td colspan="10" class="empty-cell">沒有符合條件的可轉債</td></tr>';
+    : '<tr><td colspan="10" class="empty-cell">沒有符合條件的可轉債；可清除搜尋條件後再試。</td></tr>';
   document.querySelector("#bond-card-list").innerHTML = visible.length
     ? visible.map(renderBondCard).join("")
-    : '<p class="empty-cell">沒有符合條件的可轉債</p>';
+    : '<p class="empty-cell">沒有符合條件的可轉債；可清除搜尋條件後再試。</p>';
   updateSortHeaders();
-  renderPagination(pages);
+  renderPagination(pagination.pageCount);
   bindBondOpeners();
 }
 
@@ -210,14 +201,14 @@ function renderBondRow(view) {
   return `<tr tabindex="0" data-bond-code="${escapeHtml(view.bondCode)}" aria-label="查看 ${escapeHtml(view.bondName)} 詳細資料">
     <td>${metric(`${view.bondCode} · ${view.bondName}`, `${view.issuerCode} ${term?.["機構名稱"] ?? ""}`)}</td>
     <td>${priceMetric(view.cbClose, view.cbPriceDate, view.staleCbPrice ? "非當日成交" : "")}</td>
-    <td>${priceMetric(view.stockClose, view.stockPriceDate)}</td>
-    <td>${priceMetric(view.currentConversionPrice, view.conversionPriceEffectiveDate, "生效日")}</td>
     <td>${priceMetric(view.conversionValue, view.valuationDate, "估值日", "metric-violet")}</td>
     <td>${rateMetric(view.premiumRate, view.valuationDate, reason)}</td>
-    <td>${metric(formatNumber(view.cbTradeUnits), view.cbTradeUnits === "0" ? "當日無成交" : "交易單位")}</td>
-    <td>${metric(formatMoney(view.outstandingAmount), view.outstandingAmount === null ? "資料暫缺" : view.outstandingReductionRate === null ? "官方目前餘額" : `流通減少 ${signedRate(view.outstandingReductionRate)}`)}</td>
-    <td>${metric(view.maturityDate, "契約到期日")}</td>
+    <td>${priceMetric(view.stockClose, view.stockPriceDate)}</td>
+    <td>${priceMetric(view.currentConversionPrice, view.conversionPriceEffectiveDate, "生效日")}</td>
+    <td>${metric(view.outstandingReductionRate === null ? "—" : signedRate(view.outstandingReductionRate), "流通餘額比例")}</td>
     <td>${eventMetric(view)}</td>
+    <td>${metric(view.valuationDate ?? view.cbPriceDate, "資料日期")}</td>
+    <td>${metric(view.archived || view.status === "archived" ? "封存" : view.missingReasons?.length ? "待補" : "可用", view.archived || view.status === "archived" ? `${view.archiveReason ?? "封存"} · ${view.archiveDate ?? view.archivedAt ?? "日期未提供"}` : firstReason(view) || "已驗證")}</td>
   </tr>`;
 }
 
@@ -263,16 +254,6 @@ function updateSortHeaders() {
   }
 }
 
-function updateDirectionButton() {
-  const button = document.querySelector("#bond-sort-direction");
-  button.dataset.direction = state.sortDirection;
-  button.textContent = state.sortDirection === "desc" ? "高到低 ↓" : "低到高 ↑";
-}
-
-function pageSize() {
-  return matchMedia("(max-width: 900px)").matches ? 25 : 50;
-}
-
 function renderPagination(pageCount) {
   const target = document.querySelector("#bond-pagination");
   if (pageCount <= 1) {
@@ -294,15 +275,14 @@ function renderPagination(pageCount) {
 }
 
 function syncListUrl({ push = false } = {}) {
-  const params = new URLSearchParams();
-  const query = document.querySelector("#bond-search").value.trim();
-  const preset = document.querySelector("#bond-preset").value;
-  if (query) params.set("q", query);
-  if (preset !== "all") params.set("preset", preset);
-  params.set("sort", state.sortKey);
-  params.set("direction", state.sortDirection);
-  params.set("page", String(state.page));
-  const url = `${location.pathname}?${params}`;
+  const search = serializeBondListState({
+    query: document.querySelector("#bond-search").value,
+    archived: state.archived,
+    sortKey: state.sortKey,
+    direction: state.sortDirection,
+    page: state.page,
+  });
+  const url = `${location.pathname}${search}`;
   history[push ? "pushState" : "replaceState"](null, "", url);
 }
 
@@ -311,20 +291,6 @@ function openBond(code) {
   params.set("bond", code);
   history.pushState(null, "", `${location.pathname}?${params}`);
   renderRoute();
-}
-
-function matchesPreset(view, preset) {
-  if (preset === "low-price") return numberValue(view.cbClose) < 100;
-  if (preset === "low-premium") return numberValue(view.premiumRate) < 5;
-  if (preset === "near-parity") {
-    const value = numberValue(view.conversionValue);
-    return value >= 95 && value <= 105;
-  }
-  if (preset === "maturity") return view.daysToMaturity >= 0 && view.daysToMaturity <= 365;
-  if (preset === "put") return view.daysToNextPut >= 0 && view.daysToNextPut <= 90;
-  if (preset === "no-trade") return String(view.cbTradeUnits) === "0";
-  if (preset === "missing") return view.missingReasons?.length > 0;
-  return true;
 }
 
 function renderRoute() {
@@ -616,11 +582,6 @@ function formatMoney(value) {
   return number.toLocaleString("zh-TW");
 }
 
-function formatNumber(value) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number.toLocaleString("zh-TW") : "—";
-}
-
 function formatDate(value) {
   if (value === null || value === undefined || value === "") return "—";
   const text = String(value).trim();
@@ -643,12 +604,6 @@ function formatDate(value) {
 function daysBetween(from, to) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return null;
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000);
-}
-
-function numberValue(value) {
-  if (value === null || value === undefined || value === "") return Number.POSITIVE_INFINITY;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : Number.POSITIVE_INFINITY;
 }
 
 function valueOrDash(value) {

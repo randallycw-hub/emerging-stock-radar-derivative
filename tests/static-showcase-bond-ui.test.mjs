@@ -15,16 +15,15 @@ test("bond page exposes the complete sortable CB workbench", async () => {
 
   for (const label of [
     "CB 代碼／名稱",
-    "CB 收盤價（盤後）",
-    "股票收盤價",
+    "CB 收盤",
+    "標的股收盤",
     "目前轉換價",
     "轉換價值",
     "轉換溢價率",
-    "CB 成交量",
-    "流通餘額",
-    "到期日",
-    "距到期／賣回",
-    "一鍵切換排序",
+    "流通餘額比例",
+    "下一事件",
+    "資料日期",
+    "資料品質",
   ]) {
     assert.match(bondsHtml + js, new RegExp(label));
   }
@@ -42,9 +41,8 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(home, /assets\/app\.css/);
   assert.doesNotMatch(home, /assets\/(?:app|bonds-page)\.js/);
   assert.match(bondsHtml, /id="bond-search"/);
-  assert.match(bondsHtml, /id="bond-preset"/);
-  assert.match(bondsHtml, /id="bond-sort-field"/);
-  assert.match(bondsHtml, /id="bond-sort-direction"/);
+  assert.match(bondsHtml, /id="bond-archive-toggle"/);
+  assert.match(bondsHtml, /id="bond-clear-filter"/);
   assert.match(bondsHtml, /id="bond-table-body"/);
   assert.match(bondsHtml, /id="bond-workbench"/);
   assert.match(bondsHtml, /assets\/site-shell\.js/);
@@ -59,7 +57,7 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(js, /共同估值日/);
   assert.match(js, /value === null \|\| value === undefined/);
   assert.match(js, /bond/);
-  assert.match(js, /sort/);
+  assert.match(js, /bond-list-page/);
   assert.match(js, /direction/);
   assert.match(js, /page/);
   assert.match(js, /history\.(?:pushState|replaceState)/);
@@ -88,4 +86,11 @@ test("static showcase keeps presentation out of generated runtime data", async (
   assert.match(runtime, /generationPointerUrl/);
   assert.doesNotMatch(runtime, /manifestUrl/);
   assert.doesNotMatch(runtime, /document\.querySelector|innerHTML|const val =/);
+});
+
+test("bond list module round-trips only supported list URL state", async () => {
+  const { parseBondListState, serializeBondListState } = await import("../static-showcase/assets/bond-list-page.js");
+  const state = parseBondListState("?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
+  assert.deepEqual(state, { query: "甲", archived: true, sortKey: "cbClose", direction: "desc", page: 3 });
+  assert.equal(serializeBondListState(state), "?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
 });
