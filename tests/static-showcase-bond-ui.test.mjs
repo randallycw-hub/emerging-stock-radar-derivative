@@ -94,3 +94,14 @@ test("bond list module round-trips only supported list URL state", async () => {
   assert.deepEqual(state, { query: "甲", archived: true, sortKey: "cbClose", direction: "desc", page: 3 });
   assert.equal(serializeBondListState(state), "?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
 });
+
+test("mobile bond cards keep every list field and archived metadata visible", async () => {
+  const js = await readFile(new URL("assets/bonds-page.js", root), "utf8");
+  const card = js.slice(js.indexOf("function renderBondCard"), js.indexOf("function bindBondOpeners"));
+  for (const label of ["CB 收盤", "轉換價值", "轉換溢價率", "標的股收盤", "目前轉換價", "流通餘額比例", "下一事件", "資料日期", "資料品質"]) {
+    assert.match(card, new RegExp(label));
+  }
+  assert.match(card, /archiveReason/);
+  assert.match(card, /archiveDate/);
+  assert.match(card, /archivedAt/);
+});

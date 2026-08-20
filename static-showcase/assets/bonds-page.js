@@ -216,14 +216,15 @@ function renderBondCard(view) {
   return `<button class="bond-card" type="button" data-bond-code="${escapeHtml(view.bondCode)}">
     <header><strong>${escapeHtml(view.bondCode)} · ${escapeHtml(view.bondName)}</strong><span>${view.staleCbPrice ? "非當日成交" : ""}</span></header>
     <span class="bond-card-grid">
-      ${cardMetric("CB 收盤價（盤後）", valueOrDash(view.cbClose), view.cbPriceDate)}
-      ${cardMetric("股票收盤", valueOrDash(view.stockClose), view.stockPriceDate)}
-      ${cardMetric("目前轉換價", valueOrDash(view.currentConversionPrice), view.conversionPriceEffectiveDate)}
+      ${cardMetric("CB 收盤", valueOrDash(view.cbClose), view.cbPriceDate)}
       ${cardMetric("轉換價值", valueOrDash(view.conversionValue), view.valuationDate)}
       ${cardMetric("轉換溢價率", view.premiumRate === null ? "—" : signedRate(view.premiumRate), view.valuationDate)}
-      ${cardMetric("流通餘額", formatMoney(view.outstandingAmount), "官方目前餘額")}
-      ${cardMetric("到期日", view.maturityDate, `距到期 ${view.daysToMaturity} 天`)}
-      ${cardMetric("最近事件", eventLabel(view), eventDate(view))}
+      ${cardMetric("標的股收盤", valueOrDash(view.stockClose), view.stockPriceDate)}
+      ${cardMetric("目前轉換價", valueOrDash(view.currentConversionPrice), view.conversionPriceEffectiveDate)}
+      ${cardMetric("流通餘額比例", view.outstandingReductionRate === null ? "—" : signedRate(view.outstandingReductionRate), "流通餘額比例")}
+      ${cardMetric("下一事件", eventLabel(view), eventDate(view))}
+      ${cardMetric("資料日期", view.valuationDate ?? view.cbPriceDate, "資料日期")}
+      ${cardMetric("資料品質", view.archived || view.status === "archived" ? "封存" : view.missingReasons?.length ? "待補" : "可用", view.archived || view.status === "archived" ? `${view.archiveReason ?? "封存"} · ${view.archiveDate ?? view.archivedAt ?? "日期未提供"}` : firstReason(view) || "已驗證")}
     </span>
   </button>`;
 }
