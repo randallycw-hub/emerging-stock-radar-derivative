@@ -33,13 +33,16 @@ const CORRECTION_KEYS = [
   "beforeHash",
   "afterHash",
 ];
-const OFFICIAL_CORRECTION_SOURCES = new Set([
-  "tpex-cb-day-query",
-  "twse-stock-day-all",
-  "tpex-mainboard-daily-close",
-  "tpex-conversion-index",
-  "mops-conversion-detail",
+const OFFICIAL_CORRECTION_RESOURCES = new Map([
+  ["tpex-cb-day-query", "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry"],
 ]);
+const OFFICIAL_EVIDENCE_KEYS = [
+  "sourceId",
+  "resourceUrl",
+  "retrievedAt",
+  "sha256",
+  "payload",
+];
 
 export async function backfillBondMarketHistory(options = {}) {
   assertExactOptions(options, [
@@ -47,16 +50,20 @@ export async function backfillBondMarketHistory(options = {}) {
     "fetchImpl",
     "asOfDate",
     "correction",
+    "officialEvidence",
   ], "backfillBondMarketHistory");
   const {
     dataDirectory = "static-showcase/data",
     fetchImpl = fetch,
     asOfDate = taipeiDate(new Date()),
     correction,
+    officialEvidence,
   } = options;
   if (!isIsoDate(asOfDate)) throw new TypeError("asOfDate must be an ISO date");
   if (typeof fetchImpl !== "function") throw new TypeError("fetchImpl must be a function");
-  if (correction !== undefined) validateCorrectionManifest(correction);
+  if (correction !== undefined || officialEvidence !== undefined) {
+    validateCorrectionEvidence(correction, officialEvidence);
+  }
   const [rawBonds, conversionPrices, currentStockCloses, previousHistory] = await Promise.all([
     readJson(join(dataDirectory, "11406.json")),
     readJson(join(dataDirectory, "conversion-prices.json")),
@@ -103,6 +110,7 @@ export async function backfillBondMarketHistory(options = {}) {
       previous: verifiedPreviousHistory,
       candidate: overlayHistory(verifiedPreviousHistory, currentPoints),
       correction,
+      officialEvidence,
     });
   const points = corrected?.history
     ?? mergeBondMarketHistory(verifiedPreviousHistory, currentPoints);
@@ -153,11 +161,12 @@ export async function backfillBondMarketHistory(options = {}) {
 export function applyBondMarketHistoryCorrection(options = {}) {
   assertExactOptions(
     options,
-    ["previous", "candidate", "correction"],
+    ["previous", "candidate", "correction", "officialEvidence"],
     "applyBondMarketHistoryCorrection",
   );
-  const { previous, candidate, correction } = options;
-  const evidence = validateCorrectionManifest(correction);
+  const { previous, candidate, correction, officialEvidence } = options;
+  const { manifest: evidence, capturedPoint, traceEvidence } =
+    validateCorrectionEvidence(correction, officialEvidence);
   const previousHistory = parseBondMarketHistory(previous);
   const candidateHistory = parseBondMarketHistory(candidate);
   const identity = `${evidence.bondCode}\u001f${evidence.date}`;
@@ -170,6 +179,7 @@ export function applyBondMarketHistoryCorrection(options = {}) {
     || after === undefined
     || pointSha256(before) !== evidence.beforeHash
     || pointSha256(after) !== evidence.afterHash
+    || pointSha256(capturedPoint) !== evidence.afterHash
     || evidence.beforeHash === evidence.afterHash
   ) {
     throw new TypeError("correction evidence does not match the targeted history point");
@@ -187,6 +197,7 @@ export function applyBondMarketHistoryCorrection(options = {}) {
     history: candidateHistory,
     trace: Object.freeze({
       correction: Object.freeze({ ...evidence }),
+      officialEvidence: traceEvidence,
       previousGeneration: historySha256(previousHistory),
       nextGeneration: historySha256(candidateHistory),
     }),
@@ -283,7 +294,7 @@ function validateCorrectionManifest(value) {
   if (!/^\d{5,6}$/.test(manifest.bondCode) || !isIsoDate(manifest.date)) {
     throw new TypeError("correction evidence target is invalid");
   }
-  if (!OFFICIAL_CORRECTION_SOURCES.has(manifest.sourceId)) {
+  if (!OFFICIAL_CORRECTION_RESOURCES.has(manifest.sourceId)) {
     throw new TypeError("correction evidence sourceId is not approved");
   }
   if (
@@ -298,18 +309,80 @@ function validateCorrectionManifest(value) {
       throw new TypeError(`correction evidence ${key} is invalid`);
     }
   }
-  const evidenceHash = sha256(JSON.stringify([
-    manifest.bondCode,
-    manifest.date,
-    manifest.sourceId,
-    manifest.retrievedAt,
-    manifest.beforeHash,
-    manifest.afterHash,
-  ]));
-  if (manifest.sha256 !== evidenceHash) {
-    throw new TypeError("correction evidence sha256 does not match its manifest");
-  }
   return Object.freeze(manifest);
+}
+
+function validateCorrectionEvidence(correction, officialEvidence) {
+  const manifest = validateCorrectionManifest(correction);
+  const captured = requireExactDataRecord(
+    officialEvidence,
+    OFFICIAL_EVIDENCE_KEYS,
+    "official correction evidence",
+  );
+  const expectedUrl = OFFICIAL_CORRECTION_RESOURCES.get(captured.sourceId);
+  if (
+    expectedUrl === undefined
+    || captured.resourceUrl !== expectedUrl
+    || captured.sourceId !== manifest.sourceId
+    || captured.retrievedAt !== manifest.retrievedAt
+    || captured.sha256 !== manifest.sha256
+    || typeof captured.payload !== "string"
+    || sha256(captured.payload) !== captured.sha256
+  ) {
+    throw new TypeError("official correction evidence does not match the approved capture");
+  }
+  let capturedPoint;
+  try {
+    capturedPoint = parseBondMarketHistory([JSON.parse(captured.payload)])[0];
+  } catch (error) {
+    throw new TypeError(`official correction evidence payload is invalid: ${error.message}`);
+  }
+  if (
+    capturedPoint.bondCode !== manifest.bondCode
+    || capturedPoint.date !== manifest.date
+    || pointSha256(capturedPoint) !== manifest.afterHash
+  ) {
+    throw new TypeError("official correction evidence payload does not match the target");
+  }
+  return {
+    manifest,
+    capturedPoint,
+    traceEvidence: Object.freeze({
+      sourceId: captured.sourceId,
+      resourceUrl: captured.resourceUrl,
+      retrievedAt: captured.retrievedAt,
+      sha256: captured.sha256,
+    }),
+  };
+}
+
+function requireExactDataRecord(value, expectedKeys, name) {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || types.isProxy(value)
+    || (
+      Object.getPrototypeOf(value) !== Object.prototype
+      && Object.getPrototypeOf(value) !== null
+    )
+  ) {
+    throw new TypeError(`${name} must be a data-only correction evidence record`);
+  }
+  const keys = Reflect.ownKeys(value);
+  if (
+    keys.length !== expectedKeys.length
+    || keys.some((key) => typeof key !== "string" || !expectedKeys.includes(key))
+  ) {
+    throw new TypeError(`${name} keys must match the correction evidence contract`);
+  }
+  const entries = keys.map((key) => [key, Object.getOwnPropertyDescriptor(value, key)]);
+  if (entries.some(([, descriptor]) => (
+    descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable
+  ))) {
+    throw new TypeError(`${name} must use data-only correction evidence properties`);
+  }
+  return Object.fromEntries(entries.map(([key, descriptor]) => [key, descriptor.value]));
 }
 
 function historyByIdentity(history) {

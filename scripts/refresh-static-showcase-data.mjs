@@ -29,6 +29,7 @@ import {
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCsv } from "../lib/source-verification/csv.ts";
 import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
+import { parseConversionIndex } from "../lib/source-verification/source-cb-market.ts";
 import { normalize94025Row, parse94025Csv } from "../lib/source-verification/source-94025.ts";
 import {
   bondInputsFrom11406Rows,
@@ -52,6 +53,9 @@ export const OFFICIAL_SHOWCASE_SOURCES = {
 };
 
 const DATA_DIRECTORY = "static-showcase/data";
+const OFFICIAL_ROSTER_CENSUS_SOURCE =
+  "https://www.tpex.org.tw/www/zh-tw/bond/convSearch";
+let officialFetchBoundaryTail = Promise.resolve();
 
 export function buildRuntimeBootstrap() {
   return [
@@ -108,6 +112,7 @@ export async function fetchOfficialCsvWithRetry(
   fetchImpl = fetch,
   {
     maxAttempts = 5,
+    requestInit = {},
     sleep = (milliseconds) =>
       new Promise((resolve) => setTimeout(resolve, milliseconds)),
   } = {},
@@ -117,7 +122,11 @@ export async function fetchOfficialCsvWithRetry(
     let retryDelayMs = 250;
     try {
       const response = await fetchImpl(url, {
-        headers: { Accept: "text/csv, application/json, application/octet-stream" },
+        ...requestInit,
+        headers: {
+          Accept: "text/csv, application/json, application/octet-stream",
+          ...requestInit.headers,
+        },
         redirect: "error",
       });
       if (!response.ok) {
@@ -290,6 +299,56 @@ async function refreshStaticShowcaseCandidate({
     });
   }
 
+  let marketFetchImpl = fetchImpl;
+  if (expectedDataDate !== undefined) {
+    const censusResponse = await fetchOfficialCsvWithRetry(
+      OFFICIAL_ROSTER_CENSUS_SOURCE,
+      fetchImpl,
+      {
+        requestInit: {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "user-agent": "EmergingStockRadar/1.0 official-eod-collector",
+          },
+          body: new URLSearchParams({
+            name: "bondIssuer",
+            searchNo: "",
+            response: "json",
+          }),
+        },
+      },
+    );
+    if (!censusResponse.ok) {
+      throw new Error(`11406 census: HTTP_${censusResponse.status}`);
+    }
+    const censusText = new TextDecoder("utf-8", { fatal: true }).decode(
+      censusResponse.bytes,
+    );
+    const census = parseConversionIndex(JSON.parse(censusText));
+    verifyRosterCompleteness(datasets["11406"], census);
+    manifestDatasets.push({
+      datasetId: "11406Census",
+      sourceUrl: OFFICIAL_ROSTER_CENSUS_SOURCE,
+      downloadedAt: taipeiDate(now),
+      sha256: `sha256:${createHash("sha256").update(censusResponse.bytes).digest("hex")}`,
+      rawBytes: censusResponse.bytes.byteLength,
+      rowCount: census.length,
+    });
+    let replayCensus = true;
+    marketFetchImpl = async (url, init) => {
+      if (replayCensus && String(url) === OFFICIAL_ROSTER_CENSUS_SOURCE) {
+        replayCensus = false;
+        return new Response(censusResponse.bytes.slice(), {
+          status: 200,
+          headers: { "content-type": "application/json;charset=UTF-8" },
+        });
+      }
+      return fetchImpl(url, init);
+    };
+  }
+
   const emergingResponse = await fetchOfficialCsvWithRetry(
     OFFICIAL_SHOWCASE_SOURCES.emergingMarket,
     fetchImpl,
@@ -382,25 +441,36 @@ async function refreshStaticShowcaseCandidate({
       "utf8",
     );
 
-    const marketResult = await marketBuilder({
-      outputDir: stagingDataDirectory,
-      asOfDate: emergingSnapshot.tradingDate,
-      collectImpl: async (options) => {
-        const store = await openMarketCheckpoint({
-          date: options.date,
-          directory: paths.marketCheckpointDirectory,
-        });
-        return fetchCurrentOfficialMarketData({
-          ...options,
-          fetchImpl,
-          checkpoint: store.checkpoint,
-          onCheckpoint: store.onCheckpoint,
-        });
-      },
-      now: () => now,
-      manifestBase: baseManifest,
-      previousIssuerResearch,
-    });
+    const marketResult = await withOfficialFetchBoundary(
+      marketFetchImpl,
+      () => marketBuilder({
+        outputDir: stagingDataDirectory,
+        asOfDate: expectedDataDate ?? emergingSnapshot.tradingDate,
+        collectImpl: async (options) => {
+          const store = await openMarketCheckpoint({
+            date: options.date,
+            directory: paths.marketCheckpointDirectory,
+          });
+          return fetchCurrentOfficialMarketData({
+            ...options,
+            fetchImpl: marketFetchImpl,
+            checkpoint: store.checkpoint,
+            onCheckpoint: store.onCheckpoint,
+          });
+        },
+        now: () => now,
+        manifestBase: baseManifest,
+        previousIssuerResearch,
+      }),
+    );
+    if (expectedDataDate !== undefined) {
+      await verifyRequiredCoreMarketDate({
+        dataDirectory: stagingDataDirectory,
+        expectedDataDate,
+        rosterRows: datasets["11406"],
+        manifest: marketResult.manifest,
+      });
+    }
     const manifest = marketResult.manifest;
     await writeFile(
       join(stagingDataDirectory, "manifest.json"),
@@ -455,7 +525,12 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     "runtime",
     "cache",
     "nightly-success",
-    "nightly-required-failure",
+    "nightly-partial-roster",
+    "nightly-roster-http-failure",
+    "nightly-core-terms-failure",
+    "nightly-core-quote-failure",
+    "nightly-core-date-mismatch",
+    "nightly-core-stock-date-mismatch",
     "nightly-optional-stale",
   ]).has(scenario)) {
     throw new TypeError(
@@ -482,6 +557,7 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     activeRequests: 0,
     maximumConcurrency: 0,
     marketAsOfDate: null,
+    marketBuilderMode: scenario.startsWith("nightly-") ? "production" : "isolated",
   };
   try {
     await seedIsolatedHarnessRoot(paths, scenario);
@@ -491,7 +567,7 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     let error;
     try {
       value = await refreshStaticShowcaseCandidate({
-        fetchImpl: async (url) => {
+        fetchImpl: async (url, init = {}) => {
           observations.requestedUrls.push(String(url));
           observations.activeRequests += 1;
           observations.maximumConcurrency = Math.max(
@@ -499,16 +575,18 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
             observations.activeRequests,
           );
           try {
+            if (scenario.startsWith("nightly-")) {
+              return nightlyFixtureResponse({
+                fixtureTexts,
+                init,
+                scenario,
+                url: String(url),
+              });
+            }
             const datasetId = Object.entries(OFFICIAL_SHOWCASE_SOURCES)
               .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
             if (datasetId === undefined) {
               throw new TypeError("isolated harness received an unknown source URL");
-            }
-            if (scenario === "nightly-required-failure" && datasetId === "11406") {
-              return new Response("unavailable", { status: 503 });
-            }
-            if (datasetId === "11406" && scenario.startsWith("nightly-")) {
-              return new Response(nightlyRosterCsv(fixtureTexts[datasetId]), { status: 200 });
             }
             return new Response(fixtureTexts[datasetId], { status: 200 });
           } finally {
@@ -518,15 +596,17 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
         expectedDataDate: dataDate,
         now,
         paths,
-        marketBuilder: async ({ outputDir, manifestBase, asOfDate }) => {
-          observations.marketAsOfDate = asOfDate;
-          return buildIsolatedMarketCandidate({
-            outputDir,
-            manifestBase,
-            generatedAt: nowText,
-            scenario,
-          });
-        },
+        marketBuilder: scenario.startsWith("nightly-")
+          ? buildBondMarketSnapshot
+          : async ({ outputDir, manifestBase, asOfDate }) => {
+            observations.marketAsOfDate = asOfDate;
+            return buildIsolatedMarketCandidate({
+              outputDir,
+              manifestBase,
+              generatedAt: nowText,
+              scenario,
+            });
+          },
       });
     } catch (caught) {
       status = "rejected";
@@ -540,6 +620,7 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
         requestedUrls: [...observations.requestedUrls],
         maximumConcurrency: observations.maximumConcurrency,
         marketAsOfDate: observations.marketAsOfDate,
+        marketBuilderMode: observations.marketBuilderMode,
       },
       artifacts: {
         before,
@@ -570,6 +651,88 @@ function createRefreshPathBundle(workspaceRoot) {
     ),
     marketCheckpointDirectory: join(absoluteRoot, ".cache", "official-market"),
   });
+}
+
+function verifyRosterCompleteness(rosterRows, censusEntries) {
+  const rosterCodes = new Set(
+    bondInputsFrom11406Rows(rosterRows).map((bond) => bond.bondCode),
+  );
+  if (!Array.isArray(censusEntries) || censusEntries.length === 0) {
+    throw new Error("VALIDATION_FAILED:ROSTER_COMPLETENESS:EMPTY_CENSUS");
+  }
+  const missing = censusEntries
+    .map((entry) => entry.bondCode)
+    .filter((bondCode) => !rosterCodes.has(bondCode));
+  if (missing.length > 0) {
+    throw new Error(
+      `VALIDATION_FAILED:ROSTER_COMPLETENESS:MISSING_CENSUS_CODES:${missing.join(",")}`,
+    );
+  }
+}
+
+async function verifyRequiredCoreMarketDate({
+  dataDirectory,
+  expectedDataDate,
+  rosterRows,
+  manifest,
+}) {
+  const [cbQuotes, stockCloses] = await Promise.all([
+    readFile(join(dataDirectory, "cb-quotes.json"), "utf8").then(JSON.parse),
+    readFile(join(dataDirectory, "stock-closes.json"), "utf8").then(JSON.parse),
+  ]);
+  const bonds = bondInputsFrom11406Rows(rosterRows);
+  const bondCodes = new Set(bonds.map((bond) => bond.bondCode));
+  const issuerCodes = new Set(bonds.map((bond) => bond.issuerCode));
+  const exactQuoteCodes = new Set(
+    Array.isArray(cbQuotes)
+      ? cbQuotes
+        .filter((quote) => (
+          quote?.tradingMode === "equivalent"
+          && quote?.tradingDate === expectedDataDate
+        ))
+        .map((quote) => quote.bondCode)
+      : [],
+  );
+  const exactStockCodes = new Set(
+    Array.isArray(stockCloses)
+      ? stockCloses
+        .filter((stock) => stock?.tradingDate === expectedDataDate)
+        .map((stock) => stock.companyCode)
+      : [],
+  );
+  const market = manifest?.market;
+  if (
+    !Array.isArray(cbQuotes)
+    || !Array.isArray(stockCloses)
+    || cbQuotes.some((quote) => quote?.tradingDate !== expectedDataDate)
+    || stockCloses.some((stock) => stock?.tradingDate !== expectedDataDate)
+    || [...bondCodes].some((bondCode) => !exactQuoteCodes.has(bondCode))
+    || [...issuerCodes].some((issuerCode) => !exactStockCodes.has(issuerCode))
+    || market?.requestedDate !== expectedDataDate
+    || market?.latestCbPriceDate !== expectedDataDate
+    || market?.latestStockPriceDate !== expectedDataDate
+    || market?.dataDate !== expectedDataDate
+  ) {
+    throw new Error("VALIDATION_FAILED:CORE_MARKET_DATE_MISMATCH");
+  }
+}
+
+async function withOfficialFetchBoundary(fetchImpl, run) {
+  if (fetchImpl === globalThis.fetch) return run();
+  const previous = officialFetchBoundaryTail;
+  let release;
+  officialFetchBoundaryTail = new Promise((resolve) => {
+    release = resolve;
+  });
+  await previous;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = fetchImpl;
+  try {
+    return await run();
+  } finally {
+    globalThis.fetch = originalFetch;
+    release();
+  }
 }
 
 function parseIsolatedHarnessOptions(value) {
@@ -620,6 +783,46 @@ async function loadIsolatedHarnessFixtures() {
       "../tests/fixtures/source-verification/emerging-market/tpex-esb-latest-statistics.json",
       import.meta.url,
     ), "utf8"),
+    cbQuote: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-market/tpex-cb-quote.json",
+      import.meta.url,
+    ), "utf8"),
+    conversionIndex: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-market/tpex-conversion-index.json",
+      import.meta.url,
+    ), "utf8"),
+    conversionDetail: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-market/mops-bond-detail.html",
+      import.meta.url,
+    ), "utf8"),
+    twseStock: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-market/twse-stock-close.json",
+      import.meta.url,
+    ), "utf8"),
+    tpexStock: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-market/tpex-stock-close.json",
+      import.meta.url,
+    ), "utf8"),
+    listedResearch: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-issuer-research/listed-minimal.csv",
+      import.meta.url,
+    ), "utf8"),
+    otcResearch: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-issuer-research/otc-minimal.csv",
+      import.meta.url,
+    ), "utf8"),
+    institution: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-institution/daily-minimal.json",
+      import.meta.url,
+    ), "utf8"),
+    redemption: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-redemption/year-minimal.json",
+      import.meta.url,
+    ), "utf8"),
+    underwriting: await readFile(new URL(
+      "../tests/fixtures/source-verification/cb-underwriting/current-year-minimal.html",
+      import.meta.url,
+    ), "utf8"),
   };
 }
 
@@ -652,6 +855,137 @@ function nightlyRosterCsv(current) {
     "",
     "7",
   ].map((value) => `"${value}"`).join(",")}\n`;
+}
+
+function nightlyFixtureResponse({ fixtureTexts, init, scenario, url }) {
+  if (url === OFFICIAL_SHOWCASE_SOURCES["11406"]) {
+    if (scenario === "nightly-roster-http-failure") {
+      return fixedResponse("unavailable", url, "text/plain", 503);
+    }
+    const complete = nightlyRosterCsv(fixtureTexts["11406"]);
+    if (scenario === "nightly-partial-roster") {
+      const lines = complete.trimEnd().split("\n");
+      return fixedResponse(`${lines[0]}\n${lines.at(-1)}\n`, url, "text/csv");
+    }
+    const roster = scenario === "nightly-core-terms-failure"
+      ? complete.replace('"123100000"', '"999999999"')
+      : complete;
+    return fixedResponse(roster, url, "text/csv");
+  }
+  if (url === OFFICIAL_SHOWCASE_SOURCES["94025"]) {
+    return fixedResponse(fixtureTexts["94025"], url, "text/csv");
+  }
+  if (url === OFFICIAL_SHOWCASE_SOURCES["11586"]) {
+    return fixedResponse(fixtureTexts["11586"], url, "text/csv");
+  }
+  if (url === OFFICIAL_SHOWCASE_SOURCES.emergingMarket) {
+    return fixedResponse(
+      fixtureTexts.emergingMarket.replaceAll("1150730", "1150729"),
+      url,
+      "application/json",
+    );
+  }
+  if (url === OFFICIAL_ROSTER_CENSUS_SOURCE) {
+    return fixedResponse(fixtureTexts.conversionIndex, url, "application/json");
+  }
+  if (url === "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry") {
+    if (scenario === "nightly-core-quote-failure") {
+      return fixedResponse("{}", url, "application/json", 503);
+    }
+    const code = init.body instanceof URLSearchParams
+      ? init.body.get("code")
+      : null;
+    const tradingDate = scenario === "nightly-core-date-mismatch"
+      ? "1150728"
+      : "1150729";
+    const text = code === "11011"
+      ? JSON.stringify(noTradeQuotePayload(tradingDate))
+      : fixtureTexts.cbQuote.replaceAll("1150729", tradingDate);
+    return fixedResponse(text, url, "application/json");
+  }
+  if (url === "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL") {
+    const rows = JSON.parse(fixtureTexts.twseStock);
+    rows.push({ ...rows[0], Code: "1101", Name: "台泥" });
+    if (scenario === "nightly-core-stock-date-mismatch") {
+      rows.find((row) => row.Code === "1101").Date = "1150728";
+    }
+    return fixedResponse(JSON.stringify(rows), url, "application/json");
+  }
+  if (url === "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes") {
+    return fixedResponse(fixtureTexts.tpexStock, url, "application/json");
+  }
+  if (url.startsWith("https://mopsov.twse.com.tw/mops/web/t120sg01?")) {
+    return fixedResponse(fixtureTexts.conversionDetail, url, "text/html");
+  }
+
+  const optionalFailure = scenario === "nightly-optional-stale";
+  if (url === "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv") {
+    return fixedResponse(
+      optionalFailure ? "unavailable" : fixtureTexts.listedResearch,
+      url,
+      optionalFailure ? "text/plain" : "text/csv",
+      optionalFailure ? 503 : 200,
+    );
+  }
+  if (url === "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv") {
+    return fixedResponse(
+      optionalFailure ? "unavailable" : fixtureTexts.otcResearch,
+      url,
+      optionalFailure ? "text/plain" : "text/csv",
+      optionalFailure ? 503 : 200,
+    );
+  }
+  if (url === "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade") {
+    return fixedResponse(
+      optionalFailure ? "{}" : fixtureTexts.institution,
+      url,
+      "application/json",
+      optionalFailure ? 503 : 200,
+    );
+  }
+  if (url === "https://www.tpex.org.tw/www/zh-tw/bond/redeem") {
+    return fixedResponse(
+      optionalFailure ? "{}" : fixtureTexts.redemption,
+      url,
+      "application/json",
+      optionalFailure ? 503 : 200,
+    );
+  }
+  if (url === "https://web.twsa.org.tw/edoc2/default.aspx") {
+    return fixedResponse(
+      optionalFailure ? "unavailable" : fixtureTexts.underwriting,
+      url,
+      optionalFailure ? "text/plain" : "text/html",
+      optionalFailure ? 503 : 200,
+    );
+  }
+  throw new TypeError(`isolated nightly harness received unknown approved URL: ${url}`);
+}
+
+function noTradeQuotePayload(date) {
+  return {
+    tables: [{
+      fields: [
+        "日期", "交易模式", "收市價", "漲跌", "開市價", "最高價", "最低價",
+        "成交筆數", "單位", "成交金額(元)", "平均價",
+      ],
+      data: [[date, "等價", "", "", "", "", "", "0", "0", "0", ""]],
+    }],
+    date: "20260729",
+    stat: "ok",
+  };
+}
+
+function fixedResponse(body, url, contentType, status = 200) {
+  const response = new Response(body, {
+    status,
+    headers: { "content-type": contentType },
+  });
+  Object.defineProperties(response, {
+    redirected: { value: false },
+    url: { value: url },
+  });
+  return response;
 }
 
 async function buildIsolatedMarketCandidate({
@@ -961,9 +1295,9 @@ async function seedIsolatedHarnessRoot(paths, scenario) {
     "utf8",
   );
   await writeFile(join(priorGeneration, "runtime.json"), "prior runtime", "utf8");
-  await writeFile(
-    join(priorGeneration, "cb-issuer-research.json"),
-    `${JSON.stringify({
+  const priorIssuerResearch = scenario === "nightly-optional-stale"
+    ? isolatedIssuerResearchSnapshot("2026-07-29T06:00:06.000Z")
+    : {
       schemaVersion: 1,
       generatedAt: "2026-07-29T06:00:06.000Z",
       records: [],
@@ -972,7 +1306,10 @@ async function seedIsolatedHarnessRoot(paths, scenario) {
         otc: { status: "unavailable", dataDate: null, fetchedAt: null },
       },
       diagnostics: [],
-    })}\n`,
+    };
+  await writeFile(
+    join(priorGeneration, "cb-issuer-research.json"),
+    `${JSON.stringify(priorIssuerResearch)}\n`,
     "utf8",
   );
   const currentTerm = isolatedWorkbenchTerm();

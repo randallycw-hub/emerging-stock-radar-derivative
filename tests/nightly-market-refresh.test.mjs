@@ -37,32 +37,42 @@ function pointHash(point) {
   return sha256(JSON.stringify(point));
 }
 
-function correctionManifest(before, after, patch = {}) {
-  const core = {
+function correctionBundle(before, after, manifestPatch = {}, evidencePatch = {}) {
+  const payload = JSON.stringify(after);
+  const officialEvidence = {
+    sourceId: "tpex-cb-day-query",
+    resourceUrl: "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry",
+    retrievedAt: "2026-08-20T14:30:00.000Z",
+    sha256: sha256(payload),
+    payload,
+    ...evidencePatch,
+  };
+  const manifest = {
     bondCode: before.bondCode,
     date: before.date,
-    sourceId: "tpex-cb-day-query",
-    retrievedAt: "2026-08-20T14:30:00.000Z",
+    sourceId: officialEvidence.sourceId,
+    retrievedAt: officialEvidence.retrievedAt,
+    sha256: officialEvidence.sha256,
     beforeHash: pointHash(before),
     afterHash: pointHash(after),
-    ...patch,
+    ...manifestPatch,
   };
-  return {
-    bondCode: core.bondCode,
-    date: core.date,
-    sourceId: core.sourceId,
-    retrievedAt: core.retrievedAt,
-    sha256: sha256(JSON.stringify([
-      core.bondCode,
-      core.date,
-      core.sourceId,
-      core.retrievedAt,
-      core.beforeHash,
-      core.afterHash,
-    ])),
-    beforeHash: core.beforeHash,
-    afterHash: core.afterHash,
-  };
+  return { manifest, officialEvidence };
+}
+
+function assertAtomicRollback(outcome) {
+  assert.equal(outcome.status, "rejected");
+  assert.equal(outcome.artifacts.after.pointerText, outcome.artifacts.before.pointerText);
+  assert.equal(
+    outcome.artifacts.after.priorWorkbenchText,
+    outcome.artifacts.before.priorWorkbenchText,
+  );
+  assert.equal(typeof outcome.artifacts.before.priorHistoryText, "string");
+  assert.equal(
+    outcome.artifacts.after.priorHistoryText,
+    outcome.artifacts.before.priorHistoryText,
+  );
+  assert.equal(outcome.artifacts.after.cacheText, outcome.artifacts.before.cacheText);
 }
 
 test("nightly CLI accepts only an exact data date and maps it to 22:30 Asia/Taipei", () => {
@@ -90,13 +100,24 @@ test("nightly CLI accepts only an exact data date and maps it to 22:30 Asia/Taip
 
 test("nightly full roster adds, updates, archives, and keeps a zero-trade bond active", async () => {
   const outcome = await runIsolatedNightlyMarketRefreshTestHarness({
-    date: "2026-07-30",
+    date: "2026-07-29",
     scenario: "success",
   });
 
   assert.equal(outcome.status, "fulfilled");
-  assert.equal(outcome.scheduledAt, "2026-07-30T14:30:00.000Z");
+  assert.equal(outcome.scheduledAt, "2026-07-29T14:30:00.000Z");
   assert.deepEqual(outcome.deploymentEffects, []);
+  for (const url of [
+    "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry",
+    "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL",
+    "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes",
+    "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
+    "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv",
+    "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv",
+  ]) {
+    assert.ok(outcome.observations.requestedUrls.includes(url), url);
+  }
+  assert.equal(outcome.observations.marketBuilderMode, "production");
   assert.deepEqual(outcome.decisions, {
     added: ["11011"],
     updated: ["35221"],
@@ -112,41 +133,44 @@ test("nightly full roster adds, updates, archives, and keeps a zero-trade bond a
   assert.equal(noTrade.fieldStates.price, "missing");
 });
 
-test("nightly required-source failure preserves pointer, workbench, and history byte-for-byte", async () => {
+test("a partial but valid 11406 HTTP 200 fails the independent roster census", async () => {
   const outcome = await runIsolatedNightlyMarketRefreshTestHarness({
-    date: "2026-07-30",
-    scenario: "required-failure",
+    date: "2026-07-29",
+    scenario: "partial-roster",
   });
-
-  assert.equal(outcome.status, "rejected");
-  assert.match(outcome.error.message, /11406.*HTTP_503/);
-  assert.equal(outcome.artifacts.after.pointerText, outcome.artifacts.before.pointerText);
-  assert.equal(
-    outcome.artifacts.after.priorWorkbenchText,
-    outcome.artifacts.before.priorWorkbenchText,
-  );
-  assert.equal(typeof outcome.artifacts.before.priorHistoryText, "string");
-  assert.equal(
-    outcome.artifacts.after.priorHistoryText,
-    outcome.artifacts.before.priorHistoryText,
-  );
-  assert.equal(outcome.artifacts.after.cacheText, outcome.artifacts.before.cacheText);
+  assertAtomicRollback(outcome);
+  assert.match(outcome.error.message, /ROSTER_COMPLETENESS/);
 });
 
-test("wrong candidate date rolls back and optional failures retain only their own stale snapshots", async () => {
-  const wrongDate = await runIsolatedNightlyMarketRefreshTestHarness({
-    date: "2026-07-29",
-    scenario: "success",
-  });
-  assert.equal(wrongDate.status, "rejected");
-  assert.match(wrongDate.error.message, /DATA_DATE_MISMATCH/i);
-  assert.equal(
-    wrongDate.artifacts.after.pointerText,
-    wrongDate.artifacts.before.pointerText,
-  );
+test("every required source failure preserves pointer, workbench, and history bytes", async () => {
+  for (const [scenario, error] of [
+    ["roster-http-failure", /11406.*HTTP_503/],
+    ["core-terms-failure", /outstanding|term|11406/i],
+    ["core-quote-failure", /cbDayQry|HTTP_503|CB quote/i],
+  ]) {
+    const outcome = await runIsolatedNightlyMarketRefreshTestHarness({
+      date: "2026-07-29",
+      scenario,
+    });
+    assertAtomicRollback(outcome);
+    assert.match(outcome.error.message, error, scenario);
+  }
+});
 
+test("a mismatched or missing required core market date cannot switch the pointer", async () => {
+  for (const scenario of ["core-date-mismatch", "core-stock-date-mismatch"]) {
+    const wrongDate = await runIsolatedNightlyMarketRefreshTestHarness({
+      date: "2026-07-29",
+      scenario,
+    });
+    assertAtomicRollback(wrongDate);
+    assert.match(wrongDate.error.message, /CORE_MARKET_DATE_MISMATCH/, scenario);
+  }
+});
+
+test("optional failures retain only their own stale snapshots", async () => {
   const stale = await runIsolatedNightlyMarketRefreshTestHarness({
-    date: "2026-07-30",
+    date: "2026-07-29",
     scenario: "optional-stale",
   });
   assert.equal(stale.status, "fulfilled");
@@ -202,12 +226,13 @@ test("history correction requires exact official evidence and traces prior and n
   });
   const previous = [unchanged, before];
   const candidate = [unchanged, after];
-  const manifest = correctionManifest(before, after);
+  const { manifest, officialEvidence } = correctionBundle(before, after);
 
   const result = applyBondMarketHistoryCorrection({
     previous,
     candidate,
     correction: manifest,
+    officialEvidence,
   });
   assert.deepEqual(result.history, candidate);
   assert.deepEqual(result.trace.correction, manifest);
@@ -215,15 +240,34 @@ test("history correction requires exact official evidence and traces prior and n
   assert.equal(result.trace.nextGeneration, sha256(JSON.stringify(candidate)));
 
   const cases = [
-    ["absent evidence", undefined],
-    ["wrong evidence hash", { ...manifest, sha256: `sha256:${"0".repeat(64)}` }],
-    ["wrong before hash", { ...manifest, beforeHash: `sha256:${"0".repeat(64)}` }],
-    ["unapproved source", correctionManifest(before, after, { sourceId: "other-source" })],
-    ["extra field", { ...manifest, path: "correction.json" }],
+    ["absent evidence", manifest, undefined],
+    ["wrong evidence hash", manifest, {
+      ...officialEvidence,
+      sha256: `sha256:${"0".repeat(64)}`,
+    }],
+    ["wrong manifest hash", {
+      ...manifest,
+      sha256: `sha256:${"0".repeat(64)}`,
+    }, officialEvidence],
+    ["wrong before hash", {
+      ...manifest,
+      beforeHash: `sha256:${"0".repeat(64)}`,
+    }, officialEvidence],
+    ["unapproved source", {
+      ...manifest,
+      sourceId: "other-source",
+    }, officialEvidence],
+    ["extra manifest field", { ...manifest, path: "correction.json" }, officialEvidence],
+    ["extra evidence field", manifest, { ...officialEvidence, path: "capture.json" }],
   ];
-  for (const [name, correction] of cases) {
+  for (const [name, correction, evidence] of cases) {
     assert.throws(
-      () => applyBondMarketHistoryCorrection({ previous, candidate, correction }),
+      () => applyBondMarketHistoryCorrection({
+        previous,
+        candidate,
+        correction,
+        officialEvidence: evidence,
+      }),
       /correction evidence/i,
       name,
     );
@@ -237,6 +281,7 @@ test("history correction requires exact official evidence and traces prior and n
         after,
       ],
       correction: manifest,
+      officialEvidence,
     }),
     /only the targeted history point/i,
   );
@@ -255,6 +300,7 @@ test("history correction requires exact official evidence and traces prior and n
       previous,
       candidate,
       correction: accessorEvidence,
+      officialEvidence,
     }),
     /data-only correction evidence/i,
   );

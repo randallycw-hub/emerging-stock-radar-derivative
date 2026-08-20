@@ -50,8 +50,17 @@ export async function runIsolatedNightlyMarketRefreshTestHarness(options = {}) {
   assertExactOptions(options, ["date", "scenario"]);
   const { date, scenario } = options;
   if (!isIsoDate(date)) throw new TypeError("date must be an ISO date");
-  if (!new Set(["success", "required-failure", "optional-stale"]).has(scenario)) {
-    throw new TypeError("scenario must be success, required-failure, or optional-stale");
+  if (!new Set([
+    "success",
+    "partial-roster",
+    "roster-http-failure",
+    "core-terms-failure",
+    "core-quote-failure",
+    "core-date-mismatch",
+    "core-stock-date-mismatch",
+    "optional-stale",
+  ]).has(scenario)) {
+    throw new TypeError("scenario must be a supported fixed nightly scenario");
   }
   const scheduledAt = nightlyRefreshTimestamp(date);
   const outcome = await runIsolatedRefreshStaticShowcaseTestHarness({
