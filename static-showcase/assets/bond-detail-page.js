@@ -11,6 +11,12 @@ const STATE_LABELS = {
   partial: "待確認", pending: "待確認", complete: "complete", stale: "stale", date_mismatch: "date_mismatch", missing: "missing", accumulating: "accumulating",
 };
 const MISSING_WORDING = "目前無核准公開資料／待確認";
+const APPROVED_EVENT_SOURCE_URLS = new Map([
+  ["11406", "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv"],
+  ["tpex-cb-institution-daily", "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade"],
+  ["tpex-cb-redemption-announcements", "https://www.tpex.org.tw/www/zh-tw/bond/redeem"],
+  ["twsa-cb-underwriting-announcements", "https://web.twsa.org.tw/edoc2/default.aspx"],
+]);
 const FORBIDDEN_UI_PATTERNS = [
   [["a", "ggregate-score"].join(""), /(?:\u7e3d\u5206|\u7e3d\u8a55\u5206|aggregate\s+score)/iu],
   ["recommendation", /(?:\u5efa\u8b70\s*(?:\u8cb7\u9032|\u8ce3\u51fa|\u653e\u7a7a|\u4e0b\u55ae)|\u63a8\u85a6\s*(?:\u8cb7\u9032|\u8ce3\u51fa|\u653e\u7a7a|\u4e0b\u55ae)|\b(?:recommend(?:ed|ation)?|advice)\s+(?:\u0062\u0075\u0079|\u0073\u0065\u006c\u006c|\u0073\u0068\u006f\u0072\u0074|\u006f\u0072\u0064\u0065\u0072))/iu],
@@ -59,6 +65,36 @@ export function renderBondDetail(record) {
   return html;
 }
 
+export function detailRecordFromLegacy({ view = {}, term = {}, events = [] } = {}) {
+  const bondCode = String(view.bondCode ?? term["債券代碼"] ?? "");
+  const dataDate = view.valuationDate ?? view.cbPriceDate ?? null;
+  return {
+    bondCode,
+    status: view.archived || view.status === "archived" ? "archived" : "active",
+    archiveReason: view.archiveReason ?? null,
+    archivedAt: view.archiveDate ?? view.archivedAt ?? null,
+    term: {
+      bondName: term["債券簡稱"] ?? view.bondName ?? null,
+      issuerName: term["機構名稱"] ?? view.issuerName ?? view.issuerCode ?? null,
+      issueDate: term["發行日期"] ?? null,
+      listingDate: term["掛牌日期"] ?? null,
+      maturityDate: term["到期日期"] ?? view.maturityDate ?? null,
+      issueAmount: term["發行總額"] ?? null,
+      outstandingAmount: term["目前餘額"] ?? view.outstandingAmount ?? null,
+      initialConversionPrice: term["發行時轉換價格"] ?? null,
+      conversionStartDate: term["轉換期間起"] ?? null,
+      conversionEndDate: term["迄"] ?? null,
+      putDates: term["賣回權日期"] ? [term["賣回權日期"]] : [],
+      putPrice: null,
+      securedStatus: term["債券擔保情形"] ?? null,
+    },
+    view: { ...view, missingReasons: [...(view.missingReasons ?? []), "UNVERIFIED_WORKBENCH_SNAPSHOT"] },
+    fieldStates: legacyFieldStates(view),
+    assessment: legacyAssessment(dataDate),
+    events: Array.isArray(events) ? events : [],
+  };
+}
+
 export function bindBondDetail(target, onClose) {
   target.querySelector("[data-detail-close]")?.addEventListener("click", onClose);
   for (const button of target.querySelectorAll("[data-detail-tab]")) {
@@ -75,7 +111,7 @@ export function bindBondDetail(target, onClose) {
 }
 
 function tabButton(id, label, selected = false) { return `<button type="button" role="tab" data-detail-tab="${id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}">${label}</button>`; }
-function mobileArea(label, tab, content) { return `<details class="detail-mobile-area" open><summary>${text(label)}</summary><section class="bond-detail-section" data-detail-panel="${tab}" aria-label="${text(label)}">${content}</section></details>`; }
+function mobileArea(label, tab, content) { return `<details class="detail-mobile-area"><summary>${text(label)}</summary><section class="bond-detail-section" data-detail-panel="${tab}" aria-label="${text(label)}">${content}</section></details>`; }
 function identitySection(record, dataDate) {
   const view = record?.view ?? {};
   return `<h3>債券識別與資料完整性</h3><dl class="detail-facts">${fact("債券代碼", record?.bondCode)}${fact("狀態", record?.status === "archived" ? "封存" : "active")}${fact("封存原因", record?.archiveReason)}${fact("封存日", record?.archivedAt)}${fact("資料日", dataDate)}${fact("資料完整性", view.dataQuality ?? record?.fieldStates?.price)}</dl>`;
@@ -108,10 +144,29 @@ function companySection(view, strategies, fieldStates = {}) {
 }
 function eventsSection(events) {
   const values = Array.isArray(events) ? events : [];
-  return `<h3>事件時間軸</h3><ol class="detail-event-timeline">${values.length ? values.map((event) => `<li><time>${text(event.date)}</time><strong>${text(event.title)}</strong><span>${text(event.type)} · ${text(event.sourceId)}</span>${sourceLink(event.sourceUrl)}</li>`).join("") : `<li>${MISSING_WORDING}</li>`}</ol>`;
+  return `<h3>事件時間軸</h3><ol class="detail-event-timeline">${values.length ? values.map((event) => `<li><time>${text(event.date)}</time><strong>${text(event.title)}</strong><span>${text(event.type)} · ${text(event.sourceId)}</span>${sourceLink(event.sourceUrl, event.sourceId)}</li>`).join("") : `<li>${MISSING_WORDING}</li>`}</ol>`;
 }
-function sourceLink(value) { const url = verifiedHttpsUrl(value); return url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">已驗證公開來源</a>` : ""; }
-function verifiedHttpsUrl(value) { try { const url = new URL(value); return url.protocol === "https:" ? url.href : null; } catch { return null; } }
+function sourceLink(value, sourceId) { const url = verifiedSnapshotUrl(value, sourceId); return url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">已驗證公開來源</a>` : ""; }
+function verifiedSnapshotUrl(value, sourceId) {
+  if (typeof value !== "string" || APPROVED_EVENT_SOURCE_URLS.get(sourceId) !== value) return null;
+  try { return new URL(value).protocol === "https:" ? value : null; } catch { return null; }
+}
+function legacyFieldStates(view) {
+  const status = (value, date = null) => value == null ? "missing" : date == null ? "stale" : "complete";
+  return {
+    price: status(view.cbClose, view.cbPriceDate), valuation: status(view.conversionValue, view.valuationDate),
+    outstanding: status(view.outstandingAmount, view.outstandingDataDate), institutions: status(view.institutionNetUnits, view.institutionDataDate),
+    company: view.issuerResearch == null ? "missing" : "complete", events: "missing", history: "missing",
+  };
+}
+function legacyAssessment(dataDate) {
+  const dimensions = Object.keys(DIMENSION_LABELS).map((code) => legacySection(code));
+  const strategies = Object.keys(STRATEGY_LABELS).map((code) => legacySection(code));
+  return { dimensions, strategies };
+  function legacySection(code) {
+    return { code, state: "pending", checks: [{ code: `${code}_pending`, label: "公開資料條件檢核", state: "pending", actual: null, threshold: MISSING_WORDING, dataDate, sourceId: null, missingReason: "UNVERIFIED_WORKBENCH_SNAPSHOT" }] };
+  }
+}
 function fact(label, value) { return `<div><dt>${text(label)}</dt><dd>${text(value ?? MISSING_WORDING)}</dd></div>`; }
 function stateLabel(value) { return STATE_LABELS[value] ?? value ?? "pending"; }
 function text(value) { return escapeHtml(value ?? MISSING_WORDING); }

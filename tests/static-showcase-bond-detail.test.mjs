@@ -128,7 +128,7 @@ function fixture(patch = {}) {
     assessment: { dimensions, strategies },
     events: [{
       eventId: "put-1", type: "put", date: "2027-08-30", title: "賣回權日",
-      sourceId: "11406", sourceUrl: "https://www.tpex.org.tw/verified-event",
+      sourceId: "tpex-cb-institution-daily", sourceUrl: "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
     }],
     ...patch,
   };
@@ -223,4 +223,36 @@ test("detail escapes fixture content and omits non-HTTPS event URLs", () => {
   assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/);
   assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
   assert.doesNotMatch(html, /href="javascript:/);
+});
+
+test("detail links only project-approved official snapshot URLs", () => {
+  const unapproved = renderBondDetail(fixture({
+    events: [{ ...fixture().events[0], sourceUrl: "https://unapproved.example/verified-event" }],
+  }));
+  assert.doesNotMatch(unapproved, /href="https:\/\/unapproved\.example/);
+
+  const approved = renderBondDetail(fixture({
+    events: [{ ...fixture().events[0], sourceId: "tpex-cb-institution-daily", sourceUrl: "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade" }],
+  }));
+  assert.match(approved, /href="https:\/\/www\.tpex\.org\.tw\/www\/zh-tw\/bond\/newCb3itrade"/);
+});
+
+test("mobile detail areas are collapsed by default", () => {
+  const html = renderBondDetail(fixture());
+  assert.doesNotMatch(html, /<details class="detail-mobile-area" open>/);
+  assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 9);
+});
+
+test("legacy list records project into the complete public detail contract", async () => {
+  const { detailRecordFromLegacy } = await import("../static-showcase/assets/bond-detail-page.js");
+  const record = detailRecordFromLegacy({
+    view: fixture().view,
+    term: { "機構名稱": "公開發行人", "債券簡稱": "公開一", "發行日期": "20231218", "到期日期": "20280729" },
+    events: [],
+  });
+  const html = renderBondDetail(record);
+  for (const label of orderedSections) assert.match(html, new RegExp(label));
+  assert.equal((html.match(/class="dimension-card/g) ?? []).length, 6);
+  assert.equal((html.match(/class="strategy-card/g) ?? []).length, 6);
+  assert.match(html, /目前無核准公開資料／待確認/);
 });

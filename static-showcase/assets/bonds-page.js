@@ -5,7 +5,7 @@ import {
   serializeBondListState,
   sortBondRecords,
 } from "./bond-list-page.js";
-import { bindBondDetail, renderBondDetail } from "./bond-detail-page.js";
+import { bindBondDetail, detailRecordFromLegacy, renderBondDetail } from "./bond-detail-page.js";
 
 const workbenchSections = [
   "交易摘要",
@@ -317,13 +317,10 @@ function renderRoute() {
     target.querySelector(".close-workbench").addEventListener("click", closeDetail);
     return;
   }
-  const detail = state.workbench.find((candidate) => candidate.bondCode === code);
-  if (detail) {
-    target.innerHTML = renderBondDetail(detail);
-    bindBondDetail(target, closeDetail);
-  } else {
-    renderWorkbench(view);
-  }
+  const detail = state.workbench.find((candidate) => candidate.bondCode === code)
+    ?? detailRecordFromLegacy({ view, term: termFor(view.bondCode) ?? {}, events: [] });
+  target.innerHTML = renderBondDetail(detail);
+  bindBondDetail(target, closeDetail);
   target.hidden = false;
   list.hidden = true;
   target.focus?.();
