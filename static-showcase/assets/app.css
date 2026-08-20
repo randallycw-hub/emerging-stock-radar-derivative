@@ -25,6 +25,14 @@
   --ipo-stage-c: #624d78;
   --ipo-stage-d: #624d78;
   --shadow: 0 16px 40px rgb(59 42 43 / 9%);
+  --chart-up: #8b412d;
+  --chart-down: #624d78;
+  --chart-marker-conversion_adjustment: #315eae;
+  --chart-marker-conversion_suspension: #624d78;
+  --chart-marker-ex_dividend: #8b412d;
+  --chart-marker-put: #315eae;
+  --chart-marker-redemption: #8b412d;
+  --chart-marker-maturity: #624d78;
 }
 
 [data-theme="dark"] {
@@ -54,6 +62,14 @@
   --ipo-stage-c: #c4abe0;
   --ipo-stage-d: #c4abe0;
   --shadow: 0 18px 44px rgb(0 0 0 / 24%);
+  --chart-up: #f0a080;
+  --chart-down: #c4abe0;
+  --chart-marker-conversion_adjustment: #8cb6ff;
+  --chart-marker-conversion_suspension: #c4abe0;
+  --chart-marker-ex_dividend: #f0a080;
+  --chart-marker-put: #8cb6ff;
+  --chart-marker-redemption: #f0a080;
+  --chart-marker-maturity: #c4abe0;
 }
 
 * { box-sizing: border-box; }
@@ -520,8 +536,8 @@ a { color: inherit; }
 .chart-controls button[aria-pressed="true"] { border-color: var(--violet); background: var(--violet); color: var(--paper); }
 .chart-controls button:focus-visible, .bond-candlestick canvas:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 8px; font-size: 12px; }
-.chart-legend-up::before, .chart-legend-down::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; border: 2px solid #9b3d2e; }
-.chart-legend-down::before { border-color: #216b70; background: #216b70; }
+.chart-legend-up::before, .chart-legend-down::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; border: 2px solid var(--chart-up); }
+.chart-legend-down::before { border-color: var(--chart-down); background: var(--chart-down); }
 .bond-candlestick canvas { display: block; width: 100%; max-width: 100%; margin: 0 auto; background: var(--panel); }
 .chart-screen-summary { min-height: 1.4em; margin: 8px 0; color: var(--ink); font-variant-numeric: tabular-nums; }
 .bond-candlestick details { margin-top: 8px; border-top: 1px solid var(--line); }
@@ -531,6 +547,9 @@ a { color: inherit; }
 .chart-table-wrap table { width: 100%; min-width: 520px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .chart-table-wrap th, .chart-table-wrap td { padding: 7px 8px; border-top: 1px solid var(--line); text-align: right; }
 .chart-table-wrap th:first-child, .chart-table-wrap td:first-child { text-align: left; }
+.chart-events { margin-top: 10px; border-top: 1px solid var(--line); }
+.chart-events h4 { margin: 10px 0 4px; font-size: 13px; }
+.chart-events ul { margin: 0; padding-left: 20px; }
 .public-financial-checks { margin-top: 16px; }
 .detail-event-timeline { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 .detail-event-timeline li { padding: 12px; border-left: 3px solid var(--clay); background: var(--paper); display: grid; gap: 3px; }

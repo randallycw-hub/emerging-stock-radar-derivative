@@ -111,7 +111,7 @@ export function bindBondDetail(target, onClose, chartOptions = {}) {
     });
   }
   const stored = target.querySelector("[data-chart-data]")?.textContent;
-  bindCandlestickChart(target, { ...parseChartData(stored), ...chartOptions });
+  return bindCandlestickChart(target, { ...parseChartData(stored), ...chartOptions });
 }
 
 function tabButton(id, label, selected = false) { return `<button type="button" role="tab" data-detail-tab="${id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}">${label}</button>`; }
@@ -145,6 +145,7 @@ function candleSection(record) {
     <p id="bond-chart-summary" data-chart-summary class="chart-screen-summary" aria-live="polite">資料累積中</p>
     <details data-chart-advanced><summary>進階數值（不提供交易訊號）</summary><p>Bollinger(20,2) · RSI(14) · KD(9,3,3) · MACD(12,26,9)</p><output data-chart-advanced-values>資料累積中</output></details>
     <details data-chart-table><summary>顯示 OHLC 資料表</summary><div class="chart-table-wrap"><table><thead><tr><th>日期</th><th>開</th><th>高</th><th>低</th><th>收</th><th>成交量</th></tr></thead><tbody data-chart-table-body></tbody></table></div></details>
+    <section class="chart-events" aria-label="圖表事件標記"><h4>公開事件標記</h4><ul data-chart-events><li>此視窗無公開事件標記</li></ul></section>
     <script type="application/json" data-chart-data>${chartData}</script>
     <p>僅呈現已驗證 OHLC 資料；缺漏日期不插補，資料不足時顯示資料累積中。</p>
   </section>`;

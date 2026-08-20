@@ -80,6 +80,7 @@ test("bond page exposes the complete sortable CB workbench", async () => {
     "區域資料變數不可遮蔽瀏覽器 history 物件",
   );
   assert.match(js, /drawHistoryChart/);
+  assert.match(js, /bindBondDetail\(target, closeDetail, \{ history: state\.history\.filter/);
   assert.match(js, /data-history-range="1M"/);
   assert.match(js, /<canvas[^>]+bond-history-chart/);
   assert.match(detailJs, /function noAdviceViolations/);

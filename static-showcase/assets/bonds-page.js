@@ -40,6 +40,7 @@ const state = {
   page: 1,
   archived: false,
 };
+let disposeDetail = () => {};
 
 initializeFromUrl();
 bindFilters();
@@ -302,6 +303,8 @@ function renderRoute() {
   const code = new URLSearchParams(location.search).get("bond");
   const target = document.querySelector("#bond-workbench");
   const list = document.querySelector("#bond-list-view");
+  disposeDetail();
+  disposeDetail = () => {};
   if (!code) {
     target.hidden = true;
     target.innerHTML = "";
@@ -320,7 +323,7 @@ function renderRoute() {
   const detail = state.workbench.find((candidate) => candidate.bondCode === code)
     ?? detailRecordFromLegacy({ view, term: termFor(view.bondCode) ?? {}, events: [] });
   target.innerHTML = renderBondDetail(detail);
-  bindBondDetail(target, closeDetail);
+  disposeDetail = bindBondDetail(target, closeDetail, { history: state.history.filter((point) => point.bondCode === code), events: detail.events, archived: detail.status === "archived" });
   target.hidden = false;
   list.hidden = true;
   target.focus?.();

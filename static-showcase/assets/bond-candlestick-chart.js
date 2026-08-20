@@ -12,6 +12,14 @@ const RANGE_DAYS = { "1M": 31, "3M": 93, "6M": 186, "1Y": 366, "3Y": 1096 };
 const EVENT_TYPES = new Set([
   "conversion_adjustment", "conversion_suspension", "ex_dividend", "put", "redemption", "maturity",
 ]);
+const MARKER_SYMBOLS = { conversion_adjustment: "A", conversion_suspension: "S", ex_dividend: "D", put: "P", redemption: "R", maturity: "M" };
+
+export function chartPalette() {
+  return {
+    up: "var(--chart-up)", down: "var(--chart-down)",
+    marker: Object.fromEntries([...EVENT_TYPES].map((type) => [type, { symbol: MARKER_SYMBOLS[type], color: `var(--chart-marker-${type})` }])),
+  };
+}
 
 export function buildChartModel({ history = [], events = [], period = "day", range = "6M", archived = false } = {}) {
   const points = Array.isArray(history) ? history.filter((point) => validDate(point?.date)) : [];
@@ -52,6 +60,13 @@ export function selectVisibleCandles(candles, { range = "6M", viewport = null } 
   return ranged.slice(first, last + 1).map((slot, offset) => ({ ...slot, index: first + offset }));
 }
 
+export function selectVisibleEventMarkers(markers, candles) {
+  const first = candles?.[0]?.date;
+  const last = candles?.at(-1)?.date;
+  if (!first || !last) return [];
+  return (Array.isArray(markers) ? markers : []).filter((marker) => marker.date >= first && marker.date <= last);
+}
+
 export function buildEventMarkers(events, candles) {
   const visible = Array.isArray(candles) ? candles : [];
   const start = visible[0]?.date;
@@ -64,7 +79,8 @@ export function buildEventMarkers(events, candles) {
     .map((event) => {
       const stackIndex = stacks.get(event.date) ?? 0;
       stacks.set(event.date, stackIndex + 1);
-      return { eventId: event.eventId ?? `${event.type}:${event.date}:${stackIndex}`, date: event.date, type: event.type, title: event.title ?? event.type, stackIndex };
+      const title = event.title ?? event.type;
+      return { eventId: event.eventId ?? `${event.type}:${event.date}:${stackIndex}`, date: event.date, type: event.type, title, stackIndex, accessibleLabel: `${title}（${event.type}）` };
     });
 }
 
@@ -88,16 +104,19 @@ export function bindCandlestickChart(target, options = {}) {
     const capacity = Math.max(12, Math.floor((width - 72) / 9));
     const all = model.candles;
     visible = selectVisibleCandles(all, { viewport: { start: Math.max(0, all.length - capacity), end: all.length - 1 } });
-    drawCanvas(canvas, visible, model.eventMarkers, activeIndex, model);
+    const markers = selectVisibleEventMarkers(model.eventMarkers, visible);
+    drawCanvas(canvas, visible, markers, activeIndex, model);
     updateTable(table, visible);
+    updateEvents(root.querySelector("[data-chart-events]"), markers);
     updateAdvanced(advanced, model);
     updateSummary(summary, activeIndex >= 0 ? model.hoverPayload(visible[activeIndex]?.index) : null, model.status);
   };
   const activate = (index) => {
     if (!visible.length) return;
     activeIndex = Math.max(0, Math.min(visible.length - 1, index));
-    drawCanvas(canvas, visible, model.eventMarkers, activeIndex, model);
-    updateSummary(summary, model.hoverPayload(visible[activeIndex].index), model.status);
+    const markers = selectVisibleEventMarkers(model.eventMarkers, visible);
+    drawCanvas(canvas, visible, markers, activeIndex, model);
+    updateSummary(summary, model.hoverPayload(visible[activeIndex].index), model.status, markers.filter((marker) => marker.date === visible[activeIndex].date));
   };
   root.querySelectorAll("[data-chart-period]").forEach((button) => button.addEventListener("click", () => {
     period = button.dataset.chartPeriod;
@@ -153,7 +172,8 @@ function alignValues(slots, values, candleIndexByDate) {
 }
 
 function hoverPayload(slot) {
-  if (!slot?.candle) return null;
+  if (!slot) return null;
+  if (!slot.candle) return { date: slot.date, unavailable: true, message: "OHLC 資料尚未提供" };
   const candle = slot.candle;
   return { date: slot.date, open: candle.open, high: candle.high, low: candle.low, close: candle.close, volume: candle.tradingUnits };
 }
@@ -171,8 +191,10 @@ function drawCanvas(canvas, visible, markers, activeIndex, model) {
   canvas.style.width = `${cssWidth}px`; canvas.style.height = `${cssHeight}px`;
   context.setTransform(ratio, 0, 0, ratio, 0, 0); context.clearRect(0, 0, cssWidth, cssHeight);
   const style = typeof getComputedStyle === "function" ? getComputedStyle(document.documentElement) : null;
-  const colors = { grid: style?.getPropertyValue("--line").trim() || "#d8d0c4", ink: style?.getPropertyValue("--ink").trim() || "#211e1b", up: "#9b3d2e", down: "#216b70", ma5: "#7a638f", ma20: "#b96849", ma60: "#4b6172" };
-  const pad = { left: 48, right: 16, top: 42, bottom: 54 }; const priceBottom = 216; const volumeTop = 248; const volumeBottom = 300;
+  const palette = chartPalette(); const color = (value, fallback) => style?.getPropertyValue(value.slice(4, -1)).trim() || fallback;
+  const colors = { grid: style?.getPropertyValue("--line").trim() || "#d8d0c4", ink: style?.getPropertyValue("--ink").trim() || "#211e1b", up: color(palette.up, "#8b412d"), down: color(palette.down, "#624d78"), ma5: style?.getPropertyValue("--violet").trim() || "#7a638f", ma20: style?.getPropertyValue("--clay").trim() || "#b96849", ma60: style?.getPropertyValue("--line-strong").trim() || "#4b6172" };
+  const markerRows = Math.max(0, ...markers.map((marker) => marker.stackIndex + 1));
+  const pad = { left: 48, right: 16, top: 42 + markerRows * 12, bottom: 54 }; const priceBottom = 216; const volumeTop = 248; const volumeBottom = 300;
   const numeric = visible.flatMap((slot) => slot.candle ? [slot.candle.high, slot.candle.low].map(Number).filter(Number.isFinite) : []);
   if (!numeric.length) { context.fillStyle = colors.ink; context.font = "14px system-ui"; context.textAlign = "center"; context.fillText(model.status || "資料累積中", cssWidth / 2, 150); return; }
   const low = Math.min(...numeric); const high = Math.max(...numeric); const spread = Math.max(high - low, 1); const y = (value) => pad.top + (high - Number(value)) / spread * (priceBottom - pad.top);
@@ -191,19 +213,26 @@ function drawCanvas(canvas, visible, markers, activeIndex, model) {
     context.strokeStyle = color; context.lineWidth = 1.3; context.setLineDash(key === "ma60" ? [4, 3] : []); context.beginPath(); let started = false;
     visible.forEach((slot, index) => { const value = slot.movingAverages?.[key]; if (value === null || value === undefined) { started = false; return; } if (!started) { context.moveTo(x(index), y(value)); started = true; } else context.lineTo(x(index), y(value)); }); context.stroke();
   }); context.setLineDash([]);
-  markers.forEach((marker) => { const slotIndex = visible.findIndex((slot) => slot.date >= marker.date); if (slotIndex < 0) return; const px = x(slotIndex); context.strokeStyle = colors.ink; context.setLineDash([2, 2]); context.beginPath(); context.moveTo(px, pad.top + marker.stackIndex * 10); context.lineTo(px, priceBottom); context.stroke(); context.setLineDash([]); context.fillStyle = colors.ink; context.font = "10px system-ui"; context.fillText("●", px - 3, pad.top + 10 + marker.stackIndex * 10); });
+  markers.forEach((marker) => { const slotIndex = visible.findIndex((slot) => slot.date === marker.date); if (slotIndex < 0) return; const markerStyle = palette.marker[marker.type]; const px = x(slotIndex); const markerColor = color(markerStyle.color, colors.ink); const markerY = pad.top - 8 - marker.stackIndex * 12; context.strokeStyle = markerColor; context.setLineDash([2, 2]); context.beginPath(); context.moveTo(px, pad.top); context.lineTo(px, priceBottom); context.stroke(); context.setLineDash([]); context.fillStyle = markerColor; context.font = "bold 10px system-ui"; context.fillText(markerStyle.symbol, px - 3, markerY); });
   if (activeIndex >= 0 && visible[activeIndex]) { context.strokeStyle = colors.ink; context.setLineDash([3, 2]); context.beginPath(); context.moveTo(x(activeIndex), pad.top); context.lineTo(x(activeIndex), volumeBottom); context.stroke(); context.setLineDash([]); }
   context.fillStyle = colors.ink; context.font = "11px system-ui"; context.textAlign = "left"; context.fillText(visible[0].date, pad.left, 316); context.textAlign = "right"; context.fillText(visible.at(-1).date, cssWidth - pad.right, 316);
 }
 
-function updateSummary(target, payload, status) {
+function updateSummary(target, payload, status, markers = []) {
   if (!target) return;
-  target.textContent = payload ? `${payload.date}，開 ${payload.open}、高 ${payload.high}、低 ${payload.low}、收 ${payload.close}、成交量 ${payload.volume}` : (status || "移到圖表或用左右方向鍵檢視 K 線資料。");
+  if (!payload) { target.textContent = status || "移到圖表或用左右方向鍵檢視 K 線資料。"; return; }
+  const eventText = markers.length ? `；事件 ${markers.map((marker) => marker.accessibleLabel).join("、")}` : "";
+  target.textContent = payload.unavailable ? `${payload.date}，${payload.message}${eventText}` : `${payload.date}，開 ${payload.open}、高 ${payload.high}、低 ${payload.low}、收 ${payload.close}、成交量 ${payload.volume}${eventText}`;
 }
 
 function updateTable(target, visible) {
   if (!target) return;
   target.innerHTML = visible.map((slot) => slot.candle ? `<tr><td>${slot.date}</td><td>${slot.candle.open}</td><td>${slot.candle.high}</td><td>${slot.candle.low}</td><td>${slot.candle.close}</td><td>${slot.candle.tradingUnits}</td></tr>` : `<tr><td>${slot.date}</td><td colspan="5">資料累積中</td></tr>`).join("");
+}
+
+function updateEvents(target, markers) {
+  if (!target) return;
+  target.innerHTML = markers.length ? markers.map((marker) => `<li><time>${escapeHtml(marker.date)}</time> ${escapeHtml(marker.accessibleLabel)}</li>`).join("") : "<li>此視窗無公開事件標記</li>";
 }
 
 function updateAdvanced(target, model) {
@@ -216,4 +245,8 @@ function updateAdvanced(target, model) {
   target.textContent = bollinger || kd || macdValue || rsi
     ? `Bollinger 上 ${bollinger?.upper ?? "資料累積中"}／中 ${bollinger?.middle ?? "資料累積中"}／下 ${bollinger?.lower ?? "資料累積中"}；RSI ${rsi ?? "資料累積中"}；KD K ${kd?.k ?? "資料累積中"}／D ${kd?.d ?? "資料累積中"}；MACD ${macdValue?.macd ?? "資料累積中"}／線 ${macdValue?.signal ?? "資料累積中"}／柱 ${macdValue?.histogram ?? "資料累積中"}`
     : "資料累積中";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
 }

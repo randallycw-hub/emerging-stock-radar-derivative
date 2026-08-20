@@ -4,8 +4,11 @@ import test from "node:test";
 import {
   buildChartModel,
   buildEventMarkers,
+  chartPalette,
+  selectVisibleEventMarkers,
   selectVisibleCandles,
 } from "../static-showcase/assets/bond-candlestick-chart.js";
+import { bindBondDetail, renderBondDetail } from "../static-showcase/assets/bond-detail-page.js";
 
 function point(date, values = {}) {
   return {
@@ -77,4 +80,43 @@ test("event markers stack same-date public event kinds and chart records stay av
   ]);
   assert.equal(buildChartModel({ history: [point("2026-01-05")], events, archived: true }).archived, true);
   assert.doesNotMatch(JSON.stringify(markers), /buy|sell|signal|買點|賣點/i);
+});
+
+test("viewport marker selection omits offscreen markers and exposes kind, title, and stack position", () => {
+  const markers = buildEventMarkers([
+    { eventId: "past", date: "2026-01-01", type: "put", title: "賣回權日" },
+    { eventId: "current", date: "2026-02-02", type: "redemption", title: "提前贖回" },
+    { eventId: "same-day", date: "2026-02-02", type: "maturity", title: "到期" },
+  ], [{ date: "2026-01-01" }, { date: "2026-02-02" }]);
+  const visible = selectVisibleEventMarkers(markers, [{ date: "2026-02-02" }]);
+  assert.deepEqual(visible.map(({ eventId, stackIndex, accessibleLabel }) => ({ eventId, stackIndex, accessibleLabel })), [
+    { eventId: "current", stackIndex: 0, accessibleLabel: "提前贖回（redemption）" },
+    { eventId: "same-day", stackIndex: 1, accessibleLabel: "到期（maturity）" },
+  ]);
+});
+
+test("gap hover reports its date and unavailable OHLC rather than returning a generic prompt", () => {
+  const model = buildChartModel({ history: [
+    point("2026-01-05"),
+    point("2026-01-06", { cbOpen: null, cbHigh: null, cbLow: null, cbClose: null }),
+  ] });
+  assert.deepEqual(model.hoverPayload(1), {
+    date: "2026-01-06", unavailable: true, message: "OHLC 資料尚未提供",
+  });
+});
+
+test("chart palette uses theme variables instead of hard-coded dark-theme-unsafe colors", () => {
+  const palette = chartPalette();
+  assert.equal(palette.up, "var(--chart-up)");
+  assert.equal(palette.down, "var(--chart-down)");
+  assert.deepEqual(Object.fromEntries(Object.entries(palette.marker).map(([type, value]) => [type, value.symbol])), {
+    conversion_adjustment: "A", conversion_suspension: "S", ex_dividend: "D", put: "P", redemption: "R", maturity: "M",
+  });
+});
+
+test("detail binding returns chart cleanup and serialized record history remains available to the chart", () => {
+  const cleanup = bindBondDetail({ querySelector: () => null, querySelectorAll: () => [] }, () => {});
+  assert.equal(typeof cleanup, "function");
+  const html = renderBondDetail({ bondCode: "35221", history: [point("2026-01-05")], events: [], view: {}, term: {}, assessment: {} });
+  assert.match(html, /"cbOpen":"100"/);
 });
