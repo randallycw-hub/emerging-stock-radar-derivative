@@ -243,6 +243,17 @@ test("mobile detail areas are collapsed by default", () => {
   assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 9);
 });
 
+test("detail exposes an accessible, collapsed candlestick workbench without a trading direction", () => {
+  const html = renderBondDetail(fixture());
+  assert.match(html, /data-bond-candlestick-chart/);
+  assert.match(html, /data-chart-period="day"/);
+  assert.match(html, /data-chart-range="6M"[^>]*aria-pressed="true"/);
+  assert.match(html, /data-chart-advanced/);
+  assert.match(html, /Bollinger\(20,2\).*RSI\(14\).*KD\(9,3,3\).*MACD\(12,26,9\)/s);
+  assert.match(html, /data-chart-table/);
+  assert.doesNotMatch(html, /(?:買點|賣點|buy|sell|signal)/i);
+});
+
 test("legacy list records project into the complete public detail contract", async () => {
   const { detailRecordFromLegacy } = await import("../static-showcase/assets/bond-detail-page.js");
   const record = detailRecordFromLegacy({

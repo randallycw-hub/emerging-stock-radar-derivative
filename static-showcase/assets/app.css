@@ -512,7 +512,25 @@ a { color: inherit; }
 .condition-check { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
 .formula-details { margin-top: 14px; border-top: 1px solid var(--line); }
 .formula-details summary { padding: 12px 0; cursor: pointer; font-weight: 850; }
-.bond-candlestick { min-height: 160px; padding: 20px; border: 1px dashed var(--line-strong); display: grid; place-items: center; color: var(--muted); text-align: center; }
+.bond-candlestick { min-height: 160px; padding: 16px; border: 1px solid var(--line-strong); color: var(--muted); background: color-mix(in srgb, var(--panel) 92%, var(--paper)); }
+.chart-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.chart-controls fieldset { min-width: 0; margin: 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chart-controls legend { width: 100%; margin-bottom: 5px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.chart-controls button { min-height: 32px; padding: 6px 10px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink); font-weight: 800; cursor: pointer; }
+.chart-controls button[aria-pressed="true"] { border-color: var(--violet); background: var(--violet); color: var(--paper); }
+.chart-controls button:focus-visible, .bond-candlestick canvas:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 8px; font-size: 12px; }
+.chart-legend-up::before, .chart-legend-down::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; border: 2px solid #9b3d2e; }
+.chart-legend-down::before { border-color: #216b70; background: #216b70; }
+.bond-candlestick canvas { display: block; width: 100%; max-width: 100%; margin: 0 auto; background: var(--panel); }
+.chart-screen-summary { min-height: 1.4em; margin: 8px 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.bond-candlestick details { margin-top: 8px; border-top: 1px solid var(--line); }
+.bond-candlestick summary { padding: 10px 0; cursor: pointer; font-weight: 800; }
+.bond-candlestick details p { margin: 0 0 10px; }
+.chart-table-wrap { overflow-x: auto; }
+.chart-table-wrap table { width: 100%; min-width: 520px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.chart-table-wrap th, .chart-table-wrap td { padding: 7px 8px; border-top: 1px solid var(--line); text-align: right; }
+.chart-table-wrap th:first-child, .chart-table-wrap td:first-child { text-align: left; }
 .public-financial-checks { margin-top: 16px; }
 .detail-event-timeline { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 .detail-event-timeline li { padding: 12px; border-left: 3px solid var(--clay); background: var(--paper); display: grid; gap: 3px; }

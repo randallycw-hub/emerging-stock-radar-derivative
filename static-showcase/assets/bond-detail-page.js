@@ -1,3 +1,5 @@
+import { bindCandlestickChart } from "./bond-candlestick-chart.js";
+
 const DIMENSION_LABELS = {
   price: "價格研究維度", days: "天數研究維度", premium: "溢價研究維度",
   remaining: "餘額研究維度", spread: "價差研究維度", liquidity: "流動性研究維度",
@@ -55,7 +57,7 @@ export function renderBondDetail(record) {
     ${mobileArea("風險與缺漏提醒", "overview", riskSection(view, record?.fieldStates))}
     ${mobileArea("六項研究維度", "overview", assessmentSection("六項研究維度", "dimension", assessment.dimensions, DIMENSION_LABELS))}
     ${mobileArea("六項策略條件", "overview", assessmentSection("六項策略條件", "strategy", assessment.strategies, STRATEGY_LABELS))}
-    ${mobileArea("K 線圖", "overview", candleSection())}
+    ${mobileArea("K 線圖", "overview", candleSection(record))}
     ${mobileArea("債券條款", "terms", termsSection(term, view))}
     ${mobileArea("法人 1／5／20 日", "institutions", institutionsSection(view, record?.fieldStates))}
     ${mobileArea("公司營運與公開財務", "company", companySection(view, assessment.strategies, record?.fieldStates))}
@@ -95,7 +97,7 @@ export function detailRecordFromLegacy({ view = {}, term = {}, events = [] } = {
   };
 }
 
-export function bindBondDetail(target, onClose) {
+export function bindBondDetail(target, onClose, chartOptions = {}) {
   target.querySelector("[data-detail-close]")?.addEventListener("click", onClose);
   for (const button of target.querySelectorAll("[data-detail-tab]")) {
     button.addEventListener("click", () => {
@@ -108,6 +110,8 @@ export function bindBondDetail(target, onClose) {
       target.querySelectorAll("[data-detail-panel]").forEach((panel) => { panel.hidden = panel.dataset.detailPanel !== tab; });
     });
   }
+  const stored = target.querySelector("[data-chart-data]")?.textContent;
+  bindCandlestickChart(target, { ...parseChartData(stored), ...chartOptions });
 }
 
 function tabButton(id, label, selected = false) { return `<button type="button" role="tab" data-detail-tab="${id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}">${label}</button>`; }
@@ -128,7 +132,24 @@ function renderCheck(check) {
   const missing = check?.actual === null || check?.actual === undefined || !check?.dataDate || !check?.sourceId;
   return `<dl class="condition-check">${fact("完整規則", check?.label)}${fact("實際值", missing ? MISSING_WORDING : check.actual)}${fact("門檻", check?.threshold)}${fact("結果", stateLabel(check?.state))}${fact("資料日", check?.dataDate ?? MISSING_WORDING)}${fact("來源 ID", check?.sourceId ?? MISSING_WORDING)}${fact("狀態", check?.state ?? "pending")}${fact("缺漏原因", check?.missingReason)}</dl>`;
 }
-function candleSection() { return `<h3>K 線圖</h3><div id="bond-candlestick" class="bond-candlestick" role="img" aria-label="可轉債 K 線圖容器"><p>僅呈現已驗證 OHLC 資料；目前沒有可呈現的 K 線資料時不插補。</p></div>`; }
+function candleSection(record) {
+  const chartData = JSON.stringify({
+    history: Array.isArray(record?.history) ? record.history : [],
+    events: Array.isArray(record?.events) ? record.events : [],
+    archived: record?.status === "archived",
+  }).replaceAll("<", "\\u003c");
+  return `<h3>K 線圖</h3><section id="bond-candlestick" class="bond-candlestick" data-bond-candlestick-chart aria-label="可轉債 K 線與成交量圖表">
+    <div class="chart-controls"><fieldset><legend>週期</legend><button type="button" data-chart-period="day" aria-pressed="true">日</button><button type="button" data-chart-period="week" aria-pressed="false">週</button><button type="button" data-chart-period="month" aria-pressed="false">月</button></fieldset><fieldset><legend>區間</legend><button type="button" data-chart-range="1M" aria-pressed="false">1M</button><button type="button" data-chart-range="3M" aria-pressed="false">3M</button><button type="button" data-chart-range="6M" aria-pressed="true">6M</button><button type="button" data-chart-range="1Y" aria-pressed="false">1Y</button><button type="button" data-chart-range="3Y" aria-pressed="false">3Y</button></fieldset></div>
+    <p class="chart-legend"><span class="chart-legend-up">空心：收高</span><span class="chart-legend-down">實心：收低</span><span>均線 MA5／20／60</span></p>
+    <canvas tabindex="0" role="img" aria-describedby="bond-chart-summary" aria-label="可轉債 K 線與成交量；左右方向鍵可逐筆檢視"></canvas>
+    <p id="bond-chart-summary" data-chart-summary class="chart-screen-summary" aria-live="polite">資料累積中</p>
+    <details data-chart-advanced><summary>進階數值（不提供交易訊號）</summary><p>Bollinger(20,2) · RSI(14) · KD(9,3,3) · MACD(12,26,9)</p><output data-chart-advanced-values>資料累積中</output></details>
+    <details data-chart-table><summary>顯示 OHLC 資料表</summary><div class="chart-table-wrap"><table><thead><tr><th>日期</th><th>開</th><th>高</th><th>低</th><th>收</th><th>成交量</th></tr></thead><tbody data-chart-table-body></tbody></table></div></details>
+    <script type="application/json" data-chart-data>${chartData}</script>
+    <p>僅呈現已驗證 OHLC 資料；缺漏日期不插補，資料不足時顯示資料累積中。</p>
+  </section>`;
+}
+function parseChartData(value) { try { return JSON.parse(value ?? "{}"); } catch { return {}; } }
 function termsSection(term, view) {
   return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}</dl>${formulaDetails(view)}`;
 }
