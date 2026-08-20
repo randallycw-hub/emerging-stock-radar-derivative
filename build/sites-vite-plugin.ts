@@ -24,28 +24,36 @@ export function sites(): Plugin {
     configResolved(config) {
       root = config.root;
     },
-    async closeBundle() {
-      const outputDirectory = resolve(root, "dist", ".openai");
-      const hostingConfig = resolve(root, ".openai", "hosting.json");
-      const drizzleSource = resolve(root, "drizzle");
-      const migrationsSource = resolve(root, "migrations");
+    closeBundle: {
+      order: "post",
+      sequential: true,
+      async handler() {
+        if (this.environment.name !== "client") {
+          return;
+        }
 
-      await rm(outputDirectory, { recursive: true, force: true });
-      await mkdir(outputDirectory, { recursive: true });
+        const outputDirectory = resolve(root, "dist", ".openai");
+        const hostingConfig = resolve(root, ".openai", "hosting.json");
+        const drizzleSource = resolve(root, "drizzle");
+        const migrationsSource = resolve(root, "migrations");
 
-      if (await exists(hostingConfig)) {
-        await cp(hostingConfig, resolve(outputDirectory, "hosting.json"));
-      }
-      if (await exists(drizzleSource)) {
-        await cp(drizzleSource, resolve(outputDirectory, "drizzle"), {
-          recursive: true,
-        });
-      }
-      if (await exists(migrationsSource)) {
-        await cp(migrationsSource, resolve(outputDirectory, "migrations"), {
-          recursive: true,
-        });
-      }
+        await rm(outputDirectory, { recursive: true, force: true });
+        await mkdir(outputDirectory, { recursive: true });
+
+        if (await exists(hostingConfig)) {
+          await cp(hostingConfig, resolve(outputDirectory, "hosting.json"));
+        }
+        if (await exists(drizzleSource)) {
+          await cp(drizzleSource, resolve(outputDirectory, "drizzle"), {
+            recursive: true,
+          });
+        }
+        if (await exists(migrationsSource)) {
+          await cp(migrationsSource, resolve(outputDirectory, "migrations"), {
+            recursive: true,
+          });
+        }
+      },
     },
   };
 }
