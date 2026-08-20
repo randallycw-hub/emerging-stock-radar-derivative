@@ -8,6 +8,7 @@ import {
 } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { types } from "node:util";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
 import {
@@ -23,12 +24,39 @@ import {
 } from "./lib/official-market-fetch.mjs";
 import { mapLimit } from "./lib/map-limit.mjs";
 
-export async function backfillBondMarketHistory({
-  dataDirectory = "static-showcase/data",
-  fetchImpl = fetch,
-  asOfDate = taipeiDate(new Date()),
-} = {}) {
+const CORRECTION_KEYS = [
+  "bondCode",
+  "date",
+  "sourceId",
+  "retrievedAt",
+  "sha256",
+  "beforeHash",
+  "afterHash",
+];
+const OFFICIAL_CORRECTION_SOURCES = new Set([
+  "tpex-cb-day-query",
+  "twse-stock-day-all",
+  "tpex-mainboard-daily-close",
+  "tpex-conversion-index",
+  "mops-conversion-detail",
+]);
+
+export async function backfillBondMarketHistory(options = {}) {
+  assertExactOptions(options, [
+    "dataDirectory",
+    "fetchImpl",
+    "asOfDate",
+    "correction",
+  ], "backfillBondMarketHistory");
+  const {
+    dataDirectory = "static-showcase/data",
+    fetchImpl = fetch,
+    asOfDate = taipeiDate(new Date()),
+    correction,
+  } = options;
   if (!isIsoDate(asOfDate)) throw new TypeError("asOfDate must be an ISO date");
+  if (typeof fetchImpl !== "function") throw new TypeError("fetchImpl must be a function");
+  if (correction !== undefined) validateCorrectionManifest(correction);
   const [rawBonds, conversionPrices, currentStockCloses, previousHistory] = await Promise.all([
     readJson(join(dataDirectory, "11406.json")),
     readJson(join(dataDirectory, "conversion-prices.json")),
@@ -64,11 +92,20 @@ export async function backfillBondMarketHistory({
       })
   );
 
-  const points = mergeBondMarketHistory(verifiedPreviousHistory, buildHistoryPoints({
+  const currentPoints = buildHistoryPoints({
     cbQuotes: cbGroups.flat(),
     stockCloses: stockGroups.flat(),
     conversionPrices,
-  }));
+  });
+  const corrected = correction === undefined
+    ? undefined
+    : applyBondMarketHistoryCorrection({
+      previous: verifiedPreviousHistory,
+      candidate: overlayHistory(verifiedPreviousHistory, currentPoints),
+      correction,
+    });
+  const points = corrected?.history
+    ?? mergeBondMarketHistory(verifiedPreviousHistory, currentPoints);
   const outputPath = join(dataDirectory, "bond-market-history.json");
   const stagingDirectory = await mkdtemp(
     join(dirname(outputPath), ".cb-history-"),
@@ -109,7 +146,51 @@ export async function backfillBondMarketHistory({
           .filter((issuerCode) => !issuerMarkets.has(issuerCode)),
       ),
     ],
+    ...(corrected === undefined ? {} : { correctionTrace: corrected.trace }),
   };
+}
+
+export function applyBondMarketHistoryCorrection(options = {}) {
+  assertExactOptions(
+    options,
+    ["previous", "candidate", "correction"],
+    "applyBondMarketHistoryCorrection",
+  );
+  const { previous, candidate, correction } = options;
+  const evidence = validateCorrectionManifest(correction);
+  const previousHistory = parseBondMarketHistory(previous);
+  const candidateHistory = parseBondMarketHistory(candidate);
+  const identity = `${evidence.bondCode}\u001f${evidence.date}`;
+  const beforeByIdentity = historyByIdentity(previousHistory);
+  const afterByIdentity = historyByIdentity(candidateHistory);
+  const before = beforeByIdentity.get(identity);
+  const after = afterByIdentity.get(identity);
+  if (
+    before === undefined
+    || after === undefined
+    || pointSha256(before) !== evidence.beforeHash
+    || pointSha256(after) !== evidence.afterHash
+    || evidence.beforeHash === evidence.afterHash
+  ) {
+    throw new TypeError("correction evidence does not match the targeted history point");
+  }
+  for (const [key, point] of beforeByIdentity) {
+    const replacement = afterByIdentity.get(key);
+    if (replacement === undefined) {
+      throw new TypeError("correction evidence cannot remove history points");
+    }
+    if (key !== identity && JSON.stringify(replacement) !== JSON.stringify(point)) {
+      throw new TypeError("correction evidence may change only the targeted history point");
+    }
+  }
+  return Object.freeze({
+    history: candidateHistory,
+    trace: Object.freeze({
+      correction: Object.freeze({ ...evidence }),
+      previousGeneration: historySha256(previousHistory),
+      nextGeneration: historySha256(candidateHistory),
+    }),
+  });
 }
 
 export function latestTwelveMonths(asOfDate) {
@@ -158,6 +239,117 @@ async function readOptionalJson(path) {
   } catch (error) {
     if (error?.code === "ENOENT") return undefined;
     throw error;
+  }
+}
+
+function validateCorrectionManifest(value) {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || types.isProxy(value)
+    || (
+      Object.getPrototypeOf(value) !== Object.prototype
+      && Object.getPrototypeOf(value) !== null
+    )
+  ) {
+    throw new TypeError("data-only correction evidence must be a plain manifest");
+  }
+  const keys = Reflect.ownKeys(value);
+  if (
+    keys.length !== CORRECTION_KEYS.length
+    || keys.some((key) => (
+      typeof key !== "string"
+      || !CORRECTION_KEYS.includes(key)
+      || !Object.prototype.propertyIsEnumerable.call(value, key)
+    ))
+  ) {
+    throw new TypeError("correction evidence keys must match the exact contract");
+  }
+  const descriptors = Object.fromEntries(keys.map((key) => [
+    key,
+    Object.getOwnPropertyDescriptor(value, key),
+  ]));
+  if (Object.values(descriptors).some((descriptor) => (
+    descriptor === undefined
+    || !("value" in descriptor)
+    || !descriptor.enumerable
+  ))) {
+    throw new TypeError("data-only correction evidence must use plain properties");
+  }
+  const manifest = Object.fromEntries(
+    CORRECTION_KEYS.map((key) => [key, descriptors[key].value]),
+  );
+  if (!/^\d{5,6}$/.test(manifest.bondCode) || !isIsoDate(manifest.date)) {
+    throw new TypeError("correction evidence target is invalid");
+  }
+  if (!OFFICIAL_CORRECTION_SOURCES.has(manifest.sourceId)) {
+    throw new TypeError("correction evidence sourceId is not approved");
+  }
+  if (
+    typeof manifest.retrievedAt !== "string"
+    || !Number.isFinite(Date.parse(manifest.retrievedAt))
+    || new Date(manifest.retrievedAt).toISOString() !== manifest.retrievedAt
+  ) {
+    throw new TypeError("correction evidence retrievedAt is invalid");
+  }
+  for (const key of ["sha256", "beforeHash", "afterHash"]) {
+    if (!/^sha256:[0-9a-f]{64}$/.test(manifest[key])) {
+      throw new TypeError(`correction evidence ${key} is invalid`);
+    }
+  }
+  const evidenceHash = sha256(JSON.stringify([
+    manifest.bondCode,
+    manifest.date,
+    manifest.sourceId,
+    manifest.retrievedAt,
+    manifest.beforeHash,
+    manifest.afterHash,
+  ]));
+  if (manifest.sha256 !== evidenceHash) {
+    throw new TypeError("correction evidence sha256 does not match its manifest");
+  }
+  return Object.freeze(manifest);
+}
+
+function historyByIdentity(history) {
+  return new Map(history.map((point) => [
+    `${point.bondCode}\u001f${point.date}`,
+    point,
+  ]));
+}
+
+function overlayHistory(previous, current) {
+  const points = historyByIdentity(parseBondMarketHistory(previous));
+  for (const point of parseBondMarketHistory(current)) {
+    points.set(`${point.bondCode}\u001f${point.date}`, point);
+  }
+  return parseBondMarketHistory([...points.values()].sort(
+    (left, right) => left.date.localeCompare(right.date)
+      || left.bondCode.localeCompare(right.bondCode),
+  ));
+}
+
+function pointSha256(point) {
+  return sha256(JSON.stringify(point));
+}
+
+function historySha256(history) {
+  return sha256(JSON.stringify(history));
+}
+
+function assertExactOptions(value, allowed, name) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${name} options must be an object`);
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    if (
+      typeof key !== "string"
+      || !allowed.includes(key)
+      || !Object.prototype.propertyIsEnumerable.call(value, key)
+    ) {
+      throw new TypeError(`${String(key)} is not supported by ${name}`);
+    }
   }
 }
 

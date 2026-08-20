@@ -127,6 +127,31 @@ test("production refresh rejects marketBuilder before fetch or pointer mutation"
   assert.equal(await readFile(workspacePointerPath, "utf8"), workspacePointerBefore);
 });
 
+test("production refresh rejects history correction controls before fetch or pointer mutation", async () => {
+  const workspacePointerPath = join(process.cwd(), "static-showcase/data/current.json");
+  const workspacePointerBefore = await readFile(workspacePointerPath, "utf8");
+  await withTemporaryShowcase(async (root) => {
+    await seedPriorGeneration(root);
+    const pointerPath = join(root, "static-showcase/data/current.json");
+    const beforePointer = await readFile(pointerPath, "utf8");
+    let fetchCalls = 0;
+
+    await assert.rejects(
+      withBlockedGlobalFetch(() => refreshStaticShowcase({
+        correction: { path: "evidence.json" },
+        fetchImpl: async () => {
+          fetchCalls += 1;
+          return new Response("must not fetch", { status: 500 });
+        },
+      })),
+      /correction.*not supported/i,
+    );
+    assert.equal(fetchCalls, 0);
+    assert.equal(await readFile(pointerPath, "utf8"), beforePointer);
+  });
+  assert.equal(await readFile(workspacePointerPath, "utf8"), workspacePointerBefore);
+});
+
 test("isolated harness rejects executable callbacks without external writes", async (context) => {
   const { runIsolatedRefreshStaticShowcaseTestHarness } = await import(
     "../scripts/refresh-static-showcase-data.mjs"

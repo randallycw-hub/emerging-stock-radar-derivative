@@ -15,8 +15,12 @@ import { types } from "node:util";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
 import { EmergingMarketViewSchema } from "../lib/domain/schema.ts";
+import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
 import { buildEmergingMarketViews } from "../lib/market-data/emerging-market-view.ts";
-import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
+import {
+  buildCbSupplementalSnapshot,
+  parseCbSupplementalSnapshot,
+} from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
 import {
   buildBondWorkbenchSnapshot,
@@ -210,13 +214,18 @@ export async function openMarketCheckpoint({
 }
 
 export async function refreshStaticShowcase(options = {}) {
-  assertPublicOptions(options, ["fetchImpl", "now"], "refreshStaticShowcase");
+  assertPublicOptions(options, ["dataDate", "fetchImpl", "now"], "refreshStaticShowcase");
   const {
+    dataDate,
     fetchImpl = fetch,
     now = new Date(),
   } = options;
+  if (dataDate !== undefined && !isIsoDate(dataDate)) {
+    throw new TypeError("dataDate must be an ISO date");
+  }
   const paths = createRefreshPathBundle(process.cwd());
   return refreshStaticShowcaseCandidate({
+    expectedDataDate: dataDate,
     fetchImpl,
     now,
     marketBuilder: buildBondMarketSnapshot,
@@ -224,7 +233,13 @@ export async function refreshStaticShowcase(options = {}) {
   });
 }
 
-async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, paths }) {
+async function refreshStaticShowcaseCandidate({
+  expectedDataDate,
+  fetchImpl,
+  now,
+  marketBuilder,
+  paths,
+}) {
   const activeGeneration = await readActiveGeneration(paths.dataDirectory);
   const previousWorkbench = await readPublishedBondWorkbenchFromActive(
     activeGeneration,
@@ -294,6 +309,14 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, p
   const marketRows = parseEmergingMarketSource(JSON.parse(emergingText));
   const companyRows = newest94025CompanyRows(datasetTexts["94025"]);
   const emergingSnapshot = buildEmergingMarketSnapshot({ marketRows, companyRows });
+  if (
+    expectedDataDate !== undefined
+    && emergingSnapshot.tradingDate !== expectedDataDate
+  ) {
+    throw new Error(
+      `VALIDATION_FAILED:DATA_DATE_MISMATCH:${expectedDataDate}:${emergingSnapshot.tradingDate}`,
+    );
+  }
   manifestDatasets.push({
     datasetId: "emergingMarket",
     sourceUrl: OFFICIAL_SHOWCASE_SOURCES.emergingMarket,
@@ -417,6 +440,7 @@ async function refreshStaticShowcaseCandidate({ fetchImpl, now, marketBuilder, p
 
 export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) {
   const {
+    dataDate,
     scenario,
     now: nowText = "2026-07-30T06:00:06.000Z",
   } = parseIsolatedHarnessOptions(options);
@@ -430,10 +454,16 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     "workbench",
     "runtime",
     "cache",
+    "nightly-success",
+    "nightly-required-failure",
+    "nightly-optional-stale",
   ]).has(scenario)) {
     throw new TypeError(
-      "isolated refresh scenario must be one of success, hash, manifest, cross-file, supplemental, supplemental-view, workbench, runtime, cache",
+      "isolated refresh scenario must be one of the supported fixed scenarios",
     );
+  }
+  if (dataDate !== undefined && !isIsoDate(dataDate)) {
+    throw new TypeError("isolated refresh dataDate must be an ISO date");
   }
   if (
     typeof nowText !== "string"
@@ -454,7 +484,7 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
     marketAsOfDate: null,
   };
   try {
-    await seedIsolatedHarnessRoot(paths);
+    await seedIsolatedHarnessRoot(paths, scenario);
     const before = await captureIsolatedArtifacts(paths);
     let status = "fulfilled";
     let value;
@@ -474,11 +504,18 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
             if (datasetId === undefined) {
               throw new TypeError("isolated harness received an unknown source URL");
             }
+            if (scenario === "nightly-required-failure" && datasetId === "11406") {
+              return new Response("unavailable", { status: 503 });
+            }
+            if (datasetId === "11406" && scenario.startsWith("nightly-")) {
+              return new Response(nightlyRosterCsv(fixtureTexts[datasetId]), { status: 200 });
+            }
             return new Response(fixtureTexts[datasetId], { status: 200 });
           } finally {
             observations.activeRequests -= 1;
           }
         },
+        expectedDataDate: dataDate,
         now,
         paths,
         marketBuilder: async ({ outputDir, manifestBase, asOfDate }) => {
@@ -550,7 +587,7 @@ function parseIsolatedHarnessOptions(value) {
   }
   const output = {};
   for (const key of Reflect.ownKeys(value)) {
-    if (typeof key !== "string" || !["scenario", "now"].includes(key)) {
+    if (typeof key !== "string" || !["dataDate", "scenario", "now"].includes(key)) {
       throw new TypeError(
         `${String(key)} is not supported by runIsolatedRefreshStaticShowcaseTestHarness`,
       );
@@ -586,13 +623,49 @@ async function loadIsolatedHarnessFixtures() {
   };
 }
 
+function nightlyRosterCsv(current) {
+  return `${current.trimEnd()}\n${[
+    "20260730",
+    "1101",
+    "台泥",
+    "11011",
+    "5",
+    "1",
+    "",
+    "台泥一永",
+    "20241210",
+    "20241210",
+    "20291210",
+    "8000000000",
+    "8000000000",
+    "0.000000",
+    "2",
+    "",
+    "36.5000",
+    "20250311",
+    "20291210",
+    "20271210",
+    "100.0000",
+    "980T元大證券",
+    "中國信託商業銀行股份有限公司",
+    "20241210",
+    "",
+    "7",
+  ].map((value) => `"${value}"`).join(",")}\n`;
+}
+
 async function buildIsolatedMarketCandidate({
   outputDir,
   manifestBase,
   generatedAt,
   scenario,
 }) {
-  const snapshot = isolatedIssuerResearchSnapshot(generatedAt);
+  const nightlyScenario = scenario.startsWith("nightly-");
+  const staleOptional = scenario === "nightly-optional-stale";
+  const snapshot = isolatedIssuerResearchSnapshot(
+    generatedAt,
+    staleOptional ? "stale" : "current",
+  );
   const compact = {
     market: "listed",
     industryName: "食品工業",
@@ -606,21 +679,37 @@ async function buildIsolatedMarketCandidate({
     cumulativeYearOverYearPercent: "3",
   };
   const researchText = `${JSON.stringify(snapshot, null, 2)}\n`;
-  const supplemental = isolatedSupplementalSnapshot(generatedAt);
+  const supplemental = isolatedSupplementalSnapshot(
+    generatedAt,
+    nightlyScenario ? (staleOptional ? "stale" : "fresh") : "unavailable",
+  );
   const supplementalText = `${JSON.stringify(supplemental, null, 2)}\n`;
-  const view = isolatedWorkbenchView(compact, scenario);
-  const viewsText = `${JSON.stringify([view], null, 2)}\n`;
-  const [term] = bondTermSummariesFrom11406Rows(JSON.parse(await readFile(
+  const rawRows = JSON.parse(await readFile(
     join(outputDir, "11406.json"),
     "utf8",
-  )));
+  ));
+  const terms = bondTermSummariesFrom11406Rows(rawRows).map((term) => ({
+    ...term,
+    unitFaceValueTwd: supplemental.unitFaceValueTwd,
+  }));
+  const views = nightlyScenario
+    ? buildEmergingFreeBondViews(rawRows, supplemental, snapshot.records)
+    : [isolatedWorkbenchView(compact, scenario)];
+  const viewsText = `${JSON.stringify(views, null, 2)}\n`;
+  const previous = nightlyScenario
+    ? parseBondWorkbenchSnapshot(JSON.parse(await readFile(
+      join(outputDir, "bond-workbench.json"),
+      "utf8",
+    )))
+    : undefined;
   const workbench = buildBondWorkbenchSnapshot({
     generatedAt,
     dataDate: "2026-07-30",
     asOfDate: "2026-07-30",
-    currentTerms: [{ ...term, unitFaceValueTwd: supplemental.unitFaceValueTwd }],
-    currentViews: [view],
+    currentTerms: terms,
+    currentViews: views,
     currentEvents: [],
+    ...(previous === undefined ? {} : { previous }),
   });
   const workbenchText = `${JSON.stringify(workbench, null, 2)}\n`;
   const workbenchSourceStateSummary = summarizeWorkbenchSourceStates(workbench);
@@ -642,13 +731,13 @@ async function buildIsolatedMarketCandidate({
     {
       name: "bond-market-view.json",
       sha256: sha256Text(viewsText),
-      recordCount: 1,
+      recordCount: views.length,
     },
     {
       name: "bond-workbench.json",
       sha256: sha256Text(workbenchText),
       rawBytes: Buffer.byteLength(workbenchText),
-      recordCount: 1,
+      recordCount: workbench.records.length,
       schemaVersion: 1,
       sourceStateSummary: workbenchSourceStateSummary,
     },
@@ -704,6 +793,18 @@ async function buildIsolatedMarketCandidate({
     report: { validation: "passed" },
     ...(scenario === "runtime" ? { runtimeScenario: "workbench-path" } : {}),
   };
+}
+
+function buildEmergingFreeBondViews(rawRows, supplemental, issuerResearch) {
+  return buildBondMarketViews({
+    asOfDate: "2026-07-30",
+    bonds: bondInputsFrom11406Rows(rawRows),
+    cbQuotes: [],
+    stockCloses: [],
+    conversionPrices: [],
+    supplemental,
+    issuerResearch,
+  });
 }
 
 function isolatedWorkbenchView(compact, scenario = "success") {
@@ -775,8 +876,8 @@ function isolatedWorkbenchTerm() {
   };
 }
 
-function isolatedSupplementalSnapshot(generatedAt) {
-  return {
+function isolatedSupplementalSnapshot(generatedAt, state = "unavailable") {
+  if (state === "unavailable") return {
     schemaVersion: 1,
     generatedAt,
     unitFaceValueTwd: null,
@@ -784,14 +885,33 @@ function isolatedSupplementalSnapshot(generatedAt) {
     redemptions: [],
     underwritingCases: [],
     sources: {
-      institution: { state: "unavailable", dataDate: null, periodYear: null },
-      redemption: { state: "unavailable", dataDate: null, periodYear: null },
-      underwriting: { state: "unavailable", dataDate: null, periodYear: null },
+      institution: { state, dataDate: null, periodYear: null },
+      redemption: { state, dataDate: null, periodYear: null },
+      underwriting: { state, dataDate: null, periodYear: null },
     },
   };
+  const previousGeneratedAt = "2026-07-29T06:00:06.000Z";
+  const fresh = buildCbSupplementalSnapshot({
+    generatedAt: state === "fresh" ? generatedAt : previousGeneratedAt,
+    institution: {
+      tradingDate: state === "fresh" ? generatedAt.slice(0, 10) : "2026-07-29",
+      tradingUnitFaceValueTwd: "100000",
+      records: [],
+    },
+    redemptions: [],
+    redemptionYear: 2026,
+    underwriting: {
+      rocYear: 115,
+      notice: "本公告系統僅供參考，相關資料以正式刊登報紙之公告內容為準。",
+      records: [],
+    },
+  });
+  return state === "fresh"
+    ? fresh
+    : buildCbSupplementalSnapshot({ generatedAt, previous: fresh });
 }
 
-function isolatedIssuerResearchSnapshot(generatedAt) {
+function isolatedIssuerResearchSnapshot(generatedAt, status = "current") {
   return {
     schemaVersion: 1,
     generatedAt,
@@ -811,9 +931,11 @@ function isolatedIssuerResearchSnapshot(generatedAt) {
     }],
     sources: {
       listed: {
-        status: "current",
+        status,
         dataDate: "2026-07-17",
-        fetchedAt: generatedAt,
+        fetchedAt: status === "stale"
+          ? "2026-07-29T06:00:06.000Z"
+          : generatedAt,
       },
       otc: { status: "unavailable", dataDate: null, fetchedAt: null },
     },
@@ -821,7 +943,7 @@ function isolatedIssuerResearchSnapshot(generatedAt) {
   };
 }
 
-async function seedIsolatedHarnessRoot(paths) {
+async function seedIsolatedHarnessRoot(paths, scenario) {
   const priorGeneration = join(paths.dataDirectory, "generations", "abcdef");
   await mkdir(priorGeneration, { recursive: true });
   await writeFile(
@@ -853,40 +975,76 @@ async function seedIsolatedHarnessRoot(paths) {
     })}\n`,
     "utf8",
   );
+  const currentTerm = isolatedWorkbenchTerm();
+  const oldTerm = {
+    ...currentTerm,
+    bondCode: "99999",
+    issuerCode: "9999",
+    issuerName: "舊公司",
+    bondName: "舊債一",
+    maturityDate: "2029-12-18",
+    conversionEndDate: "2029-12-18",
+  };
+  const oldView = {
+    ...isolatedWorkbenchView(null),
+    bondCode: oldTerm.bondCode,
+    issuerCode: oldTerm.issuerCode,
+    bondName: oldTerm.bondName,
+    maturityDate: oldTerm.maturityDate,
+    daysToMaturity: 1238,
+    nextEventDate: oldTerm.maturityDate,
+    daysToNextEvent: 1238,
+  };
+  const nightlyScenario = typeof scenario === "string" && scenario.startsWith("nightly-");
   const priorWorkbench = buildBondWorkbenchSnapshot({
     generatedAt: "2026-07-29T06:00:06.000Z",
     dataDate: "2026-07-29",
     asOfDate: "2026-07-29",
-    currentTerms: [isolatedWorkbenchTerm()],
-    currentViews: [isolatedWorkbenchView(null)],
+    currentTerms: nightlyScenario ? [currentTerm, oldTerm] : [currentTerm],
+    currentViews: nightlyScenario
+      ? [isolatedWorkbenchView(null), oldView]
+      : [isolatedWorkbenchView(null)],
     currentEvents: [],
   });
   const priorWorkbenchText = `${JSON.stringify(priorWorkbench, null, 2)}\n`;
   const priorWorkbenchSourceStateSummary = summarizeWorkbenchSourceStates(
     priorWorkbench,
   );
+  const priorHistoryText = "[]\n";
   await writeFile(join(priorGeneration, "bond-workbench.json"), priorWorkbenchText, "utf8");
+  await writeFile(join(priorGeneration, "bond-market-history.json"), priorHistoryText, "utf8");
   await writeFile(
     join(priorGeneration, "manifest.json"),
     JSON.stringify({
       market: {
         status: "verified",
         workbenchSourceStateSummary: priorWorkbenchSourceStateSummary,
-        files: [{
-          name: "bond-workbench.json",
-          sha256: sha256Text(priorWorkbenchText),
-          rawBytes: Buffer.byteLength(priorWorkbenchText),
-          recordCount: priorWorkbench.records.length,
-          schemaVersion: priorWorkbench.schemaVersion,
-          sourceStateSummary: priorWorkbenchSourceStateSummary,
-        }],
+        files: [
+          {
+            name: "bond-workbench.json",
+            sha256: sha256Text(priorWorkbenchText),
+            rawBytes: Buffer.byteLength(priorWorkbenchText),
+            recordCount: priorWorkbench.records.length,
+            schemaVersion: priorWorkbench.schemaVersion,
+            sourceStateSummary: priorWorkbenchSourceStateSummary,
+          },
+          {
+            name: "bond-market-history.json",
+            sha256: sha256Text(priorHistoryText),
+            rawBytes: Buffer.byteLength(priorHistoryText),
+            recordCount: 0,
+          },
+        ],
       },
     }),
     "utf8",
   );
   await writeFile(
     join(priorGeneration, "bond-supplemental.json"),
-    `${JSON.stringify(isolatedSupplementalSnapshot("2026-07-29T06:00:06.000Z"))}\n`,
+    `${JSON.stringify(isolatedSupplementalSnapshot(
+      "2026-07-29T06:00:06.000Z",
+      nightlyScenario ? "fresh" : "unavailable",
+    ))}\n`,
     "utf8",
   );
   await mkdir(dirname(paths.publishedHistoryCachePath), { recursive: true });
@@ -915,6 +1073,12 @@ async function captureIsolatedArtifacts(paths) {
       "generations",
       "abcdef",
       "bond-workbench.json",
+    )),
+    priorHistoryText: await readOptionalText(join(
+      paths.dataDirectory,
+      "generations",
+      "abcdef",
+      "bond-market-history.json",
     )),
     cacheText: await readOptionalText(paths.publishedHistoryCachePath),
   };
