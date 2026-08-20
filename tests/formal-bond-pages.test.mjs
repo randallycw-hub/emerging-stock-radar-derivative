@@ -32,3 +32,24 @@ test("靜態可轉債詳情保留公開資料條件檢核與行動版摺疊介�
   assert.match(css, /\.detail-mobile-area/);
   assert.match(css, /\.detail-tabs/);
 });
+
+test("靜態可轉債公開內容維持中性且不產生交易指令", async () => {
+  const [html, page, detail] = await Promise.all([
+    readFile(new URL("../static-showcase/bonds.html", import.meta.url), "utf8"),
+    readFile(new URL("../static-showcase/assets/bonds-page.js", import.meta.url), "utf8"),
+    import("../static-showcase/assets/bond-detail-page.js"),
+  ]);
+  assert.deepEqual(detail.noAdviceViolations(`${html}\n${page}`), []);
+  assert.match(html, /僅整理公開資訊，不構成投資建議/);
+  assert.doesNotMatch(`${html}\n${page}`, /(?:第三方分數|專有評分|避險比率|建立部位)/);
+});
+
+test("公開說明不宣稱工作台呈現尚未發布的 TWSA 承銷公告", async () => {
+  const [readme, registry] = await Promise.all([
+    readFile(new URL("../README.md", import.meta.url), "utf8"),
+    readFile(new URL("../docs/data-source-registry.md", import.meta.url), "utf8"),
+  ]);
+  assert.doesNotMatch(readme, /另顯示[^。\n]*TWSA 承銷公告/);
+  assert.doesNotMatch(registry, /\| 新 CB 承銷雷達 \|/);
+  assert.match(registry, /TWSA[^。\n]*(?:不在|尚未)[^。\n]*(?:公開工作台|UI)[^。\n]*(?:呈現|顯示)/);
+});

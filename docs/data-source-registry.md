@@ -296,3 +296,34 @@ Resource status: `VERIFIED_FOR_IMPLEMENTATION`。這不是已暫停的 `bond_cb_
 目前來源失敗時，只能複製前一份經完整驗證且無 mutable alias 的對應區段，明確標示為 `stale` 並保留原 `dataDate`；不得冒充 fresh、改寫日期或把舊資料當作新的來源事實。這項 2026-08-09 production 核准僅就上述「完整驗證 previous snapshot 區段」明確取代前述不得以 stale replacement 的文字；未經完整驗證的舊資料、來源替換、替代 URL 與 fallback 仍一律禁止。沒有合法 current 或 previous 區段時必須標示 `unavailable`。
 
 所有 redirect、替代 URL、自動 fallback、Yahoo／券商／第三方來源、即時資料、買賣建議與擴張用途仍禁止。`edoc2` 不得推論可轉債代號、發行金額、轉換價格或掛牌日期；這些欄位仍須由 TPEx／MOPS 的 exact-code 契約證據確認。本 amendment 不核准 UI、公開發布或將承銷公告提升為契約真相。
+
+## 可轉債公開分析工作台發布語意 amendment（2026-08-20）
+
+公開工作台不新增來源授權；它只消費本 registry 已核准且通過 generation 驗證的欄位。瀏覽器只下載當代靜態 snapshot，不直接呼叫市場端點。主要欄位及其唯一來源邊界如下：
+
+| 公開欄位 | 已核准來源 | 日期／關聯限制 |
+| --- | --- | --- |
+| 發行條款、發行總額、目前餘額、到期與賣回條款 | TPEx 11406 CSV | 以五至六碼債券代碼為 identity；保留來源資料日 |
+| CB O/H/L/C、成交單位、成交金額 | TPEx `cbDayQry` | 盤後、實際交易日、等價交易；無 OHLC 不插補 |
+| 標的股收盤 | TWSE `STOCK_DAY_ALL` 或 TPEx `tpex_mainboard_daily_close_quotes` | 以四碼公司代碼精確關聯；與 CB 交易日一致才估值 |
+| 發行人索引與轉換價 | TPEx `convSearch`、MOPS `t120sg01` | 債券代碼與公司代碼都須一致；轉換價生效日不得晚於估值日 |
+| 三大法人 1／5／20 日 | TPEx `newCb3itrade` | 五至六碼債券代碼與交易日精確一致 |
+| 贖回／終止櫃檯買賣事件 | TPEx `redeem` | 只接受已驗證事件與受限 MOPS detail URL |
+| 公司月營收 | data.gov.tw 18420／56510 的官方 CSV | 只以四碼公司代碼精確關聯；上市、上櫃來源分別失敗與 stale |
+
+TWSA `edoc2/default.aspx` 雖是已核准的次要收集來源，目前不在公開工作台或 UI 呈現；不得據此宣稱工作台顯示承銷公告，也不得推論 CB 代碼、發行額、轉換價或掛牌日。
+
+工作台公式採十進位字串運算後按欄位規則呈現：
+
+- `conversionValue = stockClose / effectiveConversionPrice * 100`
+- `premiumRate = (cbClose / conversionValue - 1) * 100%`
+- `remainingUnits = outstandingAmount / unitFaceValueTwd`
+- `remainingRatio = outstandingAmount / issueAmount * 100%`
+- `dailyTurnoverRate = cbTradeUnits / remainingUnits * 100%`
+- 事件天數為 snapshot 資料日與事件日之日曆日差。
+
+若 CB、股票與已生效轉換價沒有共同日期，轉換價值與溢價率維持 `null`，並標示 date mismatch 或 missing。零成交保留 active + no-trade 語意；缺少 OHLC 的日期是 chart gap，不可用 `open=high=low=close` 製造 K 棒。
+
+`stale` 只表示該 optional source 沿用自身上一份完整驗證快照，資料日不得改寫，也不得跨市場或跨公司借用。`archived` 只適用到期、已贖回、餘額歸零或從完整官方名冊移除的債券；歷史與封存原因仍可追溯，預設 active 列表不顯示。`accumulating` 表示歷史樣本不足以產生完整均線或技術指標，不代表零值。
+
+目前沒有核准的 TTM、PS 或 TCRI 工作台資料；不得宣稱已提供、填零、推估或仿造第三方評等。公開頁面只做教育性條件檢核，不提供綜合投資總分、買賣／放空／下單、部位、價格目標或 hedge ratio 指令。

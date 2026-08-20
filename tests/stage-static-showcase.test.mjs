@@ -26,6 +26,17 @@ test("Sites staging copies the complete static showcase including the active gen
     "export const analysis = 'shared';\n",
     "utf8",
   );
+  for (const file of [
+    "bond-list-page.js",
+    "bond-detail-page.js",
+    "bond-candlestick-chart.js",
+  ]) {
+    await writeFile(
+      join(source, "assets", file),
+      `export const staged = "${file}";\n`,
+      "utf8",
+    );
+  }
   await writeFile(
     join(source, "data", "current.json"),
     '{"schemaVersion":1,"generation":"generations/abc123","runtimeUrl":"./data/generations/abc123/runtime.json"}\n',
@@ -72,6 +83,16 @@ test("Sites staging copies the complete static showcase including the active gen
     ),
     "export const analysis = 'shared';\n",
   );
+  for (const file of [
+    "bond-list-page.js",
+    "bond-detail-page.js",
+    "bond-candlestick-chart.js",
+  ]) {
+    assert.equal(
+      await readFile(join(destination, "assets", file), "utf8"),
+      `export const staged = "${file}";\n`,
+    );
+  }
   assert.deepEqual(
     JSON.parse(await readFile(join(destination, "data", "current.json"), "utf8")),
     {
@@ -287,6 +308,40 @@ test("Sites staging copies only a manifest-declared validated bond workbench", a
   );
 });
 
+test("Sites staging rejects a workbench event with an arbitrary source URL", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-workbench-source-"));
+  const source = join(root, "source");
+  const destination = join(root, "destination");
+  const workbenchSnapshot = buildBondWorkbenchSnapshot({
+    generatedAt: "2026-07-31T06:00:00.000Z",
+    dataDate: "2026-07-31",
+    asOfDate: "2026-07-31",
+    currentTerms: [stageTerm()],
+    currentViews: [stageView()],
+    currentEvents: [{
+      bondCode: "90001",
+      eventId: "listing-1",
+      type: "listing",
+      date: "2026-07-31",
+      title: "掛牌",
+      sourceId: "11406",
+      sourceUrl: "https://unapproved.example.test/workbench-event",
+    }],
+  });
+  await seedDeclaredIssuerResearchGeneration(source, {
+    includeRuntimeKey: true,
+    includeSupplemental: true,
+    includeWorkbench: true,
+    workbenchSnapshot,
+  });
+
+  await assert.rejects(
+    stageStaticShowcase({ source, destination }),
+    /workbench event approved source URL/i,
+  );
+  await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
+});
+
 test("Sites staging verifies history and 11406 bytes against their manifest entries", async (context) => {
   for (const name of ["bond-market-history.json", "11406.json"]) {
     await context.test(name, async () => {
@@ -313,6 +368,45 @@ test("Sites staging verifies history and 11406 bytes against their manifest entr
       assert.equal(await readFile(join(destination, "sentinel.txt"), "utf8"), "prior");
     });
   }
+});
+
+test("Sites staging requires canonical normalized 11406 integrity without a legacy file entry", async (context) => {
+  await context.test("verified normalized input", async () => {
+    const root = await mkdtemp(join(tmpdir(), "showcase-stage-normalized-11406-"));
+    const source = join(root, "source");
+    const destination = join(root, "destination");
+    await seedDeclaredIssuerResearchGeneration(source, {
+      includeRuntimeKey: true,
+      includeSupplemental: true,
+      includeWorkbench: true,
+      includeLegacyIssuanceEntry: false,
+    });
+    await stageStaticShowcase({ source, destination });
+    assert.equal(
+      await readFile(join(destination, "data/generations/abc123/11406.json"), "utf8"),
+      "[]\n",
+    );
+  });
+
+  await context.test("same-row-count byte mutation", async () => {
+    const root = await mkdtemp(join(tmpdir(), "showcase-stage-normalized-11406-mutation-"));
+    const source = join(root, "source");
+    await seedDeclaredIssuerResearchGeneration(source, {
+      includeRuntimeKey: true,
+      includeSupplemental: true,
+      includeWorkbench: true,
+      includeLegacyIssuanceEntry: false,
+    });
+    await writeFile(
+      join(source, "data/generations/abc123/11406.json"),
+      "[ ]\n",
+      "utf8",
+    );
+    await assert.rejects(
+      stageStaticShowcase({ source, destination: join(root, "destination") }),
+      /normalized 11406|integrity|hash|bytes/i,
+    );
+  });
 });
 
 test("Sites staging fails closed for declared-missing and undeclared-extra workbench files", async (context) => {
@@ -495,6 +589,8 @@ async function seedDeclaredIssuerResearchGeneration(
     includeSupplementalRuntimeKey = includeSupplemental,
     includeWorkbench = false,
     includeWorkbenchRuntimeKey = includeWorkbench,
+    includeLegacyIssuanceEntry = true,
+    workbenchSnapshot = emptyWorkbenchSnapshot,
   },
 ) {
   const generation = join(source, "data", "generations", "abc123");
@@ -508,10 +604,10 @@ async function seedDeclaredIssuerResearchGeneration(
   const researchText = `${JSON.stringify(emptyIssuerResearchSnapshot, null, 2)}\n`;
   const viewsText = "[]\n";
   const supplementalText = `${JSON.stringify(emptySupplementalSnapshot, null, 2)}\n`;
-  const workbenchText = `${JSON.stringify(emptyWorkbenchSnapshot, null, 2)}\n`;
+  const workbenchText = `${JSON.stringify(workbenchSnapshot, null, 2)}\n`;
   const emptyArrayText = "[]\n";
   const workbenchSourceStateSummary = summarizeWorkbenchSourceStates(
-    emptyWorkbenchSnapshot,
+    workbenchSnapshot,
   );
   await writeFile(join(generation, "cb-issuer-research.json"), researchText, "utf8");
   await writeFile(join(generation, "bond-market-view.json"), viewsText, "utf8");
@@ -556,7 +652,7 @@ async function seedDeclaredIssuerResearchGeneration(
             name: "bond-workbench.json",
             sha256: sha256Text(workbenchText),
             rawBytes: Buffer.byteLength(workbenchText),
-            recordCount: 0,
+            recordCount: workbenchSnapshot.records.length,
             schemaVersion: 1,
             sourceStateSummary: workbenchSourceStateSummary,
           }, {
@@ -564,18 +660,34 @@ async function seedDeclaredIssuerResearchGeneration(
             sha256: sha256Text(emptyArrayText),
             rawBytes: Buffer.byteLength(emptyArrayText),
             recordCount: 0,
-          }, {
+          }, ...(includeLegacyIssuanceEntry ? [{
             name: "11406.json",
             sha256: sha256Text(emptyArrayText),
             rawBytes: Buffer.byteLength(emptyArrayText),
             recordCount: 0,
-          }] : []),
+          }] : [])] : []),
         ],
         ...(includeSupplemental
           ? { supplementalSources: emptySupplementalSnapshot.sources }
           : {}),
-        ...(includeWorkbench ? { workbenchSourceStateSummary } : {}),
+        ...(includeWorkbench ? {
+          workbenchSourceStateSummary,
+          normalizedInputs: [{
+            name: "11406.json",
+            sha256: sha256Text(emptyArrayText),
+            rawBytes: Buffer.byteLength(emptyArrayText),
+            recordCount: 0,
+          }],
+        } : {}),
       },
+      ...(includeWorkbench ? { datasets: [{
+        datasetId: "11406",
+        sourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+        downloadedAt: "2026-07-31",
+        sha256: `sha256:${"a".repeat(64)}`,
+        rawBytes: 100,
+        rowCount: 0,
+      }] } : {}),
       emergingMarketUrl: "./data/generations/abc123/emerging-market.json",
     })}\n`,
     "utf8",
@@ -621,6 +733,35 @@ async function seedDeclaredIssuerResearchGeneration(
       "utf8",
     );
   }
+}
+
+function stageTerm() {
+  return {
+    bondCode: "90001", issuerCode: "9000", bondName: "公開樣本一", issuerName: "公開發行人甲",
+    issueDate: "2024-01-01", listingDate: "2024-01-02", maturityDate: "2028-01-01",
+    issueAmount: "100000000", outstandingAmount: "80000000", outstandingDataDate: "2026-07-31",
+    initialConversionPrice: "40", conversionStartDate: "2024-02-01", conversionEndDate: "2027-12-31",
+    putDates: [], putPrice: null, securedStatus: "無擔保", underwriter: null, trustee: null,
+    unitFaceValueTwd: null,
+  };
+}
+
+function stageView() {
+  return {
+    bondCode: "90001", issuerCode: "9000", bondName: "公開樣本一", issuerResearch: null,
+    cbClose: "101", cbPriceDate: "2026-07-31", cbTradeUnits: "0",
+    stockClose: "40", stockPriceDate: "2026-07-31",
+    currentConversionPrice: "40", conversionPriceEffectiveDate: "2026-01-01",
+    valuationDate: "2026-07-31", valuationCbClose: "101", valuationStockClose: "40",
+    conversionValue: "100", premiumRate: "1", outstandingAmount: "80000000",
+    outstandingDataDate: "2026-07-31", outstandingReductionRate: "20", remainingUnits: null,
+    remainingRatio: "80", dailyTurnoverRate: null, institutionDataDate: null,
+    institutionNetUnits: null, institutionNet5dUnits: null, institutionNet20dUnits: null,
+    redemptionEvent: null, maturityDate: "2028-01-01", daysToMaturity: 519,
+    nextPutDate: null, daysToNextPut: null, nextEventType: "maturity",
+    nextEventDate: "2028-01-01", daysToNextEvent: 519, dataQuality: "complete",
+    staleCbPrice: false, missingReasons: [],
+  };
 }
 
 function sha256Text(text) {

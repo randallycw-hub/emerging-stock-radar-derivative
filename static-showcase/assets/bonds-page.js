@@ -39,39 +39,63 @@ const state = {
   sortDirection: "asc",
   page: 1,
   archived: false,
+  workbenchDeclared: false,
+  workbenchUnavailable: false,
+  detailOrigin: null,
 };
 let disposeDetail = () => {};
 
-initializeFromUrl();
-bindFilters();
-await loadAndRender();
-window.addEventListener("popstate", () => {
+if (globalThis.window && globalThis.document) {
   initializeFromUrl();
-  renderRoute();
-});
+  bindFilters();
+  await loadAndRender();
+  globalThis.window.addEventListener("popstate", () => {
+    initializeFromUrl();
+    renderRoute();
+  });
+}
 
 async function loadAndRender() {
   const pointer = await loadJson(bootstrapConfig.generationPointerUrl, null);
   const config = pointer?.runtimeUrl
     ? await loadJson(new URL(pointer.runtimeUrl, document.baseURI), { manifestUrl: null, datasets: {} })
     : bootstrapConfig;
-  const [manifest, bondTerms, market, conversions, history, workbench] =
+  const workbenchDeclared = Object.prototype.hasOwnProperty.call(
+    config.datasets ?? {},
+    "bondWorkbench",
+  );
+  const [manifest, bondTerms, market, conversions, history, workbenchResult] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
       loadJson(config.datasets["11406"], []),
       loadJson(config.datasets.bondMarket, []),
       loadJson(config.datasets.conversionPrices, []),
       loadJson(config.datasets.bondHistory, []),
-      loadJson(config.datasets.bondWorkbench, null),
+      workbenchDeclared
+        ? loadDeclaredWorkbench(config.datasets.bondWorkbench)
+        : Promise.resolve({ ok: true, value: null }),
     ]);
   state.manifest = manifest;
   state.bondTerms = arrayValue(bondTerms);
-  state.views = arrayValue(market);
+  const marketViews = arrayValue(market);
   state.conversions = arrayValue(conversions);
   state.history = arrayValue(history);
-  state.workbench = arrayValue(workbench?.records);
-
-  if (state.views.length === 0) state.views = fallbackBondViews(state.bondTerms);
+  state.workbenchDeclared = workbenchDeclared;
+  state.workbenchUnavailable = workbenchDeclared && !workbenchResult.ok;
+  state.workbench = state.workbenchUnavailable
+    ? []
+    : arrayValue(workbenchResult.value?.records);
+  state.views = state.workbenchUnavailable
+    ? []
+    : workbenchDeclared
+      ? buildBondListRecords({
+        workbench: state.workbench,
+        bondTerms: state.bondTerms,
+      })
+      : buildBondListRecords({
+        views: marketViews.length === 0 ? fallbackBondViews(state.bondTerms) : marketViews,
+        bondTerms: state.bondTerms,
+      });
   renderRoute();
   const marketDate = state.manifest?.market?.dataDate;
   document.querySelector("#bond-update-status").textContent = marketDate
@@ -138,8 +162,62 @@ async function loadJson(url, fallback) {
   }
 }
 
+async function loadDeclaredWorkbench(url) {
+  if (typeof url !== "string" || url.length === 0) return { ok: false, value: null };
+  try {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP_${response.status}`);
+    const value = await response.json();
+    if (
+      value === null
+      || typeof value !== "object"
+      || Array.isArray(value)
+      || !Array.isArray(value.records)
+    ) {
+      throw new Error("INVALID_WORKBENCH");
+    }
+    return { ok: true, value };
+  } catch {
+    return { ok: false, value: null };
+  }
+}
+
 function arrayValue(value) {
   return Array.isArray(value) ? value : Array.isArray(value?.records) ? value.records : [];
+}
+
+export function buildBondListRecords({ views = [], workbench = [], bondTerms = [] } = {}) {
+  const termsByBondCode = new Map(
+    arrayValue(bondTerms)
+      .filter((term) => /^\d{5,6}$/.test(String(term?.["債券代碼"] ?? "")))
+      .map((term) => [String(term["債券代碼"]), term]),
+  );
+  if (arrayValue(workbench).length > 0) {
+    return arrayValue(workbench).map((record) => {
+      const view = record?.view ?? {};
+      const term = record?.term ?? {};
+      const legacyTerm = termsByBondCode.get(record?.bondCode);
+      return {
+        ...view,
+        bondCode: record.bondCode,
+        issuerCode: term.issuerCode ?? view.issuerCode,
+        issuerName: term.issuerName ?? legacyTerm?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
+        bondName: term.bondName ?? view.bondName,
+        status: record.status,
+        archived: record.status === "archived",
+        archiveReason: record.archiveReason,
+        archivedAt: record.archivedAt,
+        archiveDate: record.archivedAt,
+      };
+    });
+  }
+  return arrayValue(views).map((view) => {
+    const term = termsByBondCode.get(view.bondCode);
+    return {
+      ...view,
+      issuerName: term?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
+    };
+  });
 }
 
 function fallbackBondViews(rows) {
@@ -176,6 +254,15 @@ function fallbackBondViews(rows) {
 }
 
 function renderBonds() {
+  if (state.workbenchUnavailable) {
+    const message = "可轉債工作台資料目前無法使用；請稍後再試。";
+    setText("#bond-result-count", "資料無法使用");
+    document.querySelector("#bond-clear-filter").hidden = true;
+    document.querySelector("#bond-table-body").innerHTML = `<tr><td colspan="10" class="empty-cell">${message}</td></tr>`;
+    document.querySelector("#bond-card-list").innerHTML = `<p class="empty-cell">${message}</p>`;
+    document.querySelector("#bond-pagination").innerHTML = "";
+    return;
+  }
   const prepared = state.views.map((view) => ({ ...view, issuerName: termFor(view.bondCode)?.["機構名稱"] ?? view.issuerName ?? view.issuerCode }));
   const filtered = filterBondRecords(prepared, {
     query: document.querySelector("#bond-search").value,
@@ -236,7 +323,7 @@ function renderBondCard(view) {
 
 function bindBondOpeners() {
   for (const element of document.querySelectorAll("[data-bond-code]")) {
-    const open = () => openBond(element.dataset.bondCode);
+    const open = () => openBond(element.dataset.bondCode, element);
     element.addEventListener("click", open);
     element.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
@@ -292,7 +379,10 @@ function syncListUrl({ push = false } = {}) {
   history[push ? "pushState" : "replaceState"](null, "", url);
 }
 
-function openBond(code) {
+function openBond(code, origin = null) {
+  state.detailOrigin = origin
+    ? { bondCode: code, tagName: origin.tagName ?? null }
+    : null;
   const params = new URLSearchParams(location.search);
   params.set("bond", code);
   history.pushState(null, "", `${location.pathname}?${params}`);
@@ -312,12 +402,22 @@ function renderRoute() {
     renderBonds();
     return;
   }
+  if (state.workbenchUnavailable) {
+    target.hidden = false;
+    list.hidden = true;
+    target.innerHTML = '<p class="empty-cell">可轉債工作台資料目前無法使用；請稍後再試。</p><button class="close-workbench" type="button">返回可轉債總表</button>';
+    const closeButton = target.querySelector(".close-workbench");
+    closeButton.addEventListener("click", closeDetail);
+    closeButton.focus();
+    return;
+  }
   const view = state.views.find((candidate) => candidate.bondCode === code);
   if (!view) {
     target.hidden = false;
     list.hidden = true;
     target.innerHTML = `<p class="empty-cell">找不到代碼 ${escapeHtml(code)} 的可轉債資料。</p><button class="close-workbench" type="button">返回可轉債總表</button>`;
     target.querySelector(".close-workbench").addEventListener("click", closeDetail);
+    target.querySelector(".close-workbench").focus();
     return;
   }
   const detail = state.workbench.find((candidate) => candidate.bondCode === code)
@@ -326,15 +426,24 @@ function renderRoute() {
   disposeDetail = bindBondDetail(target, closeDetail, { history: state.history.filter((point) => point.bondCode === code), events: detail.events, archived: detail.status === "archived" });
   target.hidden = false;
   list.hidden = true;
-  target.focus?.();
+  target.querySelector("[data-detail-close]")?.focus();
 }
 
 function closeDetail() {
+  const origin = state.detailOrigin;
+  state.detailOrigin = null;
   const params = new URLSearchParams(location.search);
   params.delete("bond");
   history.pushState(null, "", `${location.pathname}?${params}`);
   initializeFromUrl();
   renderRoute();
+  const candidates = [...document.querySelectorAll("[data-bond-code]")];
+  const focusTarget = candidates.find((element) => (
+    element.dataset.bondCode === origin?.bondCode
+    && (origin.tagName === null || element.tagName === origin.tagName)
+    && element.getClientRects().length > 0
+  )) ?? document.querySelector("#bond-search");
+  focusTarget?.focus();
 }
 
 function renderWorkbench(view) {

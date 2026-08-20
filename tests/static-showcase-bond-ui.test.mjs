@@ -116,6 +116,97 @@ test("bond list module round-trips only supported list URL state", async () => {
   assert.equal(serializeBondListState(state), "?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
 });
 
+test("page loader projects archived workbench identities into the searchable list by exact bond code", async () => {
+  const { buildBondListRecords } = await import("../static-showcase/assets/bonds-page.js");
+  const records = buildBondListRecords({
+    views: [{ bondCode: "90001", issuerCode: "9000", bondName: "舊名稱", cbClose: "101" }],
+    workbench: [
+      {
+        bondCode: "90001",
+        status: "archived",
+        archiveReason: "matured",
+        archivedAt: "2026-08-12",
+        term: { bondCode: "90001", issuerCode: "9000", issuerName: "公開發行人", bondName: "封存一" },
+        view: { bondCode: "90001", issuerCode: "9000", bondName: "封存一", cbClose: "101" },
+      },
+      {
+        bondCode: "90002",
+        status: "active",
+        archiveReason: null,
+        archivedAt: null,
+        term: { bondCode: "90002", issuerCode: "9000", issuerName: "公開發行人", bondName: "現行二" },
+        view: { bondCode: "90002", issuerCode: "9000", bondName: "現行二", cbClose: null },
+      },
+    ],
+  });
+
+  assert.deepEqual(records.map(({ bondCode, issuerName, archived }) => ({ bondCode, issuerName, archived })), [
+    { bondCode: "90001", issuerName: "公開發行人", archived: true },
+    { bondCode: "90002", issuerName: "公開發行人", archived: false },
+  ]);
+});
+
+test("detail disclosures align with the 900px CSS breakpoint and initialize the selected desktop tab only", async () => {
+  const { syncBondDetailDisclosureMode } = await import("../static-showcase/assets/bond-detail-page.js");
+  const disclosures = [{ open: false }, { open: true }];
+  const panels = [
+    { dataset: { detailPanel: "overview" }, hidden: true },
+    { dataset: { detailPanel: "terms" }, hidden: false },
+  ];
+  const target = {
+    querySelector(selector) {
+      assert.equal(selector, "[data-detail-tab][aria-selected=\"true\"]");
+      return { dataset: { detailTab: "overview" } };
+    },
+    querySelectorAll(selector) {
+      if (selector === ".detail-mobile-area") return disclosures;
+      if (selector === "[data-detail-panel]") return panels;
+      assert.fail(`unexpected selector: ${selector}`);
+    },
+  };
+
+  syncBondDetailDisclosureMode(target, { compact: false });
+  assert.deepEqual(disclosures.map(({ open }) => open), [true, true]);
+  assert.deepEqual(panels.map(({ hidden }) => hidden), [false, true]);
+
+  syncBondDetailDisclosureMode(target, { compact: true });
+  assert.deepEqual(disclosures.map(({ open }) => open), [false, false]);
+  assert.deepEqual(panels.map(({ hidden }) => hidden), [false, false]);
+
+  const [page, detail] = await Promise.all([
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
+    readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
+  ]);
+  assert.match(detail, /matchMedia\?\.\("\(max-width: 900px\)"\)/);
+  assert.doesNotMatch(page, /max-width: 760px/);
+});
+
+test("detail close button handles Enter as one keyboard activation", async () => {
+  const { bindBondDetail } = await import("../static-showcase/assets/bond-detail-page.js");
+  const listeners = new Map();
+  const closeButton = {
+    addEventListener(type, listener) { listeners.set(type, listener); },
+  };
+  const target = {
+    querySelector(selector) {
+      if (selector === "[data-detail-close]") return closeButton;
+      return null;
+    },
+    querySelectorAll() { return []; },
+  };
+  let closeCount = 0;
+  bindBondDetail(target, () => { closeCount += 1; });
+  let prevented = false;
+
+  listeners.get("keydown")({
+    key: "Enter",
+    preventDefault() { prevented = true; },
+  });
+
+  assert.equal(prevented, true);
+  assert.equal(closeCount, 1);
+});
+
 test("mobile bond cards keep every list field and archived metadata visible", async () => {
   const js = await readFile(new URL("assets/bonds-page.js", root), "utf8");
   const card = js.slice(js.indexOf("function renderBondCard"), js.indexOf("function bindBondOpeners"));

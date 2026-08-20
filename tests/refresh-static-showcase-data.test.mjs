@@ -373,6 +373,16 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
     },
   );
   const runtime = JSON.parse(outcome.artifacts.active["runtime.json"]);
+  const stagedUrls = [
+    runtime.manifestUrl,
+    runtime.emergingMarketUrl,
+    runtime.ipoEventsUrl,
+    ...Object.values(runtime.datasets),
+  ];
+  assert.ok(stagedUrls.every((url) => {
+    const fileName = new URL(url, "https://isolated.invalid/").pathname.split("/").at(-1);
+    return Object.hasOwn(outcome.artifacts.active, fileName);
+  }));
   assert.equal(runtime.generation, pointer.generation);
   assert.equal(runtime.manifestUrl, `./data/${pointer.generation}/manifest.json`);
   assert.equal(

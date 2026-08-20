@@ -13,6 +13,7 @@ import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-rese
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
 import { parseBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
+import { getApprovedResource } from "../lib/pipeline/source-registry.ts";
 import {
   bondInputsFrom11406Rows,
   summarizeWorkbenchSourceStates,
@@ -33,6 +34,9 @@ const ROOT_FILES = new Set([
 ]);
 const ASSET_FILES = new Set([
   "app.css",
+  "bond-candlestick-chart.js",
+  "bond-detail-page.js",
+  "bond-list-page.js",
   "bond-technical-analysis.js",
   "bonds-page.js",
   "emerging-page.js",
@@ -81,6 +85,21 @@ const BASE_DATASET_FILES = {
   conversionPrices: "conversion-prices.json",
   bondHistory: "bond-market-history.json",
 };
+const APPROVED_WORKBENCH_EVENT_SOURCE_URLS = new Map([
+  ["11406", getApprovedResource("11406", "11406-csv").exactUrl],
+  ["tpex-cb-institution-daily", getApprovedResource(
+    "tpex-cb-institution-daily",
+    "tpex-cb-institution-daily-json",
+  ).exactUrl],
+  ["tpex-cb-redemption-announcements", getApprovedResource(
+    "tpex-cb-redemption-announcements",
+    "tpex-cb-redemption-announcements-json",
+  ).exactUrl],
+  ["twsa-cb-underwriting-announcements", getApprovedResource(
+    "twsa-cb-underwriting-announcements",
+    "twsa-cb-underwriting-announcements-html",
+  ).exactUrl],
+]);
 
 export async function stageStaticShowcase({
   source = "static-showcase",
@@ -502,7 +521,7 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
     || issuerEntries.length !== 1
     || supplementalEntries.length !== 1
     || historyEntries.length !== 1
-    || issuanceEntries.length !== 1
+    || issuanceEntries.length > 1
   ) {
     throw new Error("active generation bond workbench manifest is invalid");
   }
@@ -518,6 +537,7 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
     throw new Error("active generation bond workbench hash is invalid");
   }
   const workbench = parseBondWorkbenchSnapshot(JSON.parse(workbenchText));
+  assertApprovedWorkbenchEventSources(workbench);
   if (
     workbench.records.length !== entry.recordCount
     || workbench.schemaVersion !== entry.schemaVersion
@@ -549,12 +569,33 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
   if (!Array.isArray(issuanceRows)) {
     throw new Error("active generation 11406 artifact is invalid");
   }
-  verifyMarketEvidenceEntry(
-    issuanceEntries[0],
-    "11406.json",
-    issuanceText,
-    issuanceRows.length,
-  );
+  if (issuanceEntries.length === 1) {
+    verifyMarketEvidenceEntry(
+      issuanceEntries[0],
+      "11406.json",
+      issuanceText,
+      issuanceRows.length,
+    );
+  } else {
+    const normalizedIssuanceEntries = Array.isArray(manifest.market.normalizedInputs)
+      ? manifest.market.normalizedInputs.filter((entry) => entry?.name === "11406.json")
+      : [];
+    if (normalizedIssuanceEntries.length !== 1) {
+      throw new Error("active generation normalized 11406 integrity record is invalid");
+    }
+    verifyMarketEvidenceEntry(
+      normalizedIssuanceEntries[0],
+      "11406.json",
+      issuanceText,
+      issuanceRows.length,
+    );
+    verifyOfficialDatasetEvidence(
+      manifest.datasets,
+      "11406",
+      APPROVED_WORKBENCH_EVENT_SOURCE_URLS.get("11406"),
+      issuanceRows.length,
+    );
+  }
   const views = await readJson(
     join(source, `${base}/bond-market-view.json`.replace(/^\.\//, "")),
     "active generation bond workbench views are invalid",
@@ -584,6 +625,20 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
   });
 }
 
+export function assertApprovedWorkbenchEventSources(workbench) {
+  for (const record of workbench.records) {
+    for (const event of record.events) {
+      const approvedUrl = APPROVED_WORKBENCH_EVENT_SOURCE_URLS.get(event.sourceId);
+      if (
+        approvedUrl === undefined
+        || (event.sourceUrl !== null && event.sourceUrl !== approvedUrl)
+      ) {
+        throw new Error("active generation workbench event approved source URL is invalid");
+      }
+    }
+  }
+}
+
 function verifyMarketEvidenceEntry(entry, name, text, recordCount) {
   if (
     entry === null
@@ -606,6 +661,42 @@ function verifyMarketEvidenceEntry(entry, name, text, recordCount) {
     || entry.recordCount !== recordCount
   ) {
     throw new Error(`active generation ${name} manifest integrity is invalid`);
+  }
+}
+
+function verifyOfficialDatasetEvidence(
+  datasets,
+  datasetId,
+  sourceUrl,
+  recordCount,
+) {
+  const entries = Array.isArray(datasets)
+    ? datasets.filter((entry) => entry?.datasetId === datasetId)
+    : [];
+  const entry = entries[0];
+  if (
+    entries.length !== 1
+    || entry === null
+    || typeof entry !== "object"
+    || Array.isArray(entry)
+    || !equalStringArrays(Object.keys(entry).sort(), [
+      "datasetId",
+      "downloadedAt",
+      "rawBytes",
+      "rowCount",
+      "sha256",
+      "sourceUrl",
+    ].sort())
+    || entry.sourceUrl !== sourceUrl
+    || typeof entry.downloadedAt !== "string"
+    || !/^\d{4}-\d{2}-\d{2}$/.test(entry.downloadedAt)
+    || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
+    || !Number.isInteger(entry.rawBytes)
+    || entry.rawBytes <= 0
+    || !Number.isInteger(entry.rowCount)
+    || entry.rowCount !== recordCount
+  ) {
+    throw new Error(`active generation ${datasetId} official dataset evidence is invalid`);
   }
 }
 

@@ -119,7 +119,16 @@ export async function buildBondMarketSnapshot(options = {}) {
     throw new TypeError("asOfDate must be an ISO date");
   }
   const asOfDate = requestedAsOfDate ?? taipeiDate(generatedDate);
-  const sourceRows = bonds === undefined ? await loadBondRows(outputDir) : undefined;
+  const normalized11406Text = bonds === undefined
+    ? await readFile(join(outputDir, "11406.json"), "utf8")
+    : undefined;
+  const normalized11406Rows = normalized11406Text === undefined
+    ? undefined
+    : JSON.parse(normalized11406Text);
+  if (normalized11406Rows !== undefined && !Array.isArray(normalized11406Rows)) {
+    throw new TypeError("normalized 11406 artifact must be an array");
+  }
+  const sourceRows = bonds === undefined ? normalized11406Rows : undefined;
   const bondInputs = bonds ?? bondInputsFrom11406Rows(sourceRows);
   if (!Array.isArray(bondInputs)) throw new TypeError("bonds must be an array");
   const baseTerms = sourceRows === undefined
@@ -281,6 +290,14 @@ export async function buildBondMarketSnapshot(options = {}) {
         dataDate,
         supplementalSources: supplemental.sources,
         workbenchSourceStateSummary,
+        ...(normalized11406Text === undefined ? {} : {
+          normalizedInputs: [{
+            name: "11406.json",
+            sha256: sha256(normalized11406Text),
+            rawBytes: Buffer.byteLength(normalized11406Text, "utf8"),
+            recordCount: normalized11406Rows.length,
+          }],
+        }),
         files,
       },
     };

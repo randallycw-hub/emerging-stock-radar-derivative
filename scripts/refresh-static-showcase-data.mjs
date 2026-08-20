@@ -1477,6 +1477,14 @@ async function captureActiveGeneration(paths, pointerText) {
     ...pointer.generation.split("/"),
   );
   return Object.fromEntries(await Promise.all([
+    "11406.json",
+    "11586.json",
+    "94025.json",
+    "bond-market-history.json",
+    "cb-quotes.json",
+    "conversion-prices.json",
+    "ipo-events.json",
+    "stock-closes.json",
     "cb-issuer-research.json",
     "bond-supplemental.json",
     "bond-market-view.json",

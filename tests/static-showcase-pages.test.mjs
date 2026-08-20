@@ -163,6 +163,28 @@ test("深淺色主題具備完整語意色彩與鍵盤互動狀態", async () =>
   }
 });
 
+test("可轉債工作台在桌機與手機維持局部捲動、分頁與鍵盤替代資訊", async () => {
+  const [html, css, list, detail, chart] = await Promise.all([
+    readShowcaseFile("bonds.html"),
+    readShowcaseFile("assets/app.css"),
+    readShowcaseFile("assets/bonds-page.js"),
+    readShowcaseFile("assets/bond-detail-page.js"),
+    readShowcaseFile("assets/bond-candlestick-chart.js"),
+  ]);
+  assert.match(html, /<html[^>]+data-theme="light"/);
+  assert.match(css, /body\s*\{[\s\S]*?overflow-x:\s*hidden/);
+  assert.match(css, /\.bond-table-shell\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.bond-table-shell\s*\{\s*display:\s*none/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.bond-card-list\s*\{\s*display:\s*grid/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.detail-tabs\s*\{\s*display:\s*none/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.detail-mobile-area\s*\{\s*display:\s*block/);
+  assert.match(detail, /role="tablist"/);
+  assert.match(detail, /<details class="detail-mobile-area"/);
+  assert.match(list, /event\.key === "Enter" \|\| event\.key === " "/);
+  assert.match(chart, /event\.key !== "ArrowLeft" && event\.key !== "ArrowRight"/);
+  assert.match(detail, /id="bond-chart-summary"[^>]+aria-live="polite"/);
+});
+
 function contrastRatio(foreground, background) {
   const luminance = (hex) => {
     const channels = [1, 3, 5].map((index) => Number.parseInt(hex.slice(index, index + 2), 16) / 255);

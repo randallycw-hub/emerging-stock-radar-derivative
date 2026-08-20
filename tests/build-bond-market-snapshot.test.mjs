@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import {
   mkdir,
   mkdtemp,
@@ -43,6 +44,18 @@ const bond = {
   outstandingDataDate: "2026-07-30",
   putDates: ["2027-08-30"],
 };
+
+const normalized11406Rows = [{
+  債券代碼: "35221",
+  機構代碼: "3522",
+  機構名稱: "御嵿",
+  債券簡稱: "御嵿一",
+  到期日期: "1170729",
+  發行總額: "500000000",
+  目前餘額: "400000000",
+  資料日期: "1150730",
+  賣回權日期: "1160830",
+}];
 
 const previousIssuerResearch = {
   schemaVersion: 1,
@@ -167,6 +180,10 @@ async function makePublishedDirectory() {
       generatedAt: "2026-07-29",
       datasets: [],
     })}\n`,
+  );
+  await writeFile(
+    join(outputDir, "11406.json"),
+    `${JSON.stringify(normalized11406Rows)}\n`,
   );
   return outputDir;
 }
@@ -945,10 +962,10 @@ test("a valid candidate publishes verified files and appends exact-date history"
       premiumRate: "-3.24",
     }])}\n`,
   );
-  const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
-    outputDir,
-    bonds: [bond],
-    collectImpl: async () => validCollectedMarketData,
+    const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
+      outputDir,
+      bonds: [bond],
+      collectImpl: async () => validCollectedMarketData,
     now: () => new Date("2026-07-30T12:30:00.000Z"),
   }));
 
@@ -1065,7 +1082,6 @@ test("publishes a verified workbench manifest entry and archives prior-only bond
 
   const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
     outputDir,
-    bonds: [bond],
     collectImpl: async () => validCollectedMarketData,
     now: () => new Date("2026-07-30T12:30:00.000Z"),
   }));
@@ -1088,7 +1104,29 @@ test("publishes a verified workbench manifest entry and archives prior-only bond
   assert.match(entry.sha256, /^sha256:[0-9a-f]{64}$/);
   assert.deepEqual(entry.sourceStateSummary.lifecycle, { active: 1, archived: 1 });
   assert.deepEqual(entry.sourceStateSummary, result.manifest.market.workbenchSourceStateSummary);
+  const normalizedText = await readFile(join(outputDir, "11406.json"), "utf8");
+  assert.deepEqual(result.manifest.market.normalizedInputs, [{
+    name: "11406.json",
+    sha256: `sha256:${createHash("sha256").update(normalizedText, "utf8").digest("hex")}`,
+    rawBytes: Buffer.byteLength(normalizedText, "utf8"),
+    recordCount: normalized11406Rows.length,
+  }]);
   assert.equal(result.workbench.records.length, 2);
+});
+
+test("a bonds override cannot claim normalized 11406 integrity provenance", async () => {
+  const outputDir = await makePublishedDirectory();
+  const result = await withOfflineProductionFetch(() => buildBondMarketSnapshot({
+    outputDir,
+    bonds: [{ ...bond, issueAmount: "499000000" }],
+    collectImpl: async () => validCollectedMarketData,
+    now: () => new Date("2026-07-30T12:30:00.000Z"),
+  }));
+
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(result.manifest.market, "normalizedInputs"),
+    false,
+  );
 });
 
 test("workbench cross-file verification uses exact bond codes, history and source states", async () => {

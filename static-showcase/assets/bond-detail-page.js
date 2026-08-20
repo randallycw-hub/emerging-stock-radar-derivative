@@ -98,7 +98,19 @@ export function detailRecordFromLegacy({ view = {}, term = {}, events = [] } = {
 }
 
 export function bindBondDetail(target, onClose, chartOptions = {}) {
-  target.querySelector("[data-detail-close]")?.addEventListener("click", onClose);
+  const compactQuery = globalThis.window?.matchMedia?.("(max-width: 900px)") ?? null;
+  const syncDisclosureMode = () => syncBondDetailDisclosureMode(target, {
+    compact: compactQuery?.matches ?? false,
+  });
+  syncDisclosureMode();
+  compactQuery?.addEventListener("change", syncDisclosureMode);
+  const closeButton = target.querySelector("[data-detail-close]");
+  closeButton?.addEventListener("click", onClose);
+  closeButton?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    onClose();
+  });
   for (const button of target.querySelectorAll("[data-detail-tab]")) {
     button.addEventListener("click", () => {
       const tab = button.dataset.detailTab;
@@ -111,7 +123,23 @@ export function bindBondDetail(target, onClose, chartOptions = {}) {
     });
   }
   const stored = target.querySelector("[data-chart-data]")?.textContent;
-  return bindCandlestickChart(target, { ...parseChartData(stored), ...chartOptions });
+  const disposeChart = bindCandlestickChart(target, { ...parseChartData(stored), ...chartOptions });
+  return () => {
+    compactQuery?.removeEventListener("change", syncDisclosureMode);
+    disposeChart();
+  };
+}
+
+export function syncBondDetailDisclosureMode(target, { compact } = {}) {
+  const selectedTab = target.querySelector(
+    "[data-detail-tab][aria-selected=\"true\"]",
+  )?.dataset.detailTab ?? "overview";
+  for (const disclosure of target.querySelectorAll(".detail-mobile-area")) {
+    disclosure.open = !compact;
+  }
+  for (const panel of target.querySelectorAll("[data-detail-panel]")) {
+    panel.hidden = compact ? false : panel.dataset.detailPanel !== selectedTab;
+  }
 }
 
 function tabButton(id, label, selected = false) { return `<button type="button" role="tab" data-detail-tab="${id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}">${label}</button>`; }
