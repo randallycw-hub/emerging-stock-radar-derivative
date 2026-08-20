@@ -5,6 +5,7 @@ import {
   serializeBondListState,
   sortBondRecords,
 } from "./bond-list-page.js";
+import { bindBondDetail, renderBondDetail } from "./bond-detail-page.js";
 
 const workbenchSections = [
   "交易摘要",
@@ -33,6 +34,7 @@ const state = {
   views: [],
   conversions: [],
   history: [],
+  workbench: [],
   sortKey: null,
   sortDirection: "asc",
   page: 1,
@@ -52,19 +54,21 @@ async function loadAndRender() {
   const config = pointer?.runtimeUrl
     ? await loadJson(new URL(pointer.runtimeUrl, document.baseURI), { manifestUrl: null, datasets: {} })
     : bootstrapConfig;
-  const [manifest, bondTerms, market, conversions, history] =
+  const [manifest, bondTerms, market, conversions, history, workbench] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
       loadJson(config.datasets["11406"], []),
       loadJson(config.datasets.bondMarket, []),
       loadJson(config.datasets.conversionPrices, []),
       loadJson(config.datasets.bondHistory, []),
+      loadJson(config.datasets.bondWorkbench, null),
     ]);
   state.manifest = manifest;
   state.bondTerms = arrayValue(bondTerms);
   state.views = arrayValue(market);
   state.conversions = arrayValue(conversions);
   state.history = arrayValue(history);
+  state.workbench = arrayValue(workbench?.records);
 
   if (state.views.length === 0) state.views = fallbackBondViews(state.bondTerms);
   renderRoute();
@@ -313,7 +317,13 @@ function renderRoute() {
     target.querySelector(".close-workbench").addEventListener("click", closeDetail);
     return;
   }
-  renderWorkbench(view);
+  const detail = state.workbench.find((candidate) => candidate.bondCode === code);
+  if (detail) {
+    target.innerHTML = renderBondDetail(detail);
+    bindBondDetail(target, closeDetail);
+  } else {
+    renderWorkbench(view);
+  }
   target.hidden = false;
   list.hidden = true;
   target.focus?.();

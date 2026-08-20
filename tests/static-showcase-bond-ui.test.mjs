@@ -5,10 +5,11 @@ import test from "node:test";
 const root = new URL("../static-showcase/", import.meta.url);
 
 test("bond page exposes the complete sortable CB workbench", async () => {
-  const [home, bondsHtml, js, sortJs, css] = await Promise.all([
+  const [home, bondsHtml, js, detailJs, sortJs, css] = await Promise.all([
     readFile(new URL("index.html", root), "utf8"),
     readFile(new URL("bonds.html", root), "utf8"),
     readFile(new URL("assets/bonds-page.js", root), "utf8"),
+    readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
     readFile(new URL("assets/table-sort.js", root), "utf8"),
     readFile(new URL("assets/app.css", root), "utf8"),
   ]);
@@ -45,6 +46,7 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(bondsHtml, /id="bond-clear-filter"/);
   assert.match(bondsHtml, /id="bond-table-body"/);
   assert.match(bondsHtml, /id="bond-workbench"/);
+  assert.match(bondsHtml, /data-detail-url-param="bond"/);
   assert.match(bondsHtml, /assets\/site-shell\.js/);
   assert.match(bondsHtml, /assets\/bonds-page\.js/);
   assert.doesNotMatch(bondsHtml, /href="\.\/methodology\.html"/);
@@ -58,6 +60,8 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(js, /value === null \|\| value === undefined/);
   assert.match(js, /bond/);
   assert.match(js, /bond-list-page/);
+  assert.match(js, /bond-detail-page/);
+  assert.match(js, /bondWorkbench/);
   assert.match(js, /direction/);
   assert.match(js, /page/);
   assert.match(js, /history\.(?:pushState|replaceState)/);
@@ -78,6 +82,22 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(js, /drawHistoryChart/);
   assert.match(js, /data-history-range="1M"/);
   assert.match(js, /<canvas[^>]+bond-history-chart/);
+  assert.match(detailJs, /function noAdviceViolations/);
+  assert.match(detailJs, /FORBIDDEN_UI_PATTERNS/);
+  assert.match(detailJs, /bond-candlestick/);
+  assert.match(detailJs, /noopener noreferrer/);
+  assert.match(detailJs, /目前無核准公開資料／待確認/);
+});
+
+test("detail UI gate scans static presentation strings for prohibited public investment directions", async () => {
+  const [html, listJs] = await Promise.all([
+    readFile(new URL("bonds.html", root), "utf8"),
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
+  ]);
+  const { noAdviceViolations } = await import("../static-showcase/assets/bond-detail-page.js");
+  assert.deepEqual(noAdviceViolations(html + listJs), []);
+  assert.deepEqual(noAdviceViolations("條件符合"), []);
+  assert.deepEqual(noAdviceViolations("建議買進後下單"), ["recommendation", "buy-sell-short", "order"]);
 });
 
 test("static showcase keeps presentation out of generated runtime data", async () => {
