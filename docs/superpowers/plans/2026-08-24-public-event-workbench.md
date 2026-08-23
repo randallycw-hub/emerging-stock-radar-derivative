@@ -54,7 +54,7 @@ test("event digest only counts valid published events", () => {
       { bondCode: "1101A", nextEventDate: "2026-09-01", maturityDate: "2027-08-01", dataQuality: "complete" },
       { bondCode: "1101B", nextEventDate: "bad-date", maturityDate: "2026-10-01", dataQuality: "partial" },
     ],
-    ipoRecords: [{ companyCode: "1234", events: [{ date: "2026-08-25", label: "掛牌", sourceId: "twse-auctions" }] }],
+    ipoRecords: [{ companyCode: "1234", events: [{ date: "2026-08-25", label: "掛牌", sourceRecordIds: ["TWSE:1234:1150825"] }] }],
   });
   assert.deepEqual(digest.map((item) => [item.id, item.count, item.nearestDate, item.href, item.state]), [
     ["ipo-recent", 1, "2026-08-25", "./ipo.html?sort=eventDate&direction=asc", "ready"],
@@ -78,7 +78,7 @@ Expected: FAIL because the module does not exist.
 
 - [ ] **Step 3: Write minimal implementation**
 
-Export isPublishedIsoDate(value) and buildPublicEventDigest(input). Validate ISO dates with a strict YYYY-MM-DD pattern plus Date.parse. Count IPO events only if event has sourceId and valid date. Count right events only when nextEventDate is 0–90 calendar days from asOfDate. Count maturities only when maturityDate is 0–365 days away. Count pending CB records only where dataQuality is not complete. Invalid/missing input creates unavailable state, never a fabricated count.
+Export isPublishedIsoDate(value) and buildPublicEventDigest(input). Validate ISO dates with a strict YYYY-MM-DD pattern plus Date.parse. Count IPO events only if event has a non-empty sourceRecordIds array and valid date. Count right events only when nextEventDate is 0–90 calendar days from asOfDate. Count maturities only when maturityDate is 0–365 days away. Count pending CB records only where dataQuality is not complete. Invalid/missing input creates unavailable state, never a fabricated count.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -262,15 +262,15 @@ git commit -m "feat: clarify CB and IPO public evidence"
 
 **Interfaces:**
 - Consumes: active pointer/runtime/manifest, declared workbench, ipo-events.json, hash and record counts.
-- Produces: assertPublishedEventInputs({ manifest, runtime, root }); it returns only when event inputs are valid, evidence-backed and identity-safe, otherwise throws before destination mutation.
+- Produces: assertPublishedEventInputs({ manifest, runtime, root }); it returns only when event inputs are valid, sourceManifest-backed and identity-safe, otherwise throws before destination mutation.
 
 - [ ] **Step 1: Write failing staging test**
 
 ~~~js
-test("Sites staging fails closed when IPO event evidence lacks source, date, or identity", async () => {
+test("Sites staging fails closed when IPO event evidence lacks source record, date, or identity", async () => {
   const { source, destination } = await seededGenerationWithIpoEvents();
   await writeFile(join(source, "data/generations/abc123/ipo-events.json"), JSON.stringify({
-    records: [{ companyCode: "1234", events: [{ date: "2026-08-25", label: "掛牌", sourceId: null }] }],
+    records: [{ companyCode: "1234", events: [{ date: "2026-08-25", label: "掛牌", sourceRecordIds: [] }] }],
   }) + "\n", "utf8");
   await assert.rejects(stageStaticShowcase({ source, destination }), /IPO event.*source|date|identity/i);
   await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
@@ -281,11 +281,11 @@ test("Sites staging fails closed when IPO event evidence lacks source, date, or 
 
 Run: node --test tests/stage-static-showcase.test.mjs
 
-Expected: FAIL because staging does not yet validate IPO event evidence at this boundary.
+Expected: FAIL because staging does not yet validate IPO event provenance at this boundary.
 
 - [ ] **Step 3: Implement validation before destination mutation**
 
-Add assertPublishedEventInputs adjacent to declared-workbench validators. Resolve only previously validated active pointer/runtime paths. Require runtime.ipoEventsUrl to be inside the active generation and have exactly one manifest entry. Verify SHA-256, raw bytes and record count with existing helpers. Parse { records }; every record requires companyCode and every event requires date, label, sourceId, sourceUrl and unique companyCode:event.kind:event.date:sourceId identity. The source URL must pass the existing official IPO source registry. Call this before copying files or writing destination current.json. Never add previous-generation fallback.
+Add assertPublishedEventInputs adjacent to declared-workbench validators. Resolve only previously validated active pointer/runtime paths. Require runtime.ipoEventsUrl to be inside the active generation and have exactly one manifest entry. Verify SHA-256, raw bytes and record count with existing helpers. Parse { records, sourceManifest }; every record requires companyCode and every event requires date, label, a non-empty sourceRecordIds array, and a unique companyCode:market:event.kind:event.date:sourceRecordId identity. Each source-record prefix must map to exactly one sourceManifest entry whose source URL passes the existing official IPO source registry. Call this before copying files or writing destination current.json. Never add previous-generation fallback or per-event source fields.
 
 - [ ] **Step 4: Run staging and source tests**
 
@@ -358,4 +358,3 @@ Report commit IDs, verification outputs and local preview behavior. Publication 
 - **Scope:** Excludes phase-two company pages, new adapters, financial statements, realtime updates, non-official data and deployment.
 - **Placeholder scan:** Each task includes files, interfaces, actual test behavior, failure/pass commands, implementation details and a commit boundary.
 - **Type consistency:** buildPublicEventDigest, parseBondListState, serializeBondListState, filterBondRecords, projectIpoLifecycle and assertPublishedEventInputs are defined before use. URL values are consistently rights90, maturity365 and pending.
-
