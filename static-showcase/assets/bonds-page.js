@@ -24,6 +24,7 @@ const state = {
   bondTerms: [],
   views: [],
   history: [],
+  conversionPrices: [],
   workbench: [],
   sortKey: null,
   sortDirection: "asc",
@@ -54,12 +55,13 @@ async function loadAndRender() {
     config.datasets ?? {},
     "bondWorkbench",
   );
-  const [manifest, bondTerms, market, history, workbenchResult] =
+  const [manifest, bondTerms, market, history, conversionPrices, workbenchResult] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
       loadJson(config.datasets["11406"], []),
       loadJson(config.datasets.bondMarket, []),
       loadJson(config.datasets.bondHistory, []),
+      loadJson(config.datasets.conversionPrices, []),
       workbenchDeclared
         ? loadDeclaredWorkbench(config.datasets.bondWorkbench)
         : Promise.resolve({ ok: true, value: null }),
@@ -68,6 +70,7 @@ async function loadAndRender() {
   state.bondTerms = arrayValue(bondTerms);
   const marketViews = arrayValue(market);
   state.history = arrayValue(history);
+  state.conversionPrices = arrayValue(conversionPrices);
   state.workbenchDeclared = workbenchDeclared;
   state.workbenchUnavailable = workbenchDeclared && !workbenchResult.ok;
   state.workbench = state.workbenchUnavailable
@@ -463,8 +466,9 @@ function renderRoute() {
     target.querySelector(".close-workbench").focus();
     return;
   }
-  const detail = state.workbench.find((candidate) => candidate.bondCode === code)
+  const detailRecord = state.workbench.find((candidate) => candidate.bondCode === code)
     ?? detailRecordFromLegacy({ view, term: termFor(view.bondCode) ?? {}, events: [] });
+  const detail = detailWithValuationConversionEvidence(detailRecord, state.conversionPrices);
   target.innerHTML = renderBondDetail(detail);
   disposeDetail = bindBondDetail(target, closeDetail, { history: state.history.filter((point) => point.bondCode === code), events: detail.events, archived: detail.status === "archived" });
   target.hidden = false;
@@ -522,6 +526,30 @@ export function bondListPresentation(view = {}) {
     qualityLabel: view.dataQuality === "complete" && !view.missingReasons?.length
       ? "可用"
       : "待補",
+  };
+}
+
+export function detailWithValuationConversionEvidence(record = {}, conversionPrices = []) {
+  const view = record?.view ?? {};
+  const valuationDate = view.valuationDate;
+  const bondCode = String(record?.bondCode ?? view.bondCode ?? "");
+  const applied = Array.isArray(conversionPrices)
+    ? conversionPrices
+      .filter((item) => (
+        String(item?.bondCode ?? "") === bondCode
+        && typeof item?.effectiveDate === "string"
+        && typeof valuationDate === "string"
+        && item.effectiveDate <= valuationDate
+      ))
+      .sort((left, right) => right.effectiveDate.localeCompare(left.effectiveDate))[0]
+    : undefined;
+  return {
+    ...record,
+    view: {
+      ...view,
+      valuationConversionPrice: applied?.currentConversionPrice ?? null,
+      valuationConversionPriceEffectiveDate: applied?.effectiveDate ?? null,
+    },
   };
 }
 

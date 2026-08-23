@@ -99,6 +99,8 @@ function fixture(patch = {}) {
       valuationDate: dataDate,
       conversionValue: "108.57",
       premiumRate: "5",
+      valuationConversionPrice: "35",
+      valuationConversionPriceEffectiveDate: "2026-08-01",
       outstandingAmount: "400000000",
       outstandingDataDate: dataDate,
       remainingUnits: "4000",
@@ -134,6 +136,12 @@ function fixture(patch = {}) {
   };
 }
 
+function matrixCard(html, title) {
+  const start = html.indexOf(`<h4>${title}</h4>`);
+  assert.notEqual(start, -1, `${title} matrix card must exist`);
+  return html.slice(start, html.indexOf("</article>", start));
+}
+
 test("complete fixture renders required detail sections, conditions, evidence, and formulas in order", () => {
   const html = renderBondDetail(fixture());
   let previous = -1;
@@ -151,6 +159,56 @@ test("complete fixture renders required detail sections, conditions, evidence, a
   assert.match(html, /<details[^>]*class="formula-details"/);
   assert.match(html, /本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。/);
   assert.match(html, /target="_blank" rel="noopener noreferrer"/);
+});
+
+test("detail begins with an evidence-backed status matrix without replacing its raw fields", () => {
+  const html = renderBondDetail(fixture());
+  const matrixAt = html.indexOf("資料狀態矩陣");
+  assert.ok(matrixAt > html.indexOf("教育性條件檢核"));
+  assert.ok(matrixAt < html.indexOf("詳細資料分頁"));
+  assert.equal((html.match(/class="status-matrix-card/g) ?? []).length, 5);
+  for (const label of ["現股／轉換價", "CB／轉換價值", "在外餘額", "到期與轉換期間", "資料完整性"]) {
+    assert.match(html, new RegExp(label));
+  }
+  assert.match(html, /<details class="matrix-evidence">/);
+  assert.match(html, /現股價格.*38/s);
+  assert.match(html, /目前轉換價.*35/s);
+  assert.match(html, /轉換價值.*108\.57/s);
+  assert.match(html, /資料日.*2026-08-12/s);
+});
+
+test("status matrix keeps an accumulating history as incomplete evidence", () => {
+  const html = renderBondDetail(fixture({
+    fieldStates: { ...fixture().fieldStates, history: "accumulating" },
+  }));
+  const card = matrixCard(html, "資料完整性");
+  assert.match(card, /待確認/);
+  assert.doesNotMatch(card, /已核對/);
+  assert.match(card, /history: accumulating/);
+});
+
+test("status matrix exposes the raw valuation inputs behind conversion value", () => {
+  const html = renderBondDetail(fixture({
+    view: { ...fixture().view, valuationCbClose: "110", valuationStockClose: "38" },
+  }));
+  const card = matrixCard(html, "CB／轉換價值");
+  assert.match(card, /估值 CB 收盤.*110/s);
+  assert.match(card, /估值現股收盤.*38/s);
+  assert.match(card, /估值採用轉換價.*35/s);
+  assert.match(card, /估值轉換價生效日.*2026-08-01/s);
+});
+
+test("status matrix does not apply an unrelated valuation mismatch to the stock conversion card", () => {
+  const html = renderBondDetail(fixture({
+    view: { ...fixture().view, stockPriceDate: "2026-08-11" },
+    fieldStates: { ...fixture().fieldStates, valuation: "date_mismatch" },
+  }));
+  const marketCard = matrixCard(html, "現股／轉換價");
+  const valuationCard = matrixCard(html, "CB／轉換價值");
+  assert.match(marketCard, /已列示/);
+  assert.doesNotMatch(marketCard, /資料日不一致/);
+  assert.match(valuationCard, /資料日不一致/);
+  assert.match(marketCard, /2026-08-11/);
 });
 
 test("partial fixture retains every missing check and discloses the approved missing wording", () => {

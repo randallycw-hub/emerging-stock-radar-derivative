@@ -169,7 +169,7 @@ test("offline builder and outer refresh stage the same CB generation through the
         new Set([
           "current.json", "runtime.json", "manifest.json", "11406.json",
           "bond-market-view.json", "bond-market-history.json",
-          "bond-workbench.json",
+          "conversion-prices.json", "bond-workbench.json",
         ]),
       );
       assert.match(page.document.element("bond-table-body").innerHTML, /35221/);

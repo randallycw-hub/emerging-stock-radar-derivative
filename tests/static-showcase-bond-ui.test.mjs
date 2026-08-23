@@ -135,6 +135,22 @@ test("page loader projects archived workbench identities into the searchable lis
   ]);
 });
 
+test("detail evidence selects the conversion-price version effective on its valuation date", async () => {
+  const { detailWithValuationConversionEvidence } = await import("../static-showcase/assets/bonds-page.js");
+  const record = {
+    bondCode: "90001",
+    view: { valuationDate: "2026-08-12", currentConversionPrice: "31" },
+  };
+  const enriched = detailWithValuationConversionEvidence(record, [
+    { bondCode: "90001", currentConversionPrice: "35", effectiveDate: "2026-07-01" },
+    { bondCode: "90001", currentConversionPrice: "31", effectiveDate: "2026-08-13" },
+    { bondCode: "90001", currentConversionPrice: "36", effectiveDate: "2026-06-01" },
+  ]);
+  assert.equal(enriched.view.valuationConversionPrice, "35");
+  assert.equal(enriched.view.valuationConversionPriceEffectiveDate, "2026-07-01");
+  assert.equal(record.view.valuationConversionPrice, undefined);
+});
+
 test("page loader projects legacy market fields into canonical list fields until the next refresh", async () => {
   const { buildBondListRecords } = await import("../static-showcase/assets/bonds-page.js");
   const [record] = buildBondListRecords({

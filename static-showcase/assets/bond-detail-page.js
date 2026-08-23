@@ -52,6 +52,7 @@ export function renderBondDetail(record) {
   const html = `
     <header class="bond-detail-head"><div><p class="section-number">${text(record?.bondCode)} / PUBLIC CB DETAIL</p><h2>${text(term.bondName ?? view.bondName)}</h2><p>${text(term.issuerName ?? view.issuerCode)}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債總表">← 返回總表</button></header>
     <p class="bond-detail-disclaimer">本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。</p>
+    ${statusMatrixSection(view, term, record?.fieldStates)}
     <nav class="detail-tabs" aria-label="詳細資料分頁" role="tablist">${tabButton("overview", "總覽", true)}${tabButton("terms", "條款與事件")}${tabButton("institutions", "法人")}${tabButton("company", "公司營運")}</nav>
     ${mobileArea("債券識別與資料完整性", "overview", identitySection(record, dataDate))}
     ${mobileArea("風險與缺漏提醒", "overview", riskSection(view, record?.fieldStates))}
@@ -152,6 +153,43 @@ function riskSection(view, fieldStates = {}) {
   const reminders = [...(Array.isArray(view.missingReasons) ? view.missingReasons : []), ...Object.entries(fieldStates).filter(([, value]) => value === "missing" || value === "date_mismatch").map(([key, value]) => `${key}: ${value}`)];
   return `<h3>風險與缺漏提醒</h3><p>${reminders.length ? text(reminders.join("；")) : "公開資料欄位已依資料日列示；仍請自行確認適用性。"}</p><p>${reminders.length ? MISSING_WORDING : "缺漏欄位不以零值代替。"}</p>`;
 }
+function statusMatrixSection(view, term, fieldStates = {}) {
+  const marketState = listedMarketState(view);
+  const valuationState = matrixState(fieldStates.valuation, [view.cbClose, view.conversionValue, view.premiumRate, view.valuationConversionPrice, view.valuationConversionPriceEffectiveDate]);
+  const outstandingState = matrixState(fieldStates.outstanding, [view.outstandingAmount, view.remainingRatio]);
+  const termsState = matrixState(null, [term.maturityDate, term.conversionEndDate]);
+  const completenessState = overallMatrixState(fieldStates);
+  const cards = [
+    matrixCard("現股／轉換價", marketState, `現股 ${value(view.stockClose)} ／轉換價 ${value(view.currentConversionPrice)}`, `${fact("現股價格", view.stockClose)}${fact("現股資料日", view.stockPriceDate)}${fact("目前轉換價", view.currentConversionPrice)}${fact("轉換價生效日", view.conversionPriceEffectiveDate)}${fact("估值資料狀態", fieldStates.valuation)}`),
+    matrixCard("CB／轉換價值", valuationState, `CB ${value(view.cbClose)} ／轉換價值 ${value(view.conversionValue)}`, `${fact("CB 收盤", view.cbClose)}${fact("CB 資料日", view.cbPriceDate)}${fact("估值 CB 收盤", view.valuationCbClose)}${fact("估值現股收盤", view.valuationStockClose)}${fact("估值採用轉換價", view.valuationConversionPrice)}${fact("估值轉換價生效日", view.valuationConversionPriceEffectiveDate)}${fact("轉換價值", view.conversionValue)}${fact("轉換溢價", view.premiumRate)}${fact("估值資料日", view.valuationDate)}`),
+    matrixCard("在外餘額", outstandingState, `餘額 ${value(view.outstandingAmount)} ／剩餘比例 ${value(view.remainingRatio)}`, `${fact("流通餘額", view.outstandingAmount)}${fact("剩餘單位", view.remainingUnits)}${fact("剩餘比例", view.remainingRatio)}${fact("餘額資料日", view.outstandingDataDate)}${fact("餘額資料狀態", fieldStates.outstanding)}`),
+    matrixCard("到期與轉換期間", termsState, `到期 ${value(term.maturityDate)} ／轉換截止 ${value(term.conversionEndDate)}`, `${fact("到期日", term.maturityDate)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("剩餘天數", view.daysToMaturity)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}`),
+    matrixCard("資料完整性", completenessState, completenessSummary(fieldStates), Object.entries(fieldStates ?? {}).map(([key, state]) => fact(key, state)).join("")),
+  ];
+  return `<section class="status-matrix" aria-label="資料狀態矩陣"><header><div><p class="section-number">DATA FIRST</p><h3>資料狀態矩陣</h3></div><p>只標示資料是否可核對；展開可查看原始值、資料日與判定依據。</p></header><div class="status-matrix-grid">${cards.join("")}</div></section>`;
+}
+function matrixCard(title, state, summary, evidence) {
+  return `<article class="status-matrix-card" data-matrix-state="${text(state.code)}"><header><h4>${text(title)}</h4><span>${text(state.label)}</span></header><p>${text(summary)}</p><details class="matrix-evidence"><summary>展開判定依據</summary><dl class="detail-facts">${evidence}</dl></details></article>`;
+}
+function matrixState(fieldState, values) {
+  if (fieldState === "date_mismatch") return { code: "mismatch", label: "資料日不一致" };
+  if (fieldState === "missing" || fieldState === "stale" || values.some((item) => item === null || item === undefined || item === "")) return { code: "pending", label: "待確認" };
+  return { code: "verified", label: "已核對" };
+}
+function listedMarketState(view) {
+  if ([view.stockClose, view.stockPriceDate, view.currentConversionPrice, view.conversionPriceEffectiveDate].some((item) => item === null || item === undefined || item === "")) return { code: "pending", label: "待確認" };
+  return { code: "listed", label: "已列示" };
+}
+function overallMatrixState(fieldStates = {}) {
+  const states = Object.values(fieldStates ?? {});
+  if (states.includes("date_mismatch")) return { code: "mismatch", label: "資料日不一致" };
+  if (states.length === 0 || states.some((item) => item === "missing" || item === "stale" || item === "accumulating")) return { code: "pending", label: "待確認" };
+  return { code: "verified", label: "已核對" };
+}
+function completenessSummary(fieldStates = {}) {
+  const states = Object.entries(fieldStates ?? {}).map(([key, state]) => `${key}: ${state}`);
+  return states.length ? states.join("；") : MISSING_WORDING;
+}
 function assessmentSection(title, cardClass, sections, labels) {
   const cards = Array.isArray(sections) ? sections : [];
   return `<h3>${text(title)}</h3><div class="detail-condition-grid">${cards.map((section) => `<article class="${cardClass}-card detail-condition-card"><header><h4>${text(labels[section.code] ?? section.code)}</h4><span>${text(stateLabel(section.state))}</span></header>${(Array.isArray(section.checks) ? section.checks : []).map(renderCheck).join("")}</article>`).join("")}</div>`;
@@ -219,4 +257,5 @@ function legacyAssessment(dataDate) {
 }
 function fact(label, value) { return `<div><dt>${text(label)}</dt><dd>${text(value ?? MISSING_WORDING)}</dd></div>`; }
 function stateLabel(value) { return STATE_LABELS[value] ?? value ?? "pending"; }
+function value(item) { return item ?? MISSING_WORDING; }
 function text(value) { return escapeHtml(value ?? MISSING_WORDING); }
