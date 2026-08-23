@@ -84,6 +84,19 @@ test("首頁介紹文字在更新資訊列之上仍保有獨立的閱讀層級",
   assert.match(css, /\.home-hero > p:not\(\.kicker\)\s*(?:,|\{)/);
 });
 
+test("首頁以已發布資料提供事件列與覆蓋狀態", async () => {
+  const [home, script, css] = await Promise.all([
+    readShowcaseFile("index.html"), readShowcaseFile("assets/home-page.js"), readShowcaseFile("assets/app.css"),
+  ]);
+  assert.match(home, /id="home-event-strip"/);
+  assert.match(home, /id="home-data-coverage"/);
+  assert.match(script, /buildPublicEventDigest/);
+  assert.match(script, /ipoEventsUrl/);
+  assert.match(script, /bondWorkbench/);
+  assert.match(css, /\.home-event-strip/);
+  assert.doesNotMatch(home + script, /排行|推薦|買進|賣出|目標價/);
+});
+
 test("IPO 兩頁使用可辨識的桌機資料表與行動卡片版面語意", async () => {
   const css = await readShowcaseFile("assets/app.css");
   for (const selector of ["ipo-radar-summary", "ipo-upcoming-grid", "ipo-stage-flow", "ipo-timeline-table", "ipo-card-list"]) {
