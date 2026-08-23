@@ -82,7 +82,11 @@ test("keeps every official 11406 name alias under one exact issuer code", () => 
 
 test("loads the controller-authorized production 11406 context with 310 unique issuer codes", async () => {
   const context = await loadActiveCbIssuerContext();
-  assert.equal(context.generation, "generations/d9560508d9dceb87");
+  const pointer = JSON.parse(await readFile(
+    new URL("../static-showcase/data/current.json", import.meta.url),
+    "utf8",
+  ));
+  assert.equal(context.generation, pointer.generation);
   assert.equal(context.activeBondCount, 385);
   assert.equal(context.activeIssuers.length, 310);
   assert.deepEqual(

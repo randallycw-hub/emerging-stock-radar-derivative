@@ -44,6 +44,7 @@ const ASSET_FILES = new Set([
   "ipo-data.js",
   "ipo-page.js",
   "ipo-radar-page.js",
+  "ipo-stage-filter.js",
   "site-shell.js",
   "table-sort.js",
 ]);

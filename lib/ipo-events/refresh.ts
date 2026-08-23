@@ -22,6 +22,7 @@ type FetchImplementation = (input: string, init?: RequestInit) => Promise<Respon
 interface RefreshOptions {
   fetchImpl: FetchImplementation;
   now: Date;
+  excludeCompleted?: boolean;
 }
 
 interface IpoEventsResponseOptions extends RefreshOptions {
@@ -41,7 +42,7 @@ export function shouldRefreshIpoSnapshot({ now, current }: { now: Date; current:
   return current.dataDate < taipei.date && taipei.hour >= 22 && (taipei.hour > 22 || taipei.minute >= 30);
 }
 
-export async function refreshOfficialIpoSnapshot({ fetchImpl, now }: RefreshOptions): Promise<IpoEventSnapshot> {
+export async function refreshOfficialIpoSnapshot({ fetchImpl, now, excludeCompleted = false }: RefreshOptions): Promise<IpoEventSnapshot> {
   const taipei = taipeiDateTime(now);
   const resources = {
     twseApplications: getApprovedIpoResource("twse-applications", taipei.year),
@@ -75,13 +76,12 @@ export async function refreshOfficialIpoSnapshot({ fetchImpl, now }: RefreshOpti
   const tpexListings = await loadRequiredSource("tpex-ipo-listings", resources.tpexIpoListings, fetchImpl, downloadedAt, (bytes) => parseTpexIpoListingSource(parseJson(bytes)));
   const auctions = await loadRequiredSource("twse-auctions", resources.twseAuctions, fetchImpl, downloadedAt, (bytes) => parseTwseAuctionSource(parseJson(bytes)));
   const publicOfferings = await loadRequiredSource("twse-public-offerings", resources.twsePublicOfferings, fetchImpl, downloadedAt, (bytes) => parseTwsePublicOfferingSource(parseJson(bytes)));
-
   return buildIpoEventSnapshot({
-    twseApplications: twseApplications.rows,
-    tpexApplications: tpexApplications.rows,
-    tpexListings: tpexListings.rows,
-    auctions: auctions.rows,
-    publicOfferings: publicOfferings.rows,
+    twseApplications: filterCompletedRows(twseApplications.rows, taipei.date, excludeCompleted),
+    tpexApplications: filterCompletedRows(tpexApplications.rows, taipei.date, excludeCompleted),
+    tpexListings: filterCompletedRows(tpexListings.rows, taipei.date, excludeCompleted),
+    auctions: filterCompletedRows(auctions.rows, taipei.date, excludeCompleted),
+    publicOfferings: filterCompletedRows(publicOfferings.rows, taipei.date, excludeCompleted),
     generatedAt: downloadedAt,
     dataDate: taipei.date,
     sourceManifest: [
@@ -92,6 +92,16 @@ export async function refreshOfficialIpoSnapshot({ fetchImpl, now }: RefreshOpti
       publicOfferings.manifest,
     ],
   });
+}
+
+function filterCompletedRows<T extends { listingDate: string | null }>(
+  rows: T[],
+  dataDate: string,
+  excludeCompleted: boolean,
+): T[] {
+  return excludeCompleted
+    ? rows.filter((row) => row.listingDate === null || row.listingDate > dataDate)
+    : rows;
 }
 
 export async function getIpoEventsResponse({

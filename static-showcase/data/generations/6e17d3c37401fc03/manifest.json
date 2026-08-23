@@ -1,0 +1,75 @@
+{
+  "kind": "official-source-snapshot",
+  "status": "official-static-snapshot",
+  "generatedAt": "2026-08-01",
+  "datasets": [
+    {
+      "datasetId": "11406",
+      "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+      "downloadedAt": "2026-08-01",
+      "sha256": "sha256:557ca7f01ff3ab9dec003c3d4e6be81b2df3e0e253b97b27c19ddd8bd1d95feb",
+      "rawBytes": 137370,
+      "rowCount": 415
+    },
+    {
+      "datasetId": "11586",
+      "sourceUrl": "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
+      "downloadedAt": "2026-08-01",
+      "sha256": "sha256:0373ecf384f13492d3be544a031a55ec6b04a36e2c3677345452454f07a01a4b",
+      "rawBytes": 80020,
+      "rowCount": 697
+    },
+    {
+      "datasetId": "94025",
+      "sourceUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
+      "downloadedAt": "2026-08-01",
+      "sha256": "sha256:f9bc7d149bb5a602fc798f0f1f5f007d0f8eff1aa6cd2a68f80084636249ac44",
+      "rawBytes": 66187,
+      "rowCount": 354
+    },
+    {
+      "datasetId": "emergingMarket",
+      "sourceUrl": "https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics",
+      "downloadedAt": "2026-08-01",
+      "sha256": "sha256:a777c20498f598423e239241cd096f816b00fc3ae4e6eb065e508e6ec2cf8439",
+      "rawBytes": 140849,
+      "rowCount": 359
+    }
+  ],
+  "emergingMarketUrl": "./data/generations/6e17d3c37401fc03/emerging-market.json",
+  "market": {
+    "status": "verified",
+    "generatedAt": "2026-08-01T09:45:08.084Z",
+    "requestedDate": "2026-07-31",
+    "latestCbPriceDate": "2026-07-31",
+    "latestStockPriceDate": "2026-07-31",
+    "dataDate": "2026-07-31",
+    "files": [
+      {
+        "name": "cb-quotes.json",
+        "sha256": "sha256:7b228f9d64473f3bc299c5e3d0f865b0abaaa90748bbea7fba3ba950f709c4b8",
+        "recordCount": 16176
+      },
+      {
+        "name": "stock-closes.json",
+        "sha256": "sha256:26e51df086ccce5fdb46c551e06eaff7c5bc1ac733ffd3a1868af1d1cbc93848",
+        "recordCount": 307
+      },
+      {
+        "name": "conversion-prices.json",
+        "sha256": "sha256:6a53db7768d9af31d94f54b2378d7d92e97cb46669f57caf83eb3272f747faf5",
+        "recordCount": 384
+      },
+      {
+        "name": "bond-market-view.json",
+        "sha256": "sha256:46957c74fa74cccdc6f37b4444bee9e29236ea89ec3431dcae88fb31cb9b7ad8",
+        "recordCount": 385
+      },
+      {
+        "name": "bond-market-history.json",
+        "sha256": "sha256:62471a90c83544c64caac324261844d6255fda82f43cae7baf0af86966432e56",
+        "recordCount": 4393
+      }
+    ]
+  }
+}

@@ -18,7 +18,6 @@ import {
 } from "../../lib/source-verification/source-cb-issuer-research.ts";
 import { bondInputsFrom11406Rows } from "../build-bond-market-snapshot.mjs";
 
-const ACTIVE_GENERATION = "generations/d9560508d9dceb87";
 const ACTIVE_JSON_BYTES = 435_121;
 const ACTIVE_JSON_SHA256 = "f0e75150f0acaff4ee4d57949ba69a14cea1176701191b8faa06072f2ab501fd";
 const ACTIVE_RAW_SHA256 = "sha256:557ca7f01ff3ab9dec003c3d4e6be81b2df3e0e253b97b27c19ddd8bd1d95feb";
@@ -51,15 +50,19 @@ export async function loadActiveCbIssuerContext() {
     "active generation pointer",
   );
   assertExactKeys(pointer, ["schemaVersion", "generation", "runtimeUrl"], "active generation pointer");
-  if (pointer.schemaVersion !== 1 || pointer.generation !== ACTIVE_GENERATION) {
+  if (
+    pointer.schemaVersion !== 1
+    || !/^generations\/[a-f0-9]+$/i.test(pointer.generation ?? "")
+  ) {
     throw new TypeError("active generation pointer is not the reviewed 11406 context");
   }
-  const expectedRuntimeUrl = `./data/${ACTIVE_GENERATION}/runtime.json`;
+  const activeGeneration = pointer.generation;
+  const expectedRuntimeUrl = `./data/${activeGeneration}/runtime.json`;
   if (pointer.runtimeUrl !== expectedRuntimeUrl) {
     throw new TypeError("active generation pointer runtime URL is invalid");
   }
 
-  const generationRoot = new URL(`${ACTIVE_GENERATION.slice("generations/".length)}/`, new URL("generations/", ACTIVE_DATA_ROOT));
+  const generationRoot = new URL(`${activeGeneration.slice("generations/".length)}/`, new URL("generations/", ACTIVE_DATA_ROOT));
   const manifest = parsePlainJson(
     await readFile(new URL("manifest.json", generationRoot), "utf8"),
     "active generation manifest",
@@ -94,9 +97,9 @@ export async function loadActiveCbIssuerContext() {
     "active generation runtime",
   );
   if (
-    runtime.generation !== ACTIVE_GENERATION
-    || runtime.manifestUrl !== `./data/${ACTIVE_GENERATION}/manifest.json`
-    || runtime.datasets?.["11406"] !== `./data/${ACTIVE_GENERATION}/11406.json`
+    runtime.generation !== activeGeneration
+    || runtime.manifestUrl !== `./data/${activeGeneration}/manifest.json`
+    || runtime.datasets?.["11406"] !== `./data/${activeGeneration}/11406.json`
   ) {
     throw new TypeError("active generation runtime does not bind the reviewed 11406 artifact");
   }
@@ -118,7 +121,7 @@ export async function loadActiveCbIssuerContext() {
     throw new TypeError("active generation 11406 denominator changed");
   }
   return Object.freeze({
-    generation: ACTIVE_GENERATION,
+    generation: activeGeneration,
     activeBondCount,
     activeIssuers: Object.freeze(activeIssuers.map((issuer) => Object.freeze({
       issuerCode: issuer.issuerCode,

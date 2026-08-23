@@ -1,5 +1,6 @@
 import { formatDate, formatNumber } from "./site-shell.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
+import { defaultIpoStage, matchesIpoStage, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 
 const stageLabels = {
   A: "A 送件觀察",
@@ -18,7 +19,7 @@ const state = {
   dataDate: null,
   query: "",
   market: "all",
-  stage: "all",
+  stage: "active",
   sortKey: "eventDate",
   direction: "asc",
   page: 1,
@@ -63,7 +64,7 @@ function initializeFromUrl() {
   const params = new URLSearchParams(location.search);
   state.query = params.get("q") ?? "";
   state.market = params.get("market") ?? "all";
-  state.stage = ["AB", "A", "B", "C", "D"].includes(params.get("stage")) ? params.get("stage") : "all";
+  state.stage = defaultIpoStage(params.get("stage"), { includeAB: true, activeOnly: true });
   state.sortKey = ["company", "stage", "eventDate", "days"].includes(params.get("sort")) ? params.get("sort") : "eventDate";
   state.direction = params.get("direction") === "desc" ? "desc" : "asc";
   state.page = positiveInteger(params.get("page"));
@@ -117,7 +118,7 @@ function bindControls() {
 }
 
 function applyStage(stage) {
-  state.stage = ["AB", "A", "B", "C", "D"].includes(stage) ? stage : "all";
+  state.stage = defaultIpoStage(stage, { includeAB: true, activeOnly: true });
   state.page = 1;
   syncUrl();
   applyStateToControls();
@@ -150,7 +151,7 @@ function filteredRows() {
   return state.rows.filter((row) => {
     const matchesQuery = !query || `${row.companyCode} ${row.companyName}`.toLocaleLowerCase("zh-Hant").includes(query);
     const matchesMarket = state.market === "all" || row.market === state.market;
-    const matchesStage = state.stage === "all" || (state.stage === "AB" ? ["A", "B"].includes(row.stage) : row.stage === state.stage);
+    const matchesStage = matchesIpoStage(row.stage, state.stage);
     return matchesQuery && matchesMarket && matchesStage;
   });
 }
@@ -223,7 +224,7 @@ function syncUrl() {
   const params = new URLSearchParams();
   if (state.query) params.set("q", state.query);
   if (state.market !== "all") params.set("market", state.market);
-  if (state.stage !== "all") params.set("stage", state.stage);
+  if (shouldWriteIpoStage(state.stage)) params.set("stage", state.stage);
   if (state.sortKey !== "eventDate") params.set("sort", state.sortKey);
   if (state.direction !== "asc") params.set("direction", state.direction);
   if (state.page > 1) params.set("page", String(state.page));
