@@ -68,3 +68,10 @@ No live source request, secret access, publish/deploy operation, push, amend, re
 - Failing tests added first: `page loader projects legacy market fields into canonical list fields until the next refresh`; initially all four canonical list values were `undefined`, then the quality assertion failed with `dataQuality: undefined`.
 - Fix: apply a list-boundary adapter only when the canonical properties are absent. It derives the legacy remaining ratio from the published reduction rate, preserves an explicit canonical value (including `null`), projects the already-published put/maturity event fields, and marks legacy quality complete only when a CB close exists and the published missing-reason array is explicitly empty.
 - Green output: `tests/static-showcase-bond-ui.test.mjs` passed `10/10` at BelowNormal priority. Browser reload of the existing active generation rendered `100%`, `賣回 497 天`, and `可用` in the first row, with no desktop horizontal overflow.
+
+## Post-visual-review correction
+
+- Independent review found that mixed-schema records could contain an explicit canonical event `null` alongside absent sibling event fields. The first adapter treated the three event fields as all-or-nothing and would overwrite that explicit `null`.
+- Failing test added first: `page loader preserves explicit canonical event nulls while filling only absent legacy fields`; RED output changed `nextEventType: null` to `put`.
+- Fix: guard each canonical event field independently with `Object.hasOwn`, preserving an explicit value including `null` and deriving only sibling fields that are absent.
+- Green output: `tests/static-showcase-bond-ui.test.mjs` passed `11/11` at BelowNormal priority.

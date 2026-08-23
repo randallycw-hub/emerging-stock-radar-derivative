@@ -167,6 +167,32 @@ test("page loader projects legacy market fields into canonical list fields until
   });
 });
 
+test("page loader preserves explicit canonical event nulls while filling only absent legacy fields", async () => {
+  const { buildBondListRecords } = await import("../static-showcase/assets/bonds-page.js");
+  const [record] = buildBondListRecords({
+    views: [{
+      bondCode: "90002",
+      issuerCode: "9000",
+      bondName: "混合格式二",
+      nextEventType: null,
+      nextPutDate: "2027-09-21",
+      daysToNextPut: 394,
+      maturityDate: "2028-12-18",
+      daysToMaturity: 848,
+    }],
+  });
+
+  assert.deepEqual({
+    nextEventType: record.nextEventType,
+    nextEventDate: record.nextEventDate,
+    daysToNextEvent: record.daysToNextEvent,
+  }, {
+    nextEventType: null,
+    nextEventDate: "2027-09-21",
+    daysToNextEvent: 394,
+  });
+});
+
 test("bond list presentation uses remaining ratio and canonical redemption event fields", async () => {
   const { bondListPresentation } = await import("../static-showcase/assets/bonds-page.js");
   assert.deepEqual(bondListPresentation({

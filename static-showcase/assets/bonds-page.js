@@ -221,8 +221,12 @@ function canonicalListFieldsForLegacyView(view) {
       || !Number.isFinite(reduction)
         ? null
         : String(Number((100 - reduction).toFixed(8)));
-  const hasCanonicalEvent = ["nextEventType", "nextEventDate", "daysToNextEvent"].every(has);
   const usesPut = Boolean(view.nextPutDate);
+  const legacyEventType = usesPut ? "put" : "maturity";
+  const legacyEventDate = usesPut ? view.nextPutDate : view.maturityDate ?? null;
+  const legacyDaysToNextEvent = usesPut
+    ? view.daysToNextPut ?? null
+    : view.daysToMaturity ?? null;
   const dataQuality = has("dataQuality")
     ? view.dataQuality
     : view.cbClose !== null
@@ -234,15 +238,15 @@ function canonicalListFieldsForLegacyView(view) {
         : "partial";
   return {
     remainingRatio,
-    nextEventType: hasCanonicalEvent
+    nextEventType: has("nextEventType")
       ? view.nextEventType
-      : usesPut ? "put" : "maturity",
-    nextEventDate: hasCanonicalEvent
+      : legacyEventType,
+    nextEventDate: has("nextEventDate")
       ? view.nextEventDate
-      : usesPut ? view.nextPutDate : view.maturityDate ?? null,
-    daysToNextEvent: hasCanonicalEvent
+      : legacyEventDate,
+    daysToNextEvent: has("daysToNextEvent")
       ? view.daysToNextEvent
-      : usesPut ? view.daysToNextPut ?? null : view.daysToMaturity ?? null,
+      : legacyDaysToNextEvent,
     dataQuality,
   };
 }
