@@ -92,6 +92,17 @@ const CB_SUPPLEMENTAL_RESOURCES = [
   },
 ];
 
+const WORKBENCH_EVENT_SOURCES = Object.freeze({
+  terms: {
+    sourceId: "11406",
+    sourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+  },
+  redemption: {
+    sourceId: "tpex-cb-redemption-announcements",
+    sourceUrl: "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+  },
+});
+
 export async function buildBondMarketSnapshot(options = {}) {
   assertPublicOptions(options, [
     "outputDir",
@@ -223,13 +234,23 @@ export async function buildBondMarketSnapshot(options = {}) {
     ...term,
     unitFaceValueTwd: supplemental.unitFaceValueTwd,
   }));
+  const currentEvents = buildBondWorkbenchEvents({
+    terms: currentTerms,
+    supplemental,
+  });
+  const currentSourceStates = buildWorkbenchSourceStates({
+    views,
+    supplemental,
+    issuerResearch,
+  });
   const workbench = buildBondWorkbenchSnapshot({
     generatedAt: generatedDate.toISOString(),
     dataDate,
     asOfDate: collected.requestedDate ?? asOfDate,
     currentTerms,
     currentViews: views,
-    currentEvents: [],
+    currentEvents,
+    currentSourceStates,
     currentAssessments: buildCandidateAssessments(views, history),
     ...(previousWorkbench === undefined ? {} : { previous: previousWorkbench }),
   });
@@ -766,8 +787,73 @@ async function verifyStagedFiles(
     dataDate: manifest?.market?.dataDate,
     sourceStateSummary: manifest?.market?.workbenchSourceStateSummary,
     previous: previousWorkbench,
-    events: [],
   });
+}
+
+export function buildBondWorkbenchEvents({ terms, supplemental }) {
+  const knownBondCodes = new Set(terms.map((term) => term.bondCode));
+  const events = [];
+  for (const term of terms) {
+    if (term.listingDate !== null) {
+      events.push(termEvent(term, "listing", term.listingDate, "掛牌日"));
+    }
+    for (const date of term.putDates) {
+      events.push(termEvent(term, "put", date, "賣回權日期"));
+    }
+    events.push(termEvent(term, "maturity", term.maturityDate, "到期日"));
+  }
+  for (const redemption of supplemental.redemptions) {
+    if (!knownBondCodes.has(redemption.bondCode)) continue;
+    events.push({
+      bondCode: redemption.bondCode,
+      eventId: `redemption:${redemption.announcementDate}:${redemption.delistingDate}`,
+      type: "redemption",
+      date: redemption.announcementDate,
+      title: `${redemption.bondName}贖回公告`,
+      ...WORKBENCH_EVENT_SOURCES.redemption,
+    });
+    events.push({
+      bondCode: redemption.bondCode,
+      eventId: `delisting:${redemption.delistingDate}`,
+      type: "delisting",
+      date: redemption.delistingDate,
+      title: `${redemption.bondName}終止櫃檯買賣`,
+      ...WORKBENCH_EVENT_SOURCES.redemption,
+    });
+  }
+  return events.sort((left, right) => (
+    left.bondCode.localeCompare(right.bondCode)
+    || left.date.localeCompare(right.date)
+    || left.eventId.localeCompare(right.eventId)
+  ));
+}
+
+export function buildWorkbenchSourceStates({ views, supplemental, issuerResearch }) {
+  return views.map((view) => ({
+    bondCode: view.bondCode,
+    institutions: supplemental.sources.institution.state,
+    company: issuerSourceState(view, issuerResearch),
+    events: supplemental.sources.redemption.state,
+  }));
+}
+
+function issuerSourceState(view, issuerResearch) {
+  if (view.issuerResearch === null) return "unavailable";
+  const status = issuerResearch.sources[view.issuerResearch.market]?.status;
+  if (status === "current") return "fresh";
+  if (status === "stale") return "stale";
+  return "unavailable";
+}
+
+function termEvent(term, type, date, label) {
+  return {
+    bondCode: term.bondCode,
+    eventId: `11406:${type}:${date}`,
+    type,
+    date,
+    title: `${term.bondName}${label}`,
+    ...WORKBENCH_EVENT_SOURCES.terms,
+  };
 }
 
 export function verifyWorkbenchConsistency({
@@ -781,7 +867,6 @@ export function verifyWorkbenchConsistency({
   dataDate,
   sourceStateSummary,
   previous,
-  events = [],
 }) {
   const snapshot = parseBondWorkbenchSnapshot(workbench);
   const parsedHistory = parseBondMarketHistory(history);
@@ -825,7 +910,12 @@ export function verifyWorkbenchConsistency({
     asOfDate: requestedDate,
     currentTerms: terms,
     currentViews: views,
-    currentEvents: events,
+    currentEvents: buildBondWorkbenchEvents({ terms, supplemental }),
+    currentSourceStates: buildWorkbenchSourceStates({
+      views,
+      supplemental,
+      issuerResearch,
+    }),
     currentAssessments: buildCandidateAssessments(views, parsedHistory),
     previous: expectedPrevious,
   });

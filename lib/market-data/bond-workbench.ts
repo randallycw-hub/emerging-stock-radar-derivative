@@ -27,6 +27,14 @@ const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/;
 const SIGNED_INTEGER = /^-?(?:0|[1-9]\d*)$/;
 const EVENT_TYPES = new Set<BondWorkbenchEvent["type"]>(["conversion_adjustment", "conversion_suspension", "ex_dividend", "put", "redemption", "maturity", "listing", "delisting"]);
 const FIELD_STATES = new Set<BondFieldState>(["complete", "stale", "date_mismatch", "missing", "accumulating"]);
+const OPTIONAL_SOURCE_STATES = new Set(["fresh", "stale", "unavailable"] as const);
+type OptionalSourceState = "fresh" | "stale" | "unavailable";
+type WorkbenchSourceStates = {
+  bondCode: string;
+  institutions: OptionalSourceState;
+  company: OptionalSourceState;
+  events: OptionalSourceState;
+};
 const ARCHIVE_REASONS = new Set<BondArchiveReason>(["matured", "redeemed", "balance_exhausted", "removed_from_official_roster"]);
 
 export function parseBondWorkbenchSnapshot(value: unknown): BondWorkbenchSnapshot {
@@ -46,11 +54,12 @@ export function buildBondWorkbenchSnapshot(input: {
   currentTerms: readonly BondTermSummary[];
   currentViews: readonly BondMarketView[];
   currentEvents: readonly BondWorkbenchEvent[];
+  currentSourceStates?: readonly WorkbenchSourceStates[];
   currentAssessments?: readonly { bondCode: string; assessment: BondAssessment }[];
   previous?: BondWorkbenchSnapshot;
 }): BondWorkbenchSnapshot {
   const options = requireRecord(input, "bond workbench input");
-  assertExactKeys(options, ["generatedAt", "dataDate", "asOfDate", "currentTerms", "currentViews", "currentEvents", "currentAssessments", "previous"].filter((key) => key in options), "bond workbench input");
+  assertExactKeys(options, ["generatedAt", "dataDate", "asOfDate", "currentTerms", "currentViews", "currentEvents", "currentSourceStates", "currentAssessments", "previous"].filter((key) => key in options), "bond workbench input");
   assertTimestamp(input.generatedAt, "generatedAt");
   assertDate(input.dataDate, "dataDate");
   assertDate(input.asOfDate, "asOfDate");
@@ -58,11 +67,22 @@ export function buildBondWorkbenchSnapshot(input: {
   const terms = parseTerms(input.currentTerms);
   const views = parseViews(input.currentViews);
   const events = parseEvents(input.currentEvents);
+  const sourceStates = input.currentSourceStates === undefined
+    ? []
+    : parseSourceStates(input.currentSourceStates);
   const assessments = parseAssessments(input.currentAssessments ?? [], "current assessments");
   const termsByCode = indexByCode(terms, "current terms");
   const viewsByCode = indexByCode(views, "current views");
   const assessmentsByCode = indexByCode(assessments, "current assessments");
+  const sourceStatesByCode = indexByCode(sourceStates, "current source states");
   if ([...assessmentsByCode.keys()].some((code) => !viewsByCode.has(code))) throw new TypeError("assessment has unknown bond code");
+  if (
+    sourceStates.length > 0
+    && (
+      sourceStatesByCode.size !== viewsByCode.size
+      || [...viewsByCode.keys()].some((code) => !sourceStatesByCode.has(code))
+    )
+  ) throw new TypeError("current source states must match current view bond codes");
   if (termsByCode.size !== viewsByCode.size || [...termsByCode.keys()].some((code) => !viewsByCode.has(code))) {
     throw new TypeError("current terms and views must have matching bond codes");
   }
@@ -93,7 +113,12 @@ export function buildBondWorkbenchSnapshot(input: {
       term: currentTerm,
       view: currentView,
       events: (eventsByCode.get(bondCode) ?? []).map(cloneEvent),
-      fieldStates: buildFieldStates(currentView, input.dataDate, eventsByCode.get(bondCode) ?? []),
+      fieldStates: buildFieldStates(
+        currentView,
+        input.dataDate,
+        eventsByCode.get(bondCode) ?? [],
+        sourceStatesByCode.get(bondCode),
+      ),
       assessment: assessmentsByCode.get(bondCode)?.assessment ?? defaultAssessment(currentView),
     });
   }
@@ -120,17 +145,44 @@ function archiveReasonFor(term: BondTermSummary, view: BondMarketView, asOfDate:
   return null;
 }
 
-function buildFieldStates(view: BondMarketView, dataDate: string, events: readonly BondWorkbenchEvent[]): BondWorkbenchFieldStates {
+function buildFieldStates(
+  view: BondMarketView,
+  dataDate: string,
+  events: readonly BondWorkbenchEvent[],
+  sources?: WorkbenchSourceStates,
+): BondWorkbenchFieldStates {
   const dated = (value: string | null): BondFieldState => value === null ? "missing" : value === dataDate ? "complete" : "stale";
   return {
     price: view.cbClose === null ? "missing" : view.staleCbPrice ? "stale" : dated(view.cbPriceDate),
     valuation: view.dataQuality === "date_mismatch" ? "date_mismatch" : dated(view.valuationDate),
     outstanding: view.dataQuality === "date_mismatch" ? "date_mismatch" : view.outstandingAmount === null ? "missing" : dated(view.outstandingDataDate),
-    institutions: view.institutionNetUnits === null ? "missing" : dated(view.institutionDataDate),
-    company: view.issuerResearch === null ? "missing" : "complete",
-    events: events.length === 0 ? "missing" : "complete",
+    institutions: optionalSourceFieldState(
+      sources?.institutions,
+      view.institutionNetUnits !== null,
+      () => dated(view.institutionDataDate),
+    ),
+    company: optionalSourceFieldState(
+      sources?.company,
+      view.issuerResearch !== null,
+      () => "complete",
+    ),
+    events: optionalSourceFieldState(
+      sources?.events,
+      events.length > 0,
+      () => "complete",
+    ),
     history: "accumulating",
   };
+}
+
+function optionalSourceFieldState(
+  source: OptionalSourceState | undefined,
+  hasValue: boolean,
+  whenFresh: () => BondFieldState,
+): BondFieldState {
+  if (!hasValue || source === "unavailable") return "missing";
+  if (source === "stale") return "stale";
+  return whenFresh();
 }
 
 function parseRecords(value: unknown): BondWorkbenchRecord[] {
@@ -380,6 +432,29 @@ function parseEvents(value: unknown): BondWorkbenchEvent[] {
   });
   if (new Set(events.map((event) => `${event.bondCode}\u001f${event.eventId}`)).size !== events.length) throw new TypeError("duplicate bond workbench event id");
   return events.sort((left, right) => left.bondCode.localeCompare(right.bondCode) || left.date.localeCompare(right.date) || left.eventId.localeCompare(right.eventId));
+}
+
+function parseSourceStates(value: unknown): WorkbenchSourceStates[] {
+  assertDenseArray(value, "current source states");
+  return value.map((entry, index) => {
+    const state = requireRecord(entry, `current source state ${index}`);
+    assertExactKeys(
+      state,
+      ["bondCode", "institutions", "company", "events"],
+      `current source state ${index}`,
+    );
+    for (const key of ["institutions", "company", "events"] as const) {
+      if (!OPTIONAL_SOURCE_STATES.has(state[key] as OptionalSourceState)) {
+        throw new TypeError(`current source state ${index}.${key} is invalid`);
+      }
+    }
+    return {
+      bondCode: readBondCode(state.bondCode, `current source state ${index}.bondCode`),
+      institutions: state.institutions as OptionalSourceState,
+      company: state.company as OptionalSourceState,
+      events: state.events as OptionalSourceState,
+    };
+  });
 }
 
 function parseFieldStates(value: unknown, name: string): BondWorkbenchFieldStates {

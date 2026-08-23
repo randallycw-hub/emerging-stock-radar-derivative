@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
@@ -48,6 +49,19 @@ function historyPoint(patch = {}) {
     effectiveConversionPrice: null,
     conversionValue: null,
     premiumRate: null,
+    ...patch,
+  };
+}
+
+function legacyHistoryPoint(patch = {}) {
+  return {
+    bondCode: "35221",
+    date: "2026-06-30",
+    cbClose: "101.5",
+    stockClose: "52.3",
+    effectiveConversionPrice: "44.2",
+    conversionValue: "118.3258",
+    premiumRate: "-14.2201",
     ...patch,
   };
 }
@@ -432,6 +446,165 @@ test("refresh reads the prior generation bond history before staging a replaceme
   assert.deepEqual(await readPublishedBondHistory(dataRoot), history);
 });
 
+test("published history verifies and migrates a declared legacy active generation before merging cache", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-legacy-history-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  const cachePath = join(root, ".cache", "published-history", "bond-market-history.json");
+  const legacy = [legacyHistoryPoint(), legacyHistoryPoint({ bondCode: "35222" })];
+  const legacyText = `${JSON.stringify(legacy)}\n`;
+  await mkdir(generation, { recursive: true });
+  await mkdir(join(root, ".cache", "published-history"), { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
+    "utf8",
+  );
+  await writeFile(join(generation, "bond-market-history.json"), legacyText, "utf8");
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({
+      market: {
+        status: "verified",
+        files: [{
+          name: "bond-market-history.json",
+          sha256: `sha256:${createHash("sha256").update(legacyText).digest("hex")}`,
+          rawBytes: Buffer.byteLength(legacyText),
+          recordCount: legacy.length,
+        }],
+      },
+    }),
+    "utf8",
+  );
+  await writeFile(
+    cachePath,
+    JSON.stringify([
+      historyPoint({ bondCode: "35221", cbClose: "101.5", stockClose: "52.3", effectiveConversionPrice: "44.2", conversionValue: "118.3258", premiumRate: "-14.2201" }),
+      historyPoint({ bondCode: "35223", date: "2026-07-01", cbClose: "102" }),
+    ]),
+    "utf8",
+  );
+
+  assert.deepEqual(await readPublishedBondHistory(dataRoot, cachePath), [
+    historyPoint({ cbClose: "101.5", stockClose: "52.3", effectiveConversionPrice: "44.2", conversionValue: "118.3258", premiumRate: "-14.2201" }),
+    historyPoint({ bondCode: "35222", cbClose: "101.5", stockClose: "52.3", effectiveConversionPrice: "44.2", conversionValue: "118.3258", premiumRate: "-14.2201" }),
+    historyPoint({ bondCode: "35223", date: "2026-07-01", cbClose: "102" }),
+  ]);
+});
+
+test("checked-in active legacy history preserves all 4,393 identities and values during migration", async () => {
+  const dataRoot = fileURLToPath(new URL("../static-showcase/data/", import.meta.url));
+  const pointer = JSON.parse(await readFile(join(dataRoot, "current.json"), "utf8"));
+  const legacy = JSON.parse(await readFile(
+    join(dataRoot, pointer.generation, "bond-market-history.json"),
+    "utf8",
+  ));
+  const migrated = await readPublishedBondHistory(dataRoot);
+  assert.equal(legacy.length, 4_393);
+  assert.equal(migrated.length, 4_393);
+  assert.deepEqual(
+    migrated.map(({ bondCode, date }) => `${bondCode}:${date}`),
+    legacy.map(({ bondCode, date }) => `${bondCode}:${date}`).sort(),
+  );
+  const migratedByIdentity = new Map(migrated.map((point) => [
+    `${point.bondCode}:${point.date}`,
+    point,
+  ]));
+  for (const point of legacy) {
+    const migratedPoint = migratedByIdentity.get(`${point.bondCode}:${point.date}`);
+    assert.deepEqual(
+      {
+        bondCode: migratedPoint.bondCode,
+        date: migratedPoint.date,
+        cbClose: migratedPoint.cbClose,
+        stockClose: migratedPoint.stockClose,
+        effectiveConversionPrice: migratedPoint.effectiveConversionPrice,
+        conversionValue: migratedPoint.conversionValue,
+        premiumRate: migratedPoint.premiumRate,
+      },
+      point,
+    );
+    assert.deepEqual(
+      {
+        cbOpen: migratedPoint.cbOpen,
+        cbHigh: migratedPoint.cbHigh,
+        cbLow: migratedPoint.cbLow,
+        cbAverage: migratedPoint.cbAverage,
+        cbChange: migratedPoint.cbChange,
+        cbTradingUnits: migratedPoint.cbTradingUnits,
+        cbTurnover: migratedPoint.cbTurnover,
+      },
+      {
+        cbOpen: null,
+        cbHigh: null,
+        cbLow: null,
+        cbAverage: null,
+        cbChange: null,
+        cbTradingUnits: null,
+        cbTurnover: null,
+      },
+    );
+  }
+});
+
+test("published legacy history verifies manifest count before migration", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-legacy-count-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  const legacyText = `${JSON.stringify([legacyHistoryPoint()])}\n`;
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
+    "utf8",
+  );
+  await writeFile(join(generation, "bond-market-history.json"), legacyText, "utf8");
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({ market: { files: [{
+      name: "bond-market-history.json",
+      sha256: `sha256:${createHash("sha256").update(legacyText).digest("hex")}`,
+      recordCount: 2,
+    }] } }),
+    "utf8",
+  );
+
+  await assert.rejects(
+    readPublishedBondHistory(dataRoot),
+    /manifest integrity is invalid/,
+  );
+});
+
+test("published history rejects conflicting cache values for the same active legacy identity", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-history-conflict-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  const cachePath = join(root, "cache.json");
+  const legacyText = `${JSON.stringify([legacyHistoryPoint()])}\n`;
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
+    "utf8",
+  );
+  await writeFile(join(generation, "bond-market-history.json"), legacyText, "utf8");
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({ market: { files: [{
+      name: "bond-market-history.json",
+      sha256: `sha256:${createHash("sha256").update(legacyText).digest("hex")}`,
+      recordCount: 1,
+    }] } }),
+    "utf8",
+  );
+  await writeFile(cachePath, JSON.stringify([historyPoint({ cbClose: "999" })]), "utf8");
+
+  await assert.rejects(
+    readPublishedBondHistory(dataRoot, cachePath),
+    /CONFLICTING_PUBLISHED_BOND_HISTORY.*35221.*2026-06-30/,
+  );
+});
+
 for (const manifestFailure of ["missing", "corrupt"]) {
   test(`refresh fails before fetch when the active generation manifest is ${manifestFailure}`, async () => {
     await withTemporaryShowcase(async (root) => {
@@ -717,7 +890,7 @@ test("refresh merges a restored CI history cache with the committed generation",
   await writeFile(
     cachePath,
     JSON.stringify([
-      historyPoint({ cbClose: "101" }),
+      historyPoint(),
       historyPoint({ date: "2026-07-31", cbClose: "102" }),
     ]),
     "utf8",

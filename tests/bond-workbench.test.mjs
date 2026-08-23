@@ -137,6 +137,63 @@ test("builds a sorted, defensive active snapshot keyed only by bond code", () =>
   assert.throws(() => { result.records[0].term.bondName = "mutated"; }, TypeError);
 });
 
+test("optional source outcomes override value presence in workbench field states", () => {
+  const issuerResearch = {
+    market: "listed",
+    industryName: "觀光餐旅",
+    revenueMonth: "2026-07",
+    sourcePublishedOn: "2026-08-11",
+    revenueUnit: "仟元",
+    currentMonthRevenue: "100",
+    monthOverMonthPercent: "1",
+    yearOverYearPercent: "2",
+    cumulativeRevenue: "700",
+    cumulativeYearOverYearPercent: "3",
+  };
+  const currentViews = [view("35221", {
+    issuerResearch,
+    institutionDataDate: dataDate,
+    institutionNetUnits: "10",
+  })];
+  const currentEvents = [event("35221")];
+  const stale = buildBondWorkbenchSnapshot(input({
+    currentViews,
+    currentEvents,
+    currentSourceStates: [{
+      bondCode: "35221",
+      institutions: "stale",
+      company: "stale",
+      events: "stale",
+    }],
+  }));
+  assert.deepEqual(
+    stale.records[0].fieldStates,
+    {
+      price: "complete",
+      valuation: "complete",
+      outstanding: "complete",
+      institutions: "stale",
+      company: "stale",
+      events: "stale",
+      history: "accumulating",
+    },
+  );
+
+  const unavailable = buildBondWorkbenchSnapshot(input({
+    currentViews,
+    currentEvents,
+    currentSourceStates: [{
+      bondCode: "35221",
+      institutions: "unavailable",
+      company: "unavailable",
+      events: "unavailable",
+    }],
+  }));
+  assert.equal(unavailable.records[0].fieldStates.institutions, "missing");
+  assert.equal(unavailable.records[0].fieldStates.company, "missing");
+  assert.equal(unavailable.records[0].fieldStates.events, "missing");
+});
+
 test("preserves a supplied strict assessment and rejects unmarked cross-date strategy checks", () => {
   const verified = evaluateBondAssessment({
     view: view(), history: [], spreadPercent: "0.8", spreadDataDate: dataDate,

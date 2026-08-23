@@ -104,6 +104,13 @@ function buildView(
     .sort((left, right) => right.effectiveDate.localeCompare(left.effectiveDate));
 
   const latestCb = cbQuotes[0];
+  const sameDayCbWithoutClose = input.cbQuotes.some((quote) => (
+    quote.bondCode === bond.bondCode
+    && quote.tradingMode === "equivalent"
+    && quote.tradingDate === input.asOfDate
+    && quote.close === null
+    && quote.tradingUnits === "0"
+  ));
   const latestStock = stockCloses[0];
   const latestConversion = conversionPrices[0];
   const stockByDate = new Map(
@@ -146,7 +153,7 @@ function buildView(
   }
 
   const missingReasons: string[] = [];
-  if (!latestCb) missingReasons.push("NO_CB_CLOSE");
+  if (!latestCb || sameDayCbWithoutClose) missingReasons.push("NO_CB_CLOSE");
   if (!latestStock) missingReasons.push("NO_STOCK_CLOSE");
   if (!latestConversion) missingReasons.push("NO_CONVERSION_PRICE");
   if (!valuationCb || !valuationStock) {

@@ -34,7 +34,9 @@ import { parseConversionIndex } from "../lib/source-verification/source-cb-marke
 import { normalize94025Row, parse94025Csv } from "../lib/source-verification/source-94025.ts";
 import {
   bondInputsFrom11406Rows,
+  buildBondWorkbenchEvents,
   buildBondMarketSnapshot,
+  buildWorkbenchSourceStates,
   summarizeWorkbenchSourceStates,
   verifyIssuerResearchViewConsistency,
   verifySupplementalViewConsistency,
@@ -1081,7 +1083,12 @@ async function buildIsolatedMarketCandidate({
     asOfDate: "2026-07-30",
     currentTerms: terms,
     currentViews: views,
-    currentEvents: [],
+    currentEvents: buildBondWorkbenchEvents({ terms, supplemental }),
+    currentSourceStates: buildWorkbenchSourceStates({
+      views,
+      supplemental,
+      issuerResearch: snapshot,
+    }),
     ...(previous === undefined ? {} : { previous }),
   });
   const workbenchText = `${JSON.stringify(workbench, null, 2)}\n`;
@@ -1529,16 +1536,16 @@ async function readPublishedBondHistoryFromActive(active, cachePath) {
   const histories = [];
   if (active !== undefined) {
     try {
-      const { text, value } = await readHistoryFile(
+      const { text, raw } = await readHistoryJson(
         join(active.root, "bond-market-history.json"),
       );
       validatePriorManifestFile(
         active.manifest,
         "bond-market-history.json",
         text,
-        value.length,
+        Array.isArray(raw) ? raw.length : undefined,
       );
-      histories.push(value);
+      histories.push(parsePublishedHistory(raw, { allowLegacy: true }));
     } catch (error) {
       if (error?.code !== "ENOENT") throw error;
       if (declaresFile(active.manifest, "bond-market-history.json")) {
@@ -1548,7 +1555,7 @@ async function readPublishedBondHistoryFromActive(active, cachePath) {
   }
   if (cachePath) {
     try {
-      histories.unshift((await readHistoryFile(cachePath)).value);
+      histories.unshift(parsePublishedHistory((await readHistoryJson(cachePath)).raw));
     } catch (error) {
       if (error?.code !== "ENOENT") throw error;
     }
@@ -1564,7 +1571,14 @@ async function readPublishedBondHistoryFromActive(active, cachePath) {
       ) {
         throw new Error("INVALID_PUBLISHED_BOND_HISTORY");
       }
-      merged.set(`${row.bondCode}\u0000${row.date}`, row);
+      const key = `${row.bondCode}\u0000${row.date}`;
+      const existing = merged.get(key);
+      if (existing !== undefined && !equalJson(existing, row)) {
+        throw new Error(
+          `CONFLICTING_PUBLISHED_BOND_HISTORY:${row.bondCode}:${row.date}`,
+        );
+      }
+      merged.set(key, row);
     }
   }
   return [...merged.values()].sort((left, right) =>
@@ -1682,14 +1696,57 @@ async function readPublishedCbSupplementalFromActive(active) {
   }
 }
 
-async function readHistoryFile(path) {
+async function readHistoryJson(path) {
   const text = await readFile(path, "utf8");
-  const history = JSON.parse(text);
+  return { text, raw: JSON.parse(text) };
+}
+
+const LEGACY_HISTORY_POINT_KEYS = Object.freeze([
+  "bondCode",
+  "date",
+  "cbClose",
+  "stockClose",
+  "effectiveConversionPrice",
+  "conversionValue",
+  "premiumRate",
+]);
+
+function parsePublishedHistory(history, { allowLegacy = false } = {}) {
+  const compatibleHistory = allowLegacy && Array.isArray(history)
+    ? history.map((point) => migrateLegacyHistoryPoint(point))
+    : history;
   try {
-    return { text, value: parseBondMarketHistory(history) };
+    return parseBondMarketHistory(compatibleHistory);
   } catch (error) {
     throw new Error(`INVALID_PUBLISHED_BOND_HISTORY:${error.message}`);
   }
+}
+
+function migrateLegacyHistoryPoint(point) {
+  if (
+    point === null
+    || typeof point !== "object"
+    || Array.isArray(point)
+    || !equalJson(Object.keys(point).sort(), [...LEGACY_HISTORY_POINT_KEYS].sort())
+  ) {
+    return point;
+  }
+  return {
+    bondCode: point.bondCode,
+    date: point.date,
+    cbOpen: null,
+    cbHigh: null,
+    cbLow: null,
+    cbClose: point.cbClose,
+    cbAverage: null,
+    cbChange: null,
+    cbTradingUnits: null,
+    cbTurnover: null,
+    stockClose: point.stockClose,
+    effectiveConversionPrice: point.effectiveConversionPrice,
+    conversionValue: point.conversionValue,
+    premiumRate: point.premiumRate,
+  };
 }
 
 async function readActiveGeneration(dataDirectory) {
@@ -2003,7 +2060,6 @@ async function verifyStagedGeneration(stagingDataDirectory, previousWorkbench) {
       dataDate: manifest.market.dataDate,
       sourceStateSummary: manifest.market.workbenchSourceStateSummary,
       previous: previousWorkbench,
-      events: [],
     });
     if (JSON.stringify(workbenchEntry.sourceStateSummary)
       !== JSON.stringify(manifest.market.workbenchSourceStateSummary)) {

@@ -28,17 +28,6 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   ]) {
     assert.match(bondsHtml + js, new RegExp(label));
   }
-  for (const section of [
-    "交易摘要",
-    "價格日期與估值日",
-    "價格走勢",
-    "轉換與餘額",
-    "契約生命週期",
-    "發行條款",
-    "公告與文件",
-  ]) {
-    assert.match(js, new RegExp(section));
-  }
   assert.match(home, /assets\/app\.css/);
   assert.doesNotMatch(home, /assets\/(?:app|bonds-page)\.js/);
   assert.match(bondsHtml, /id="bond-search"/);
@@ -51,12 +40,14 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(bondsHtml, /assets\/bonds-page\.js/);
   assert.doesNotMatch(bondsHtml, /href="\.\/methodology\.html"/);
   assert.match(bondsHtml, /aria-label="可轉債分頁"/);
+  assert.match(bondsHtml, /data-sort-key="remainingRatio"/);
+  assert.match(bondsHtml, /data-sort-key="nextEventDate"/);
+  assert.doesNotMatch(bondsHtml, /data-sort-key="outstandingReductionRate"/);
+  assert.doesNotMatch(bondsHtml, /data-sort-key="nextPutDate"/);
   assert.match(js, /URLSearchParams/);
   assert.match(js, /maturityDate/);
   assert.match(js, /daysToMaturity/);
   assert.match(js, /cbPriceDate/);
-  assert.match(js, /官方目前餘額/);
-  assert.match(js, /共同估值日/);
   assert.match(js, /value === null \|\| value === undefined/);
   assert.match(js, /bond/);
   assert.match(js, /bond-list-page/);
@@ -79,10 +70,8 @@ test("bond page exposes the complete sortable CB workbench", async () => {
     /const history =[\s\S]*history\.replaceState/,
     "區域資料變數不可遮蔽瀏覽器 history 物件",
   );
-  assert.match(js, /drawHistoryChart/);
+  assert.doesNotMatch(js, /function renderWorkbench|function drawHistoryChart/);
   assert.match(js, /bindBondDetail\(target, closeDetail, \{ history: state\.history\.filter/);
-  assert.match(js, /data-history-range="1M"/);
-  assert.match(js, /<canvas[^>]+bond-history-chart/);
   assert.match(detailJs, /function noAdviceViolations/);
   assert.match(detailJs, /FORBIDDEN_UI_PATTERNS/);
   assert.match(detailJs, /bond-candlestick/);
@@ -144,6 +133,31 @@ test("page loader projects archived workbench identities into the searchable lis
     { bondCode: "90001", issuerName: "公開發行人", archived: true },
     { bondCode: "90002", issuerName: "公開發行人", archived: false },
   ]);
+});
+
+test("bond list presentation uses remaining ratio and canonical redemption event fields", async () => {
+  const { bondListPresentation } = await import("../static-showcase/assets/bonds-page.js");
+  assert.deepEqual(bondListPresentation({
+    remainingRatio: "82.07",
+    nextEventType: "redemption",
+    nextEventDate: "2026-09-21",
+    daysToNextEvent: 53,
+    dataQuality: "complete",
+    missingReasons: [],
+  }), {
+    remainingRatio: "82.07%",
+    eventLabel: "贖回 53 天",
+    eventDate: "2026-09-21",
+    qualityLabel: "可用",
+  });
+  assert.equal(bondListPresentation({
+    remainingRatio: null,
+    nextEventType: "maturity",
+    nextEventDate: "2028-07-29",
+    daysToNextEvent: 705,
+    dataQuality: "partial",
+    missingReasons: ["NO_CB_CLOSE"],
+  }).qualityLabel, "待補");
 });
 
 test("detail disclosures align with the 900px CSS breakpoint and initialize the selected desktop tab only", async () => {

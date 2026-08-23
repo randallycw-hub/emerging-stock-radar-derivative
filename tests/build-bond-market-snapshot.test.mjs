@@ -28,7 +28,9 @@ import {
 
 const {
   bondInputsFrom11406Rows,
+  buildBondWorkbenchEvents,
   buildBondMarketSnapshot,
+  buildWorkbenchSourceStates,
   summarizeWorkbenchSourceStates,
   verifyWorkbenchConsistency,
 } = snapshotBuilder;
@@ -1112,6 +1114,77 @@ test("publishes a verified workbench manifest entry and archives prior-only bond
     recordCount: normalized11406Rows.length,
   }]);
   assert.equal(result.workbench.records.length, 2);
+  assert.deepEqual(
+    result.workbench.records[0].events.map(({ type, date, sourceId }) => [
+      type,
+      date,
+      sourceId,
+    ]),
+    [
+      ["put", "2027-08-30", "11406"],
+      ["maturity", "2028-07-29", "11406"],
+    ],
+  );
+});
+
+test("builds deterministic workbench redemption and delisting events from verified supplemental input", () => {
+  const terms = [workbenchTerm()];
+  const supplemental = buildCbSupplementalSnapshot({
+    generatedAt: "2026-08-09T12:30:00.000Z",
+    redemptions: [{
+      issuerCode: "3522",
+      issuerName: "御嵿",
+      bondCode: "35221",
+      bondName: "御嵿一",
+      announcementDate: "2026-08-04",
+      delistingDate: "2026-09-21",
+      subject: "公告御嵿股份有限公司國內第一次無擔保轉換公司債(簡稱：御嵿一，代碼：35221)發行公司行使債券贖回權暨訂於115年09月21日終止櫃檯買賣等相關事宜。",
+      detailUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3522&date1=20260804&seq_no=1&pub_class=0&firstin=1",
+    }],
+    redemptionYear: 2026,
+  });
+
+  assert.deepEqual(
+    buildBondWorkbenchEvents({ terms, supplemental }).map(
+      ({ type, date, title, sourceId, sourceUrl }) => ({
+        type,
+        date,
+        title,
+        sourceId,
+        sourceUrl,
+      }),
+    ),
+    [
+      {
+        type: "redemption",
+        date: "2026-08-04",
+        title: "御嵿一贖回公告",
+        sourceId: "tpex-cb-redemption-announcements",
+        sourceUrl: "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+      },
+      {
+        type: "delisting",
+        date: "2026-09-21",
+        title: "御嵿一終止櫃檯買賣",
+        sourceId: "tpex-cb-redemption-announcements",
+        sourceUrl: "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+      },
+      {
+        type: "put",
+        date: "2027-08-30",
+        title: "御嵿一賣回權日期",
+        sourceId: "11406",
+        sourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+      },
+      {
+        type: "maturity",
+        date: "2028-07-29",
+        title: "御嵿一到期日",
+        sourceId: "11406",
+        sourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+      },
+    ],
+  );
 });
 
 test("a bonds override cannot claim normalized 11406 integrity provenance", async () => {
@@ -1156,6 +1229,17 @@ test("workbench cross-file verification uses exact bond codes, history and sourc
     sourceStateSummary: entry.sourceStateSummary,
   };
   assert.doesNotThrow(() => verifyWorkbenchConsistency(valid));
+  const missingLoadedEvents = structuredClone(result.workbench);
+  missingLoadedEvents.records[0].events = [];
+  missingLoadedEvents.records[0].fieldStates.events = "missing";
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      workbench: missingLoadedEvents,
+      sourceStateSummary: summarizeWorkbenchSourceStates(missingLoadedEvents),
+    }),
+    /WORKBENCH_CANDIDATE_MISMATCH/,
+  );
   assert.throws(
     () => verifyWorkbenchConsistency({
       ...valid,
@@ -1204,6 +1288,90 @@ test("workbench cross-file verification uses exact bond codes, history and sourc
       workbench: forgedAssessment,
     }),
     /WORKBENCH_HISTORY_ASSESSMENT/,
+  );
+
+  const institutionFixture = JSON.parse(await readFile(new URL(
+    "./fixtures/source-verification/cb-institution/daily-minimal.json",
+    import.meta.url,
+  ), "utf8"));
+  institutionFixture.date = "20260729";
+  institutionFixture.tables[0].date = "115/07/29";
+  institutionFixture.tables[0].data = [[
+    "35221", "御嵿一", "0", "0", "0", "0", "0", "0", "10", "0", "10", "10",
+  ]];
+  institutionFixture.tables[0].totalCount = 1;
+  const priorSupplemental = buildCbSupplementalSnapshot({
+    generatedAt: "2026-07-29T12:30:00.000Z",
+    institution: parseCbInstitutionDaily(institutionFixture),
+    redemptions: [],
+    redemptionYear: 2026,
+  });
+  const staleSupplemental = buildCbSupplementalSnapshot({
+    generatedAt: "2026-07-31T12:30:00.000Z",
+    previous: priorSupplemental,
+  });
+  const staleIssuerResearch = structuredClone(result.issuerResearch);
+  staleIssuerResearch.generatedAt = "2026-07-31T12:30:00.000Z";
+  const issuerMarket = staleIssuerResearch.records[0].market;
+  staleIssuerResearch.sources[issuerMarket].status = "stale";
+  const staleViews = buildBondMarketViews({
+    asOfDate: valid.requestedDate,
+    bonds: [bond],
+    cbQuotes: validCollectedMarketData.cbQuotes,
+    stockCloses: validCollectedMarketData.stockCloses,
+    conversionPrices: validCollectedMarketData.conversionPrices,
+    supplemental: staleSupplemental,
+    issuerResearch: staleIssuerResearch.records,
+  });
+  const staleTerms = valid.terms.map((term) => ({
+    ...term,
+    unitFaceValueTwd: staleSupplemental.unitFaceValueTwd,
+  }));
+  const currentSourceStates = buildWorkbenchSourceStates({
+    views: staleViews,
+    supplemental: staleSupplemental,
+    issuerResearch: staleIssuerResearch,
+  });
+  const staleWorkbench = buildBondWorkbenchSnapshot({
+    generatedAt: result.workbench.generatedAt,
+    dataDate: valid.dataDate,
+    asOfDate: valid.requestedDate,
+    currentTerms: staleTerms,
+    currentViews: staleViews,
+    currentEvents: buildBondWorkbenchEvents({
+      terms: staleTerms,
+      supplemental: staleSupplemental,
+    }),
+    currentSourceStates,
+    currentAssessments: result.workbench.records
+      .filter((record) => record.status === "active")
+      .map((record) => ({ bondCode: record.bondCode, assessment: record.assessment })),
+  });
+  assert.equal(staleWorkbench.records[0].fieldStates.company, "stale");
+  assert.equal(staleWorkbench.records[0].fieldStates.events, "stale");
+  assert.doesNotThrow(() => verifyWorkbenchConsistency({
+    ...valid,
+    workbench: staleWorkbench,
+    terms: staleTerms,
+    views: staleViews,
+    supplemental: staleSupplemental,
+    issuerResearch: staleIssuerResearch,
+    sourceStateSummary: summarizeWorkbenchSourceStates(staleWorkbench),
+  }));
+  const falselyCompleteSources = structuredClone(staleWorkbench);
+  falselyCompleteSources.records[0].fieldStates.company = "complete";
+  falselyCompleteSources.records[0].fieldStates.events = "complete";
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      workbench: falselyCompleteSources,
+      terms: staleTerms,
+      views: staleViews,
+      supplemental: staleSupplemental,
+      issuerResearch: staleIssuerResearch,
+      sourceStateSummary: summarizeWorkbenchSourceStates(falselyCompleteSources),
+    }),
+    /WORKBENCH_CANDIDATE_MISMATCH/,
   );
 });
 

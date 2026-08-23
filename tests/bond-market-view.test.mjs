@@ -409,6 +409,30 @@ test("uses a common valuation date and keeps latest display prices separate", ()
   assert.equal(view.staleCbPrice, true);
 });
 
+test("marks a same-day zero-trade null CB quote unusable even when an older close exists", () => {
+  const [view] = buildBondMarketViews(fixture({
+    cbQuotes: [
+      quote("2026-07-30", null, {
+        open: null,
+        high: null,
+        low: null,
+        average: null,
+        tradeCount: "0",
+        tradingUnits: "0",
+        turnover: "0",
+      }),
+      quote("2026-07-29", "103.5"),
+    ],
+    stockCloses: [stock("2026-07-29", "38.25")],
+    conversionPrices: [conversion("2025-11-09", "35.1")],
+  }));
+
+  assert.equal(view.cbClose, "103.5");
+  assert.equal(view.staleCbPrice, true);
+  assert.ok(view.missingReasons.includes("NO_CB_CLOSE"));
+  assert.notEqual(view.dataQuality, "complete");
+});
+
 test("does not compute when no common CB and stock date exists", () => {
   const [view] = buildBondMarketViews(fixture({
     cbQuotes: [quote("2026-07-29", "103.5")],
