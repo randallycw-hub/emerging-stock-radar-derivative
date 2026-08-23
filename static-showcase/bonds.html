@@ -46,13 +46,24 @@
       </header>
 
       <div id="bond-list-view">
-        <form class="filters" id="bond-filters" aria-label="可轉債篩選">
+        <form class="filters bond-filters" id="bond-filters" aria-label="可轉債篩選">
           <label class="search-field">
             <span>搜尋</span>
             <input id="bond-search" name="q" type="search" placeholder="5/6 位代碼、債券名稱或發行人">
           </label>
           <label class="archive-toggle"><input id="bond-archive-toggle" name="archived" type="checkbox"> 顯示封存可轉債</label>
-          <button id="bond-clear-filter" type="button" hidden>清除搜尋</button>
+          <fieldset class="bond-event-shortcuts">
+            <legend>公開事件捷徑</legend>
+            <button type="button" data-bond-shortcut="rights90" aria-pressed="false">90 日內權利事件</button>
+            <button type="button" data-bond-shortcut="maturity365" aria-pressed="false">365 日內到期</button>
+            <button type="button" data-bond-shortcut="pending" aria-pressed="false">待補／待確認資料</button>
+            <button type="button" data-bond-shortcut="clear" aria-pressed="false">清除所有條件</button>
+          </fieldset>
+          <label><span>到期日不晚於</span><input id="bond-maturity-before" name="maturityBefore" type="date"></label>
+          <label><span>流通餘額比例上限 (%)</span><input id="bond-remaining-max" name="remainingMax" type="number" min="0" max="100" step="0.01" inputmode="decimal"></label>
+          <label><span>擔保情形</span><select id="bond-secured" name="secured"><option value="">不限</option><option value="無擔保">無擔保</option><option value="有擔保">有擔保</option></select></label>
+          <label><span>資料品質</span><select id="bond-quality" name="quality"><option value="">不限</option><option value="pending">待補／待確認</option></select></label>
+          <button id="bond-clear-filter" type="button" hidden>清除所有條件</button>
           <output id="bond-result-count" aria-live="polite">—</output>
         </form>
         <p class="table-hint">點選可比較欄位：遞增、遞減、取消排序。</p>

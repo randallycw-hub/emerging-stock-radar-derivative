@@ -502,6 +502,14 @@ a { color: inherit; }
 .archive-toggle { align-self: center; color: var(--ink) !important; font-size: 13px !important; font-weight: 750; }
 .archive-toggle input { width: 18px; min-height: 18px; accent-color: var(--violet); vertical-align: middle; }
 #bond-clear-filter { min-height: 40px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink); cursor: pointer; }
+.bond-filters { grid-template-columns: minmax(230px, 1.4fr) repeat(3, minmax(140px, .6fr)) auto; }
+.bond-event-shortcuts { grid-column: 1 / -1; margin: 0; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; border: 1px solid var(--line-strong); }
+.bond-event-shortcuts legend { padding: 0 5px; color: var(--violet-ink); font-size: 11px; font-weight: 850; }
+.bond-event-shortcuts button { min-height: 36px; border: 1px solid var(--line-strong); padding: 7px 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.bond-event-shortcuts button:hover,
+.bond-event-shortcuts button:focus-visible,
+.bond-event-shortcuts button[aria-pressed="true"] { border-color: var(--violet); background: var(--violet-soft); color: var(--violet-ink); }
+.bond-event-shortcuts button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 .bond-table-shell { width: 100%; overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
 .bond-table { width: 100%; min-width: 1120px; table-layout: fixed; border-collapse: collapse; font-size: clamp(11px, .82vw, 13px); }
@@ -972,6 +980,8 @@ a { color: inherit; }
 .ipo-card > footer { padding: 12px 14px; display: grid; gap: 4px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 
 @media (max-width: 900px) {
+  .bond-filters { grid-template-columns: 1fr; }
+  .bond-event-shortcuts { grid-column: auto; }
   .mobile-sort-control,
   .sort-direction {
     display: grid;

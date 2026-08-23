@@ -101,8 +101,56 @@ test("static showcase keeps presentation out of generated runtime data", async (
 test("bond list module round-trips only supported list URL state", async () => {
   const { parseBondListState, serializeBondListState } = await import("../static-showcase/assets/bond-list-page.js");
   const state = parseBondListState("?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
-  assert.deepEqual(state, { query: "甲", archived: true, sortKey: "cbClose", direction: "desc", page: 3 });
+  assert.deepEqual(state, {
+    query: "甲", archived: true, sortKey: "cbClose", direction: "desc", page: 3,
+    event: "", quality: "", maturityBefore: "", remainingMax: null, secured: "",
+  });
   assert.equal(serializeBondListState(state), "?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
+});
+
+test("bond list state round-trips composable public event conditions and filters a matching record", async () => {
+  const { filterBondRecords, parseBondListState, serializeBondListState } = await import("../static-showcase/assets/bond-list-page.js");
+  const state = parseBondListState("?event=rights90&quality=pending&remainingMax=25&secured=%E7%84%A1%E6%93%94%E4%BF%9D");
+  assert.deepEqual(state, {
+    query: "",
+    archived: false,
+    sortKey: "bondCode",
+    direction: "asc",
+    page: 1,
+    event: "rights90",
+    quality: "pending",
+    maturityBefore: "",
+    remainingMax: 25,
+    secured: "無擔保",
+  });
+  assert.equal(
+    serializeBondListState(state),
+    "?event=rights90&quality=pending&remainingMax=25&secured=%E7%84%A1%E6%93%94%E4%BF%9D&sort=bondCode&direction=asc&page=1",
+  );
+  assert.deepEqual(filterBondRecords([{
+    bondCode: "90001",
+    daysToNextEvent: 90,
+    daysToMaturity: 365,
+    dataQuality: "partial",
+    remainingRatio: "25",
+    securedStatus: "無擔保",
+  }], state).map((record) => record.bondCode), ["90001"]);
+});
+
+test("bond page provides composable public event controls and a clear-all empty state", async () => {
+  const [html, js, css] = await Promise.all([
+    readFile(new URL("bonds.html", root), "utf8"),
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
+    readFile(new URL("assets/app.css", root), "utf8"),
+  ]);
+  assert.match(html, /<fieldset class="bond-event-shortcuts"/);
+  assert.equal((html.match(/data-bond-shortcut=/g) ?? []).length, 4);
+  for (const id of ["bond-maturity-before", "bond-remaining-max", "bond-secured", "bond-quality"]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.match(js, /aria-pressed/);
+  assert.match(js, /清除所有條件/);
+  assert.match(css, /\.bond-event-shortcuts/);
 });
 
 test("page loader projects archived workbench identities into the searchable list by exact bond code", async () => {

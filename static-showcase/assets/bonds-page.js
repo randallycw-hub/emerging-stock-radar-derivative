@@ -30,6 +30,11 @@ const state = {
   sortDirection: "asc",
   page: 1,
   archived: false,
+  event: "",
+  quality: "",
+  maturityBefore: "",
+  remainingMax: null,
+  secured: "",
   workbenchDeclared: false,
   workbenchUnavailable: false,
   detailOrigin: null,
@@ -100,8 +105,18 @@ function initializeFromUrl() {
   state.sortDirection = listState.direction;
   state.page = listState.page;
   state.archived = listState.archived;
+  state.event = listState.event;
+  state.quality = listState.quality;
+  state.maturityBefore = listState.maturityBefore;
+  state.remainingMax = listState.remainingMax;
+  state.secured = listState.secured;
   document.querySelector("#bond-search").value = listState.query;
   document.querySelector("#bond-archive-toggle").checked = state.archived;
+  setControlValue("#bond-maturity-before", state.maturityBefore);
+  setControlValue("#bond-remaining-max", state.remainingMax ?? "");
+  setControlValue("#bond-secured", state.secured);
+  setControlValue("#bond-quality", state.quality);
+  updateBondShortcutStates();
 }
 
 function bindFilters() {
@@ -117,12 +132,34 @@ function bindFilters() {
     renderBonds();
   });
   document.querySelector("#bond-clear-filter").addEventListener("click", () => {
-    document.querySelector("#bond-search").value = "";
-    state.page = 1;
-    syncListUrl();
-    renderBonds();
+    clearBondFilters();
     document.querySelector("#bond-search").focus();
   });
+  for (const selector of ["#bond-maturity-before", "#bond-remaining-max", "#bond-secured", "#bond-quality"]) {
+    document.querySelector(selector)?.addEventListener("change", (event) => {
+      if (selector === "#bond-quality") state.quality = event.target.value;
+      state.page = 1;
+      syncListUrl();
+      renderBonds();
+    });
+  }
+  for (const button of document.querySelectorAll("[data-bond-shortcut]")) {
+    button.addEventListener("click", () => {
+      const shortcut = button.dataset.bondShortcut;
+      if (shortcut === "rights90" || shortcut === "maturity365") {
+        state.event = state.event === shortcut ? "" : shortcut;
+      } else if (shortcut === "pending") {
+        state.quality = state.quality === "pending" ? "" : "pending";
+        setControlValue("#bond-quality", state.quality);
+      } else if (shortcut === "clear") {
+        clearBondFilters();
+        return;
+      }
+      state.page = 1;
+      syncListUrl();
+      renderBonds();
+    });
+  }
   for (const button of document.querySelectorAll("[data-sort-key]")) {
     button.addEventListener("click", () => {
       const key = button.dataset.sortKey;
@@ -307,11 +344,16 @@ function renderBonds() {
     document.querySelector("#bond-pagination").innerHTML = "";
     return;
   }
-  const prepared = state.views.map((view) => ({ ...view, issuerName: termFor(view.bondCode)?.["機構名稱"] ?? view.issuerName ?? view.issuerCode }));
-  const filtered = filterBondRecords(prepared, {
-    query: document.querySelector("#bond-search").value,
-    archived: state.archived,
+  const prepared = state.views.map((view) => {
+    const term = termFor(view.bondCode);
+    return {
+      ...view,
+      issuerName: term?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
+      securedStatus: view.securedStatus ?? term?.securedStatus ?? term?.["有無擔保"] ?? null,
+    };
   });
+  const filters = currentBondFilters();
+  const filtered = filterBondRecords(prepared, filters);
   const ordered = state.sortKey ? sortBondRecords(filtered, { key: state.sortKey, direction: state.sortDirection }) : filtered;
   const pagination = paginateBondRecords(ordered, state.page);
   state.page = pagination.page;
@@ -319,14 +361,19 @@ function renderBonds() {
   const noResults = ordered.length === 0;
 
   setText("#bond-result-count", `${pagination.total} 檔 · 第 ${state.page}/${pagination.pageCount} 頁`);
-  document.querySelector("#bond-clear-filter").hidden = !noResults || !document.querySelector("#bond-search").value.trim();
+  document.querySelector("#bond-clear-filter").hidden = !noResults || activeBondConditions(filters).length === 0;
+  const activeConditions = activeBondConditions(filters);
+  const emptyMessage = activeConditions.length
+    ? `沒有符合條件的可轉債；目前條件：${activeConditions.join("、")}。可清除所有條件後再試。`
+    : "沒有符合條件的可轉債；可清除搜尋條件後再試。";
   document.querySelector("#bond-table-body").innerHTML = visible.length
     ? visible.map(renderBondRow).join("")
-    : '<tr><td colspan="10" class="empty-cell">沒有符合條件的可轉債；可清除搜尋條件後再試。</td></tr>';
+    : `<tr><td colspan="10" class="empty-cell">${escapeHtml(emptyMessage)}</td></tr>`;
   document.querySelector("#bond-card-list").innerHTML = visible.length
     ? visible.map(renderBondCard).join("")
-    : '<p class="empty-cell">沒有符合條件的可轉債；可清除搜尋條件後再試。</p>';
+    : `<p class="empty-cell">${escapeHtml(emptyMessage)}</p>`;
   updateSortHeaders();
+  updateBondShortcutStates();
   renderPagination(pagination.pageCount);
   bindBondOpeners();
 }
@@ -415,14 +462,73 @@ function renderPagination(pageCount) {
 
 function syncListUrl({ push = false } = {}) {
   const search = serializeBondListState({
-    query: document.querySelector("#bond-search").value,
-    archived: state.archived,
+    ...currentBondFilters(),
     sortKey: state.sortKey,
     direction: state.sortDirection,
     page: state.page,
   });
   const url = `${location.pathname}${search}`;
   history[push ? "pushState" : "replaceState"](null, "", url);
+}
+
+function currentBondFilters() {
+  return {
+    query: document.querySelector("#bond-search").value,
+    archived: state.archived,
+    event: state.event,
+    quality: controlValue("#bond-quality", state.quality),
+    maturityBefore: controlValue("#bond-maturity-before", state.maturityBefore),
+    remainingMax: controlValue("#bond-remaining-max", state.remainingMax ?? ""),
+    secured: controlValue("#bond-secured", state.secured),
+  };
+}
+
+function controlValue(selector, fallback = "") {
+  return document.querySelector(selector)?.value ?? fallback;
+}
+
+function setControlValue(selector, value) {
+  const control = document.querySelector(selector);
+  if (control) control.value = value;
+}
+
+function activeBondConditions(filters) {
+  const labels = [];
+  if (filters.query.trim()) labels.push(`搜尋「${filters.query.trim()}」`);
+  if (filters.archived) labels.push("顯示封存可轉債");
+  if (filters.event === "rights90") labels.push("90 日內權利事件");
+  if (filters.event === "maturity365") labels.push("365 日內到期");
+  if (filters.quality === "pending") labels.push("待補／待確認資料");
+  if (filters.maturityBefore) labels.push(`到期日不晚於 ${filters.maturityBefore}`);
+  if (filters.remainingMax !== "" && filters.remainingMax !== null) labels.push(`流通餘額比例不高於 ${filters.remainingMax}%`);
+  if (filters.secured) labels.push(`擔保情形：${filters.secured}`);
+  return labels;
+}
+
+function updateBondShortcutStates() {
+  for (const button of document.querySelectorAll("[data-bond-shortcut]")) {
+    const shortcut = button.dataset.bondShortcut;
+    const pressed = shortcut === state.event || (shortcut === "pending" && state.quality === "pending");
+    button.setAttribute("aria-pressed", String(pressed));
+  }
+}
+
+function clearBondFilters() {
+  document.querySelector("#bond-search").value = "";
+  document.querySelector("#bond-archive-toggle").checked = false;
+  setControlValue("#bond-maturity-before", "");
+  setControlValue("#bond-remaining-max", "");
+  setControlValue("#bond-secured", "");
+  setControlValue("#bond-quality", "");
+  state.archived = false;
+  state.event = "";
+  state.quality = "";
+  state.maturityBefore = "";
+  state.remainingMax = null;
+  state.secured = "";
+  state.page = 1;
+  syncListUrl();
+  renderBonds();
 }
 
 function openBond(code, origin = null) {
