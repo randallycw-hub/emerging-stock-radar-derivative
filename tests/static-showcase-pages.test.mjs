@@ -64,6 +64,26 @@ test("首頁提供市場與 IPO 雙入口以及最後成功更新狀態", async 
   assert.doesNotMatch(home, /<table\b/);
 });
 
+test("首頁將四個市場入口同層呈現，IPO 時程不再是孤立文字連結", async () => {
+  const home = await readShowcaseFile("index.html");
+  const moduleLinks = [...home.matchAll(/<a class="market-module[^>]+href="(\.\/[^\"]+)"/g)]
+    .map((match) => match[1]);
+
+  assert.deepEqual(moduleLinks, [
+    "./bonds.html",
+    "./emerging.html",
+    "./ipo-radar.html",
+    "./ipo.html",
+  ]);
+  assert.doesNotMatch(home, /class="home-ipo-schedule-link"/);
+});
+
+test("首頁介紹文字在更新資訊列之上仍保有獨立的閱讀層級", async () => {
+  const css = await readShowcaseFile("assets/app.css");
+
+  assert.match(css, /\.home-hero > p:not\(\.kicker\)\s*(?:,|\{)/);
+});
+
 test("IPO 兩頁使用可辨識的桌機資料表與行動卡片版面語意", async () => {
   const css = await readShowcaseFile("assets/app.css");
   for (const selector of ["ipo-radar-summary", "ipo-upcoming-grid", "ipo-stage-flow", "ipo-timeline-table", "ipo-card-list"]) {

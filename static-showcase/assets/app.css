@@ -175,21 +175,39 @@ a { color: inherit; }
   padding: clamp(42px, 7vw, 94px) 0 80px;
 }
 .home-hero {
-  max-width: 970px;
-  margin-bottom: clamp(36px, 6vw, 70px);
+  max-width: 1030px;
+  margin-bottom: clamp(32px, 4vw, 52px);
 }
 .home-hero h1,
 .page-heading h1 {
   margin: 10px 0 18px;
-  font: 800 clamp(44px, 8vw, 94px)/.95 Georgia, "Noto Serif TC", serif;
+  font: 800 clamp(44px, 6.5vw, 76px)/.98 Georgia, "Noto Serif TC", serif;
   letter-spacing: -.055em;
 }
-.home-hero > p:last-child,
+.home-hero > p:not(.kicker),
 .page-heading > p:last-child {
   max-width: 720px;
   margin: 0;
   color: var(--muted);
   font-size: clamp(16px, 2vw, 20px);
+}
+.home-hero__meta {
+  max-width: 720px;
+  margin-top: 22px;
+  padding: 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+.home-hero__meta .update-status {
+  margin: 0;
+  color: var(--violet-ink);
+  font-weight: 800;
 }
 .home-modules {
   display: grid;
@@ -219,6 +237,12 @@ a { color: inherit; }
 .market-module--violet {
   background: linear-gradient(135deg, var(--violet-soft), var(--panel) 62%);
 }
+.market-module--ipo {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--clay-soft) 52%, var(--violet-soft)), var(--panel) 70%);
+}
+.market-module--schedule {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--violet-soft) 54%, var(--panel)), var(--panel) 70%);
+}
 .market-module__number {
   justify-self: end;
   color: var(--clay-ink);
@@ -232,7 +256,7 @@ a { color: inherit; }
 }
 .market-module h2 {
   grid-column: 1 / -1;
-  margin: 14px 0 38px;
+  margin: 14px 0 12px;
   font: 800 clamp(27px, 4vw, 46px)/1 Georgia, "Noto Serif TC", serif;
 }
 .market-module > span:last-child {
@@ -241,28 +265,11 @@ a { color: inherit; }
   color: var(--violet-ink);
   font-weight: 800;
 }
-.market-module--ipo {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--clay-soft) 72%, var(--panel)), var(--panel) 70%);
-}
-.market-module--ipo h2 { margin-bottom: 12px; }
 .market-module__copy {
   grid-column: 1 / -1;
   max-width: 44ch;
-  margin: 0 0 22px;
+  margin: 0 0 28px;
   color: var(--muted);
-}
-.home-ipo-schedule-link {
-  min-height: 44px;
-  margin: 10px 0 0 auto;
-  display: flex;
-  width: max-content;
-  max-width: 100%;
-  align-items: center;
-  color: var(--violet-ink);
-  font-weight: 800;
-  text-underline-offset: 4px;
 }
 .update-panel {
   margin-top: 18px;

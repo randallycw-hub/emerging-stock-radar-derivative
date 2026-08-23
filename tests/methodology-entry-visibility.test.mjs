@@ -31,10 +31,6 @@ test("public navigation does not list methodology while direct pages remain", as
   }
   assert.doesNotMatch(sitemap, /`\$\{BASE_URL\}\/methodology`/);
 
-  assert.equal(
-    [...staticSources[0].matchAll(/<a class="market-module(?:\s|")/g)].length,
-    3,
-  );
   assert.match(staticSources[4], /DATA METHODOLOGY/);
   assert.match(staticSources[4], /04 \/ VALUATION/);
   assert.match(nextMethodology, /METHODOLOGY/);

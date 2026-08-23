@@ -38,20 +38,26 @@
       <p class="kicker">TAIWAN POST-CLOSE MARKET DESK</p>
       <h1 id="home-title">可轉債與興櫃盤後資訊</h1>
       <p>集中查看可轉債、興櫃市場與 IPO 公開資訊，並清楚標示計算方法與更新狀態。</p>
+      <div class="home-hero__meta" aria-label="資料更新狀態">
+        <span>公開市場資訊整理</span>
+        <p id="last-successful-update" class="update-status" aria-live="polite">更新資訊讀取中</p>
+      </div>
     </section>
 
     <section class="home-modules" aria-label="市場資訊入口">
-      <a class="market-module market-module--clay" href="./bonds.html">
+      <a class="market-module market-module--clay" href="./bonds.html" aria-describedby="bonds-module-copy">
         <span class="market-module__number">01</span>
         <p>CONVERTIBLE BONDS</p>
         <h2>可轉債盤後</h2>
-        <span>前往市場頁 <span aria-hidden="true">→</span></span>
+        <span id="bonds-module-copy" class="market-module__copy">查看盤後、發行條件與可核對的資料狀態。</span>
+        <span>前往可轉債 <span aria-hidden="true">→</span></span>
       </a>
-      <a class="market-module market-module--violet" href="./emerging.html">
+      <a class="market-module market-module--violet" href="./emerging.html" aria-describedby="emerging-module-copy">
         <span class="market-module__number">02</span>
         <p>EMERGING MARKET</p>
         <h2>興櫃市場</h2>
-        <span>前往市場頁 <span aria-hidden="true">→</span></span>
+        <span id="emerging-module-copy" class="market-module__copy">瀏覽興櫃公司盤後行情與公開資訊。</span>
+        <span>前往興櫃市場 <span aria-hidden="true">→</span></span>
       </a>
       <a class="market-module market-module--ipo" href="./ipo-radar.html" aria-describedby="ipo-module-copy">
         <span class="market-module__number">03</span>
@@ -60,15 +66,13 @@
         <span id="ipo-module-copy" class="market-module__copy">先看近期送件、審議、契約與定價事件。</span>
         <span>查看進度雷達 <span aria-hidden="true">→</span></span>
       </a>
-    </section>
-    <a class="home-ipo-schedule-link" href="./ipo.html">需要逐家公司完整日期？前往 IPO 時程 <span aria-hidden="true">→</span></a>
-
-    <section class="update-panel" aria-labelledby="update-heading">
-      <div>
-        <p class="kicker">DATA UPDATE</p>
-        <h2 id="update-heading">最近一次成功更新</h2>
-      </div>
-      <p id="last-successful-update" class="update-status" aria-live="polite">更新資訊讀取中</p>
+      <a class="market-module market-module--schedule" href="./ipo.html" aria-describedby="ipo-schedule-module-copy">
+        <span class="market-module__number">04</span>
+        <p>IPO SCHEDULE</p>
+        <h2>IPO 時程</h2>
+        <span id="ipo-schedule-module-copy" class="market-module__copy">依公司查看承銷、審議與掛牌的完整日期。</span>
+        <span>查看完整時程 <span aria-hidden="true">→</span></span>
+      </a>
     </section>
   </main>
 
