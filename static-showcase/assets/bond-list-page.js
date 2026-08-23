@@ -53,11 +53,14 @@ export function filterBondRecords(records, {
     if (!archived && (record.archived === true || record.status === "archived")) return false;
     if (needle && ![record.bondCode, record.bondName, record.issuerName]
       .some((value) => normalizeBondQuery(value).includes(needle))) return false;
-    if (normalizedEvent === "rights90" && !(validDayCount(record.daysToNextEvent) <= 90)) return false;
-    if (normalizedEvent === "maturity365" && !(validDayCount(record.daysToMaturity) <= 365)) return false;
+    const nextEventDays = validDayCount(record.daysToNextEvent);
+    if (normalizedEvent === "rights90" && (nextEventDays === null || nextEventDays > 90)) return false;
+    const maturityDays = validDayCount(record.daysToMaturity);
+    if (normalizedEvent === "maturity365" && (maturityDays === null || maturityDays > 365)) return false;
     if (normalizedQuality === "pending" && record.dataQuality === "complete") return false;
     if (normalizedMaturityBefore && !(normalizeBondDate(record.maturityDate) && normalizeBondDate(record.maturityDate) <= normalizedMaturityBefore)) return false;
-    if (normalizedRemainingMax !== null && !(finiteRecordNumber(record.remainingRatio) <= normalizedRemainingMax)) return false;
+    const remainingRatio = finiteRecordNumber(record.remainingRatio);
+    if (normalizedRemainingMax !== null && (remainingRatio === null || remainingRatio > normalizedRemainingMax)) return false;
     if (normalizedSecured && normalizedSecuredStatus(record.securedStatus) !== normalizedSecured) return false;
     return true;
   });

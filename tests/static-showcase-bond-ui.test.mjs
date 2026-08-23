@@ -137,6 +137,34 @@ test("bond list state round-trips composable public event conditions and filters
   }], state).map((record) => record.bondCode), ["90001"]);
 });
 
+test("event filters reject records with missing or invalid day counts", async () => {
+  const { filterBondRecords } = await import("../static-showcase/assets/bond-list-page.js");
+  const records = [
+    { bondCode: "rights-missing", daysToNextEvent: null, daysToMaturity: 30 },
+    { bondCode: "rights-invalid", daysToNextEvent: "unknown", daysToMaturity: 30 },
+    { bondCode: "rights-match", daysToNextEvent: 90, daysToMaturity: 30 },
+    { bondCode: "maturity-missing", daysToNextEvent: 30, daysToMaturity: null },
+    { bondCode: "maturity-invalid", daysToNextEvent: 30, daysToMaturity: "unknown" },
+    { bondCode: "maturity-match", daysToNextEvent: 30, daysToMaturity: 365 },
+  ];
+  assert.deepEqual(filterBondRecords(records, { event: "rights90" }).map((record) => record.bondCode), [
+    "rights-match", "maturity-missing", "maturity-invalid", "maturity-match",
+  ]);
+  assert.deepEqual(filterBondRecords(records, { event: "maturity365" }).map((record) => record.bondCode), [
+    "rights-missing", "rights-invalid", "rights-match", "maturity-match",
+  ]);
+});
+
+test("remaining-ratio upper bound rejects missing or invalid record values", async () => {
+  const { filterBondRecords } = await import("../static-showcase/assets/bond-list-page.js");
+  const records = [
+    { bondCode: "missing", remainingRatio: null },
+    { bondCode: "invalid", remainingRatio: "unknown" },
+    { bondCode: "match", remainingRatio: "25" },
+  ];
+  assert.deepEqual(filterBondRecords(records, { remainingMax: 25 }).map((record) => record.bondCode), ["match"]);
+});
+
 test("bond page provides composable public event controls and a clear-all empty state", async () => {
   const [html, js, css] = await Promise.all([
     readFile(new URL("bonds.html", root), "utf8"),
