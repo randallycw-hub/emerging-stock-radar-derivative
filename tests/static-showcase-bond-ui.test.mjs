@@ -135,6 +135,38 @@ test("page loader projects archived workbench identities into the searchable lis
   ]);
 });
 
+test("page loader projects legacy market fields into canonical list fields until the next refresh", async () => {
+  const { buildBondListRecords } = await import("../static-showcase/assets/bonds-page.js");
+  const [record] = buildBondListRecords({
+    views: [{
+      bondCode: "90001",
+      issuerCode: "9000",
+      bondName: "舊格式一",
+      cbClose: "101",
+      missingReasons: [],
+      outstandingReductionRate: "17.93",
+      nextPutDate: "2027-09-21",
+      daysToNextPut: 394,
+      maturityDate: "2028-12-18",
+      daysToMaturity: 848,
+    }],
+  });
+
+  assert.deepEqual({
+    remainingRatio: record.remainingRatio,
+    nextEventType: record.nextEventType,
+    nextEventDate: record.nextEventDate,
+    daysToNextEvent: record.daysToNextEvent,
+    dataQuality: record.dataQuality,
+  }, {
+    remainingRatio: "82.07",
+    nextEventType: "put",
+    nextEventDate: "2027-09-21",
+    daysToNextEvent: 394,
+    dataQuality: "complete",
+  });
+});
+
 test("bond list presentation uses remaining ratio and canonical redemption event fields", async () => {
   const { bondListPresentation } = await import("../static-showcase/assets/bonds-page.js");
   assert.deepEqual(bondListPresentation({

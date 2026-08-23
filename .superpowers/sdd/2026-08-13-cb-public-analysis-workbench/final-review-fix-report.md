@@ -61,3 +61,10 @@ Scope: one focused offline repair round; no live fetch, publication, deployment,
 - Whitespace: `git diff --check` exited `0` with no output.
 
 No live source request, secret access, publish/deploy operation, push, amend, rebase, or worktree cleanup was performed.
+
+## Post-repair visual QA compatibility fix
+
+- Root cause: the checked-in active generation predates the workbench schema and has no `remainingRatio`, `nextEvent*`, or `dataQuality` keys. The corrected list renderer consequently showed blank ratio/event fields until the next verified nightly refresh.
+- Failing tests added first: `page loader projects legacy market fields into canonical list fields until the next refresh`; initially all four canonical list values were `undefined`, then the quality assertion failed with `dataQuality: undefined`.
+- Fix: apply a list-boundary adapter only when the canonical properties are absent. It derives the legacy remaining ratio from the published reduction rate, preserves an explicit canonical value (including `null`), projects the already-published put/maturity event fields, and marks legacy quality complete only when a CB close exists and the published missing-reason array is explicitly empty.
+- Green output: `tests/static-showcase-bond-ui.test.mjs` passed `10/10` at BelowNormal priority. Browser reload of the existing active generation rendered `100%`, `賣回 497 天`, and `可用` in the first row, with no desktop horizontal overflow.

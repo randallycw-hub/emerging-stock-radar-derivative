@@ -187,6 +187,7 @@ export function buildBondListRecords({ views = [], workbench = [], bondTerms = [
       const legacyTerm = termsByBondCode.get(record?.bondCode);
       return {
         ...view,
+        ...canonicalListFieldsForLegacyView(view),
         bondCode: record.bondCode,
         issuerCode: term.issuerCode ?? view.issuerCode,
         issuerName: term.issuerName ?? legacyTerm?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
@@ -203,9 +204,47 @@ export function buildBondListRecords({ views = [], workbench = [], bondTerms = [
     const term = termsByBondCode.get(view.bondCode);
     return {
       ...view,
+      ...canonicalListFieldsForLegacyView(view),
       issuerName: term?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
     };
   });
+}
+
+function canonicalListFieldsForLegacyView(view) {
+  const has = (key) => Object.hasOwn(view, key);
+  const reduction = Number(view.outstandingReductionRate);
+  const remainingRatio = has("remainingRatio")
+    ? view.remainingRatio
+    : view.outstandingReductionRate === null
+      || view.outstandingReductionRate === undefined
+      || view.outstandingReductionRate === ""
+      || !Number.isFinite(reduction)
+        ? null
+        : String(Number((100 - reduction).toFixed(8)));
+  const hasCanonicalEvent = ["nextEventType", "nextEventDate", "daysToNextEvent"].every(has);
+  const usesPut = Boolean(view.nextPutDate);
+  const dataQuality = has("dataQuality")
+    ? view.dataQuality
+    : view.cbClose !== null
+      && view.cbClose !== undefined
+      && view.cbClose !== ""
+      && Array.isArray(view.missingReasons)
+      && view.missingReasons.length === 0
+        ? "complete"
+        : "partial";
+  return {
+    remainingRatio,
+    nextEventType: hasCanonicalEvent
+      ? view.nextEventType
+      : usesPut ? "put" : "maturity",
+    nextEventDate: hasCanonicalEvent
+      ? view.nextEventDate
+      : usesPut ? view.nextPutDate : view.maturityDate ?? null,
+    daysToNextEvent: hasCanonicalEvent
+      ? view.daysToNextEvent
+      : usesPut ? view.daysToNextPut ?? null : view.daysToMaturity ?? null,
+    dataQuality,
+  };
 }
 
 function fallbackBondViews(rows) {
