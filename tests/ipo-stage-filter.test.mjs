@@ -23,3 +23,11 @@ test("IPO default stage shows A–D in-progress cases but keeps explicit all-his
   assert.equal(shouldWriteIpoStage("active"), false);
   assert.equal(shouldWriteIpoStage("all"), true);
 });
+
+test("market-event default prioritizes contract and trading stages", () => {
+  assert.equal(defaultIpoStage(null, { marketFirst: true }), "market");
+  assert.equal(matchesIpoStage("A", "market"), false);
+  assert.equal(matchesIpoStage("B", "market"), false);
+  assert.equal(matchesIpoStage("C", "market"), true);
+  assert.equal(matchesIpoStage("D", "market"), true);
+});

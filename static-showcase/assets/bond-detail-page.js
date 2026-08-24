@@ -31,6 +31,17 @@ export function detailUrlForBond(pathWithSearch, bondCode) {
   return `${url.pathname}${url.search}`;
 }
 
+export function companyContextLinks(issuerCode) {
+  const query = String(issuerCode ?? "").trim();
+  if (!query) return [];
+  const value = encodeURIComponent(query);
+  return [
+    { label: "興櫃市場", href: `./emerging.html?q=${value}` },
+    { label: "IPO 時程", href: `./ipo.html?q=${value}` },
+    { label: "IPO 雷達", href: `./ipo-radar.html?q=${value}` },
+  ];
+}
+
 export function noAdviceViolations(text) {
   return FORBIDDEN_UI_PATTERNS.filter(([, pattern]) => pattern.test(String(text))).map(([code]) => code);
 }
@@ -217,7 +228,11 @@ function institutionsSection(view) {
 }
 function companySection(view) {
   const company = view.issuerResearch;
-  return `<h3>公司營運與公開財務</h3><dl class="detail-facts">${fact("營收月份", company?.revenueMonth)}${fact("發布日", company?.sourcePublishedOn)}${fact("營收單位", company?.revenueUnit)}${fact("當月營收", company?.currentMonthRevenue)}${fact("月增率", company?.monthOverMonthPercent)}${fact("年增率", company?.yearOverYearPercent)}${fact("累計營收", company?.cumulativeRevenue)}${fact("累計年增率", company?.cumulativeYearOverYearPercent)}</dl>`;
+  const links = companyContextLinks(view?.issuerCode);
+  const context = links.length
+    ? `<section class="company-context"><h4>關聯市場</h4><p>${links.map((link) => `<a href="${escapeHtml(link.href)}">${text(link.label)} →</a>`).join(" ")}</p></section>`
+    : "";
+  return `<h3>公司營運與公開財務</h3><dl class="detail-facts">${fact("營收月份", company?.revenueMonth)}${fact("發布日", company?.sourcePublishedOn)}${fact("營收單位", company?.revenueUnit)}${fact("當月營收", company?.currentMonthRevenue)}${fact("月增率", company?.monthOverMonthPercent)}${fact("年增率", company?.yearOverYearPercent)}${fact("累計營收", company?.cumulativeRevenue)}${fact("累計年增率", company?.cumulativeYearOverYearPercent)}</dl>${context}`;
 }
 function eventsSection(events) {
   const values = Array.isArray(events) ? events : [];

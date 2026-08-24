@@ -1,5 +1,5 @@
 const activeStages = new Set(["A", "B", "C", "D"]);
-const selectableStages = new Set(["all", "active", "A", "B", "C", "D", "listed", "withdrawn", "delayed", "cancelled"]);
+const selectableStages = new Set(["all", "active", "market", "A", "B", "C", "D", "listed", "withdrawn", "delayed", "cancelled"]);
 const activeWindowDays = 365;
 const approvedSourceIds = new Set([
   "twse-applications",
@@ -9,11 +9,11 @@ const approvedSourceIds = new Set([
   "twse-public-offerings",
 ]);
 
-export function defaultIpoStage(value, { includeAB = false, activeOnly = false } = {}) {
-  if (value === null) return "active";
+export function defaultIpoStage(value, { includeAB = false, activeOnly = false, marketFirst = false } = {}) {
+  if (value === null) return marketFirst ? "market" : "active";
   if (includeAB && value === "AB") return "AB";
   if (!selectableStages.has(value)) return "all";
-  if (activeOnly && !activeStages.has(value) && value !== "active" && value !== "all") {
+  if (activeOnly && !activeStages.has(value) && value !== "active" && value !== "market" && value !== "all") {
     return "all";
   }
   return value;
@@ -22,6 +22,7 @@ export function defaultIpoStage(value, { includeAB = false, activeOnly = false }
 export function matchesIpoStage(stage, selectedStage) {
   if (selectedStage === "all") return true;
   if (selectedStage === "active") return activeStages.has(stage);
+  if (selectedStage === "market") return stage === "C" || stage === "D";
   if (selectedStage === "AB") return stage === "A" || stage === "B";
   return stage === selectedStage;
 }
@@ -76,7 +77,7 @@ export function projectActiveIpoEventEntries(rows, dataDate) {
 }
 
 export function shouldWriteIpoStage(stage) {
-  return stage !== "active";
+  return stage !== "active" && stage !== "market";
 }
 
 function approvedSourceIdForRecordIds(recordIds, manifestSourceIds) {

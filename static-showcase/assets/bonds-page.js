@@ -46,6 +46,18 @@ const state = {
 };
 let disposeDetail = () => {};
 
+export function bondShortcutState(shortcut) {
+  const screeners = {
+    "recent-issue": "recent90",
+    "low-premium": "lowPremium",
+    "near-conversion": "conversion100",
+    "low-price": "cheap",
+  };
+  if (screeners[shortcut]) return { screener: screeners[shortcut] };
+  if (shortcut === "upcoming-rights") return { screener: "", event: "rights90" };
+  return null;
+}
+
 if (globalThis.window && globalThis.document) {
   initializeFromUrl();
   bindFilters();
@@ -155,7 +167,14 @@ function bindFilters() {
   for (const button of document.querySelectorAll("[data-bond-shortcut]")) {
     button.addEventListener("click", () => {
       const shortcut = button.dataset.bondShortcut;
-      if (shortcut === "rights90" || shortcut === "maturity365") {
+      const shortcutState = bondShortcutState(shortcut);
+      if (shortcutState) {
+        state.screener = shortcutState.screener;
+        state.event = shortcutState.event ?? "";
+        state.sortKey = null;
+        state.sortDirection = "asc";
+        setControlValue("#bond-public-screener", state.screener);
+      } else if (shortcut === "rights90" || shortcut === "maturity365") {
         state.event = state.event === shortcut ? "" : shortcut;
       } else if (shortcut === "clear") {
         clearBondFilters();
@@ -548,7 +567,10 @@ function activeBondConditions(filters) {
 function updateBondShortcutStates() {
   for (const button of document.querySelectorAll("[data-bond-shortcut]")) {
     const shortcut = button.dataset.bondShortcut;
-    const pressed = shortcut === state.event;
+    const shortcutState = bondShortcutState(shortcut);
+    const pressed = shortcutState
+      ? state.screener === shortcutState.screener && state.event === (shortcutState.event ?? "")
+      : shortcut === state.event;
     button.setAttribute("aria-pressed", String(pressed));
   }
 }
