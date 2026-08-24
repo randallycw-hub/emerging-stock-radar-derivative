@@ -72,10 +72,10 @@
 - `evaluateMarketCandidate({ previous, candidate, expectedDate, thresholds }) -> { eligible, reasons }`.
 - Gates reject row-count collapse, date regression, duplicate identity, invalid balance bounds, no-trade price fabrication, conversion conflicts and IPO stage regression.
 
-- [ ] **Step 1: Write fixtures/tests** for each rejected condition and one valid candidate that remains eligible.
-- [ ] **Step 2: Run RED** `node --test tests/pipeline/quality-gates.test.mjs`.
-- [ ] **Step 3: Implement pure, deterministic gates** and call them before any pointer/generation promotion.
-- [ ] **Step 4: Run GREEN** with publication, IPO refresh and nightly-market regressions.
+- [x] **Step 1: Write fixtures/tests** for each rejected condition and one valid candidate that remains eligible.
+- [x] **Step 2: Run RED** `node --test tests/pipeline/quality-gates.test.mjs`.
+- [x] **Step 3: Implement pure, deterministic gates** and call them before any pointer/generation promotion.
+- [x] **Step 4: Run GREEN** with publication, IPO refresh and nightly-market regressions.
 - [ ] **Step 5: Commit** `feat: add cross-market publication quality gates`.
 
 ### Task 4: Formalize refresh modes and Taiwan-time scheduling

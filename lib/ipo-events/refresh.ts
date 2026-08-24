@@ -12,6 +12,7 @@ import {
 } from "../source-verification/source-ipo-events.ts";
 import type { IpoSnapshotRepository } from "./repository.ts";
 import { buildIpoEventSnapshot, type IpoEventSnapshot, type IpoSourceManifestEntry } from "./snapshot.ts";
+import { evaluateIpoStageProgress } from "../pipeline/quality-gates.ts";
 
 const MAX_ATTEMPTS = 3;
 const FRESH_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600";
@@ -126,7 +127,7 @@ export async function getIpoEventsResponse({
   if (!shouldRefreshIpoSnapshot({ now, current })) return jsonResponse(current, 200, FRESH_CACHE_CONTROL, headers);
 
   try {
-    const next = await refreshWithSingleFlight({ repository, fetchImpl, now });
+    const next = await refreshWithSingleFlight({ repository, fetchImpl, now }, current);
     return jsonResponse(next, 200, FRESH_CACHE_CONTROL, headers);
   } catch {
     if (current) return jsonResponse({ ...current, stale: true }, 200, STALE_CACHE_CONTROL, headers);
@@ -134,8 +135,11 @@ export async function getIpoEventsResponse({
   }
 }
 
-async function refreshWithSingleFlight(options: IpoEventsResponseOptions): Promise<IpoEventSnapshot> {
-  const pending = inFlightRefresh ?? (inFlightRefresh = refreshWithLease(options));
+async function refreshWithSingleFlight(
+  options: IpoEventsResponseOptions,
+  previous: IpoEventSnapshot | null,
+): Promise<IpoEventSnapshot> {
+  const pending = inFlightRefresh ?? (inFlightRefresh = refreshWithLease(options, previous));
   try {
     return await pending;
   } finally {
@@ -143,13 +147,18 @@ async function refreshWithSingleFlight(options: IpoEventsResponseOptions): Promi
   }
 }
 
-async function refreshWithLease({ repository, fetchImpl, now }: IpoEventsResponseOptions): Promise<IpoEventSnapshot> {
+async function refreshWithLease(
+  { repository, fetchImpl, now }: IpoEventsResponseOptions,
+  previous: IpoEventSnapshot | null,
+): Promise<IpoEventSnapshot> {
   const ownerToken = crypto.randomUUID();
   const acquired = await repository.tryAcquireRefreshLease({ ownerToken, now });
   if (!acquired) throw new IpoRefreshLeaseUnavailableError();
   let succeeded = false;
   try {
     const next = await refreshOfficialIpoSnapshot({ fetchImpl, now });
+    const stageQuality = evaluateIpoStageProgress(previous?.records ?? [], next.records);
+    if (!stageQuality.eligible) throw new Error(stageQuality.reasons.join("|"));
     await repository.publish(next);
     succeeded = true;
     return next;

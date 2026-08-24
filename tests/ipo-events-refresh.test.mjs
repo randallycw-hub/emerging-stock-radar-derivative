@@ -206,6 +206,33 @@ test("a failed explicit refresh enters cooldown instead of refetching without a 
   assert.equal(completionCalls, 1);
 });
 
+test("retains the last published IPO snapshot when a current company would regress a verified stage", async () => {
+  const fetchImpl = await createOfficialFetch(() => undefined);
+  const candidate = await refreshOfficialIpoSnapshot({ fetchImpl, now });
+  const record = candidate.records.find((item) => ["A", "B", "C"].includes(item.stage));
+  assert.ok(record, "fixture must contain one in-progress IPO record");
+  const current = {
+    ...candidate,
+    dataDate: "2026-07-31",
+    records: [{ ...record, stage: "D", exceptionStatus: null }],
+  };
+  let publishCalls = 0;
+  const repository = {
+    readCurrent: async () => current,
+    publish: async () => { publishCalls += 1; },
+    tryAcquireRefreshLease: async () => true,
+    completeRefreshAttempt: async () => {},
+  };
+
+  const response = await getIpoEventsResponse({ repository, fetchImpl, now, refreshRequested: true });
+  const payload = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.stale, true);
+  assert.equal(publishCalls, 0);
+  assert.equal(payload.records[0].stage, "D");
+});
+
 test("an explicit refresh replaces a corrupt current snapshot instead of comparing its invalid date", async () => {
   const fetchImpl = await createOfficialFetch(() => undefined);
   let published = null;

@@ -6,6 +6,12 @@ import { runPublicSnapshotIngestion } from "../../lib/pipeline/orchestration/pub
 const required = ["94025", "11406", "11586"];
 
 function adapter(datasetId, overrides = {}) {
+  const recordCount = overrides.recordCount ?? 1;
+  const records = Array.from({ length: recordCount }, (_, index) => datasetId === "94025"
+    ? { companyCode: `${datasetId}${index}`, companyName: `Company ${datasetId} ${index}`, yearMonth: "2026-06" }
+    : datasetId === "11406"
+      ? { bondId: `${datasetId}-${index}`, bondName: `Bond ${datasetId} ${index}` }
+      : { sourceRecordId: `${datasetId}-${index}`, companyCode: `${datasetId}${index}` });
   return {
     sourceId: datasetId,
     resourceId: `${datasetId}-csv`,
@@ -22,15 +28,11 @@ function adapter(datasetId, overrides = {}) {
       fetchedAt: "2026-07-28T00:00:00.000Z",
       responseHash: `sha256:${datasetId}`,
       responseBytes: 10,
-      rawRowCount: 1,
-      normalizedRecordCount: 1,
+      rawRowCount: recordCount,
+      normalizedRecordCount: recordCount,
       rejectedRecordCount: 0,
-      integrityReport: { status: "valid", acceptedRecordCount: 1, rejectedRecordCount: 0, warningCount: 0, errors: [], warnings: [], identityConflicts: [], canPublishCandidate: true },
-      records: [datasetId === "94025"
-        ? { companyCode: datasetId, companyName: `Company ${datasetId}`, yearMonth: "2026-06" }
-        : datasetId === "11406"
-          ? { bondId: datasetId, bondName: `Bond ${datasetId}` }
-          : { sourceRecordId: datasetId, companyCode: datasetId }],
+      integrityReport: { status: "valid", acceptedRecordCount: recordCount, rejectedRecordCount: 0, warningCount: 0, errors: [], warnings: [], identityConflicts: [], canPublishCandidate: true },
+      records,
       executionStatus: "succeeded",
       diagnostics: [],
       ...overrides,
@@ -65,4 +67,26 @@ test("does not move any pointer when one required ingestion fails", async () => 
   assert.match(result.reasons.join(","), /INGESTION_FAILED:11406:failed_fetch/);
   assert.equal(result.diagnostics["11406"][0].code, "NETWORK_ERROR");
   for (const datasetId of required) assert.equal(await repository.getPublishedSnapshotPointer(datasetId), undefined);
+});
+
+test("keeps the prior published pointer when a verified candidate has a material row-count collapse", async () => {
+  const repository = new InMemoryPipelineRepository();
+  const initialAdapters = Object.fromEntries(required.map((datasetId) => [datasetId, adapter(datasetId, { recordCount: 4 })]));
+  const initial = await runPublicSnapshotIngestion(options(repository, initialAdapters));
+  assert.equal(initial.published, true);
+  const priorPointer = await repository.getPublishedSnapshotPointer("11406");
+
+  const nextAdapters = Object.fromEntries(required.map((datasetId) => [datasetId, adapter(datasetId, {
+    recordCount: datasetId === "11406" ? 2 : 4,
+    responseHash: `sha256:next-${datasetId}`,
+  })]));
+  const result = await runPublicSnapshotIngestion({
+    ...options(repository, nextAdapters),
+    publicationRunId: "publication-2",
+    clock: () => "2026-07-29T01:00:00.000Z",
+  });
+
+  assert.equal(result.published, false);
+  assert.match(result.reasons.join(","), /QUALITY_GATE:11406:ROW_COUNT_COLLAPSE/);
+  assert.equal((await repository.getPublishedSnapshotPointer("11406"))?.currentSnapshotId, priorPointer?.currentSnapshotId);
 });
