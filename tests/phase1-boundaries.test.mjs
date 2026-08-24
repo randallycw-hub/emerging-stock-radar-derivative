@@ -16,6 +16,7 @@ const rootFormalFiles = [
   "tsconfig.json",
 ];
 const fixtureRoot = "tests/fixtures/phase1-guardrails";
+const privateImportRoot = "lib/private-cb-import/";
 
 async function filesUnder(relativePath) {
   const absolutePath = path.join(root, relativePath);
@@ -82,8 +83,17 @@ test("formal code has no banned provider, source path, fallback, realtime transp
   const files = [
     ...(await Promise.all(sourceRoots.map(filesUnder))).flat(),
     ...rootFormalFiles,
-  ];
+  ].filter((relativePath) => !relativePath.replaceAll("\\", "/").startsWith(privateImportRoot));
   await assertNoProhibitedMarketFeatures(files);
+});
+
+test("private CB import code is local-only and never opens a network or process boundary", async () => {
+  const files = await filesUnder(privateImportRoot);
+  assert.ok(files.length > 0);
+  for (const relativePath of files) {
+    const source = await readFile(path.join(root, relativePath), "utf8");
+    assert.doesNotMatch(source, /https?:\/\/|\bfetch\s*\(|\bXMLHttpRequest\b|\b(?:WebSocket|EventSource)\b|node:child_process/);
+  }
 });
 
 test("permits approved end-of-day and contractual price field names", async () => {

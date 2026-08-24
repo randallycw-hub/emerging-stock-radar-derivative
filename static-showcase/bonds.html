@@ -53,20 +53,20 @@
             <span id="bond-search-suggestions" class="bond-search-suggestions" role="listbox" aria-label="可轉債搜尋建議" hidden></span>
           </label>
           <label class="archive-toggle"><input id="bond-archive-toggle" name="archived" type="checkbox"> 顯示封存可轉債</label>
+          <label><span>公開資料快速檢視</span><select id="bond-public-screener" name="screener"><option value="">全部可轉債</option><option value="recent90">近 90 日發行</option><option value="maturity365">365 日內到期</option><option value="converted75">已轉換逾 75%</option><option value="cheap">低 CB 收盤價</option><option value="conversion100">轉換價值接近 100</option><option value="lowPremium">低轉換溢價</option></select></label>
           <fieldset class="bond-event-shortcuts">
             <legend>公開事件捷徑</legend>
             <button type="button" data-bond-shortcut="rights90" aria-pressed="false">90 日內權利事件</button>
             <button type="button" data-bond-shortcut="maturity365" aria-pressed="false">365 日內到期</button>
-            <button type="button" data-bond-shortcut="pending" aria-pressed="false">待補／待確認資料</button>
             <button type="button" data-bond-shortcut="clear" aria-pressed="false">清除所有條件</button>
           </fieldset>
           <label><span>到期日不晚於</span><input id="bond-maturity-before" name="maturityBefore" type="date"></label>
           <label><span>流通餘額比例上限 (%)</span><input id="bond-remaining-max" name="remainingMax" type="number" min="0" max="100" step="0.01" inputmode="decimal"></label>
           <label><span>擔保情形</span><select id="bond-secured" name="secured"><option value="">不限</option><option value="無擔保">無擔保</option><option value="有擔保">有擔保</option></select></label>
-          <label><span>資料品質</span><select id="bond-quality" name="quality"><option value="">不限</option><option value="pending">待補／待確認</option></select></label>
           <button id="bond-clear-filter" type="button" hidden>清除所有條件</button>
           <output id="bond-result-count" aria-live="polite">—</output>
         </form>
+        <p class="bond-screener-note">快速檢視只使用可核對的公開條款與盤後資料。</p>
         <p class="table-hint">點選可比較欄位：遞增、遞減、取消排序。</p>
 
         <div class="bond-table-shell">
@@ -81,9 +81,8 @@
               <th aria-sort="none"><button type="button" data-sort-key="remainingRatio">流通餘額比例 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-sort-key="nextEventDate">下一事件 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-sort-key="valuationDate">資料日期 <span aria-hidden="true"></span></button></th>
-              <th aria-sort="none">資料品質</th>
             </tr></thead>
-            <tbody id="bond-table-body"><tr><td colspan="10" class="empty-cell">盤後資料讀取中</td></tr></tbody>
+            <tbody id="bond-table-body"><tr><td colspan="9" class="empty-cell">盤後資料讀取中</td></tr></tbody>
           </table>
         </div>
         <div id="bond-card-list" class="bond-card-list" aria-live="polite"></div>

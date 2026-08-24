@@ -200,7 +200,8 @@ test("offline builder and outer refresh stage the same CB generation through the
       assert.match(page.document.element("bond-table-body").innerHTML, /99999/);
       page.document.resultFor("99999").dispatch("click");
       assert.equal(page.location.search, "?archived=1&direction=asc&page=1&bond=99999");
-      assert.match(page.document.element("bond-workbench").innerHTML, /封存/);
+      assert.match(page.document.element("bond-workbench").innerHTML, /舊債一/);
+      assert.doesNotMatch(page.document.element("bond-workbench").innerHTML, /封存原因|archiveReason/);
     } finally {
       page.dispose();
     }

@@ -1,4 +1,12 @@
 const PAGE_SIZE = 50;
+const PUBLIC_BOND_SCREENERS = new Set([
+  "recent90",
+  "maturity365",
+  "converted75",
+  "cheap",
+  "conversion100",
+  "lowPremium",
+]);
 
 export function normalizeBondQuery(value = "") {
   return String(value).normalize("NFC").trim().replace(/[a-z]/g, (letter) => letter.toUpperCase());
@@ -62,14 +70,12 @@ export function filterBondRecords(records, {
   query = "",
   archived = false,
   event = "",
-  quality = "",
   maturityBefore = "",
   remainingMax = null,
   secured = "",
 } = {}) {
   const needle = normalizeBondQuery(query);
   const normalizedEvent = event === "rights90" || event === "maturity365" ? event : "";
-  const normalizedQuality = quality === "pending" ? quality : "";
   const normalizedMaturityBefore = normalizeBondDate(maturityBefore);
   const normalizedRemainingMax = normalizeRemainingMax(remainingMax);
   const normalizedSecured = normalizeBondQuery(secured);
@@ -81,7 +87,6 @@ export function filterBondRecords(records, {
     if (normalizedEvent === "rights90" && (nextEventDays === null || nextEventDays > 90)) return false;
     const maturityDays = validDayCount(record.daysToMaturity);
     if (normalizedEvent === "maturity365" && (maturityDays === null || maturityDays > 365)) return false;
-    if (normalizedQuality === "pending" && record.dataQuality === "complete") return false;
     if (normalizedMaturityBefore && !(normalizeBondDate(record.maturityDate) && normalizeBondDate(record.maturityDate) <= normalizedMaturityBefore)) return false;
     const remainingRatio = finiteRecordNumber(record.remainingRatio);
     if (normalizedRemainingMax !== null && (remainingRatio === null || remainingRatio > normalizedRemainingMax)) return false;
@@ -107,6 +112,54 @@ export function sortBondRecords(records, { key = "bondCode", direction = "asc" }
   }).map(({ record }) => record);
 }
 
+export function normalizePublicBondScreener(value = "") {
+  return PUBLIC_BOND_SCREENERS.has(value) ? value : "";
+}
+
+export function applyPublicBondScreener(records, screener, { asOfDate = null } = {}) {
+  const values = Array.isArray(records) ? [...records] : [];
+  const selected = normalizePublicBondScreener(screener);
+  if (!selected) return values;
+  if (selected === "recent90") {
+    const asOf = normalizeBondDate(asOfDate);
+    if (!asOf) return [];
+    const start = new Date(`${asOf}T00:00:00Z`);
+    start.setUTCDate(start.getUTCDate() - 90);
+    const lowerBound = start.toISOString().slice(0, 10);
+    return values.filter((record) => {
+      const issueDate = normalizeBondDate(record?.issueDate);
+      return issueDate && issueDate >= lowerBound && issueDate <= asOf;
+    }).sort((left, right) => String(right.issueDate).localeCompare(String(left.issueDate)));
+  }
+  if (selected === "maturity365") return numericScreener(values, "daysToMaturity", (value) => value >= 0 && value <= 365);
+  if (selected === "converted75") return numericScreener(values, "remainingRatio", (value) => value >= 0 && value <= 25);
+  if (selected === "cheap") return numericSort(values, (record) => finiteRecordNumber(record?.cbClose));
+  if (selected === "conversion100") return numericSort(values, (record) => {
+    const conversionValue = finiteRecordNumber(record?.conversionValue);
+    return conversionValue === null ? null : Math.abs(conversionValue - 100);
+  });
+  if (selected === "lowPremium") return numericSort(values, (record) => finiteRecordNumber(record?.premiumRate));
+  return values;
+}
+
+function numericScreener(records, key, predicate) {
+  return records
+    .map((record, index) => ({ record, index, value: finiteRecordNumber(record?.[key]) }))
+    .filter((item) => item.value !== null && predicate(item.value))
+    .sort((left, right) => left.value - right.value || left.index - right.index)
+    .map((item) => item.record);
+}
+
+function numericSort(records, valueForRecord) {
+  return records
+    .map((record, index) => ({ record, index, value: valueForRecord(record) }))
+    .sort((left, right) => {
+      if (left.value === null || right.value === null) return left.value === right.value ? left.index - right.index : left.value === null ? 1 : -1;
+      return left.value - right.value || left.index - right.index;
+    })
+    .map((item) => item.record);
+}
+
 export function paginateBondRecords(records, requestedPage = 1) {
   const total = Array.isArray(records) ? records.length : 0;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -117,7 +170,6 @@ export function paginateBondRecords(records, requestedPage = 1) {
 export function parseBondListState(search = "") {
   const params = new URLSearchParams(search);
   const event = params.get("event");
-  const quality = params.get("quality");
   return {
     query: normalizeBondQuery(params.get("q") || ""),
     archived: params.get("archived") === "1",
@@ -125,10 +177,10 @@ export function parseBondListState(search = "") {
     direction: params.get("direction") === "desc" ? "desc" : "asc",
     page: Math.max(1, Number.parseInt(params.get("page") || "1", 10) || 1),
     event: event === "rights90" || event === "maturity365" ? event : "",
-    quality: quality === "pending" ? quality : "",
     maturityBefore: normalizeBondDate(params.get("maturityBefore") || ""),
     remainingMax: normalizeRemainingMax(params.get("remainingMax")),
     secured: normalizeBondQuery(params.get("secured") || ""),
+    screener: normalizePublicBondScreener(params.get("screener") || ""),
   };
 }
 
@@ -139,19 +191,19 @@ export function serializeBondListState({
   direction = "asc",
   page = 1,
   event = "",
-  quality = "",
   maturityBefore = "",
   remainingMax = null,
   secured = "",
+  screener = "",
 } = {}) {
   const params = new URLSearchParams();
   if (normalizeBondQuery(query)) params.set("q", normalizeBondQuery(query));
   if (archived) params.set("archived", "1");
   if (event === "rights90" || event === "maturity365") params.set("event", event);
-  if (quality === "pending") params.set("quality", quality);
   if (normalizeBondDate(maturityBefore)) params.set("maturityBefore", normalizeBondDate(maturityBefore));
   if (normalizeRemainingMax(remainingMax) !== null) params.set("remainingMax", String(normalizeRemainingMax(remainingMax)));
   if (normalizeBondQuery(secured)) params.set("secured", normalizeBondQuery(secured));
+  if (normalizePublicBondScreener(screener)) params.set("screener", normalizePublicBondScreener(screener));
   if (sortKey) params.set("sort", sortKey);
   params.set("direction", direction === "desc" ? "desc" : "asc");
   params.set("page", String(Math.max(1, Number.parseInt(page, 10) || 1)));

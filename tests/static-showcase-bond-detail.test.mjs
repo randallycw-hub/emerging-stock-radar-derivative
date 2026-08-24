@@ -8,19 +8,8 @@ import {
 } from "../static-showcase/assets/bond-detail-page.js";
 
 const dataDate = "2026-08-12";
-const strategyLabels = [
-  "股債相對條件",
-  "到期賣回條件",
-  "現股相對觀察",
-  "等同現股條件",
-  "套利條件",
-  "動態避險條件",
-];
 const orderedSections = [
-  "債券識別與資料完整性",
-  "風險與缺漏提醒",
-  "六項研究維度",
-  "六項策略條件",
+  "可轉債重點",
   "K 線圖",
   "債券條款",
   "法人 1／5／20 日",
@@ -136,13 +125,7 @@ function fixture(patch = {}) {
   };
 }
 
-function matrixCard(html, title) {
-  const start = html.indexOf(`<h4>${title}</h4>`);
-  assert.notEqual(start, -1, `${title} matrix card must exist`);
-  return html.slice(start, html.indexOf("</article>", start));
-}
-
-test("complete fixture renders required detail sections, conditions, evidence, and formulas in order", () => {
+test("complete fixture renders the public-only detail sections in order", () => {
   const html = renderBondDetail(fixture());
   let previous = -1;
   for (const label of orderedSections) {
@@ -150,68 +133,33 @@ test("complete fixture renders required detail sections, conditions, evidence, a
     assert.ok(index > previous, `${label} must follow the required order`);
     previous = index;
   }
-  assert.equal((html.match(/class="dimension-card/g) ?? []).length, 6);
-  assert.equal((html.match(/class="strategy-card/g) ?? []).length, 6);
-  for (const label of strategyLabels) assert.match(html, new RegExp(label));
-  for (const label of ["完整規則", "實際值", "門檻", "結果", "資料日", "來源 ID", "狀態", "轉換價值", "轉換溢價", "剩餘單位", "剩餘比例", "週轉率", "天數"]) {
+  for (const label of ["轉換價值", "轉換溢價", "剩餘單位", "剩餘比例", "週轉率", "天數"]) {
     assert.match(html, new RegExp(label));
   }
   assert.match(html, /<details[^>]*class="formula-details"/);
-  assert.match(html, /本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。/);
   assert.match(html, /target="_blank" rel="noopener noreferrer"/);
 });
 
-test("detail begins with an evidence-backed status matrix without replacing its raw fields", () => {
+test("detail never renders internal completeness, diagnostic, or rule-engine content", () => {
   const html = renderBondDetail(fixture());
-  const matrixAt = html.indexOf("資料狀態矩陣");
-  assert.ok(matrixAt > html.indexOf("教育性條件檢核"));
-  assert.ok(matrixAt < html.indexOf("詳細資料分頁"));
-  assert.equal((html.match(/class="status-matrix-card/g) ?? []).length, 5);
-  for (const label of ["現股／轉換價", "CB／轉換價值", "在外餘額", "到期與轉換期間", "資料完整性"]) {
-    assert.match(html, new RegExp(label));
+  for (const label of [
+    "目前資料快照", "資料完整性", "資料狀態矩陣", "風險與缺漏提醒",
+    "六項研究維度", "六項策略條件", "來源 ID", "缺漏原因",
+    "approved_cb_history", "not_met", "條件未符合", "目前無核准公開資料／待確認",
+    "CBAS 權利金", "TCRI 信用評等", "未納入公開資料快照", "完整性狀態",
+  ]) {
+    assert.doesNotMatch(html, new RegExp(label));
   }
-  assert.match(html, /<details class="matrix-evidence">/);
-  assert.match(html, /現股價格.*38/s);
-  assert.match(html, /目前轉換價.*35/s);
-  assert.match(html, /轉換價值.*108\.57/s);
-  assert.match(html, /資料日.*2026-08-12/s);
 });
 
-test("status matrix keeps an accumulating history as incomplete evidence", () => {
+test("incomplete history does not create a public pending diagnostic", () => {
   const html = renderBondDetail(fixture({
     fieldStates: { ...fixture().fieldStates, history: "accumulating" },
   }));
-  const card = matrixCard(html, "資料完整性");
-  assert.match(card, /待確認/);
-  assert.doesNotMatch(card, /已核對/);
-  assert.match(card, /history: accumulating/);
+  assert.doesNotMatch(html, /待確認|accumulating|資料狀態/);
 });
 
-test("status matrix exposes the raw valuation inputs behind conversion value", () => {
-  const html = renderBondDetail(fixture({
-    view: { ...fixture().view, valuationCbClose: "110", valuationStockClose: "38" },
-  }));
-  const card = matrixCard(html, "CB／轉換價值");
-  assert.match(card, /估值 CB 收盤.*110/s);
-  assert.match(card, /估值現股收盤.*38/s);
-  assert.match(card, /估值採用轉換價.*35/s);
-  assert.match(card, /估值轉換價生效日.*2026-08-01/s);
-});
-
-test("status matrix does not apply an unrelated valuation mismatch to the stock conversion card", () => {
-  const html = renderBondDetail(fixture({
-    view: { ...fixture().view, stockPriceDate: "2026-08-11" },
-    fieldStates: { ...fixture().fieldStates, valuation: "date_mismatch" },
-  }));
-  const marketCard = matrixCard(html, "現股／轉換價");
-  const valuationCard = matrixCard(html, "CB／轉換價值");
-  assert.match(marketCard, /已列示/);
-  assert.doesNotMatch(marketCard, /資料日不一致/);
-  assert.match(valuationCard, /資料日不一致/);
-  assert.match(marketCard, /2026-08-11/);
-});
-
-test("partial fixture retains every missing check and discloses the approved missing wording", () => {
+test("partial fixture keeps public sections but hides unavailable rule checks", () => {
   const record = fixture({
     view: { ...fixture().view, issuerResearch: null, missingReasons: ["MISSING_TTM", "MISSING_PS", "MISSING_STOCK_BORROW"] },
     fieldStates: { ...fixture().fieldStates, company: "missing", institutions: "missing" },
@@ -226,12 +174,12 @@ test("partial fixture retains every missing check and discloses the approved mis
     },
   });
   const html = renderBondDetail(record);
-  assert.match(html, /目前無核准公開資料／待確認/);
-  assert.match(html, /TTM/);
-  assert.match(html, /六項策略條件/);
+  assert.doesNotMatch(html, /目前無核准公開資料／待確認/);
+  assert.doesNotMatch(html, /TTM|六項策略條件|UNVERIFIED_PUBLIC_FINANCIALS/);
+  assert.match(html, /K 線圖/);
 });
 
-test("date-mismatch fixture displays source and data-date mismatch without deciding the check", () => {
+test("date-mismatch fixture does not expose technical states", () => {
   const record = fixture({
     assessment: {
       ...fixture().assessment,
@@ -242,20 +190,18 @@ test("date-mismatch fixture displays source and data-date mismatch without decid
     fieldStates: { ...fixture().fieldStates, valuation: "date_mismatch" },
   });
   const html = renderBondDetail(record);
-  assert.match(html, /2026-08-11/);
-  assert.match(html, /DATE_MISMATCH/);
-  assert.match(html, /date_mismatch/);
+  assert.doesNotMatch(html, /2026-08-11/);
+  assert.doesNotMatch(html, /DATE_MISMATCH/);
+  assert.doesNotMatch(html, /date_mismatch|待確認|條件未符合/);
 });
 
-test("archived fixture displays archive reason and preserves its traceable event", () => {
+test("archived fixture preserves its public event without internal archive reason", () => {
   const html = renderBondDetail(fixture({ status: "archived", archiveReason: "redeemed", archivedAt: dataDate }));
-  assert.match(html, /封存/);
-  assert.match(html, /redeemed/);
-  assert.match(html, /2026-08-12/);
+  assert.doesNotMatch(html, /封存|redeemed/);
   assert.match(html, /賣回權日/);
 });
 
-test("TTM-unavailable fixture retains neutral condition text and the no-advice gate rejects forbidden language", () => {
+test("unavailable checks stay outside the public page and no-advice gate remains active", () => {
   const record = fixture({
     assessment: {
       ...fixture().assessment,
@@ -265,7 +211,7 @@ test("TTM-unavailable fixture retains neutral condition text and the no-advice g
     },
   });
   const html = renderBondDetail(record);
-  assert.match(html, /條件符合|條件未符合|待確認/);
+  assert.doesNotMatch(html, /條件符合|條件未符合|待確認|UNVERIFIED_PUBLIC_FINANCIALS/);
   assert.deepEqual(noAdviceViolations(html), []);
   assert.deepEqual(noAdviceViolations("總分 9；建議買進並下單 1 張"), ["aggregate-score", "recommendation", "buy-sell-short", "order"]);
   assert.equal(detailUrlForBond("/bonds.html?q=甲", "35221"), "/bonds.html?q=%E7%94%B2&bond=35221");
@@ -298,7 +244,7 @@ test("detail links only project-approved official snapshot URLs", () => {
 test("mobile detail areas are collapsed by default", () => {
   const html = renderBondDetail(fixture());
   assert.doesNotMatch(html, /<details class="detail-mobile-area" open>/);
-  assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 9);
+  assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 6);
 });
 
 test("detail exposes an accessible, collapsed candlestick workbench without a trading direction", () => {
@@ -312,7 +258,7 @@ test("detail exposes an accessible, collapsed candlestick workbench without a tr
   assert.doesNotMatch(html, /(?:買點|賣點|buy|sell|signal)/i);
 });
 
-test("legacy list records project into the complete public detail contract", async () => {
+test("legacy list records project into the public-only detail contract", async () => {
   const { detailRecordFromLegacy } = await import("../static-showcase/assets/bond-detail-page.js");
   const record = detailRecordFromLegacy({
     view: fixture().view,
@@ -321,7 +267,6 @@ test("legacy list records project into the complete public detail contract", asy
   });
   const html = renderBondDetail(record);
   for (const label of orderedSections) assert.match(html, new RegExp(label));
-  assert.equal((html.match(/class="dimension-card/g) ?? []).length, 6);
-  assert.equal((html.match(/class="strategy-card/g) ?? []).length, 6);
-  assert.match(html, /目前無核准公開資料／待確認/);
+  assert.doesNotMatch(html, /目前無核准公開資料／待確認/);
+  assert.doesNotMatch(html, /資料完整性|六項策略條件|來源 ID/);
 });

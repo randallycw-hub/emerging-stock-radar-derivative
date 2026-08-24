@@ -1,20 +1,11 @@
 import { bindCandlestickChart } from "./bond-candlestick-chart.js";
 
-const DIMENSION_LABELS = {
-  price: "價格研究維度", days: "天數研究維度", premium: "溢價研究維度",
-  remaining: "餘額研究維度", spread: "價差研究維度", liquidity: "流動性研究維度",
-};
-const STRATEGY_LABELS = {
-  stock_bond_relative: "股債相對條件", maturity_put: "到期賣回條件", equity_relative: "現股相對觀察",
-  stock_equivalent: "等同現股條件", arbitrage: "套利條件", dynamic_hedge: "動態避險條件",
-};
-const STATE_LABELS = {
-  favorable: "條件符合", met: "條件符合", watch: "條件未符合", risk: "條件未符合", not_met: "條件未符合",
-  partial: "待確認", pending: "待確認", complete: "complete", stale: "stale", date_mismatch: "date_mismatch", missing: "missing", accumulating: "accumulating",
-};
-const MISSING_WORDING = "目前無核准公開資料／待確認";
+const MISSING_WORDING = "—";
 const APPROVED_EVENT_SOURCE_URLS = new Map([
   ["11406", "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv"],
+  ["tpex-cb-day-quotes", "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry"],
+  ["twse-stock-day-all", "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"],
+  ["tpex-stock-day-close", "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes"],
   ["tpex-cb-institution-daily", "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade"],
   ["tpex-cb-redemption-announcements", "https://www.tpex.org.tw/www/zh-tw/bond/redeem"],
   ["twsa-cb-underwriting-announcements", "https://web.twsa.org.tw/edoc2/default.aspx"],
@@ -47,23 +38,16 @@ export function noAdviceViolations(text) {
 export function renderBondDetail(record, { asOfDate = null } = {}) {
   const view = record?.view ?? {};
   const term = record?.term ?? {};
-  const assessment = record?.assessment ?? { dimensions: [], strategies: [] };
-  const dataDate = view.valuationDate ?? view.cbPriceDate ?? term.outstandingDataDate ?? null;
   const html = `
     <header class="bond-detail-head"><div><p class="section-number">${text(record?.bondCode)} / PUBLIC CB DETAIL</p><h2>${text(term.bondName ?? view.bondName)}</h2><p>${text(term.issuerName ?? view.issuerCode)}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債總表">← 返回總表</button></header>
     <p class="bond-detail-disclaimer">本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。</p>
     ${factDashboardSection(record, { asOfDate })}
-    ${snapshotSection(record, dataDate)}
-    ${statusMatrixSection(view, term, record?.fieldStates)}
-    <nav class="detail-tabs" aria-label="詳細資料分頁" role="tablist">${tabButton("overview", "總覽", true)}${tabButton("terms", "條款與事件")}${tabButton("institutions", "法人")}${tabButton("company", "公司營運")}</nav>
-    ${mobileArea("債券識別與資料完整性", "overview", identitySection(record, dataDate))}
-    ${mobileArea("風險與缺漏提醒", "overview", riskSection(view, record?.fieldStates))}
-    ${mobileArea("六項研究維度", "overview", assessmentSection("六項研究維度", "dimension", assessment.dimensions, DIMENSION_LABELS))}
-    ${mobileArea("六項策略條件", "overview", assessmentSection("六項策略條件", "strategy", assessment.strategies, STRATEGY_LABELS))}
+    <nav class="detail-tabs" aria-label="詳細資料分頁" role="tablist">${tabButton("overview", "行情圖表", true)}${tabButton("terms", "條款與事件")}${tabButton("institutions", "法人")}${tabButton("company", "公司營運")}</nav>
     ${mobileArea("K 線圖", "overview", candleSection(record))}
     ${mobileArea("債券條款", "terms", termsSection(term, view))}
+    ${mobileArea("資料來源與授權範圍", "terms", dataSourceSection())}
     ${mobileArea("法人 1／5／20 日", "institutions", institutionsSection(view, record?.fieldStates))}
-    ${mobileArea("公司營運與公開財務", "company", companySection(view, assessment.strategies, record?.fieldStates))}
+    ${mobileArea("公司營運與公開財務", "company", companySection(view))}
     ${mobileArea("事件時間軸", "terms", eventsSection(record?.events))}`;
   const violations = noAdviceViolations(html);
   if (violations.length) throw new Error(`detail UI contains prohibited content: ${violations.join(", ")}`);
@@ -71,8 +55,9 @@ export function renderBondDetail(record, { asOfDate = null } = {}) {
 }
 
 function factDashboardSection(record, { asOfDate } = {}) {
-  const facts = projectCbFactDashboard(record, { asOfDate });
-  return `<section class="cb-fact-dashboard" aria-label="可轉債事實儀表板"><header><div><p class="section-number">FACTS BY EVIDENCE</p><h3>可轉債事實儀表板</h3></div><p>每一欄位各自列示資料日期與來源狀態；未核對不以零值或推論代替。</p></header><dl>${facts.map((item) => `<div class="cb-fact-card" data-evidence-state="${text(item.evidenceState)}"><dt>${text(item.label)}</dt><dd>${text(item.value)}</dd><small>資料日期：${text(item.dataDate)}</small><small>來源狀態：${text(item.evidence)}</small></div>`).join("")}</dl></section>`;
+  const facts = projectCbFactDashboard(record, { asOfDate }).filter((item) => item.evidenceState === "verified");
+  if (facts.length === 0) return "";
+  return `<section class="cb-fact-dashboard" aria-label="可轉債事實儀表板"><header><div><p class="section-number">MARKET FACTS</p><h3>可轉債重點</h3></div></header><dl>${facts.map((item) => `<div class="cb-fact-card"><dt>${text(item.label)}</dt><dd>${text(item.value)}</dd><small>資料日期：${text(item.dataDate)}</small></div>`).join("")}</dl></section>`;
 }
 
 export function projectCbFactDashboard(record = {}, { asOfDate = null } = {}) {
@@ -85,7 +70,7 @@ export function projectCbFactDashboard(record = {}, { asOfDate = null } = {}) {
     const directEvidence = verifiedSnapshotUrl(sourceUrl, sourceId);
     const publishedEvidence = fieldState === "complete";
     if (value == null || value === "" || !validIsoDate(dataDate) || (!directEvidence && !publishedEvidence)) return missing(key, label);
-    const evidence = directEvidence ? `已驗證公開來源（${sourceId}）` : "已發布工作台欄位：已核對";
+    const evidence = directEvidence ? "已驗證公開來源" : "已核對公開資料";
     return { key, label, value: String(value), dataDate, evidence, evidenceState: "verified" };
   };
   const publishedAsOfDate = validIsoDate(asOfDate)
@@ -104,20 +89,19 @@ export function projectCbFactDashboard(record = {}, { asOfDate = null } = {}) {
     approvedField("conversionValue", "轉換價值", view.conversionValue, view.valuationDate, fieldStates.valuation, view.valuationSourceId, view.valuationSourceUrl),
     approvedField("premium", "轉換溢價", view.premiumRate, view.valuationDate, fieldStates.valuation, view.valuationSourceId, view.valuationSourceUrl),
     (balance || fieldStates.outstanding === "complete") && view.remainingRatio != null && validIsoDate(view.outstandingDataDate)
-      ? { key: "remainingRatio", label: "流通餘額比例", value: String(view.remainingRatio), dataDate: view.outstandingDataDate, evidence: balance ? `已驗證公開來源（${balance.sourceId}）` : "已發布工作台欄位：已核對", evidenceState: "verified" }
+      ? { key: "remainingRatio", label: "流通餘額比例", value: String(view.remainingRatio), dataDate: view.outstandingDataDate, evidence: balance ? "已驗證公開來源" : "已核對公開資料", evidenceState: "verified" }
       : missing("remainingRatio", "流通餘額比例"),
     event
-      ? { key: "nextEvent", label: "下一事件", value: `${event.type ?? event.title ?? "事件"} ${event.date}`, dataDate: event.date, evidence: `已驗證公開來源（${event.sourceId}）`, evidenceState: "verified" }
+      ? { key: "nextEvent", label: "下一事件", value: `${event.type ?? event.title ?? "事件"} ${event.date}`, dataDate: event.date, evidence: "已驗證公開來源", evidenceState: "verified" }
       : missing("nextEvent", "下一事件"),
     maturity
-      ? { key: "maturity", label: "到期日", value: term.maturityDate, dataDate: maturity.date, evidence: `已驗證公開來源（${maturity.sourceId}）`, evidenceState: "verified" }
+      ? { key: "maturity", label: "到期日", value: term.maturityDate, dataDate: maturity.date, evidence: "已驗證公開來源", evidenceState: "verified" }
       : missing("maturity", "到期日"),
   ];
 }
 
 export function detailRecordFromLegacy({ view = {}, term = {}, events = [] } = {}) {
   const bondCode = String(view.bondCode ?? term["債券代碼"] ?? "");
-  const dataDate = view.valuationDate ?? view.cbPriceDate ?? null;
   return {
     bondCode,
     status: view.archived || view.status === "archived" ? "archived" : "active",
@@ -138,9 +122,8 @@ export function detailRecordFromLegacy({ view = {}, term = {}, events = [] } = {
       putPrice: null,
       securedStatus: term["債券擔保情形"] ?? null,
     },
-    view: { ...view, missingReasons: [...(view.missingReasons ?? []), "UNVERIFIED_WORKBENCH_SNAPSHOT"] },
+    view,
     fieldStates: legacyFieldStates(view),
-    assessment: legacyAssessment(dataDate),
     events: Array.isArray(events) ? events : [],
   };
 }
@@ -192,97 +175,10 @@ export function syncBondDetailDisclosureMode(target, { compact } = {}) {
 
 function tabButton(id, label, selected = false) { return `<button type="button" role="tab" data-detail-tab="${id}" aria-selected="${selected}" tabindex="${selected ? 0 : -1}">${label}</button>`; }
 function mobileArea(label, tab, content) { return `<details class="detail-mobile-area"><summary>${text(label)}</summary><section class="bond-detail-section" data-detail-panel="${tab}" aria-label="${text(label)}">${content}</section></details>`; }
-function identitySection(record, dataDate) {
-  const view = record?.view ?? {};
-  return `<h3>債券識別與資料完整性</h3><dl class="detail-facts">${fact("債券代碼", record?.bondCode)}${fact("狀態", record?.status === "archived" ? "封存" : "active")}${fact("封存原因", record?.archiveReason)}${fact("封存日", record?.archivedAt)}${fact("資料日", dataDate)}${fact("資料完整性", view.dataQuality ?? record?.fieldStates?.price)}</dl>`;
-}
-function riskSection(view, fieldStates = {}) {
-  const reminders = [...(Array.isArray(view.missingReasons) ? view.missingReasons : []), ...Object.entries(fieldStates).filter(([, value]) => value === "missing" || value === "date_mismatch").map(([key, value]) => `${key}: ${value}`)];
-  return `<h3>風險與缺漏提醒</h3><p>${reminders.length ? text(reminders.join("；")) : "公開資料欄位已依資料日列示；仍請自行確認適用性。"}</p><p>${reminders.length ? MISSING_WORDING : "缺漏欄位不以零值代替。"}</p>`;
-}
-function snapshotSection(record, dataDate) {
-  const snapshot = projectCbSnapshot(record, dataDate);
-  const evidenceLink = snapshot.evidence ? sourceLink(snapshot.evidence.sourceUrl, snapshot.evidence.sourceId) : "";
-  return `<section class="cb-snapshot" aria-label="目前資料快照"><header><div><p class="section-number">PUBLIC EVIDENCE</p><h3>目前資料快照</h3></div><p>只並列已有核准公開來源且可核對的欄位。</p></header><dl class="detail-facts cb-snapshot-facts">${fact("資料日期", snapshot.dataDate)}${fact("流通餘額", snapshot.outstandingAmount)}${fact("流通餘額比例", snapshot.remainingRatio)}${fact("餘額變動", snapshot.change)}${fact("下一事件", snapshot.nextEvent)}${fact("到期日", snapshot.maturity)}${fact("可比較性", snapshot.comparability)}</dl><p class="cb-snapshot-evidence">${evidenceLink ? `條款／事件來源：${evidenceLink}` : snapshot.evidenceReason}</p></section>`;
-}
-export function projectCbSnapshot(record = {}, dataDate = null) {
-  const view = record?.view ?? {};
-  const term = record?.term ?? {};
-  const events = Array.isArray(record?.events) ? record.events : [];
-  const unavailable = (reason) => `${MISSING_WORDING}（${reason}）`;
-  const balanceEvidence = approved11406BalanceEvidence(view);
-  const balanceDate = validIsoDate(view.outstandingDataDate) ? view.outstandingDataDate : null;
-  const approvedEvent = (type) => events.find((event) => event?.type === type && validIsoDate(event?.date)
-    && verifiedSnapshotUrl(event.sourceUrl, event.sourceId));
-  const maturityEvidence = approvedEvent("maturity");
-  const nextEventEvidence = events.filter((event) => validIsoDate(event?.date) && verifiedSnapshotUrl(event.sourceUrl, event.sourceId)
-    && (!dataDate || event.date >= dataDate)).sort((left, right) => left.date.localeCompare(right.date))[0] ?? null;
-  const compatibleChange = view.outstandingChange != null
-    && view.outstandingComparison?.compatibleRules === true
-    && view.outstandingComparison?.sameDefinition === true
-    && verifiedSnapshotUrl(view.outstandingComparison?.sourceUrl, view.outstandingComparison?.sourceId)
-    && balanceEvidence;
-  return {
-    dataDate: balanceEvidence && balanceDate ? balanceDate : unavailable("資料日期缺少核准公開來源"),
-    outstandingAmount: balanceEvidence && view.outstandingAmount != null ? view.outstandingAmount : unavailable("流通餘額缺少核准公開來源"),
-    remainingRatio: balanceEvidence && view.remainingRatio != null ? view.remainingRatio : unavailable("流通餘額比例缺少核准公開來源"),
-    change: compatibleChange ? view.outstandingChange : unavailable("缺少同口徑前期來源或比較規則"),
-    nextEvent: nextEventEvidence ? `${nextEventEvidence.type ?? nextEventEvidence.title ?? "事件"} ${nextEventEvidence.date}` : unavailable("尚未有已核對事件日期"),
-    maturity: maturityEvidence && term.maturityDate ? term.maturityDate : unavailable("到期日缺少核准公開來源"),
-    comparability: compatibleChange ? "同口徑、同規則可比較" : unavailable("未具備可比較的同口徑證據"),
-    evidence: balanceEvidence ?? maturityEvidence ?? nextEventEvidence,
-    evidenceReason: unavailable("快照欄位來源尚待確認"),
-  };
-}
 function approved11406BalanceEvidence(view) {
   const sourceId = view?.outstandingSourceId;
   const sourceUrl = view?.outstandingSourceUrl;
   return sourceId === "11406" && verifiedSnapshotUrl(sourceUrl, sourceId) ? { sourceId, sourceUrl } : null;
-}
-function statusMatrixSection(view, term, fieldStates = {}) {
-  const marketState = listedMarketState(view);
-  const valuationState = matrixState(fieldStates.valuation, [view.cbClose, view.conversionValue, view.premiumRate, view.valuationConversionPrice, view.valuationConversionPriceEffectiveDate]);
-  const outstandingState = matrixState(fieldStates.outstanding, [view.outstandingAmount, view.remainingRatio]);
-  const termsState = matrixState(null, [term.maturityDate, term.conversionEndDate]);
-  const completenessState = overallMatrixState(fieldStates);
-  const cards = [
-    matrixCard("現股／轉換價", marketState, `現股 ${value(view.stockClose)} ／轉換價 ${value(view.currentConversionPrice)}`, `${fact("現股價格", view.stockClose)}${fact("現股資料日", view.stockPriceDate)}${fact("目前轉換價", view.currentConversionPrice)}${fact("轉換價生效日", view.conversionPriceEffectiveDate)}${fact("估值資料狀態", fieldStates.valuation)}`),
-    matrixCard("CB／轉換價值", valuationState, `CB ${value(view.cbClose)} ／轉換價值 ${value(view.conversionValue)}`, `${fact("CB 收盤", view.cbClose)}${fact("CB 資料日", view.cbPriceDate)}${fact("估值 CB 收盤", view.valuationCbClose)}${fact("估值現股收盤", view.valuationStockClose)}${fact("估值採用轉換價", view.valuationConversionPrice)}${fact("估值轉換價生效日", view.valuationConversionPriceEffectiveDate)}${fact("轉換價值", view.conversionValue)}${fact("轉換溢價", view.premiumRate)}${fact("估值資料日", view.valuationDate)}`),
-    matrixCard("在外餘額", outstandingState, `餘額 ${value(view.outstandingAmount)} ／剩餘比例 ${value(view.remainingRatio)}`, `${fact("流通餘額", view.outstandingAmount)}${fact("剩餘單位", view.remainingUnits)}${fact("剩餘比例", view.remainingRatio)}${fact("餘額資料日", view.outstandingDataDate)}${fact("餘額資料狀態", fieldStates.outstanding)}`),
-    matrixCard("到期與轉換期間", termsState, `到期 ${value(term.maturityDate)} ／轉換截止 ${value(term.conversionEndDate)}`, `${fact("到期日", term.maturityDate)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("剩餘天數", view.daysToMaturity)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}`),
-    matrixCard("資料完整性", completenessState, completenessSummary(fieldStates), Object.entries(fieldStates ?? {}).map(([key, state]) => fact(key, state)).join("")),
-  ];
-  return `<section class="status-matrix" aria-label="資料狀態矩陣"><header><div><p class="section-number">DATA FIRST</p><h3>資料狀態矩陣</h3></div><p>只標示資料是否可核對；展開可查看原始值、資料日與判定依據。</p></header><div class="status-matrix-grid">${cards.join("")}</div></section>`;
-}
-function matrixCard(title, state, summary, evidence) {
-  return `<article class="status-matrix-card" data-matrix-state="${text(state.code)}"><header><h4>${text(title)}</h4><span>${text(state.label)}</span></header><p>${text(summary)}</p><details class="matrix-evidence"><summary>展開判定依據</summary><dl class="detail-facts">${evidence}</dl></details></article>`;
-}
-function matrixState(fieldState, values) {
-  if (fieldState === "date_mismatch") return { code: "mismatch", label: "資料日不一致" };
-  if (fieldState === "missing" || fieldState === "stale" || values.some((item) => item === null || item === undefined || item === "")) return { code: "pending", label: "待確認" };
-  return { code: "verified", label: "已核對" };
-}
-function listedMarketState(view) {
-  if ([view.stockClose, view.stockPriceDate, view.currentConversionPrice, view.conversionPriceEffectiveDate].some((item) => item === null || item === undefined || item === "")) return { code: "pending", label: "待確認" };
-  return { code: "listed", label: "已列示" };
-}
-function overallMatrixState(fieldStates = {}) {
-  const states = Object.values(fieldStates ?? {});
-  if (states.includes("date_mismatch")) return { code: "mismatch", label: "資料日不一致" };
-  if (states.length === 0 || states.some((item) => item === "missing" || item === "stale" || item === "accumulating")) return { code: "pending", label: "待確認" };
-  return { code: "verified", label: "已核對" };
-}
-function completenessSummary(fieldStates = {}) {
-  const states = Object.entries(fieldStates ?? {}).map(([key, state]) => `${key}: ${state}`);
-  return states.length ? states.join("；") : MISSING_WORDING;
-}
-function assessmentSection(title, cardClass, sections, labels) {
-  const cards = Array.isArray(sections) ? sections : [];
-  return `<h3>${text(title)}</h3><div class="detail-condition-grid">${cards.map((section) => `<article class="${cardClass}-card detail-condition-card"><header><h4>${text(labels[section.code] ?? section.code)}</h4><span>${text(stateLabel(section.state))}</span></header>${(Array.isArray(section.checks) ? section.checks : []).map(renderCheck).join("")}</article>`).join("")}</div>`;
-}
-function renderCheck(check) {
-  const missing = check?.actual === null || check?.actual === undefined || !check?.dataDate || !check?.sourceId;
-  return `<dl class="condition-check">${fact("完整規則", check?.label)}${fact("實際值", missing ? MISSING_WORDING : check.actual)}${fact("門檻", check?.threshold)}${fact("結果", stateLabel(check?.state))}${fact("資料日", check?.dataDate ?? MISSING_WORDING)}${fact("來源 ID", check?.sourceId ?? MISSING_WORDING)}${fact("狀態", check?.state ?? "pending")}${fact("缺漏原因", check?.missingReason)}</dl>`;
 }
 function candleSection(record) {
   const chartData = JSON.stringify({
@@ -306,19 +202,26 @@ function parseChartData(value) { try { return JSON.parse(value ?? "{}"); } catch
 function termsSection(term, view) {
   return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}</dl>${formulaDetails(view)}`;
 }
-function formulaDetails(view) { return `<details class="formula-details"><summary>展開公式與已驗證輸入值</summary><dl class="detail-facts">${fact("轉換價值", view.conversionValue)}${fact("轉換溢價", view.premiumRate)}${fact("剩餘單位", view.remainingUnits)}${fact("剩餘比例", view.remainingRatio)}${fact("週轉率", view.dailyTurnoverRate)}${fact("天數", view.daysToMaturity)}</dl><p>轉換價值與轉換溢價僅依同日公開欄位檢核；不同資料日維持待確認。</p></details>`; }
-function institutionsSection(view, fieldStates = {}) {
-  const unavailable = view.institutionNetUnits === null || view.institutionNetUnits === undefined;
-  return `<h3>法人 1／5／20 日</h3><dl class="detail-facts">${fact("資料日", view.institutionDataDate)}${fact("資料狀態", fieldStates.institutions)}${fact("法人 1 日淨額", unavailable ? MISSING_WORDING : view.institutionNetUnits)}${fact("法人 5 日淨額", unavailable ? MISSING_WORDING : view.institutionNet5dUnits)}${fact("法人 20 日淨額", unavailable ? MISSING_WORDING : view.institutionNet20dUnits)}</dl>`;
+function dataSourceSection() {
+  return `<h3>資料來源與授權範圍</h3><p>本工作台只列示可核對的公開資料；每項數值旁標註其資料日期。</p><dl class="detail-facts">${sourceFact("CB 盤後收盤與成交量", "tpex-cb-day-quotes", "TPEx 可轉債每日成交資訊")}${sourceFact("上市標的股盤後", "twse-stock-day-all", "TWSE 每日收盤資訊")}${sourceFact("上櫃標的股盤後", "tpex-stock-day-close", "TPEx 上櫃每日收盤資訊")}${sourceFact("條款、轉換價與流通餘額", "11406", "TPEx 可轉債公開清單")}${sourceFact("提前贖回公告", "tpex-cb-redemption-announcements", "TPEx 贖回公告")}</dl><p>不蒐集會員帳密、個人投資部位或交易資料。</p>`;
 }
-function companySection(view, strategies, fieldStates = {}) {
+function sourceFact(label, sourceId, sourceLabel) {
+  const url = APPROVED_EVENT_SOURCE_URLS.get(sourceId);
+  const link = sourceLink(url, sourceId);
+  return `<div><dt>${text(label)}</dt><dd>${link ? `${link}（${text(sourceLabel)}）` : MISSING_WORDING}</dd></div>`;
+}
+function formulaDetails(view) { return `<details class="formula-details"><summary>展開公式與已驗證輸入值</summary><dl class="detail-facts">${fact("轉換價值", view.conversionValue)}${fact("轉換溢價", view.premiumRate)}${fact("剩餘單位", view.remainingUnits)}${fact("剩餘比例", view.remainingRatio)}${fact("週轉率", view.dailyTurnoverRate)}${fact("天數", view.daysToMaturity)}</dl></details>`; }
+function institutionsSection(view) {
+  const unavailable = view.institutionNetUnits === null || view.institutionNetUnits === undefined;
+  return `<h3>法人 1／5／20 日</h3><dl class="detail-facts">${fact("資料日", view.institutionDataDate)}${fact("法人 1 日淨額", unavailable ? MISSING_WORDING : view.institutionNetUnits)}${fact("法人 5 日淨額", unavailable ? MISSING_WORDING : view.institutionNet5dUnits)}${fact("法人 20 日淨額", unavailable ? MISSING_WORDING : view.institutionNet20dUnits)}</dl>`;
+}
+function companySection(view) {
   const company = view.issuerResearch;
-  const financialChecks = (Array.isArray(strategies) ? strategies : []).find((item) => item.code === "equity_relative")?.checks ?? [];
-  return `<h3>公司營運與公開財務</h3><dl class="detail-facts">${fact("營收月份", company?.revenueMonth)}${fact("發布日", company?.sourcePublishedOn)}${fact("營收單位", company?.revenueUnit)}${fact("當月營收", company?.currentMonthRevenue)}${fact("月增率", company?.monthOverMonthPercent)}${fact("年增率", company?.yearOverYearPercent)}${fact("累計營收", company?.cumulativeRevenue)}${fact("累計年增率", company?.cumulativeYearOverYearPercent)}${fact("資料狀態", fieldStates.company)}</dl><div class="public-financial-checks">${financialChecks.map(renderCheck).join("") || `<p>${MISSING_WORDING}</p>`}</div>`;
+  return `<h3>公司營運與公開財務</h3><dl class="detail-facts">${fact("營收月份", company?.revenueMonth)}${fact("發布日", company?.sourcePublishedOn)}${fact("營收單位", company?.revenueUnit)}${fact("當月營收", company?.currentMonthRevenue)}${fact("月增率", company?.monthOverMonthPercent)}${fact("年增率", company?.yearOverYearPercent)}${fact("累計營收", company?.cumulativeRevenue)}${fact("累計年增率", company?.cumulativeYearOverYearPercent)}</dl>`;
 }
 function eventsSection(events) {
   const values = Array.isArray(events) ? events : [];
-  return `<h3>事件時間軸</h3><ol class="detail-event-timeline">${values.length ? values.map((event) => `<li><time>${text(event.date)}</time><strong>${text(event.title)}</strong><span>${text(event.type)} · ${text(event.sourceId)}</span>${sourceLink(event.sourceUrl, event.sourceId)}</li>`).join("") : `<li>${MISSING_WORDING}</li>`}</ol>`;
+  return `<h3>事件時間軸</h3><ol class="detail-event-timeline">${values.length ? values.map((event) => `<li><time>${text(event.date)}</time><strong>${text(event.title)}</strong><span>${text(event.type)}</span>${sourceLink(event.sourceUrl, event.sourceId)}</li>`).join("") : `<li>${MISSING_WORDING}</li>`}</ol>`;
 }
 function sourceLink(value, sourceId) { const url = verifiedSnapshotUrl(value, sourceId); return url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">已驗證公開來源</a>` : ""; }
 function validIsoDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")); }
@@ -334,15 +237,5 @@ function legacyFieldStates(view) {
     company: view.issuerResearch == null ? "missing" : "complete", events: "missing", history: "missing",
   };
 }
-function legacyAssessment(dataDate) {
-  const dimensions = Object.keys(DIMENSION_LABELS).map((code) => legacySection(code));
-  const strategies = Object.keys(STRATEGY_LABELS).map((code) => legacySection(code));
-  return { dimensions, strategies };
-  function legacySection(code) {
-    return { code, state: "pending", checks: [{ code: `${code}_pending`, label: "公開資料條件檢核", state: "pending", actual: null, threshold: MISSING_WORDING, dataDate, sourceId: null, missingReason: "UNVERIFIED_WORKBENCH_SNAPSHOT" }] };
-  }
-}
 function fact(label, value) { return `<div><dt>${text(label)}</dt><dd>${text(value ?? MISSING_WORDING)}</dd></div>`; }
-function stateLabel(value) { return STATE_LABELS[value] ?? value ?? "pending"; }
-function value(item) { return item ?? MISSING_WORDING; }
 function text(value) { return escapeHtml(value ?? MISSING_WORDING); }
