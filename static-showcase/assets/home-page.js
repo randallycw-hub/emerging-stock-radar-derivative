@@ -58,8 +58,9 @@ function renderHomeEvents(input) {
 }
 
 function eventCardHtml(event) {
+  const unit = event.id === "ipo-recent" ? "筆事件" : "項";
   const content = `<p>${escapeHtml(event.label)}</p>${event.state === "ready"
-    ? `<strong>${event.count} 項</strong>${isPublishedIsoDate(event.nearestDate) ? `<span>最近日期 ${formatDate(event.nearestDate)}</span>` : ""}`
+    ? `<strong>${event.count} ${unit}</strong>${isPublishedIsoDate(event.nearestDate) ? `<span>最近日期 ${formatDate(event.nearestDate)}</span>` : ""}`
     : "<span>資料暫時無法讀取</span>"}`;
   if (event.state === "ready") {
     return `<a class="home-event-card" href="${escapeAttribute(event.href)}">${content}<span aria-hidden="true">→</span></a>`;

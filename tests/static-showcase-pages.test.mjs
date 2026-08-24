@@ -93,6 +93,8 @@ test("首頁以已發布資料提供事件列與覆蓋狀態", async () => {
   assert.match(script, /buildPublicEventDigest/);
   assert.match(script, /ipoEventsUrl/);
   assert.match(script, /bondWorkbench/);
+  assert.match(script, /event\.id === "ipo-recent" \? "筆事件" : "項"/);
+  assert.match(script, /\$\{event\.count\} \$\{unit\}/);
   assert.match(css, /\.home-event-strip/);
   assert.doesNotMatch(home + script, /排行|推薦|買進|賣出|目標價/);
 });
