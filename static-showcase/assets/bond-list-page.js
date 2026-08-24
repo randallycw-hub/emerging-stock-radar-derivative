@@ -70,14 +70,12 @@ export function filterBondRecords(records, {
   query = "",
   archived = false,
   event = "",
-  quality = "",
   maturityBefore = "",
   remainingMax = null,
   secured = "",
 } = {}) {
   const needle = normalizeBondQuery(query);
   const normalizedEvent = event === "rights90" || event === "maturity365" ? event : "";
-  const normalizedQuality = quality === "pending" ? quality : "";
   const normalizedMaturityBefore = normalizeBondDate(maturityBefore);
   const normalizedRemainingMax = normalizeRemainingMax(remainingMax);
   const normalizedSecured = normalizeBondQuery(secured);
@@ -89,7 +87,6 @@ export function filterBondRecords(records, {
     if (normalizedEvent === "rights90" && (nextEventDays === null || nextEventDays > 90)) return false;
     const maturityDays = validDayCount(record.daysToMaturity);
     if (normalizedEvent === "maturity365" && (maturityDays === null || maturityDays > 365)) return false;
-    if (normalizedQuality === "pending" && record.dataQuality === "complete") return false;
     if (normalizedMaturityBefore && !(normalizeBondDate(record.maturityDate) && normalizeBondDate(record.maturityDate) <= normalizedMaturityBefore)) return false;
     const remainingRatio = finiteRecordNumber(record.remainingRatio);
     if (normalizedRemainingMax !== null && (remainingRatio === null || remainingRatio > normalizedRemainingMax)) return false;
@@ -173,7 +170,6 @@ export function paginateBondRecords(records, requestedPage = 1) {
 export function parseBondListState(search = "") {
   const params = new URLSearchParams(search);
   const event = params.get("event");
-  const quality = params.get("quality");
   return {
     query: normalizeBondQuery(params.get("q") || ""),
     archived: params.get("archived") === "1",
@@ -181,7 +177,6 @@ export function parseBondListState(search = "") {
     direction: params.get("direction") === "desc" ? "desc" : "asc",
     page: Math.max(1, Number.parseInt(params.get("page") || "1", 10) || 1),
     event: event === "rights90" || event === "maturity365" ? event : "",
-    quality: quality === "pending" ? quality : "",
     maturityBefore: normalizeBondDate(params.get("maturityBefore") || ""),
     remainingMax: normalizeRemainingMax(params.get("remainingMax")),
     secured: normalizeBondQuery(params.get("secured") || ""),
@@ -196,7 +191,6 @@ export function serializeBondListState({
   direction = "asc",
   page = 1,
   event = "",
-  quality = "",
   maturityBefore = "",
   remainingMax = null,
   secured = "",
@@ -206,7 +200,6 @@ export function serializeBondListState({
   if (normalizeBondQuery(query)) params.set("q", normalizeBondQuery(query));
   if (archived) params.set("archived", "1");
   if (event === "rights90" || event === "maturity365") params.set("event", event);
-  if (quality === "pending") params.set("quality", quality);
   if (normalizeBondDate(maturityBefore)) params.set("maturityBefore", normalizeBondDate(maturityBefore));
   if (normalizeRemainingMax(remainingMax) !== null) params.set("remainingMax", String(normalizeRemainingMax(remainingMax)));
   if (normalizeBondQuery(secured)) params.set("secured", normalizeBondQuery(secured));

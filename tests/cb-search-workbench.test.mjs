@@ -10,7 +10,7 @@ import {
   renderBondDetail,
 } from "../static-showcase/assets/bond-detail-page.js";
 
-const unavailable = "目前無核准公開資料／待確認";
+const unavailable = "—";
 
 test("CB search suggestions match published bond and issuer identifiers without a fetch", () => {
   const records = [
@@ -77,7 +77,7 @@ test("fact dashboard keeps dates and evidence per field and never fabricates mis
   );
   const html = renderBondDetail({ term: {}, view: { currentConversionPrice: "0" }, events: [] });
   const dashboardHtml = html.slice(html.indexOf('class="cb-fact-dashboard"'), html.indexOf("</section>", html.indexOf('class="cb-fact-dashboard"')));
-  assert.match(dashboardHtml, /可轉債事實儀表板/);
+  assert.equal(dashboardHtml, "");
   assert.doesNotMatch(dashboardHtml, /<dd>0<\/dd>/);
 
   const published = projectCbFactDashboard({
@@ -106,7 +106,7 @@ test("fact dashboard selects only the next verified event on or after the publis
 
   assert.deepEqual(
     dashboard.find((item) => item.key === "nextEvent"),
-    { key: "nextEvent", label: "下一事件", value: "put 2026-08-30", dataDate: "2026-08-30", evidence: "已驗證公開來源（11406）", evidenceState: "verified" },
+    { key: "nextEvent", label: "下一事件", value: "put 2026-08-30", dataDate: "2026-08-30", evidence: "已驗證公開來源", evidenceState: "verified" },
   );
 });
 

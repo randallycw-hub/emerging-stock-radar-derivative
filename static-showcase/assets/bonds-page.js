@@ -33,7 +33,6 @@ const state = {
   page: 1,
   archived: false,
   event: "",
-  quality: "",
   maturityBefore: "",
   remainingMax: null,
   secured: "",
@@ -109,7 +108,6 @@ function initializeFromUrl() {
   state.page = listState.page;
   state.archived = listState.archived;
   state.event = listState.event;
-  state.quality = listState.quality;
   state.maturityBefore = listState.maturityBefore;
   state.remainingMax = listState.remainingMax;
   state.secured = listState.secured;
@@ -119,7 +117,6 @@ function initializeFromUrl() {
   setControlValue("#bond-maturity-before", state.maturityBefore);
   setControlValue("#bond-remaining-max", state.remainingMax ?? "");
   setControlValue("#bond-secured", state.secured);
-  setControlValue("#bond-quality", state.quality);
   setControlValue("#bond-public-screener", state.screener);
   updateBondShortcutStates();
 }
@@ -143,9 +140,8 @@ function bindFilters() {
     clearBondFilters();
     document.querySelector("#bond-search").focus();
   });
-  for (const selector of ["#bond-maturity-before", "#bond-remaining-max", "#bond-secured", "#bond-quality", "#bond-public-screener"]) {
+  for (const selector of ["#bond-maturity-before", "#bond-remaining-max", "#bond-secured", "#bond-public-screener"]) {
     document.querySelector(selector)?.addEventListener("change", (event) => {
-      if (selector === "#bond-quality") state.quality = event.target.value;
       if (selector === "#bond-public-screener") {
         state.screener = event.target.value;
         state.sortKey = null;
@@ -161,9 +157,6 @@ function bindFilters() {
       const shortcut = button.dataset.bondShortcut;
       if (shortcut === "rights90" || shortcut === "maturity365") {
         state.event = state.event === shortcut ? "" : shortcut;
-      } else if (shortcut === "pending") {
-        state.quality = state.quality === "pending" ? "" : "pending";
-        setControlValue("#bond-quality", state.quality);
       } else if (shortcut === "clear") {
         clearBondFilters();
         return;
@@ -368,7 +361,6 @@ function renderBondRow(view) {
     <td>${metric(presentation.remainingRatio, "流通餘額比例")}</td>
     <td>${eventMetric(view)}</td>
     <td>${metric(view.valuationDate ?? view.cbPriceDate, "資料日期")}</td>
-    <td>${metric(view.archived || view.status === "archived" ? "封存" : presentation.qualityLabel, view.archived || view.status === "archived" ? `${view.archiveReason ?? "封存"} · ${view.archiveDate ?? view.archivedAt ?? "日期未提供"}` : firstReason(view) || "已驗證")}</td>
   </tr>`;
 }
 
@@ -385,7 +377,6 @@ function renderBondCard(view) {
       ${cardMetric("流通餘額比例", presentation.remainingRatio, "流通餘額比例")}
       ${cardMetric("下一事件", presentation.eventLabel, presentation.eventDate)}
       ${cardMetric("資料日期", view.valuationDate ?? view.cbPriceDate, "資料日期")}
-      ${cardMetric("資料品質", view.archived || view.status === "archived" ? "封存" : presentation.qualityLabel, view.archived || view.status === "archived" ? `${view.archiveReason ?? "封存"} · ${view.archiveDate ?? view.archivedAt ?? "日期未提供"}` : firstReason(view) || "已驗證")}
     </span>
   </button>`;
 }
@@ -517,7 +508,6 @@ function currentBondFilters() {
     query: document.querySelector("#bond-search").value,
     archived: state.archived,
     event: state.event,
-    quality: controlValue("#bond-quality", state.quality),
     maturityBefore: controlValue("#bond-maturity-before", state.maturityBefore),
     remainingMax: controlValue("#bond-remaining-max", state.remainingMax ?? ""),
     secured: controlValue("#bond-secured", state.secured),
@@ -549,7 +539,6 @@ function activeBondConditions(filters) {
   if (filters.archived) labels.push("顯示封存可轉債");
   if (filters.event === "rights90") labels.push("90 日內權利事件");
   if (filters.event === "maturity365") labels.push("365 日內到期");
-  if (filters.quality === "pending") labels.push("待補／待確認資料");
   if (filters.maturityBefore) labels.push(`到期日不晚於 ${filters.maturityBefore}`);
   if (filters.remainingMax !== "" && filters.remainingMax !== null) labels.push(`流通餘額比例不高於 ${filters.remainingMax}%`);
   if (filters.secured) labels.push(`擔保情形：${filters.secured}`);
@@ -559,7 +548,7 @@ function activeBondConditions(filters) {
 function updateBondShortcutStates() {
   for (const button of document.querySelectorAll("[data-bond-shortcut]")) {
     const shortcut = button.dataset.bondShortcut;
-    const pressed = shortcut === state.event || (shortcut === "pending" && state.quality === "pending");
+    const pressed = shortcut === state.event;
     button.setAttribute("aria-pressed", String(pressed));
   }
 }
@@ -570,11 +559,9 @@ function clearBondFilters() {
   setControlValue("#bond-maturity-before", "");
   setControlValue("#bond-remaining-max", "");
   setControlValue("#bond-secured", "");
-  setControlValue("#bond-quality", "");
   setControlValue("#bond-public-screener", "");
   state.archived = false;
   state.event = "";
-  state.quality = "";
   state.maturityBefore = "";
   state.remainingMax = null;
   state.secured = "";
@@ -684,9 +671,6 @@ export function bondListPresentation(view = {}) {
     remainingRatio: plainRate(view.remainingRatio),
     eventLabel: view.nextEventDate ? eventLabel : "資料暫缺",
     eventDate: view.nextEventDate ?? "資料暫缺",
-    qualityLabel: view.dataQuality === "complete" && !view.missingReasons?.length
-      ? "可用"
-      : "待補",
   };
 }
 

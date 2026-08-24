@@ -24,7 +24,6 @@ test("bond page exposes the complete sortable CB workbench", async () => {
     "流通餘額比例",
     "下一事件",
     "資料日期",
-    "資料品質",
   ]) {
     assert.match(bondsHtml + js, new RegExp(label));
   }
@@ -77,6 +76,7 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(detailJs, /bond-candlestick/);
   assert.match(detailJs, /noopener noreferrer/);
   assert.doesNotMatch(detailJs, /目前無核准公開資料／待確認/);
+  assert.doesNotMatch(bondsHtml + js + detailJs, /資料品質|待補／待確認資料|CBAS 權利金|TCRI 信用評等/);
 });
 
 test("detail UI gate scans static presentation strings for prohibited public investment directions", async () => {
@@ -103,7 +103,7 @@ test("bond list module round-trips only supported list URL state", async () => {
   const state = parseBondListState("?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
   assert.deepEqual(state, {
     query: "甲", archived: true, sortKey: "cbClose", direction: "desc", page: 3,
-    event: "", quality: "", maturityBefore: "", remainingMax: null, secured: "", screener: "",
+    event: "", maturityBefore: "", remainingMax: null, secured: "", screener: "",
   });
   assert.equal(serializeBondListState(state), "?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
 });
@@ -118,7 +118,6 @@ test("bond list state round-trips composable public event conditions and filters
     direction: "asc",
     page: 1,
     event: "rights90",
-    quality: "pending",
     maturityBefore: "",
     remainingMax: 25,
     secured: "無擔保",
@@ -126,7 +125,7 @@ test("bond list state round-trips composable public event conditions and filters
   });
   assert.equal(
     serializeBondListState(state),
-    "?event=rights90&quality=pending&remainingMax=25&secured=%E7%84%A1%E6%93%94%E4%BF%9D&sort=bondCode&direction=asc&page=1",
+    "?event=rights90&remainingMax=25&secured=%E7%84%A1%E6%93%94%E4%BF%9D&sort=bondCode&direction=asc&page=1",
   );
   assert.deepEqual(filterBondRecords([{
     bondCode: "90001",
@@ -191,8 +190,8 @@ test("bond page provides composable public event controls and a clear-all empty 
     readFile(new URL("assets/app.css", root), "utf8"),
   ]);
   assert.match(html, /<fieldset class="bond-event-shortcuts"/);
-  assert.equal((html.match(/data-bond-shortcut=/g) ?? []).length, 4);
-  for (const id of ["bond-maturity-before", "bond-remaining-max", "bond-secured", "bond-quality"]) {
+  assert.equal((html.match(/data-bond-shortcut=/g) ?? []).length, 3);
+  for (const id of ["bond-maturity-before", "bond-remaining-max", "bond-secured"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
   assert.match(js, /aria-pressed/);
@@ -200,16 +199,16 @@ test("bond page provides composable public event controls and a clear-all empty 
   assert.match(css, /\.bond-event-shortcuts/);
 });
 
-test("bond page separates public screeners from licensed-only CBAS and credit data", async () => {
+test("bond page keeps public screeners and official sources without unavailable licensed-data notices", async () => {
   const [html, detail] = await Promise.all([
     readFile(new URL("bonds.html", root), "utf8"),
     readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
   ]);
   assert.match(html, /id="bond-public-screener"/);
-  assert.match(html, /CBAS 權利金與信用評等不納入公開資料篩選/);
-  for (const label of ["資料來源與授權範圍", "TPEx 可轉債每日成交資訊", "CBAS 權利金", "TCRI 信用評等", "未納入公開資料快照"]) {
+  for (const label of ["資料來源與授權範圍", "TPEx 可轉債每日成交資訊", "TPEx 可轉債公開清單"]) {
     assert.match(detail, new RegExp(label));
   }
+  assert.doesNotMatch(html + detail, /CBAS 權利金|TCRI 信用評等|未納入公開資料快照|資料品質|待補／待確認/);
 });
 
 test("page loader projects archived workbench identities into the searchable list by exact bond code", async () => {
@@ -323,22 +322,11 @@ test("bond list presentation uses remaining ratio and canonical redemption event
     nextEventType: "redemption",
     nextEventDate: "2026-09-21",
     daysToNextEvent: 53,
-    dataQuality: "complete",
-    missingReasons: [],
   }), {
     remainingRatio: "82.07%",
     eventLabel: "贖回 53 天",
     eventDate: "2026-09-21",
-    qualityLabel: "可用",
   });
-  assert.equal(bondListPresentation({
-    remainingRatio: null,
-    nextEventType: "maturity",
-    nextEventDate: "2028-07-29",
-    daysToNextEvent: 705,
-    dataQuality: "partial",
-    missingReasons: ["NO_CB_CLOSE"],
-  }).qualityLabel, "待補");
 });
 
 test("detail disclosures align with the 900px CSS breakpoint and initialize the selected desktop tab only", async () => {
@@ -402,62 +390,11 @@ test("detail close button handles Enter as one keyboard activation", async () =>
   assert.equal(closeCount, 1);
 });
 
-test("mobile bond cards keep every list field and archived metadata visible", async () => {
+test("mobile bond cards keep public market fields without archive diagnostics", async () => {
   const js = await readFile(new URL("assets/bonds-page.js", root), "utf8");
   const card = js.slice(js.indexOf("function renderBondCard"), js.indexOf("function bindBondOpeners"));
-  for (const label of ["CB 收盤", "轉換價值", "轉換溢價率", "標的股收盤", "目前轉換價", "流通餘額比例", "下一事件", "資料日期", "資料品質"]) {
+  for (const label of ["CB 收盤", "轉換價值", "轉換溢價率", "標的股收盤", "目前轉換價", "流通餘額比例", "下一事件", "資料日期"]) {
     assert.match(card, new RegExp(label));
   }
-  assert.match(card, /archiveReason/);
-  assert.match(card, /archiveDate/);
-  assert.match(card, /archivedAt/);
-});
-
-test("CB detail snapshot communicates evidence scope and unavailable comparisons", async () => {
-  const js = await readFile(new URL("assets/bond-detail-page.js", root), "utf8");
-
-  for (const label of ["目前資料快照", "可比較性", "—"]) {
-    assert.match(js, new RegExp(label));
-  }
-});
-
-test("CB snapshot fails closed for each value without its own approved evidence", async () => {
-  const { projectCbSnapshot } = await import("../static-showcase/assets/bond-detail-page.js");
-  const snapshot = projectCbSnapshot({
-    view: { valuationDate: "2026-08-24", outstandingAmount: "100000000", remainingRatio: "50" },
-    term: { maturityDate: "2028-12-31" },
-    events: [],
-  });
-
-  for (const [key, reason] of [
-    ["dataDate", "資料日期缺少核准公開來源"],
-    ["outstandingAmount", "流通餘額缺少核准公開來源"],
-    ["remainingRatio", "流通餘額比例缺少核准公開來源"],
-    ["maturity", "到期日缺少核准公開來源"],
-  ]) {
-    assert.equal(snapshot[key], `—（${reason}）`);
-  }
-});
-
-test("CB snapshot renders balance values only with exact approved 11406 evidence", async () => {
-  const { projectCbSnapshot } = await import("../static-showcase/assets/bond-detail-page.js");
-  const snapshot = projectCbSnapshot({
-    view: {
-      outstandingDataDate: "2026-08-24",
-      outstandingAmount: "100000000",
-      remainingRatio: "50",
-      outstandingSourceId: "11406",
-      outstandingSourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
-    },
-  });
-
-  assert.deepEqual({
-    dataDate: snapshot.dataDate,
-    outstandingAmount: snapshot.outstandingAmount,
-    remainingRatio: snapshot.remainingRatio,
-  }, {
-    dataDate: "2026-08-24",
-    outstandingAmount: "100000000",
-    remainingRatio: "50",
-  });
+  assert.doesNotMatch(card, /archiveReason|archiveDate|archivedAt|資料品質/);
 });
