@@ -102,3 +102,38 @@ test("IPO lifecycle UI labels unavailable public evidence without inventing offe
     assert.match(source, new RegExp(label));
   }
 });
+
+test("IPO evidence accepts only manifest-backed approved source-record identifiers", async () => {
+  const { normalizeIpoRecord, projectIpoEvidence } = await import("../static-showcase/assets/ipo-page.js");
+  const record = {
+    companyCode: "1234", companyName: "測試公司", market: "上市", stage: "D", applicationDate: "2026-08-01",
+    underwriter: "未核准承銷商",
+    auction: { sourceRecordId: "attacker:auction:1234", auctionOpenDate: "2026-09-10" },
+    publicOffering: { sourceRecordId: "attacker:offering:1234", label: "未核准發行" },
+    events: [{ kind: "application_submitted", date: "2026-08-01", label: "申請送件", sourceRecordIds: ["attacker:1234"] }],
+  };
+  const denied = normalizeIpoRecord(record, { dataDate: "2026-08-24", sourceManifest: [{ sourceId: "twse-applications" }] });
+  assert.deepEqual(projectIpoEvidence(denied), { underwriter: null, issuance: null, auction: null });
+
+  const allowed = normalizeIpoRecord({
+    ...record,
+    underwriter: "正式承銷商",
+    events: [{ kind: "application_submitted", date: "2026-08-01", label: "申請送件", sourceRecordIds: ["TWSE:1234:20260801"] }],
+  }, { dataDate: "2026-08-24", sourceManifest: [{ sourceId: "twse-applications" }] });
+  assert.equal(projectIpoEvidence(allowed).underwriter, "正式承銷商");
+});
+
+test("IPO default active path excludes terminal and historically stale applications", async () => {
+  const { matchesIpoCalendarStage } = await import("../static-showcase/assets/ipo-page.js");
+  const today = "2026-08-24";
+  const current = { stage: "A", exceptionStatus: null, applicationDate: "2026-08-01", events: [{ date: "2026-08-01" }] };
+  const stale = { stage: "A", exceptionStatus: null, applicationDate: "2025-08-23", events: [{ date: "2025-08-23" }] };
+  const withdrawn = { stage: "withdrawn", exceptionStatus: "withdrawn", applicationDate: "2026-08-01", events: [{ date: "2026-08-01" }] };
+  const cancelled = { stage: "cancelled", exceptionStatus: "cancelled", applicationDate: "2026-08-01", events: [{ date: "2026-08-01" }] };
+
+  assert.equal(matchesIpoCalendarStage(current, "active", today), true);
+  assert.equal(matchesIpoCalendarStage(stale, "active", today), false);
+  assert.equal(matchesIpoCalendarStage(withdrawn, "active", today), false);
+  assert.equal(matchesIpoCalendarStage(cancelled, "active", today), false);
+  for (const row of [stale, withdrawn, cancelled]) assert.equal(matchesIpoCalendarStage(row, "all", today), true);
+});

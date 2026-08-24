@@ -389,3 +389,21 @@ test("CB detail snapshot communicates evidence scope and unavailable comparisons
     assert.match(js, new RegExp(label));
   }
 });
+
+test("CB snapshot fails closed for each value without its own approved evidence", async () => {
+  const { projectCbSnapshot } = await import("../static-showcase/assets/bond-detail-page.js");
+  const snapshot = projectCbSnapshot({
+    view: { valuationDate: "2026-08-24", outstandingAmount: "100000000", remainingRatio: "50" },
+    term: { maturityDate: "2028-12-31" },
+    events: [],
+  });
+
+  for (const [key, reason] of [
+    ["dataDate", "資料日期缺少核准公開來源"],
+    ["outstandingAmount", "流通餘額缺少核准公開來源"],
+    ["remainingRatio", "流通餘額比例缺少核准公開來源"],
+    ["maturity", "到期日缺少核准公開來源"],
+  ]) {
+    assert.equal(snapshot[key], `目前無核准公開資料／待確認（${reason}）`);
+  }
+});

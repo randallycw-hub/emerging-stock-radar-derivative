@@ -17,6 +17,9 @@ const lifecycleDefinitions = [
   ["pricing", "轉換價確認", /(?:pricing|price|定價|轉換價)/iu],
   ["listing", "掛牌", /(?:listing_date|listing|掛牌|上市)/iu],
 ];
+const approvedIpoSourceIds = new Set(["twse-applications", "tpex-applications", "tpex-ipo-listings", "twse-auctions", "twse-public-offerings"]);
+const activeIpoStages = new Set(["A", "B", "C", "D"]);
+const activeIpoWindowDays = 365;
 
 if (globalThis.document) {
   initializeFromUrl();
@@ -45,7 +48,7 @@ async function loadData() {
 
 function applySnapshot(snapshot) {
   state.dataDate = validDate(snapshot.dataDate) ? snapshot.dataDate : null;
-  state.rows = snapshot.records.map(normalizeRecord).filter((row) => row.companyCode && row.companyName);
+  state.rows = snapshot.records.map((record) => normalizeIpoRecord(record, { dataDate: state.dataDate, sourceManifest: snapshot.sourceManifest })).filter((row) => row.companyCode && row.companyName);
   populateFilters();
   applyStateToControls();
   render();
@@ -125,6 +128,7 @@ function render() {
 function renderStageSummary() {
   const counts = { A: 0, B: 0, board: 0, C: 0, D: 0 };
   for (const row of state.rows) {
+    if (!matchesIpoCalendarStage(row, "active", state.dataDate)) continue;
     const stage = row.stage === "B" && row.events.some((event) => /董事會/.test(event.label)) ? "board" : row.stage;
     if (Object.hasOwn(counts, stage)) counts[stage] += 1;
   }
@@ -139,7 +143,7 @@ function filteredEventEntries(rows, filters) {
   return rows.flatMap((row) => {
     const matchesCompany = (!query || `${row.companyCode} ${row.companyName} ${row.underwriter}`.toLocaleLowerCase("zh-Hant").includes(query))
       && (filters.market === "all" || row.market === filters.market)
-      && matchesIpoStage(row.stage, filters.stage);
+      && matchesIpoCalendarStage(row, filters.stage, state.dataDate);
     if (!matchesCompany) return [];
     return row.events.filter((event) => (filters.event === "all" || event.kind === filters.event)
       && (filters.year === "all" || event.date.slice(0, 4) === filters.year)).map((event) => ({ row, event }));
@@ -178,17 +182,18 @@ function cardHtml(row) {
 }
 
 function timelineHtml(row) {
-  const evidence = hasOfficialEvidence(row);
-  const underwriter = evidence && row.underwriter ? `<div><dt>承銷商</dt><dd>${escapeHtml(row.underwriter)}</dd></div>` : "";
-  const issuance = evidence && sourceIdOf(row.publicOffering) ? `<div><dt>發行資訊</dt><dd>${escapeHtml(row.publicOffering.label ?? "已公告")}</dd></div>` : "";
-  const auction = (hasOfficialEvidence(row, "auction") || sourceIdOf(row.auction)) && row.auction ? `<div><dt>競拍進度</dt><dd>${escapeHtml(auctionStatus(row))}</dd></div>` : "";
+  const evidence = projectIpoEvidence(row);
+  const underwriter = evidence.underwriter ? `<div><dt>承銷商</dt><dd>${escapeHtml(evidence.underwriter)}</dd></div>` : "";
+  const issuance = evidence.issuance ? `<div><dt>發行資訊</dt><dd>${escapeHtml(evidence.issuance)}</dd></div>` : "";
+  const auction = evidence.auction ? `<div><dt>競拍進度</dt><dd>${escapeHtml(evidence.auction)}</dd></div>` : "";
   return `${timelineFacts(row, `${underwriter}${issuance}${auction}`)}${lifecycleHtml(row)}<details class="ipo-full-timeline"><summary>完整事件</summary><ol class="ipo-timeline">${row.events.map(eventHtml).join("") || "<li>尚無公開資料</li>"}</ol></details>`;
 }
 
-function normalizeRecord(record) {
-  const events = Array.isArray(record.events) ? record.events.filter((event) => validDate(event?.date) && event?.label).map((event) => ({ date: event.date, label: String(event.label), kind: String(event.kind ?? event.type ?? event.label), sourceId: String(event.sourceId ?? event.sourceRecordIds?.[0] ?? "").trim() || null })) : [];
+export function normalizeIpoRecord(record, { dataDate = null, sourceManifest = [] } = {}) {
+  const manifestSourceIds = approvedManifestSourceIds(sourceManifest);
+  const events = Array.isArray(record.events) ? record.events.filter((event) => validDate(event?.date) && event?.label).map((event) => ({ date: event.date, label: String(event.label), kind: String(event.kind ?? event.type ?? event.label), sourceId: approvedSourceIdForRecordIds(event.sourceRecordIds, manifestSourceIds) })) : [];
   const primary = selectPrimaryEvent(events);
-  return { companyCode: String(record.companyCode ?? "").trim(), companyName: String(record.companyName ?? "").trim(), market: String(record.market ?? "其他").trim(), stage: Object.hasOwn(stageLabels, record.stage) ? record.stage : "A", stageOrder: stageOrder[record.stage] ?? 1, underwriter: String(record.underwriter ?? "").trim(), events, primaryEventDate: primary?.date ?? null, primaryEventLabel: primary?.label ?? "—", distanceDays: primary ? taipeiCalendarDistance(taipeiToday(), primary.date) : null, auctionOpenDate: validDate(record.auction?.auctionOpenDate) ? record.auction.auctionOpenDate : null, auction: record.auction ?? null, publicOffering: record.publicOffering ?? null, listingDate: validDate(record.listingDate) ? record.listingDate : null, dataDate: state.dataDate, hasProvisionalPricing: Boolean(record.provisionalUnderwritingPrice), hasFinalPricing: Boolean(record.finalUnderwritingPrice) };
+  return { companyCode: String(record.companyCode ?? "").trim(), companyName: String(record.companyName ?? "").trim(), market: String(record.market ?? "其他").trim(), stage: Object.hasOwn(stageLabels, record.stage) ? record.stage : "A", exceptionStatus: record.exceptionStatus ?? null, stageOrder: stageOrder[record.stage] ?? 1, underwriter: String(record.underwriter ?? "").trim(), events, primaryEventDate: primary?.date ?? null, primaryEventLabel: primary?.label ?? "—", distanceDays: primary ? taipeiCalendarDistance(taipeiToday(), primary.date) : null, auctionOpenDate: validDate(record.auction?.auctionOpenDate) ? record.auction.auctionOpenDate : null, auction: record.auction ?? null, auctionSourceId: approvedSourceIdForRecordIds([record.auction?.sourceRecordId], manifestSourceIds), publicOffering: record.publicOffering ?? null, publicOfferingSourceId: approvedSourceIdForRecordIds([record.publicOffering?.sourceRecordId], manifestSourceIds), applicationDate: validDate(record.applicationDate) ? record.applicationDate : null, listingDate: validDate(record.listingDate) ? record.listingDate : null, dataDate, hasProvisionalPricing: Boolean(record.provisionalUnderwritingPrice), hasFinalPricing: Boolean(record.finalUnderwritingPrice) };
 }
 
 export function projectIpoLifecycle(row, today = taipeiToday()) {
@@ -210,13 +215,18 @@ function lifecycleHtml(row) { return `<ol class="ipo-lifecycle-list">${projectIp
 function eventHtml(event) { return `<li class="${event.date <= taipeiToday() ? "is-complete" : ""}"><span>${escapeHtml(event.label)}</span><time>${formatDate(event.date)}</time></li>`; }
 function eventSummary(row, direction) { const today = taipeiToday(); const events = [...row.events].sort((left, right) => left.date.localeCompare(right.date)); const event = direction === "next" ? events.find((value) => value.date >= today) : events.filter((value) => value.date <= today).at(-1); return event ? `${escapeHtml(event.label)} ${formatDate(event.date)}` : "尚無公開資料"; }
 function hasOfficialEvidence(row, kind = null) { return row.events.some((event) => event.sourceId && (!kind || new RegExp(kind, "iu").test(`${event.kind} ${event.label}`))); }
-function sourceIdOf(value) { return String(value?.sourceId ?? value?.sourceRecordIds?.[0] ?? "").trim() || null; }
+export function projectIpoEvidence(row) {
+  const underwriter = hasOfficialEvidence(row) && row.underwriter ? row.underwriter : null;
+  const issuance = row.publicOfferingSourceId && row.publicOffering ? row.publicOffering.label ?? "已公告" : null;
+  const auction = row.auctionSourceId && row.auction ? auctionStatus(row) : null;
+  return { underwriter, issuance, auction };
+}
 function timelineFacts(row, extra = "") { return `<dl class="ipo-card-details"><div><dt>最近事件</dt><dd>${eventSummary(row, "recent")}</dd></div><div><dt>下一已知事件</dt><dd>${eventSummary(row, "next")}</dd></div><div><dt>資料日期</dt><dd>${formatDate(row.dataDate)}</dd></div>${extra}</dl>`; }
 
 function selectPrimaryEvent(events) { const today = taipeiToday(); const future = events.filter((event) => event.date >= today).sort((left, right) => left.date.localeCompare(right.date)); return future[0] ?? [...events].sort((left, right) => right.date.localeCompare(left.date))[0] ?? null; }
 function pricingStatus(row) { if (!hasOfficialEvidence(row)) return "尚無公開資料"; return row.hasFinalPricing ? "已公告" : row.hasProvisionalPricing ? "暫定公告" : "—"; }
-function auctionStatus(row) { if (!row.auction || (!hasOfficialEvidence(row, "auction") && !sourceIdOf(row.auction))) return "尚無公開資料"; if (row.auction.cancelled) return "已取消"; if (validDate(row.auction.auctionOpenDate)) return `已開標 ${formatDate(row.auction.auctionOpenDate)}`; if (validDate(row.auction.bidStartDate)) return `投標 ${formatDate(row.auction.bidStartDate)}`; return "待公告"; }
-function populateFilters() { replaceOptions("#ipo-market", "全部市場", unique(state.rows.map((row) => row.market))); replaceOptions("#ipo-stage", "全部階段", ["active", ...unique(state.rows.map((row) => row.stage))], stageLabels); replaceOptions("#ipo-event", "全部事件", unique(state.rows.flatMap((row) => row.events.map((event) => event.kind))), Object.fromEntries(state.rows.flatMap((row) => row.events.map((event) => [event.kind, event.label])))); replaceOptions("#ipo-year", "全部年份", unique(state.rows.flatMap((row) => row.events.map((event) => event.date.slice(0, 4)))).sort().reverse()); }
+function auctionStatus(row) { if (!row.auction || !row.auctionSourceId) return "尚無公開資料"; if (row.auction.cancelled) return "已取消"; if (validDate(row.auction.auctionOpenDate)) return `已開標 ${formatDate(row.auction.auctionOpenDate)}`; if (validDate(row.auction.bidStartDate)) return `投標 ${formatDate(row.auction.bidStartDate)}`; return "待公告"; }
+function populateFilters() { replaceOptions("#ipo-market", "全部市場", unique(state.rows.map((row) => row.market))); replaceOptions("#ipo-stage", "全部歷程", ["active", ...unique(state.rows.map((row) => row.stage).filter((stage) => activeIpoStages.has(stage)))], stageLabels); replaceOptions("#ipo-event", "全部事件", unique(state.rows.flatMap((row) => row.events.map((event) => event.kind))), Object.fromEntries(state.rows.flatMap((row) => row.events.map((event) => [event.kind, event.label])))); replaceOptions("#ipo-year", "全部年份", unique(state.rows.flatMap((row) => row.events.map((event) => event.date.slice(0, 4)))).sort().reverse()); }
 function replaceOptions(selector, allLabel, values, labels = {}) { document.querySelector(selector).innerHTML = `<option value="all">${allLabel}</option>${values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(labels[value] ?? value)}</option>`).join("")}`; }
 function renderPagination(total) { const target = document.querySelector("#ipo-pagination"); target.innerHTML = `<button type="button" ${state.page === 1 ? "disabled" : ""} data-page="${state.page - 1}">上一頁</button><span>第 ${state.page}／${total} 頁</span><button type="button" ${state.page === total ? "disabled" : ""} data-page="${state.page + 1}">下一頁</button>`; for (const button of target.querySelectorAll("[data-page]")) button.addEventListener("click", () => { state.page = Number(button.dataset.page); syncUrl(); render(); }); }
 function applyStateToControls() { document.querySelector("#ipo-search").value = state.query; selectExistingValue("#ipo-market", state.market); selectExistingValue("#ipo-stage", state.stage); selectExistingValue("#ipo-event", state.event); selectExistingValue("#ipo-year", state.year); updateSortControls(); }
@@ -238,3 +248,8 @@ function emptyCard(message = "沒有符合條件的資料") { return `<p class="
 function selectExistingValue(selector, value) { const select = document.querySelector(selector); select.value = [...select.options].some((option) => option.value === value) ? value : "all"; }
 function unique(values) { return [...new Set(values.filter(Boolean))].sort((left, right) => left.localeCompare(right, "zh-Hant")); }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]); }
+function approvedManifestSourceIds(sourceManifest) { return new Set((Array.isArray(sourceManifest) ? sourceManifest : []).map((entry) => entry?.sourceId).filter((sourceId) => approvedIpoSourceIds.has(sourceId))); }
+function approvedSourceIdForRecordIds(recordIds, manifestSourceIds) { for (const recordId of Array.isArray(recordIds) ? recordIds : []) { const sourceId = sourceIdForRecordId(recordId); if (sourceId && manifestSourceIds.has(sourceId)) return sourceId; } return null; }
+function sourceIdForRecordId(recordId) { const value = String(recordId ?? ""); if (/^TWSE:auction:\d{4}:/.test(value)) return "twse-auctions"; if (/^TWSE:public-offering:\d{4}:/.test(value)) return "twse-public-offerings"; if (/^TPEx:ipo-no-limit:\d{4}:/i.test(value)) return "tpex-ipo-listings"; if (/^TWSE:\d{4}:/.test(value)) return "twse-applications"; if (/^TPEx:\d{4}:/.test(value)) return "tpex-applications"; return null; }
+export function matchesIpoCalendarStage(row, selectedStage, dataDate) { if (selectedStage === "all") return true; if (!activeIpoStages.has(row?.stage) || row?.exceptionStatus || isHistoricalIpoApplication(row, dataDate)) return false; return matchesIpoStage(row.stage, selectedStage); }
+function isHistoricalIpoApplication(row, dataDate) { if (!validDate(dataDate)) return false; const dates = [row?.applicationDate, ...(Array.isArray(row?.events) ? row.events.map((event) => event.date) : [])].filter(validDate).sort(); const lastKnownDate = dates.at(-1); return lastKnownDate ? taipeiCalendarDistance(lastKnownDate, dataDate) > activeIpoWindowDays : true; }

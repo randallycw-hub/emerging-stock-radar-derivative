@@ -155,26 +155,35 @@ function riskSection(view, fieldStates = {}) {
   return `<h3>風險與缺漏提醒</h3><p>${reminders.length ? text(reminders.join("；")) : "公開資料欄位已依資料日列示；仍請自行確認適用性。"}</p><p>${reminders.length ? MISSING_WORDING : "缺漏欄位不以零值代替。"}</p>`;
 }
 function snapshotSection(record, dataDate) {
+  const snapshot = projectCbSnapshot(record, dataDate);
+  const evidenceLink = snapshot.evidence ? sourceLink(snapshot.evidence.sourceUrl, snapshot.evidence.sourceId) : "";
+  return `<section class="cb-snapshot" aria-label="目前資料快照"><header><div><p class="section-number">PUBLIC EVIDENCE</p><h3>目前資料快照</h3></div><p>只並列已有核准公開來源且可核對的欄位。</p></header><dl class="detail-facts cb-snapshot-facts">${fact("資料日期", snapshot.dataDate)}${fact("流通餘額", snapshot.outstandingAmount)}${fact("流通餘額比例", snapshot.remainingRatio)}${fact("餘額變動", snapshot.change)}${fact("下一事件", snapshot.nextEvent)}${fact("到期日", snapshot.maturity)}${fact("可比較性", snapshot.comparability)}</dl><p class="cb-snapshot-evidence">${evidenceLink ? `條款／事件來源：${evidenceLink}` : snapshot.evidenceReason}</p></section>`;
+}
+export function projectCbSnapshot(record = {}, dataDate = null) {
   const view = record?.view ?? {};
   const term = record?.term ?? {};
   const events = Array.isArray(record?.events) ? record.events : [];
-  const termEvidence = evidenceFor(term, "11406");
-  const outstandingEvidence = evidenceFor(view, termEvidence.sourceId);
-  const nextEvent = events.filter((event) => validIsoDate(event?.date) && event.date >= dataDate).sort((left, right) => left.date.localeCompare(right.date))[0]
-    ?? (validIsoDate(view.nextEventDate) ? { date: view.nextEventDate, type: view.nextEventType } : null);
+  const unavailable = (reason) => `${MISSING_WORDING}（${reason}）`;
+  const approvedEvent = (type) => events.find((event) => event?.type === type && validIsoDate(event?.date)
+    && verifiedSnapshotUrl(event.sourceUrl, event.sourceId));
+  const maturityEvidence = approvedEvent("maturity");
+  const nextEventEvidence = events.filter((event) => validIsoDate(event?.date) && verifiedSnapshotUrl(event.sourceUrl, event.sourceId)
+    && (!dataDate || event.date >= dataDate)).sort((left, right) => left.date.localeCompare(right.date))[0] ?? null;
   const compatibleChange = view.outstandingChange != null
     && view.outstandingComparison?.compatibleRules === true
-    && verifiedSnapshotUrl(view.outstandingComparison?.sourceUrl, view.outstandingComparison?.sourceId)
-    && outstandingEvidence.url;
-  const comparable = compatibleChange && view.outstandingComparison?.sameDefinition === true;
-  const unavailable = (reason) => `${MISSING_WORDING}（${text(reason)}）`;
-  const evidenceLink = (evidence) => evidence.url ? sourceLink(evidence.url, evidence.sourceId) : "";
-  return `<section class="cb-snapshot" aria-label="目前資料快照"><header><div><p class="section-number">PUBLIC EVIDENCE</p><h3>目前資料快照</h3></div><p>只並列已有核准公開來源且可核對的欄位。</p></header><dl class="detail-facts cb-snapshot-facts">${fact("資料日期", dataDate)}${fact("流通餘額", view.outstandingAmount ?? term.outstandingAmount)}${fact("流通餘額比例", view.remainingRatio)}${fact("餘額變動", compatibleChange ? view.outstandingChange : unavailable("缺少同口徑前期來源或比較規則"))}${fact("下一事件", nextEvent?.date ? `${nextEvent.type ?? nextEvent.title ?? "事件"} ${nextEvent.date}` : unavailable("尚未有已核對事件日期"))}${fact("到期日", term.maturityDate ?? view.maturityDate)}${fact("可比較性", comparable ? "同口徑、同規則可比較" : unavailable("未具備可比較的同口徑證據"))}</dl><p class="cb-snapshot-evidence">${outstandingEvidence.url ? `流通餘額來源：${evidenceLink(outstandingEvidence)}` : unavailable("流通餘額來源尚待確認")}</p></section>`;
-}
-function evidenceFor(value, fallbackSourceId = null) {
-  const sourceId = value?.sourceId ?? value?.outstandingSourceId ?? fallbackSourceId;
-  const sourceUrl = value?.sourceUrl ?? value?.outstandingSourceUrl ?? (sourceId ? APPROVED_EVENT_SOURCE_URLS.get(sourceId) : null);
-  return { sourceId, url: verifiedSnapshotUrl(sourceUrl, sourceId) };
+    && view.outstandingComparison?.sameDefinition === true
+    && verifiedSnapshotUrl(view.outstandingComparison?.sourceUrl, view.outstandingComparison?.sourceId);
+  return {
+    dataDate: unavailable("資料日期缺少核准公開來源"),
+    outstandingAmount: unavailable("流通餘額缺少核准公開來源"),
+    remainingRatio: unavailable("流通餘額比例缺少核准公開來源"),
+    change: compatibleChange ? view.outstandingChange : unavailable("缺少同口徑前期來源或比較規則"),
+    nextEvent: nextEventEvidence ? `${nextEventEvidence.type ?? nextEventEvidence.title ?? "事件"} ${nextEventEvidence.date}` : unavailable("尚未有已核對事件日期"),
+    maturity: maturityEvidence && term.maturityDate ? term.maturityDate : unavailable("到期日缺少核准公開來源"),
+    comparability: compatibleChange ? "同口徑、同規則可比較" : unavailable("未具備可比較的同口徑證據"),
+    evidence: maturityEvidence ?? nextEventEvidence,
+    evidenceReason: unavailable("快照欄位來源尚待確認"),
+  };
 }
 function statusMatrixSection(view, term, fieldStates = {}) {
   const marketState = listedMarketState(view);
