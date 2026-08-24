@@ -274,7 +274,7 @@ function optionalOfficialDate(value: string, name: string): string | null {
 
 function optionalDecimal(value: string, name: string): string | null {
   const text = optionalText(value);
-  if (!text) return null;
+  if (!text || text === "未訂出") return null;
   const normalized = text.replaceAll(",", "");
   if (!/^\d+(?:\.\d+)?$/.test(normalized)) throw new IpoSourceValidationError(`${name} must be a non-negative decimal`);
   return normalized.replace(/^0+(?=\d)/, "");

@@ -50,6 +50,15 @@ test("official IPO source parsers normalize primary-source events without market
   assert.equal(parseTwsePublicOfferingSource(publicForm)[1].cancelled, true);
   assert.equal(parseTwseAuctionSource(auction).length, 1);
   assert.equal(parseTwsePublicOfferingSource(publicForm).length, 2);
+
+  const pendingPricePublicOffering = structuredClone(publicForm);
+  pendingPricePublicOffering.data = [pendingPricePublicOffering.data[0]];
+  pendingPricePublicOffering.data[0][9] = "未訂出";
+  pendingPricePublicOffering.data[0][10] = "未訂出";
+  const [pendingPrice] = parseTwsePublicOfferingSource(pendingPricePublicOffering);
+  assert.equal(pendingPrice.provisionalUnderwritingPrice, null);
+  assert.equal(pendingPrice.finalUnderwritingPrice, null);
+
   const convertibleBondOnly = structuredClone(auction);
   convertibleBondOnly.data = [convertibleBondOnly.data[1]];
   assert.equal(parseTwseAuctionSource(convertibleBondOnly).length, 0);

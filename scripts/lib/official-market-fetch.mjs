@@ -196,6 +196,7 @@ export async function fetchCurrentOfficialMarketData({
   const stockCloses = [
     ...twsePayload
       .filter((row) => issuerSet.has(recordCode(row, "Code")))
+      .filter(hasPublishedTwseClose)
       .map(normalizeTwseStockClose),
     ...tpexPayload
       .filter((row) => issuerSet.has(recordCode(row, "SecuritiesCompanyCode")))
@@ -604,6 +605,16 @@ function hasPublishedTpexClose(row) {
     && typeof row.Change === "string"
     && row.Close.trim() === "---"
     && row.Change.trim() === "---"
+  );
+}
+
+function hasPublishedTwseClose(row) {
+  return !(
+    row !== null
+    && typeof row === "object"
+    && !Array.isArray(row)
+    && typeof row.ClosingPrice === "string"
+    && row.ClosingPrice.trim() === ""
   );
 }
 

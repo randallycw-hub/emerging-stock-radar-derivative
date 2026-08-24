@@ -18,9 +18,9 @@ import {
 } from "../../lib/source-verification/source-cb-issuer-research.ts";
 import { bondInputsFrom11406Rows } from "../build-bond-market-snapshot.mjs";
 
-const ACTIVE_JSON_BYTES = 435_121;
-const ACTIVE_JSON_SHA256 = "f0e75150f0acaff4ee4d57949ba69a14cea1176701191b8faa06072f2ab501fd";
-const ACTIVE_RAW_SHA256 = "sha256:557ca7f01ff3ab9dec003c3d4e6be81b2df3e0e253b97b27c19ddd8bd1d95feb";
+const ACTIVE_JSON_BYTES = 439_172;
+const ACTIVE_JSON_SHA256 = "cfec9f95f8be384c299bce897a2694dcf9c851598e56072a8845ebe4584e5f84";
+const ACTIVE_RAW_SHA256 = "sha256:1027ff0cd72be9d495f8914c34c0f7802ce68c24456a7be99341911b47722b00";
 const ACTIVE_SOURCE_URL = "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv";
 const ACTIVE_DATA_ROOT = new URL("../../static-showcase/data/", import.meta.url);
 const SOURCE_ORDER = Object.freeze(["listed", "otc"]);
@@ -84,10 +84,10 @@ export async function loadActiveCbIssuerContext() {
   );
   if (
     sourceEntry.sourceUrl !== ACTIVE_SOURCE_URL
-    || sourceEntry.downloadedAt !== "2026-08-01"
+    || sourceEntry.downloadedAt !== "2026-08-24"
     || sourceEntry.sha256 !== ACTIVE_RAW_SHA256
-    || sourceEntry.rawBytes !== 137_370
-    || sourceEntry.rowCount !== 415
+    || sourceEntry.rawBytes !== 138_545
+    || sourceEntry.rowCount !== 419
   ) {
     throw new TypeError("active generation 11406 manifest entry is not the reviewed snapshot");
   }
@@ -117,7 +117,7 @@ export async function loadActiveCbIssuerContext() {
   }
   const activeIssuers = deriveActiveCbIssuerIdentities(rows);
   const activeBondCount = bondInputsFrom11406Rows(rows).length;
-  if (activeBondCount !== 385 || activeIssuers.length !== 310) {
+  if (activeBondCount !== 388 || activeIssuers.length !== 312) {
     throw new TypeError("active generation 11406 denominator changed");
   }
   return Object.freeze({

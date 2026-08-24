@@ -80,15 +80,15 @@ test("keeps every official 11406 name alias under one exact issuer code", () => 
   ]), [{ issuerCode: "1101", issuerNames: ["台泥", "台泥-創"] }]);
 });
 
-test("loads the controller-authorized production 11406 context with 310 unique issuer codes", async () => {
+test("loads the controller-authorized production 11406 context with 312 unique issuer codes", async () => {
   const context = await loadActiveCbIssuerContext();
   const pointer = JSON.parse(await readFile(
     new URL("../static-showcase/data/current.json", import.meta.url),
     "utf8",
   ));
   assert.equal(context.generation, pointer.generation);
-  assert.equal(context.activeBondCount, 385);
-  assert.equal(context.activeIssuers.length, 310);
+  assert.equal(context.activeBondCount, 388);
+  assert.equal(context.activeIssuers.length, 312);
   assert.deepEqual(
     context.activeIssuers.find(({ issuerCode }) => issuerCode === "6873"),
     { issuerCode: "6873", issuerNames: ["泓德能源", "泓德能源-創"] },

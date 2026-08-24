@@ -536,14 +536,18 @@ test("94025 rejects a data month later than publication month but permits histor
     "2025-12",
   );
 });
-test("94025 rejects cumulative revenue below current month revenue", () => {
-  assert.throws(
-    () => normalize94025Row(synthetic94025Row({
-      currentMonthRevenue: "100.01",
-      cumulativeRevenue: "100",
-    })),
-    /cumulativeRevenue.*currentMonthRevenue/,
-  );
+test("94025 preserves an official investment-company month above its year-to-date revenue", () => {
+  const value = normalize94025Row(synthetic94025Row({
+    companyCode: "7882",
+    companyName: "倍利創投",
+    yearMonth: "11507",
+    currentMonthRevenue: "416353",
+    cumulativeRevenue: "171795",
+    noteText: "營業收入為投資標的之評價損益(含已實現及未實現)",
+  }));
+
+  assert.equal(value.currentMonthRevenue, "416353");
+  assert.equal(value.cumulativeRevenue, "171795");
 });
 
 test("94025 January cumulative revenue must equal current month revenue when provided", () => {

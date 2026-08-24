@@ -1,0 +1,6369 @@
+{
+  "schemaVersion": 1,
+  "dataDate": "2026-08-24",
+  "generatedAt": "2026-08-24T14:01:54+08:00",
+  "sourceManifest": [
+    {
+      "sourceId": "twse-applications",
+      "sourceUrl": "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
+      "downloadedAt": "2026-08-24T14:01:54+08:00",
+      "sha256": "sha256:9f1e036c9e651672cab247e9e83ae1c50a2f022237986b511611847aef4d75c5",
+      "rawBytes": 80045,
+      "rowCount": 695
+    },
+    {
+      "sourceId": "tpex-applications",
+      "sourceUrl": "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies",
+      "downloadedAt": "2026-08-24T14:01:54+08:00",
+      "sha256": "sha256:30548828db71a1f807d7d0b091acbcaa1815365500b1923b88ef293bbecbaba7",
+      "rawBytes": 274320,
+      "rowCount": 811
+    },
+    {
+      "sourceId": "tpex-ipo-listings",
+      "sourceUrl": "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit",
+      "downloadedAt": "2026-08-24T14:01:54+08:00",
+      "sha256": "sha256:83405d4306c60d812033a23a43a9ba1f071d28a27a4c3e43c03d59ef2239e26a",
+      "rawBytes": 443,
+      "rowCount": 1
+    },
+    {
+      "sourceId": "twse-auctions",
+      "sourceUrl": "https://www.twse.com.tw/announcement/auction?response=json&yy=2026",
+      "downloadedAt": "2026-08-24T14:01:54+08:00",
+      "sha256": "sha256:e123e7dcc0fd6c80fd4a30459fad4d7f0e6503b450b279e465dc3e9a6070767c",
+      "rawBytes": 26681,
+      "rowCount": 42
+    },
+    {
+      "sourceId": "twse-public-offerings",
+      "sourceUrl": "https://www.twse.com.tw/announcement/publicForm?response=json&yy=2026",
+      "downloadedAt": "2026-08-24T14:01:54+08:00",
+      "sha256": "sha256:d290e508c9fe21e1cf1ab4bf445c412c8470a8922931d82e1ba9a33c2befee5a",
+      "rawBytes": 34222,
+      "rowCount": 38
+    }
+  ],
+  "records": [
+    {
+      "companyCode": "1257",
+      "companyName": "F-茱莉",
+      "market": "上櫃",
+      "stage": "withdrawn",
+      "exceptionStatus": "withdrawn",
+      "applicationDate": "2011-10-26",
+      "reviewDate": "2011-11-16",
+      "boardDate": "2011-11-25",
+      "contractDate": "2011-12-23",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "1257",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2011-10-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:1257:2011-10-26"
+          ]
+        },
+        {
+          "companyCode": "1257",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2011-11-16",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:1257:2011-10-26"
+          ]
+        },
+        {
+          "companyCode": "1257",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2011-11-25",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:1257:2011-10-26"
+          ]
+        },
+        {
+          "companyCode": "1257",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2011-12-23",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:1257:2011-10-26"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "1269",
+      "companyName": "乾杯",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-05-13",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "1269",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2019-05-13",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:1269:2019-05-13"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "1336",
+      "companyName": "台翰精密",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2006-07-10",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "1336",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2006-07-10",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:1336:2006-07-10"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "1594",
+      "companyName": "日高工程",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2012-08-15",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國票",
+      "events": [
+        {
+          "companyCode": "1594",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2012-08-15",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:1594:2012-08-15"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "1623",
+      "companyName": "大東電",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2024-12-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國泰",
+      "events": [
+        {
+          "companyCode": "1623",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2024-12-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:1623:1131224"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "1752",
+      "companyName": "南光化學製藥",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2006-06-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "日盛證券",
+      "events": [
+        {
+          "companyCode": "1752",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2006-06-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:1752:2006-06-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "1780",
+      "companyName": "立弘生化",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2018-04-16",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "1780",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2018-04-16",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:1780:1070416"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "1807",
+      "companyName": "羅馬磁磚(管理股票)",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2006-07-19",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台証",
+      "events": [
+        {
+          "companyCode": "1807",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2006-07-19",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:1807:2006-07-19"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2061",
+      "companyName": "風青實業",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-03-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "華南永昌",
+      "events": [
+        {
+          "companyCode": "2061",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2007-03-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2061:2007-03-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2230",
+      "companyName": "泰茂實業",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-03-26",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "華南永昌",
+      "events": [
+        {
+          "companyCode": "2230",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2010-03-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2230:2010-03-26"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2249",
+      "companyName": "湧盛",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-05-08",
+      "reviewDate": "2026-07-07",
+      "boardDate": "2026-07-24",
+      "contractDate": "2026-07-28",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "2249",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-05-08",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2249:2026-05-08"
+          ]
+        },
+        {
+          "companyCode": "2249",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-07-07",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:2249:2026-05-08"
+          ]
+        },
+        {
+          "companyCode": "2249",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-07-24",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:2249:2026-05-08"
+          ]
+        },
+        {
+          "companyCode": "2249",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2026-07-28",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:2249:2026-05-08"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2591",
+      "companyName": "高逸工程",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-06-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益",
+      "events": [
+        {
+          "companyCode": "2591",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2008-06-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2591:2008-06-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2722",
+      "companyName": "夏都",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-08-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "統一綜合證券",
+      "events": [
+        {
+          "companyCode": "2722",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2010-08-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:2722:0990827"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2741",
+      "companyName": "老四川",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-05-18",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "2741",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-05-18",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2741:2015-05-18"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2758",
+      "companyName": "路易莎咖啡",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2023-12-21",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "2758",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2023-12-21",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2758:2023-12-21"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2928",
+      "companyName": "F-紅馬",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2013-12-25",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "康和",
+      "events": [
+        {
+          "companyCode": "2928",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2013-12-25",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2928:2013-12-25"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2938",
+      "companyName": "床的世界",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-29",
+      "reviewDate": "2026-06-22",
+      "boardDate": "2026-07-24",
+      "contractDate": "2026-07-28",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "統一",
+      "events": [
+        {
+          "companyCode": "2938",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-04-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2938:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "2938",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-06-22",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:2938:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "2938",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-07-24",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:2938:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "2938",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2026-07-28",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:2938:2026-04-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "2941",
+      "companyName": "米斯特",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2023-07-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國泰",
+      "events": [
+        {
+          "companyCode": "2941",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2023-07-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:2941:2023-07-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3092",
+      "companyName": "鴻碩精密電工",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-06-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "3092",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2008-06-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3092:2008-06-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3105",
+      "companyName": "穩懋",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2011-03-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益證券",
+      "events": [
+        {
+          "companyCode": "3105",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2011-03-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3105:1000328"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3131",
+      "companyName": "弘塑科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2009-11-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益",
+      "events": [
+        {
+          "companyCode": "3131",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2009-11-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3131:2009-11-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3167",
+      "companyName": "大量科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-07-16",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台証",
+      "events": [
+        {
+          "companyCode": "3167",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2007-07-16",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3167:2007-07-16"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3168",
+      "companyName": "眾福科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2006-11-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "3168",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2006-11-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3168:2006-11-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3176",
+      "companyName": "基亞",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-04-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "3176",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-04-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3176:0970430"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3206",
+      "companyName": "志豐電子",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2006-10-03",
+      "reviewDate": "2006-12-15",
+      "boardDate": "2006-12-22",
+      "contractDate": "2007-01-05",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "3206",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2006-10-03",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3206:2006-10-03"
+          ]
+        },
+        {
+          "companyCode": "3206",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2006-12-15",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:3206:2006-10-03"
+          ]
+        },
+        {
+          "companyCode": "3206",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2006-12-22",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:3206:2006-10-03"
+          ]
+        },
+        {
+          "companyCode": "3206",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2007-01-05",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:3206:2006-10-03"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3307",
+      "companyName": "遠業",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2014-08-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "3307",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2014-08-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3307:1030828"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3307",
+      "companyName": "遠業科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2009-10-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "3307",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2009-10-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3307:2009-10-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3322",
+      "companyName": "建舜電子製造",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-09-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "3322",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2007-09-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3322:2007-09-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3357",
+      "companyName": "臺慶科",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-04-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "3357",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2015-04-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3357:1040430"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3411",
+      "companyName": "宜揚科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-03-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "3411",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2008-03-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3411:2008-03-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3430",
+      "companyName": "奇鈦科",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-06-25",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "中國信託",
+      "events": [
+        {
+          "companyCode": "3430",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2019-06-25",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3430:2019-06-25"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3431",
+      "companyName": "長天科技(管理股票)",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-08-21",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "",
+      "events": [
+        {
+          "companyCode": "3431",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2019-08-21",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3431:2019-08-21"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3455",
+      "companyName": "由田新技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2006-04-19",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "3455",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2006-04-19",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3455:2006-04-19"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3471",
+      "companyName": "雅士",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2012-12-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "康和綜合",
+      "events": [
+        {
+          "companyCode": "3471",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2012-12-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3471:1011227"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3492",
+      "companyName": "長盛科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-04-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "中信",
+      "events": [
+        {
+          "companyCode": "3492",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2007-04-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3492:2007-04-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3499",
+      "companyName": "環天衛星科技",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2006-04-26",
+      "reviewDate": "2006-06-28",
+      "boardDate": "2006-07-21",
+      "contractDate": "2006-08-10",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大京華",
+      "events": [
+        {
+          "companyCode": "3499",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2006-04-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3499:2006-04-26"
+          ]
+        },
+        {
+          "companyCode": "3499",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2006-06-28",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:3499:2006-04-26"
+          ]
+        },
+        {
+          "companyCode": "3499",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2006-07-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:3499:2006-04-26"
+          ]
+        },
+        {
+          "companyCode": "3499",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2006-08-10",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:3499:2006-04-26"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3507",
+      "companyName": "力群電子",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-06-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "3507",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2007-06-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3507:2007-06-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3529",
+      "companyName": "力旺",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2009-10-19",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "大華",
+      "events": [
+        {
+          "companyCode": "3529",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2009-10-19",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3529:0981019"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3530",
+      "companyName": "晶相光",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2017-10-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "3530",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2017-10-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3530:1061031"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3543",
+      "companyName": "州巧",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2009-08-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "3543",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2009-08-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3543:0980828"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3550",
+      "companyName": "聯穎",
+      "market": "上市",
+      "stage": "withdrawn",
+      "exceptionStatus": "withdrawn",
+      "applicationDate": "2008-05-28",
+      "reviewDate": "2008-09-02",
+      "boardDate": "2008-09-16",
+      "contractDate": "2008-09-30",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "3550",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-05-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3550:0970528"
+          ]
+        },
+        {
+          "companyCode": "3550",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2008-09-02",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:3550:0970528"
+          ]
+        },
+        {
+          "companyCode": "3550",
+          "market": "上市",
+          "kind": "board_approved",
+          "date": "2008-09-16",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TWSE:3550:0970528"
+          ]
+        },
+        {
+          "companyCode": "3550",
+          "market": "上市",
+          "kind": "contract_approved",
+          "date": "2008-09-30",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TWSE:3550:0970528"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3558",
+      "companyName": "神準",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-05-20",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益證券",
+      "events": [
+        {
+          "companyCode": "3558",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2010-05-20",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3558:0990520"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3558",
+      "companyName": "神準科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2011-10-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益金鼎",
+      "events": [
+        {
+          "companyCode": "3558",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2011-10-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3558:2011-10-24"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3591",
+      "companyName": "艾笛森",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-06-19",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "3591",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-06-19",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3591:0970619"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3592",
+      "companyName": "瑞鼎",
+      "market": "上市",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2008-08-14",
+      "reviewDate": "2008-09-23",
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "3592",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-08-14",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3592:0970814"
+          ]
+        },
+        {
+          "companyCode": "3592",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2008-09-23",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:3592:0970814"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3595",
+      "companyName": "山太士",
+      "market": "上櫃",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2026-06-17",
+      "reviewDate": "2026-07-31",
+      "boardDate": "2026-08-21",
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "3595",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-06-17",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3595:2026-06-17"
+          ]
+        },
+        {
+          "companyCode": "3595",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-07-31",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:3595:2026-06-17"
+          ]
+        },
+        {
+          "companyCode": "3595",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-08-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:3595:2026-06-17"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3599",
+      "companyName": "旺能",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-08-26",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "3599",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2010-08-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3599:0990826"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3601",
+      "companyName": "前源科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-06-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "3601",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2008-06-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3601:2008-06-24"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3623",
+      "companyName": "富晶通",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-10-22",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "大華",
+      "events": [
+        {
+          "companyCode": "3623",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-10-22",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3623:0971022"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3627",
+      "companyName": "華信科",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-06-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "3627",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2016-06-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3627:2016-06-24"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3631",
+      "companyName": "晟楠科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2009-09-15",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "3631",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2009-09-15",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3631:2009-09-15"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3632",
+      "companyName": "研勤科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2009-06-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台証",
+      "events": [
+        {
+          "companyCode": "3632",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2009-06-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3632:2009-06-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3642",
+      "companyName": "駿熠電(管理股票)",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2023-06-16",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "",
+      "events": [
+        {
+          "companyCode": "3642",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2023-06-16",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3642:2023-06-16"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3644",
+      "companyName": "凌嘉科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2011-06-10",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "3644",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2011-06-10",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3644:2011-06-10"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3656",
+      "companyName": "聯勝",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-11-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益證券",
+      "events": [
+        {
+          "companyCode": "3656",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2010-11-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3656:0991124"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3669",
+      "companyName": "圓展",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-03-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "3669",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2010-03-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:3669:0990329"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3675",
+      "companyName": "德微",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-03-15",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "3675",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2010-03-15",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3675:2010-03-15"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3680",
+      "companyName": "家登精密工業",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-06-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "金鼎",
+      "events": [
+        {
+          "companyCode": "3680",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2010-06-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3680:2010-06-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "3684",
+      "companyName": "榮昌",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2011-12-23",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益金鼎",
+      "events": [
+        {
+          "companyCode": "3684",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2011-12-23",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:3684:2011-12-23"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4136",
+      "companyName": "太和-KY",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2018-03-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "4136",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2018-03-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4136:2018-03-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4149",
+      "companyName": "F-宜佰",
+      "market": "上櫃",
+      "stage": "withdrawn",
+      "exceptionStatus": "withdrawn",
+      "applicationDate": "2011-10-07",
+      "reviewDate": "2011-10-13",
+      "boardDate": "2011-10-21",
+      "contractDate": "2011-11-04",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "4149",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2011-10-07",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4149:2011-10-07"
+          ]
+        },
+        {
+          "companyCode": "4149",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2011-10-13",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:4149:2011-10-07"
+          ]
+        },
+        {
+          "companyCode": "4149",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2011-10-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:4149:2011-10-07"
+          ]
+        },
+        {
+          "companyCode": "4149",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2011-11-04",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:4149:2011-10-07"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4155",
+      "companyName": "訊映光電",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2012-04-06",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "4155",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2012-04-06",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4155:2012-04-06"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4166",
+      "companyName": "友霖",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-11-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "康和",
+      "events": [
+        {
+          "companyCode": "4166",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2016-11-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4166:2016-11-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4177",
+      "companyName": "柏登",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-07-22",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "日盛",
+      "events": [
+        {
+          "companyCode": "4177",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-07-22",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4177:2015-07-22"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4178",
+      "companyName": "F-永生",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2014-05-09",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基證券",
+      "events": [
+        {
+          "companyCode": "4178",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2014-05-09",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4178:2014-05-09"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4537",
+      "companyName": "旭東",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-09",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "4537",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-07-09",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:4537:1150709"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4542",
+      "companyName": "科嶠工業",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2013-10-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "4542",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2013-10-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4542:2013-10-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4544",
+      "companyName": "春日",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2021-09-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國票",
+      "events": [
+        {
+          "companyCode": "4544",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2021-09-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:4544:1100929"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4545",
+      "companyName": "銘鈺",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2014-07-25",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "統一",
+      "events": [
+        {
+          "companyCode": "4545",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2014-07-25",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:4545:1030725"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4546",
+      "companyName": "長亨",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2020-04-23",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "4546",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2020-04-23",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:4546:1090423"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4554",
+      "companyName": "橙的",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-06-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "4554",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-06-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4554:2015-06-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4559",
+      "companyName": "久裕興",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2022-06-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "4559",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2022-06-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:4559:1110630"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4563",
+      "companyName": "百德",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-12-16",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "日盛",
+      "events": [
+        {
+          "companyCode": "4563",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2016-12-16",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4563:2016-12-16"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4565",
+      "companyName": "宏偉",
+      "market": "上櫃",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2026-06-26",
+      "reviewDate": "2026-08-11",
+      "boardDate": "2026-08-21",
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "中國信託",
+      "events": [
+        {
+          "companyCode": "4565",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-06-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4565:2026-06-26"
+          ]
+        },
+        {
+          "companyCode": "4565",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-08-11",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:4565:2026-06-26"
+          ]
+        },
+        {
+          "companyCode": "4565",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-08-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:4565:2026-06-26"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4579",
+      "companyName": "北鉅科技-KY",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2021-09-17",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國票",
+      "events": [
+        {
+          "companyCode": "4579",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2021-09-17",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4579:2021-09-17"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4749",
+      "companyName": "新應材",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2022-08-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "4749",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2022-08-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:4749:1110831"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4753",
+      "companyName": "F-中晶",
+      "market": "上櫃",
+      "stage": "withdrawn",
+      "exceptionStatus": "withdrawn",
+      "applicationDate": "2013-10-30",
+      "reviewDate": "2014-03-13",
+      "boardDate": "2014-03-21",
+      "contractDate": "2014-04-11",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益金鼎",
+      "events": [
+        {
+          "companyCode": "4753",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2013-10-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4753:2013-10-30"
+          ]
+        },
+        {
+          "companyCode": "4753",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2014-03-13",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:4753:2013-10-30"
+          ]
+        },
+        {
+          "companyCode": "4753",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2014-03-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:4753:2013-10-30"
+          ]
+        },
+        {
+          "companyCode": "4753",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2014-04-11",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:4753:2013-10-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4754",
+      "companyName": "國碳科",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-05-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國票",
+      "events": [
+        {
+          "companyCode": "4754",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-05-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4754:2015-05-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4765",
+      "companyName": "磐采",
+      "market": "上櫃",
+      "stage": "withdrawn",
+      "exceptionStatus": "withdrawn",
+      "applicationDate": "2018-04-23",
+      "reviewDate": "2018-06-13",
+      "boardDate": "2018-06-22",
+      "contractDate": "2018-06-25",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益金鼎",
+      "events": [
+        {
+          "companyCode": "4765",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2018-04-23",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4765:2018-04-23"
+          ]
+        },
+        {
+          "companyCode": "4765",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2018-06-13",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:4765:2018-04-23"
+          ]
+        },
+        {
+          "companyCode": "4765",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2018-06-22",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:4765:2018-04-23"
+          ]
+        },
+        {
+          "companyCode": "4765",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2018-06-25",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:4765:2018-04-23"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4773",
+      "companyName": "高福",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2025-08-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "4773",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2025-08-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:4773:1140828"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4801",
+      "companyName": "高盛電(管理股票轉一般類股)",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2012-03-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國票",
+      "events": [
+        {
+          "companyCode": "4801",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2012-03-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4801:2012-03-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4802",
+      "companyName": "樂美館",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-07-12",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠證",
+      "events": [
+        {
+          "companyCode": "4802",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2016-07-12",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4802:2016-07-12"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4916",
+      "companyName": "事欣科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-08-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "4916",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2010-08-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4916:2010-08-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4941",
+      "companyName": "晶積科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2011-03-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "華南永昌",
+      "events": [
+        {
+          "companyCode": "4941",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2011-03-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4941:2011-03-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4949",
+      "companyName": "有成精密",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2012-04-12",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "4949",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2012-04-12",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:4949:2012-04-12"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "4961",
+      "companyName": "天鈺",
+      "market": "上市",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2015-08-27",
+      "reviewDate": "2015-10-21",
+      "boardDate": "2015-10-27",
+      "contractDate": "2015-10-29",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "福邦",
+      "events": [
+        {
+          "companyCode": "4961",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2015-08-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:4961:1040827"
+          ]
+        },
+        {
+          "companyCode": "4961",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2015-10-21",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:4961:1040827"
+          ]
+        },
+        {
+          "companyCode": "4961",
+          "market": "上市",
+          "kind": "board_approved",
+          "date": "2015-10-27",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TWSE:4961:1040827"
+          ]
+        },
+        {
+          "companyCode": "4961",
+          "market": "上市",
+          "kind": "contract_approved",
+          "date": "2015-10-29",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TWSE:4961:1040827"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5204",
+      "companyName": "得捷(管理股票轉一般類股)",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2011-03-16",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "大眾",
+      "events": [
+        {
+          "companyCode": "5204",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2011-03-16",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5204:2011-03-16"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5217",
+      "companyName": "旭泓",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2012-07-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "大華",
+      "events": [
+        {
+          "companyCode": "5217",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2012-07-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:5217:1010731"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5222",
+      "companyName": "全訊",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2020-06-15",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國泰",
+      "events": [
+        {
+          "companyCode": "5222",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2020-06-15",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5222:2020-06-15"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5244",
+      "companyName": "弘凱光電",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2012-10-25",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "5244",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2012-10-25",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5244:2012-10-25"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5254",
+      "companyName": "欣訊科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2023-04-26",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "5254",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2023-04-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5254:2023-04-26"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5256",
+      "companyName": "銳捷",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2014-09-19",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "日盛",
+      "events": [
+        {
+          "companyCode": "5256",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2014-09-19",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5256:2014-09-19"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5281",
+      "companyName": "F-大峽",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-03-20",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "5281",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-03-20",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5281:2015-03-20"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5286",
+      "companyName": "育駿科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2013-10-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "5286",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2013-10-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5286:2013-10-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5364",
+      "companyName": "易福(管理股票)",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2013-08-09",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "5364",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2013-08-09",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5364:2013-08-09"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5452",
+      "companyName": "佶優",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-11-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益",
+      "events": [
+        {
+          "companyCode": "5452",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2007-11-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:5452:0961130"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5505",
+      "companyName": "和旺(管理股票)",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-07-06",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "",
+      "events": [
+        {
+          "companyCode": "5505",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-07-06",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5505:2015-07-06"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5530",
+      "companyName": "龍巖",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2017-09-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "5530",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2017-09-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:5530:1060927"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5541",
+      "companyName": "廣朋",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2014-09-15",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "5541",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2014-09-15",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:5541:2014-09-15"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "5905",
+      "companyName": "南仁湖",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-11-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益",
+      "events": [
+        {
+          "companyCode": "5905",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2007-11-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:5905:0961128"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6021",
+      "companyName": "大慶證",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-06-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "一銀",
+      "events": [
+        {
+          "companyCode": "6021",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-06-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6021:0970624"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6125",
+      "companyName": "廣運",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-04-02",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "6125",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-04-02",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6125:0970402"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6159",
+      "companyName": "詮鼎",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-11-23",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "6159",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2007-11-23",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6159:0961123"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6199",
+      "companyName": "精威(管理股票轉一般類股)",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-04-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益金鼎",
+      "events": [
+        {
+          "companyCode": "6199",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-04-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6199:2015-04-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6207",
+      "companyName": "雷科",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2012-05-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "6207",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2012-05-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6207:1010530"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6272",
+      "companyName": "驊陞科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2013-04-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "6272",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2013-04-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6272:2013-04-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6409",
+      "companyName": "旭隼",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2013-07-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大寶來",
+      "events": [
+        {
+          "companyCode": "6409",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2013-07-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6409:1020729"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6425",
+      "companyName": "易發",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-05-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "6425",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-05-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6425:2015-05-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6438",
+      "companyName": "迅得",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2014-10-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "康和",
+      "events": [
+        {
+          "companyCode": "6438",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2014-10-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6438:2014-10-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6441",
+      "companyName": "廣錠",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2014-06-20",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "6441",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2014-06-20",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6441:2014-06-20"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6453",
+      "companyName": "健永",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2017-03-03",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "6453",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2017-03-03",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6453:2017-03-03"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6467",
+      "companyName": "泰合",
+      "market": "上市",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-03-27",
+      "reviewDate": "2026-05-07",
+      "boardDate": "2026-05-19",
+      "contractDate": "2026-05-28",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "6467",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-03-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6467:1150327"
+          ]
+        },
+        {
+          "companyCode": "6467",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2026-05-07",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:6467:1150327"
+          ]
+        },
+        {
+          "companyCode": "6467",
+          "market": "上市",
+          "kind": "board_approved",
+          "date": "2026-05-19",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TWSE:6467:1150327"
+          ]
+        },
+        {
+          "companyCode": "6467",
+          "market": "上市",
+          "kind": "contract_approved",
+          "date": "2026-05-28",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TWSE:6467:1150327"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6472",
+      "companyName": "保瑞",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-08-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "6472",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2015-08-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6472:2015-08-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6474",
+      "companyName": "華豫寧",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2022-07-19",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "6474",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2022-07-19",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6474:2022-07-19"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6479",
+      "companyName": "瑞寶",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-06-01",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "6479",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2016-06-01",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6479:2016-06-01"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6508",
+      "companyName": "惠光",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-07-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "6508",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-07-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6508:0970729"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6521",
+      "companyName": "金樺",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-03-09",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "6521",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2016-03-09",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6521:2016-03-09"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6534",
+      "companyName": "正瀚",
+      "market": "上市",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2016-05-19",
+      "reviewDate": "2016-11-21",
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "6534",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2016-05-19",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6534:1050519"
+          ]
+        },
+        {
+          "companyCode": "6534",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2016-11-21",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:6534:1050519"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6539",
+      "companyName": "翔宇",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-10-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "6539",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2019-10-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6539:2019-10-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6546",
+      "companyName": "正基",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2021-07-15",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "6546",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2021-07-15",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6546:1100715"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6551",
+      "companyName": "必翔電",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-11-11",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "6551",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2016-11-11",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6551:1051111"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6553",
+      "companyName": "豐華",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2017-04-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "6553",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2017-04-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6553:2017-04-28"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6579",
+      "companyName": "研揚科技",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-12-09",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "6579",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2016-12-09",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6579:1051209"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6585",
+      "companyName": "鼎基",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-09-03",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "6585",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2019-09-03",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6585:1080903"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6592",
+      "companyName": "和潤企業",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-07-16",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "6592",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2019-07-16",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6592:1080716"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6599",
+      "companyName": "普達系統",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "6599",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-07-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6599:2026-07-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6604",
+      "companyName": "儒億",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-28",
+      "reviewDate": "2026-06-18",
+      "boardDate": "2026-06-26",
+      "contractDate": "2026-07-02",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "6604",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-04-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6604:2026-04-28"
+          ]
+        },
+        {
+          "companyCode": "6604",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-06-18",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:6604:2026-04-28"
+          ]
+        },
+        {
+          "companyCode": "6604",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-06-26",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:6604:2026-04-28"
+          ]
+        },
+        {
+          "companyCode": "6604",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2026-07-02",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:6604:2026-04-28"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6620",
+      "companyName": "漢達",
+      "market": "上櫃",
+      "stage": "withdrawn",
+      "exceptionStatus": "withdrawn",
+      "applicationDate": "2023-12-27",
+      "reviewDate": "2024-03-07",
+      "boardDate": "2024-03-22",
+      "contractDate": "2024-03-28",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "6620",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2023-12-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6620:2023-12-27"
+          ]
+        },
+        {
+          "companyCode": "6620",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2024-03-07",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:6620:2023-12-27"
+          ]
+        },
+        {
+          "companyCode": "6620",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2024-03-22",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:6620:2023-12-27"
+          ]
+        },
+        {
+          "companyCode": "6620",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2024-03-28",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:6620:2023-12-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6637",
+      "companyName": "醫影",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2018-05-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "6637",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2018-05-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6637:2018-05-24"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6650",
+      "companyName": "帝圖",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2024-08-26",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元富",
+      "events": [
+        {
+          "companyCode": "6650",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2024-08-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6650:1130826"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6650",
+      "companyName": "帝圖",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2020-07-10",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "6650",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2020-07-10",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6650:2020-07-10"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6651",
+      "companyName": "全宇昕",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2018-11-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "玉山",
+      "events": [
+        {
+          "companyCode": "6651",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2018-11-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6651:2018-11-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6665",
+      "companyName": "康聯生醫",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-11-04",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "福邦",
+      "events": [
+        {
+          "companyCode": "6665",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2019-11-04",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6665:2019-11-04"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6673",
+      "companyName": "和詮",
+      "market": "上櫃",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2018-09-21",
+      "reviewDate": "2018-11-02",
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "6673",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2018-09-21",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6673:2018-09-21"
+          ]
+        },
+        {
+          "companyCode": "6673",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2018-11-02",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:6673:2018-09-21"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6689",
+      "companyName": "伊雲谷",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2021-09-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "6689",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2021-09-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6689:1100924"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6689",
+      "companyName": "伊雲谷",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-09-12",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "6689",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2019-09-12",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6689:2019-09-12"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6706",
+      "companyName": "惠特",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2019-06-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "6706",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2019-06-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6706:1080628"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6730",
+      "companyName": "常廣",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2020-07-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "6730",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2020-07-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6730:2020-07-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6731",
+      "companyName": "啟坤",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2021-12-23",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "6731",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2021-12-23",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6731:2021-12-23"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6757",
+      "companyName": "台灣虎航",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2021-12-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "6757",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2021-12-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6757:1101228"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6775",
+      "companyName": "穎台科技",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2020-11-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國泰",
+      "events": [
+        {
+          "companyCode": "6775",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2020-11-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6775:1091130"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6797",
+      "companyName": "圓點奈米",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2021-10-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "6797",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2021-10-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6797:2021-10-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6825",
+      "companyName": "和暢科技",
+      "market": "上櫃",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2026-06-17",
+      "reviewDate": "2026-07-29",
+      "boardDate": "2026-08-21",
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "6825",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-06-17",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6825:2026-06-17"
+          ]
+        },
+        {
+          "companyCode": "6825",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-07-29",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:6825:2026-06-17"
+          ]
+        },
+        {
+          "companyCode": "6825",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-08-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:6825:2026-06-17"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6826",
+      "companyName": "和淞",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2021-12-28",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "6826",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2021-12-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6826:1101228"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6868",
+      "companyName": "采威國際",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2025-03-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台中銀",
+      "events": [
+        {
+          "companyCode": "6868",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2025-03-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6868:2025-03-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6892",
+      "companyName": "台寶生醫",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2024-12-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "6892",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2024-12-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6892:2024-12-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6898",
+      "companyName": "程曦資訊",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-30",
+      "reviewDate": "2026-06-12",
+      "boardDate": "2026-06-26",
+      "contractDate": "2026-07-02",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "6898",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-04-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6898:2026-04-30"
+          ]
+        },
+        {
+          "companyCode": "6898",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-06-12",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:6898:2026-04-30"
+          ]
+        },
+        {
+          "companyCode": "6898",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-06-26",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:6898:2026-04-30"
+          ]
+        },
+        {
+          "companyCode": "6898",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2026-07-02",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:6898:2026-04-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6903",
+      "companyName": "巨漢",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2023-07-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "富邦",
+      "events": [
+        {
+          "companyCode": "6903",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2023-07-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:6903:1120731"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6938",
+      "companyName": "藍新資訊",
+      "market": "上櫃",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2026-06-09",
+      "reviewDate": "2026-08-03",
+      "boardDate": "2026-08-21",
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國票",
+      "events": [
+        {
+          "companyCode": "6938",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-06-09",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6938:2026-06-09"
+          ]
+        },
+        {
+          "companyCode": "6938",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-08-03",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:6938:2026-06-09"
+          ]
+        },
+        {
+          "companyCode": "6938",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-08-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:6938:2026-06-09"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "6979",
+      "companyName": "勝釩",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2025-12-10",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "華南永昌",
+      "events": [
+        {
+          "companyCode": "6979",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2025-12-10",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:6979:2025-12-10"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7562",
+      "companyName": "博來科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "華南永昌",
+      "events": [
+        {
+          "companyCode": "7562",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-07-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7562:2026-07-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7583",
+      "companyName": "國際海洋",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-03-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "7583",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-03-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7583:2026-03-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7669",
+      "companyName": "碩正科技",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "7669",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-07-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7669:2026-07-27"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7706",
+      "companyName": "宏碁創達",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-06-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "7706",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-06-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7706:2026-06-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7710",
+      "companyName": "東擎科技",
+      "market": "上市",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2026-06-05",
+      "reviewDate": "2026-07-16",
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "7710",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-06-05",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:7710:1150605"
+          ]
+        },
+        {
+          "companyCode": "7710",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2026-07-16",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:7710:1150605"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7762",
+      "companyName": "吉晟生技股份有限公司",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-08-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "7762",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-08-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7762:2026-08-24"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7763",
+      "companyName": "崇舜",
+      "market": "上市",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-28",
+      "reviewDate": "2026-06-08",
+      "boardDate": "2026-07-21",
+      "contractDate": "2026-07-29",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "台新",
+      "events": [
+        {
+          "companyCode": "7763",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-04-28",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:7763:1150428"
+          ]
+        },
+        {
+          "companyCode": "7763",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2026-06-08",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:7763:1150428"
+          ]
+        },
+        {
+          "companyCode": "7763",
+          "market": "上市",
+          "kind": "board_approved",
+          "date": "2026-07-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TWSE:7763:1150428"
+          ]
+        },
+        {
+          "companyCode": "7763",
+          "market": "上市",
+          "kind": "contract_approved",
+          "date": "2026-07-29",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TWSE:7763:1150428"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7801",
+      "companyName": "華芸科技",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-22",
+      "reviewDate": "2026-06-09",
+      "boardDate": "2026-06-26",
+      "contractDate": "2026-07-02",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益金鼎",
+      "events": [
+        {
+          "companyCode": "7801",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-04-22",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7801:2026-04-22"
+          ]
+        },
+        {
+          "companyCode": "7801",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-06-09",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:7801:2026-04-22"
+          ]
+        },
+        {
+          "companyCode": "7801",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-06-26",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:7801:2026-04-22"
+          ]
+        },
+        {
+          "companyCode": "7801",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2026-07-02",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:7801:2026-04-22"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7806",
+      "companyName": "精華生醫",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-29",
+      "reviewDate": "2026-06-16",
+      "boardDate": "2026-06-26",
+      "contractDate": "2026-07-02",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "7806",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-04-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7806:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "7806",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-06-16",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:7806:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "7806",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-06-26",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:7806:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "7806",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2026-07-02",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:7806:2026-04-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7825",
+      "companyName": "和亞智慧",
+      "market": "上櫃",
+      "stage": "D",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-10",
+      "reviewDate": "2026-05-21",
+      "boardDate": "2026-06-26",
+      "contractDate": "2026-07-02",
+      "listingDate": "2026-09-10",
+      "auction": {
+        "companyCode": "7825",
+        "companyName": "和亞智慧",
+        "market": "上櫃",
+        "bidStartDate": "2026-08-26",
+        "bidEndDate": "2026-08-28",
+        "auctionOpenDate": "2026-09-01",
+        "listingDate": "2026-09-10",
+        "minimumBidPrice": "39.1",
+        "finalUnderwritingPrice": "0",
+        "underwriter": "群益金鼎",
+        "cancelled": false,
+        "sourceRecordId": "TWSE:auction:7825:2026-09-01"
+      },
+      "publicOffering": {
+        "companyCode": "7825",
+        "companyName": "和亞智慧",
+        "market": "上櫃",
+        "subscriptionStartDate": "2026-08-31",
+        "subscriptionEndDate": "2026-09-02",
+        "drawDate": "2026-09-04",
+        "listingDate": "2026-09-10",
+        "provisionalUnderwritingPrice": "48.88",
+        "finalUnderwritingPrice": null,
+        "underwriter": "群益金鼎",
+        "cancelled": false,
+        "sourceRecordId": "TWSE:public-offering:7825:2026-09-04"
+      },
+      "provisionalUnderwritingPrice": "48.88",
+      "finalUnderwritingPrice": "0",
+      "underwriter": "群益金鼎",
+      "events": [
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-04-10",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7825:2026-04-10"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-05-21",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:7825:2026-04-10"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-06-26",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:7825:2026-04-10"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2026-07-02",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:7825:2026-04-10"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "auction_bid_start",
+          "date": "2026-08-26",
+          "label": "競拍投標開始",
+          "sourceRecordIds": [
+            "TWSE:auction:7825:2026-09-01"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "auction_bid_end",
+          "date": "2026-08-28",
+          "label": "競拍投標截止",
+          "sourceRecordIds": [
+            "TWSE:auction:7825:2026-09-01"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "public_subscription_start",
+          "date": "2026-08-31",
+          "label": "公開申購開始",
+          "sourceRecordIds": [
+            "TWSE:public-offering:7825:2026-09-04"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "auction_open",
+          "date": "2026-09-01",
+          "label": "競拍開標",
+          "sourceRecordIds": [
+            "TWSE:auction:7825:2026-09-01"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "public_subscription_end",
+          "date": "2026-09-02",
+          "label": "公開申購截止",
+          "sourceRecordIds": [
+            "TWSE:public-offering:7825:2026-09-04"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "public_draw",
+          "date": "2026-09-04",
+          "label": "公開抽籤",
+          "sourceRecordIds": [
+            "TWSE:public-offering:7825:2026-09-04"
+          ]
+        },
+        {
+          "companyCode": "7825",
+          "market": "上櫃",
+          "kind": "listing_date",
+          "date": "2026-09-10",
+          "label": "掛牌日期",
+          "sourceRecordIds": [
+            "TWSE:auction:7825:2026-09-01",
+            "TWSE:public-offering:7825:2026-09-04"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7840",
+      "companyName": "祥圃",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-05-11",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "國泰",
+      "events": [
+        {
+          "companyCode": "7840",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-05-11",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7840:2026-05-11"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7843",
+      "companyName": "英柏得",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-24",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "7843",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-07-24",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:7843:1150724"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7848",
+      "companyName": "騏億鑫",
+      "market": "上櫃",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2026-05-12",
+      "reviewDate": "2026-07-29",
+      "boardDate": "2026-08-21",
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "7848",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-05-12",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7848:2026-05-12"
+          ]
+        },
+        {
+          "companyCode": "7848",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-07-29",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:7848:2026-05-12"
+          ]
+        },
+        {
+          "companyCode": "7848",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-08-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:7848:2026-05-12"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7856",
+      "companyName": "漢測",
+      "market": "上櫃",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-29",
+      "reviewDate": "2026-06-10",
+      "boardDate": "2026-06-26",
+      "contractDate": "2026-07-02",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "7856",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-04-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7856:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "7856",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-06-10",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:7856:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "7856",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-06-26",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:7856:2026-04-29"
+          ]
+        },
+        {
+          "companyCode": "7856",
+          "market": "上櫃",
+          "kind": "contract_approved",
+          "date": "2026-07-02",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TPEx:7856:2026-04-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7861",
+      "companyName": "貝爾威勒",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-05-26",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "7861",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-05-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:7861:1150526"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7867",
+      "companyName": "特力屋",
+      "market": "上市",
+      "stage": "C",
+      "exceptionStatus": null,
+      "applicationDate": "2026-04-29",
+      "reviewDate": "2026-06-09",
+      "boardDate": "2026-07-21",
+      "contractDate": "2026-07-30",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "福邦",
+      "events": [
+        {
+          "companyCode": "7867",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-04-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:7867:1150429"
+          ]
+        },
+        {
+          "companyCode": "7867",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2026-06-09",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:7867:1150429"
+          ]
+        },
+        {
+          "companyCode": "7867",
+          "market": "上市",
+          "kind": "board_approved",
+          "date": "2026-07-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TWSE:7867:1150429"
+          ]
+        },
+        {
+          "companyCode": "7867",
+          "market": "上市",
+          "kind": "contract_approved",
+          "date": "2026-07-30",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TWSE:7867:1150429"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7868",
+      "companyName": "聖育",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "中國信託",
+      "events": [
+        {
+          "companyCode": "7868",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-07-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7868:2026-07-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7869",
+      "companyName": "宏于電機",
+      "market": "上櫃",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2026-06-26",
+      "reviewDate": "2026-08-06",
+      "boardDate": "2026-08-21",
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "7869",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-06-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7869:2026-06-26"
+          ]
+        },
+        {
+          "companyCode": "7869",
+          "market": "上櫃",
+          "kind": "review_completed",
+          "date": "2026-08-06",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TPEx:7869:2026-06-26"
+          ]
+        },
+        {
+          "companyCode": "7869",
+          "market": "上櫃",
+          "kind": "board_approved",
+          "date": "2026-08-21",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TPEx:7869:2026-06-26"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7872",
+      "companyName": "登豐",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "7872",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-07-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7872:2026-07-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7881",
+      "companyName": "科明",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-06-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "7881",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-06-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7881:2026-06-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7883",
+      "companyName": "饗賓",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "元大",
+      "events": [
+        {
+          "companyCode": "7883",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-07-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:7883:1150727"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "7889",
+      "companyName": "騰勢",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-29",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "7889",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2026-07-29",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:7889:2026-07-29"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8038",
+      "companyName": "長園科",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2011-03-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "8038",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2011-03-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8038:1000331"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8058",
+      "companyName": "耐特",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-20",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "兆豐",
+      "events": [
+        {
+          "companyCode": "8058",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-07-20",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8058:1150720"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8065",
+      "companyName": "天瑞企業",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2010-10-06",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "華南永昌",
+      "events": [
+        {
+          "companyCode": "8065",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2010-10-06",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:8065:2010-10-06"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8093",
+      "companyName": "保銳",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2008-05-26",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "日盛",
+      "events": [
+        {
+          "companyCode": "8093",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-05-26",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8093:0970526"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8199",
+      "companyName": "廣鎵",
+      "market": "上市",
+      "stage": "B",
+      "exceptionStatus": null,
+      "applicationDate": "2008-08-19",
+      "reviewDate": "2008-09-30",
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "群益",
+      "events": [
+        {
+          "companyCode": "8199",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-08-19",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8199:0970819"
+          ]
+        },
+        {
+          "companyCode": "8199",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2008-09-30",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:8199:0970819"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8215",
+      "companyName": "明基材",
+      "market": "上市",
+      "stage": "withdrawn",
+      "exceptionStatus": "withdrawn",
+      "applicationDate": "2008-04-30",
+      "reviewDate": "2008-06-03",
+      "boardDate": "2008-06-17",
+      "contractDate": "2008-06-24",
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "大華",
+      "events": [
+        {
+          "companyCode": "8215",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2008-04-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8215:0970430"
+          ]
+        },
+        {
+          "companyCode": "8215",
+          "market": "上市",
+          "kind": "review_completed",
+          "date": "2008-06-03",
+          "label": "審查完成",
+          "sourceRecordIds": [
+            "TWSE:8215:0970430"
+          ]
+        },
+        {
+          "companyCode": "8215",
+          "market": "上市",
+          "kind": "board_approved",
+          "date": "2008-06-17",
+          "label": "董事會核准",
+          "sourceRecordIds": [
+            "TWSE:8215:0970430"
+          ]
+        },
+        {
+          "companyCode": "8215",
+          "market": "上市",
+          "kind": "contract_approved",
+          "date": "2008-06-24",
+          "label": "契約核准",
+          "sourceRecordIds": [
+            "TWSE:8215:0970430"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8297",
+      "companyName": "金橋電子實業",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2007-12-31",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "大華",
+      "events": [
+        {
+          "companyCode": "8297",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2007-12-31",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:8297:2007-12-31"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8415",
+      "companyName": "大國鋼",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2015-04-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "統一",
+      "events": [
+        {
+          "companyCode": "8415",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2015-04-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8415:1040430"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8437",
+      "companyName": "F-大地",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2013-10-30",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "8437",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2013-10-30",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:8437:2013-10-30"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8458",
+      "companyName": "影一",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-12-21",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "8458",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2016-12-21",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:8458:2016-12-21"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8462",
+      "companyName": "柏文",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2018-09-13",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "8462",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2018-09-13",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8462:1070913"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8478",
+      "companyName": "東哥",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2016-07-11",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "凱基",
+      "events": [
+        {
+          "companyCode": "8478",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2016-07-11",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8478:1050711"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8487",
+      "companyName": "愛爾達",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2022-09-15",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "宏遠",
+      "events": [
+        {
+          "companyCode": "8487",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2022-09-15",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:8487:2022-09-15"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8491",
+      "companyName": "真好玩",
+      "market": "上櫃",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2018-07-05",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "永豐金",
+      "events": [
+        {
+          "companyCode": "8491",
+          "market": "上櫃",
+          "kind": "application_submitted",
+          "date": "2018-07-05",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TPEx:8491:2018-07-05"
+          ]
+        }
+      ]
+    },
+    {
+      "companyCode": "8908",
+      "companyName": "欣雄",
+      "market": "上市",
+      "stage": "A",
+      "exceptionStatus": null,
+      "applicationDate": "2026-07-27",
+      "reviewDate": null,
+      "boardDate": null,
+      "contractDate": null,
+      "listingDate": null,
+      "auction": null,
+      "publicOffering": null,
+      "provisionalUnderwritingPrice": null,
+      "finalUnderwritingPrice": null,
+      "underwriter": "第一金",
+      "events": [
+        {
+          "companyCode": "8908",
+          "market": "上市",
+          "kind": "application_submitted",
+          "date": "2026-07-27",
+          "label": "申請送件",
+          "sourceRecordIds": [
+            "TWSE:8908:1150727"
+          ]
+        }
+      ]
+    }
+  ]
+}

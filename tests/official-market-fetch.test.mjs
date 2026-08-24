@@ -264,10 +264,25 @@ test("collects only requested official CB, stock and conversion records", async 
   );
 });
 
-test("omits a requested TPEx issuer when the official row has no closing value", async () => {
+test("omits requested TWSE and TPEx issuers when official rows have no closing value", async () => {
   const values = {
     quote: await fixture("tpex-cb-quote.json"),
-    twse: await fixture("twse-stock-close.json"),
+    twse: JSON.stringify([
+      ...JSON.parse(await fixture("twse-stock-close.json")),
+      {
+        Date: "1150821",
+        Code: "4190",
+        Name: "佐登-KY",
+        TradeVolume: "263",
+        TradeValue: "6679",
+        OpeningPrice: "",
+        HighestPrice: "",
+        LowestPrice: "",
+        ClosingPrice: "",
+        Change: "0.0000",
+        Transaction: "1",
+      },
+    ]),
     tpex: JSON.stringify([
       ...JSON.parse(await fixture("tpex-stock-close.json")),
       {
@@ -308,7 +323,7 @@ test("omits a requested TPEx issuer when the official row has no closing value",
 
   const result = await fetchCurrentOfficialMarketData({
     bondCodes: ["35221"],
-    issuerCodes: ["2330", "3522", "3587"],
+    issuerCodes: ["2330", "3522", "3587", "4190"],
     date: "2026-07-31",
     fetchImpl: fakeFetch,
     sleepImpl: async () => {},

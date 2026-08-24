@@ -186,14 +186,6 @@ export function normalize94025Row(
   );
 
   if (
-    cumulativeRevenue !== undefined
-    && compareNonNegativeDecimals(cumulativeRevenue, currentMonthRevenue) < 0
-  ) {
-    throw new Source94025ValidationError(
-      "cumulativeRevenue cannot be less than currentMonthRevenue",
-    );
-  }
-  if (
     yearMonth.endsWith("-01")
     && cumulativeRevenue !== undefined
     && compareNonNegativeDecimals(cumulativeRevenue, currentMonthRevenue) !== 0
