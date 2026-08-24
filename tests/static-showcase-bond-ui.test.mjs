@@ -341,6 +341,18 @@ test("bond list presentation uses remaining ratio and canonical redemption event
   });
 });
 
+test("public CB list uses plain dashes for unavailable values and labels earlier official closes", async () => {
+  const js = await readFile(new URL("assets/bonds-page.js", root), "utf8");
+  assert.match(js, /前次成交/);
+  assert.doesNotMatch(js, /資料暫缺|尚無可用 CB 收盤|CB 與股票沒有共同估值日/);
+  const { bondListPresentation } = await import("../static-showcase/assets/bonds-page.js");
+  assert.deepEqual(bondListPresentation({ remainingRatio: null, nextEventType: null, nextEventDate: null }), {
+    remainingRatio: "—",
+    eventLabel: "—",
+    eventDate: "—",
+  });
+});
+
 test("detail disclosures align with the 900px CSS breakpoint and initialize the selected desktop tab only", async () => {
   const { syncBondDetailDisclosureMode } = await import("../static-showcase/assets/bond-detail-page.js");
   const disclosures = [{ open: false }, { open: true }];
