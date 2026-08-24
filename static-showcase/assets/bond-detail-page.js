@@ -52,6 +52,7 @@ export function renderBondDetail(record) {
   const html = `
     <header class="bond-detail-head"><div><p class="section-number">${text(record?.bondCode)} / PUBLIC CB DETAIL</p><h2>${text(term.bondName ?? view.bondName)}</h2><p>${text(term.issuerName ?? view.issuerCode)}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債總表">← 返回總表</button></header>
     <p class="bond-detail-disclaimer">本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。</p>
+    ${factDashboardSection(record)}
     ${snapshotSection(record, dataDate)}
     ${statusMatrixSection(view, term, record?.fieldStates)}
     <nav class="detail-tabs" aria-label="詳細資料分頁" role="tablist">${tabButton("overview", "總覽", true)}${tabButton("terms", "條款與事件")}${tabButton("institutions", "法人")}${tabButton("company", "公司營運")}</nav>
@@ -67,6 +68,46 @@ export function renderBondDetail(record) {
   const violations = noAdviceViolations(html);
   if (violations.length) throw new Error(`detail UI contains prohibited content: ${violations.join(", ")}`);
   return html;
+}
+
+function factDashboardSection(record) {
+  const facts = projectCbFactDashboard(record);
+  return `<section class="cb-fact-dashboard" aria-label="可轉債事實儀表板"><header><div><p class="section-number">FACTS BY EVIDENCE</p><h3>可轉債事實儀表板</h3></div><p>每一欄位各自列示資料日期與來源狀態；未核對不以零值或推論代替。</p></header><dl>${facts.map((item) => `<div class="cb-fact-card" data-evidence-state="${text(item.evidenceState)}"><dt>${text(item.label)}</dt><dd>${text(item.value)}</dd><small>資料日期：${text(item.dataDate)}</small><small>來源狀態：${text(item.evidence)}</small></div>`).join("")}</dl></section>`;
+}
+
+export function projectCbFactDashboard(record = {}) {
+  const view = record?.view ?? {};
+  const term = record?.term ?? {};
+  const events = Array.isArray(record?.events) ? record.events : [];
+  const fieldStates = record?.fieldStates ?? {};
+  const missing = (key, label) => ({ key, label, value: MISSING_WORDING, dataDate: MISSING_WORDING, evidence: MISSING_WORDING, evidenceState: "unavailable" });
+  const approvedField = (key, label, value, dataDate, fieldState, sourceId, sourceUrl) => {
+    const directEvidence = verifiedSnapshotUrl(sourceUrl, sourceId);
+    const publishedEvidence = fieldState === "complete";
+    if (value == null || value === "" || !validIsoDate(dataDate) || (!directEvidence && !publishedEvidence)) return missing(key, label);
+    const evidence = directEvidence ? `已驗證公開來源（${sourceId}）` : "已發布工作台欄位：已核對";
+    return { key, label, value: String(value), dataDate, evidence, evidenceState: "verified" };
+  };
+  const event = events.filter((item) => validIsoDate(item?.date) && verifiedSnapshotUrl(item?.sourceUrl, item?.sourceId))
+    .sort((left, right) => left.date.localeCompare(right.date))[0] ?? null;
+  const maturity = events.find((item) => item?.type === "maturity" && item?.date === term.maturityDate
+    && validIsoDate(item.date) && verifiedSnapshotUrl(item.sourceUrl, item.sourceId));
+  const balance = approved11406BalanceEvidence(view);
+  return [
+    approvedField("conversionPrice", "目前轉換價", view.currentConversionPrice, view.conversionPriceEffectiveDate, fieldStates.price, view.conversionPriceSourceId, view.conversionPriceSourceUrl),
+    approvedField("stockClose", "標的股收盤", view.stockClose, view.stockPriceDate, fieldStates.price, view.stockPriceSourceId, view.stockPriceSourceUrl),
+    approvedField("conversionValue", "轉換價值", view.conversionValue, view.valuationDate, fieldStates.valuation, view.valuationSourceId, view.valuationSourceUrl),
+    approvedField("premium", "轉換溢價", view.premiumRate, view.valuationDate, fieldStates.valuation, view.valuationSourceId, view.valuationSourceUrl),
+    (balance || fieldStates.outstanding === "complete") && view.remainingRatio != null && validIsoDate(view.outstandingDataDate)
+      ? { key: "remainingRatio", label: "流通餘額比例", value: String(view.remainingRatio), dataDate: view.outstandingDataDate, evidence: balance ? `已驗證公開來源（${balance.sourceId}）` : "已發布工作台欄位：已核對", evidenceState: "verified" }
+      : missing("remainingRatio", "流通餘額比例"),
+    event
+      ? { key: "nextEvent", label: "下一事件", value: `${event.type ?? event.title ?? "事件"} ${event.date}`, dataDate: event.date, evidence: `已驗證公開來源（${event.sourceId}）`, evidenceState: "verified" }
+      : missing("nextEvent", "下一事件"),
+    maturity
+      ? { key: "maturity", label: "到期日", value: term.maturityDate, dataDate: maturity.date, evidence: `已驗證公開來源（${maturity.sourceId}）`, evidenceState: "verified" }
+      : missing("maturity", "到期日"),
+  ];
 }
 
 export function detailRecordFromLegacy({ view = {}, term = {}, events = [] } = {}) {

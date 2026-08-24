@@ -49,7 +49,8 @@
         <form class="filters bond-filters" id="bond-filters" aria-label="可轉債篩選">
           <label class="search-field">
             <span>搜尋</span>
-            <input id="bond-search" name="q" type="search" placeholder="5/6 位代碼、債券名稱或發行人">
+            <input id="bond-search" name="q" type="search" role="combobox" aria-autocomplete="list" aria-controls="bond-search-suggestions" aria-expanded="false" placeholder="5/6 位代碼、債券名稱或發行人">
+            <span id="bond-search-suggestions" class="bond-search-suggestions" role="listbox" aria-label="可轉債搜尋建議" hidden></span>
           </label>
           <label class="archive-toggle"><input id="bond-archive-toggle" name="archived" type="checkbox"> 顯示封存可轉債</label>
           <fieldset class="bond-event-shortcuts">

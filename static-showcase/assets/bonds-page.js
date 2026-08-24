@@ -1,4 +1,5 @@
 import {
+  buildBondSearchSuggestions,
   filterBondRecords,
   paginateBondRecords,
   parseBondListState,
@@ -38,6 +39,8 @@ const state = {
   workbenchDeclared: false,
   workbenchUnavailable: false,
   detailOrigin: null,
+  suggestions: [],
+  highlightedSuggestion: -1,
 };
 let disposeDetail = () => {};
 
@@ -92,6 +95,7 @@ async function loadAndRender() {
         views: marketViews.length === 0 ? fallbackBondViews(state.bondTerms) : marketViews,
         bondTerms: state.bondTerms,
       });
+  updateSearchSuggestions();
   renderRoute();
   const marketDate = state.manifest?.market?.dataDate;
   document.querySelector("#bond-update-status").textContent = marketDate
@@ -120,11 +124,14 @@ function initializeFromUrl() {
 }
 
 function bindFilters() {
-  document.querySelector("#bond-search").addEventListener("input", () => {
+  const search = document.querySelector("#bond-search");
+  search.addEventListener("input", () => {
     state.page = 1;
     syncListUrl();
+    updateSearchSuggestions();
     renderBonds();
   });
+  search.addEventListener("keydown", handleSearchKeydown);
   document.querySelector("#bond-archive-toggle").addEventListener("change", (event) => {
     state.archived = event.target.checked;
     state.page = 1;
@@ -427,6 +434,71 @@ function bindBondOpeners() {
   }
 }
 
+function handleSearchKeydown(event) {
+  if (event.key === "Escape") {
+    closeSearchSuggestions();
+    return;
+  }
+  if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "Enter") return;
+  if (event.key === "Enter" && state.highlightedSuggestion < 0) return;
+  event.preventDefault();
+  if (event.key === "Enter") {
+    const selected = state.suggestions[state.highlightedSuggestion];
+    if (selected) openBond(selected.bondCode, event.currentTarget);
+    return;
+  }
+  if (state.suggestions.length === 0) return;
+  const step = event.key === "ArrowDown" ? 1 : -1;
+  state.highlightedSuggestion = (state.highlightedSuggestion + step + state.suggestions.length) % state.suggestions.length;
+  renderSearchSuggestions();
+}
+
+function updateSearchSuggestions() {
+  const query = document.querySelector("#bond-search")?.value ?? "";
+  state.suggestions = buildBondSearchSuggestions(searchableBondRecords(), query);
+  state.highlightedSuggestion = -1;
+  renderSearchSuggestions();
+}
+
+function searchableBondRecords() {
+  return state.views.map((view) => {
+    const term = termFor(view.bondCode);
+    return {
+      ...view,
+      issuerCode: view.issuerCode ?? term?.["機構代碼"] ?? "",
+      issuerName: view.issuerName ?? term?.["機構名稱"] ?? "",
+    };
+  });
+}
+
+function renderSearchSuggestions() {
+  const input = document.querySelector("#bond-search");
+  const target = document.querySelector("#bond-search-suggestions");
+  if (!input || !target) return;
+  const open = state.suggestions.length > 0;
+  input.setAttribute("aria-expanded", String(open));
+  if (!open) {
+    input.removeAttribute("aria-activedescendant");
+    target.hidden = true;
+    target.innerHTML = "";
+    return;
+  }
+  const activeId = state.highlightedSuggestion >= 0 ? `bond-suggestion-${state.highlightedSuggestion}` : null;
+  if (activeId) input.setAttribute("aria-activedescendant", activeId);
+  else input.removeAttribute("aria-activedescendant");
+  target.hidden = false;
+  target.innerHTML = state.suggestions.map((item, index) => `<button type="button" id="bond-suggestion-${index}" role="option" aria-selected="${index === state.highlightedSuggestion}" data-bond-suggestion="${escapeHtml(item.bondCode)}"><strong>${escapeHtml(item.bondCode)} · ${escapeHtml(item.bondName)}</strong><span>${escapeHtml(item.issuerCode)} ${escapeHtml(item.issuerName)}</span></button>`).join("");
+  for (const button of target.querySelectorAll("[data-bond-suggestion]")) {
+    button.addEventListener("click", () => openBond(button.dataset.bondSuggestion, input));
+  }
+}
+
+function closeSearchSuggestions() {
+  state.suggestions = [];
+  state.highlightedSuggestion = -1;
+  renderSearchSuggestions();
+}
+
 function updateSortHeaders() {
   for (const button of document.querySelectorAll("[data-sort-key]")) {
     const active = button.dataset.sortKey === state.sortKey;
@@ -527,6 +599,7 @@ function clearBondFilters() {
   state.remainingMax = null;
   state.secured = "";
   state.page = 1;
+  closeSearchSuggestions();
   syncListUrl();
   renderBonds();
 }
@@ -537,6 +610,7 @@ function openBond(code, origin = null) {
     : null;
   const params = new URLSearchParams(location.search);
   params.set("bond", code);
+  closeSearchSuggestions();
   history.pushState(null, "", `${location.pathname}?${params}`);
   renderRoute();
 }

@@ -4,6 +4,30 @@ export function normalizeBondQuery(value = "") {
   return String(value).normalize("NFC").trim().replace(/[a-z]/g, (letter) => letter.toUpperCase());
 }
 
+export function buildBondSearchSuggestions(records, query, limit = 8) {
+  const needle = normalizeBondQuery(query);
+  if (!needle) return [];
+  const max = Number.isInteger(limit) && limit > 0 ? limit : 8;
+  return (Array.isArray(records) ? records : [])
+    .map((record, index) => ({ record, index }))
+    .filter(({ record }) => [record?.bondCode, record?.bondName, record?.issuerCode, record?.issuerName]
+      .some((value) => normalizeBondQuery(value).includes(needle)))
+    .sort((left, right) => {
+      const leftExact = normalizeBondQuery(left.record.bondCode) === needle;
+      const rightExact = normalizeBondQuery(right.record.bondCode) === needle;
+      if (leftExact !== rightExact) return leftExact ? -1 : 1;
+      return left.index - right.index;
+    })
+    .slice(0, max)
+    .map(({ record }) => ({
+      bondCode: String(record.bondCode ?? ""),
+      bondName: String(record.bondName ?? ""),
+      issuerCode: String(record.issuerCode ?? ""),
+      issuerName: String(record.issuerName ?? ""),
+      exact: normalizeBondQuery(record.bondCode) === needle,
+    }));
+}
+
 function normalizeBondDate(value = "") {
   const date = String(value).trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
@@ -51,7 +75,7 @@ export function filterBondRecords(records, {
   const normalizedSecured = normalizeBondQuery(secured);
   return (Array.isArray(records) ? records : []).filter((record) => {
     if (!archived && (record.archived === true || record.status === "archived")) return false;
-    if (needle && ![record.bondCode, record.bondName, record.issuerName]
+    if (needle && ![record.bondCode, record.bondName, record.issuerCode, record.issuerName]
       .some((value) => normalizeBondQuery(value).includes(needle))) return false;
     const nextEventDays = validDayCount(record.daysToNextEvent);
     if (normalizedEvent === "rights90" && (nextEventDays === null || nextEventDays > 90)) return false;
