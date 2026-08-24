@@ -69,6 +69,12 @@
         "name": "bond-market-history.json",
         "sha256": "sha256:62471a90c83544c64caac324261844d6255fda82f43cae7baf0af86966432e56",
         "recordCount": 4393
+      },
+      {
+        "name": "ipo-events.json",
+        "sha256": "sha256:88e7f40d5b2f7d908b752b872fde030e60437fa3a59390c9d4c8f8dda82c5e1c",
+        "rawBytes": 165593,
+        "recordCount": 186
       }
     ]
   }

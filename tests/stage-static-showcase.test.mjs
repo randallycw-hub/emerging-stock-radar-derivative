@@ -179,6 +179,80 @@ test("Sites staging rejects a runtime that omits required dataset artifacts", as
   );
 });
 
+test("Sites staging fails closed when IPO event evidence lacks source record, date, or identity", async (context) => {
+  const cases = [
+    {
+      name: "source record",
+      mutate(snapshot) {
+        snapshot.records[0].events[0].sourceRecordIds = [];
+      },
+      expected: /IPO event.*source/i,
+    },
+    {
+      name: "date",
+      mutate(snapshot) {
+        snapshot.records[0].events[0].date = "not-a-date";
+      },
+      expected: /IPO event.*date/i,
+    },
+    {
+      name: "identity",
+      mutate(snapshot) {
+        snapshot.records.push({
+          ...snapshot.records[0],
+          events: [{ ...snapshot.records[0].events[0] }],
+        });
+      },
+      expected: /IPO event.*identity/i,
+    },
+  ];
+
+  for (const testCase of cases) {
+    await context.test(testCase.name, async () => {
+      const { source, destination, generation, snapshot } = await seededGenerationWithIpoEvents();
+      testCase.mutate(snapshot);
+      await writeIpoArtifact({ source, generation, snapshot });
+
+      await assert.rejects(stageStaticShowcase({ source, destination }), testCase.expected);
+      await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
+    });
+  }
+});
+
+test("Sites staging fails closed when IPO event artifact integrity or generation path is invalid", async (context) => {
+  await context.test("hash mutation", async () => {
+    const { source, destination, generation } = await seededGenerationWithIpoEvents();
+    await writeFile(
+      join(source, "data", generation, "ipo-events.json"),
+      "{\"tampered\":true}\n",
+      "utf8",
+    );
+
+    await assert.rejects(stageStaticShowcase({ source, destination }), /IPO event.*hash|bytes|integrity/i);
+    await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
+  });
+
+  await context.test("wrong generation path", async () => {
+    const { source, destination, generation } = await seededGenerationWithIpoEvents();
+    const runtimePath = join(source, "data", generation, "runtime.json");
+    const runtime = JSON.parse(await readFile(runtimePath, "utf8"));
+    runtime.ipoEventsUrl = "./data/generations/deadbeef/ipo-events.json";
+    await writeFile(runtimePath, `${JSON.stringify(runtime)}\n`, "utf8");
+
+    await assert.rejects(stageStaticShowcase({ source, destination }), /runtime datasets|IPO event/i);
+    await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
+  });
+});
+
+test("Sites staging rejects IPO event source records without one approved source manifest match", async () => {
+  const { source, destination, generation, snapshot } = await seededGenerationWithIpoEvents();
+  snapshot.records[0].events[0].sourceRecordIds = ["UNAPPROVED:1234:2026-08-25"];
+  await writeIpoArtifact({ source, generation, snapshot });
+
+  await assert.rejects(stageStaticShowcase({ source, destination }), /IPO event.*source/i);
+  await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
+});
+
 test("Sites staging rejects an extra runtime dataset and raw CSV before touching destination", async () => {
   const root = await mkdtemp(join(tmpdir(), "showcase-stage-runtime-extra-"));
   const source = join(root, "source");
@@ -751,6 +825,114 @@ async function seedDeclaredIssuerResearchGeneration(
       "utf8",
     );
   }
+}
+
+async function seededGenerationWithIpoEvents() {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-ipo-events-"));
+  const source = join(root, "source");
+  const destination = join(root, "destination");
+  const generation = "generations/abc123";
+  const snapshot = validIpoSnapshot();
+  await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+  await writeIpoArtifact({ source, generation, snapshot });
+  const runtimePath = join(source, "data", generation, "runtime.json");
+  const runtime = JSON.parse(await readFile(runtimePath, "utf8"));
+  runtime.ipoEventsUrl = `./data/${generation}/ipo-events.json`;
+  await writeFile(runtimePath, `${JSON.stringify(runtime)}\n`, "utf8");
+  return { source, destination, generation, snapshot };
+}
+
+async function writeIpoArtifact({ source, generation, snapshot }) {
+  const path = join(source, "data", generation, "ipo-events.json");
+  const text = `${JSON.stringify(snapshot, null, 2)}\n`;
+  await writeFile(path, text, "utf8");
+  const manifestPath = join(source, "data", generation, "manifest.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.market.files = manifest.market.files.filter(
+    (entry) => entry.name !== "ipo-events.json",
+  );
+  manifest.market.files.push({
+    name: "ipo-events.json",
+    sha256: sha256Text(text),
+    rawBytes: Buffer.byteLength(text, "utf8"),
+    recordCount: snapshot.records.length,
+  });
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`, "utf8");
+}
+
+function validIpoSnapshot() {
+  return {
+    schemaVersion: 1,
+    dataDate: "2026-08-24",
+    generatedAt: "2026-08-24T09:00:00.000Z",
+    sourceManifest: [
+      {
+        sourceId: "twse-applications",
+        sourceUrl: "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
+        downloadedAt: "2026-08-24T09:00:00.000Z",
+        sha256: `sha256:${"1".repeat(64)}`,
+        rawBytes: 1,
+        rowCount: 1,
+      },
+      {
+        sourceId: "tpex-applications",
+        sourceUrl: "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies",
+        downloadedAt: "2026-08-24T09:00:00.000Z",
+        sha256: `sha256:${"2".repeat(64)}`,
+        rawBytes: 1,
+        rowCount: 1,
+      },
+      {
+        sourceId: "tpex-ipo-listings",
+        sourceUrl: "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit",
+        downloadedAt: "2026-08-24T09:00:00.000Z",
+        sha256: `sha256:${"3".repeat(64)}`,
+        rawBytes: 1,
+        rowCount: 1,
+      },
+      {
+        sourceId: "twse-auctions",
+        sourceUrl: "https://www.twse.com.tw/announcement/auction?response=json&yy=2026",
+        downloadedAt: "2026-08-24T09:00:00.000Z",
+        sha256: `sha256:${"4".repeat(64)}`,
+        rawBytes: 1,
+        rowCount: 1,
+      },
+      {
+        sourceId: "twse-public-offerings",
+        sourceUrl: "https://www.twse.com.tw/announcement/publicForm?response=json&yy=2026",
+        downloadedAt: "2026-08-24T09:00:00.000Z",
+        sha256: `sha256:${"5".repeat(64)}`,
+        rawBytes: 1,
+        rowCount: 1,
+      },
+    ],
+    records: [{
+      companyCode: "1234",
+      companyName: "測試公司",
+      market: "上市",
+      stage: "A",
+      exceptionStatus: null,
+      applicationDate: "2026-08-25",
+      reviewDate: null,
+      boardDate: null,
+      contractDate: null,
+      listingDate: null,
+      auction: null,
+      publicOffering: null,
+      provisionalUnderwritingPrice: null,
+      finalUnderwritingPrice: null,
+      underwriter: "",
+      events: [{
+        companyCode: "1234",
+        market: "上市",
+        kind: "application_submitted",
+        date: "2026-08-25",
+        label: "申請送件",
+        sourceRecordIds: ["TWSE:1234:1150825"],
+      }],
+    }],
+  };
 }
 
 function stageTerm() {

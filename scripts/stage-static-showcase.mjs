@@ -13,7 +13,10 @@ import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-rese
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
 import { parseBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
-import { getApprovedResource } from "../lib/pipeline/source-registry.ts";
+import {
+  getApprovedIpoResource,
+  getApprovedResource,
+} from "../lib/pipeline/source-registry.ts";
 import {
   bondInputsFrom11406Rows,
   summarizeWorkbenchSourceStates,
@@ -174,6 +177,9 @@ export async function stageStaticShowcase({
   if (declaresWorkbench) {
     await verifyDeclaredWorkbench({ source, manifest, runtime, base });
   }
+  if (runtime.ipoEventsUrl !== undefined) {
+    await assertPublishedEventInputs({ manifest, runtime, root: source });
+  }
   const approvedFiles = await collectApprovedSourceFiles(source, pointer.generation);
   await rm(destination, { recursive: true, force: true });
   for (const relativePath of approvedFiles) {
@@ -181,6 +187,178 @@ export async function stageStaticShowcase({
     await mkdir(dirname(target), { recursive: true });
     await copyFile(join(source, ...relativePath.split("/")), target);
   }
+}
+
+export async function assertPublishedEventInputs({ manifest, runtime, root }) {
+  const generation = runtime?.generation;
+  const base = `./data/${generation}`;
+  if (
+    typeof root !== "string"
+    || !/^generations\/[a-f0-9]+$/i.test(generation ?? "")
+    || runtime?.ipoEventsUrl !== `${base}/ipo-events.json`
+    || !isStrictIsoDate(manifest?.market?.dataDate)
+    || !Array.isArray(manifest?.market?.files)
+  ) {
+    throw new Error("active generation IPO event inputs are invalid");
+  }
+
+  const entries = manifest.market.files.filter(
+    (entry) => entry?.name === "ipo-events.json",
+  );
+  if (entries.length !== 1) {
+    throw new Error("active generation IPO event manifest integrity is invalid");
+  }
+  const entry = validateIpoEventFileEntry(entries[0]);
+  const text = await readFile(
+    join(root, `${base}/ipo-events.json`.replace(/^\.\//, "")),
+    "utf8",
+  );
+  if (
+    sha256Text(text) !== entry.sha256
+    || Buffer.byteLength(text, "utf8") !== entry.rawBytes
+  ) {
+    throw new Error("active generation IPO event artifact hash or bytes are invalid");
+  }
+
+  let snapshot;
+  try {
+    snapshot = JSON.parse(text);
+  } catch {
+    throw new Error("active generation IPO event artifact is invalid");
+  }
+  if (
+    snapshot === null
+    || typeof snapshot !== "object"
+    || Array.isArray(snapshot)
+    || !Array.isArray(snapshot.records)
+    || !Array.isArray(snapshot.sourceManifest)
+    || snapshot.records.length !== entry.recordCount
+    || !isStrictIsoDate(snapshot.dataDate)
+  ) {
+    throw new Error("active generation IPO event artifact is invalid");
+  }
+
+  const sourceEntries = new Map();
+  for (const sourceEntry of snapshot.sourceManifest) {
+    if (
+      sourceEntry === null
+      || typeof sourceEntry !== "object"
+      || Array.isArray(sourceEntry)
+      || typeof sourceEntry.sourceId !== "string"
+      || typeof sourceEntry.sourceUrl !== "string"
+    ) {
+      throw new Error("active generation IPO event source manifest is invalid");
+    }
+    const sourceId = sourceEntry.sourceId;
+    const entriesForId = sourceEntries.get(sourceId) ?? [];
+    entriesForId.push(sourceEntry);
+    sourceEntries.set(sourceId, entriesForId);
+    let approved;
+    try {
+      approved = getApprovedIpoResource(sourceId, Number(snapshot.dataDate.slice(0, 4)));
+    } catch {
+      throw new Error("active generation IPO event source manifest is invalid");
+    }
+    if (sourceEntry.sourceUrl !== approved.exactUrl) {
+      throw new Error("active generation IPO event source manifest is invalid");
+    }
+  }
+
+  const identities = new Set();
+  for (const record of snapshot.records) {
+    if (
+      record === null
+      || typeof record !== "object"
+      || Array.isArray(record)
+      || !isNonEmptyText(record.companyCode)
+      || !Array.isArray(record.events)
+    ) {
+      throw new Error("active generation IPO event record identity is invalid");
+    }
+    for (const event of record.events) {
+      if (
+        event === null
+        || typeof event !== "object"
+        || Array.isArray(event)
+        || event.companyCode !== record.companyCode
+        || !isNonEmptyText(event.market)
+        || !isNonEmptyText(event.kind)
+        || !isStrictIsoDate(event.date)
+        || !isNonEmptyText(event.label)
+        || !Array.isArray(event.sourceRecordIds)
+        || event.sourceRecordIds.length === 0
+      ) {
+        throw new Error("active generation IPO event source, date, or identity is invalid");
+      }
+      for (const sourceRecordId of event.sourceRecordIds) {
+        if (!isNonEmptyText(sourceRecordId)) {
+          throw new Error("active generation IPO event source, date, or identity is invalid");
+        }
+        const sourceId = sourceIdForIpoRecord(sourceRecordId);
+        const matches = sourceId === undefined ? [] : sourceEntries.get(sourceId) ?? [];
+        if (matches.length !== 1) {
+          throw new Error("active generation IPO event source, date, or identity is invalid");
+        }
+        const identity = [
+          record.companyCode,
+          event.market,
+          event.kind,
+          event.date,
+          sourceRecordId,
+        ].join(":");
+        if (identities.has(identity)) {
+          throw new Error("active generation IPO event source, date, or identity is invalid");
+        }
+        identities.add(identity);
+      }
+    }
+  }
+}
+
+function validateIpoEventFileEntry(entry) {
+  if (
+    entry === null
+    || typeof entry !== "object"
+    || Array.isArray(entry)
+    || !equalStringArrays(Object.keys(entry).sort(), [
+      "name",
+      "rawBytes",
+      "recordCount",
+      "sha256",
+    ].sort())
+    || entry.name !== "ipo-events.json"
+    || !/^sha256:[0-9a-f]{64}$/.test(entry.sha256 ?? "")
+    || !Number.isInteger(entry.rawBytes)
+    || entry.rawBytes <= 0
+    || !Number.isInteger(entry.recordCount)
+    || entry.recordCount < 0
+  ) {
+    throw new Error("active generation IPO event manifest integrity is invalid");
+  }
+  return entry;
+}
+
+function isNonEmptyText(value) {
+  return typeof value === "string" && value.trim() !== "";
+}
+
+function isStrictIsoDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const time = Date.parse(`${value}T00:00:00.000Z`);
+  if (!Number.isFinite(time)) return false;
+  const date = new Date(time);
+  return date.getUTCFullYear() === Number(value.slice(0, 4))
+    && date.getUTCMonth() + 1 === Number(value.slice(5, 7))
+    && date.getUTCDate() === Number(value.slice(8, 10));
+}
+
+function sourceIdForIpoRecord(sourceRecordId) {
+  if (/^TWSE:auction:[^:]+:[^:]+$/.test(sourceRecordId)) return "twse-auctions";
+  if (/^TWSE:public-offering:[^:]+:[^:]+$/.test(sourceRecordId)) return "twse-public-offerings";
+  if (/^TPEx:ipo-no-limit:[^:]+:[^:]+$/.test(sourceRecordId)) return "tpex-ipo-listings";
+  if (/^TWSE:[^:]+:[^:]+$/.test(sourceRecordId)) return "twse-applications";
+  if (/^TPEx:[^:]+:[^:]+$/.test(sourceRecordId)) return "tpex-applications";
+  return undefined;
 }
 
 function expectedRuntimeDatasets(

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -61,7 +62,8 @@ test("IPO-only publication switches to a new self-contained generation", async (
     const generationRoot = join(dataDirectory, pointer.generation);
     const runtime = JSON.parse(await readFile(join(generationRoot, "runtime.json"), "utf8"));
     const manifest = JSON.parse(await readFile(join(generationRoot, "manifest.json"), "utf8"));
-    const snapshot = JSON.parse(await readFile(join(generationRoot, "ipo-events.json"), "utf8"));
+    const snapshotText = await readFile(join(generationRoot, "ipo-events.json"), "utf8");
+    const snapshot = JSON.parse(snapshotText);
 
     assert.notEqual(pointer.generation, priorPointer.generation);
     assert.equal(result.generation, pointer.generation);
@@ -70,6 +72,15 @@ test("IPO-only publication switches to a new self-contained generation", async (
     assert.equal(runtime.ipoEventsUrl, `./data/${pointer.generation}/ipo-events.json`);
     assert.equal(runtime.manifestUrl, `./data/${pointer.generation}/manifest.json`);
     assert.equal(manifest.emergingMarketUrl, `./data/${pointer.generation}/emerging-market.json`);
+    assert.deepEqual(
+      manifest.market.files.filter((entry) => entry.name === "ipo-events.json"),
+      [{
+        name: "ipo-events.json",
+        sha256: `sha256:${createHash("sha256").update(snapshotText, "utf8").digest("hex")}`,
+        rawBytes: Buffer.byteLength(snapshotText, "utf8"),
+        recordCount: snapshot.records.length,
+      }],
+    );
     assert.equal(await readFile(join(priorGeneration, "ipo-events.json"), "utf8"), "{\"prior\":true}\n");
     assert.equal(await readFile(join(generationRoot, "94025.json"), "utf8"), "[]\n");
   } finally {

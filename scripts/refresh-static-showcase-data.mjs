@@ -435,16 +435,13 @@ async function refreshStaticShowcaseCandidate({
       `${JSON.stringify(emergingSnapshot, null, 2)}\n`,
       "utf8",
     );
-    await writeFile(
-      join(stagingDataDirectory, "ipo-events.json"),
-      `${JSON.stringify(buildStaticIpoSnapshot({
+    const ipoEventsText = `${JSON.stringify(buildStaticIpoSnapshot({
         twseRows: datasets["11586"],
         tpexRows: tpexIpoApplicationSnapshot,
         dataDate: emergingSnapshot.tradingDate,
         generatedAt: now.toISOString(),
-      }), null, 2)}\n`,
-      "utf8",
-    );
+      }), null, 2)}\n`;
+    await writeFile(join(stagingDataDirectory, "ipo-events.json"), ipoEventsText, "utf8");
 
     const marketResult = await marketBuilder({
         outputDir: stagingDataDirectory,
@@ -491,6 +488,18 @@ async function refreshStaticShowcaseCandidate({
       });
     }
     const manifest = marketResult.manifest;
+    if (!Array.isArray(manifest?.market?.files)) {
+      throw new Error("VALIDATION_FAILED:IPO_EVENTS_MANIFEST");
+    }
+    manifest.market.files = [
+      ...manifest.market.files.filter((entry) => entry?.name !== "ipo-events.json"),
+      {
+        name: "ipo-events.json",
+        sha256: sha256Text(ipoEventsText),
+        rawBytes: Buffer.byteLength(ipoEventsText, "utf8"),
+        recordCount: JSON.parse(ipoEventsText).records.length,
+      },
+    ];
     await writeFile(
       join(stagingDataDirectory, "manifest.json"),
       `${JSON.stringify(manifest, null, 2)}\n`,
@@ -1886,6 +1895,20 @@ async function verifyStagedGeneration(stagingDataDirectory, previousWorkbench) {
   );
   if (generationMatch === null) {
     throw new Error("VALIDATION_FAILED:EMERGING_MARKET_MANIFEST");
+  }
+  const ipoEntries = Array.isArray(manifest.market?.files)
+    ? manifest.market.files.filter((file) => file?.name === "ipo-events.json")
+    : [];
+  const ipoEventsText = await readFile(join(stagingDataDirectory, "ipo-events.json"), "utf8");
+  const ipoEvents = JSON.parse(ipoEventsText);
+  if (
+    ipoEntries.length !== 1
+    || ipoEntries[0]?.sha256 !== sha256Text(ipoEventsText)
+    || ipoEntries[0]?.rawBytes !== Buffer.byteLength(ipoEventsText, "utf8")
+    || !Array.isArray(ipoEvents?.records)
+    || ipoEntries[0]?.recordCount !== ipoEvents.records.length
+  ) {
+    throw new Error("VALIDATION_FAILED:IPO_EVENTS_MANIFEST");
   }
   const runtime = JSON.parse(await readFile(join(stagingDataDirectory, "runtime.json"), "utf8"));
   const expectedRuntime = buildGenerationRuntime(generationMatch[1], manifest);

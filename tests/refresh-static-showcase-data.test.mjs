@@ -375,6 +375,17 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
 
   const manifest = JSON.parse(outcome.artifacts.active["manifest.json"]);
   assert.equal(manifest.emergingMarketUrl, `./data/${pointer.generation}/emerging-market.json`);
+  const ipoEventsText = outcome.artifacts.active["ipo-events.json"];
+  const ipoEvents = JSON.parse(ipoEventsText);
+  assert.deepEqual(
+    manifest.market.files.filter((entry) => entry.name === "ipo-events.json"),
+    [{
+      name: "ipo-events.json",
+      sha256: `sha256:${createHash("sha256").update(ipoEventsText, "utf8").digest("hex")}`,
+      rawBytes: Buffer.byteLength(ipoEventsText, "utf8"),
+      recordCount: ipoEvents.records.length,
+    }],
+  );
   assert.deepEqual(
     manifest.datasets.find((dataset) => dataset.datasetId === "emergingMarket"),
     {

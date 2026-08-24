@@ -41,9 +41,22 @@ export async function publishStaticIpoSnapshot({
     if (manifest === null || typeof manifest !== "object" || Array.isArray(manifest)) {
       throw new Error("INVALID_ACTIVE_GENERATION_MANIFEST");
     }
+    const snapshotText = `${JSON.stringify(nextSnapshot, null, 2)}\n`;
+    if (!Array.isArray(manifest.market?.files)) {
+      throw new Error("INVALID_ACTIVE_GENERATION_MANIFEST");
+    }
+    manifest.market.files = [
+      ...manifest.market.files.filter((entry) => entry?.name !== "ipo-events.json"),
+      {
+        name: "ipo-events.json",
+        sha256: sha256Text(snapshotText),
+        rawBytes: Buffer.byteLength(snapshotText, "utf8"),
+        recordCount: nextSnapshot.records.length,
+      },
+    ];
     manifest.emergingMarketUrl = `./data/${generation}/emerging-market.json`;
     await writeFile(join(stagedGenerationRoot, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-    await writeFile(join(stagedGenerationRoot, "ipo-events.json"), `${JSON.stringify(nextSnapshot, null, 2)}\n`, "utf8");
+    await writeFile(join(stagedGenerationRoot, "ipo-events.json"), snapshotText, "utf8");
     await writeFile(
       join(stagedGenerationRoot, "runtime.json"),
       `${JSON.stringify(buildGenerationRuntime(generation, manifest), null, 2)}\n`,
@@ -65,6 +78,10 @@ export async function publishStaticIpoSnapshot({
   } finally {
     await rm(stagingRoot, { recursive: true, force: true });
   }
+}
+
+function sha256Text(text) {
+  return `sha256:${createHash("sha256").update(text, "utf8").digest("hex")}`;
 }
 
 async function readActiveGeneration(dataDirectory) {
