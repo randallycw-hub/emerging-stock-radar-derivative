@@ -407,3 +407,26 @@ test("CB snapshot fails closed for each value without its own approved evidence"
     assert.equal(snapshot[key], `目前無核准公開資料／待確認（${reason}）`);
   }
 });
+
+test("CB snapshot renders balance values only with exact approved 11406 evidence", async () => {
+  const { projectCbSnapshot } = await import("../static-showcase/assets/bond-detail-page.js");
+  const snapshot = projectCbSnapshot({
+    view: {
+      outstandingDataDate: "2026-08-24",
+      outstandingAmount: "100000000",
+      remainingRatio: "50",
+      outstandingSourceId: "11406",
+      outstandingSourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+    },
+  });
+
+  assert.deepEqual({
+    dataDate: snapshot.dataDate,
+    outstandingAmount: snapshot.outstandingAmount,
+    remainingRatio: snapshot.remainingRatio,
+  }, {
+    dataDate: "2026-08-24",
+    outstandingAmount: "100000000",
+    remainingRatio: "50",
+  });
+});

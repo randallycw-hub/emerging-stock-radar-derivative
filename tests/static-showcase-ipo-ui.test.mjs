@@ -123,6 +123,17 @@ test("IPO evidence accepts only manifest-backed approved source-record identifie
   assert.equal(projectIpoEvidence(allowed).underwriter, "正式承銷商");
 });
 
+test("IPO evidence restores a verified TWSE public-offering record", async () => {
+  const { normalizeIpoRecord, projectIpoEvidence } = await import("../static-showcase/assets/ipo-page.js");
+  const row = normalizeIpoRecord({
+    companyCode: "1234", companyName: "測試公司", market: "上市", stage: "D", applicationDate: "2026-08-01",
+    publicOffering: { sourceRecordId: "TWSE:public:1234:2026-09-10", label: "公開申購" },
+    events: [],
+  }, { dataDate: "2026-08-24", sourceManifest: [{ sourceId: "twse-public-offerings" }] });
+
+  assert.equal(projectIpoEvidence(row).issuance, "公開申購");
+});
+
 test("IPO default active path excludes terminal and historically stale applications", async () => {
   const { matchesIpoCalendarStage } = await import("../static-showcase/assets/ipo-page.js");
   const today = "2026-08-24";

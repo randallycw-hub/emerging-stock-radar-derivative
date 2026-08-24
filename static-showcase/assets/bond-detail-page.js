@@ -164,6 +164,8 @@ export function projectCbSnapshot(record = {}, dataDate = null) {
   const term = record?.term ?? {};
   const events = Array.isArray(record?.events) ? record.events : [];
   const unavailable = (reason) => `${MISSING_WORDING}（${reason}）`;
+  const balanceEvidence = approved11406BalanceEvidence(view);
+  const balanceDate = validIsoDate(view.outstandingDataDate) ? view.outstandingDataDate : null;
   const approvedEvent = (type) => events.find((event) => event?.type === type && validIsoDate(event?.date)
     && verifiedSnapshotUrl(event.sourceUrl, event.sourceId));
   const maturityEvidence = approvedEvent("maturity");
@@ -172,18 +174,24 @@ export function projectCbSnapshot(record = {}, dataDate = null) {
   const compatibleChange = view.outstandingChange != null
     && view.outstandingComparison?.compatibleRules === true
     && view.outstandingComparison?.sameDefinition === true
-    && verifiedSnapshotUrl(view.outstandingComparison?.sourceUrl, view.outstandingComparison?.sourceId);
+    && verifiedSnapshotUrl(view.outstandingComparison?.sourceUrl, view.outstandingComparison?.sourceId)
+    && balanceEvidence;
   return {
-    dataDate: unavailable("資料日期缺少核准公開來源"),
-    outstandingAmount: unavailable("流通餘額缺少核准公開來源"),
-    remainingRatio: unavailable("流通餘額比例缺少核准公開來源"),
+    dataDate: balanceEvidence && balanceDate ? balanceDate : unavailable("資料日期缺少核准公開來源"),
+    outstandingAmount: balanceEvidence && view.outstandingAmount != null ? view.outstandingAmount : unavailable("流通餘額缺少核准公開來源"),
+    remainingRatio: balanceEvidence && view.remainingRatio != null ? view.remainingRatio : unavailable("流通餘額比例缺少核准公開來源"),
     change: compatibleChange ? view.outstandingChange : unavailable("缺少同口徑前期來源或比較規則"),
     nextEvent: nextEventEvidence ? `${nextEventEvidence.type ?? nextEventEvidence.title ?? "事件"} ${nextEventEvidence.date}` : unavailable("尚未有已核對事件日期"),
     maturity: maturityEvidence && term.maturityDate ? term.maturityDate : unavailable("到期日缺少核准公開來源"),
     comparability: compatibleChange ? "同口徑、同規則可比較" : unavailable("未具備可比較的同口徑證據"),
-    evidence: maturityEvidence ?? nextEventEvidence,
+    evidence: balanceEvidence ?? maturityEvidence ?? nextEventEvidence,
     evidenceReason: unavailable("快照欄位來源尚待確認"),
   };
+}
+function approved11406BalanceEvidence(view) {
+  const sourceId = view?.outstandingSourceId;
+  const sourceUrl = view?.outstandingSourceUrl;
+  return sourceId === "11406" && verifiedSnapshotUrl(sourceUrl, sourceId) ? { sourceId, sourceUrl } : null;
 }
 function statusMatrixSection(view, term, fieldStates = {}) {
   const marketState = listedMarketState(view);

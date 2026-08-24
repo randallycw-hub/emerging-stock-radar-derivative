@@ -40,3 +40,22 @@
 - IPO source-record identifiers are mapped only to known source formats and accepted only when the matching approved identifier appears in the loaded snapshot manifest. Underwriter, issuance, and auction UI consumes that normalized proof only.
 - The normal IPO path and stage counters share an active predicate: only current A–D records are included. Withdrawn/cancelled records and entries whose latest known event is more than 365 days behind the snapshot date appear only under `all` history.
 - `git diff --check` returned no whitespace errors. No schema or advice behavior was added.
+
+## Round 2 re-review fixes
+
+### Root cause and correction
+
+- The round-1 CB guard was too broad: it rejected values even when the existing `outstandingSourceId` / `outstandingSourceUrl` pair supplied exact approved `11406` provenance. The snapshot now accepts that field-specific pair for its balance date, amount, and ratio only; absent or non-exact evidence remains unavailable.
+- The IPO source-record mapper supported the older `TWSE:public-offering:` spelling but not the actual official `TWSE:public:` prefix. Both exact recognised prefixes now map to `twse-public-offerings`, still requiring that identifier in the snapshot manifest.
+
+### TDD and verification evidence
+
+- **RED:** focused low-load tests after adding the positive CB and public-offering regressions: 24 passed, 2 failed. The CB assertion received unavailable wording and the IPO issuance was `null`, precisely reproducing the findings.
+- **GREEN (focused):** `UV_THREADPOOL_SIZE=2 node --test tests/static-showcase-bond-ui.test.mjs tests/static-showcase-ipo-ui.test.mjs`: 26 passed, 0 failed.
+- **Full low-load:** `BelowNormal` shell priority with `UV_THREADPOOL_SIZE=2`, then `npm test`: build completed; 965 passed, 0 failed (14,795.8394 ms).
+
+### Self-review
+
+- The new positive test uses the exact allowlisted 11406 CSV URL; the existing negative test confirms no unproved value is surfaced.
+- The public-offering test requires both a recognised `TWSE:public:` record identifier and the matching approved manifest source; the default active IPO filtering remains unchanged.
+- `git diff --check` returned no whitespace errors.
