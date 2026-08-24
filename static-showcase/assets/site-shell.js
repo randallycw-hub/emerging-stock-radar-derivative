@@ -1,5 +1,13 @@
 const themeStorageKey = "market-theme";
 
+export const PUBLIC_PRIMARY_NAVIGATION = Object.freeze([
+  Object.freeze({ key: "home", label: "首頁", href: "./index.html" }),
+  Object.freeze({ key: "emerging", label: "興櫃市場", href: "./emerging.html" }),
+  Object.freeze({ key: "ipo", label: "IPO", href: "./ipo-radar.html" }),
+  Object.freeze({ key: "bonds", label: "可轉債", href: "./bonds.html" }),
+  Object.freeze({ key: "data-center", label: "資料中心", href: "./data-center.html" }),
+]);
+
 export function formatDate(value) {
   if (!value) return "—";
   const isoDate = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);

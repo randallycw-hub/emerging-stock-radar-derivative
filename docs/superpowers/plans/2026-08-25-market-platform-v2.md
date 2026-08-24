@@ -33,10 +33,10 @@
 - Production boundary scanner must reject prohibited source domains and advice vocabulary in public presentation files.
 - Existing static links (`bonds.html?bond=<code>`) remain routable after V2.
 
-- [ ] **Step 1: Add a failing V2 boundary test** for the five top-level information architecture labels and the ban on public “快速策略／綜合健診／推薦”.
-- [ ] **Step 2: Run** `node --test tests/phase1-boundaries.test.mjs` and confirm RED because the existing navigation has no 資料中心 and the bond page still calls filters strategies.
-- [ ] **Step 3: Implement the minimal shared constants** for public vocabulary and navigation without changing data sources.
-- [ ] **Step 4: Run GREEN** with `node --test tests/phase1-boundaries.test.mjs tests/static-showcase-pages.test.mjs`.
+- [x] **Step 1: Add a failing V2 boundary test** for the five top-level information architecture labels and the ban on public “快速策略／綜合健診／推薦”.
+- [x] **Step 2: Run** `node --test tests/phase1-boundaries.test.mjs` and confirm RED because the existing navigation has no 資料中心 and the bond page still calls filters strategies.
+- [x] **Step 3: Implement the minimal shared constants** for public vocabulary and navigation without changing data sources.
+- [x] **Step 4: Run GREEN** with `node --test tests/phase1-boundaries.test.mjs tests/static-showcase-pages.test.mjs`.
 - [ ] **Step 5: Commit** `chore: establish market platform v2 baseline`.
 
 ### Task 2: Add shared sourced values and public provenance projection
@@ -289,4 +289,3 @@
 - [ ] **Step 4: Inspect public output** for private-source strings, credentials, prohibited advice language and fixture data; fix any failure through a new regression test first.
 - [ ] **Step 5: Request code review, commit the completion checklist and report source limitations.**
 - [ ] **Step 6: Only after explicit user approval, merge the verified branch and publish through the existing Sites workflow.**
-

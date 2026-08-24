@@ -3,6 +3,8 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { PUBLIC_PRIMARY_NAVIGATION } from "../static-showcase/assets/site-shell.js";
+
 const root = path.resolve(import.meta.dirname, "..");
 const sourceRoots = ["app", "lib", "worker", "db", "scripts", "public"];
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".mjs", ".sql", ".json", ".css", ".html", ".svg"]);
@@ -157,4 +159,20 @@ test("does not retain unused market-price UI selectors", async () => {
   const stylesheet = await readFile(path.join(root, "app/globals.css"), "utf8");
   assert.doesNotMatch(stylesheet, /\.price-cell\b/);
   assert.doesNotMatch(stylesheet, /\.quote-(?:clock|source-bar|panel)\b/);
+});
+
+test("V2 public navigation and presentation vocabulary stay research-only", async () => {
+  assert.deepEqual(PUBLIC_PRIMARY_NAVIGATION.map((item) => item.label), [
+    "首頁",
+    "興櫃市場",
+    "IPO",
+    "可轉債",
+    "資料中心",
+  ]);
+
+  const publicFiles = await filesUnder("static-showcase");
+  const publicSource = await Promise.all(
+    publicFiles.map((file) => readFile(path.join(root, file), "utf8")),
+  );
+  assert.doesNotMatch(publicSource.join("\n"), /快速策略|綜合健診|強勢推薦|今日推薦/);
 });
