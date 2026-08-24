@@ -26,7 +26,8 @@ test("IPO radar page exposes filters, sorting, and responsive views", async () =
   assert.match(js, /popstate/);
   assert.match(js, /matchesIpoRecordStage/);
   assert.match(js, /function renderSummary\(\)[\s\S]*isActiveIpoRecord\(row, state\.dataDate\)/);
-  assert.match(js, /function renderUpcoming\(\)[\s\S]*isActiveIpoRecord\(row, state\.dataDate\)/);
+  assert.match(js, /function renderUpcoming\(\)[\s\S]*projectActiveIpoEventEntries\(state\.rows, state\.dataDate\)/);
+  assert.match(js, /尚無公開資料/);
   assert.match(html, /data-page-error/);
   assert.match(js, /#ipo-radar-card-list"\)\.innerHTML = visible\.length \? visible\.map\(cardHtml\)\.join\(""\) : emptyCard\(\)/);
   assert.match(js, /prefers-reduced-motion: reduce/);
@@ -115,4 +116,51 @@ test("IPO radar default active excludes a stale evidenced A record while all pre
   assert.equal(matchesIpoRecordStage(stale, "all", "2026-08-24"), true);
   assert.equal(matchesIpoRecordStage(excepted, "all", "2026-08-24"), true);
   assert.equal(matchesIpoRecordStage(unapproved, "all", "2026-08-24"), true);
+});
+
+test("unknown IPO stages stay visible as unknown history but never enter any default active surface", async () => {
+  const [calendarJs, radarJs] = await Promise.all([
+    readFile(new URL("../static-showcase/assets/ipo-page.js", import.meta.url), "utf8"),
+    readFile(pagePath, "utf8"),
+  ]);
+  const { displayIpoStage, isActiveIpoRecord } = await import(stageFilterPath);
+  const unknown = {
+    stage: "future-stage",
+    exceptionStatus: null,
+    applicationDate: "2026-08-20",
+    events: [{ date: "2026-08-20", label: "正式事件", sourceId: "twse-applications" }],
+  };
+
+  assert.equal(displayIpoStage(unknown.stage), "future-stage");
+  assert.equal(isActiveIpoRecord(unknown, "2026-08-24"), false);
+  assert.equal((calendarJs.match(/displayIpoStage\(record\.stage\)/g) ?? []).length, 1);
+  assert.equal((radarJs.match(/displayIpoStage\(record\.stage\)/g) ?? []).length, 1);
+});
+
+test("homepage, calendar, and radar share one projected active-event collection and explicit units", async () => {
+  const [calendarHtml, calendarJs, radarHtml, radarJs] = await Promise.all([
+    readFile(calendarHtmlPath, "utf8"),
+    readFile(new URL("../static-showcase/assets/ipo-page.js", import.meta.url), "utf8"),
+    readFile(htmlPath, "utf8"),
+    readFile(pagePath, "utf8"),
+  ]);
+  const { projectActiveIpoEventEntries } = await import(stageFilterPath);
+  const rows = [{
+    companyCode: "1234",
+    stage: "A",
+    exceptionStatus: null,
+    applicationDate: "2026-08-20",
+    events: [
+      { date: "2025-08-23", label: "過期事件", sourceId: "twse-applications" },
+      { date: "2026-08-20", label: "送件", sourceId: "twse-applications" },
+      { date: "2026-09-01", label: "審議", sourceId: "twse-applications" },
+    ],
+  }];
+
+  assert.equal(projectActiveIpoEventEntries(rows, "2026-08-24").length, 2);
+  assert.match(calendarJs, /projectActiveIpoEventEntries/);
+  assert.match(radarJs, /projectActiveIpoEventEntries/);
+  assert.match(calendarJs, /家公司.*筆事件/);
+  assert.match(radarJs, /家公司/);
+  assert.match(`${calendarHtml}\n${radarHtml}`, /公司數/);
 });

@@ -1,6 +1,6 @@
 import { formatDate, formatNumber } from "./site-shell.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
-import { defaultIpoStage, matchesIpoRecordStage, normalizeApprovedIpoEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
+import { defaultIpoStage, displayIpoStage, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 import { sortRows } from "./table-sort.js";
 
 const stageLabels = { active: "進行中", A: "送件待審", B: "審議後", C: "契約後", D: "競拍／買賣", listed: "已掛牌", withdrawn: "已撤件", delayed: "延期", cancelled: "已取消" };
@@ -99,14 +99,14 @@ function bindStagePanels() {
 }
 
 function render() {
-  const filteredEvents = filteredEventEntries(state.rows, state);
-  const filtered = uniqueRows(filteredEvents);
+  const filtered = filterIpoCalendarRows(state.rows, state, state.dataDate);
+  const filteredEvents = filteredEventEntries(filtered, state, state.dataDate);
   const sorted = sortRows(filtered, { key: state.sortKey === "stage" ? "stageOrder" : state.sortKey, direction: state.direction, type: state.sortKey === "stage" ? sortTypes.stage : sortTypes[state.sortKey] });
   const size = pageSize();
   const pages = Math.max(1, Math.ceil(sorted.length / size));
   state.page = Math.min(state.page, pages);
   const visible = sorted.slice((state.page - 1) * size, state.page * size);
-  document.querySelector("#ipo-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
+  document.querySelector("#ipo-result-count").textContent = `${formatNumber(sorted.length)} 家公司 · ${formatNumber(filteredEvents.length)} 筆事件`;
   document.querySelector("#ipo-table-body").innerHTML = visible.length ? visible.map(tableRowHtml).join("") : emptyRow();
   document.querySelector("#ipo-card-list").innerHTML = visible.length ? visible.map(cardHtml).join("") : emptyCard();
   renderMonthView(filteredEvents);
@@ -125,23 +125,30 @@ function renderStageSummary() {
   }
   for (const [stage, count] of Object.entries(counts)) {
     const target = document.querySelector(`[data-ipo-stage-count="${stage}"] b`);
-    if (target) target.textContent = formatNumber(count);
+    if (target) target.textContent = `${formatNumber(count)} 家公司`;
   }
 }
 
-function filteredEventEntries(rows, filters) {
+export function filterIpoCalendarRows(rows, filters, dataDate) {
   const query = filters.query.trim().toLocaleLowerCase("zh-Hant");
-  return rows.flatMap((row) => {
+  return rows.filter((row) => {
     const matchesCompany = (!query || `${row.companyCode} ${row.companyName} ${row.underwriter}`.toLocaleLowerCase("zh-Hant").includes(query))
       && (filters.market === "all" || row.market === filters.market)
-      && matchesIpoCalendarStage(row, filters.stage, state.dataDate);
-    if (!matchesCompany) return [];
-    return row.events.filter((event) => (filters.event === "all" || event.kind === filters.event)
-      && (filters.year === "all" || event.date.slice(0, 4) === filters.year)).map((event) => ({ row, event }));
+      && matchesIpoCalendarStage(row, filters.stage, dataDate);
+    if (!matchesCompany) return false;
+    if (filters.event === "all" && filters.year === "all") return true;
+    return row.events.some((event) => (filters.event === "all" || event.kind === filters.event)
+      && (filters.year === "all" || event.date.slice(0, 4) === filters.year));
   });
 }
 
-function uniqueRows(entries) { return [...new Map(entries.map(({ row }) => [`${row.companyCode}\u0000${row.market}`, row])).values()]; }
+function filteredEventEntries(rows, filters, dataDate) {
+  const entries = filters.stage === "all"
+    ? rows.flatMap((row) => row.events.map((event) => ({ row, event })))
+    : projectActiveIpoEventEntries(rows, dataDate);
+  return entries.filter(({ event }) => (filters.event === "all" || event.kind === filters.event)
+    && (filters.year === "all" || event.date.slice(0, 4) === filters.year));
+}
 
 function renderUpcoming(entries) {
   const today = taipeiToday();
@@ -161,7 +168,7 @@ function renderMonthView(entries) {
 }
 
 function tableRowHtml(row) {
-  return `<tr><th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th><td>${escapeHtml(row.market)}</td><td><span class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.distanceDays)}</td><td>${escapeHtml(pricingStatus(row))}</td><td>${escapeHtml(auctionStatus(row))}</td><td>${formatDate(row.listingDate)}</td><td>${timelineSummary(row)}</td></tr>`;
+  return `<tr><th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th><td>${escapeHtml(row.market)}</td><td><span class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.distanceDays)}</td><td>${escapeHtml(pricingStatus(row))}</td><td>${escapeHtml(auctionStatus(row))}</td><td>${formatDate(row.listingDate)}</td><td>${timelineSummary(row)}</td></tr>`;
 }
 
 function timelineSummary(row) {
@@ -169,7 +176,7 @@ function timelineSummary(row) {
 }
 
 function cardHtml(row) {
-  return `<article class="ipo-card"><header><div><span>${escapeHtml(row.market)}</span><h3>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</h3></div><strong class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabel(row.stage))}</strong></header><dl><div><dt>最近事件</dt><dd>${escapeHtml(row.primaryEventLabel)}</dd></div><div><dt>事件日期</dt><dd>${formatDate(row.primaryEventDate)} · ${daysLabel(row.distanceDays)}</dd></div></dl><details><summary>承銷與完整歷程</summary>${timelineHtml(row)}</details></article>`;
+  return `<article class="ipo-card"><header><div><span>${escapeHtml(row.market)}</span><h3>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</h3></div><strong class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</strong></header><dl><div><dt>最近事件</dt><dd>${escapeHtml(row.primaryEventLabel)}</dd></div><div><dt>事件日期</dt><dd>${formatDate(row.primaryEventDate)} · ${daysLabel(row.distanceDays)}</dd></div></dl><details><summary>承銷與完整歷程</summary>${timelineHtml(row)}</details></article>`;
 }
 
 function timelineHtml(row) {
@@ -184,7 +191,8 @@ export function normalizeIpoRecord(record, { dataDate = null, sourceManifest = [
   const manifestSourceIds = approvedManifestSourceIds(sourceManifest);
   const events = normalizeApprovedIpoEvents(record, sourceManifest);
   const primary = selectPrimaryEvent(events);
-  return { companyCode: String(record.companyCode ?? "").trim(), companyName: String(record.companyName ?? "").trim(), market: String(record.market ?? "其他").trim(), stage: Object.hasOwn(stageLabels, record.stage) ? record.stage : "A", exceptionStatus: record.exceptionStatus ?? null, stageOrder: stageOrder[record.stage] ?? 1, underwriter: String(record.underwriter ?? "").trim(), events, primaryEventDate: primary?.date ?? null, primaryEventLabel: primary?.label ?? "—", distanceDays: primary ? taipeiCalendarDistance(taipeiToday(), primary.date) : null, auctionOpenDate: validDate(record.auction?.auctionOpenDate) ? record.auction.auctionOpenDate : null, auction: record.auction ?? null, auctionSourceId: approvedSourceIdForRecordIds([record.auction?.sourceRecordId], manifestSourceIds), publicOffering: record.publicOffering ?? null, publicOfferingSourceId: approvedSourceIdForRecordIds([record.publicOffering?.sourceRecordId], manifestSourceIds), applicationDate: validDate(record.applicationDate) ? record.applicationDate : null, listingDate: validDate(record.listingDate) ? record.listingDate : null, dataDate, hasProvisionalPricing: Boolean(record.provisionalUnderwritingPrice), hasFinalPricing: Boolean(record.finalUnderwritingPrice) };
+  const stage = displayIpoStage(record.stage);
+  return { companyCode: String(record.companyCode ?? "").trim(), companyName: String(record.companyName ?? "").trim(), market: String(record.market ?? "其他").trim(), stage, exceptionStatus: record.exceptionStatus ?? null, stageOrder: stageOrder[stage] ?? 99, underwriter: String(record.underwriter ?? "").trim(), events, primaryEventDate: primary?.date ?? null, primaryEventLabel: primary?.label ?? "尚無公開資料", distanceDays: primary ? taipeiCalendarDistance(taipeiToday(), primary.date) : null, auctionOpenDate: validDate(record.auction?.auctionOpenDate) ? record.auction.auctionOpenDate : null, auction: record.auction ?? null, auctionSourceId: approvedSourceIdForRecordIds([record.auction?.sourceRecordId], manifestSourceIds), publicOffering: record.publicOffering ?? null, publicOfferingSourceId: approvedSourceIdForRecordIds([record.publicOffering?.sourceRecordId], manifestSourceIds), applicationDate: validDate(record.applicationDate) ? record.applicationDate : null, listingDate: validDate(record.listingDate) ? record.listingDate : null, dataDate, hasProvisionalPricing: Boolean(record.provisionalUnderwritingPrice), hasFinalPricing: Boolean(record.finalUnderwritingPrice) };
 }
 
 export function projectIpoLifecycle(row, today = taipeiToday()) {
@@ -229,7 +237,8 @@ function showUnavailable() { document.querySelector("#ipo-update-status").textCo
 function showError(message) { if (errorTarget) { errorTarget.textContent = message; errorTarget.hidden = false; } }
 function taipeiToday() { const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date()); const value = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value])); return `${value.year}-${value.month}-${value.day}`; }
 function taipeiCalendarDistance(today, date) { return Math.round((Date.UTC(...date.split("-").map(Number).map((value, index) => index === 1 ? value - 1 : value)) - Date.UTC(...today.split("-").map(Number).map((value, index) => index === 1 ? value - 1 : value))) / 86_400_000); }
-function stageLabel(stage) { return stageLabels[stage] ?? "—"; }
+function stageLabel(stage) { return stageLabels[stage] ?? `未知階段（${stage}）`; }
+function stageClass(stage) { return Object.hasOwn(stageLabels, stage) ? escapeHtml(stage) : "unknown"; }
 function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")); }
 function positiveInteger(value) { return Math.max(1, Number.parseInt(value ?? "1", 10) || 1); }
 function pageSize() { return matchMedia("(max-width: 900px)").matches ? 25 : 50; }

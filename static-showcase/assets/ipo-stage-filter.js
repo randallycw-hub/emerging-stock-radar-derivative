@@ -32,6 +32,10 @@ export function matchesIpoRecordStage(row, selectedStage, dataDate) {
   return matchesIpoStage(row?.stage, selectedStage);
 }
 
+export function displayIpoStage(value) {
+  return String(value ?? "").trim() || "unknown";
+}
+
 export function isActiveIpoRecord(row, dataDate) {
   if (!activeStages.has(row?.stage) || row?.exceptionStatus || !validDate(dataDate)) return false;
   const evidenceDates = (Array.isArray(row?.events) ? row.events : [])
@@ -57,6 +61,18 @@ export function normalizeApprovedIpoEvents(record, sourceManifest = []) {
       sourceId: approvedSourceIdForRecordIds(event.sourceRecordIds, manifestSourceIds),
     }))
     .filter((event) => event.sourceId !== null);
+}
+
+export function projectActiveIpoEventEntries(rows, dataDate) {
+  return (Array.isArray(rows) ? rows : []).flatMap((row) => (
+    isActiveIpoRecord(row, dataDate)
+      ? row.events
+        .filter((event) => approvedSourceIds.has(event?.sourceId)
+          && validDate(event?.date)
+          && calendarDistance(event.date, dataDate) <= activeWindowDays)
+        .map((event) => ({ row, event }))
+      : []
+  ));
 }
 
 export function shouldWriteIpoStage(stage) {

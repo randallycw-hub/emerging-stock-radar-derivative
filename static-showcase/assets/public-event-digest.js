@@ -1,4 +1,4 @@
-import { isActiveIpoRecord, normalizeApprovedIpoEvents } from "./ipo-stage-filter.js";
+import { normalizeApprovedIpoEvents, projectActiveIpoEventEntries } from "./ipo-stage-filter.js";
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -35,13 +35,12 @@ export function buildPublicEventDigest(input = {}) {
   const ipoDates = [];
 
   if (hasIpoInputs) {
-    for (const record of ipoRecords) {
-      const events = normalizeApprovedIpoEvents(record, ipoSourceManifest);
-      if (!isActiveIpoRecord({ ...record, events }, ipoDataDate)) continue;
-      for (const event of events) {
-        ipoDates.push(event.date);
-      }
-    }
+    const projectedRows = ipoRecords.map((record) => ({
+      ...record,
+      events: normalizeApprovedIpoEvents(record, ipoSourceManifest),
+    }));
+    ipoDates.push(...projectActiveIpoEventEntries(projectedRows, ipoDataDate)
+      .map(({ event }) => event.date));
   }
 
   const common = [

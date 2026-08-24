@@ -62,7 +62,8 @@ test("IPO 時程頁由正式事件快照提供五階段、篩選與完整時程"
 test("IPO 時程的未來與月份檢視在事件層共用目前篩選", async () => {
   const js = await readFile(new URL("assets/ipo-page.js", root), "utf8");
 
-  assert.match(js, /const filteredEvents = filteredEventEntries\(state\.rows, state\);/);
+  assert.match(js, /const filtered = filterIpoCalendarRows\(state\.rows, state, state\.dataDate\);/);
+  assert.match(js, /const filteredEvents = filteredEventEntries\(filtered, state, state\.dataDate\);/);
   assert.match(js, /renderUpcoming\(filteredEvents\);/);
   assert.match(js, /renderMonthView\(filteredEvents\);/);
   assert.match(js, /function filteredEventEntries[\s\S]*event\.kind === filters\.event[\s\S]*event\.date\.slice\(0, 4\) === filters\.year/);
@@ -167,4 +168,20 @@ test("IPO default active path excludes terminal and historically stale applicati
   assert.equal(matchesIpoCalendarStage(withdrawn, "active", today), false);
   assert.equal(matchesIpoCalendarStage(cancelled, "active", today), false);
   for (const row of [stale, withdrawn, cancelled]) assert.equal(matchesIpoCalendarStage(row, "all", today), true);
+});
+
+test("IPO all-history keeps a company without approved events and labels its evidence unavailable", async () => {
+  const { filterIpoCalendarRows, normalizeIpoRecord } = await import("../static-showcase/assets/ipo-page.js");
+  const row = normalizeIpoRecord({
+    companyCode: "1234",
+    companyName: "歷史公司",
+    market: "上市",
+    stage: "A",
+    applicationDate: "2025-01-01",
+    events: [{ date: "2025-01-01", label: "未核准事件", sourceRecordIds: ["attacker:1234"] }],
+  }, { dataDate: "2026-08-24", sourceManifest: [{ sourceId: "twse-applications" }] });
+
+  assert.equal(filterIpoCalendarRows([row], { query: "", market: "all", stage: "active", event: "all", year: "all" }, "2026-08-24").length, 0);
+  assert.deepEqual(filterIpoCalendarRows([row], { query: "", market: "all", stage: "all", event: "all", year: "all" }, "2026-08-24"), [row]);
+  assert.equal(row.primaryEventLabel, "尚無公開資料");
 });

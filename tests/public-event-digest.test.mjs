@@ -44,6 +44,22 @@ test("IPO digest uses its own snapshot date and excludes terminal, stale, and un
   });
 });
 
+test("IPO digest excludes an evidenced near-date record with an unknown stage", () => {
+  const digest = buildPublicEventDigest({
+    asOfDate: "2026-08-24",
+    ipoDataDate: "2026-08-24",
+    ipoSourceManifest: [{ sourceId: "twse-applications" }],
+    ipoRecords: [{
+      companyCode: "1005",
+      stage: "future-stage",
+      applicationDate: "2026-08-20",
+      events: [{ date: "2026-08-20", label: "送件", sourceRecordIds: ["TWSE:1005:2026-08-20"] }],
+    }],
+  });
+
+  assert.equal(digest.find((item) => item.id === "ipo-recent").count, 0);
+});
+
 test("IPO digest is unavailable without a valid IPO snapshot date", () => {
   const digest = buildPublicEventDigest({
     asOfDate: "2026-08-24",
