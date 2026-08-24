@@ -613,6 +613,16 @@ a { color: inherit; }
 .detail-event-timeline { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 .detail-event-timeline li { padding: 12px; border-left: 3px solid var(--clay); background: var(--paper); display: grid; gap: 3px; }
 .detail-event-timeline time, .detail-event-timeline span { color: var(--muted); font-size: 12px; }
+.cb-snapshot { margin: 16px 0; padding: 16px; border: 1px solid var(--line); background: var(--paper); }
+.cb-snapshot > header { display: flex; justify-content: space-between; gap: 16px; align-items: start; }
+.cb-snapshot > header h3, .cb-snapshot > header p { margin: 0; }
+.cb-snapshot-evidence { margin: 12px 0 0; color: var(--muted); font-size: 13px; }
+.ipo-lifecycle { min-width: 250px; }
+.ipo-lifecycle summary, .ipo-full-timeline summary { cursor: pointer; color: var(--clay-ink); }
+.ipo-lifecycle-list { display: grid; gap: 5px; margin: 10px 0; padding: 0; list-style: none; }
+.ipo-lifecycle-list li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.ipo-lifecycle-list .is-unavailable { color: var(--muted); }
+.ipo-lifecycle-list .is-complete { border-left: 3px solid var(--clay); padding-left: 7px; }
 .detail-event-timeline a { width: fit-content; font-size: 12px; }
 .workbench-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
 .workbench-head h2 { margin: 5px 0; font: 800 clamp(30px, 4vw, 54px)/1 Georgia, serif; }
@@ -739,6 +749,7 @@ a { color: inherit; }
   .detail-mobile-area > summary { display: block; padding: 14px; cursor: pointer; color: var(--violet); font: 800 18px/1.2 Georgia, serif; }
   .detail-mobile-area > .bond-detail-section { margin: 0; border-width: 1px 0 0; }
   .detail-facts, .detail-condition-grid, .condition-check, .status-matrix-grid { grid-template-columns: 1fr; }
+  .cb-snapshot > header { flex-direction: column; }
   .status-matrix > header { align-items: start; flex-direction: column; }
   .bond-card {
     width: 100%;

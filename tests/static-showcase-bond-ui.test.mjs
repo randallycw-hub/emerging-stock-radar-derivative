@@ -381,3 +381,11 @@ test("mobile bond cards keep every list field and archived metadata visible", as
   assert.match(card, /archiveDate/);
   assert.match(card, /archivedAt/);
 });
+
+test("CB detail snapshot communicates evidence scope and unavailable comparisons", async () => {
+  const js = await readFile(new URL("assets/bond-detail-page.js", root), "utf8");
+
+  for (const label of ["目前資料快照", "可比較性", "目前無核准公開資料／待確認"]) {
+    assert.match(js, new RegExp(label));
+  }
+});

@@ -67,3 +67,38 @@ test("IPO 時程的未來與月份檢視在事件層共用目前篩選", async (
   assert.match(js, /renderMonthView\(filteredEvents\);/);
   assert.match(js, /function filteredEventEntries[\s\S]*event\.kind === filters\.event[\s\S]*event\.date\.slice\(0, 4\) === filters\.year/);
 });
+
+test("IPO life-cycle projects only normalized official events in the fixed public order", async () => {
+  const { projectIpoLifecycle } = await import("../static-showcase/assets/ipo-page.js");
+  const row = {
+    events: [
+      { type: "董事會決議", date: "2026-08-01", sourceId: "board" },
+      { type: "送件", date: "2026-08-03", sourceId: "filing" },
+      { type: "核准生效", date: "2026-08-04", sourceId: "effective" },
+      { type: "競拍", date: "2026-09-10", sourceId: "auction" },
+      { type: "掛牌", date: "2026-10-01", sourceId: "listing" },
+      { type: "其他", date: "2026-09-01", sourceId: "other" },
+    ],
+  };
+
+  assert.deepEqual(projectIpoLifecycle(row, "2026-08-24"), [
+    { key: "announcement", label: "公告", date: null, sourceId: null, state: "unavailable" },
+    { key: "submission", label: "送件", date: "2026-08-03", sourceId: "filing", state: "complete" },
+    { key: "effective", label: "核准／生效", date: "2026-08-04", sourceId: "effective", state: "complete" },
+    { key: "auction", label: "詢圈或競拍", date: "2026-09-10", sourceId: "auction", state: "upcoming" },
+    { key: "pricing", label: "轉換價確認", date: null, sourceId: null, state: "unavailable" },
+    { key: "listing", label: "掛牌", date: "2026-10-01", sourceId: "listing", state: "upcoming" },
+  ]);
+});
+
+test("IPO lifecycle UI labels unavailable public evidence without inventing offering facts", async () => {
+  const [html, js] = await Promise.all([
+    readFile(new URL("ipo.html", root), "utf8"),
+    readFile(new URL("assets/ipo-page.js", root), "utf8"),
+  ]);
+  const source = html + js;
+
+  for (const label of ["公告", "送件", "核准／生效", "詢圈或競拍", "轉換價確認", "掛牌", "尚無公開資料"]) {
+    assert.match(source, new RegExp(label));
+  }
+});

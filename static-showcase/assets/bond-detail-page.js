@@ -52,6 +52,7 @@ export function renderBondDetail(record) {
   const html = `
     <header class="bond-detail-head"><div><p class="section-number">${text(record?.bondCode)} / PUBLIC CB DETAIL</p><h2>${text(term.bondName ?? view.bondName)}</h2><p>${text(term.issuerName ?? view.issuerCode)}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債總表">← 返回總表</button></header>
     <p class="bond-detail-disclaimer">本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。</p>
+    ${snapshotSection(record, dataDate)}
     ${statusMatrixSection(view, term, record?.fieldStates)}
     <nav class="detail-tabs" aria-label="詳細資料分頁" role="tablist">${tabButton("overview", "總覽", true)}${tabButton("terms", "條款與事件")}${tabButton("institutions", "法人")}${tabButton("company", "公司營運")}</nav>
     ${mobileArea("債券識別與資料完整性", "overview", identitySection(record, dataDate))}
@@ -153,6 +154,28 @@ function riskSection(view, fieldStates = {}) {
   const reminders = [...(Array.isArray(view.missingReasons) ? view.missingReasons : []), ...Object.entries(fieldStates).filter(([, value]) => value === "missing" || value === "date_mismatch").map(([key, value]) => `${key}: ${value}`)];
   return `<h3>風險與缺漏提醒</h3><p>${reminders.length ? text(reminders.join("；")) : "公開資料欄位已依資料日列示；仍請自行確認適用性。"}</p><p>${reminders.length ? MISSING_WORDING : "缺漏欄位不以零值代替。"}</p>`;
 }
+function snapshotSection(record, dataDate) {
+  const view = record?.view ?? {};
+  const term = record?.term ?? {};
+  const events = Array.isArray(record?.events) ? record.events : [];
+  const termEvidence = evidenceFor(term, "11406");
+  const outstandingEvidence = evidenceFor(view, termEvidence.sourceId);
+  const nextEvent = events.filter((event) => validIsoDate(event?.date) && event.date >= dataDate).sort((left, right) => left.date.localeCompare(right.date))[0]
+    ?? (validIsoDate(view.nextEventDate) ? { date: view.nextEventDate, type: view.nextEventType } : null);
+  const compatibleChange = view.outstandingChange != null
+    && view.outstandingComparison?.compatibleRules === true
+    && verifiedSnapshotUrl(view.outstandingComparison?.sourceUrl, view.outstandingComparison?.sourceId)
+    && outstandingEvidence.url;
+  const comparable = compatibleChange && view.outstandingComparison?.sameDefinition === true;
+  const unavailable = (reason) => `${MISSING_WORDING}（${text(reason)}）`;
+  const evidenceLink = (evidence) => evidence.url ? sourceLink(evidence.url, evidence.sourceId) : "";
+  return `<section class="cb-snapshot" aria-label="目前資料快照"><header><div><p class="section-number">PUBLIC EVIDENCE</p><h3>目前資料快照</h3></div><p>只並列已有核准公開來源且可核對的欄位。</p></header><dl class="detail-facts cb-snapshot-facts">${fact("資料日期", dataDate)}${fact("流通餘額", view.outstandingAmount ?? term.outstandingAmount)}${fact("流通餘額比例", view.remainingRatio)}${fact("餘額變動", compatibleChange ? view.outstandingChange : unavailable("缺少同口徑前期來源或比較規則"))}${fact("下一事件", nextEvent?.date ? `${nextEvent.type ?? nextEvent.title ?? "事件"} ${nextEvent.date}` : unavailable("尚未有已核對事件日期"))}${fact("到期日", term.maturityDate ?? view.maturityDate)}${fact("可比較性", comparable ? "同口徑、同規則可比較" : unavailable("未具備可比較的同口徑證據"))}</dl><p class="cb-snapshot-evidence">${outstandingEvidence.url ? `流通餘額來源：${evidenceLink(outstandingEvidence)}` : unavailable("流通餘額來源尚待確認")}</p></section>`;
+}
+function evidenceFor(value, fallbackSourceId = null) {
+  const sourceId = value?.sourceId ?? value?.outstandingSourceId ?? fallbackSourceId;
+  const sourceUrl = value?.sourceUrl ?? value?.outstandingSourceUrl ?? (sourceId ? APPROVED_EVENT_SOURCE_URLS.get(sourceId) : null);
+  return { sourceId, url: verifiedSnapshotUrl(sourceUrl, sourceId) };
+}
 function statusMatrixSection(view, term, fieldStates = {}) {
   const marketState = listedMarketState(view);
   const valuationState = matrixState(fieldStates.valuation, [view.cbClose, view.conversionValue, view.premiumRate, view.valuationConversionPrice, view.valuationConversionPriceEffectiveDate]);
@@ -235,6 +258,7 @@ function eventsSection(events) {
   return `<h3>事件時間軸</h3><ol class="detail-event-timeline">${values.length ? values.map((event) => `<li><time>${text(event.date)}</time><strong>${text(event.title)}</strong><span>${text(event.type)} · ${text(event.sourceId)}</span>${sourceLink(event.sourceUrl, event.sourceId)}</li>`).join("") : `<li>${MISSING_WORDING}</li>`}</ol>`;
 }
 function sourceLink(value, sourceId) { const url = verifiedSnapshotUrl(value, sourceId); return url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">已驗證公開來源</a>` : ""; }
+function validIsoDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")); }
 function verifiedSnapshotUrl(value, sourceId) {
   if (typeof value !== "string" || APPROVED_EVENT_SOURCE_URLS.get(sourceId) !== value) return null;
   try { return new URL(value).protocol === "https:" ? value : null; } catch { return null; }
