@@ -248,7 +248,7 @@ function filteredMarketRows() {
 
 function marketRowHtml(row) {
   return `<tr id="company-${escapeHtml(row.companyCode)}">
-    <th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th>
+    <th scope="row"><a href="./market.html?code=${encodeURIComponent(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a></th>
     <td>${escapeHtml(row.industryName ?? "未分類")}</td>
     <td>${formatEmergingDailyAverage(row)}</td>
     <td class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}<small>${formatPercent(row.averageChangePercent)}</small></td>

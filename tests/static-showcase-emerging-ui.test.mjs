@@ -108,3 +108,27 @@ test("月營收八個欄位可獨立排序並保留網址狀態", async () => {
   assert.match(js, /params\.set\("revenueDirectionSort"/);
   assert.match(js, /querySelectorAll\("\[data-revenue-sort\]"\)/);
 });
+
+test("興櫃公司詳情使用安全代碼路由與已發布 IPO 事件", async () => {
+  const [html, page] = await Promise.all([
+    readFile(new URL("market.html", root), "utf8"),
+    readFile(new URL("assets/emerging-detail-page.js", root), "utf8"),
+  ]);
+  const { parsePublicCompanyCode } = await import(new URL(
+    "../static-showcase/assets/emerging-detail-page.js",
+    import.meta.url,
+  ));
+  const source = `${html}\n${page}`;
+
+  assert.equal(parsePublicCompanyCode("1260"), "1260");
+  assert.equal(parsePublicCompanyCode("<img src=x>"), null);
+  assert.equal(parsePublicCompanyCode("126"), null);
+  assert.match(html, /id="emerging-detail-root"/);
+  assert.match(source, /本日成交均價（盤後）/);
+  assert.match(source, /IPO 進度/);
+  assert.match(source, /5 日/);
+  assert.match(page, /runtime\.emergingMarketUrl/);
+  assert.match(page, /runtime\.ipoEventsUrl/);
+  assert.match(page, /escapeHtml/);
+  assert.doesNotMatch(source, /sourceId|缺漏原因|目前無核准公開資料/);
+});
