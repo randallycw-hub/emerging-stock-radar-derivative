@@ -1,0 +1,63 @@
+name: Market data validation
+
+on:
+  schedule:
+    - cron: "15 8 * * 1-5" # FAST, 16:15 Asia/Taipei
+    - cron: "45 9 * * 1-5" # OFFICIAL, 17:45 Asia/Taipei
+    - cron: "30 14 * * *" # EVENT, 22:30 Asia/Taipei
+    - cron: "30 23 * * 0-4" # RECONCILE, 07:30 Asia/Taipei
+    - cron: "0 2 * * 6" # WEEKLY, Saturday 10:00 Asia/Taipei
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Validation mode
+        required: true
+        type: choice
+        options: [FAST, OFFICIAL, EVENT, RECONCILE, WEEKLY]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - id: context
+        shell: bash
+        run: |
+          schedule="${{ github.event.schedule }}"
+          mode="${{ inputs.mode }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            case "$schedule" in
+              "15 8 * * 1-5") mode=FAST ;;
+              "45 9 * * 1-5") mode=OFFICIAL ;;
+              "30 14 * * *") mode=EVENT ;;
+              "30 23 * * 0-4") mode=RECONCILE ;;
+              "0 2 * * 6") mode=WEEKLY ;;
+              *) exit 1 ;;
+            esac
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "data_date=$(TZ=Asia/Taipei date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Validate approved candidate
+        shell: bash
+        run: |
+          case "${{ steps.context.outputs.mode }}" in
+            FAST|OFFICIAL)
+              node scripts/run-nightly-market-refresh.mjs --date "${{ steps.context.outputs.data_date }}"
+              ;;
+            EVENT)
+              node scripts/refresh-static-ipo-snapshot.mjs
+              ;;
+            RECONCILE|WEEKLY)
+              node --test tests/pipeline/refresh-mode.test.mjs
+              ;;
+            *) exit 1 ;;
+          esac

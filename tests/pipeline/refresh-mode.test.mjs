@@ -38,6 +38,12 @@ test("permits market publication only when an official date advances on a tradin
     previousPublishedDate: "2026-08-22",
   }), false);
   assert.equal(shouldPublishMarketCandidate({
+    mode: "FAST",
+    requestedDate: "2026-08-24",
+    officialDataDate: "2026-08-24",
+    previousPublishedDate: "2026-08-22",
+  }), false);
+  assert.equal(shouldPublishMarketCandidate({
     mode: "EVENT",
     requestedDate: "2026-08-24",
     officialDataDate: "2026-08-22",

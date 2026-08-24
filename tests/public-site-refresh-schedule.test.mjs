@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { triggerIpoRefresh } from "../scripts/trigger-ipo-refresh.mjs";
@@ -10,6 +10,23 @@ const now = new Date("2026-08-01T14:30:00.000Z");
 
 test("obsolete Cloudflare refresh workflow stays removed", async () => {
   await assert.rejects(access(".github/workflows/refresh-public-site.yml"), { code: "ENOENT" });
+});
+
+test("Taipei refresh workflow schedules validation modes without deployment credentials", async () => {
+  const workflow = await readFile(".github/workflows/market-data-refresh.yml", "utf8");
+
+  for (const cron of [
+    "15 8 * * 1-5",
+    "45 9 * * 1-5",
+    "30 14 * * *",
+    "30 23 * * 0-4",
+    "0 2 * * 6",
+  ]) {
+    assert.match(workflow, new RegExp(`cron: ['\"]${cron.replaceAll("*", "\\*")}['\"]`));
+  }
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /mode:/);
+  assert.doesNotMatch(workflow, /deploy|hosting|token|secret|curl/i);
 });
 
 test("nightly static-input runner rejects deployment and correction controls before I/O", async () => {

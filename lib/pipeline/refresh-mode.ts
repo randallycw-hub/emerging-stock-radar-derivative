@@ -33,7 +33,7 @@ export function shouldPublishMarketCandidate(input: Readonly<{
   previousPublishedDate: string | null;
 }>): boolean {
   const mode = parseRefreshMode(input.mode);
-  if (mode !== "FAST" && mode !== "OFFICIAL") return false;
+  if (mode !== "OFFICIAL") return false;
   if (!isIsoDate(input.requestedDate) || !isIsoDate(input.officialDataDate)) return false;
   if (input.officialDataDate !== input.requestedDate) return false;
   return input.previousPublishedDate === null
