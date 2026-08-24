@@ -12,7 +12,6 @@ const stageLabels = {
   delayed: "延期",
   cancelled: "已取消",
 };
-const snapshotStorageKey = "ipo-radar-snapshot:v1";
 const errorTarget = document.querySelector("[data-page-error]");
 const state = {
   rows: [],
@@ -37,15 +36,8 @@ async function loadData() {
     snapshot = null;
   }
   if (snapshot) {
-    saveSnapshot(snapshot);
     applySnapshot(snapshot);
     if (snapshot.stale) showError("資料暫時未更新，顯示最近一次成功資料。");
-    return;
-  }
-  const priorSnapshot = readSavedSnapshot();
-  if (priorSnapshot) {
-    applySnapshot(priorSnapshot);
-    showError("資料暫時無法讀取，顯示最近一次成功資料。");
     return;
   }
   showUnavailable();
@@ -279,21 +271,6 @@ function showUnavailable() {
 function showError(message) {
   errorTarget.textContent = message;
   errorTarget.hidden = false;
-}
-
-function readSavedSnapshot() {
-  try {
-    const snapshot = JSON.parse(sessionStorage.getItem(snapshotStorageKey) ?? "null");
-    return snapshot?.schemaVersion === 1 && Array.isArray(snapshot.records) ? snapshot : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveSnapshot(snapshot) {
-  try {
-    sessionStorage.setItem(snapshotStorageKey, JSON.stringify(snapshot));
-  } catch {}
 }
 
 function compareDates(left, right) {

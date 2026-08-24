@@ -6,7 +6,9 @@ import { join } from "node:path";
 import test from "node:test";
 
 import { buildIpoEventSnapshot } from "../lib/ipo-events/snapshot.ts";
+import { buildBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
 import { publishStaticIpoSnapshot } from "../scripts/refresh-static-ipo-snapshot.mjs";
+import { summarizeWorkbenchSourceStates } from "../scripts/build-bond-market-snapshot.mjs";
 
 const downloadedAt = "2026-08-23T22:30:00+08:00";
 const sha256 = `sha256:${"0".repeat(64)}`;
@@ -46,8 +48,25 @@ test("IPO-only publication switches to a new self-contained generation", async (
   await writeFile(join(dataDirectory, "current.json"), `${JSON.stringify(priorPointer)}\n`);
   await writeFile(join(priorGeneration, "ipo-events.json"), "{\"prior\":true}\n");
   await writeFile(join(priorGeneration, "94025.json"), "[]\n");
+  const workbench = buildBondWorkbenchSnapshot({
+    generatedAt: "2026-08-23T14:00:00.000Z",
+    dataDate: "2026-08-23",
+    asOfDate: "2026-08-23",
+    currentTerms: [],
+    currentViews: [],
+    currentEvents: [],
+  });
+  const workbenchText = `${JSON.stringify(workbench, null, 2)}\n`;
+  await writeFile(join(priorGeneration, "bond-workbench.json"), workbenchText);
   await writeFile(join(priorGeneration, "manifest.json"), `${JSON.stringify({
-    market: { files: [] },
+    market: { files: [{
+      name: "bond-workbench.json",
+      sha256: `sha256:${createHash("sha256").update(workbenchText, "utf8").digest("hex")}`,
+      rawBytes: Buffer.byteLength(workbenchText, "utf8"),
+      recordCount: 0,
+      schemaVersion: 1,
+      sourceStateSummary: summarizeWorkbenchSourceStates(workbench),
+    }] },
     emergingMarketUrl: "./data/generations/abcdef/emerging-market.json",
   })}\n`);
   await writeFile(join(priorGeneration, "runtime.json"), "{}\n");
@@ -83,6 +102,7 @@ test("IPO-only publication switches to a new self-contained generation", async (
     );
     assert.equal(await readFile(join(priorGeneration, "ipo-events.json"), "utf8"), "{\"prior\":true}\n");
     assert.equal(await readFile(join(generationRoot, "94025.json"), "utf8"), "[]\n");
+    assert.equal(await readFile(join(generationRoot, "bond-workbench.json"), "utf8"), workbenchText);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

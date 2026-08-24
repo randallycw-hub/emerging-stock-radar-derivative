@@ -17,8 +17,8 @@ test("Sites staging copies the complete static showcase including the active gen
   const root = await mkdtemp(join(tmpdir(), "showcase-stage-"));
   const source = join(root, "source");
   const destination = join(root, "dist", "client", "market-site");
+  await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
   await mkdir(join(source, "assets"), { recursive: true });
-  await mkdir(join(source, "data", "generations", "abc123"), { recursive: true });
   await writeFile(join(source, "index.html"), "正式首頁", "utf8");
   await writeFile(join(source, "assets", "app.css"), "body{}", "utf8");
   await writeFile(
@@ -47,37 +47,6 @@ test("Sites staging copies the complete static showcase including the active gen
       "utf8",
     );
   }
-  await writeFile(
-    join(source, "data", "current.json"),
-    '{"schemaVersion":1,"generation":"generations/abc123","runtimeUrl":"./data/generations/abc123/runtime.json"}\n',
-    "utf8",
-  );
-  await writeFile(
-    join(source, "data", "generations", "abc123", "manifest.json"),
-    '{"market":{"status":"verified","dataDate":"2026-07-31"},"emergingMarketUrl":"./data/generations/abc123/emerging-market.json"}\n',
-    "utf8",
-  );
-  await writeFile(
-    join(source, "data", "generations", "abc123", "runtime.json"),
-    '{"generation":"generations/abc123","manifestUrl":"./data/generations/abc123/manifest.json","emergingMarketUrl":"./data/generations/abc123/emerging-market.json","datasets":{"94025":"./data/generations/abc123/94025.json","11406":"./data/generations/abc123/11406.json","11586":"./data/generations/abc123/11586.json","bondMarket":"./data/generations/abc123/bond-market-view.json","conversionPrices":"./data/generations/abc123/conversion-prices.json","bondHistory":"./data/generations/abc123/bond-market-history.json"}}\n',
-    "utf8",
-  );
-  for (const file of [
-    "emerging-market.json",
-    "94025.json",
-    "11406.json",
-    "11586.json",
-    "bond-market-view.json",
-    "conversion-prices.json",
-    "bond-market-history.json",
-  ]) {
-    await writeFile(
-      join(source, "data", "generations", "abc123", file),
-      file === "emerging-market.json" ? '{"records":[]}\n' : "[]\n",
-      "utf8",
-    );
-  }
-
   await execFileAsync(process.execPath, [
     "scripts/stage-static-showcase.mjs",
     source,
@@ -119,16 +88,13 @@ test("Sites staging copies the complete static showcase including the active gen
       runtimeUrl: "./data/generations/abc123/runtime.json",
     },
   );
-  assert.deepEqual(
-    JSON.parse(await readFile(
-      join(destination, "data", "generations", "abc123", "manifest.json"),
-      "utf8",
-    )),
-    {
-      market: { status: "verified", dataDate: "2026-07-31" },
-      emergingMarketUrl: "./data/generations/abc123/emerging-market.json",
-    },
-  );
+  const manifest = JSON.parse(await readFile(
+    join(destination, "data", "generations", "abc123", "manifest.json"),
+    "utf8",
+  ));
+  assert.equal(manifest.market.status, "verified");
+  assert.ok(manifest.market.files.some((entry) => entry.name === "bond-workbench.json"));
+  assert.ok(manifest.market.files.some((entry) => entry.name === "ipo-events.json"));
 });
 
 test("Sites staging still rejects an unknown presentation asset", async () => {
@@ -175,7 +141,7 @@ test("Sites staging rejects a runtime that omits required dataset artifacts", as
       source,
       join(root, "destination"),
     ]),
-    /required dataset artifacts/i,
+    /workbench|required dataset artifacts/i,
   );
 });
 
@@ -250,6 +216,34 @@ test("Sites staging rejects IPO event source records without one approved source
   await writeIpoArtifact({ source, generation, snapshot });
 
   await assert.rejects(stageStaticShowcase({ source, destination }), /IPO event.*source/i);
+  await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
+});
+
+test("Sites staging rejects a formal generation without a declared workbench", async () => {
+  const { source, destination } = await seededGenerationWithIpoEvents({ includeWorkbench: false });
+
+  await assert.rejects(
+    stageStaticShowcase({ source, destination }),
+    /workbench|required dataset artifacts/i,
+  );
+  await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
+});
+
+test("Sites staging rejects a formal generation without declared IPO event inputs", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-required-ipo-"));
+  const source = join(root, "source");
+  const destination = join(root, "destination");
+  await seedDeclaredIssuerResearchGeneration(source, {
+    includeRuntimeKey: true,
+    includeSupplemental: true,
+    includeWorkbench: true,
+    includeIpo: false,
+  });
+
+  await assert.rejects(
+    stageStaticShowcase({ source, destination }),
+    /IPO event|required dataset artifacts/i,
+  );
   await assert.rejects(readFile(join(destination, "data/current.json"), "utf8"));
 });
 
@@ -520,7 +514,11 @@ test("Sites staging fails closed for declared-missing and undeclared-extra workb
   await context.test("undeclared extra", async () => {
     const root = await mkdtemp(join(tmpdir(), "showcase-stage-workbench-extra-"));
     const source = join(root, "source");
-    await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+    await seedDeclaredIssuerResearchGeneration(source, {
+      includeRuntimeKey: true,
+      includeSupplemental: false,
+      includeWorkbench: false,
+    });
     await writeFile(
       join(source, "data/generations/abc123/bond-workbench.json"),
       `${JSON.stringify(emptyWorkbenchSnapshot)}\n`,
@@ -677,11 +675,12 @@ async function seedDeclaredIssuerResearchGeneration(
   source,
   {
     includeRuntimeKey,
-    includeSupplemental = false,
+    includeSupplemental = true,
     includeSupplementalRuntimeKey = includeSupplemental,
-    includeWorkbench = false,
+    includeWorkbench = true,
     includeWorkbenchRuntimeKey = includeWorkbench,
     includeLegacyIssuanceEntry = true,
+    includeIpo = true,
     workbenchSnapshot = emptyWorkbenchSnapshot,
   },
 ) {
@@ -784,6 +783,13 @@ async function seedDeclaredIssuerResearchGeneration(
     })}\n`,
     "utf8",
   );
+  if (includeIpo) {
+    await writeIpoArtifact({
+      source,
+      generation: "generations/abc123",
+      snapshot: validIpoSnapshot(),
+    });
+  }
   const datasets = {
     "94025": "./data/generations/abc123/94025.json",
     "11406": "./data/generations/abc123/11406.json",
@@ -807,6 +813,9 @@ async function seedDeclaredIssuerResearchGeneration(
       generation: "generations/abc123",
       manifestUrl: "./data/generations/abc123/manifest.json",
       emergingMarketUrl: "./data/generations/abc123/emerging-market.json",
+      ...(includeIpo
+        ? { ipoEventsUrl: "./data/generations/abc123/ipo-events.json" }
+        : {}),
       datasets,
     })}\n`,
     "utf8",
@@ -827,13 +836,17 @@ async function seedDeclaredIssuerResearchGeneration(
   }
 }
 
-async function seededGenerationWithIpoEvents() {
+async function seededGenerationWithIpoEvents({ includeWorkbench = true } = {}) {
   const root = await mkdtemp(join(tmpdir(), "showcase-stage-ipo-events-"));
   const source = join(root, "source");
   const destination = join(root, "destination");
   const generation = "generations/abc123";
   const snapshot = validIpoSnapshot();
-  await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+  await seedDeclaredIssuerResearchGeneration(source, {
+    includeRuntimeKey: true,
+    includeSupplemental: includeWorkbench,
+    includeWorkbench,
+  });
   await writeIpoArtifact({ source, generation, snapshot });
   const runtimePath = join(source, "data", generation, "runtime.json");
   const runtime = JSON.parse(await readFile(runtimePath, "utf8"));

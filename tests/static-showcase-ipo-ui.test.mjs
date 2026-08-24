@@ -34,7 +34,7 @@ test("IPO 時程頁由正式事件快照提供五階段、篩選與完整時程"
   assert.match(js, /URLSearchParams/);
   assert.match(js, /history\.replaceState/);
   assert.match(js, /popstate/);
-  assert.match(js, /sessionStorage/);
+  assert.doesNotMatch(js, /sessionStorage/);
   assert.match(js, /pageSize\(\)/);
   assert.match(js, /matchMedia\("\(max-width: 900px\)"\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
@@ -72,23 +72,43 @@ test("IPO life-cycle projects only normalized official events in the fixed publi
   const { projectIpoLifecycle } = await import("../static-showcase/assets/ipo-page.js");
   const row = {
     events: [
-      { type: "董事會決議", date: "2026-08-01", sourceId: "board" },
-      { type: "送件", date: "2026-08-03", sourceId: "filing" },
-      { type: "核准生效", date: "2026-08-04", sourceId: "effective" },
-      { type: "競拍", date: "2026-09-10", sourceId: "auction" },
-      { type: "掛牌", date: "2026-10-01", sourceId: "listing" },
-      { type: "其他", date: "2026-09-01", sourceId: "other" },
+      { type: "董事會決議", date: "2026-08-01", sourceId: "twse-applications" },
+      { type: "送件", date: "2026-08-03", sourceId: "twse-applications" },
+      { type: "核准生效", date: "2026-08-04", sourceId: "twse-applications" },
+      { type: "競拍", date: "2026-09-10", sourceId: "twse-auctions" },
+      { type: "掛牌", date: "2026-10-01", sourceId: "tpex-ipo-listings" },
+      { type: "其他", date: "2026-09-01", sourceId: "twse-applications" },
     ],
   };
 
   assert.deepEqual(projectIpoLifecycle(row, "2026-08-24"), [
     { key: "announcement", label: "公告", date: null, sourceId: null, state: "unavailable" },
-    { key: "submission", label: "送件", date: "2026-08-03", sourceId: "filing", state: "complete" },
-    { key: "effective", label: "核准／生效", date: "2026-08-04", sourceId: "effective", state: "complete" },
-    { key: "auction", label: "詢圈或競拍", date: "2026-09-10", sourceId: "auction", state: "upcoming" },
+    { key: "submission", label: "送件", date: "2026-08-03", sourceId: "twse-applications", state: "complete" },
+    { key: "effective", label: "核准／生效", date: "2026-08-04", sourceId: "twse-applications", state: "complete" },
+    { key: "auction", label: "詢圈或競拍", date: "2026-09-10", sourceId: "twse-auctions", state: "upcoming" },
     { key: "pricing", label: "轉換價確認", date: null, sourceId: null, state: "unavailable" },
-    { key: "listing", label: "掛牌", date: "2026-10-01", sourceId: "listing", state: "upcoming" },
+    { key: "listing", label: "掛牌", date: "2026-10-01", sourceId: "tpex-ipo-listings", state: "upcoming" },
   ]);
+});
+
+test("IPO lifecycle leaves unapproved and missing evidence unavailable", async () => {
+  const { normalizeIpoRecord, projectIpoLifecycle } = await import("../static-showcase/assets/ipo-page.js");
+  const row = normalizeIpoRecord({
+    companyCode: "1234",
+    companyName: "測試公司",
+    market: "上市",
+    stage: "D",
+    events: [
+      { kind: "application_submitted", date: "2026-08-01", label: "申請送件", sourceRecordIds: ["ATTACKER:1234"] },
+      { kind: "auction", date: "2026-09-10", label: "競拍", sourceRecordIds: [] },
+    ],
+  }, {
+    dataDate: "2026-08-24",
+    sourceManifest: [{ sourceId: "twse-applications" }],
+  });
+
+  assert.deepEqual(row.events, []);
+  assert.ok(projectIpoLifecycle(row, "2026-08-24").every((step) => step.state === "unavailable"));
 });
 
 test("IPO lifecycle UI labels unavailable public evidence without inventing offering facts", async () => {

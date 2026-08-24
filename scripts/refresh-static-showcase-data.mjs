@@ -74,6 +74,9 @@ export function buildRuntimeBootstrap() {
 
 export function buildGenerationRuntime(generation, manifest) {
   const base = `./data/${generation}`;
+  const ipoEntries = manifest?.market?.files?.filter(
+    (file) => file?.name === "ipo-events.json",
+  ) ?? [];
   const declaresIssuerResearch = manifest?.market?.files?.some(
     (file) => file?.name === "cb-issuer-research.json",
   ) === true;
@@ -83,6 +86,9 @@ export function buildGenerationRuntime(generation, manifest) {
   const declaresBondWorkbench = manifest?.market?.files?.some(
     (file) => file?.name === "bond-workbench.json",
   ) === true;
+  if (!declaresBondWorkbench || ipoEntries.length !== 1) {
+    throw new Error("VALIDATION_FAILED: formal generation requires one bond workbench and one IPO event artifact");
+  }
   return {
     generation,
     manifestUrl: `${base}/manifest.json`,
@@ -97,9 +103,7 @@ export function buildGenerationRuntime(generation, manifest) {
       ...(declaresBondSupplemental
         ? { bondSupplemental: `${base}/bond-supplemental.json` }
         : {}),
-      ...(declaresBondWorkbench
-        ? { bondWorkbench: `${base}/bond-workbench.json` }
-        : {}),
+      bondWorkbench: `${base}/bond-workbench.json`,
     },
   };
 }

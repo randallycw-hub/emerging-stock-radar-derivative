@@ -43,7 +43,9 @@ async function loadHomeData() {
   renderHomeEvents({
     asOfDate: manifest?.market?.dataDate,
     bonds: Array.isArray(workbench?.records) ? workbench.records : undefined,
+    ipoDataDate: ipo?.dataDate,
     ipoRecords: Array.isArray(ipo?.records) ? ipo.records : undefined,
+    ipoSourceManifest: Array.isArray(ipo?.sourceManifest) ? ipo.sourceManifest : undefined,
   });
 }
 

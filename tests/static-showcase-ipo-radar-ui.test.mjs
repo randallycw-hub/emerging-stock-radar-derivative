@@ -19,7 +19,7 @@ test("IPO radar page exposes filters, sorting, and responsive views", async () =
   assert.match(js, /loadIpoSnapshot/);
   assert.match(js, /URLSearchParams/);
   assert.match(js, /history\.replaceState/);
-  assert.match(js, /sessionStorage/);
+  assert.doesNotMatch(js, /sessionStorage/);
   assert.match(js, /matchMedia\("\(max-width: 900px\)"\)/);
   assert.match(js, /data-radar-sort/);
   assert.match(js, /popstate/);

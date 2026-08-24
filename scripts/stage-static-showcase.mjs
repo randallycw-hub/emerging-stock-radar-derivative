@@ -150,6 +150,9 @@ export async function stageStaticShowcase({
   const declaresWorkbench = manifest.market.files?.some(
     (file) => file?.name === "bond-workbench.json",
   ) === true;
+  if (!declaresWorkbench) {
+    throw new Error("active generation required bond workbench is not declared");
+  }
   const expectedDatasets = expectedRuntimeDatasets(
     base,
     declaresIssuerResearch,
@@ -161,7 +164,7 @@ export async function stageStaticShowcase({
     throw new Error("active generation required dataset artifacts are missing or invalid");
   }
   const requiredUrls = [runtime.emergingMarketUrl, ...Object.values(expectedDatasets)];
-  if (runtime.ipoEventsUrl !== undefined) requiredUrls.push(runtime.ipoEventsUrl);
+  requiredUrls.push(runtime.ipoEventsUrl);
   for (const expectedUrl of requiredUrls) {
     await readJson(
       join(source, expectedUrl.replace(/^\.\//, "")),
@@ -174,12 +177,8 @@ export async function stageStaticShowcase({
   if (declaresSupplemental) {
     await verifyDeclaredSupplemental({ source, manifest, runtime, base });
   }
-  if (declaresWorkbench) {
-    await verifyDeclaredWorkbench({ source, manifest, runtime, base });
-  }
-  if (runtime.ipoEventsUrl !== undefined) {
-    await assertPublishedEventInputs({ manifest, runtime, root: source });
-  }
+  await verifyDeclaredWorkbench({ source, manifest, runtime, base });
+  await assertPublishedEventInputs({ manifest, runtime, root: source });
   const approvedFiles = await collectApprovedSourceFiles(source, pointer.generation);
   await rm(destination, { recursive: true, force: true });
   for (const relativePath of approvedFiles) {
@@ -389,10 +388,7 @@ function validateRuntime(runtime, generation, expectedDatasets) {
     || runtime.generation !== generation
     || runtime.manifestUrl !== `./data/${generation}/manifest.json`
     || runtime.emergingMarketUrl !== `./data/${generation}/emerging-market.json`
-    || (
-      runtime.ipoEventsUrl !== undefined
-      && runtime.ipoEventsUrl !== `./data/${generation}/ipo-events.json`
-    )
+    || runtime.ipoEventsUrl !== `./data/${generation}/ipo-events.json`
   ) {
     throw new Error(
       "active generation required dataset artifacts or runtime datasets are missing or invalid",
@@ -404,7 +400,7 @@ function validateRuntime(runtime, generation, expectedDatasets) {
     "emergingMarketUrl",
     "generation",
     "manifestUrl",
-    ...(runtime.ipoEventsUrl === undefined ? [] : ["ipoEventsUrl"]),
+    "ipoEventsUrl",
   ].sort();
   if (!equalStringArrays(runtimeKeys, expectedRuntimeKeys)) {
     throw new Error("active generation runtime is missing or invalid");

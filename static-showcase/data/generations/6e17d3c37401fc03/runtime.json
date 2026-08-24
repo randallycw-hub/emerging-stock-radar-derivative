@@ -9,6 +9,9 @@
     "94025": "./data/generations/6e17d3c37401fc03/94025.json",
     "bondMarket": "./data/generations/6e17d3c37401fc03/bond-market-view.json",
     "conversionPrices": "./data/generations/6e17d3c37401fc03/conversion-prices.json",
-    "bondHistory": "./data/generations/6e17d3c37401fc03/bond-market-history.json"
+    "bondHistory": "./data/generations/6e17d3c37401fc03/bond-market-history.json",
+    "cbIssuerResearch": "./data/generations/6e17d3c37401fc03/cb-issuer-research.json",
+    "bondSupplemental": "./data/generations/6e17d3c37401fc03/bond-supplemental.json",
+    "bondWorkbench": "./data/generations/6e17d3c37401fc03/bond-workbench.json"
   }
 }

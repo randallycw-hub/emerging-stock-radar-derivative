@@ -44,31 +44,194 @@
     "latestCbPriceDate": "2026-07-31",
     "latestStockPriceDate": "2026-07-31",
     "dataDate": "2026-07-31",
+    "supplementalSources": {
+      "institution": {
+        "state": "unavailable",
+        "dataDate": null,
+        "periodYear": null
+      },
+      "redemption": {
+        "state": "unavailable",
+        "dataDate": null,
+        "periodYear": null
+      },
+      "underwriting": {
+        "state": "unavailable",
+        "dataDate": null,
+        "periodYear": null
+      }
+    },
+    "workbenchSourceStateSummary": {
+      "lifecycle": {
+        "active": 385,
+        "archived": 0
+      },
+      "fields": {
+        "price": {
+          "complete": 197,
+          "stale": 147,
+          "date_mismatch": 0,
+          "missing": 41,
+          "accumulating": 0
+        },
+        "valuation": {
+          "complete": 0,
+          "stale": 0,
+          "date_mismatch": 385,
+          "missing": 0,
+          "accumulating": 0
+        },
+        "outstanding": {
+          "complete": 0,
+          "stale": 0,
+          "date_mismatch": 385,
+          "missing": 0,
+          "accumulating": 0
+        },
+        "institutions": {
+          "complete": 0,
+          "stale": 0,
+          "date_mismatch": 0,
+          "missing": 385,
+          "accumulating": 0
+        },
+        "company": {
+          "complete": 0,
+          "stale": 0,
+          "date_mismatch": 0,
+          "missing": 385,
+          "accumulating": 0
+        },
+        "events": {
+          "complete": 0,
+          "stale": 0,
+          "date_mismatch": 0,
+          "missing": 385,
+          "accumulating": 0
+        },
+        "history": {
+          "complete": 0,
+          "stale": 0,
+          "date_mismatch": 0,
+          "missing": 0,
+          "accumulating": 385
+        }
+      }
+    },
+    "normalizedInputs": [
+      {
+        "name": "11406.json",
+        "sha256": "sha256:f0e75150f0acaff4ee4d57949ba69a14cea1176701191b8faa06072f2ab501fd",
+        "rawBytes": 435121,
+        "recordCount": 415
+      }
+    ],
     "files": [
       {
         "name": "cb-quotes.json",
         "sha256": "sha256:7b228f9d64473f3bc299c5e3d0f865b0abaaa90748bbea7fba3ba950f709c4b8",
+        "rawBytes": 4631279,
         "recordCount": 16176
       },
       {
         "name": "stock-closes.json",
         "sha256": "sha256:26e51df086ccce5fdb46c551e06eaff7c5bc1ac733ffd3a1868af1d1cbc93848",
+        "rawBytes": 56678,
         "recordCount": 307
       },
       {
         "name": "conversion-prices.json",
         "sha256": "sha256:6a53db7768d9af31d94f54b2378d7d92e97cb46669f57caf83eb3272f747faf5",
+        "rawBytes": 155898,
         "recordCount": 384
       },
       {
+        "name": "bond-supplemental.json",
+        "sha256": "sha256:5fa988b84d82bf743fd68f51e90c547f80dd2b9da41354a3bf850ab88281e260",
+        "rawBytes": 514,
+        "recordCount": 0
+      },
+      {
+        "name": "cb-issuer-research.json",
+        "sha256": "sha256:b319b76c3db01bc2cd8ae2e437b5cf5f890fffa339545151577e596d1535502f",
+        "rawBytes": 23580,
+        "recordCount": 0
+      },
+      {
         "name": "bond-market-view.json",
-        "sha256": "sha256:46957c74fa74cccdc6f37b4444bee9e29236ea89ec3431dcae88fb31cb9b7ad8",
+        "sha256": "sha256:f5fe3d07b824c4d21e93bd904a73a1f1455650dd917ebf6942ef480d141fac32",
+        "rawBytes": 490069,
         "recordCount": 385
       },
       {
         "name": "bond-market-history.json",
-        "sha256": "sha256:62471a90c83544c64caac324261844d6255fda82f43cae7baf0af86966432e56",
-        "recordCount": 4393
+        "sha256": "sha256:7ed5c7fbebbe7c1825440b1577ad3d814e782a566d12d2d3c4ae81508d3cd71d",
+        "rawBytes": 2935198,
+        "recordCount": 8096
+      },
+      {
+        "name": "bond-workbench.json",
+        "sha256": "sha256:ba61c6cbcdc3cf0b5673d3e9101a44c3fba527954595d369d97466fbd8caa288",
+        "rawBytes": 6278210,
+        "recordCount": 385,
+        "schemaVersion": 1,
+        "sourceStateSummary": {
+          "lifecycle": {
+            "active": 385,
+            "archived": 0
+          },
+          "fields": {
+            "price": {
+              "complete": 197,
+              "stale": 147,
+              "date_mismatch": 0,
+              "missing": 41,
+              "accumulating": 0
+            },
+            "valuation": {
+              "complete": 0,
+              "stale": 0,
+              "date_mismatch": 385,
+              "missing": 0,
+              "accumulating": 0
+            },
+            "outstanding": {
+              "complete": 0,
+              "stale": 0,
+              "date_mismatch": 385,
+              "missing": 0,
+              "accumulating": 0
+            },
+            "institutions": {
+              "complete": 0,
+              "stale": 0,
+              "date_mismatch": 0,
+              "missing": 385,
+              "accumulating": 0
+            },
+            "company": {
+              "complete": 0,
+              "stale": 0,
+              "date_mismatch": 0,
+              "missing": 385,
+              "accumulating": 0
+            },
+            "events": {
+              "complete": 0,
+              "stale": 0,
+              "date_mismatch": 0,
+              "missing": 385,
+              "accumulating": 0
+            },
+            "history": {
+              "complete": 0,
+              "stale": 0,
+              "date_mismatch": 0,
+              "missing": 0,
+              "accumulating": 385
+            }
+          }
+        }
       },
       {
         "name": "ipo-events.json",

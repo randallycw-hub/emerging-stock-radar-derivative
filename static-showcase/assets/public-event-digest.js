@@ -1,5 +1,14 @@
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const ACTIVE_IPO_WINDOW_DAYS = 365;
+const ACTIVE_IPO_STAGES = new Set(["A", "B", "C", "D"]);
+const APPROVED_IPO_SOURCE_IDS = new Set([
+  "twse-applications",
+  "tpex-applications",
+  "tpex-ipo-listings",
+  "twse-auctions",
+  "twse-public-offerings",
+]);
 
 export function isPublishedIsoDate(value) {
   if (typeof value !== "string" || !ISO_DATE_PATTERN.test(value)) return false;
@@ -24,22 +33,28 @@ function item(id, label, count, dates, href, state = "ready") {
 export function buildPublicEventDigest(input = {}) {
   const asOfDate = input?.asOfDate;
   const hasAsOfDate = isPublishedIsoDate(asOfDate);
+  const ipoDataDate = input?.ipoDataDate;
   const ipoRecords = input?.ipoRecords;
+  const ipoSourceManifest = input?.ipoSourceManifest;
+  const hasIpoInputs = isPublishedIsoDate(ipoDataDate)
+    && Array.isArray(ipoRecords)
+    && Array.isArray(ipoSourceManifest);
   const ipoDates = [];
 
-  if (Array.isArray(ipoRecords)) {
+  if (hasIpoInputs) {
+    const manifestSourceIds = new Set(ipoSourceManifest
+      .map((entry) => entry?.sourceId)
+      .filter((sourceId) => APPROVED_IPO_SOURCE_IDS.has(sourceId)));
     for (const record of ipoRecords) {
-      if (!Array.isArray(record?.events)) continue;
-      for (const event of record.events) {
-        if (isPublishedIsoDate(event?.date) && Array.isArray(event?.sourceRecordIds) && event.sourceRecordIds.length > 0) {
-          ipoDates.push(event.date);
-        }
+      if (!isActiveIpoRecord(record, ipoDataDate, manifestSourceIds)) continue;
+      for (const event of approvedIpoEvents(record, manifestSourceIds)) {
+        ipoDates.push(event.date);
       }
     }
   }
 
   const common = [
-    item("ipo-recent", "近期 IPO 事件", ipoDates.length, ipoDates, "./ipo.html?sort=eventDate&direction=asc", Array.isArray(ipoRecords) ? "ready" : "unavailable"),
+    item("ipo-recent", "近期 IPO 事件", ipoDates.length, ipoDates, "./ipo.html?stage=active&sort=eventDate&direction=asc", hasIpoInputs ? "ready" : "unavailable"),
   ];
 
   if (!Array.isArray(input?.bonds) || !hasAsOfDate) {
@@ -70,4 +85,34 @@ export function buildPublicEventDigest(input = {}) {
     item("bond-maturity-365", "365 日內到期事件", maturityDates.length, maturityDates, "./bonds.html?event=maturity365"),
     item("bond-pending", "資料待補可轉債", pendingCount, [], "./bonds.html?quality=pending"),
   ]);
+}
+
+function approvedIpoEvents(record, manifestSourceIds) {
+  if (!Array.isArray(record?.events)) return [];
+  return record.events.filter((event) => (
+    isPublishedIsoDate(event?.date)
+    && Array.isArray(event?.sourceRecordIds)
+    && event.sourceRecordIds.some((recordId) => {
+      const sourceId = ipoSourceIdForRecordId(recordId);
+      return sourceId !== null && manifestSourceIds.has(sourceId);
+    })
+  ));
+}
+
+function isActiveIpoRecord(record, dataDate, manifestSourceIds) {
+  if (!ACTIVE_IPO_STAGES.has(record?.stage) || record?.exceptionStatus) return false;
+  const events = approvedIpoEvents(record, manifestSourceIds);
+  if (events.length === 0) return false;
+  const latestDate = events.map((event) => event.date).sort().at(-1);
+  return dayNumber(dataDate) - dayNumber(latestDate) <= ACTIVE_IPO_WINDOW_DAYS;
+}
+
+function ipoSourceIdForRecordId(recordId) {
+  const value = String(recordId ?? "");
+  if (/^TWSE:auction:\d{4}:/.test(value)) return "twse-auctions";
+  if (/^TWSE:(?:public|public-offering):\d{4}:/.test(value)) return "twse-public-offerings";
+  if (/^TPEx:ipo-no-limit:\d{4}:/i.test(value)) return "tpex-ipo-listings";
+  if (/^TWSE:\d{4}:/.test(value)) return "twse-applications";
+  if (/^TPEx:\d{4}:/.test(value)) return "tpex-applications";
+  return null;
 }

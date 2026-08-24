@@ -8,6 +8,7 @@ import test from "node:test";
 
 import {
   OFFICIAL_SHOWCASE_SOURCES,
+  buildGenerationRuntime,
   buildRuntimeBootstrap,
   fetchOfficialCsvWithRetry,
   readPublishedBondHistory,
@@ -17,6 +18,14 @@ import {
   refreshStaticShowcase,
   updateRuntimeCacheKey,
 } from "../scripts/refresh-static-showcase-data.mjs";
+
+test("generation runtime requires the formal workbench and IPO artifacts", () => {
+  const baseManifest = { market: { files: [] } };
+  assert.throws(
+    () => buildGenerationRuntime("generations/abc123", baseManifest),
+    /workbench|IPO/i,
+  );
+});
 
 async function withBlockedGlobalFetch(run) {
   const originalFetch = globalThis.fetch;
@@ -503,59 +512,23 @@ test("published history verifies and migrates a declared legacy active generatio
   ]);
 });
 
-test("checked-in active legacy history preserves all 4,393 identities and values during migration", async () => {
+test("checked-in active history preserves every published identity and value", async () => {
   const dataRoot = fileURLToPath(new URL("../static-showcase/data/", import.meta.url));
   const pointer = JSON.parse(await readFile(join(dataRoot, "current.json"), "utf8"));
-  const legacy = JSON.parse(await readFile(
+  const published = JSON.parse(await readFile(
     join(dataRoot, pointer.generation, "bond-market-history.json"),
     "utf8",
   ));
-  const migrated = await readPublishedBondHistory(dataRoot);
-  assert.equal(legacy.length, 4_393);
-  assert.equal(migrated.length, 4_393);
-  assert.deepEqual(
-    migrated.map(({ bondCode, date }) => `${bondCode}:${date}`),
-    legacy.map(({ bondCode, date }) => `${bondCode}:${date}`).sort(),
+  const readModel = await readPublishedBondHistory(dataRoot);
+  assert.ok(published.length > 0);
+  assert.equal(readModel.length, published.length);
+  assert.equal(
+    new Set(published.map(({ bondCode, date }) => `${bondCode}:${date}`)).size,
+    published.length,
   );
-  const migratedByIdentity = new Map(migrated.map((point) => [
-    `${point.bondCode}:${point.date}`,
-    point,
-  ]));
-  for (const point of legacy) {
-    const migratedPoint = migratedByIdentity.get(`${point.bondCode}:${point.date}`);
-    assert.deepEqual(
-      {
-        bondCode: migratedPoint.bondCode,
-        date: migratedPoint.date,
-        cbClose: migratedPoint.cbClose,
-        stockClose: migratedPoint.stockClose,
-        effectiveConversionPrice: migratedPoint.effectiveConversionPrice,
-        conversionValue: migratedPoint.conversionValue,
-        premiumRate: migratedPoint.premiumRate,
-      },
-      point,
-    );
-    assert.deepEqual(
-      {
-        cbOpen: migratedPoint.cbOpen,
-        cbHigh: migratedPoint.cbHigh,
-        cbLow: migratedPoint.cbLow,
-        cbAverage: migratedPoint.cbAverage,
-        cbChange: migratedPoint.cbChange,
-        cbTradingUnits: migratedPoint.cbTradingUnits,
-        cbTurnover: migratedPoint.cbTurnover,
-      },
-      {
-        cbOpen: null,
-        cbHigh: null,
-        cbLow: null,
-        cbAverage: null,
-        cbChange: null,
-        cbTradingUnits: null,
-        cbTurnover: null,
-      },
-    );
-  }
+  const sortedPublished = [...published].sort((left, right) =>
+    left.bondCode.localeCompare(right.bondCode) || left.date.localeCompare(right.date));
+  assert.equal(JSON.stringify(readModel), JSON.stringify(sortedPublished));
 });
 
 test("published legacy history verifies manifest count before migration", async () => {
