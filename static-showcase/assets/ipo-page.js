@@ -1,6 +1,6 @@
 import { formatDate, formatNumber } from "./site-shell.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
-import { defaultIpoStage, matchesIpoStage, shouldWriteIpoStage } from "./ipo-stage-filter.js";
+import { defaultIpoStage, matchesIpoRecordStage, normalizeApprovedIpoEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 import { sortRows } from "./table-sort.js";
 
 const stageLabels = { active: "進行中", A: "送件待審", B: "審議後", C: "契約後", D: "競拍／買賣", listed: "已掛牌", withdrawn: "已撤件", delayed: "延期", cancelled: "已取消" };
@@ -18,7 +18,6 @@ const lifecycleDefinitions = [
 ];
 const approvedIpoSourceIds = new Set(["twse-applications", "tpex-applications", "tpex-ipo-listings", "twse-auctions", "twse-public-offerings"]);
 const activeIpoStages = new Set(["A", "B", "C", "D"]);
-const activeIpoWindowDays = 365;
 
 if (globalThis.document) {
   initializeFromUrl();
@@ -183,7 +182,7 @@ function timelineHtml(row) {
 
 export function normalizeIpoRecord(record, { dataDate = null, sourceManifest = [] } = {}) {
   const manifestSourceIds = approvedManifestSourceIds(sourceManifest);
-  const events = Array.isArray(record.events) ? record.events.filter((event) => validDate(event?.date) && event?.label).map((event) => ({ date: event.date, label: String(event.label), kind: String(event.kind ?? event.type ?? event.label), sourceId: approvedSourceIdForRecordIds(event.sourceRecordIds, manifestSourceIds) })).filter((event) => event.sourceId !== null) : [];
+  const events = normalizeApprovedIpoEvents(record, sourceManifest);
   const primary = selectPrimaryEvent(events);
   return { companyCode: String(record.companyCode ?? "").trim(), companyName: String(record.companyName ?? "").trim(), market: String(record.market ?? "其他").trim(), stage: Object.hasOwn(stageLabels, record.stage) ? record.stage : "A", exceptionStatus: record.exceptionStatus ?? null, stageOrder: stageOrder[record.stage] ?? 1, underwriter: String(record.underwriter ?? "").trim(), events, primaryEventDate: primary?.date ?? null, primaryEventLabel: primary?.label ?? "—", distanceDays: primary ? taipeiCalendarDistance(taipeiToday(), primary.date) : null, auctionOpenDate: validDate(record.auction?.auctionOpenDate) ? record.auction.auctionOpenDate : null, auction: record.auction ?? null, auctionSourceId: approvedSourceIdForRecordIds([record.auction?.sourceRecordId], manifestSourceIds), publicOffering: record.publicOffering ?? null, publicOfferingSourceId: approvedSourceIdForRecordIds([record.publicOffering?.sourceRecordId], manifestSourceIds), applicationDate: validDate(record.applicationDate) ? record.applicationDate : null, listingDate: validDate(record.listingDate) ? record.listingDate : null, dataDate, hasProvisionalPricing: Boolean(record.provisionalUnderwritingPrice), hasFinalPricing: Boolean(record.finalUnderwritingPrice) };
 }
@@ -243,5 +242,4 @@ function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, (cha
 function approvedManifestSourceIds(sourceManifest) { return new Set((Array.isArray(sourceManifest) ? sourceManifest : []).map((entry) => entry?.sourceId).filter((sourceId) => approvedIpoSourceIds.has(sourceId))); }
 function approvedSourceIdForRecordIds(recordIds, manifestSourceIds) { for (const recordId of Array.isArray(recordIds) ? recordIds : []) { const sourceId = sourceIdForRecordId(recordId); if (sourceId && manifestSourceIds.has(sourceId)) return sourceId; } return null; }
 function sourceIdForRecordId(recordId) { const value = String(recordId ?? ""); if (/^TWSE:auction:\d{4}:/.test(value)) return "twse-auctions"; if (/^TWSE:(?:public|public-offering):\d{4}:/.test(value)) return "twse-public-offerings"; if (/^TPEx:ipo-no-limit:\d{4}:/i.test(value)) return "tpex-ipo-listings"; if (/^TWSE:\d{4}:/.test(value)) return "twse-applications"; if (/^TPEx:\d{4}:/.test(value)) return "tpex-applications"; return null; }
-export function matchesIpoCalendarStage(row, selectedStage, dataDate) { if (selectedStage === "all") return true; if (!activeIpoStages.has(row?.stage) || row?.exceptionStatus || isHistoricalIpoApplication(row, dataDate)) return false; return matchesIpoStage(row.stage, selectedStage); }
-function isHistoricalIpoApplication(row, dataDate) { if (!validDate(dataDate)) return false; const dates = [row?.applicationDate, ...(Array.isArray(row?.events) ? row.events.map((event) => event.date) : [])].filter(validDate).sort(); const lastKnownDate = dates.at(-1); return lastKnownDate ? taipeiCalendarDistance(lastKnownDate, dataDate) > activeIpoWindowDays : true; }
+export function matchesIpoCalendarStage(row, selectedStage, dataDate) { return matchesIpoRecordStage(row, selectedStage, dataDate); }

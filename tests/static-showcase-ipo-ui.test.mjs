@@ -157,10 +157,10 @@ test("IPO evidence restores a verified TWSE public-offering record", async () =>
 test("IPO default active path excludes terminal and historically stale applications", async () => {
   const { matchesIpoCalendarStage } = await import("../static-showcase/assets/ipo-page.js");
   const today = "2026-08-24";
-  const current = { stage: "A", exceptionStatus: null, applicationDate: "2026-08-01", events: [{ date: "2026-08-01" }] };
-  const stale = { stage: "A", exceptionStatus: null, applicationDate: "2025-08-23", events: [{ date: "2025-08-23" }] };
-  const withdrawn = { stage: "withdrawn", exceptionStatus: "withdrawn", applicationDate: "2026-08-01", events: [{ date: "2026-08-01" }] };
-  const cancelled = { stage: "cancelled", exceptionStatus: "cancelled", applicationDate: "2026-08-01", events: [{ date: "2026-08-01" }] };
+  const current = { stage: "A", exceptionStatus: null, applicationDate: "2026-08-01", events: [{ date: "2026-08-01", sourceId: "twse-applications" }] };
+  const stale = { stage: "A", exceptionStatus: null, applicationDate: "2025-08-23", events: [{ date: "2025-08-23", sourceId: "twse-applications" }] };
+  const withdrawn = { stage: "withdrawn", exceptionStatus: "withdrawn", applicationDate: "2026-08-01", events: [{ date: "2026-08-01", sourceId: "twse-applications" }] };
+  const cancelled = { stage: "cancelled", exceptionStatus: "cancelled", applicationDate: "2026-08-01", events: [{ date: "2026-08-01", sourceId: "twse-applications" }] };
 
   assert.equal(matchesIpoCalendarStage(current, "active", today), true);
   assert.equal(matchesIpoCalendarStage(stale, "active", today), false);

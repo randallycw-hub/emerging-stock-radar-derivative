@@ -6,6 +6,7 @@ const htmlPath = new URL("../static-showcase/ipo-radar.html", import.meta.url);
 const calendarHtmlPath = new URL("../static-showcase/ipo.html", import.meta.url);
 const pagePath = new URL("../static-showcase/assets/ipo-radar-page.js", import.meta.url);
 const dataPath = new URL("../static-showcase/assets/ipo-data.js", import.meta.url);
+const stageFilterPath = new URL("../static-showcase/assets/ipo-stage-filter.js", import.meta.url);
 
 test("IPO radar page exposes filters, sorting, and responsive views", async () => {
   const [html, js] = await Promise.all([readFile(htmlPath, "utf8"), readFile(pagePath, "utf8")]);
@@ -23,7 +24,9 @@ test("IPO radar page exposes filters, sorting, and responsive views", async () =
   assert.match(js, /matchMedia\("\(max-width: 900px\)"\)/);
   assert.match(js, /data-radar-sort/);
   assert.match(js, /popstate/);
-  assert.match(js, /matchesIpoStage/);
+  assert.match(js, /matchesIpoRecordStage/);
+  assert.match(js, /function renderSummary\(\)[\s\S]*isActiveIpoRecord\(row, state\.dataDate\)/);
+  assert.match(js, /function renderUpcoming\(\)[\s\S]*isActiveIpoRecord\(row, state\.dataDate\)/);
   assert.match(html, /data-page-error/);
   assert.match(js, /#ipo-radar-card-list"\)\.innerHTML = visible\.length \? visible\.map\(cardHtml\)\.join\(""\) : emptyCard\(\)/);
   assert.match(js, /prefers-reduced-motion: reduce/);
@@ -88,4 +91,28 @@ test("IPO pages expose the shared dashboard panel contract", async () => {
   }
   assert.match(calendarHtml, /data-ipo-stage-count/);
   assert.match(radarHtml, /data-ipo-stage-filter/);
+});
+
+test("IPO radar default active excludes a stale evidenced A record while all preserves its history", async () => {
+  const { matchesIpoRecordStage } = await import(stageFilterPath);
+  const stale = {
+    stage: "A",
+    exceptionStatus: null,
+    applicationDate: "2025-08-23",
+    events: [{
+      date: "2025-08-23",
+      label: "申請送件",
+      kind: "application_submitted",
+      sourceId: "twse-applications",
+    }],
+  };
+  const excepted = { ...stale, applicationDate: "2026-08-20", exceptionStatus: "withdrawn", events: [{ ...stale.events[0], date: "2026-08-20" }] };
+  const unapproved = { ...stale, applicationDate: "2026-08-20", events: [{ ...stale.events[0], date: "2026-08-20", sourceId: null }] };
+
+  assert.equal(matchesIpoRecordStage(stale, "active", "2026-08-24"), false);
+  assert.equal(matchesIpoRecordStage(excepted, "active", "2026-08-24"), false);
+  assert.equal(matchesIpoRecordStage(unapproved, "active", "2026-08-24"), false);
+  assert.equal(matchesIpoRecordStage(stale, "all", "2026-08-24"), true);
+  assert.equal(matchesIpoRecordStage(excepted, "all", "2026-08-24"), true);
+  assert.equal(matchesIpoRecordStage(unapproved, "all", "2026-08-24"), true);
 });

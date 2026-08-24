@@ -1,6 +1,6 @@
 import { formatDate, formatNumber } from "./site-shell.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
-import { defaultIpoStage, matchesIpoStage, shouldWriteIpoStage } from "./ipo-stage-filter.js";
+import { defaultIpoStage, isActiveIpoRecord, matchesIpoRecordStage, normalizeApprovedIpoEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 
 const stageLabels = {
   A: "A 送件觀察",
@@ -45,7 +45,7 @@ async function loadData() {
 
 function applySnapshot(snapshot) {
   state.dataDate = validDate(snapshot.dataDate) ? snapshot.dataDate : null;
-  state.rows = snapshot.records.map(normalizeRecord).filter((row) => row.companyCode && row.companyName);
+  state.rows = snapshot.records.map((record) => normalizeRecord(record, snapshot.sourceManifest)).filter((row) => row.companyCode && row.companyName);
   populateMarkets();
   applyStateToControls();
   render();
@@ -143,7 +143,7 @@ function filteredRows() {
   return state.rows.filter((row) => {
     const matchesQuery = !query || `${row.companyCode} ${row.companyName}`.toLocaleLowerCase("zh-Hant").includes(query);
     const matchesMarket = state.market === "all" || row.market === state.market;
-    const matchesStage = matchesIpoStage(row.stage, state.stage);
+    const matchesStage = matchesIpoRecordStage(row, state.stage, state.dataDate);
     return matchesQuery && matchesMarket && matchesStage;
   });
 }
@@ -163,13 +163,14 @@ function sortRows(rows) {
 }
 
 function renderSummary() {
-  setSummary("AB", state.rows.filter((row) => ["A", "B"].includes(row.stage)).length);
-  setSummary("C", state.rows.filter((row) => row.stage === "C").length);
-  setSummary("D", state.rows.filter((row) => row.stage === "D").length);
+  const activeRows = state.rows.filter((row) => isActiveIpoRecord(row, state.dataDate));
+  setSummary("AB", activeRows.filter((row) => ["A", "B"].includes(row.stage)).length);
+  setSummary("C", activeRows.filter((row) => row.stage === "C").length);
+  setSummary("D", activeRows.filter((row) => row.stage === "D").length);
 }
 
 function renderUpcoming() {
-  const rows = state.rows.filter((row) => row.primaryEventDate).sort((left, right) => compareUpcoming(left, right)).slice(0, 6);
+  const rows = state.rows.filter((row) => isActiveIpoRecord(row, state.dataDate) && row.primaryEventDate).sort((left, right) => compareUpcoming(left, right)).slice(0, 6);
   document.querySelector("#ipo-upcoming-grid").innerHTML = rows.length ? rows.map((row) => `<article class="ranking-panel"><p>${escapeHtml(row.market)}</p><h3>${companyLink(row)}</h3><strong>${escapeHtml(row.primaryEventLabel)}</strong><span>${formatDate(row.primaryEventDate)} · ${daysLabel(row.daysFromToday)}</span></article>`).join("") : "<p class=\"empty-cell\">目前沒有近期重要事件</p>";
 }
 
@@ -223,14 +224,16 @@ function syncUrl() {
   history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
 }
 
-function normalizeRecord(record) {
-  const events = Array.isArray(record.events) ? record.events.filter((event) => validDate(event?.date) && event?.label).map((event) => ({ date: event.date, label: String(event.label) })) : [];
+function normalizeRecord(record, sourceManifest) {
+  const events = normalizeApprovedIpoEvents(record, sourceManifest);
   const primary = selectPrimaryEvent(events);
   return {
     companyCode: String(record.companyCode ?? "").trim(),
     companyName: String(record.companyName ?? "").trim(),
     market: String(record.market ?? "其他").trim(),
     stage: stageLabels[record.stage] ? record.stage : "A",
+    exceptionStatus: record.exceptionStatus ?? null,
+    applicationDate: validDate(record.applicationDate) ? record.applicationDate : null,
     pricingStatus: record.finalUnderwritingPrice ? "已定價" : record.provisionalUnderwritingPrice ? "暫定價" : "待公告",
     events,
     primaryEventDate: primary?.date ?? null,
