@@ -95,6 +95,21 @@ test("fact dashboard keeps dates and evidence per field and never fabricates mis
   );
 });
 
+test("fact dashboard selects only the next verified event on or after the published as-of date", () => {
+  const dashboard = projectCbFactDashboard({
+    view: { valuationDate: "2026-08-12" },
+    events: [
+      { type: "put", date: "2026-08-01", sourceId: "11406", sourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv" },
+      { type: "put", date: "2026-08-30", sourceId: "11406", sourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv" },
+    ],
+  }, { asOfDate: "2026-08-12" });
+
+  assert.deepEqual(
+    dashboard.find((item) => item.key === "nextEvent"),
+    { key: "nextEvent", label: "下一事件", value: "put 2026-08-30", dataDate: "2026-08-30", evidence: "已驗證公開來源（11406）", evidenceState: "verified" },
+  );
+});
+
 test("CB search markup is an ARIA combobox and the workbench copy has no prohibited directions", async () => {
   const [html, controller] = await Promise.all([
     readFile(new URL("../static-showcase/bonds.html", import.meta.url), "utf8"),

@@ -38,6 +38,7 @@ const state = {
   secured: "",
   workbenchDeclared: false,
   workbenchUnavailable: false,
+  workbenchAsOfDate: null,
   detailOrigin: null,
   suggestions: [],
   highlightedSuggestion: -1,
@@ -63,11 +64,10 @@ async function loadAndRender() {
     config.datasets ?? {},
     "bondWorkbench",
   );
-  const [manifest, bondTerms, market, history, conversionPrices, workbenchResult] =
+  const [manifest, bondTerms, history, conversionPrices, workbenchResult] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
       loadJson(config.datasets["11406"], []),
-      loadJson(config.datasets.bondMarket, []),
       loadJson(config.datasets.bondHistory, []),
       loadJson(config.datasets.conversionPrices, []),
       workbenchDeclared
@@ -76,25 +76,22 @@ async function loadAndRender() {
     ]);
   state.manifest = manifest;
   state.bondTerms = arrayValue(bondTerms);
-  const marketViews = arrayValue(market);
   state.history = arrayValue(history);
   state.conversionPrices = arrayValue(conversionPrices);
   state.workbenchDeclared = workbenchDeclared;
-  state.workbenchUnavailable = workbenchDeclared && !workbenchResult.ok;
+  state.workbenchUnavailable = !workbenchDeclared || !workbenchResult.ok;
+  state.workbenchAsOfDate = validPublishedDate(workbenchResult.value?.dataDate)
+    ? workbenchResult.value.dataDate
+    : null;
   state.workbench = state.workbenchUnavailable
     ? []
     : arrayValue(workbenchResult.value?.records);
   state.views = state.workbenchUnavailable
     ? []
-    : workbenchDeclared
-      ? buildBondListRecords({
-        workbench: state.workbench,
-        bondTerms: state.bondTerms,
-      })
-      : buildBondListRecords({
-        views: marketViews.length === 0 ? fallbackBondViews(state.bondTerms) : marketViews,
-        bondTerms: state.bondTerms,
-      });
+    : buildBondListRecords({
+      workbench: state.workbench,
+      bondTerms: state.bondTerms,
+    });
   updateSearchSuggestions();
   renderRoute();
   const marketDate = state.manifest?.market?.dataDate;
@@ -221,6 +218,10 @@ function arrayValue(value) {
   return Array.isArray(value) ? value : Array.isArray(value?.records) ? value.records : [];
 }
 
+function validPublishedDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""));
+}
+
 export function buildBondListRecords({ views = [], workbench = [], bondTerms = [] } = {}) {
   const termsByBondCode = new Map(
     arrayValue(bondTerms)
@@ -296,49 +297,6 @@ function canonicalListFieldsForLegacyView(view) {
       : legacyDaysToNextEvent,
     dataQuality,
   };
-}
-
-function fallbackBondViews(rows) {
-  const today = state.manifest?.generatedAt ?? "";
-  return rows
-    .filter((row) => /^\d{5,6}$/.test(String(row["債券代碼"] ?? "")))
-    .map((row) => ({
-      bondCode: String(row["債券代碼"]),
-      issuerCode: String(row["機構代碼"] ?? ""),
-      bondName: String(row["債券簡稱"] ?? "未命名可轉債"),
-      cbClose: null,
-      cbPriceDate: null,
-      cbTradeUnits: "0",
-      stockClose: null,
-      stockPriceDate: null,
-      currentConversionPrice: null,
-      conversionPriceEffectiveDate: null,
-      valuationDate: null,
-      valuationCbClose: null,
-      valuationStockClose: null,
-      conversionValue: null,
-      premiumRate: null,
-      outstandingAmount: row["目前餘額"] || null,
-      outstandingReductionRate: null,
-      maturityDate: formatDate(row["到期日期"]),
-      daysToMaturity: daysBetween(today, formatDate(row["到期日期"])),
-      nextPutDate: row["賣回權日期"] ? formatDate(row["賣回權日期"]) : null,
-      daysToNextPut: row["賣回權日期"]
-        ? daysBetween(today, formatDate(row["賣回權日期"]))
-        : null,
-      nextEventType: row["賣回權日期"] ? "put" : "maturity",
-      nextEventDate: row["賣回權日期"]
-        ? formatDate(row["賣回權日期"])
-        : formatDate(row["到期日期"]),
-      daysToNextEvent: daysBetween(
-        today,
-        row["賣回權日期"]
-          ? formatDate(row["賣回權日期"])
-          : formatDate(row["到期日期"]),
-      ),
-      staleCbPrice: false,
-      missingReasons: ["SNAPSHOT_NOT_PUBLISHED"],
-    }));
 }
 
 function renderBonds() {
@@ -456,7 +414,7 @@ function handleSearchKeydown(event) {
 function updateSearchSuggestions() {
   const query = document.querySelector("#bond-search")?.value ?? "";
   state.suggestions = buildBondSearchSuggestions(searchableBondRecords(), query);
-  state.highlightedSuggestion = -1;
+  state.highlightedSuggestion = state.suggestions.findIndex((item) => item.exact);
   renderSearchSuggestions();
 }
 
@@ -649,7 +607,7 @@ function renderRoute() {
   const detailRecord = state.workbench.find((candidate) => candidate.bondCode === code)
     ?? detailRecordFromLegacy({ view, term: termFor(view.bondCode) ?? {}, events: [] });
   const detail = detailWithValuationConversionEvidence(detailRecord, state.conversionPrices);
-  target.innerHTML = renderBondDetail(detail);
+  target.innerHTML = renderBondDetail(detail, { asOfDate: state.workbenchAsOfDate });
   disposeDetail = bindBondDetail(target, closeDetail, { history: state.history.filter((point) => point.bondCode === code), events: detail.events, archived: detail.status === "archived" });
   target.hidden = false;
   list.hidden = true;
@@ -757,30 +715,6 @@ function plainRate(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return String(value);
   return `${number.toLocaleString("zh-TW", { maximumFractionDigits: 2 })}%`;
-}
-
-function formatDate(value) {
-  if (value === null || value === undefined || value === "") return "—";
-  const text = String(value).trim();
-  let match;
-  if ((match = /^(\d{4})(\d{2})(\d{2})$/.exec(text))) {
-    return `${match[1]}-${match[2]}-${match[3]}`;
-  }
-  if ((match = /^(\d{3})(\d{2})(\d{2})$/.exec(text))) {
-    return `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
-  }
-  if ((match = /^(\d{3})\/(\d{2})\/(\d{2})$/.exec(text))) {
-    return `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
-  }
-  if ((match = /^(\d{3})(\d{2})$/.exec(text))) {
-    return `${Number(match[1]) + 1911}-${match[2]}`;
-  }
-  return text;
-}
-
-function daysBetween(from, to) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return null;
-  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000);
 }
 
 function valueOrDash(value) {

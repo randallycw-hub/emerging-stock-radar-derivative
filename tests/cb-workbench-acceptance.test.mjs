@@ -168,7 +168,7 @@ test("offline builder and outer refresh stage the same CB generation through the
         new Set(page.fetches.map((url) => new URL(url).pathname.split("/").at(-1))),
         new Set([
           "current.json", "runtime.json", "manifest.json", "11406.json",
-          "bond-market-view.json", "bond-market-history.json",
+          "bond-market-history.json",
           "conversion-prices.json", "bond-workbench.json",
         ]),
       );
@@ -246,6 +246,38 @@ test("offline builder and outer refresh stage the same CB generation through the
       );
     } finally {
       directPage.dispose();
+    }
+
+    const keyboardPage = await runStagedBondPage(destination, {
+      initialSearch: "?event=rights90",
+    });
+    try {
+      const search = keyboardPage.document.element("bond-search");
+      search.value = "35221";
+      search.dispatch("input");
+      search.dispatch("keydown", { key: "Enter", currentTarget: search });
+      assert.equal(
+        keyboardPage.location.search,
+        "?q=35221&event=rights90&direction=asc&page=1&bond=35221",
+      );
+      assert.match(keyboardPage.document.element("bond-workbench").innerHTML, /御嵿一/);
+    } finally {
+      keyboardPage.dispose();
+    }
+
+    const undeclaredPage = await runStagedBondPage(destination, {
+      workbenchFailure: "undeclared",
+    });
+    try {
+      const search = undeclaredPage.document.element("bond-search");
+      search.value = "35221";
+      search.dispatch("input");
+      assert.match(undeclaredPage.document.element("bond-table-body").innerHTML, /可轉債工作台資料目前無法使用/);
+      assert.equal(undeclaredPage.document.element("bond-search-suggestions").innerHTML, "");
+      assert.equal(search.getAttribute("aria-expanded"), "false");
+      assert.ok(!undeclaredPage.fetches.some((url) => url.endsWith("bond-workbench.json")));
+    } finally {
+      undeclaredPage.dispose();
     }
 
     for (const workbenchFailure of ["network", "http", "json"]) {
@@ -447,6 +479,11 @@ async function runStagedBondPage(
   globalThis.fetch = async (input) => {
     const url = new URL(String(input), document.baseURI);
     fetches.push(url.href);
+    if (workbenchFailure === "undeclared" && url.pathname.endsWith("/runtime.json")) {
+      const runtime = JSON.parse(await readFile(fileURLToPath(url), "utf8"));
+      delete runtime.datasets.bondWorkbench;
+      return Response.json(runtime);
+    }
     if (url.pathname.endsWith("/bond-workbench.json")) {
       if (workbenchFailure === "empty") {
         return Response.json({ schemaVersion: 1, records: [] });
@@ -569,6 +606,7 @@ class AcceptanceDocument {
     this.elements = new Map();
     for (const id of [
       "bond-search", "bond-archive-toggle", "bond-clear-filter", "bond-result-count",
+      "bond-search-suggestions",
       "bond-table-body", "bond-card-list", "bond-pagination", "bond-list-view",
       "bond-update-status", "bond-market-heading",
     ]) this.elements.set(id, new AcceptanceElement(this, id));

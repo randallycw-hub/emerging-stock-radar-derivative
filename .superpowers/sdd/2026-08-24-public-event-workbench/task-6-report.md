@@ -43,3 +43,33 @@ exit 0
 
 - No deployment, live/third-party data access, advice, scoring, rankings, trading-cost, or realtime-data feature was added.
 - The existing detail workbench retains legacy, expandable terms/history/status/formula/evidence content as requested.
+
+## Round 1 review fixes
+
+- The dashboard now receives the published `bond-workbench.json` `dataDate` as its as-of date and chooses the first verified event on or after it. A completed event is not labelled `下一事件`.
+- A runtime that omits `datasets.bondWorkbench` now fails closed: no fallback to `bondMarket` or terms, no search suggestions, and no workbench opening. The legacy market-view request was removed from this page loader.
+- Exact CB-code suggestions are pre-highlighted, so Enter opens the exact record without requiring ArrowDown and retains the active list filters in the URL.
+
+### Round 1 TDD and verification
+
+1. Added an expired-versus-future verified-event assertion; it failed because the dashboard selected the oldest event, then passed after as-of filtering.
+2. Added a staged runtime fixture that removes `bondWorkbench`; it failed because the page rendered a legacy fallback, then passed after fail-closed loading.
+3. Added an exact-code Enter acceptance regression; it failed while no suggestion was highlighted, then passed after exact-match preselection.
+4. Added a loader-fetch assertion that `bond-market-view.json` is no longer read by this published-workbench page; it failed before the fallback request was removed.
+
+```text
+node --test tests/cb-search-workbench.test.mjs tests/cb-workbench-acceptance.test.mjs tests/static-showcase-bond-ui.test.mjs tests/static-showcase-bond-detail.test.mjs
+41 passed, 0 failed
+
+node --test --test-concurrency=2
+978 passed, 0 failed
+
+npm.cmd run typecheck
+exit 0
+
+npm.cmd run lint
+exit 0; 3 existing warnings in scripts/static-ipo-fallback.mjs and static-showcase/assets/bond-candlestick-chart.js
+
+npm.cmd run build
+exit 0
+```
