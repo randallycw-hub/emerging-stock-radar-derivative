@@ -18,6 +18,7 @@ test("CBAS row parser maps quotes, upcoming redemption and close-conversion sect
     dueRows: [
       ["狀態", "標的", "名稱", "CB市價", "賣回價", "賣回日", "CB餘額", "流通%", "到期日", "強制贖回日"],
       ["強贖", "89964", "高力四", 463, 100.7519, new Date("2026-12-06T00:00:00Z"), 71, 0.0071, new Date("2028-12-06T00:00:00Z"), new Date("2026-08-27T00:00:00Z")],
+      ["到期", "12345", "測試債", 100, 100, new Date("2026-12-06T00:00:00Z"), 1, 0.01, new Date("2028-12-06T00:00:00Z"), "--"],
     ],
     stopRows: [
       ["債券代碼\nBond Code", "債券簡稱\nShort Name", "停止轉(交)換起日\nStart Date", "停止轉(交)換迄日\nDue Date", "停止轉(交)換事由\nReason of Close Conversion"],
@@ -29,6 +30,7 @@ test("CBAS row parser maps quotes, upcoming redemption and close-conversion sect
   assert.equal(parsed.quoteRecords[0].bondCode, "17172");
   assert.equal(parsed.quoteRecords[0].cbMarketPrice, 132.4);
   assert.equal(parsed.dueRecords[0].forceRedemptionDate, "2026-08-27");
+  assert.equal(parsed.dueRecords[1].forceRedemptionDate, null);
   assert.equal(parsed.conversionStops[0].startDate, "2026-09-14");
 });
 
