@@ -9,14 +9,6 @@ import {
 } from "./bond-list-page.js";
 import { bindBondDetail, detailRecordFromLegacy, renderBondDetail } from "./bond-detail-page.js";
 
-const reasonLabels = {
-  NO_CB_CLOSE: "尚無可用 CB 收盤",
-  NO_STOCK_CLOSE: "尚無可用股票收盤",
-  NO_CONVERSION_PRICE: "尚無已驗證轉換價",
-  NO_COMMON_VALUATION_DATE: "CB 與股票沒有共同估值日",
-  NO_EFFECTIVE_CONVERSION_PRICE: "估值日缺少已生效轉換價",
-  SNAPSHOT_NOT_PUBLISHED: "盤後市場快照尚未發布",
-};
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
   datasets: {},
@@ -368,13 +360,12 @@ function renderBonds() {
 
 function renderBondRow(view) {
   const term = termFor(view.bondCode);
-  const reason = firstReason(view);
   const presentation = bondListPresentation(view);
   return `<tr tabindex="0" data-bond-code="${escapeHtml(view.bondCode)}" aria-label="查看 ${escapeHtml(view.bondName)} 詳細資料">
     <td>${metric(`${view.bondCode} · ${view.bondName}`, `${view.issuerCode} ${term?.["機構名稱"] ?? ""}`)}</td>
-    <td>${priceMetric(view.cbClose, view.cbPriceDate, view.staleCbPrice ? "非當日成交" : "")}</td>
+    <td>${priceMetric(view.cbClose, view.cbPriceDate, view.staleCbPrice ? "前次成交" : "")}</td>
     <td>${priceMetric(view.conversionValue, view.valuationDate, "估值日", "metric-violet")}</td>
-    <td>${rateMetric(view.premiumRate, view.valuationDate, reason)}</td>
+    <td>${rateMetric(view.premiumRate, view.valuationDate)}</td>
     <td>${priceMetric(view.stockClose, view.stockPriceDate)}</td>
     <td>${priceMetric(view.currentConversionPrice, view.conversionPriceEffectiveDate, "生效日")}</td>
     <td>${metric(presentation.remainingRatio, "流通餘額比例")}</td>
@@ -386,7 +377,7 @@ function renderBondRow(view) {
 function renderBondCard(view) {
   const presentation = bondListPresentation(view);
   return `<button class="bond-card" type="button" data-bond-code="${escapeHtml(view.bondCode)}">
-    <header><strong>${escapeHtml(view.bondCode)} · ${escapeHtml(view.bondName)}</strong><span>${view.staleCbPrice ? "非當日成交" : ""}</span></header>
+    <header><strong>${escapeHtml(view.bondCode)} · ${escapeHtml(view.bondName)}</strong><span>${view.staleCbPrice ? "前次成交" : ""}</span></header>
     <span class="bond-card-grid">
       ${cardMetric("CB 收盤", valueOrDash(view.cbClose), view.cbPriceDate)}
       ${cardMetric("轉換價值", valueOrDash(view.conversionValue), view.valuationDate)}
@@ -668,11 +659,11 @@ function metric(main, sub, className = "") {
 }
 
 function priceMetric(value, date, note = "", className = "") {
-  return metric(valueOrDash(value), [date, note].filter(Boolean).join(" · ") || "資料暫缺", className);
+  return metric(valueOrDash(value), [date, note].filter(Boolean).join(" · "), className);
 }
 
-function rateMetric(value, date, reason) {
-  if (value === null || value === undefined) return metric("—", reason || "資料暫缺", "metric-alert");
+function rateMetric(value, date) {
+  if (value === null || value === undefined) return metric("—", "", "metric-alert");
   const number = Number(value);
   const icon = number > 0 ? "▲" : number < 0 ? "▼" : "•";
   return metric(`${icon} ${signedRate(value)}`, date ? `估值日 ${date}` : "", number > 0 ? "metric-alert" : "metric-violet");
@@ -691,8 +682,8 @@ export function bondListPresentation(view = {}) {
     : eventTypeLabel;
   return {
     remainingRatio: plainRate(view.remainingRatio),
-    eventLabel: view.nextEventDate ? eventLabel : "資料暫缺",
-    eventDate: view.nextEventDate ?? "資料暫缺",
+    eventLabel: view.nextEventDate ? eventLabel : "—",
+    eventDate: view.nextEventDate ?? "—",
   };
 }
 
@@ -721,11 +712,7 @@ export function detailWithValuationConversionEvidence(record = {}, conversionPri
 }
 
 function cardMetric(label, value, sub) {
-  return `<span><span>${escapeHtml(label)}</span><strong>${escapeHtml(valueOrDash(value))}</strong><small>${escapeHtml(sub ?? "資料暫缺")}</small></span>`;
-}
-
-function firstReason(view) {
-  return reasonLabels[view.missingReasons?.[0]] ?? (view.missingReasons?.length ? "資料暫缺" : "");
+  return `<span><span>${escapeHtml(label)}</span><strong>${escapeHtml(valueOrDash(value))}</strong><small>${escapeHtml(valueOrDash(sub))}</small></span>`;
 }
 
 function termFor(code) {
