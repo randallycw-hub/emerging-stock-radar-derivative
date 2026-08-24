@@ -53,10 +53,10 @@
 - `type SourcedValue<T> = Readonly<{ value: T | null; asOfDate: string | null; source: PublicSourceRef | null; fetchedAt: string | null; status: "ok" | "stale" | "conflict" | "missing" }>`.
 - `toPublicProvenance(value) -> { label, asOfDate, sourceUrl } | null` exposes no internal source ID, error, or raw response metadata.
 
-- [ ] **Step 1: Write failing tests** that reject inconsistent dates/statuses and assert conflict/missing values never gain a public numeric value.
-- [ ] **Step 2: Run RED** `node --test tests/sourced-value.test.mjs`.
-- [ ] **Step 3: Implement frozen, schema-checked sourced values and public projection.** Keep legacy flat fields as read-only compatibility aliases.
-- [ ] **Step 4: Run GREEN** with domain, publication, static detail and source-registry tests.
+- [x] **Step 1: Write failing tests** that reject inconsistent dates/statuses and assert conflict/missing values never gain a public numeric value.
+- [x] **Step 2: Run RED** `node --test tests/sourced-value.test.mjs`.
+- [x] **Step 3: Implement frozen, schema-checked sourced values and public projection.** Keep legacy flat fields as read-only compatibility aliases.
+- [x] **Step 4: Run GREEN** with domain, publication, static detail and source-registry tests.
 - [ ] **Step 5: Commit** `feat: add sourced values and public provenance`.
 
 ### Task 3: Harden cross-market QA gates and publication decisions

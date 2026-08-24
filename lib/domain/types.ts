@@ -5,6 +5,21 @@ export type PriceSemantics = "emerging_daily_average" | "official_end_of_day_clo
 
 export type SourceHealthStatus = "healthy" | "delayed" | "partial" | "stale" | "unavailable";
 export type DataFreshnessLevel = "current" | "delayed" | "stale" | "unknown";
+export type SourcedValueStatus = "ok" | "stale" | "conflict" | "missing";
+
+export interface PublicSourceReference {
+  providerName: string;
+  datasetName: string;
+  officialUrl: string;
+}
+
+export interface SourcedValue<T> {
+  value: T | null;
+  asOfDate: string | null;
+  source: PublicSourceReference | null;
+  fetchedAt: string | null;
+  status: SourcedValueStatus;
+}
 
 export interface OfficialSource {
   sourceId: string;

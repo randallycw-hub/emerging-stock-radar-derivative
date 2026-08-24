@@ -30,6 +30,14 @@ export function formatNumber(value, options = {}) {
   return new Intl.NumberFormat("zh-TW", options).format(number);
 }
 
+export function formatPublicProvenance(value) {
+  if (!value || typeof value !== "object") return "";
+  const label = typeof value.label === "string" ? value.label.trim() : "";
+  const asOfDate = typeof value.asOfDate === "string" ? value.asOfDate : "";
+  if (!label || !/^\d{4}-\d{2}-\d{2}$/.test(asOfDate)) return "";
+  return `資料日期 ${formatDate(asOfDate)} · ${label}`;
+}
+
 export async function safeJsonFetch(
   url,
   {

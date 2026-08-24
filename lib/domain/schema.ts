@@ -33,6 +33,7 @@ import {
   type SourceHealth,
   type SourceHealthStatus,
 } from "./types.ts";
+import { createSourcedValue, type SourcedValue } from "./sourced-value.ts";
 
 export class DomainValidationError extends Error {
   constructor(message: string) {
@@ -307,6 +308,35 @@ function sourceAttribution(value: unknown, path = "sourceAttribution"): SourceAt
 export const SourceAttributionSchema = schema<SourceAttribution>(
   "SourceAttribution",
   sourceAttribution,
+);
+
+export const SourcedTextValueSchema = schema<SourcedValue<string>>(
+  "SourcedTextValue",
+  (value) => {
+    const input = record(value, "SourcedTextValue");
+    strict(input, ["value", "asOfDate", "source", "fetchedAt", "status"], "SourcedTextValue");
+    const sourceInput = input.source === null
+      ? null
+      : record(input.source, "SourcedTextValue.source");
+    if (sourceInput !== null) {
+      strict(sourceInput, ["providerName", "datasetName", "officialUrl"], "SourcedTextValue.source");
+    }
+    return createSourcedValue({
+      value: nullableString(input.value, "SourcedTextValue.value"),
+      asOfDate: input.asOfDate === null ? null : isoDate(input.asOfDate, "SourcedTextValue.asOfDate"),
+      source: sourceInput === null
+        ? null
+        : {
+          providerName: requiredString(sourceInput.providerName, "SourcedTextValue.source.providerName"),
+          datasetName: requiredString(sourceInput.datasetName, "SourcedTextValue.source.datasetName"),
+          officialUrl: requiredString(sourceInput.officialUrl, "SourcedTextValue.source.officialUrl"),
+        },
+      fetchedAt: input.fetchedAt === null
+        ? null
+        : isoDateTime(input.fetchedAt, "SourcedTextValue.fetchedAt"),
+      status: enumValue(input.status, ["ok", "stale", "conflict", "missing"], "SourcedTextValue.status"),
+    });
+  },
 );
 
 export const OfficialSourceSchema = schema<OfficialSource>("OfficialSource", (value) => {
