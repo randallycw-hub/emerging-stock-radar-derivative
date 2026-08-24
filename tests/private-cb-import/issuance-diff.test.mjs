@@ -35,6 +35,21 @@ test("issuance parser maps the 18-column IPO sheet with a filename-derived sourc
   });
 });
 
+test("issuance parser preserves a quoted premium range or an undetermined premium", () => {
+  const snapshot = parseIssuanceRows({
+    fileName: "CB發行案件更新_20260814.xlsx",
+    rows: [
+      [null, "代碼", "債券代碼"],
+      ["送件", "7631", "76311", "測試一", null, 1, null, null, null, null, null, "102~110", null],
+      ["送件", "3450", "34501", "測試二", null, 1, null, null, "未定", null, null, "未定", null],
+    ],
+  });
+  assert.deepEqual(snapshot.records.map((record) => [record.bondCode, record.premiumRate, record.conversionPrice, record.filingDate]), [
+    ["76311", "102~110", null, null],
+    ["34501", "未定", null, "未定"],
+  ]);
+});
+
 test("difference report separates added, changed and removed bond codes", () => {
   const result = diffSnapshots(
     { records: [{ bondCode: "89365", listingDate: "2026-08-17" }, { bondCode: "30811", listingDate: null }] },
