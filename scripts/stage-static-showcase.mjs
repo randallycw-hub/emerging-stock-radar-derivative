@@ -42,6 +42,7 @@ const ASSET_FILES = new Set([
   "bond-list-page.js",
   "bond-technical-analysis.js",
   "bonds-page.js",
+  "emerging-market-display.js",
   "emerging-page.js",
   "home-page.js",
   "ipo-data.js",

@@ -1,4 +1,5 @@
 import { formatDate, formatNumber, safeJsonFetch } from "./site-shell.js";
+import { emergingDailyAverageLabel } from "./emerging-market-display.js";
 import { sortRows } from "./table-sort.js";
 
 const pointerUrl = new URL("../data/current.json", import.meta.url);
@@ -249,7 +250,7 @@ function marketRowHtml(row) {
   return `<tr id="company-${escapeHtml(row.companyCode)}">
     <th scope="row"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</th>
     <td>${escapeHtml(row.industryName ?? "未分類")}</td>
-    <td>${formatNumber(row.lastTradedPrice, { maximumFractionDigits: 2 })}</td>
+    <td>${formatEmergingDailyAverage(row)}</td>
     <td class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}<small>${formatPercent(row.averageChangePercent)}</small></td>
     <td>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}</td>
     <td>${formatNumber(row.dailyLowPrice, { maximumFractionDigits: 2 })}</td>
@@ -262,7 +263,7 @@ function marketRowHtml(row) {
 
 function marketCardHtml(row) {
   return `<article class="market-card" id="card-${escapeHtml(row.companyCode)}"><header><strong>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</strong><span>${escapeHtml(row.industryName ?? "未分類")}</span></header><dl>
-    <div><dt>最後成交價（盤後）</dt><dd>${formatNumber(row.lastTradedPrice, { maximumFractionDigits: 2 })}</dd></div>
+    <div><dt>本日成交均價（盤後）</dt><dd>${formatEmergingDailyAverage(row)}</dd></div>
     <div><dt>均價漲跌</dt><dd class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}／${formatPercent(row.averageChangePercent)}</dd></div>
     <div><dt>最高／最低</dt><dd>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}／${formatNumber(row.dailyLowPrice, { maximumFractionDigits: 2 })}</dd></div>
     <div><dt>成交股數</dt><dd>${formatNumber(row.transactionVolume)}</dd></div>
@@ -399,6 +400,11 @@ function formatPercent(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return "—";
   return `${number > 0 ? "+" : ""}${formatNumber(number, { maximumFractionDigits: 2 })}%`;
+}
+
+function formatEmergingDailyAverage(row) {
+  const label = emergingDailyAverageLabel(row);
+  return label ?? formatNumber(row.dailyAveragePrice, { maximumFractionDigits: 2 });
 }
 
 function formatRocMonth(value) {

@@ -5,15 +5,17 @@ import test from "node:test";
 const root = new URL("../static-showcase/", import.meta.url);
 
 test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async () => {
-  const [html, js, css] = await Promise.all([
+  const [html, js, display, css] = await Promise.all([
     readFile(new URL("emerging.html", root), "utf8"),
     readFile(new URL("assets/emerging-page.js", root), "utf8"),
+    readFile(new URL("assets/emerging-market-display.js", root), "utf8"),
     readFile(new URL("assets/app.css", root), "utf8"),
   ]);
-  const source = html + js;
+  const source = html + js + display;
 
   for (const label of [
-    "最後成交價（盤後）",
+    "本日成交均價（盤後）",
+    "今日無成交",
     "公司家數",
     "有效樣本",
     "上漲／下跌／持平",
@@ -59,11 +61,11 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
   assert.match(js, /matchMedia\("\(max-width: 900px\)"\)/);
   assert.match(js, /\.slice\(0, 5\)/);
   assert.match(js, /estimatedTransactionAmount/);
-  assert.match(js, /row\.lastTradedPrice/);
-  assert.match(html, /data-market-sort="lastTradedPrice"/);
-  assert.doesNotMatch(html, /當日成交均價（盤後）/);
-  assert.doesNotMatch(html, /data-market-sort="dailyAveragePrice"/);
-  assert.doesNotMatch(js, /<dt>當日成交均價（盤後）<\/dt>/);
+  assert.match(js, /row\.dailyAveragePrice/);
+  assert.match(html, /data-market-sort="dailyAveragePrice"/);
+  assert.doesNotMatch(html, /data-market-sort="lastTradedPrice"/);
+  assert.doesNotMatch(html, /最後成交價（盤後）/);
+  assert.match(display, /今日無成交/);
   assert.match(js, /emptyRow\(10/);
   assert.match(html, /盤後資料讀取中/);
   assert.match(js, /monthlyRevenue/);

@@ -36,6 +36,11 @@ test("Sites staging copies the complete static showcase including the active gen
     "export const digest = true;\n",
     "utf8",
   );
+  await writeFile(
+    join(source, "assets", "emerging-market-display.js"),
+    "export const dailyAverage = true;\n",
+    "utf8",
+  );
   for (const file of [
     "bond-list-page.js",
     "bond-detail-page.js",
@@ -69,6 +74,10 @@ test("Sites staging copies the complete static showcase including the active gen
   assert.equal(
     await readFile(join(destination, "assets", "public-event-digest.js"), "utf8"),
     "export const digest = true;\n",
+  );
+  assert.equal(
+    await readFile(join(destination, "assets", "emerging-market-display.js"), "utf8"),
+    "export const dailyAverage = true;\n",
   );
   for (const file of [
     "bond-list-page.js",
