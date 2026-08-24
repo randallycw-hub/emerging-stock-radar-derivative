@@ -1,8 +1,17 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { bondShortcutState } from "../static-showcase/assets/bonds-page.js";
 
 const root = new URL("../static-showcase/", import.meta.url);
+
+test("bond strategy shortcuts select a public screener without internal quality filters", () => {
+  assert.deepEqual(bondShortcutState("recent-issue"), { screener: "recent90" });
+  assert.deepEqual(bondShortcutState("low-premium"), { screener: "lowPremium" });
+  assert.deepEqual(bondShortcutState("near-conversion"), { screener: "conversion100" });
+  assert.deepEqual(bondShortcutState("low-price"), { screener: "cheap" });
+  assert.deepEqual(bondShortcutState("upcoming-rights"), { screener: "", event: "rights90" });
+});
 
 test("bond page exposes the complete sortable CB workbench", async () => {
   const [home, bondsHtml, js, detailJs, sortJs, css] = await Promise.all([
@@ -190,7 +199,10 @@ test("bond page provides composable public event controls and a clear-all empty 
     readFile(new URL("assets/app.css", root), "utf8"),
   ]);
   assert.match(html, /<fieldset class="bond-event-shortcuts"/);
-  assert.equal((html.match(/data-bond-shortcut=/g) ?? []).length, 3);
+  assert.equal((html.match(/data-bond-shortcut=/g) ?? []).length, 7);
+  for (const label of ["新發行", "低溢價", "接近轉換價值", "低 CB 收盤價", "90 日內權利事件"]) {
+    assert.match(html, new RegExp(label));
+  }
   for (const id of ["bond-maturity-before", "bond-remaining-max", "bond-secured"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }

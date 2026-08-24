@@ -2,10 +2,19 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  companyContextLinks,
   detailUrlForBond,
   noAdviceViolations,
   renderBondDetail,
 } from "../static-showcase/assets/bond-detail-page.js";
+
+test("company context links retain the issuer code across public market desks", () => {
+  assert.deepEqual(companyContextLinks("2303"), [
+    { label: "興櫃市場", href: "./emerging.html?q=2303" },
+    { label: "IPO 時程", href: "./ipo.html?q=2303" },
+    { label: "IPO 雷達", href: "./ipo-radar.html?q=2303" },
+  ]);
+});
 
 const dataDate = "2026-08-12";
 const orderedSections = [

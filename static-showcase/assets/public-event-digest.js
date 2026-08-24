@@ -40,27 +40,25 @@ export function buildPublicEventDigest(input = {}) {
       events: normalizeApprovedIpoEvents(record, ipoSourceManifest),
     }));
     ipoDates.push(...projectActiveIpoEventEntries(projectedRows, ipoDataDate)
+      .filter(({ row }) => row.stage === "C" || row.stage === "D")
       .map(({ event }) => event.date));
   }
 
   const common = [
-    item("ipo-recent", "近期 IPO 事件", ipoDates.length, ipoDates, "./ipo.html?stage=active&sort=eventDate&direction=asc", hasIpoInputs ? "ready" : "unavailable"),
+    item("ipo-recent", "近期 IPO 事件", ipoDates.length, ipoDates, "./ipo.html?stage=market&sort=eventDate&direction=asc", hasIpoInputs ? "ready" : "unavailable"),
   ];
 
   if (!Array.isArray(input?.bonds) || !hasAsOfDate) {
     return common.concat([
       item("bond-rights-90", "90 日內權利事件", null, [], "./bonds.html?event=rights90", "unavailable"),
       item("bond-maturity-365", "365 日內到期事件", null, [], "./bonds.html?event=maturity365", "unavailable"),
-      item("bond-pending", "資料待補可轉債", null, [], "./bonds.html?quality=pending", "unavailable"),
     ]);
   }
 
   const asOfDay = dayNumber(asOfDate);
   const rightsDates = [];
   const maturityDates = [];
-  let pendingCount = 0;
   for (const bond of input.bonds) {
-    if (bond?.dataQuality !== "complete") pendingCount += 1;
     if (isPublishedIsoDate(bond?.nextEventDate)) {
       const days = dayNumber(bond.nextEventDate) - asOfDay;
       if (days >= 0 && days <= 90) rightsDates.push(bond.nextEventDate);
@@ -73,6 +71,5 @@ export function buildPublicEventDigest(input = {}) {
   return common.concat([
     item("bond-rights-90", "90 日內權利事件", rightsDates.length, rightsDates, "./bonds.html?event=rights90"),
     item("bond-maturity-365", "365 日內到期事件", maturityDates.length, maturityDates, "./bonds.html?event=maturity365"),
-    item("bond-pending", "資料待補可轉債", pendingCount, [], "./bonds.html?quality=pending"),
   ]);
 }

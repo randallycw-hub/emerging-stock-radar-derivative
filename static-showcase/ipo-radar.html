@@ -40,7 +40,7 @@
       <form id="ipo-radar-filters" class="filters ipo-filters" aria-label="IPO 進度雷達篩選">
         <label class="search-field"><span>搜尋</span><input id="ipo-radar-search" name="q" type="search" placeholder="公司代碼或名稱"></label>
         <label><span>市場</span><select id="ipo-radar-market" name="market"><option value="all">全部市場</option></select></label>
-        <label><span>進度</span><select id="ipo-radar-stage" name="stage"><option value="active">進行中</option><option value="all">全部進度</option><option value="AB">送件／審議</option><option value="A">A 送件觀察</option><option value="B">B 審議進程</option><option value="C">C 契約／時程</option><option value="D">D 定價／掛牌</option></select></label>
+        <label><span>進度</span><select id="ipo-radar-stage" name="stage"><option value="market">交易事件優先</option><option value="active">所有進行中</option><option value="all">全部進度</option><option value="AB">送件／審議</option><option value="A">A 送件觀察</option><option value="B">B 審議進程</option><option value="C">C 契約／時程</option><option value="D">D 定價／掛牌</option></select></label>
         <label class="mobile-sort-control"><span>排序欄位</span><select id="ipo-radar-sort-field" name="sort"><option value="eventDate">最近事件日</option><option value="company">公司</option><option value="stage">目前進度</option><option value="days">距今天數</option></select></label>
         <button id="ipo-radar-sort-direction" class="sort-direction" type="button" aria-label="切換排序方向" data-direction="asc">近到遠 ↑</button>
         <output id="ipo-radar-result-count" aria-live="polite">—</output>

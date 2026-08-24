@@ -18,7 +18,7 @@ const state = {
   dataDate: null,
   query: "",
   market: "all",
-  stage: "active",
+  stage: "market",
   sortKey: "eventDate",
   direction: "asc",
   page: 1,
@@ -56,7 +56,7 @@ function initializeFromUrl() {
   const params = new URLSearchParams(location.search);
   state.query = params.get("q") ?? "";
   state.market = params.get("market") ?? "all";
-  state.stage = defaultIpoStage(params.get("stage"), { includeAB: true, activeOnly: true });
+  state.stage = defaultIpoStage(params.get("stage"), { includeAB: true, activeOnly: true, marketFirst: true });
   state.sortKey = ["company", "stage", "eventDate", "days"].includes(params.get("sort")) ? params.get("sort") : "eventDate";
   state.direction = params.get("direction") === "desc" ? "desc" : "asc";
   state.page = positiveInteger(params.get("page"));
@@ -110,7 +110,7 @@ function bindControls() {
 }
 
 function applyStage(stage) {
-  state.stage = defaultIpoStage(stage, { includeAB: true, activeOnly: true });
+  state.stage = defaultIpoStage(stage, { includeAB: true, activeOnly: true, marketFirst: true });
   state.page = 1;
   syncUrl();
   applyStateToControls();

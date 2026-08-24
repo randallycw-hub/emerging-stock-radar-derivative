@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { buildPublicEventDigest } from "../static-showcase/assets/public-event-digest.js";
 
-test("event digest only counts valid published events", () => {
+test("event digest only publishes verified investor-facing events", () => {
   const digest = buildPublicEventDigest({
     asOfDate: "2026-08-24",
     ipoDataDate: "2026-08-25",
@@ -14,11 +14,31 @@ test("event digest only counts valid published events", () => {
     ipoRecords: [{ companyCode: "1234", stage: "D", events: [{ date: "2026-08-25", label: "掛牌", sourceRecordIds: ["TWSE:2026:1234"] }] }],
   });
   assert.deepEqual(digest.map((item) => [item.id, item.count, item.nearestDate, item.href, item.state]), [
-    ["ipo-recent", 1, "2026-08-25", "./ipo.html?stage=active&sort=eventDate&direction=asc", "ready"],
+    ["ipo-recent", 1, "2026-08-25", "./ipo.html?stage=market&sort=eventDate&direction=asc", "ready"],
     ["bond-rights-90", 1, "2026-09-01", "./bonds.html?event=rights90", "ready"],
     ["bond-maturity-365", 2, "2026-10-01", "./bonds.html?event=maturity365", "ready"],
-    ["bond-pending", 1, null, "./bonds.html?quality=pending", "ready"],
   ]);
+});
+
+test("event digest never exposes internal completeness counts", () => {
+  const digest = buildPublicEventDigest({
+    asOfDate: "2026-08-24",
+    bonds: [{ bondCode: "1101A", dataQuality: "partial" }],
+  });
+  assert.equal(digest.some((entry) => entry.id === "bond-pending"), false);
+});
+
+test("IPO digest prioritizes contract and trading events", () => {
+  const digest = buildPublicEventDigest({
+    asOfDate: "2026-08-24",
+    ipoDataDate: "2026-08-24",
+    ipoSourceManifest: [{ sourceId: "twse-applications" }],
+    ipoRecords: [
+      { companyCode: "1001", stage: "A", events: [{ date: "2026-08-25", label: "送件", sourceRecordIds: ["TWSE:1001:20260825"] }] },
+      { companyCode: "1002", stage: "D", events: [{ date: "2026-08-26", label: "競拍", sourceRecordIds: ["TWSE:1002:20260826"] }] },
+    ],
+  });
+  assert.equal(digest.find((item) => item.id === "ipo-recent").count, 1);
 });
 
 test("IPO digest uses its own snapshot date and excludes terminal, stale, and unapproved evidence", () => {
@@ -37,9 +57,9 @@ test("IPO digest uses its own snapshot date and excludes terminal, stale, and un
   assert.deepEqual(digest.find((item) => item.id === "ipo-recent"), {
     id: "ipo-recent",
     label: "近期 IPO 事件",
-    count: 1,
-    nearestDate: "2026-08-20",
-    href: "./ipo.html?stage=active&sort=eventDate&direction=asc",
+    count: 0,
+    nearestDate: null,
+    href: "./ipo.html?stage=market&sort=eventDate&direction=asc",
     state: "ready",
   });
 });
