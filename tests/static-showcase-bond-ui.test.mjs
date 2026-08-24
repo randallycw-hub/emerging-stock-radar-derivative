@@ -103,7 +103,7 @@ test("bond list module round-trips only supported list URL state", async () => {
   const state = parseBondListState("?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
   assert.deepEqual(state, {
     query: "甲", archived: true, sortKey: "cbClose", direction: "desc", page: 3,
-    event: "", quality: "", maturityBefore: "", remainingMax: null, secured: "",
+    event: "", quality: "", maturityBefore: "", remainingMax: null, secured: "", screener: "",
   });
   assert.equal(serializeBondListState(state), "?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
 });
@@ -122,6 +122,7 @@ test("bond list state round-trips composable public event conditions and filters
     maturityBefore: "",
     remainingMax: 25,
     secured: "無擔保",
+    screener: "",
   });
   assert.equal(
     serializeBondListState(state),
@@ -165,6 +166,24 @@ test("remaining-ratio upper bound rejects missing or invalid record values", asy
   assert.deepEqual(filterBondRecords(records, { remainingMax: 25 }).map((record) => record.bondCode), ["match"]);
 });
 
+test("public CB screeners derive only reproducible views from verified public fields", async () => {
+  const { applyPublicBondScreener } = await import("../static-showcase/assets/bond-list-page.js");
+  const records = [
+    { bondCode: "recent", issueDate: "2026-08-01", daysToMaturity: 700, remainingRatio: "100", cbClose: "105", conversionValue: "85", premiumRate: "23" },
+    { bondCode: "maturing", issueDate: "2024-06-01", daysToMaturity: 120, remainingRatio: "60", cbClose: "99", conversionValue: "104", premiumRate: "-5" },
+    { bondCode: "converted", issueDate: "2023-06-01", daysToMaturity: 900, remainingRatio: "20", cbClose: "88", conversionValue: "99", premiumRate: "-1" },
+    { bondCode: "missing", issueDate: null, daysToMaturity: null, remainingRatio: null, cbClose: null, conversionValue: null, premiumRate: null },
+  ];
+
+  assert.deepEqual(applyPublicBondScreener(records, "recent90", { asOfDate: "2026-08-24" }).map((item) => item.bondCode), ["recent"]);
+  assert.deepEqual(applyPublicBondScreener(records, "maturity365", { asOfDate: "2026-08-24" }).map((item) => item.bondCode), ["maturing"]);
+  assert.deepEqual(applyPublicBondScreener(records, "converted75", { asOfDate: "2026-08-24" }).map((item) => item.bondCode), ["converted"]);
+  assert.deepEqual(applyPublicBondScreener(records, "cheap", { asOfDate: "2026-08-24" }).map((item) => item.bondCode), ["converted", "maturing", "recent", "missing"]);
+  assert.deepEqual(applyPublicBondScreener(records, "conversion100", { asOfDate: "2026-08-24" }).map((item) => item.bondCode), ["converted", "maturing", "recent", "missing"]);
+  assert.deepEqual(applyPublicBondScreener(records, "lowPremium", { asOfDate: "2026-08-24" }).map((item) => item.bondCode), ["maturing", "converted", "recent", "missing"]);
+  assert.deepEqual(applyPublicBondScreener(records, "unknown", { asOfDate: "2026-08-24" }).map((item) => item.bondCode), records.map((item) => item.bondCode));
+});
+
 test("bond page provides composable public event controls and a clear-all empty state", async () => {
   const [html, js, css] = await Promise.all([
     readFile(new URL("bonds.html", root), "utf8"),
@@ -179,6 +198,18 @@ test("bond page provides composable public event controls and a clear-all empty 
   assert.match(js, /aria-pressed/);
   assert.match(js, /清除所有條件/);
   assert.match(css, /\.bond-event-shortcuts/);
+});
+
+test("bond page separates public screeners from licensed-only CBAS and credit data", async () => {
+  const [html, detail] = await Promise.all([
+    readFile(new URL("bonds.html", root), "utf8"),
+    readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
+  ]);
+  assert.match(html, /id="bond-public-screener"/);
+  assert.match(html, /CBAS 權利金與信用評等不納入公開資料篩選/);
+  for (const label of ["資料來源與授權範圍", "TPEx 可轉債每日成交資訊", "CBAS 權利金", "TCRI 信用評等", "未納入公開資料快照"]) {
+    assert.match(detail, new RegExp(label));
+  }
 });
 
 test("page loader projects archived workbench identities into the searchable list by exact bond code", async () => {

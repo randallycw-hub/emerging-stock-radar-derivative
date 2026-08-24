@@ -15,6 +15,9 @@ const STATE_LABELS = {
 const MISSING_WORDING = "目前無核准公開資料／待確認";
 const APPROVED_EVENT_SOURCE_URLS = new Map([
   ["11406", "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv"],
+  ["tpex-cb-day-quotes", "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry"],
+  ["twse-stock-day-all", "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"],
+  ["tpex-stock-day-close", "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes"],
   ["tpex-cb-institution-daily", "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade"],
   ["tpex-cb-redemption-announcements", "https://www.tpex.org.tw/www/zh-tw/bond/redeem"],
   ["twsa-cb-underwriting-announcements", "https://web.twsa.org.tw/edoc2/default.aspx"],
@@ -62,6 +65,7 @@ export function renderBondDetail(record, { asOfDate = null } = {}) {
     ${mobileArea("六項策略條件", "overview", assessmentSection("六項策略條件", "strategy", assessment.strategies, STRATEGY_LABELS))}
     ${mobileArea("K 線圖", "overview", candleSection(record))}
     ${mobileArea("債券條款", "terms", termsSection(term, view))}
+    ${mobileArea("資料來源與授權範圍", "terms", dataSourceSection())}
     ${mobileArea("法人 1／5／20 日", "institutions", institutionsSection(view, record?.fieldStates))}
     ${mobileArea("公司營運與公開財務", "company", companySection(view, assessment.strategies, record?.fieldStates))}
     ${mobileArea("事件時間軸", "terms", eventsSection(record?.events))}`;
@@ -305,6 +309,14 @@ function candleSection(record) {
 function parseChartData(value) { try { return JSON.parse(value ?? "{}"); } catch { return {}; } }
 function termsSection(term, view) {
   return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}</dl>${formulaDetails(view)}`;
+}
+function dataSourceSection() {
+  return `<h3>資料來源與授權範圍</h3><p>本工作台只使用可核對的公開來源；每個資料欄位仍以其資料日與完整性狀態為準。</p><dl class="detail-facts">${sourceFact("CB 盤後收盤與成交量", "tpex-cb-day-quotes", "TPEx 可轉債每日成交資訊")}${sourceFact("上市標的股盤後", "twse-stock-day-all", "TWSE 每日收盤資訊")}${sourceFact("上櫃標的股盤後", "tpex-stock-day-close", "TPEx 上櫃每日收盤資訊")}${sourceFact("條款、轉換價與流通餘額", "11406", "TPEx 可轉債公開清單")}${sourceFact("提前贖回公告", "tpex-cb-redemption-announcements", "TPEx 贖回公告")}${fact("CBAS 權利金", "未納入公開資料快照：需取得元大證券可用來源或授權")}${fact("TCRI 信用評等", "未納入公開資料快照：需取得評等資料授權")}</dl><p>不蒐集會員帳密、個人投資部位或交易資料。</p>`;
+}
+function sourceFact(label, sourceId, sourceLabel) {
+  const url = APPROVED_EVENT_SOURCE_URLS.get(sourceId);
+  const link = sourceLink(url, sourceId);
+  return `<div><dt>${text(label)}</dt><dd>${link ? `${link}（${text(sourceLabel)}）` : MISSING_WORDING}</dd></div>`;
 }
 function formulaDetails(view) { return `<details class="formula-details"><summary>展開公式與已驗證輸入值</summary><dl class="detail-facts">${fact("轉換價值", view.conversionValue)}${fact("轉換溢價", view.premiumRate)}${fact("剩餘單位", view.remainingUnits)}${fact("剩餘比例", view.remainingRatio)}${fact("週轉率", view.dailyTurnoverRate)}${fact("天數", view.daysToMaturity)}</dl><p>轉換價值與轉換溢價僅依同日公開欄位檢核；不同資料日維持待確認。</p></details>`; }
 function institutionsSection(view, fieldStates = {}) {

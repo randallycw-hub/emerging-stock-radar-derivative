@@ -1,4 +1,5 @@
 import {
+  applyPublicBondScreener,
   buildBondSearchSuggestions,
   filterBondRecords,
   paginateBondRecords,
@@ -36,6 +37,7 @@ const state = {
   maturityBefore: "",
   remainingMax: null,
   secured: "",
+  screener: "",
   workbenchDeclared: false,
   workbenchUnavailable: false,
   workbenchAsOfDate: null,
@@ -111,12 +113,14 @@ function initializeFromUrl() {
   state.maturityBefore = listState.maturityBefore;
   state.remainingMax = listState.remainingMax;
   state.secured = listState.secured;
+  state.screener = listState.screener;
   document.querySelector("#bond-search").value = listState.query;
   document.querySelector("#bond-archive-toggle").checked = state.archived;
   setControlValue("#bond-maturity-before", state.maturityBefore);
   setControlValue("#bond-remaining-max", state.remainingMax ?? "");
   setControlValue("#bond-secured", state.secured);
   setControlValue("#bond-quality", state.quality);
+  setControlValue("#bond-public-screener", state.screener);
   updateBondShortcutStates();
 }
 
@@ -139,9 +143,14 @@ function bindFilters() {
     clearBondFilters();
     document.querySelector("#bond-search").focus();
   });
-  for (const selector of ["#bond-maturity-before", "#bond-remaining-max", "#bond-secured", "#bond-quality"]) {
+  for (const selector of ["#bond-maturity-before", "#bond-remaining-max", "#bond-secured", "#bond-quality", "#bond-public-screener"]) {
     document.querySelector(selector)?.addEventListener("change", (event) => {
       if (selector === "#bond-quality") state.quality = event.target.value;
+      if (selector === "#bond-public-screener") {
+        state.screener = event.target.value;
+        state.sortKey = null;
+        state.sortDirection = "asc";
+      }
       state.page = 1;
       syncListUrl();
       renderBonds();
@@ -315,11 +324,13 @@ function renderBonds() {
       ...view,
       issuerName: term?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
       securedStatus: view.securedStatus ?? term?.securedStatus ?? term?.["有無擔保"] ?? null,
+      issueDate: term?.["發行日期"] ?? null,
     };
   });
   const filters = currentBondFilters();
   const filtered = filterBondRecords(prepared, filters);
-  const ordered = state.sortKey ? sortBondRecords(filtered, { key: state.sortKey, direction: state.sortDirection }) : filtered;
+  const screened = applyPublicBondScreener(filtered, state.screener, { asOfDate: state.workbenchAsOfDate });
+  const ordered = state.sortKey ? sortBondRecords(screened, { key: state.sortKey, direction: state.sortDirection }) : screened;
   const pagination = paginateBondRecords(ordered, state.page);
   state.page = pagination.page;
   const visible = pagination.records;
@@ -510,6 +521,7 @@ function currentBondFilters() {
     maturityBefore: controlValue("#bond-maturity-before", state.maturityBefore),
     remainingMax: controlValue("#bond-remaining-max", state.remainingMax ?? ""),
     secured: controlValue("#bond-secured", state.secured),
+    screener: state.screener,
   };
 }
 
@@ -524,7 +536,16 @@ function setControlValue(selector, value) {
 
 function activeBondConditions(filters) {
   const labels = [];
+  const screenerLabels = {
+    recent90: "近 90 日發行",
+    maturity365: "365 日內到期",
+    converted75: "已轉換逾 75%",
+    cheap: "低 CB 收盤價",
+    conversion100: "轉換價值接近 100",
+    lowPremium: "低轉換溢價",
+  };
   if (filters.query.trim()) labels.push(`搜尋「${filters.query.trim()}」`);
+  if (screenerLabels[filters.screener]) labels.push(screenerLabels[filters.screener]);
   if (filters.archived) labels.push("顯示封存可轉債");
   if (filters.event === "rights90") labels.push("90 日內權利事件");
   if (filters.event === "maturity365") labels.push("365 日內到期");
@@ -550,12 +571,14 @@ function clearBondFilters() {
   setControlValue("#bond-remaining-max", "");
   setControlValue("#bond-secured", "");
   setControlValue("#bond-quality", "");
+  setControlValue("#bond-public-screener", "");
   state.archived = false;
   state.event = "";
   state.quality = "";
   state.maturityBefore = "";
   state.remainingMax = null;
   state.secured = "";
+  state.screener = "";
   state.page = 1;
   closeSearchSuggestions();
   syncListUrl();

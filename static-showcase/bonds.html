@@ -53,6 +53,7 @@
             <span id="bond-search-suggestions" class="bond-search-suggestions" role="listbox" aria-label="可轉債搜尋建議" hidden></span>
           </label>
           <label class="archive-toggle"><input id="bond-archive-toggle" name="archived" type="checkbox"> 顯示封存可轉債</label>
+          <label><span>公開資料快速檢視</span><select id="bond-public-screener" name="screener"><option value="">全部可轉債</option><option value="recent90">近 90 日發行</option><option value="maturity365">365 日內到期</option><option value="converted75">已轉換逾 75%</option><option value="cheap">低 CB 收盤價</option><option value="conversion100">轉換價值接近 100</option><option value="lowPremium">低轉換溢價</option></select></label>
           <fieldset class="bond-event-shortcuts">
             <legend>公開事件捷徑</legend>
             <button type="button" data-bond-shortcut="rights90" aria-pressed="false">90 日內權利事件</button>
@@ -67,6 +68,7 @@
           <button id="bond-clear-filter" type="button" hidden>清除所有條件</button>
           <output id="bond-result-count" aria-live="polite">—</output>
         </form>
+        <p class="bond-screener-note">快速檢視只使用可核對的公開條款與盤後資料；CBAS 權利金與信用評等不納入公開資料篩選。</p>
         <p class="table-hint">點選可比較欄位：遞增、遞減、取消排序。</p>
 
         <div class="bond-table-shell">

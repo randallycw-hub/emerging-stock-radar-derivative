@@ -298,7 +298,7 @@ test("detail links only project-approved official snapshot URLs", () => {
 test("mobile detail areas are collapsed by default", () => {
   const html = renderBondDetail(fixture());
   assert.doesNotMatch(html, /<details class="detail-mobile-area" open>/);
-  assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 9);
+  assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 10);
 });
 
 test("detail exposes an accessible, collapsed candlestick workbench without a trading direction", () => {
