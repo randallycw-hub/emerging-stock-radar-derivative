@@ -76,7 +76,7 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(detailJs, /FORBIDDEN_UI_PATTERNS/);
   assert.match(detailJs, /bond-candlestick/);
   assert.match(detailJs, /noopener noreferrer/);
-  assert.match(detailJs, /目前無核准公開資料／待確認/);
+  assert.doesNotMatch(detailJs, /目前無核准公開資料／待確認/);
 });
 
 test("detail UI gate scans static presentation strings for prohibited public investment directions", async () => {
@@ -416,7 +416,7 @@ test("mobile bond cards keep every list field and archived metadata visible", as
 test("CB detail snapshot communicates evidence scope and unavailable comparisons", async () => {
   const js = await readFile(new URL("assets/bond-detail-page.js", root), "utf8");
 
-  for (const label of ["目前資料快照", "可比較性", "目前無核准公開資料／待確認"]) {
+  for (const label of ["目前資料快照", "可比較性", "—"]) {
     assert.match(js, new RegExp(label));
   }
 });
@@ -435,7 +435,7 @@ test("CB snapshot fails closed for each value without its own approved evidence"
     ["remainingRatio", "流通餘額比例缺少核准公開來源"],
     ["maturity", "到期日缺少核准公開來源"],
   ]) {
-    assert.equal(snapshot[key], `目前無核准公開資料／待確認（${reason}）`);
+    assert.equal(snapshot[key], `—（${reason}）`);
   }
 });
 

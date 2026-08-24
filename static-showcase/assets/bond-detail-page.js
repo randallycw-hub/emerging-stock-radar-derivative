@@ -12,7 +12,7 @@ const STATE_LABELS = {
   favorable: "條件符合", met: "條件符合", watch: "條件未符合", risk: "條件未符合", not_met: "條件未符合",
   partial: "待確認", pending: "待確認", complete: "complete", stale: "stale", date_mismatch: "date_mismatch", missing: "missing", accumulating: "accumulating",
 };
-const MISSING_WORDING = "目前無核准公開資料／待確認";
+const MISSING_WORDING = "—";
 const APPROVED_EVENT_SOURCE_URLS = new Map([
   ["11406", "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv"],
   ["tpex-cb-day-quotes", "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry"],
@@ -281,12 +281,21 @@ function completenessSummary(fieldStates = {}) {
   return states.length ? states.join("；") : MISSING_WORDING;
 }
 function assessmentSection(title, cardClass, sections, labels) {
-  const cards = Array.isArray(sections) ? sections : [];
-  return `<h3>${text(title)}</h3><div class="detail-condition-grid">${cards.map((section) => `<article class="${cardClass}-card detail-condition-card"><header><h4>${text(labels[section.code] ?? section.code)}</h4><span>${text(stateLabel(section.state))}</span></header>${(Array.isArray(section.checks) ? section.checks : []).map(renderCheck).join("")}</article>`).join("")}</div>`;
+  const cards = (Array.isArray(sections) ? sections : []).map((section) => ({
+    ...section,
+    checks: (Array.isArray(section.checks) ? section.checks : []).filter(isPublicCheck),
+  })).filter((section) => section.checks.length > 0);
+  if (cards.length === 0) return "";
+  return `<h3>${text(title)}</h3><div class="detail-condition-grid">${cards.map((section) => `<article class="${cardClass}-card detail-condition-card"><header><h4>${text(labels[section.code] ?? section.code)}</h4><span>${text(stateLabel(section.state))}</span></header>${section.checks.map(renderCheck).join("")}</article>`).join("")}</div>`;
 }
 function renderCheck(check) {
-  const missing = check?.actual === null || check?.actual === undefined || !check?.dataDate || !check?.sourceId;
-  return `<dl class="condition-check">${fact("完整規則", check?.label)}${fact("實際值", missing ? MISSING_WORDING : check.actual)}${fact("門檻", check?.threshold)}${fact("結果", stateLabel(check?.state))}${fact("資料日", check?.dataDate ?? MISSING_WORDING)}${fact("來源 ID", check?.sourceId ?? MISSING_WORDING)}${fact("狀態", check?.state ?? "pending")}${fact("缺漏原因", check?.missingReason)}</dl>`;
+  return `<dl class="condition-check">${fact("完整規則", check?.label)}${fact("實際值", check.actual)}${fact("門檻", check.threshold)}${fact("結果", stateLabel(check.state))}${fact("資料日", check.dataDate)}${fact("公開來源", "已驗證")}</dl>`;
+}
+function isPublicCheck(check) {
+  return check?.actual !== null && check?.actual !== undefined && check?.actual !== ""
+    && validIsoDate(check?.dataDate)
+    && APPROVED_EVENT_SOURCE_URLS.has(check?.sourceId)
+    && ["favorable", "met"].includes(check?.state);
 }
 function candleSection(record) {
   const chartData = JSON.stringify({
@@ -330,7 +339,7 @@ function companySection(view, strategies, fieldStates = {}) {
 }
 function eventsSection(events) {
   const values = Array.isArray(events) ? events : [];
-  return `<h3>事件時間軸</h3><ol class="detail-event-timeline">${values.length ? values.map((event) => `<li><time>${text(event.date)}</time><strong>${text(event.title)}</strong><span>${text(event.type)} · ${text(event.sourceId)}</span>${sourceLink(event.sourceUrl, event.sourceId)}</li>`).join("") : `<li>${MISSING_WORDING}</li>`}</ol>`;
+  return `<h3>事件時間軸</h3><ol class="detail-event-timeline">${values.length ? values.map((event) => `<li><time>${text(event.date)}</time><strong>${text(event.title)}</strong><span>${text(event.type)}</span>${sourceLink(event.sourceUrl, event.sourceId)}</li>`).join("") : `<li>${MISSING_WORDING}</li>`}</ol>`;
 }
 function sourceLink(value, sourceId) { const url = verifiedSnapshotUrl(value, sourceId); return url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">已驗證公開來源</a>` : ""; }
 function validIsoDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")); }

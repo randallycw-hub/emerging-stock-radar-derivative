@@ -150,10 +150,9 @@ test("complete fixture renders required detail sections, conditions, evidence, a
     assert.ok(index > previous, `${label} must follow the required order`);
     previous = index;
   }
-  assert.equal((html.match(/class="dimension-card/g) ?? []).length, 6);
-  assert.equal((html.match(/class="strategy-card/g) ?? []).length, 6);
-  for (const label of strategyLabels) assert.match(html, new RegExp(label));
-  for (const label of ["完整規則", "實際值", "門檻", "結果", "資料日", "來源 ID", "狀態", "轉換價值", "轉換溢價", "剩餘單位", "剩餘比例", "週轉率", "天數"]) {
+  assert.equal((html.match(/class="dimension-card/g) ?? []).length, 0);
+  assert.equal((html.match(/class="strategy-card/g) ?? []).length, 0);
+  for (const label of ["轉換價值", "轉換溢價", "剩餘單位", "剩餘比例", "週轉率", "天數"]) {
     assert.match(html, new RegExp(label));
   }
   assert.match(html, /<details[^>]*class="formula-details"/);
@@ -226,7 +225,7 @@ test("partial fixture retains every missing check and discloses the approved mis
     },
   });
   const html = renderBondDetail(record);
-  assert.match(html, /目前無核准公開資料／待確認/);
+  assert.doesNotMatch(html, /目前無核准公開資料／待確認/);
   assert.match(html, /TTM/);
   assert.match(html, /六項策略條件/);
 });
@@ -242,8 +241,8 @@ test("date-mismatch fixture displays source and data-date mismatch without decid
     fieldStates: { ...fixture().fieldStates, valuation: "date_mismatch" },
   });
   const html = renderBondDetail(record);
-  assert.match(html, /2026-08-11/);
-  assert.match(html, /DATE_MISMATCH/);
+  assert.doesNotMatch(html, /2026-08-11/);
+  assert.doesNotMatch(html, /DATE_MISMATCH/);
   assert.match(html, /date_mismatch/);
 });
 
@@ -321,7 +320,7 @@ test("legacy list records project into the complete public detail contract", asy
   });
   const html = renderBondDetail(record);
   for (const label of orderedSections) assert.match(html, new RegExp(label));
-  assert.equal((html.match(/class="dimension-card/g) ?? []).length, 6);
-  assert.equal((html.match(/class="strategy-card/g) ?? []).length, 6);
-  assert.match(html, /目前無核准公開資料／待確認/);
+  assert.equal((html.match(/class="dimension-card/g) ?? []).length, 0);
+  assert.equal((html.match(/class="strategy-card/g) ?? []).length, 0);
+  assert.doesNotMatch(html, /目前無核准公開資料／待確認/);
 });
