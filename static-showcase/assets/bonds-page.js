@@ -1,14 +1,13 @@
-import { sortRows } from "./table-sort.js";
+import {
+  buildBondSearchSuggestions,
+  filterBondRecords,
+  paginateBondRecords,
+  parseBondListState,
+  serializeBondListState,
+  sortBondRecords,
+} from "./bond-list-page.js";
+import { bindBondDetail, detailRecordFromLegacy, renderBondDetail } from "./bond-detail-page.js";
 
-const workbenchSections = [
-  "交易摘要",
-  "價格日期與估值日",
-  "價格走勢",
-  "轉換與餘額",
-  "契約生命週期",
-  "發行條款",
-  "公告與文件",
-];
 const reasonLabels = {
   NO_CB_CLOSE: "尚無可用 CB 收盤",
   NO_STOCK_CLOSE: "尚無可用股票收盤",
@@ -25,41 +24,75 @@ const state = {
   manifest: null,
   bondTerms: [],
   views: [],
-  conversions: [],
   history: [],
-  sortKey: "bondCode",
+  conversionPrices: [],
+  workbench: [],
+  sortKey: null,
   sortDirection: "asc",
   page: 1,
+  archived: false,
+  event: "",
+  quality: "",
+  maturityBefore: "",
+  remainingMax: null,
+  secured: "",
+  workbenchDeclared: false,
+  workbenchUnavailable: false,
+  workbenchAsOfDate: null,
+  detailOrigin: null,
+  suggestions: [],
+  highlightedSuggestion: -1,
 };
+let disposeDetail = () => {};
 
-initializeFromUrl();
-bindFilters();
-await loadAndRender();
-window.addEventListener("popstate", () => {
+if (globalThis.window && globalThis.document) {
   initializeFromUrl();
-  renderRoute();
-});
+  bindFilters();
+  await loadAndRender();
+  globalThis.window.addEventListener("popstate", () => {
+    initializeFromUrl();
+    renderRoute();
+  });
+}
 
 async function loadAndRender() {
   const pointer = await loadJson(bootstrapConfig.generationPointerUrl, null);
   const config = pointer?.runtimeUrl
     ? await loadJson(new URL(pointer.runtimeUrl, document.baseURI), { manifestUrl: null, datasets: {} })
     : bootstrapConfig;
-  const [manifest, bondTerms, market, conversions, history] =
+  const workbenchDeclared = Object.prototype.hasOwnProperty.call(
+    config.datasets ?? {},
+    "bondWorkbench",
+  );
+  const [manifest, bondTerms, history, conversionPrices, workbenchResult] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
       loadJson(config.datasets["11406"], []),
-      loadJson(config.datasets.bondMarket, []),
-      loadJson(config.datasets.conversionPrices, []),
       loadJson(config.datasets.bondHistory, []),
+      loadJson(config.datasets.conversionPrices, []),
+      workbenchDeclared
+        ? loadDeclaredWorkbench(config.datasets.bondWorkbench)
+        : Promise.resolve({ ok: true, value: null }),
     ]);
   state.manifest = manifest;
   state.bondTerms = arrayValue(bondTerms);
-  state.views = arrayValue(market);
-  state.conversions = arrayValue(conversions);
   state.history = arrayValue(history);
-
-  if (state.views.length === 0) state.views = fallbackBondViews(state.bondTerms);
+  state.conversionPrices = arrayValue(conversionPrices);
+  state.workbenchDeclared = workbenchDeclared;
+  state.workbenchUnavailable = !workbenchDeclared || !workbenchResult.ok;
+  state.workbenchAsOfDate = validPublishedDate(workbenchResult.value?.dataDate)
+    ? workbenchResult.value.dataDate
+    : null;
+  state.workbench = state.workbenchUnavailable
+    ? []
+    : arrayValue(workbenchResult.value?.records);
+  state.views = state.workbenchUnavailable
+    ? []
+    : buildBondListRecords({
+      workbench: state.workbench,
+      bondTerms: state.bondTerms,
+    });
+  updateSearchSuggestions();
   renderRoute();
   const marketDate = state.manifest?.market?.dataDate;
   document.querySelector("#bond-update-status").textContent = marketDate
@@ -68,49 +101,82 @@ async function loadAndRender() {
 }
 
 function initializeFromUrl() {
-  const params = new URLSearchParams(location.search);
-  state.sortKey = params.get("sort") || "bondCode";
-  state.sortDirection = params.get("direction") === "desc" ? "desc" : "asc";
-  state.page = Math.max(1, Number.parseInt(params.get("page") || "1", 10) || 1);
-  document.querySelector("#bond-search").value = params.get("q") || "";
-  document.querySelector("#bond-preset").value = params.get("preset") || "all";
-  document.querySelector("#bond-sort-field").value = state.sortKey;
-  updateDirectionButton();
+  const listState = parseBondListState(location.search);
+  state.sortKey = new URLSearchParams(location.search).get("sort") || null;
+  state.sortDirection = listState.direction;
+  state.page = listState.page;
+  state.archived = listState.archived;
+  state.event = listState.event;
+  state.quality = listState.quality;
+  state.maturityBefore = listState.maturityBefore;
+  state.remainingMax = listState.remainingMax;
+  state.secured = listState.secured;
+  document.querySelector("#bond-search").value = listState.query;
+  document.querySelector("#bond-archive-toggle").checked = state.archived;
+  setControlValue("#bond-maturity-before", state.maturityBefore);
+  setControlValue("#bond-remaining-max", state.remainingMax ?? "");
+  setControlValue("#bond-secured", state.secured);
+  setControlValue("#bond-quality", state.quality);
+  updateBondShortcutStates();
 }
 
 function bindFilters() {
-  for (const selector of ["#bond-search", "#bond-preset"]) {
-    document.querySelector(selector).addEventListener("input", () => {
+  const search = document.querySelector("#bond-search");
+  search.addEventListener("input", () => {
+    state.page = 1;
+    syncListUrl();
+    updateSearchSuggestions();
+    renderBonds();
+  });
+  search.addEventListener("keydown", handleSearchKeydown);
+  document.querySelector("#bond-archive-toggle").addEventListener("change", (event) => {
+    state.archived = event.target.checked;
+    state.page = 1;
+    syncListUrl();
+    renderBonds();
+  });
+  document.querySelector("#bond-clear-filter").addEventListener("click", () => {
+    clearBondFilters();
+    document.querySelector("#bond-search").focus();
+  });
+  for (const selector of ["#bond-maturity-before", "#bond-remaining-max", "#bond-secured", "#bond-quality"]) {
+    document.querySelector(selector)?.addEventListener("change", (event) => {
+      if (selector === "#bond-quality") state.quality = event.target.value;
       state.page = 1;
       syncListUrl();
       renderBonds();
     });
   }
-  document.querySelector("#bond-sort-field").addEventListener("change", (event) => {
-    state.sortKey = event.target.value;
-    state.sortDirection = "desc";
-    state.page = 1;
-    updateDirectionButton();
-    syncListUrl();
-    renderBonds();
-  });
-  document.querySelector("#bond-sort-direction").addEventListener("click", () => {
-    state.sortDirection = state.sortDirection === "desc" ? "asc" : "desc";
-    state.page = 1;
-    updateDirectionButton();
-    syncListUrl();
-    renderBonds();
-  });
+  for (const button of document.querySelectorAll("[data-bond-shortcut]")) {
+    button.addEventListener("click", () => {
+      const shortcut = button.dataset.bondShortcut;
+      if (shortcut === "rights90" || shortcut === "maturity365") {
+        state.event = state.event === shortcut ? "" : shortcut;
+      } else if (shortcut === "pending") {
+        state.quality = state.quality === "pending" ? "" : "pending";
+        setControlValue("#bond-quality", state.quality);
+      } else if (shortcut === "clear") {
+        clearBondFilters();
+        return;
+      }
+      state.page = 1;
+      syncListUrl();
+      renderBonds();
+    });
+  }
   for (const button of document.querySelectorAll("[data-sort-key]")) {
     button.addEventListener("click", () => {
       const key = button.dataset.sortKey;
-      state.sortDirection = state.sortKey === key && state.sortDirection === "desc"
-        ? "asc"
-        : "desc";
-      state.sortKey = key;
+      if (state.sortKey !== key) {
+        state.sortKey = key;
+        state.sortDirection = "asc";
+      } else if (state.sortDirection === "asc") {
+        state.sortDirection = "desc";
+      } else {
+        state.sortKey = null;
+        state.sortDirection = "asc";
+      }
       state.page = 1;
-      document.querySelector("#bond-sort-field").value = key;
-      updateDirectionButton();
       syncListUrl();
       renderBonds();
     });
@@ -128,118 +194,194 @@ async function loadJson(url, fallback) {
   }
 }
 
+async function loadDeclaredWorkbench(url) {
+  if (typeof url !== "string" || url.length === 0) return { ok: false, value: null };
+  try {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP_${response.status}`);
+    const value = await response.json();
+    if (
+      value === null
+      || typeof value !== "object"
+      || Array.isArray(value)
+      || !Array.isArray(value.records)
+    ) {
+      throw new Error("INVALID_WORKBENCH");
+    }
+    return { ok: true, value };
+  } catch {
+    return { ok: false, value: null };
+  }
+}
+
 function arrayValue(value) {
   return Array.isArray(value) ? value : Array.isArray(value?.records) ? value.records : [];
 }
 
-function fallbackBondViews(rows) {
-  const today = state.manifest?.generatedAt ?? "";
-  return rows
-    .filter((row) => /^\d{5,6}$/.test(String(row["債券代碼"] ?? "")))
-    .map((row) => ({
-      bondCode: String(row["債券代碼"]),
-      issuerCode: String(row["機構代碼"] ?? ""),
-      bondName: String(row["債券簡稱"] ?? "未命名可轉債"),
-      cbClose: null,
-      cbPriceDate: null,
-      cbTradeUnits: "0",
-      stockClose: null,
-      stockPriceDate: null,
-      currentConversionPrice: null,
-      conversionPriceEffectiveDate: null,
-      valuationDate: null,
-      valuationCbClose: null,
-      valuationStockClose: null,
-      conversionValue: null,
-      premiumRate: null,
-      outstandingAmount: row["目前餘額"] || null,
-      outstandingReductionRate: null,
-      maturityDate: formatDate(row["到期日期"]),
-      daysToMaturity: daysBetween(today, formatDate(row["到期日期"])),
-      nextPutDate: row["賣回權日期"] ? formatDate(row["賣回權日期"]) : null,
-      daysToNextPut: row["賣回權日期"]
-        ? daysBetween(today, formatDate(row["賣回權日期"]))
-        : null,
-      staleCbPrice: false,
-      missingReasons: ["SNAPSHOT_NOT_PUBLISHED"],
-    }));
+function validPublishedDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""));
+}
+
+export function buildBondListRecords({ views = [], workbench = [], bondTerms = [] } = {}) {
+  const termsByBondCode = new Map(
+    arrayValue(bondTerms)
+      .filter((term) => /^\d{5,6}$/.test(String(term?.["債券代碼"] ?? "")))
+      .map((term) => [String(term["債券代碼"]), term]),
+  );
+  if (arrayValue(workbench).length > 0) {
+    return arrayValue(workbench).map((record) => {
+      const view = record?.view ?? {};
+      const term = record?.term ?? {};
+      const legacyTerm = termsByBondCode.get(record?.bondCode);
+      return {
+        ...view,
+        ...canonicalListFieldsForLegacyView(view),
+        bondCode: record.bondCode,
+        issuerCode: term.issuerCode ?? view.issuerCode,
+        issuerName: term.issuerName ?? legacyTerm?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
+        bondName: term.bondName ?? view.bondName,
+        status: record.status,
+        archived: record.status === "archived",
+        archiveReason: record.archiveReason,
+        archivedAt: record.archivedAt,
+        archiveDate: record.archivedAt,
+      };
+    });
+  }
+  return arrayValue(views).map((view) => {
+    const term = termsByBondCode.get(view.bondCode);
+    return {
+      ...view,
+      ...canonicalListFieldsForLegacyView(view),
+      issuerName: term?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
+    };
+  });
+}
+
+function canonicalListFieldsForLegacyView(view) {
+  const has = (key) => Object.hasOwn(view, key);
+  const reduction = Number(view.outstandingReductionRate);
+  const remainingRatio = has("remainingRatio")
+    ? view.remainingRatio
+    : view.outstandingReductionRate === null
+      || view.outstandingReductionRate === undefined
+      || view.outstandingReductionRate === ""
+      || !Number.isFinite(reduction)
+        ? null
+        : String(Number((100 - reduction).toFixed(8)));
+  const usesPut = Boolean(view.nextPutDate);
+  const legacyEventType = usesPut ? "put" : "maturity";
+  const legacyEventDate = usesPut ? view.nextPutDate : view.maturityDate ?? null;
+  const legacyDaysToNextEvent = usesPut
+    ? view.daysToNextPut ?? null
+    : view.daysToMaturity ?? null;
+  const dataQuality = has("dataQuality")
+    ? view.dataQuality
+    : view.cbClose !== null
+      && view.cbClose !== undefined
+      && view.cbClose !== ""
+      && Array.isArray(view.missingReasons)
+      && view.missingReasons.length === 0
+        ? "complete"
+        : "partial";
+  return {
+    remainingRatio,
+    nextEventType: has("nextEventType")
+      ? view.nextEventType
+      : legacyEventType,
+    nextEventDate: has("nextEventDate")
+      ? view.nextEventDate
+      : legacyEventDate,
+    daysToNextEvent: has("daysToNextEvent")
+      ? view.daysToNextEvent
+      : legacyDaysToNextEvent,
+    dataQuality,
+  };
 }
 
 function renderBonds() {
-  const query = document.querySelector("#bond-search").value.trim().toLowerCase();
-  const preset = document.querySelector("#bond-preset").value;
-  const filtered = state.views.filter((view) => {
+  if (state.workbenchUnavailable) {
+    const message = "可轉債工作台資料目前無法使用；請稍後再試。";
+    setText("#bond-result-count", "資料無法使用");
+    document.querySelector("#bond-clear-filter").hidden = true;
+    document.querySelector("#bond-table-body").innerHTML = `<tr><td colspan="10" class="empty-cell">${message}</td></tr>`;
+    document.querySelector("#bond-card-list").innerHTML = `<p class="empty-cell">${message}</p>`;
+    document.querySelector("#bond-pagination").innerHTML = "";
+    return;
+  }
+  const prepared = state.views.map((view) => {
     const term = termFor(view.bondCode);
-    const haystack = [
-      view.bondCode,
-      view.bondName,
-      view.issuerCode,
-      term?.["機構名稱"],
-    ].join(" ").toLowerCase();
-    return haystack.includes(query) && matchesPreset(view, preset);
+    return {
+      ...view,
+      issuerName: term?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
+      securedStatus: view.securedStatus ?? term?.securedStatus ?? term?.["有無擔保"] ?? null,
+    };
   });
-  const rows = sortRows(filtered, {
-    key: state.sortKey,
-    direction: state.sortDirection,
-    type: state.sortKey === "bondCode"
-      || state.sortKey === "bondName"
-      || state.sortKey === "maturityDate"
-      ? "text"
-      : "number",
-  });
-  const size = pageSize();
-  const pages = Math.max(1, Math.ceil(rows.length / size));
-  state.page = Math.min(state.page, pages);
-  const visible = rows.slice((state.page - 1) * size, state.page * size);
+  const filters = currentBondFilters();
+  const filtered = filterBondRecords(prepared, filters);
+  const ordered = state.sortKey ? sortBondRecords(filtered, { key: state.sortKey, direction: state.sortDirection }) : filtered;
+  const pagination = paginateBondRecords(ordered, state.page);
+  state.page = pagination.page;
+  const visible = pagination.records;
+  const noResults = ordered.length === 0;
 
-  setText("#bond-result-count", `${rows.length} 檔 · 第 ${state.page}/${pages} 頁`);
+  setText("#bond-result-count", `${pagination.total} 檔 · 第 ${state.page}/${pagination.pageCount} 頁`);
+  document.querySelector("#bond-clear-filter").hidden = !noResults || activeBondConditions(filters).length === 0;
+  const activeConditions = activeBondConditions(filters);
+  const emptyMessage = activeConditions.length
+    ? `沒有符合條件的可轉債；目前條件：${activeConditions.join("、")}。可清除所有條件後再試。`
+    : "沒有符合條件的可轉債；可清除搜尋條件後再試。";
   document.querySelector("#bond-table-body").innerHTML = visible.length
     ? visible.map(renderBondRow).join("")
-    : '<tr><td colspan="10" class="empty-cell">沒有符合條件的可轉債</td></tr>';
+    : `<tr><td colspan="10" class="empty-cell">${escapeHtml(emptyMessage)}</td></tr>`;
   document.querySelector("#bond-card-list").innerHTML = visible.length
     ? visible.map(renderBondCard).join("")
-    : '<p class="empty-cell">沒有符合條件的可轉債</p>';
+    : `<p class="empty-cell">${escapeHtml(emptyMessage)}</p>`;
   updateSortHeaders();
-  renderPagination(pages);
+  updateBondShortcutStates();
+  renderPagination(pagination.pageCount);
   bindBondOpeners();
 }
 
 function renderBondRow(view) {
   const term = termFor(view.bondCode);
   const reason = firstReason(view);
+  const presentation = bondListPresentation(view);
   return `<tr tabindex="0" data-bond-code="${escapeHtml(view.bondCode)}" aria-label="查看 ${escapeHtml(view.bondName)} 詳細資料">
     <td>${metric(`${view.bondCode} · ${view.bondName}`, `${view.issuerCode} ${term?.["機構名稱"] ?? ""}`)}</td>
     <td>${priceMetric(view.cbClose, view.cbPriceDate, view.staleCbPrice ? "非當日成交" : "")}</td>
-    <td>${priceMetric(view.stockClose, view.stockPriceDate)}</td>
-    <td>${priceMetric(view.currentConversionPrice, view.conversionPriceEffectiveDate, "生效日")}</td>
     <td>${priceMetric(view.conversionValue, view.valuationDate, "估值日", "metric-violet")}</td>
     <td>${rateMetric(view.premiumRate, view.valuationDate, reason)}</td>
-    <td>${metric(formatNumber(view.cbTradeUnits), view.cbTradeUnits === "0" ? "當日無成交" : "交易單位")}</td>
-    <td>${metric(formatMoney(view.outstandingAmount), view.outstandingAmount === null ? "資料暫缺" : view.outstandingReductionRate === null ? "官方目前餘額" : `流通減少 ${signedRate(view.outstandingReductionRate)}`)}</td>
-    <td>${metric(view.maturityDate, "契約到期日")}</td>
+    <td>${priceMetric(view.stockClose, view.stockPriceDate)}</td>
+    <td>${priceMetric(view.currentConversionPrice, view.conversionPriceEffectiveDate, "生效日")}</td>
+    <td>${metric(presentation.remainingRatio, "流通餘額比例")}</td>
     <td>${eventMetric(view)}</td>
+    <td>${metric(view.valuationDate ?? view.cbPriceDate, "資料日期")}</td>
+    <td>${metric(view.archived || view.status === "archived" ? "封存" : presentation.qualityLabel, view.archived || view.status === "archived" ? `${view.archiveReason ?? "封存"} · ${view.archiveDate ?? view.archivedAt ?? "日期未提供"}` : firstReason(view) || "已驗證")}</td>
   </tr>`;
 }
 
 function renderBondCard(view) {
+  const presentation = bondListPresentation(view);
   return `<button class="bond-card" type="button" data-bond-code="${escapeHtml(view.bondCode)}">
     <header><strong>${escapeHtml(view.bondCode)} · ${escapeHtml(view.bondName)}</strong><span>${view.staleCbPrice ? "非當日成交" : ""}</span></header>
     <span class="bond-card-grid">
-      ${cardMetric("CB 收盤價（盤後）", valueOrDash(view.cbClose), view.cbPriceDate)}
-      ${cardMetric("股票收盤", valueOrDash(view.stockClose), view.stockPriceDate)}
-      ${cardMetric("目前轉換價", valueOrDash(view.currentConversionPrice), view.conversionPriceEffectiveDate)}
+      ${cardMetric("CB 收盤", valueOrDash(view.cbClose), view.cbPriceDate)}
       ${cardMetric("轉換價值", valueOrDash(view.conversionValue), view.valuationDate)}
       ${cardMetric("轉換溢價率", view.premiumRate === null ? "—" : signedRate(view.premiumRate), view.valuationDate)}
-      ${cardMetric("流通餘額", formatMoney(view.outstandingAmount), "官方目前餘額")}
-      ${cardMetric("到期日", view.maturityDate, `距到期 ${view.daysToMaturity} 天`)}
-      ${cardMetric("最近事件", eventLabel(view), eventDate(view))}
+      ${cardMetric("標的股收盤", valueOrDash(view.stockClose), view.stockPriceDate)}
+      ${cardMetric("目前轉換價", valueOrDash(view.currentConversionPrice), view.conversionPriceEffectiveDate)}
+      ${cardMetric("流通餘額比例", presentation.remainingRatio, "流通餘額比例")}
+      ${cardMetric("下一事件", presentation.eventLabel, presentation.eventDate)}
+      ${cardMetric("資料日期", view.valuationDate ?? view.cbPriceDate, "資料日期")}
+      ${cardMetric("資料品質", view.archived || view.status === "archived" ? "封存" : presentation.qualityLabel, view.archived || view.status === "archived" ? `${view.archiveReason ?? "封存"} · ${view.archiveDate ?? view.archivedAt ?? "日期未提供"}` : firstReason(view) || "已驗證")}
     </span>
   </button>`;
 }
 
 function bindBondOpeners() {
   for (const element of document.querySelectorAll("[data-bond-code]")) {
-    const open = () => openBond(element.dataset.bondCode);
+    const open = () => openBond(element.dataset.bondCode, element);
     element.addEventListener("click", open);
     element.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
@@ -248,6 +390,71 @@ function bindBondOpeners() {
       }
     });
   }
+}
+
+function handleSearchKeydown(event) {
+  if (event.key === "Escape") {
+    closeSearchSuggestions();
+    return;
+  }
+  if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "Enter") return;
+  if (event.key === "Enter" && state.highlightedSuggestion < 0) return;
+  event.preventDefault();
+  if (event.key === "Enter") {
+    const selected = state.suggestions[state.highlightedSuggestion];
+    if (selected) openBond(selected.bondCode, event.currentTarget);
+    return;
+  }
+  if (state.suggestions.length === 0) return;
+  const step = event.key === "ArrowDown" ? 1 : -1;
+  state.highlightedSuggestion = (state.highlightedSuggestion + step + state.suggestions.length) % state.suggestions.length;
+  renderSearchSuggestions();
+}
+
+function updateSearchSuggestions() {
+  const query = document.querySelector("#bond-search")?.value ?? "";
+  state.suggestions = buildBondSearchSuggestions(searchableBondRecords(), query);
+  state.highlightedSuggestion = state.suggestions.findIndex((item) => item.exact);
+  renderSearchSuggestions();
+}
+
+function searchableBondRecords() {
+  return state.views.map((view) => {
+    const term = termFor(view.bondCode);
+    return {
+      ...view,
+      issuerCode: view.issuerCode ?? term?.["機構代碼"] ?? "",
+      issuerName: view.issuerName ?? term?.["機構名稱"] ?? "",
+    };
+  });
+}
+
+function renderSearchSuggestions() {
+  const input = document.querySelector("#bond-search");
+  const target = document.querySelector("#bond-search-suggestions");
+  if (!input || !target) return;
+  const open = state.suggestions.length > 0;
+  input.setAttribute("aria-expanded", String(open));
+  if (!open) {
+    input.removeAttribute("aria-activedescendant");
+    target.hidden = true;
+    target.innerHTML = "";
+    return;
+  }
+  const activeId = state.highlightedSuggestion >= 0 ? `bond-suggestion-${state.highlightedSuggestion}` : null;
+  if (activeId) input.setAttribute("aria-activedescendant", activeId);
+  else input.removeAttribute("aria-activedescendant");
+  target.hidden = false;
+  target.innerHTML = state.suggestions.map((item, index) => `<button type="button" id="bond-suggestion-${index}" role="option" aria-selected="${index === state.highlightedSuggestion}" data-bond-suggestion="${escapeHtml(item.bondCode)}"><strong>${escapeHtml(item.bondCode)} · ${escapeHtml(item.bondName)}</strong><span>${escapeHtml(item.issuerCode)} ${escapeHtml(item.issuerName)}</span></button>`).join("");
+  for (const button of target.querySelectorAll("[data-bond-suggestion]")) {
+    button.addEventListener("click", () => openBond(button.dataset.bondSuggestion, input));
+  }
+}
+
+function closeSearchSuggestions() {
+  state.suggestions = [];
+  state.highlightedSuggestion = -1;
+  renderSearchSuggestions();
 }
 
 function updateSortHeaders() {
@@ -261,16 +468,6 @@ function updateSortHeaders() {
       ? state.sortDirection === "desc" ? "↓" : "↑"
       : "";
   }
-}
-
-function updateDirectionButton() {
-  const button = document.querySelector("#bond-sort-direction");
-  button.dataset.direction = state.sortDirection;
-  button.textContent = state.sortDirection === "desc" ? "高到低 ↓" : "低到高 ↑";
-}
-
-function pageSize() {
-  return matchMedia("(max-width: 900px)").matches ? 25 : 50;
 }
 
 function renderPagination(pageCount) {
@@ -294,48 +491,108 @@ function renderPagination(pageCount) {
 }
 
 function syncListUrl({ push = false } = {}) {
-  const params = new URLSearchParams();
-  const query = document.querySelector("#bond-search").value.trim();
-  const preset = document.querySelector("#bond-preset").value;
-  if (query) params.set("q", query);
-  if (preset !== "all") params.set("preset", preset);
-  params.set("sort", state.sortKey);
-  params.set("direction", state.sortDirection);
-  params.set("page", String(state.page));
-  const url = `${location.pathname}?${params}`;
+  const search = serializeBondListState({
+    ...currentBondFilters(),
+    sortKey: state.sortKey,
+    direction: state.sortDirection,
+    page: state.page,
+  });
+  const url = `${location.pathname}${search}`;
   history[push ? "pushState" : "replaceState"](null, "", url);
 }
 
-function openBond(code) {
-  const params = new URLSearchParams(location.search);
-  params.set("bond", code);
-  history.pushState(null, "", `${location.pathname}?${params}`);
-  renderRoute();
+function currentBondFilters() {
+  return {
+    query: document.querySelector("#bond-search").value,
+    archived: state.archived,
+    event: state.event,
+    quality: controlValue("#bond-quality", state.quality),
+    maturityBefore: controlValue("#bond-maturity-before", state.maturityBefore),
+    remainingMax: controlValue("#bond-remaining-max", state.remainingMax ?? ""),
+    secured: controlValue("#bond-secured", state.secured),
+  };
 }
 
-function matchesPreset(view, preset) {
-  if (preset === "low-price") return numberValue(view.cbClose) < 100;
-  if (preset === "low-premium") return numberValue(view.premiumRate) < 5;
-  if (preset === "near-parity") {
-    const value = numberValue(view.conversionValue);
-    return value >= 95 && value <= 105;
+function controlValue(selector, fallback = "") {
+  return document.querySelector(selector)?.value ?? fallback;
+}
+
+function setControlValue(selector, value) {
+  const control = document.querySelector(selector);
+  if (control) control.value = value;
+}
+
+function activeBondConditions(filters) {
+  const labels = [];
+  if (filters.query.trim()) labels.push(`搜尋「${filters.query.trim()}」`);
+  if (filters.archived) labels.push("顯示封存可轉債");
+  if (filters.event === "rights90") labels.push("90 日內權利事件");
+  if (filters.event === "maturity365") labels.push("365 日內到期");
+  if (filters.quality === "pending") labels.push("待補／待確認資料");
+  if (filters.maturityBefore) labels.push(`到期日不晚於 ${filters.maturityBefore}`);
+  if (filters.remainingMax !== "" && filters.remainingMax !== null) labels.push(`流通餘額比例不高於 ${filters.remainingMax}%`);
+  if (filters.secured) labels.push(`擔保情形：${filters.secured}`);
+  return labels;
+}
+
+function updateBondShortcutStates() {
+  for (const button of document.querySelectorAll("[data-bond-shortcut]")) {
+    const shortcut = button.dataset.bondShortcut;
+    const pressed = shortcut === state.event || (shortcut === "pending" && state.quality === "pending");
+    button.setAttribute("aria-pressed", String(pressed));
   }
-  if (preset === "maturity") return view.daysToMaturity >= 0 && view.daysToMaturity <= 365;
-  if (preset === "put") return view.daysToNextPut >= 0 && view.daysToNextPut <= 90;
-  if (preset === "no-trade") return String(view.cbTradeUnits) === "0";
-  if (preset === "missing") return view.missingReasons?.length > 0;
-  return true;
+}
+
+function clearBondFilters() {
+  document.querySelector("#bond-search").value = "";
+  document.querySelector("#bond-archive-toggle").checked = false;
+  setControlValue("#bond-maturity-before", "");
+  setControlValue("#bond-remaining-max", "");
+  setControlValue("#bond-secured", "");
+  setControlValue("#bond-quality", "");
+  state.archived = false;
+  state.event = "";
+  state.quality = "";
+  state.maturityBefore = "";
+  state.remainingMax = null;
+  state.secured = "";
+  state.page = 1;
+  closeSearchSuggestions();
+  syncListUrl();
+  renderBonds();
+}
+
+function openBond(code, origin = null) {
+  state.detailOrigin = origin
+    ? { bondCode: code, tagName: origin.tagName ?? null }
+    : null;
+  const params = new URLSearchParams(location.search);
+  params.set("bond", code);
+  closeSearchSuggestions();
+  history.pushState(null, "", `${location.pathname}?${params}`);
+  renderRoute();
 }
 
 function renderRoute() {
   const code = new URLSearchParams(location.search).get("bond");
   const target = document.querySelector("#bond-workbench");
   const list = document.querySelector("#bond-list-view");
+  disposeDetail();
+  disposeDetail = () => {};
   if (!code) {
     target.hidden = true;
     target.innerHTML = "";
     list.hidden = false;
     renderBonds();
+    return;
+  }
+  if (state.workbenchUnavailable) {
+    target.hidden = false;
+    list.hidden = true;
+    target.innerHTML = '<p class="empty-cell">可轉債工作台資料目前無法使用；請稍後再試。</p><button class="close-workbench" type="button">返回可轉債總表</button>';
+    const closeButton = target.querySelector(".close-workbench");
+    closeButton.addEventListener("click", closeDetail);
+    closeButton.focus();
     return;
   }
   const view = state.views.find((candidate) => candidate.bondCode === code);
@@ -344,217 +601,34 @@ function renderRoute() {
     list.hidden = true;
     target.innerHTML = `<p class="empty-cell">找不到代碼 ${escapeHtml(code)} 的可轉債資料。</p><button class="close-workbench" type="button">返回可轉債總表</button>`;
     target.querySelector(".close-workbench").addEventListener("click", closeDetail);
+    target.querySelector(".close-workbench").focus();
     return;
   }
-  renderWorkbench(view);
+  const detailRecord = state.workbench.find((candidate) => candidate.bondCode === code)
+    ?? detailRecordFromLegacy({ view, term: termFor(view.bondCode) ?? {}, events: [] });
+  const detail = detailWithValuationConversionEvidence(detailRecord, state.conversionPrices);
+  target.innerHTML = renderBondDetail(detail, { asOfDate: state.workbenchAsOfDate });
+  disposeDetail = bindBondDetail(target, closeDetail, { history: state.history.filter((point) => point.bondCode === code), events: detail.events, archived: detail.status === "archived" });
   target.hidden = false;
   list.hidden = true;
-  target.focus?.();
+  target.querySelector("[data-detail-close]")?.focus();
 }
 
 function closeDetail() {
+  const origin = state.detailOrigin;
+  state.detailOrigin = null;
   const params = new URLSearchParams(location.search);
   params.delete("bond");
   history.pushState(null, "", `${location.pathname}?${params}`);
   initializeFromUrl();
   renderRoute();
-}
-
-function renderWorkbench(view) {
-  const target = document.querySelector("#bond-workbench");
-  const term = termFor(view.bondCode) ?? {};
-  const conversion = state.conversions.find((value) => value.bondCode === view.bondCode);
-  const historyPoints = state.history.filter(
-    (point) => point.bondCode === view.bondCode,
-  );
-  target.innerHTML = `
-    <header class="workbench-head">
-      <div><p class="section-number">${escapeHtml(view.bondCode)} / BOND WORKBENCH</p><h2>${escapeHtml(view.bondName)}</h2><p>${escapeHtml(term["機構名稱"] ?? view.issuerCode)}</p></div>
-      <button class="close-workbench" type="button" aria-label="返回可轉債總表">← 返回總表</button>
-    </header>
-    <section aria-label="${workbenchSections[0]}" class="workbench-summary">
-      ${summaryMetric("CB 收盤價（盤後）", view.cbClose, view.cbPriceDate)}
-      ${summaryMetric("股票收盤", view.stockClose, view.stockPriceDate)}
-      ${summaryMetric("目前轉換價", view.currentConversionPrice, view.conversionPriceEffectiveDate)}
-      ${summaryMetric("轉換價值", view.conversionValue, view.valuationDate)}
-      ${view.valuationDate === null ? "" : summaryMetric("轉換溢價率", signedRate(view.premiumRate), view.valuationDate)}
-    </section>
-    <div class="workbench-grid">
-      ${panel(workbenchSections[1], [
-        ["CB 價格日", view.cbPriceDate],
-        ["股票價格日", view.stockPriceDate],
-        ["轉換價生效日", view.conversionPriceEffectiveDate],
-        ["共同估值日", view.valuationDate],
-      ])}
-      <section class="workbench-panel history-panel"><div class="workbench-heading"><h3>${workbenchSections[2]}</h3>
-        <div class="history-ranges" aria-label="選擇價格走勢區間">
-          <button type="button" data-history-range="1M">1M</button>
-          <button type="button" data-history-range="3M" class="is-active">3M</button>
-          <button type="button" data-history-range="6M">6M</button>
-          <button type="button" data-history-range="1Y">1Y</button>
-        </div></div>
-        <div class="history-chart"><canvas id="bond-history-chart" height="230" aria-label="可轉債、標的股與轉換價值歷史走勢圖" role="img"></canvas></div>
-        <p id="bond-history-caption" class="history-caption">${historyPoints.length ? `已載入 ${historyPoints.length} 個共同交易日資料點；缺漏日期不插值。` : "目前區間尚無可驗證歷史資料；不插補價格。"}</p>
-      </section>
-      ${panel(workbenchSections[3], [
-        ["發行時轉換價", term["發行時轉換價格"]],
-        ["目前轉換價", view.currentConversionPrice],
-        ["發行總額", formatMoney(term["發行總額"])],
-        ["流通餘額", formatMoney(view.outstandingAmount)],
-        ["餘額單位", "官方目前餘額（原始面額）"],
-        ["流通減少率", view.outstandingReductionRate === null ? null : signedRate(view.outstandingReductionRate)],
-      ])}
-      ${panel(workbenchSections[4], [
-        ["發行日", formatDate(term["發行日期"])],
-        ["掛牌日", formatDate(term["掛牌日期"])],
-        ["轉換開始", formatDate(term["轉換期間起"])],
-        ["最近賣回", view.nextPutDate],
-        ["轉換截止", formatDate(term["迄"])],
-        ["到期日", view.maturityDate],
-        ["距到期", view.daysToMaturity === null ? null : `${view.daysToMaturity} 天`],
-      ])}
-      ${panel(workbenchSections[5], [
-        ["票面利率", term["票面利率"] ? `${term["票面利率"]}%` : null],
-        ["擔保", term["有無擔保"] === "1" ? term["債券擔保情形"] || "有擔保" : "無擔保"],
-        ["承銷商", term["承銷機構"]],
-        ["受託人", term["受託人"]],
-        ["募集方式", term["募集方式"]],
-      ])}
-      <section class="workbench-panel"><h3>${workbenchSections[6]}</h3><div class="document-links">
-        ${conversion?.officialDetailUrl ? `<a href="${escapeHtml(conversion.officialDetailUrl)}" target="_blank" rel="noopener noreferrer">發行資料明細</a>` : ""}
-        <a href="https://www.tpex.org.tw/zh-tw/bond/info/statistics-cb/day-quotes.html" target="_blank" rel="noopener noreferrer">可轉債行情查詢</a>
-      </div></section>
-    </div>`;
-  target.querySelector(".close-workbench").addEventListener("click", closeDetail);
-  const drawSelectedHistory = (range) => {
-    drawHistoryChart(historyPoints, range);
-    target.querySelectorAll("[data-history-range]").forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.historyRange === range);
-    });
-  };
-  target.querySelectorAll("[data-history-range]").forEach((button) => {
-    button.addEventListener("click", () => drawSelectedHistory(button.dataset.historyRange));
-  });
-  drawSelectedHistory("3M");
-}
-
-function drawHistoryChart(points, range) {
-  const canvas = document.getElementById("bond-history-chart");
-  const caption = document.getElementById("bond-history-caption");
-  if (!canvas || !caption) return;
-
-  const daysByRange = { "1M": 31, "3M": 93, "6M": 186, "1Y": 366 };
-  const datedPoints = (Array.isArray(points) ? points : [])
-    .map((point) => ({ ...point, timestamp: Date.parse(`${point.date}T00:00:00Z`) }))
-    .filter((point) => Number.isFinite(point.timestamp))
-    .sort((a, b) => a.timestamp - b.timestamp);
-  const latest = datedPoints.at(-1)?.timestamp;
-  const cutoff = latest == null
-    ? Number.POSITIVE_INFINITY
-    : latest - (daysByRange[range] || daysByRange["3M"]) * 86_400_000;
-  const visible = datedPoints.filter((point) => point.timestamp >= cutoff);
-  const context = canvas.getContext("2d");
-  if (!context) return;
-
-  const cssWidth = Math.max(320, Math.floor(canvas.parentElement?.clientWidth || 720));
-  const cssHeight = 230;
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.floor(cssWidth * pixelRatio);
-  canvas.height = Math.floor(cssHeight * pixelRatio);
-  canvas.style.width = `${cssWidth}px`;
-  canvas.style.height = `${cssHeight}px`;
-  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-  context.clearRect(0, 0, cssWidth, cssHeight);
-
-  const styles = getComputedStyle(document.documentElement);
-  const colors = {
-    grid: styles.getPropertyValue("--line").trim() || "#d8d0c4",
-    muted: styles.getPropertyValue("--muted").trim() || "#746f68",
-    clay: styles.getPropertyValue("--clay").trim() || "#b55f45",
-    violet: styles.getPropertyValue("--violet").trim() || "#6652a3",
-    ink: styles.getPropertyValue("--ink").trim() || "#211e1b",
-  };
-  const series = [
-    { key: "bondClose", label: "可轉債收盤", color: colors.clay },
-    { key: "stockClose", label: "標的股收盤", color: colors.violet },
-    { key: "conversionValue", label: "轉換價值", color: colors.ink },
-  ];
-  const values = visible.flatMap((point) =>
-    series.map(({ key }) => Number(point[key])).filter(Number.isFinite)
-  );
-
-  if (!visible.length || !values.length) {
-    context.fillStyle = colors.muted;
-    context.font = "14px system-ui, sans-serif";
-    context.textAlign = "center";
-    context.fillText("此區間尚無共同交易日資料", cssWidth / 2, cssHeight / 2);
-    caption.textContent = "目前區間尚無可驗證歷史資料；不插補價格。";
-    return;
-  }
-
-  const padding = { top: 22, right: 20, bottom: 34, left: 54 };
-  const plotWidth = cssWidth - padding.left - padding.right;
-  const plotHeight = cssHeight - padding.top - padding.bottom;
-  const minValue = Math.min(...values);
-  const maxValue = Math.max(...values);
-  const spread = Math.max(maxValue - minValue, Math.abs(maxValue) * 0.04, 1);
-  const yMin = minValue - spread * 0.08;
-  const yMax = maxValue + spread * 0.08;
-  const xFor = (timestamp) => visible.length === 1
-    ? padding.left + plotWidth / 2
-    : padding.left + ((timestamp - visible[0].timestamp) /
-      Math.max(visible.at(-1).timestamp - visible[0].timestamp, 1)) * plotWidth;
-  const yFor = (value) =>
-    padding.top + (1 - (value - yMin) / (yMax - yMin)) * plotHeight;
-
-  context.font = "12px system-ui, sans-serif";
-  context.textBaseline = "middle";
-  for (let index = 0; index <= 4; index += 1) {
-    const y = padding.top + (plotHeight / 4) * index;
-    const value = yMax - ((yMax - yMin) / 4) * index;
-    context.strokeStyle = colors.grid;
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(padding.left, y);
-    context.lineTo(cssWidth - padding.right, y);
-    context.stroke();
-    context.fillStyle = colors.muted;
-    context.textAlign = "right";
-    context.fillText(value.toFixed(value >= 100 ? 0 : 1), padding.left - 8, y);
-  }
-
-  series.forEach(({ key, color }) => {
-    visible.forEach((point) => {
-      const value = Number(point[key]);
-      if (!Number.isFinite(value)) return;
-      context.fillStyle = color;
-      context.beginPath();
-      context.arc(xFor(point.timestamp), yFor(value), 3, 0, Math.PI * 2);
-      context.fill();
-    });
-  });
-
-  const first = visible[0];
-  const last = visible.at(-1);
-  context.fillStyle = colors.muted;
-  context.textBaseline = "alphabetic";
-  context.textAlign = "left";
-  context.fillText(first.date, padding.left, cssHeight - 8);
-  context.textAlign = "right";
-  context.fillText(last.date, cssWidth - padding.right, cssHeight - 8);
-  caption.innerHTML = `${series.map(({ label, color }) =>
-    `<span class="history-legend"><i style="--legend-color:${escapeHtml(color)}"></i>${label}</span>`
-  ).join("")}<span>共 ${visible.length} 個共同交易日；缺漏日期不插值。</span>`;
-}
-
-function panel(title, entries) {
-  return `<section class="workbench-panel"><h3>${escapeHtml(title)}</h3><dl>${entries.map(([label, value]) =>
-    `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(valueOrDash(value))}</dd></div>`
-  ).join("")}</dl></section>`;
-}
-
-function summaryMetric(label, value, date) {
-  return `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(valueOrDash(value))}</strong><small>${escapeHtml(date ?? "資料暫缺")}</small></article>`;
+  const candidates = [...document.querySelectorAll("[data-bond-code]")];
+  const focusTarget = candidates.find((element) => (
+    element.dataset.bondCode === origin?.bondCode
+    && (origin.tagName === null || element.tagName === origin.tagName)
+    && element.getClientRects().length > 0
+  )) ?? document.querySelector("#bond-search");
+  focusTarget?.focus();
 }
 
 function metric(main, sub, className = "") {
@@ -573,15 +647,48 @@ function rateMetric(value, date, reason) {
 }
 
 function eventMetric(view) {
-  return metric(eventLabel(view), eventDate(view));
+  const presentation = bondListPresentation(view);
+  return metric(presentation.eventLabel, presentation.eventDate);
 }
 
-function eventLabel(view) {
-  return view.nextPutDate ? `賣回 ${view.daysToNextPut} 天` : `到期 ${view.daysToMaturity} 天`;
+export function bondListPresentation(view = {}) {
+  const eventLabels = { redemption: "贖回", put: "賣回", maturity: "到期" };
+  const eventTypeLabel = eventLabels[view.nextEventType] ?? "事件";
+  const eventLabel = Number.isInteger(view.daysToNextEvent)
+    ? `${eventTypeLabel} ${view.daysToNextEvent} 天`
+    : eventTypeLabel;
+  return {
+    remainingRatio: plainRate(view.remainingRatio),
+    eventLabel: view.nextEventDate ? eventLabel : "資料暫缺",
+    eventDate: view.nextEventDate ?? "資料暫缺",
+    qualityLabel: view.dataQuality === "complete" && !view.missingReasons?.length
+      ? "可用"
+      : "待補",
+  };
 }
 
-function eventDate(view) {
-  return view.nextPutDate ?? view.maturityDate ?? "資料暫缺";
+export function detailWithValuationConversionEvidence(record = {}, conversionPrices = []) {
+  const view = record?.view ?? {};
+  const valuationDate = view.valuationDate;
+  const bondCode = String(record?.bondCode ?? view.bondCode ?? "");
+  const applied = Array.isArray(conversionPrices)
+    ? conversionPrices
+      .filter((item) => (
+        String(item?.bondCode ?? "") === bondCode
+        && typeof item?.effectiveDate === "string"
+        && typeof valuationDate === "string"
+        && item.effectiveDate <= valuationDate
+      ))
+      .sort((left, right) => right.effectiveDate.localeCompare(left.effectiveDate))[0]
+    : undefined;
+  return {
+    ...record,
+    view: {
+      ...view,
+      valuationConversionPrice: applied?.currentConversionPrice ?? null,
+      valuationConversionPriceEffectiveDate: applied?.effectiveDate ?? null,
+    },
+  };
 }
 
 function cardMetric(label, value, sub) {
@@ -603,52 +710,11 @@ function signedRate(value) {
   return `${number > 0 ? "+" : ""}${number.toLocaleString("zh-TW", { maximumFractionDigits: 2 })}%`;
 }
 
-function formatMoney(value) {
+function plainRate(value) {
   if (value === null || value === undefined || value === "") return "—";
-  const number = Number(String(value).replaceAll(",", ""));
+  const number = Number(value);
   if (!Number.isFinite(number)) return String(value);
-  if (Math.abs(number) >= 100000000) {
-    return `${(number / 100000000).toLocaleString("zh-TW", { maximumFractionDigits: 2 })} 億`;
-  }
-  if (Math.abs(number) >= 10000) {
-    return `${(number / 10000).toLocaleString("zh-TW", { maximumFractionDigits: 1 })} 萬`;
-  }
-  return number.toLocaleString("zh-TW");
-}
-
-function formatNumber(value) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number.toLocaleString("zh-TW") : "—";
-}
-
-function formatDate(value) {
-  if (value === null || value === undefined || value === "") return "—";
-  const text = String(value).trim();
-  let match;
-  if ((match = /^(\d{4})(\d{2})(\d{2})$/.exec(text))) {
-    return `${match[1]}-${match[2]}-${match[3]}`;
-  }
-  if ((match = /^(\d{3})(\d{2})(\d{2})$/.exec(text))) {
-    return `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
-  }
-  if ((match = /^(\d{3})\/(\d{2})\/(\d{2})$/.exec(text))) {
-    return `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
-  }
-  if ((match = /^(\d{3})(\d{2})$/.exec(text))) {
-    return `${Number(match[1]) + 1911}-${match[2]}`;
-  }
-  return text;
-}
-
-function daysBetween(from, to) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return null;
-  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000);
-}
-
-function numberValue(value) {
-  if (value === null || value === undefined || value === "") return Number.POSITIVE_INFINITY;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : Number.POSITIVE_INFINITY;
+  return `${number.toLocaleString("zh-TW", { maximumFractionDigits: 2 })}%`;
 }
 
 function valueOrDash(value) {

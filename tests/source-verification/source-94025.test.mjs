@@ -14,6 +14,7 @@ import {
   normalize94025Percent,
   normalize94025Revenue,
   normalize94025Row,
+  parseMonthlyRevenueCsv,
   parse94025Csv,
   parse94025Json,
 } from "../../lib/source-verification/source-94025.ts";
@@ -43,6 +44,15 @@ async function fixtureBytes(name) {
 async function fixtureText(name) {
   return readFile(new URL(name, fixtureDirectory), "utf8");
 }
+
+test("94025 CSV API remains an exact wrapper around the shared monthly revenue parser", async () => {
+  const text = await fixtureText("csv-minimal.csv");
+
+  assert.deepEqual(
+    parse94025Csv(text),
+    parseMonthlyRevenueCsv(text, "94025 CSV"),
+  );
+});
 
 // Every row returned here is synthetic test-only data, never an official fixture record.
 function synthetic94025Row(patch = {}) {
@@ -370,6 +380,37 @@ test("94025 optional decimals handle blanks, dashes, negative ratios, full-width
   }
 });
 
+test("94025 current-month revenue preserves signed official decimals canonically", () => {
+  assert.equal(
+    normalize94025Row(synthetic94025Row({
+      currentMonthRevenue: "-1,234.500",
+      cumulativeRevenue: "100",
+    })).currentMonthRevenue,
+    "-1234.5",
+  );
+  assert.equal(
+    normalize94025Row(synthetic94025Row({
+      currentMonthRevenue: "\uFF0D1,234.500",
+      cumulativeRevenue: "100",
+    })).currentMonthRevenue,
+    "-1234.5",
+  );
+  assert.equal(
+    normalize94025Row(synthetic94025Row({
+      currentMonthRevenue: "-0.00",
+      cumulativeRevenue: "0",
+    })).currentMonthRevenue,
+    "0",
+  );
+
+  for (const malformed of ["--1", "-01", "-\uFF0D1", "\u22121"]) {
+    assert.throws(
+      () => normalize94025Row(synthetic94025Row({ currentMonthRevenue: malformed })),
+      /currentMonthRevenue.*supported decimal/,
+    );
+  }
+});
+
 test("94025 numeric normalization rejects negatives for revenue and malformed or embedded forms", () => {
   assert.throws(() => normalize94025Revenue("-1"), /non-negative/);
   for (const value of [
@@ -387,6 +428,32 @@ test("94025 numeric normalization rejects negatives for revenue and malformed or
   }
   for (const value of ["12%%", "%12", "(12)", "12 %", "12百分比", "1,00%"]) {
     assert.throws(() => normalize94025Percent(value), /decimal/);
+  }
+});
+
+for (const [field, value] of [
+  ["previousMonthRevenue", "-13x"],
+  ["priorYearMonthRevenue", "-Infinity"],
+  ["priorYearCumulativeRevenue", "-not-a-decimal"],
+]) {
+  test(`94025 rejects malformed minus-prefixed ${field}`, () => {
+    assert.throws(
+      () => normalize94025Row(synthetic94025Row({ [field]: value })),
+      new RegExp(`${field}.*supported decimal`),
+    );
+  });
+}
+
+test("94025 omits syntactically valid negative comparative revenue snapshots", () => {
+  for (const [field, value] of [
+    ["previousMonthRevenue", "-13"],
+    ["priorYearMonthRevenue", "－13.50"],
+    ["priorYearCumulativeRevenue", "-0.25"],
+  ]) {
+    assert.equal(
+      normalize94025Row(synthetic94025Row({ [field]: value }))[field],
+      undefined,
+    );
   }
 });
 

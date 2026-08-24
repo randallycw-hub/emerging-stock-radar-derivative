@@ -3,12 +3,35 @@ import { access } from "node:fs/promises";
 import test from "node:test";
 
 import { triggerIpoRefresh } from "../scripts/trigger-ipo-refresh.mjs";
+import { runNightlyMarketRefresh } from "../scripts/run-nightly-market-refresh.mjs";
 import { createValidIpoSnapshot } from "./helpers/ipo-snapshot.mjs";
 
 const now = new Date("2026-08-01T14:30:00.000Z");
 
 test("obsolete Cloudflare refresh workflow stays removed", async () => {
   await assert.rejects(access(".github/workflows/refresh-public-site.yml"), { code: "ENOENT" });
+});
+
+test("nightly static-input runner rejects deployment and correction controls before I/O", async () => {
+  let calls = 0;
+  for (const option of [
+    { deployUrl: "https://deploy.test/hook" },
+    { correction: { path: "evidence.json" } },
+    { correctionCallback: () => {} },
+  ]) {
+    await assert.rejects(
+      runNightlyMarketRefresh({
+        date: "2026-07-30",
+        fetchImpl: async () => {
+          calls += 1;
+          throw new Error("must not fetch");
+        },
+        ...option,
+      }),
+      /not supported by nightly refresh/i,
+    );
+  }
+  assert.equal(calls, 0);
 });
 
 test("IPO refresh accepts only a complete non-stale Taipei-today snapshot and adds refresh=1", async () => {

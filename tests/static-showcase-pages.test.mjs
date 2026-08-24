@@ -64,6 +64,41 @@ test("首頁提供市場與 IPO 雙入口以及最後成功更新狀態", async 
   assert.doesNotMatch(home, /<table\b/);
 });
 
+test("首頁將四個市場入口同層呈現，IPO 時程不再是孤立文字連結", async () => {
+  const home = await readShowcaseFile("index.html");
+  const moduleLinks = [...home.matchAll(/<a class="market-module[^>]+href="(\.\/[^\"]+)"/g)]
+    .map((match) => match[1]);
+
+  assert.deepEqual(moduleLinks, [
+    "./bonds.html",
+    "./emerging.html",
+    "./ipo-radar.html",
+    "./ipo.html",
+  ]);
+  assert.doesNotMatch(home, /class="home-ipo-schedule-link"/);
+});
+
+test("首頁介紹文字在更新資訊列之上仍保有獨立的閱讀層級", async () => {
+  const css = await readShowcaseFile("assets/app.css");
+
+  assert.match(css, /\.home-hero > p:not\(\.kicker\)\s*(?:,|\{)/);
+});
+
+test("首頁以已發布資料提供事件列與覆蓋狀態", async () => {
+  const [home, script, css] = await Promise.all([
+    readShowcaseFile("index.html"), readShowcaseFile("assets/home-page.js"), readShowcaseFile("assets/app.css"),
+  ]);
+  assert.match(home, /id="home-event-strip"/);
+  assert.match(home, /id="home-data-coverage"/);
+  assert.match(script, /buildPublicEventDigest/);
+  assert.match(script, /ipoEventsUrl/);
+  assert.match(script, /bondWorkbench/);
+  assert.match(script, /event\.id === "ipo-recent" \? "筆事件" : "項"/);
+  assert.match(script, /\$\{event\.count\} \$\{unit\}/);
+  assert.match(css, /\.home-event-strip/);
+  assert.doesNotMatch(home + script, /排行|推薦|買進|賣出|目標價/);
+});
+
 test("IPO 兩頁使用可辨識的桌機資料表與行動卡片版面語意", async () => {
   const css = await readShowcaseFile("assets/app.css");
   for (const selector of ["ipo-radar-summary", "ipo-upcoming-grid", "ipo-stage-flow", "ipo-timeline-table", "ipo-card-list"]) {
@@ -161,6 +196,28 @@ test("深淺色主題具備完整語意色彩與鍵盤互動狀態", async () =>
   ]) {
     assert.ok(contrastRatio(foreground, background) >= 4.5);
   }
+});
+
+test("可轉債工作台在桌機與手機維持局部捲動、分頁與鍵盤替代資訊", async () => {
+  const [html, css, list, detail, chart] = await Promise.all([
+    readShowcaseFile("bonds.html"),
+    readShowcaseFile("assets/app.css"),
+    readShowcaseFile("assets/bonds-page.js"),
+    readShowcaseFile("assets/bond-detail-page.js"),
+    readShowcaseFile("assets/bond-candlestick-chart.js"),
+  ]);
+  assert.match(html, /<html[^>]+data-theme="light"/);
+  assert.match(css, /body\s*\{[\s\S]*?overflow-x:\s*hidden/);
+  assert.match(css, /\.bond-table-shell\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.bond-table-shell\s*\{\s*display:\s*none/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.bond-card-list\s*\{\s*display:\s*grid/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.detail-tabs\s*\{\s*display:\s*none/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*?\.detail-mobile-area\s*\{\s*display:\s*block/);
+  assert.match(detail, /role="tablist"/);
+  assert.match(detail, /<details class="detail-mobile-area"/);
+  assert.match(list, /event\.key === "Enter" \|\| event\.key === " "/);
+  assert.match(chart, /event\.key !== "ArrowLeft" && event\.key !== "ArrowRight"/);
+  assert.match(detail, /id="bond-chart-summary"[^>]+aria-live="polite"/);
 });
 
 function contrastRatio(foreground, background) {

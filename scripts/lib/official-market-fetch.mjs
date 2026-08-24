@@ -1,4 +1,7 @@
 import { isIsoDate } from "../../lib/domain/dates.ts";
+import { parseCbInstitutionDaily } from "../../lib/source-verification/source-cb-institution.ts";
+import { parseCbRedemptionAnnouncements } from "../../lib/source-verification/source-cb-redemption.ts";
+import { parseCbUnderwritingHtml } from "../../lib/source-verification/source-cb-underwriting.ts";
 import {
   normalizeCbQuoteRow,
   normalizeTpexStockClose,
@@ -20,6 +23,12 @@ const TWSE_MONTHLY_STOCK =
   "https://www.twse.com.tw/exchangeReport/STOCK_DAY";
 const TPEX_MONTHLY_STOCK =
   "https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock";
+const TPEX_CB_INSTITUTION =
+  "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade";
+const TPEX_CB_REDEMPTION =
+  "https://www.tpex.org.tw/www/zh-tw/bond/redeem";
+const TWSA_CB_UNDERWRITING =
+  "https://web.twsa.org.tw/edoc2/default.aspx";
 const CB_QUOTE_FIELDS = [
   "日期",
   "交易模式",
@@ -37,6 +46,75 @@ const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 const MAX_ATTEMPTS = 3;
 const MOPS_PARSE_MAX_ATTEMPTS = 5;
 const MOPS_PARSE_RETRY_DELAY_MS = 2_000;
+const JSON_RESPONSE_MAX_BYTES = 500_000;
+const HTML_RESPONSE_MAX_BYTES = 1_000_000;
+
+export async function fetchCbSupplementalSources({
+  date,
+  fetchImpl = fetch,
+}) {
+  if (!isIsoDate(date)) throw new TypeError("date must be a valid ISO date");
+
+  const institutionBody = new URLSearchParams({
+    date: date.replaceAll("-", "/"),
+    type: "Daily",
+    id: "",
+    response: "json",
+  });
+  const redemptionBody = new URLSearchParams({
+    date: date.slice(0, 4),
+    id: "",
+    response: "json",
+  });
+  const requests = [
+    fetchJsonWithRetry(
+      TPEX_CB_INSTITUTION,
+      supplementalPostOptions(institutionBody),
+      fetchImpl,
+      JSON_RESPONSE_MAX_BYTES,
+    ).then((payload) => {
+      const parsed = parseCbInstitutionDaily(payload);
+      if (parsed.tradingDate !== date) {
+        throw new TypeError("SUPPLEMENTAL_INSTITUTION_DATE_MISMATCH");
+      }
+      return parsed;
+    }),
+    fetchJsonWithRetry(
+      TPEX_CB_REDEMPTION,
+      supplementalPostOptions(redemptionBody),
+      fetchImpl,
+      JSON_RESPONSE_MAX_BYTES,
+    ).then((payload) => {
+      const parsed = parseCbRedemptionAnnouncements(payload);
+      if (payload.date !== `${date.slice(0, 4)}0101`) {
+        throw new TypeError("SUPPLEMENTAL_REDEMPTION_YEAR_MISMATCH");
+      }
+      return parsed;
+    }),
+    fetchTextWithRetry(
+      TWSA_CB_UNDERWRITING,
+      {
+        method: "GET",
+        redirect: "error",
+        headers: {
+          accept: "text/html,application/xhtml+xml",
+          "user-agent": "EmergingStockRadar/1.0 official-eod-collector",
+        },
+      },
+      fetchImpl,
+      "text/html",
+      HTML_RESPONSE_MAX_BYTES,
+    ).then((html) => {
+      const parsed = parseCbUnderwritingHtml(html);
+      if (parsed.rocYear + 1911 !== Number(date.slice(0, 4))) {
+        throw new TypeError("SUPPLEMENTAL_UNDERWRITING_YEAR_MISMATCH");
+      }
+      return parsed;
+    }),
+  ];
+  const [institution, redemption, underwriting] = await Promise.allSettled(requests);
+  return { institution, redemption, underwriting };
+}
 
 export async function fetchMopsDetail(
   officialDetailUrl,
@@ -329,12 +407,13 @@ export async function fetchTpexMonthlyStockHistory({
   });
 }
 
-async function fetchJsonWithRetry(url, init, fetchImpl) {
+async function fetchJsonWithRetry(url, init, fetchImpl, maxBytes) {
   const text = await fetchTextWithRetry(
     url,
     init,
     fetchImpl,
     "application/json",
+    maxBytes,
   );
   try {
     return JSON.parse(text);
@@ -348,11 +427,15 @@ async function fetchTextWithRetry(
   init,
   fetchImpl,
   expectedContentType,
+  maxBytes,
 ) {
   let lastError;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     try {
       const response = await fetchImpl(url, cloneRequestInit(init));
+      if (response.redirected) {
+        throw new TypeError(`REDIRECT_NOT_ALLOWED:${url}`);
+      }
       if (!response.ok) {
         const error = new Error(`HTTP_${response.status}:${url}`);
         if (!RETRYABLE_STATUS.has(response.status) || attempt === MAX_ATTEMPTS) {
@@ -362,16 +445,49 @@ async function fetchTextWithRetry(
         continue;
       }
       const contentType = response.headers.get("content-type") ?? "";
-      if (!contentType.toLowerCase().includes(expectedContentType)) {
+      const mediaType = contentType.split(";", 1)[0].trim().toLowerCase();
+      if (mediaType !== expectedContentType) {
         throw new TypeError(`UNEXPECTED_CONTENT_TYPE:${url}:${contentType}`);
       }
-      return await response.text();
+      return await readBoundedText(response, url, maxBytes);
     } catch (error) {
       lastError = error;
       if (attempt === MAX_ATTEMPTS || !isRetryableNetworkError(error)) throw error;
     }
   }
   throw lastError;
+}
+
+async function readBoundedText(response, url, maxBytes) {
+  if (maxBytes === undefined) return response.text();
+  const contentLength = response.headers.get("content-length");
+  if (/^\d+$/.test(contentLength ?? "") && Number(contentLength) > maxBytes) {
+    throw new TypeError(`RESPONSE_TOO_LARGE:${url}:${maxBytes}`);
+  }
+  if (response.body === null || typeof response.body.getReader !== "function") {
+    const text = await response.text();
+    if (new TextEncoder().encode(text).byteLength > maxBytes) {
+      throw new TypeError(`RESPONSE_TOO_LARGE:${url}:${maxBytes}`);
+    }
+    return text;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const chunks = [];
+  let byteLength = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    byteLength += value.byteLength;
+    if (byteLength > maxBytes) {
+      await reader.cancel();
+      throw new TypeError(`RESPONSE_TOO_LARGE:${url}:${maxBytes}`);
+    }
+    chunks.push(decoder.decode(value, { stream: true }));
+  }
+  chunks.push(decoder.decode());
+  return chunks.join("");
 }
 
 function cloneRequestInit(init) {
@@ -393,6 +509,13 @@ function postOptions(body) {
       "user-agent": "EmergingStockRadar/1.0 official-eod-collector",
     },
     body,
+  };
+}
+
+function supplementalPostOptions(body) {
+  return {
+    ...postOptions(body),
+    redirect: "error",
   };
 }
 
@@ -517,7 +640,7 @@ function assertApprovedMopsUrl(value) {
 }
 
 function isRetryableNetworkError(error) {
-  if (error instanceof TypeError && /^UNEXPECTED_CONTENT_TYPE|^INVALID_JSON/.test(error.message)) {
+  if (error instanceof TypeError && /^(?:UNEXPECTED_CONTENT_TYPE|INVALID_JSON|REDIRECT_NOT_ALLOWED|RESPONSE_TOO_LARGE)/.test(error.message)) {
     return false;
   }
   return !(error instanceof Error && /^HTTP_\d+/.test(error.message));

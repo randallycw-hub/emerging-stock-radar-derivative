@@ -1,0 +1,1259 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-01T09:45:08.084Z",
+  "records": [],
+  "sources": {
+    "listed": {
+      "status": "unavailable",
+      "dataDate": null,
+      "fetchedAt": null
+    },
+    "otc": {
+      "status": "unavailable",
+      "dataDate": null,
+      "fetchedAt": null
+    }
+  },
+  "diagnostics": [
+    {
+      "issuerCode": "1101",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1256",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1316",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1338",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1402",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1436",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1438",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1466",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1472",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1474",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1514",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1526",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1536",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1560",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1586",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1595",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1598",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1609",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1623",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1717",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1781",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1786",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "1909",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2034",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2104",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2201",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2228",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2233",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2236",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2247",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2303",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2329",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2337",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2338",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2351",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2368",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2374",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2402",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2427",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2436",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2439",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2442",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2455",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2462",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2464",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2467",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2476",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2486",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2528",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2530",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2548",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2641",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2727",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2732",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2743",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2745",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2753",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2755",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2756",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "2906",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3011",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3013",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3016",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3028",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3032",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3033",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3037",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3040",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3045",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3088",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3095",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3122",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3131",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3135",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3141",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3167",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3188",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3207",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3257",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3272",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3284",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3294",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3303",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3305",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3312",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3313",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3322",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3324",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3346",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3357",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3362",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3376",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3388",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3390",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3416",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3479",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3483",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3484",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3491",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3516",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3518",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3522",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3526",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3543",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3548",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3551",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3564",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3583",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3587",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3591",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3605",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3617",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3680",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3684",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3687",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3689",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3691",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3702",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3707",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3708",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3715",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "3717",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4113",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4123",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4129",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4137",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4164",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4168",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4190",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4416",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4438",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4439",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4442",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4503",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4510",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4542",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4549",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4555",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4558",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4564",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4566",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4569",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4572",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4581",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4714",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4722",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4739",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4749",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4760",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4764",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4772",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4923",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4931",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "4979",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5201",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5209",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5212",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5244",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5245",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5263",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5284",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5289",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5291",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5306",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5309",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5321",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5388",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5439",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5450",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5457",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5464",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5534",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5536",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "5608",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6015",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6101",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6104",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6111",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6117",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6125",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6126",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6134",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6150",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6156",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6163",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6177",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6179",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6182",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6184",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6187",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6189",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6190",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6197",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6199",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6207",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6209",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6219",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6220",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6223",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6243",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6269",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6282",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6284",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6290",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6414",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6425",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6432",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6451",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6469",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6472",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6477",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6509",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6510",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6515",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6533",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6538",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6546",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6547",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6552",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6576",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6584",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6585",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6591",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6603",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6616",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6624",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6629",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6645",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6664",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6670",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6672",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6680",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6683",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6693",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6706",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6753",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6768",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6771",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6796",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6803",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6806",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6821",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6830",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6835",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6840",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6843",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6846",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6854",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6862",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6863",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6869",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6870",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6873",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6874",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6890",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6894",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6903",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6904",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6913",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6957",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "6982",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "7402",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "7556",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "7610",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "7713",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8021",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8027",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8028",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8042",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8050",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8054",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8074",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8087",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8091",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8092",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8096",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8104",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8111",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8112",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8147",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8155",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8171",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8210",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8255",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8271",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8299",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8374",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8404",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8411",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8422",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8431",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8433",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8438",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8442",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8462",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8467",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8473",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8476",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8478",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8488",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8489",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8927",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "8996",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "9802",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "9906",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "9933",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "9935",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "9939",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "9941",
+      "reason": "MISSING_REVENUE"
+    },
+    {
+      "issuerCode": "9958",
+      "reason": "MISSING_REVENUE"
+    }
+  ]
+}

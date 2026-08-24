@@ -171,6 +171,65 @@ Evidence references:
 
 This amendment does not grant production approval and does not authorize an adapter, scheduler, runtime fetch, API, page, or remote resource.
 
+## TPEx convertible-bond redemption announcements resource-level amendment (2026-08-09)
+
+Resource: `POST https://www.tpex.org.tw/www/zh-tw/bond/redeem`
+
+Status: `VERIFIED_FOR_IMPLEMENTATION`
+
+Annual form body: `{ date: "YYYY", id: "", response: "json" }`.
+
+Verified root contract: `date`, `tables`, `stat`; the annual 2026 response root date is `20260101` and `stat` is `ok`. The response contains exactly one table titled `轉換公司債行使贖回權公告`, with exact positional fields `公司代號`, `公司名稱`, `申報日期`, `主旨`, and `內容`.
+
+Evidence captured by the controller at `2026-08-09T07:47:30.7428457Z`: HTTP 200, `application/json;charset=UTF-8`, 34 source rows, and raw-response SHA-256 `05e19631e1c73ab3aa83ede258891c1057634cd5e04634a7d7e3d205d800b282`. The offline fixture preserves two exact rows only; it is not a live-fetch substitute.
+
+The `內容` detail URL must be HTTPS with host `mopsov.twse.com.tw`, path `/mops/web/ajax_t120sb23`, no credentials, `co_id` equal to the source issuer code, and `date1` equal to the normalized announcement date. The linked MOPS detail URL is a validation boundary only; this amendment does not authorize fetching it.
+
+Allowed use is alert-only: validated redemption and delisting events can enter the CB event-review queue, but must not publish a trading decision, use a third-party source, or fall back to another resource. On HTTP, payload, schema, date, subject, URL, or duplicate-key failure, reject the response, retain failure evidence, and raise a source-drift alert; do not retry through a fallback or use stale data as a replacement.
+
+## CB issuer research monthly-revenue production approval amendment (2026-08-11)
+
+This amendment independently promotes only the two exact official CSV resources below after strict fixture verification, attribution review, failure-isolation tests, signed-current-revenue correction, and a passing one-shot final live smoke at `2026-08-11T05:41:43.350Z`.
+
+| Resource ID | Production status | Exact purpose |
+| --- | --- | --- |
+| `data-gov-18420-listed-monthly-revenue-csv` | `APPROVED_FOR_PRODUCTION` | Listed-company monthly revenue for exact-code active-CB issuer research |
+| `data-gov-56510-otc-monthly-revenue-csv` | `APPROVED_FOR_PRODUCTION` | OTC-company monthly revenue for exact-code active-CB issuer research |
+
+Exact resources and metadata:
+
+- `GET https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv`; metadata https://data.gov.tw/dataset/18420.
+- `GET https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv`; metadata https://data.gov.tw/dataset/56510.
+- Provider: Financial Supervisory Commission, Securities and Futures Bureau.
+- License: Taiwan Open Government Data License, version 1.0 (OGL 1.0); free with attribution obligations.
+
+The final live evidence is recorded in `docs/source-verification/cb-issuer-research-live-smoke.md`. Both resources returned exact final URLs, HTTP 200, `text/csv`, valid bounded UTF-8 bodies, the reviewed 14-field schema, plausible newest month/date, zero duplicate identities, complete per-resource exact-code/name evidence, no warnings, and independent PASS outcomes. The earlier pre-correction failure and the official signed current-month revenue correction remain part of the audit trail.
+
+Production boundaries:
+
+- Use exact four-digit issuer code as identity; official names are code-bound aliases only. Name-only, fuzzy, suffix-derived, or cross-code joins are forbidden.
+- Preserve official signed current-month revenue. Comparative and cumulative revenue keep their reviewed non-negative contracts.
+- A failed market remains stale or unavailable independently. It must never borrow records, status, or success from the other market.
+- Missing coverage and name conflicts remain explicit and must not infer listing, delisting, or any market-status event.
+- A cross-market same-code record is rejected by the snapshot builder as `CROSS_MARKET_CONFLICT`. The compact 2026-08-11 final evidence did not retain code sets and therefore does not claim a zero aggregate overlap count.
+- Every formal refresh must inspect runtime diagnostics; before website publication, each cross-market conflict must be excluded and surfaced explicitly.
+- No retry, redirect, alternate URL, OpenAPI fallback, Yahoo, third-party data, realtime field, raw response, source note, or browser automation is approved.
+- Product attribution must name the provider, dataset, OGL 1.0, source period/date, and retrieval time.
+
+No other resource status is changed by this amendment.
+
+## TWSA underwriting announcements resource-level amendment (2026-08-09)
+
+Resource: `GET https://web.twsa.org.tw/edoc2/default.aspx`
+
+Status: `VERIFIED_FOR_IMPLEMENTATION`
+
+The current-year HTML contract has page title `115年－承銷公告`, notice `本公告系統僅供參考，相關資料以正式刊登報紙之公告內容為準。`, and one result table identified by `ctl00_cphMain_gvResult`. The verified table has exactly 11 positional headers: `序號`, `申報日期`, `主辦承銷商`, `案件名稱`, `方式`, `發行性質`, `發行種類`, `配售方式一`, `配售方式二`, `案件狀態`, and `公告檔`.
+
+Evidence captured by the controller at `2026-08-09T08:11:09.7686345Z`: HTTP 200, `text/html; charset=utf-8`, 299346 response bytes, and raw-response SHA-256 `b17dfc15a0a1e26fb0c5190248119f2b0af1494f112102ae322e2e281f5bd647`. The offline fixture retains three structural rows and performs no live fetch.
+
+This secondary source is limited to new-CB radar enrichment: accept only `發行性質` `公司債` with `發行種類` `有擔保轉換公司債` or `無擔保轉換公司債`. It must not infer a CB code, issue amount, conversion price, or listing date. It is not contract truth and cannot become contract truth without later exact-code confirmation from TPEx and/or MOPS. No fallback, third-party source, UI, runtime fetch, publication, or `APPROVED_FOR_PRODUCTION` status is authorized. On notice, title, table, header, or row-width drift, reject the response and raise a source-drift alert.
+
 ## 興櫃盤後行情 resource-level manual amendment（2026-07-30）
 
 Resource: GET https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics
@@ -207,3 +266,64 @@ Forbidden fields: BuyingPrice, BuyingQuantity, SellingPrice, SellingQuantity, La
 正式快照 smoke 結果：11406 415 列、94025 354 列、11586 697 列、興櫃盤後 359 家、可轉債 385 檔、轉換價 384 筆；市場資料日期一致為 2026-07-31。未核准 OpenAPI、`bond_cb_daily`、第三方網站、即時價、買賣價量與自動 fallback 仍維持禁止。任何 schema、授權、主機或用途變更都會撤回本核准並停止切換 generation pointer。
 
 IPO 事件用途補充：`11586-csv` 在 IPO 事件快照中另明確核准 `underwriters` 與 `note`，以及公司識別與正式申請里程碑欄位；`underwritingPrice`、`chairmanName` 與資本額不得由此用途發布。上述五個 IPO resource 的核准 identity、精確 URL（年度端點的唯一變數僅為四位數 `yy`）、Content-Type 與可用欄位，以 `lib/pipeline/source-registry.ts` 的 `ipoEventPolicy` 為可執行政策；Phase 1 quarantine 必須由該 registry 導出，不另存一份 IPO URL 白名單。
+
+## TPEx 三大法人日交易資訊 resource-level amendment（2026-08-09）
+
+Resource: `POST https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade`
+
+Form body 必須完全為 `{ date: "YYYY/MM/DD", type: "Daily", id: "", response: "json" }`；未觀察到 API key。此 resource 是每一交易日一份的可轉債三大法人交易資料，2026-08-07 經人工覆核取得 HTTP 200、`application/json;charset=UTF-8` 與 157 列回應；來源證據與最小 fixture 的 metadata 保存於 `tests/fixtures/source-verification/cb-institution/metadata.json`，完整 live response 不納入 production bundle。
+
+已驗證欄位順序為：代號、名稱、外資及陸資買／賣／淨買張數、投信買／賣／淨買張數、自營商買／賣／淨買張數、三大法人買賣超張數。回應標題明示轉（交）換及附認股權公司債以面額新台幣十萬元為一成交單位。
+
+Parser 邊界：僅接受上述 TPEx POST resource 的 `Daily` payload；root/table key、單一 table、欄位位置、ROC／西元交易日、五至六碼債券代號、整數 cell、列數、代號唯一性及各法人淨額／合計淨額算術都必須通過。schema drift 或算術不一致時拒絕 payload；不得使用 Yahoo、券商、第三方或任何 fallback。
+
+Attribution: `財團法人中華民國證券櫃檯買賣中心｜三大法人日交易資訊`，附交易日與本站擷取時間。
+
+Resource status: `VERIFIED_FOR_IMPLEMENTATION`。這不是已暫停的 `bond_cb_daily` resource；後者仍禁止 ingest 或 fallback。
+
+## 可轉債補充來源正式核准 amendment（2026-08-09）
+
+本 amendment 依專案擁有人指示與 controller 的 2026-08-09 read-only live captures，將下列三個已完成 strict parser、exact request、bounded response、attribution 與 failure-isolation 覆核的精確 resource 提升為 `APPROVED_FOR_PRODUCTION`。本 amendment 僅覆寫前述各 resource amendment 的「尚未核准 runtime fetch／production」限制，不擴張其 parser contract、資料語意或用途。
+
+| 精確 resource | 最終狀態 | production 限定用途 |
+| --- | --- | --- |
+| `POST https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade` | `APPROVED_FOR_PRODUCTION` | 僅建立可轉債三大法人盤後歷史；交易日與五至六碼債券代號必須精確一致 |
+| `POST https://www.tpex.org.tw/www/zh-tw/bond/redeem` | `APPROVED_FOR_PRODUCTION` | 僅建立已驗證的贖回／終止櫃檯買賣警示事件 |
+| `GET https://web.twsa.org.tw/edoc2/default.aspx` | `APPROVED_FOR_PRODUCTION` | 僅作新可轉債承銷雷達的次要補充；永遠不是契約真相 |
+
+兩個 TPEx POST 必須分別使用已驗證的 exact form body：`newCb3itrade` 為 `{ date: "YYYY/MM/DD", type: "Daily", id: "", response: "json" }`，`redeem` 為 `{ date: "YYYY", id: "", response: "json" }`。TWSA 僅允許上述 exact GET。每個 JSON response 上限為 500,000 bytes，HTML response 上限為 1,000,000 bytes；HTTP status、redirect、Content-Type、size、JSON 或 parser schema 失敗只拒絕該 named source。
+
+目前來源失敗時，只能複製前一份經完整驗證且無 mutable alias 的對應區段，明確標示為 `stale` 並保留原 `dataDate`；不得冒充 fresh、改寫日期或把舊資料當作新的來源事實。這項 2026-08-09 production 核准僅就上述「完整驗證 previous snapshot 區段」明確取代前述不得以 stale replacement 的文字；未經完整驗證的舊資料、來源替換、替代 URL 與 fallback 仍一律禁止。沒有合法 current 或 previous 區段時必須標示 `unavailable`。
+
+所有 redirect、替代 URL、自動 fallback、Yahoo／券商／第三方來源、即時資料、買賣建議與擴張用途仍禁止。`edoc2` 不得推論可轉債代號、發行金額、轉換價格或掛牌日期；這些欄位仍須由 TPEx／MOPS 的 exact-code 契約證據確認。本 amendment 不核准 UI、公開發布或將承銷公告提升為契約真相。
+
+## 可轉債公開分析工作台發布語意 amendment（2026-08-20）
+
+公開工作台不新增來源授權；它只消費本 registry 已核准且通過 generation 驗證的欄位。瀏覽器只下載當代靜態 snapshot，不直接呼叫市場端點。主要欄位及其唯一來源邊界如下：
+
+| 公開欄位 | 已核准來源 | 日期／關聯限制 |
+| --- | --- | --- |
+| 發行條款、發行總額、目前餘額、到期與賣回條款 | TPEx 11406 CSV | 以五至六碼債券代碼為 identity；保留來源資料日 |
+| CB O/H/L/C、成交單位、成交金額 | TPEx `cbDayQry` | 盤後、實際交易日、等價交易；無 OHLC 不插補 |
+| 標的股收盤 | TWSE `STOCK_DAY_ALL` 或 TPEx `tpex_mainboard_daily_close_quotes` | 以四碼公司代碼精確關聯；與 CB 交易日一致才估值 |
+| 發行人索引與轉換價 | TPEx `convSearch`、MOPS `t120sg01` | 債券代碼與公司代碼都須一致；轉換價生效日不得晚於估值日 |
+| 三大法人 1／5／20 日 | TPEx `newCb3itrade` | 五至六碼債券代碼與交易日精確一致 |
+| 贖回／終止櫃檯買賣事件 | TPEx `redeem` | 只接受已驗證事件與受限 MOPS detail URL |
+| 公司月營收 | data.gov.tw 18420／56510 的官方 CSV | 只以四碼公司代碼精確關聯；上市、上櫃來源分別失敗與 stale |
+
+TWSA `edoc2/default.aspx` 雖是已核准的次要收集來源，目前不在公開工作台或 UI 呈現；不得據此宣稱工作台顯示承銷公告，也不得推論 CB 代碼、發行額、轉換價或掛牌日。
+
+工作台公式採十進位字串運算後按欄位規則呈現：
+
+- `conversionValue = stockClose / effectiveConversionPrice * 100`
+- `premiumRate = (cbClose / conversionValue - 1) * 100%`
+- `remainingUnits = outstandingAmount / unitFaceValueTwd`
+- `remainingRatio = outstandingAmount / issueAmount * 100%`
+- `dailyTurnoverRate = cbTradeUnits / remainingUnits * 100%`
+- 事件天數為 snapshot 資料日與事件日之日曆日差。
+
+若 CB、股票與已生效轉換價沒有共同日期，轉換價值與溢價率維持 `null`，並標示 date mismatch 或 missing。零成交保留 active + no-trade 語意；缺少 OHLC 的日期是 chart gap，不可用 `open=high=low=close` 製造 K 棒。
+
+`stale` 只表示該 optional source 沿用自身上一份完整驗證快照，資料日不得改寫，也不得跨市場或跨公司借用。`archived` 只適用到期、已贖回、餘額歸零或從完整官方名冊移除的債券；歷史與封存原因仍可追溯，預設 active 列表不顯示。`accumulating` 表示歷史樣本不足以產生完整均線或技術指標，不代表零值。
+
+目前沒有核准的 TTM、PS 或 TCRI 工作台資料；不得宣稱已提供、填零、推估或仿造第三方評等。公開頁面只做教育性條件檢核，不提供綜合投資總分、買賣／放空／下單、部位、價格目標或 hedge ratio 指令。

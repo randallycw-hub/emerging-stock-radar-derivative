@@ -83,10 +83,17 @@ const PLAIN_DECIMAL = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
 const GROUPED_DECIMAL = /^(?:[1-9]\d{0,2})(?:,\d{3})+(?:\.\d+)?$/;
 
 export function parse94025Csv(text: string): Source94025Row[] {
+  return parseMonthlyRevenueCsv(text, "94025 CSV");
+}
+
+export function parseMonthlyRevenueCsv(
+  text: string,
+  sourceName: string,
+): Source94025Row[] {
   if (typeof text !== "string") {
-    throw new Source94025ValidationError("94025 CSV must be a string");
+    throw new Source94025ValidationError(`${sourceName} must be a string`);
   }
-  return parseAliasedDataset(parseCsv(text), "94025 CSV");
+  return parseAliasedDataset(parseCsv(text), sourceName);
 }
 
 export function parse94025Json(value: unknown): Source94025Row[] {
@@ -145,7 +152,7 @@ export function normalize94025Row(
       "yearMonth cannot be later than sourcePublishedOn month",
     );
   }
-  const currentMonthRevenue = requiredRevenue(
+  const currentMonthRevenue = requiredCurrentRevenue(
     row.currentMonthRevenue,
     "currentMonthRevenue",
   );
@@ -393,9 +400,9 @@ function requiredYearMonth(value: string): string {
   return result;
 }
 
-function requiredRevenue(value: string, name: string): string {
+function requiredCurrentRevenue(value: string, name: string): string {
   const normalized = normalizeOptionalDecimal(value, {
-    signed: false,
+    signed: true,
     percent: false,
     name,
   });
@@ -421,8 +428,13 @@ function optionalRevenueSnapshot(value: string, name: string): string | undefine
   try {
     return optionalRevenue(value, name);
   } catch (error) {
-    if (error instanceof Source94025ValidationError && /non-negative/.test(error.message) && /^[-－]/.test(value.trim())) {
-      return undefined;
+    if (error instanceof Source94025ValidationError && /non-negative/.test(error.message)) {
+      const signedValue = normalizeOptionalDecimal(value, {
+        signed: true,
+        percent: false,
+        name,
+      });
+      if (signedValue?.startsWith("-")) return undefined;
     }
     throw error;
   }

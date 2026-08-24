@@ -13,27 +13,115 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
-import { buildHistoryPoints } from "../lib/market-data/bond-market-history.ts";
+import {
+  bondInputsFrom11406Rows,
+  bondTermSummariesFrom11406Rows,
+} from "./lib/bond-inputs-from-11406.mjs";
+import { deriveBondRemainingMetrics } from "../lib/market-data/bond-derived-metrics.ts";
+import {
+  buildHistoryPoints,
+  mergeBondMarketHistory,
+  parseBondMarketHistory,
+} from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
-import { multiplyDecimal } from "../lib/market-data/decimal.ts";
-import { fetchCurrentOfficialMarketData } from "./lib/official-market-fetch.mjs";
+import { evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
+import {
+  buildBondWorkbenchSnapshot,
+  parseBondWorkbenchSnapshot,
+} from "../lib/market-data/bond-workbench.ts";
+import {
+  buildCbSupplementalSnapshot,
+  currentCbRedemption,
+  parseCbSupplementalSnapshot,
+  summarizeCbInstitution,
+} from "../lib/market-data/bond-supplemental.ts";
+import {
+  buildCbIssuerResearchSnapshot,
+  parseCbIssuerResearchSnapshot,
+} from "../lib/market-data/cb-issuer-research.ts";
+import { getApprovedResource } from "../lib/pipeline/source-registry.ts";
+import {
+  CB_ISSUER_RESEARCH_SOURCE_POLICIES,
+  fetchCbIssuerResearchSources,
+} from "../lib/source-verification/source-cb-issuer-research.ts";
+import {
+  fetchCbSupplementalSources,
+  fetchCurrentOfficialMarketData,
+} from "./lib/official-market-fetch.mjs";
 
 const MARKET_FILE_ENTRIES = [
   ["cb-quotes.json", "cbQuotes"],
   ["stock-closes.json", "stockCloses"],
   ["conversion-prices.json", "conversionPrices"],
+  ["bond-supplemental.json", "supplemental"],
+  ["cb-issuer-research.json", "issuerResearch"],
   ["bond-market-view.json", "views"],
   ["bond-market-history.json", "history"],
+  ["bond-workbench.json", "workbench"],
 ];
 
-export async function buildBondMarketSnapshot({
-  outputDir = "static-showcase/data",
-  bonds,
-  collectImpl = fetchCurrentOfficialMarketData,
-  now = () => new Date(),
-  manifestBase,
-  asOfDate: requestedAsOfDate,
-} = {}) {
+const CB_ISSUER_RESEARCH_RESOURCES = [
+  {
+    policy: CB_ISSUER_RESEARCH_SOURCE_POLICIES.listed,
+    resourceId: "data-gov-18420-listed-monthly-revenue-csv",
+  },
+  {
+    policy: CB_ISSUER_RESEARCH_SOURCE_POLICIES.otc,
+    resourceId: "data-gov-56510-otc-monthly-revenue-csv",
+  },
+];
+
+const CB_SUPPLEMENTAL_RESOURCES = [
+  {
+    key: "institution",
+    sourceId: "tpex-cb-institution-daily",
+    resourceId: "tpex-cb-institution-daily-json",
+    exactUrl: "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
+  },
+  {
+    key: "redemption",
+    sourceId: "tpex-cb-redemption-announcements",
+    resourceId: "tpex-cb-redemption-announcements-json",
+    exactUrl: "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+  },
+  {
+    key: "underwriting",
+    sourceId: "twsa-cb-underwriting-announcements",
+    resourceId: "twsa-cb-underwriting-announcements-html",
+    exactUrl: "https://web.twsa.org.tw/edoc2/default.aspx",
+  },
+];
+
+const WORKBENCH_EVENT_SOURCES = Object.freeze({
+  terms: {
+    sourceId: "11406",
+    sourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+  },
+  redemption: {
+    sourceId: "tpex-cb-redemption-announcements",
+    sourceUrl: "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+  },
+});
+
+export async function buildBondMarketSnapshot(options = {}) {
+  assertPublicOptions(options, [
+    "outputDir",
+    "bonds",
+    "collectImpl",
+    "now",
+    "manifestBase",
+    "asOfDate",
+    "previousIssuerResearch",
+  ], "buildBondMarketSnapshot");
+  const {
+    outputDir = "static-showcase/data",
+    bonds,
+    collectImpl = fetchCurrentOfficialMarketData,
+    now = () => new Date(),
+    manifestBase,
+    asOfDate: requestedAsOfDate,
+    previousIssuerResearch,
+  } = options;
   const generatedDate = now();
   if (!(generatedDate instanceof Date) || !Number.isFinite(generatedDate.valueOf())) {
     throw new TypeError("now must return a valid Date");
@@ -42,14 +130,71 @@ export async function buildBondMarketSnapshot({
     throw new TypeError("asOfDate must be an ISO date");
   }
   const asOfDate = requestedAsOfDate ?? taipeiDate(generatedDate);
-  const bondInputs = bonds ?? await loadBondInputs(outputDir);
+  const normalized11406Text = bonds === undefined
+    ? await readFile(join(outputDir, "11406.json"), "utf8")
+    : undefined;
+  const normalized11406Rows = normalized11406Text === undefined
+    ? undefined
+    : JSON.parse(normalized11406Text);
+  if (normalized11406Rows !== undefined && !Array.isArray(normalized11406Rows)) {
+    throw new TypeError("normalized 11406 artifact must be an array");
+  }
+  const sourceRows = bonds === undefined ? normalized11406Rows : undefined;
+  const bondInputs = bonds ?? bondInputsFrom11406Rows(sourceRows);
   if (!Array.isArray(bondInputs)) throw new TypeError("bonds must be an array");
+  const baseTerms = sourceRows === undefined
+    ? termSummariesFromBondInputs(bondInputs)
+    : bondTermSummariesFrom11406Rows(sourceRows);
+  const previousWorkbench = await readPreviousWorkbench(outputDir);
+  const previousHistory = await readPreviousHistory(outputDir);
+  const previousSupplemental = await readPreviousSupplemental(outputDir);
+  const validatedPreviousIssuerResearch = previousIssuerResearch === undefined
+    ? await readPreviousIssuerResearch(outputDir)
+    : parseCbIssuerResearchSnapshot(previousIssuerResearch);
   const bondCodes = bondInputs.map((bond) => bond.bondCode);
   const issuerCodes = [...new Set(bondInputs.map((bond) => bond.issuerCode))];
+  const optionalSourceAuthorization = buildProductionCbOptionalSourceAuthorization();
   const collected = await collectImpl({
     bondCodes,
     issuerCodes,
     date: asOfDate,
+    optionalSourceAuthorization,
+  });
+  const issuerResearchSourceResults = collected.issuerResearchSourceResults === undefined
+    ? await settleProductionCbIssuerResearchSources()
+    : resolveCollectedCbIssuerResearchSources(
+      collected.issuerResearchSourceResults,
+      optionalSourceAuthorization.issuerResearch,
+    );
+  const issuerResearchCandidate = buildCbIssuerResearchCandidate({
+    generatedAt: generatedDate.toISOString(),
+    issuers: issuerInputsFromBonds(bondInputs),
+    sourceResults: issuerResearchSourceResults,
+    ...(validatedPreviousIssuerResearch === undefined
+      ? {}
+      : { previous: validatedPreviousIssuerResearch }),
+  });
+  const issuerResearch = issuerResearchCandidate.snapshot;
+  const supplementalSourceResults = await settleProductionCbSupplementalSources(
+    asOfDate,
+    collected.supplementalSourceResults,
+    optionalSourceAuthorization.supplemental,
+  );
+  const supplemental = buildCbSupplementalSnapshot({
+    generatedAt: generatedDate.toISOString(),
+    ...(supplementalSourceResults.institution.status === "fulfilled"
+      ? { institution: supplementalSourceResults.institution.value }
+      : {}),
+    ...(supplementalSourceResults.redemption.status === "fulfilled"
+      ? {
+        redemptions: supplementalSourceResults.redemption.value,
+        redemptionYear: Number(asOfDate.slice(0, 4)),
+      }
+      : {}),
+    ...(supplementalSourceResults.underwriting.status === "fulfilled"
+      ? { underwriting: supplementalSourceResults.underwriting.value }
+      : {}),
+    ...(previousSupplemental === undefined ? {} : { previous: previousSupplemental }),
   });
   const views = buildBondMarketViews({
     asOfDate,
@@ -57,6 +202,8 @@ export async function buildBondMarketSnapshot({
     cbQuotes: collected.cbQuotes,
     stockCloses: collected.stockCloses,
     conversionPrices: collected.conversionPrices,
+    supplemental,
+    issuerResearch: issuerResearch.records,
   });
 
   const errors = validateCandidate({
@@ -69,34 +216,80 @@ export async function buildBondMarketSnapshot({
   }
 
   await mkdir(outputDir, { recursive: true });
-  const previousHistory =
-    await readOptionalJson(join(outputDir, "bond-market-history.json")) ?? [];
-  if (!Array.isArray(previousHistory)) {
-    throw new TypeError("bond market history must be an array");
-  }
   const currentHistory = buildHistoryPoints({
     cbQuotes: collected.cbQuotes,
     stockCloses: collected.stockCloses,
     conversionPrices: collected.conversionPrices,
   });
-  const history = mergeHistory(previousHistory, currentHistory);
+  const history = mergeBondMarketHistory(previousHistory, currentHistory);
+  const latestCbPriceDate = latestTradingDate(collected.cbQuotes);
+  const latestStockPriceDate = latestTradingDate(collected.stockCloses);
+  const dataDate = [latestCbPriceDate, latestStockPriceDate]
+    .filter(Boolean)
+    .sort()[0] ?? null;
+  if (!isIsoDate(dataDate)) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_DATA_DATE");
+  }
+  const currentTerms = baseTerms.map((term) => ({
+    ...term,
+    unitFaceValueTwd: supplemental.unitFaceValueTwd,
+  }));
+  const currentEvents = buildBondWorkbenchEvents({
+    terms: currentTerms,
+    supplemental,
+  });
+  const currentSourceStates = buildWorkbenchSourceStates({
+    views,
+    supplemental,
+    issuerResearch,
+  });
+  const workbench = buildBondWorkbenchSnapshot({
+    generatedAt: generatedDate.toISOString(),
+    dataDate,
+    asOfDate: collected.requestedDate ?? asOfDate,
+    currentTerms,
+    currentViews: views,
+    currentEvents,
+    currentSourceStates,
+    currentAssessments: buildCandidateAssessments(views, history),
+    ...(previousWorkbench === undefined ? {} : { previous: previousWorkbench }),
+  });
+  const workbenchSourceStateSummary = summarizeWorkbenchSourceStates(workbench);
   const stagingDir = await mkdtemp(join(dirname(outputDir), ".cb-market-"));
   try {
     const documents = {
       cbQuotes: collected.cbQuotes,
       stockCloses: collected.stockCloses,
       conversionPrices: collected.conversionPrices,
+      supplemental,
+      issuerResearch,
       views,
       history,
+      workbench,
     };
     const files = [];
     for (const [name, key] of MARKET_FILE_ENTRIES) {
-      const text = `${JSON.stringify(documents[key], null, 2)}\n`;
+      const text = key === "issuerResearch"
+        ? issuerResearchCandidate.artifact.text
+        : `${JSON.stringify(documents[key], null, 2)}\n`;
       await writeFile(join(stagingDir, name), text, "utf8");
       files.push({
         name,
         sha256: sha256(text),
-        recordCount: documents[key].length,
+        rawBytes: Buffer.byteLength(text, "utf8"),
+        recordCount: key === "issuerResearch"
+          ? documents[key].records.length
+          : key === "supplemental"
+            ? countSupplementalRecords(documents[key])
+            : key === "workbench"
+              ? documents[key].records.length
+              : documents[key].length,
+        ...(key === "workbench"
+          ? {
+            schemaVersion: workbench.schemaVersion,
+            sourceStateSummary: workbenchSourceStateSummary,
+          }
+          : {}),
       });
     }
 
@@ -107,11 +300,6 @@ export async function buildBondMarketSnapshot({
         generatedAt: asOfDate,
         datasets: [],
       };
-    const latestCbPriceDate = latestTradingDate(collected.cbQuotes);
-    const latestStockPriceDate = latestTradingDate(collected.stockCloses);
-    const dataDate = [latestCbPriceDate, latestStockPriceDate]
-      .filter(Boolean)
-      .sort()[0] ?? null;
     const manifest = {
       ...currentManifest,
       market: {
@@ -121,12 +309,29 @@ export async function buildBondMarketSnapshot({
         latestCbPriceDate,
         latestStockPriceDate,
         dataDate,
+        supplementalSources: supplemental.sources,
+        workbenchSourceStateSummary,
+        ...(normalized11406Text === undefined ? {} : {
+          normalizedInputs: [{
+            name: "11406.json",
+            sha256: sha256(normalized11406Text),
+            rawBytes: Buffer.byteLength(normalized11406Text, "utf8"),
+            recordCount: normalized11406Rows.length,
+          }],
+        }),
         files,
       },
     };
     const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
     await writeFile(join(stagingDir, "manifest.json"), manifestText, "utf8");
-    await verifyStagedFiles(stagingDir, files, manifestText);
+    await verifyStagedFiles(
+      stagingDir,
+      files,
+      manifestText,
+      bondInputs,
+      currentTerms,
+      previousWorkbench,
+    );
     await publishAtomically(
       stagingDir,
       outputDir,
@@ -137,7 +342,10 @@ export async function buildBondMarketSnapshot({
       status: "published",
       files: files.map((file) => file.name),
       manifest,
+      supplemental,
+      issuerResearch,
       views,
+      workbench,
       report: {
         generatedAt: generatedDate.toISOString(),
         requestedDate: collected.requestedDate ?? asOfDate,
@@ -149,7 +357,10 @@ export async function buildBondMarketSnapshot({
           cbQuotes: collected.cbQuotes.length,
           stockCloses: collected.stockCloses.length,
           conversionPrices: collected.conversionPrices.length,
+          supplemental: countSupplementalRecords(supplemental),
+          issuerResearch: issuerResearch.records.length,
           views: views.length,
+          workbench: workbench.records.length,
           missingViews: views.filter((view) => view.missingReasons.length > 0).length,
         },
         sourceUrls: collected.sourceUrls ?? [],
@@ -160,24 +371,286 @@ export async function buildBondMarketSnapshot({
   }
 }
 
-function mergeHistory(previous, current) {
-  const points = new Map();
-  for (const point of [...previous, ...current]) {
-    if (
-      point === null
-      || typeof point !== "object"
-      || !/^\d{5,6}$/.test(point.bondCode)
-      || !isIsoDate(point.date)
-    ) {
-      throw new TypeError("invalid bond market history point");
-    }
-    points.set(`${point.bondCode}\u001f${point.date}`, point);
+export async function settleProductionCbIssuerResearchSources({
+  fetchSourcesImpl = fetchCbIssuerResearchSources,
+} = {}) {
+  const error = productionIssuerResearchApprovalError();
+  if (error !== undefined) {
+    return {
+      listed: { status: "rejected", reason: error },
+      otc: { status: "rejected", reason: error },
+    };
   }
-  return [...points.values()].sort(
-    (left, right) =>
-      left.date.localeCompare(right.date)
-      || left.bondCode.localeCompare(right.bondCode),
-  );
+  if (typeof fetchSourcesImpl !== "function") {
+    throw new TypeError("fetchSourcesImpl must be a function");
+  }
+  return validateSettledIssuerResearchSources(await fetchSourcesImpl());
+}
+
+function resolveCollectedCbIssuerResearchSources(sourceResults, authorization) {
+  const settled = validateSettledIssuerResearchSources(sourceResults);
+  return {
+    listed: authorization.listed.approved
+      ? settled.listed
+      : rejectedAuthorization(authorization.listed),
+    otc: authorization.otc.approved
+      ? settled.otc
+      : rejectedAuthorization(authorization.otc),
+  };
+}
+
+async function settleProductionCbSupplementalSources(date, sourceResults, authorization) {
+  if (sourceResults === undefined) {
+    const error = productionCbSupplementalApprovalError();
+    if (error !== undefined) {
+      return {
+        institution: { status: "rejected", reason: error },
+        redemption: { status: "rejected", reason: error },
+        underwriting: { status: "rejected", reason: error },
+      };
+    }
+    return fetchCbSupplementalSources({ date });
+  }
+  const settled = validateSettledSupplementalSources(sourceResults);
+  return {
+    institution: authorization.institution.approved
+      ? settled.institution
+      : rejectedAuthorization(authorization.institution),
+    redemption: authorization.redemption.approved
+      ? settled.redemption
+      : rejectedAuthorization(authorization.redemption),
+    underwriting: authorization.underwriting.approved
+      ? settled.underwriting
+      : rejectedAuthorization(authorization.underwriting),
+  };
+}
+
+function rejectedAuthorization(authorization) {
+  return {
+    status: "rejected",
+    reason: new Error(authorization.reason),
+  };
+}
+
+function validateSettledSupplementalSources(value) {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || !hasExactEnumerableKeys(value, ["institution", "redemption", "underwriting"])
+  ) {
+    throw new TypeError("CB supplemental source results must contain exact source results");
+  }
+  return {
+    institution: validateOpaqueSettledResult(value.institution, "institution"),
+    redemption: validateOpaqueSettledResult(value.redemption, "redemption"),
+    underwriting: validateOpaqueSettledResult(value.underwriting, "underwriting"),
+  };
+}
+
+function validateOpaqueSettledResult(value, name) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${name} must be a settled result`);
+  }
+  if (value.status === "fulfilled" && hasExactEnumerableKeys(value, ["status", "value"])) {
+    return { status: "fulfilled", value: value.value };
+  }
+  if (value.status === "rejected" && hasExactEnumerableKeys(value, ["status", "reason"])) {
+    return { status: "rejected", reason: value.reason };
+  }
+  throw new TypeError(`${name} must be an exact settled result`);
+}
+
+function productionCbSupplementalApprovalError() {
+  const authorization = buildProductionCbOptionalSourceAuthorization().supplemental;
+  return Object.values(authorization).every((item) => item.approved)
+    ? undefined
+    : new Error("CB supplemental sources are not approved for production");
+}
+
+function buildProductionCbOptionalSourceAuthorization() {
+  return Object.freeze({
+    issuerResearch: Object.freeze(Object.fromEntries(
+      CB_ISSUER_RESEARCH_RESOURCES.map(({ policy, resourceId }) => [
+        policy.market,
+        authorizeProductionResource({
+          sourceId: policy.sourceId,
+          resourceId,
+          exactUrl: policy.url,
+        }),
+      ]),
+    )),
+    supplemental: Object.freeze(Object.fromEntries(
+      CB_SUPPLEMENTAL_RESOURCES.map(({ key, ...policy }) => [
+        key,
+        authorizeProductionResource(policy),
+      ]),
+    )),
+  });
+}
+
+function authorizeProductionResource(policy) {
+  try {
+    const resource = getApprovedResource(policy.sourceId, policy.resourceId);
+    if (
+      resource.approvalStatus === "APPROVED_FOR_PRODUCTION"
+      && resource.exactUrl === policy.exactUrl
+    ) {
+      return Object.freeze({
+        approved: true,
+        exactUrl: policy.exactUrl,
+        reason: null,
+      });
+    }
+  } catch {
+    // A missing central registry record is the same fail-closed state as revocation.
+  }
+  return Object.freeze({
+    approved: false,
+    exactUrl: policy.exactUrl,
+    reason: `OPTIONAL_RESOURCE_NOT_APPROVED:${policy.sourceId}/${policy.resourceId}`,
+  });
+}
+
+export function buildCbIssuerResearchCandidate({
+  generatedAt,
+  issuers,
+  sourceResults,
+  previous,
+} = {}) {
+  const settled = validateSettledIssuerResearchSources(sourceResults);
+  const snapshot = buildCbIssuerResearchSnapshot({
+    generatedAt,
+    issuers,
+    ...settled,
+    ...(previous === undefined ? {} : { previous }),
+  });
+  const text = `${JSON.stringify(snapshot, null, 2)}\n`;
+  return Object.freeze({
+    snapshot,
+    artifact: Object.freeze({
+      name: "cb-issuer-research.json",
+      text,
+      sha256: sha256(text),
+      recordCount: snapshot.records.length,
+    }),
+    viewRecords: snapshot.records,
+  });
+}
+
+function productionIssuerResearchApprovalError() {
+  const authorization = buildProductionCbOptionalSourceAuthorization().issuerResearch;
+  return Object.values(authorization).every((item) => item.approved)
+    ? undefined
+    : new Error("CB issuer research sources are not approved for production");
+}
+
+function validateSettledIssuerResearchSources(
+  value,
+  name = "CB issuer research source results",
+) {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+    || !hasExactEnumerableKeys(value, ["listed", "otc"])
+  ) {
+    throw new TypeError(`${name} must contain exact listed and otc results`);
+  }
+  return {
+    listed: validateSettledResult(value.listed, `${name}.listed`),
+    otc: validateSettledResult(value.otc, `${name}.otc`),
+  };
+}
+
+function assertPublicOptions(value, allowed, name) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${name} options must be an object`);
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    if (typeof key !== "string" || !allowed.includes(key)) {
+      throw new TypeError(`${String(key)} is not supported by ${name}`);
+    }
+  }
+}
+
+function validateSettledResult(value, name) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${name} must be a settled result`);
+  }
+  if (value.status === "fulfilled") {
+    if (!hasExactEnumerableKeys(value, ["status", "value"]) || typeof value.value !== "string") {
+      throw new TypeError(`${name} fulfilled value must be a CSV string`);
+    }
+    return { status: "fulfilled", value: value.value };
+  }
+  if (value.status === "rejected") {
+    if (!hasExactEnumerableKeys(value, ["status", "reason"])) {
+      throw new TypeError(`${name} rejected result is invalid`);
+    }
+    return { status: "rejected", reason: value.reason };
+  }
+  throw new TypeError(`${name} must be fulfilled or rejected`);
+}
+
+function issuerInputsFromBonds(bonds) {
+  return bonds.map((bond, index) => {
+    if (bond === null || typeof bond !== "object" || Array.isArray(bond)) {
+      throw new TypeError(`bond ${index} must be an object`);
+    }
+    return {
+      issuerCode: requiredPlainText(bond.issuerCode, `bond ${index} issuerCode`),
+      issuerName: requiredPlainText(bond.issuerName, `bond ${index} issuerName`),
+    };
+  });
+}
+
+function requiredPlainText(value, name) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new TypeError(`${name} must be a non-empty string`);
+  }
+  return value;
+}
+
+async function readPreviousIssuerResearch(outputDir) {
+  const value = await readOptionalJson(join(outputDir, "cb-issuer-research.json"));
+  return value === undefined ? undefined : parseCbIssuerResearchSnapshot(value);
+}
+
+async function readPreviousWorkbench(outputDir) {
+  const value = await readOptionalJson(join(outputDir, "bond-workbench.json"));
+  if (value === undefined) return undefined;
+  try {
+    return parseBondWorkbenchSnapshot(value);
+  } catch (error) {
+    throw new TypeError(`previous bond workbench is invalid: ${error.message}`);
+  }
+}
+
+async function readPreviousSupplemental(outputDir) {
+  const value = await readOptionalJson(join(outputDir, "bond-supplemental.json"));
+  if (value === undefined) return undefined;
+  try {
+    return parseCbSupplementalSnapshot(value);
+  } catch (error) {
+    throw new TypeError(`previous supplemental snapshot is invalid: ${error.message}`);
+  }
+}
+
+async function readPreviousHistory(outputDir) {
+  const value = await readOptionalJson(join(outputDir, "bond-market-history.json"));
+  try {
+    return parseBondMarketHistory(value ?? []);
+  } catch (error) {
+    throw new TypeError(`previous bond market history is invalid: ${error.message}`);
+  }
+}
+
+function countSupplementalRecords(snapshot) {
+  return Object.values(snapshot.institutionHistory)
+    .reduce((count, records) => count + records.length, 0)
+    + snapshot.redemptions.length
+    + snapshot.underwritingCases.length;
 }
 
 function latestTradingDate(records) {
@@ -188,57 +661,7 @@ function latestTradingDate(records) {
     .at(-1) ?? null;
 }
 
-export function bondInputsFrom11406Rows(rows) {
-  if (!Array.isArray(rows)) throw new TypeError("11406 rows must be an array");
-  return rows.flatMap((row, index) => {
-    if (row === null || typeof row !== "object" || Array.isArray(row)) {
-      throw new TypeError(`11406 row ${index + 1} must be an object`);
-    }
-    const bondCode = sourceText(row, "債券代碼");
-    if (bondCode === "") {
-      if (isExplicitPrivateUnlistedBond(row)) return [];
-      throw new TypeError(`11406 row ${index + 1} has missing bond code`);
-    }
-    if (!/^\d{5,6}$/.test(bondCode)) {
-      if (isExplicitPrivateUnlistedBond(row)) return [];
-      throw new TypeError(`11406 row ${index + 1} has invalid bond code`);
-    }
-    const putText = sourceText(row, "賣回權日期");
-    return [{
-      bondCode,
-      issuerCode: requiredSourceText(row, "機構代碼", index),
-      shortName: requiredSourceText(row, "債券簡稱", index),
-      maturityDate: officialDate(
-        requiredSourceText(row, "到期日期", index),
-        `11406 row ${index + 1} maturityDate`,
-      ),
-      issueAmount: officialAmount(
-        requiredSourceText(row, "發行總額", index),
-        `11406 row ${index + 1} issueAmount`,
-      ),
-      outstandingAmount: officialAmount(
-        requiredSourceText(row, "目前餘額", index),
-        `11406 row ${index + 1} outstandingAmount`,
-      ),
-      putDates: putText === ""
-        ? []
-        : putText
-          .split(/[、,;；|\s]+/)
-          .filter(Boolean)
-          .map((date) => officialDate(
-            date,
-            `11406 row ${index + 1} putDate`,
-          )),
-    }];
-  });
-}
-
-function isExplicitPrivateUnlistedBond(row) {
-  return (
-    sourceText(row, "募集方式") === "8"
-    && sourceText(row, "上市櫃否") === "5"
-  );
-}
+export { bondInputsFrom11406Rows };
 
 function validateCandidate({ bondInputs, collected, views }) {
   const errors = [];
@@ -268,18 +691,520 @@ function validateCandidate({ bondInputs, collected, views }) {
   return errors;
 }
 
-async function verifyStagedFiles(stagingDir, files, manifestText) {
+async function verifyStagedFiles(
+  stagingDir,
+  files,
+  manifestText,
+  bondInputs,
+  currentTerms,
+  previousWorkbench,
+) {
+  let stagedIssuerResearch;
+  let stagedSupplemental;
+  let stagedHistory;
+  let stagedViews;
+  let stagedWorkbench;
   for (const file of files) {
     const text = await readFile(join(stagingDir, file.name), "utf8");
+    if (file.rawBytes !== Buffer.byteLength(text, "utf8")) {
+      throw new Error(`VALIDATION_FAILED:STAGED_BYTES_MISMATCH:${file.name}`);
+    }
     const parsed = JSON.parse(text);
-    if (!Array.isArray(parsed) || parsed.length !== file.recordCount) {
+    if (file.name === "cb-issuer-research.json") {
+      stagedIssuerResearch = parseCbIssuerResearchSnapshot(parsed);
+      if (stagedIssuerResearch.records.length !== file.recordCount) {
+        throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
+      }
+    } else if (file.name === "bond-supplemental.json") {
+      stagedSupplemental = parseCbSupplementalSnapshot(parsed);
+      if (countSupplementalRecords(stagedSupplemental) !== file.recordCount) {
+        throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
+      }
+    } else if (file.name === "bond-market-history.json") {
+      stagedHistory = parseBondMarketHistory(parsed);
+      if (stagedHistory.length !== file.recordCount) {
+        throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
+      }
+    } else if (file.name === "bond-workbench.json") {
+      stagedWorkbench = parseBondWorkbenchSnapshot(parsed);
+      if (
+        stagedWorkbench.records.length !== file.recordCount
+        || file.rawBytes !== Buffer.byteLength(text, "utf8")
+        || file.schemaVersion !== stagedWorkbench.schemaVersion
+        || !equalPlainJson(
+          file.sourceStateSummary,
+          summarizeWorkbenchSourceStates(stagedWorkbench),
+        )
+      ) {
+        throw new Error(`VALIDATION_FAILED:STAGED_WORKBENCH_METADATA:${file.name}`);
+      }
+    } else if (!Array.isArray(parsed) || parsed.length !== file.recordCount) {
       throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
     }
+    if (file.name === "bond-market-view.json") stagedViews = parsed;
     if (sha256(text) !== file.sha256) {
       throw new Error(`VALIDATION_FAILED:STAGED_HASH_MISMATCH:${file.name}`);
     }
   }
-  JSON.parse(manifestText);
+  const manifest = JSON.parse(manifestText);
+  const manifestFiles = manifest?.market?.files;
+  if (
+    !Array.isArray(manifestFiles)
+    || manifestFiles.length !== files.length
+    || files.some((file) => {
+      const entry = manifestFiles.find((candidate) => candidate?.name === file.name);
+      return entry?.sha256 !== file.sha256
+        || entry?.rawBytes !== file.rawBytes
+        || entry?.recordCount !== file.recordCount;
+    })
+  ) {
+    throw new Error("VALIDATION_FAILED:MARKET_MANIFEST_FILES");
+  }
+  if (
+    stagedIssuerResearch === undefined
+    || stagedSupplemental === undefined
+    || stagedHistory === undefined
+    || stagedViews === undefined
+    || stagedWorkbench === undefined
+  ) {
+    throw new Error("VALIDATION_FAILED:MARKET_ARTIFACTS");
+  }
+  verifyIssuerResearchViewConsistency(stagedIssuerResearch, stagedViews);
+  verifySupplementalViewConsistency(
+    stagedSupplemental,
+    stagedViews,
+    manifest?.market?.requestedDate,
+    bondInputs,
+  );
+  verifyWorkbenchConsistency({
+    workbench: stagedWorkbench,
+    terms: currentTerms,
+    views: stagedViews,
+    history: stagedHistory,
+    supplemental: stagedSupplemental,
+    issuerResearch: stagedIssuerResearch,
+    requestedDate: manifest?.market?.requestedDate,
+    dataDate: manifest?.market?.dataDate,
+    sourceStateSummary: manifest?.market?.workbenchSourceStateSummary,
+    previous: previousWorkbench,
+  });
+}
+
+export function buildBondWorkbenchEvents({ terms, supplemental }) {
+  const knownBondCodes = new Set(terms.map((term) => term.bondCode));
+  const events = [];
+  for (const term of terms) {
+    if (term.listingDate !== null) {
+      events.push(termEvent(term, "listing", term.listingDate, "掛牌日"));
+    }
+    for (const date of term.putDates) {
+      events.push(termEvent(term, "put", date, "賣回權日期"));
+    }
+    events.push(termEvent(term, "maturity", term.maturityDate, "到期日"));
+  }
+  for (const redemption of supplemental.redemptions) {
+    if (!knownBondCodes.has(redemption.bondCode)) continue;
+    events.push({
+      bondCode: redemption.bondCode,
+      eventId: `redemption:${redemption.announcementDate}:${redemption.delistingDate}`,
+      type: "redemption",
+      date: redemption.announcementDate,
+      title: `${redemption.bondName}贖回公告`,
+      ...WORKBENCH_EVENT_SOURCES.redemption,
+    });
+    events.push({
+      bondCode: redemption.bondCode,
+      eventId: `delisting:${redemption.delistingDate}`,
+      type: "delisting",
+      date: redemption.delistingDate,
+      title: `${redemption.bondName}終止櫃檯買賣`,
+      ...WORKBENCH_EVENT_SOURCES.redemption,
+    });
+  }
+  return events.sort((left, right) => (
+    left.bondCode.localeCompare(right.bondCode)
+    || left.date.localeCompare(right.date)
+    || left.eventId.localeCompare(right.eventId)
+  ));
+}
+
+export function buildWorkbenchSourceStates({ views, supplemental, issuerResearch }) {
+  return views.map((view) => ({
+    bondCode: view.bondCode,
+    institutions: supplemental.sources.institution.state,
+    company: issuerSourceState(view, issuerResearch),
+    events: supplemental.sources.redemption.state,
+  }));
+}
+
+function issuerSourceState(view, issuerResearch) {
+  if (view.issuerResearch === null) return "unavailable";
+  const status = issuerResearch.sources[view.issuerResearch.market]?.status;
+  if (status === "current") return "fresh";
+  if (status === "stale") return "stale";
+  return "unavailable";
+}
+
+function termEvent(term, type, date, label) {
+  return {
+    bondCode: term.bondCode,
+    eventId: `11406:${type}:${date}`,
+    type,
+    date,
+    title: `${term.bondName}${label}`,
+    ...WORKBENCH_EVENT_SOURCES.terms,
+  };
+}
+
+export function verifyWorkbenchConsistency({
+  workbench,
+  terms,
+  views,
+  history,
+  supplemental,
+  issuerResearch,
+  requestedDate,
+  dataDate,
+  sourceStateSummary,
+  previous,
+}) {
+  const snapshot = parseBondWorkbenchSnapshot(workbench);
+  const parsedHistory = parseBondMarketHistory(history);
+  if (
+    !Array.isArray(terms)
+    || !Array.isArray(views)
+    || !isIsoDate(requestedDate)
+    || !isIsoDate(dataDate)
+    || snapshot.dataDate !== dataDate
+  ) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_ENVELOPE");
+  }
+  const termsByCode = uniqueByBondCode(terms, "WORKBENCH_TERM");
+  const viewsByCode = uniqueByBondCode(views, "WORKBENCH_VIEW");
+  const recordsByCode = uniqueByBondCode(snapshot.records, "WORKBENCH_RECORD");
+  if (
+    termsByCode.size !== viewsByCode.size
+    || [...termsByCode.keys()].some((code) => !viewsByCode.has(code))
+  ) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_CURRENT_BOND_CODES");
+  }
+  for (const [bondCode, term] of termsByCode) {
+    const view = viewsByCode.get(bondCode);
+    if (
+      term.issuerCode !== view.issuerCode
+      || term.bondName !== view.bondName
+    ) {
+      throw new Error(`VALIDATION_FAILED:WORKBENCH_CURRENT_MISMATCH:${bondCode}`);
+    }
+  }
+  if (parsedHistory.some((point) => !recordsByCode.has(point.bondCode))) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_BOND_CODE");
+  }
+  const expectedPrevious = previous ?? {
+    ...snapshot,
+    records: snapshot.records.filter((record) => !termsByCode.has(record.bondCode)),
+  };
+  const expected = buildBondWorkbenchSnapshot({
+    generatedAt: snapshot.generatedAt,
+    dataDate,
+    asOfDate: requestedDate,
+    currentTerms: terms,
+    currentViews: views,
+    currentEvents: buildBondWorkbenchEvents({ terms, supplemental }),
+    currentSourceStates: buildWorkbenchSourceStates({
+      views,
+      supplemental,
+      issuerResearch,
+    }),
+    currentAssessments: buildCandidateAssessments(views, parsedHistory),
+    previous: expectedPrevious,
+  });
+  if (!equalPlainJson(snapshot, expected)) {
+    const expectedByCode = new Map(expected.records.map((record) => [
+      record.bondCode,
+      record,
+    ]));
+    if (snapshot.records.some((record) => (
+      termsByCode.has(record.bondCode)
+      && !equalPlainJson(record.assessment, expectedByCode.get(record.bondCode)?.assessment)
+    ))) {
+      throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_ASSESSMENT");
+    }
+    throw new Error("VALIDATION_FAILED:WORKBENCH_CANDIDATE_MISMATCH");
+  }
+  if (!equalPlainJson(
+    sourceStateSummary,
+    summarizeWorkbenchSourceStates(snapshot),
+  )) {
+    throw new Error("VALIDATION_FAILED:WORKBENCH_SOURCE_STATE");
+  }
+  verifyIssuerResearchViewConsistency(issuerResearch, views);
+  verifySupplementalViewConsistency(supplemental, views, requestedDate, terms);
+  return snapshot;
+}
+
+export function summarizeWorkbenchSourceStates(workbench) {
+  const snapshot = parseBondWorkbenchSnapshot(workbench);
+  const states = ["complete", "stale", "date_mismatch", "missing", "accumulating"];
+  const fields = [
+    "price",
+    "valuation",
+    "outstanding",
+    "institutions",
+    "company",
+    "events",
+    "history",
+  ];
+  return {
+    lifecycle: {
+      active: snapshot.records.filter((record) => record.status === "active").length,
+      archived: snapshot.records.filter((record) => record.status === "archived").length,
+    },
+    fields: Object.fromEntries(fields.map((field) => [
+      field,
+      Object.fromEntries(states.map((state) => [
+        state,
+        snapshot.records.filter((record) => record.fieldStates[field] === state).length,
+      ])),
+    ])),
+  };
+}
+
+function uniqueByBondCode(records, code) {
+  const output = new Map();
+  for (const record of records) {
+    if (
+      record === null
+      || typeof record !== "object"
+      || Array.isArray(record)
+      || typeof record.bondCode !== "string"
+      || !/^\d{5,6}$/.test(record.bondCode)
+      || output.has(record.bondCode)
+    ) {
+      throw new Error(`VALIDATION_FAILED:${code}_BOND_CODE`);
+    }
+    output.set(record.bondCode, record);
+  }
+  return output;
+}
+
+function buildCandidateAssessments(views, history) {
+  return views.map((view) => ({
+    bondCode: view.bondCode,
+    assessment: evaluateBondAssessment({
+      view,
+      history: history.filter((point) => point.bondCode === view.bondCode),
+      spreadPercent: null,
+      spreadDataDate: null,
+      borrowability: "unknown",
+      conversionSuspended: null,
+      publicFinancials: {
+        ttmProfitState: "unknown",
+        revenueTrendState: "unknown",
+        psPercentile: null,
+        dataDate: null,
+        sourceId: null,
+      },
+    }),
+  }));
+}
+
+export function verifyIssuerResearchViewConsistency(snapshot, views) {
+  if (!Array.isArray(views)) {
+    throw new Error("VALIDATION_FAILED:BOND_MARKET_VIEW_ENVELOPE");
+  }
+  const researchByCode = new Map(
+    snapshot.records.map((record) => [record.issuerCode, publicIssuerResearch(record)]),
+  );
+  const viewedIssuerCodes = new Set();
+  for (const view of views) {
+    if (view === null || typeof view !== "object" || Array.isArray(view)) {
+      throw new Error("VALIDATION_FAILED:BOND_MARKET_VIEW_ENVELOPE");
+    }
+    const expected = researchByCode.get(view.issuerCode) ?? null;
+    if (!equalPlainJson(view.issuerResearch, expected)) {
+      throw new Error(`VALIDATION_FAILED:ISSUER_RESEARCH_VIEW_MISMATCH:${view.issuerCode}`);
+    }
+    viewedIssuerCodes.add(view.issuerCode);
+  }
+  if (snapshot.records.some((record) => !viewedIssuerCodes.has(record.issuerCode))) {
+    throw new Error("VALIDATION_FAILED:ORPHAN_ISSUER_RESEARCH");
+  }
+}
+
+export function verifySupplementalViewConsistency(
+  snapshot,
+  views,
+  asOfDate,
+  bondInputs,
+) {
+  const supplemental = parseCbSupplementalSnapshot(snapshot);
+  if (!isIsoDate(asOfDate) || !Array.isArray(views)) {
+    throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_VIEW_ENVELOPE");
+  }
+  const issuanceByBondCode = verifiedIssuanceEvidence(bondInputs, views);
+  for (const view of views) {
+    if (
+      view === null
+      || typeof view !== "object"
+      || Array.isArray(view)
+      || !/^\d{5,6}$/.test(view.bondCode ?? "")
+    ) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_VIEW_ENVELOPE");
+    }
+    const institution = summarizeCbInstitution(
+      supplemental,
+      view.bondCode,
+      asOfDate,
+    );
+    const institutionFieldsMatch = (
+      view.institutionDataDate === institution.dataDate
+      && view.institutionNetUnits === institution.dailyNetUnits
+      && view.institutionNet5dUnits === institution.net5dUnits
+      && view.institutionNet20dUnits === institution.net20dUnits
+    );
+    const redemption = currentCbRedemption(supplemental, view.bondCode, asOfDate);
+    const redemptionMatches =
+      JSON.stringify(view.redemptionEvent) === JSON.stringify(redemption);
+    const issuance = issuanceByBondCode.get(view.bondCode);
+    let remainingMetrics;
+    try {
+      remainingMetrics = deriveBondRemainingMetrics({
+        issueAmount: issuance.issueAmount,
+        outstandingAmount: issuance.outstandingAmount,
+        outstandingDataDate: issuance.outstandingDataDate,
+        faceValueTwd: supplemental.unitFaceValueTwd,
+        cbTradeUnits: view.cbTradeUnits,
+        cbTradeDate: view.cbPriceDate,
+      });
+    } catch {
+      throw new Error(`VALIDATION_FAILED:SUPPLEMENTAL_VIEW_MISMATCH:${view.bondCode}`);
+    }
+    const derivedReasonsMatch = derivedMissingReasonsMatch(
+      view.missingReasons,
+      remainingMetrics.missingReasons,
+    );
+    const expectedQuality = remainingMetrics.missingReasons.includes(
+      "BALANCE_TRADE_DATE_MISMATCH",
+    )
+      ? "date_mismatch"
+      : view.missingReasons.length > 0
+        ? "partial"
+        : "complete";
+    const remainingFieldsMatch = (
+      view.outstandingAmount === issuance.outstandingAmount
+      && view.outstandingDataDate === issuance.outstandingDataDate
+      && view.remainingUnits === remainingMetrics.remainingUnits
+      && view.remainingRatio === remainingMetrics.remainingRatio
+      && view.dailyTurnoverRate === remainingMetrics.dailyTurnoverRate
+      && derivedReasonsMatch
+      && view.dataQuality === expectedQuality
+    );
+    if (!institutionFieldsMatch || !redemptionMatches || !remainingFieldsMatch) {
+      throw new Error(`VALIDATION_FAILED:SUPPLEMENTAL_VIEW_MISMATCH:${view.bondCode}`);
+    }
+  }
+}
+
+const DERIVED_MISSING_REASONS = new Set([
+  "NO_VERIFIED_FACE_VALUE",
+  "OUTSTANDING_NOT_INTEGER",
+  "OUTSTANDING_NOT_DIVISIBLE",
+  "INVALID_ISSUE_AMOUNT",
+  "BALANCE_TRADE_DATE_MISMATCH",
+  "ZERO_REMAINING_UNITS",
+]);
+
+function verifiedIssuanceEvidence(bondInputs, views) {
+  if (!Array.isArray(bondInputs)) {
+    throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_ISSUANCE_EVIDENCE");
+  }
+  const evidence = new Map();
+  for (const bond of bondInputs) {
+    if (bond === null || typeof bond !== "object" || Array.isArray(bond)) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_ISSUANCE_EVIDENCE");
+    }
+    const { bondCode, issueAmount, outstandingAmount, outstandingDataDate } = bond;
+    if (
+      typeof bondCode !== "string"
+      || !/^\d{5,6}$/.test(bondCode)
+      || evidence.has(bondCode)
+      || !isOptionalCanonicalAmount(issueAmount)
+      || !isOptionalCanonicalAmount(outstandingAmount)
+      || !(
+        outstandingDataDate === null
+        || typeof outstandingDataDate === "string" && isIsoDate(outstandingDataDate)
+      )
+      || outstandingAmount !== null && outstandingDataDate === null
+    ) {
+      throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_ISSUANCE_EVIDENCE");
+    }
+    evidence.set(bondCode, { issueAmount, outstandingAmount, outstandingDataDate });
+  }
+  const viewCodes = views.map((view) => view?.bondCode);
+  if (
+    evidence.size !== views.length
+    || new Set(viewCodes).size !== views.length
+    || viewCodes.some((bondCode) => !evidence.has(bondCode))
+  ) {
+    throw new Error("VALIDATION_FAILED:SUPPLEMENTAL_ISSUANCE_EVIDENCE");
+  }
+  return evidence;
+}
+
+function isOptionalCanonicalAmount(value) {
+  return value === null
+    || typeof value === "string" && /^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value);
+}
+
+function derivedMissingReasonsMatch(actual, expected) {
+  if (!Array.isArray(actual) || actual.some((reason) => typeof reason !== "string")) {
+    return false;
+  }
+  const actualDerived = actual.filter((reason) => DERIVED_MISSING_REASONS.has(reason));
+  return new Set(actualDerived).size === actualDerived.length
+    && actualDerived.length === expected.length
+    && expected.every((reason) => actualDerived.includes(reason));
+}
+
+function publicIssuerResearch(record) {
+  return {
+    market: record.market,
+    industryName: record.industryName,
+    revenueMonth: record.revenueMonth,
+    sourcePublishedOn: record.sourcePublishedOn,
+    revenueUnit: record.revenueUnit,
+    currentMonthRevenue: record.currentMonthRevenue,
+    monthOverMonthPercent: record.monthOverMonthPercent,
+    yearOverYearPercent: record.yearOverYearPercent,
+    cumulativeRevenue: record.cumulativeRevenue,
+    cumulativeYearOverYearPercent: record.cumulativeYearOverYearPercent,
+  };
+}
+
+function equalPlainJson(left, right) {
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left)
+      && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => equalPlainJson(value, right[index]));
+  }
+  if (
+    left === null
+    || right === null
+    || typeof left !== "object"
+    || typeof right !== "object"
+  ) return false;
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+  return (
+    leftKeys.length === rightKeys.length
+    && leftKeys.every((key, index) => (
+      key === rightKeys[index]
+      && equalPlainJson(left[key], right[key])
+    ))
+  );
 }
 
 async function publishAtomically(stagingDir, outputDir, names) {
@@ -311,9 +1236,37 @@ async function publishAtomically(stagingDir, outputDir, names) {
   }
 }
 
-async function loadBondInputs(outputDir) {
-  const rows = JSON.parse(await readFile(join(outputDir, "11406.json"), "utf8"));
-  return bondInputsFrom11406Rows(rows);
+async function loadBondRows(outputDir) {
+  return JSON.parse(await readFile(join(outputDir, "11406.json"), "utf8"));
+}
+
+function termSummariesFromBondInputs(bonds) {
+  return bonds.map((bond, index) => {
+    if (bond === null || typeof bond !== "object" || Array.isArray(bond)) {
+      throw new TypeError(`bond ${index} must be an object`);
+    }
+    return {
+      bondCode: bond.bondCode,
+      issuerCode: bond.issuerCode,
+      bondName: bond.shortName,
+      issuerName: bond.issuerName,
+      issueDate: null,
+      listingDate: null,
+      maturityDate: bond.maturityDate,
+      issueAmount: bond.issueAmount,
+      outstandingAmount: bond.outstandingAmount,
+      outstandingDataDate: bond.outstandingDataDate,
+      initialConversionPrice: null,
+      conversionStartDate: null,
+      conversionEndDate: null,
+      putDates: bond.putDates,
+      putPrice: null,
+      securedStatus: null,
+      underwriter: null,
+      trustee: null,
+      unitFaceValueTwd: null,
+    };
+  });
 }
 
 function isApprovedOfficialUrl(value) {
@@ -339,50 +1292,6 @@ function isApprovedOfficialUrl(value) {
   }
 }
 
-function sourceText(row, key) {
-  if (!(key in row) || typeof row[key] !== "string") {
-    throw new TypeError(`11406 row is missing string field: ${key}`);
-  }
-  const text = row[key].trim();
-  return new Set(["-", "—", "－"]).has(text) ? "" : text;
-}
-
-function requiredSourceText(row, key, index) {
-  const value = sourceText(row, key);
-  if (value === "") {
-    throw new TypeError(`11406 row ${index + 1} requires ${key}`);
-  }
-  return value;
-}
-
-function officialDate(value, name) {
-  let iso;
-  let match;
-  if ((match = /^(\d{4})(\d{2})(\d{2})$/.exec(value))) {
-    iso = `${match[1]}-${match[2]}-${match[3]}`;
-  } else if ((match = /^(\d{3})(\d{2})(\d{2})$/.exec(value))) {
-    iso = `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
-  } else if ((match = /^(\d{3})\/(\d{2})\/(\d{2})$/.exec(value))) {
-    iso = `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
-  } else {
-    iso = value;
-  }
-  if (!isIsoDate(iso)) throw new TypeError(`${name} must be a valid date`);
-  return iso;
-}
-
-function officialAmount(value, name) {
-  const unitMatch = /^(.*?)(仟元|元)?$/.exec(value.replaceAll(",", ""));
-  if (!unitMatch) throw new TypeError(`${name} has an unsupported unit`);
-  const text = unitMatch[1];
-  if (!/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(text)) {
-    throw new TypeError(`${name} must be a non-negative decimal`);
-  }
-  const canonical = text.replace(/\.0+$/, "");
-  return unitMatch[2] === "仟元"
-    ? multiplyDecimal(canonical, "1000", 0)
-    : canonical;
-}
 
 async function readOptionalJson(path) {
   try {
@@ -400,6 +1309,18 @@ async function pathExists(path) {
   } catch {
     return false;
   }
+}
+
+function hasExactEnumerableKeys(value, expected) {
+  const keys = Reflect.ownKeys(value);
+  return (
+    keys.length === expected.length
+    && keys.every((key) => (
+      typeof key === "string"
+      && expected.includes(key)
+      && Object.prototype.propertyIsEnumerable.call(value, key)
+    ))
+  );
 }
 
 function sha256(text) {
@@ -422,7 +1343,7 @@ if (entryUrl === import.meta.url) {
   const dryRun = process.env.CB_MARKET_DRY_RUN === "1";
   if (dryRun) {
     const outputDir = "static-showcase/data";
-    const bonds = await loadBondInputs(outputDir);
+    const bonds = bondInputsFrom11406Rows(await loadBondRows(outputDir));
     const collected = await fetchCurrentOfficialMarketData({
       bondCodes: bonds.map((bond) => bond.bondCode),
       issuerCodes: [...new Set(bonds.map((bond) => bond.issuerCode))],

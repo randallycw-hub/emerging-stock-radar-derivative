@@ -1,0 +1,20 @@
+{
+  "sourceId": "tpex-cb-institution-daily",
+  "schemaVersion": "tpex-newCb3itrade-daily-v1",
+  "fixtureVersion": "official-minimal-v1",
+  "resourceUrl": "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
+  "method": "POST",
+  "formBody": {
+    "date": "2026/08/07",
+    "type": "Daily",
+    "id": "",
+    "response": "json"
+  },
+  "fetchedAt": "2026-08-09T07:38:54.6799194Z",
+  "httpStatus": 200,
+  "httpContentType": "application/json;charset=UTF-8",
+  "sourceResponseSha256": "sha256:eede0c067193ed3c77a19ab698a797a3e6f2f28234e3736c8e035e69a44942d2",
+  "sourceRowCount": 157,
+  "fixtureRowCount": 2,
+  "samplingMethod": "由 2026-08-07 經人工覆核的 TPEx Daily response 保留前兩列，保留 root/table 結構、原始欄位順序與 cell 原值；不提交完整 live response。"
+}

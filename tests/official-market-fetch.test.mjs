@@ -5,6 +5,7 @@ import test from "node:test";
 import { mapLimit } from "../scripts/lib/map-limit.mjs";
 import {
   fetchCbMonthlyHistory,
+  fetchCbSupplementalSources,
   fetchCurrentOfficialMarketData,
   fetchMopsConversionPrice,
   fetchMopsDetail,
@@ -402,9 +403,350 @@ test("normalizes the three verified monthly history contracts", async () => {
   ));
 });
 
+test("supplemental fetches only the three exact resources and parses their verified contracts", async () => {
+  const institution = await fixtureFromSource("cb-institution/daily-minimal.json");
+  const redemption = await fixtureFromSource("cb-redemption/year-minimal.json");
+  const underwriting = await fixtureFromSource("cb-underwriting/current-year-minimal.html");
+  const requests = [];
+  const fetchImpl = async (url, init = {}) => {
+    requests.push({
+      url: String(url),
+      method: init.method ?? "GET",
+      accept: init.headers?.accept,
+      contentType: init.headers?.["content-type"],
+      body: init.body?.toString() ?? null,
+      redirect: init.redirect,
+    });
+    if (String(url) === "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade") {
+      return jsonResponse(institution);
+    }
+    if (String(url) === "https://www.tpex.org.tw/www/zh-tw/bond/redeem") {
+      return jsonResponse(redemption);
+    }
+    if (String(url) === "https://web.twsa.org.tw/edoc2/default.aspx") {
+      return new Response(underwriting, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
+    throw new Error(`unexpected request: ${url}`);
+  };
+
+  const result = await fetchCbSupplementalSources({
+    date: "2026-08-07",
+    fetchImpl,
+  });
+
+  assert.deepEqual(requests, [
+    {
+      url: "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
+      method: "POST",
+      accept: "application/json",
+      contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+      body: "date=2026%2F08%2F07&type=Daily&id=&response=json",
+      redirect: "error",
+    },
+    {
+      url: "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+      method: "POST",
+      accept: "application/json",
+      contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+      body: "date=2026&id=&response=json",
+      redirect: "error",
+    },
+    {
+      url: "https://web.twsa.org.tw/edoc2/default.aspx",
+      method: "GET",
+      accept: "text/html,application/xhtml+xml",
+      contentType: undefined,
+      body: null,
+      redirect: "error",
+    },
+  ]);
+  assert.equal(result.institution.status, "fulfilled");
+  assert.equal(result.institution.value.tradingDate, "2026-08-07");
+  assert.equal(result.institution.value.records[1].bondCode, "54642");
+  assert.equal(result.redemption.status, "fulfilled");
+  assert.equal(result.redemption.value[0].announcementDate, "2026-08-04");
+  assert.equal(result.underwriting.status, "fulfilled");
+  assert.equal(result.underwriting.value.records[0].guaranteeType, "unsecured");
+});
+
+test("supplemental binds each parsed response to the requested collection period", async (t) => {
+  const institution2026 = await fixtureFromSource("cb-institution/daily-minimal.json");
+  const redemption2026 = await fixtureFromSource("cb-redemption/year-minimal.json");
+  const underwriting2026 = await fixtureFromSource("cb-underwriting/current-year-minimal.html");
+  const redemption2026Empty = emptyRedemptionFixture(redemption2026, 2026);
+
+  await t.test("institution date mismatch rejects only institution", async () => {
+    const result = await fetchCbSupplementalSources({
+      date: "2026-08-08",
+      fetchImpl: supplementalFixtureFetch({
+        institution: institution2026,
+        redemption: redemption2026,
+        underwriting: underwriting2026,
+      }),
+    });
+
+    assert.equal(result.institution.status, "rejected");
+    assert.match(result.institution.reason.message, /SUPPLEMENTAL_INSTITUTION_DATE_MISMATCH/);
+    assert.equal(result.redemption.status, "fulfilled");
+    assert.equal(result.underwriting.status, "fulfilled");
+  });
+
+  await t.test("empty redemption root year mismatch rejects only redemption", async () => {
+    const result = await fetchCbSupplementalSources({
+      date: "2026-08-07",
+      fetchImpl: supplementalFixtureFetch({
+        institution: institution2026,
+        redemption: emptyRedemptionFixture(redemption2026, 2025),
+        underwriting: underwriting2026,
+      }),
+    });
+
+    assert.equal(result.institution.status, "fulfilled");
+    assert.equal(result.redemption.status, "rejected");
+    assert.match(result.redemption.reason.message, /SUPPLEMENTAL_REDEMPTION_YEAR_MISMATCH/);
+    assert.equal(result.underwriting.status, "fulfilled");
+  });
+
+  await t.test("underwriting page year mismatch rejects only underwriting", async () => {
+    const result = await fetchCbSupplementalSources({
+      date: "2025-08-07",
+      fetchImpl: supplementalFixtureFetch({
+        institution: institutionFixtureForDate(institution2026, "2025-08-07"),
+        redemption: emptyRedemptionFixture(redemption2026, 2025),
+        underwriting: underwriting2026,
+      }),
+    });
+
+    assert.equal(result.institution.status, "fulfilled");
+    assert.equal(result.redemption.status, "fulfilled");
+    assert.equal(result.underwriting.status, "rejected");
+    assert.match(result.underwriting.reason.message, /SUPPLEMENTAL_UNDERWRITING_YEAR_MISMATCH/);
+  });
+
+  await t.test("internally valid 2026 sources all reject for a 2027 request", async () => {
+    const result = await fetchCbSupplementalSources({
+      date: "2027-08-07",
+      fetchImpl: supplementalFixtureFetch({
+        institution: institution2026,
+        redemption: redemption2026Empty,
+        underwriting: underwriting2026,
+      }),
+    });
+
+    assert.equal(result.institution.status, "rejected");
+    assert.equal(result.redemption.status, "rejected");
+    assert.equal(result.underwriting.status, "rejected");
+  });
+});
+
+test("supplemental sources settle independently when underwriting remains unavailable", async () => {
+  const institution = await fixtureFromSource("cb-institution/daily-minimal.json");
+  const redemption = await fixtureFromSource("cb-redemption/year-minimal.json");
+  const calls = [];
+  let releaseJson;
+  const jsonGate = new Promise((resolve) => {
+    releaseJson = resolve;
+  });
+  const fetchImpl = async (url) => {
+    const target = String(url);
+    calls.push(target);
+    if (target.endsWith("/newCb3itrade")) {
+      await jsonGate;
+      return jsonResponse(institution);
+    }
+    if (target.endsWith("/redeem")) {
+      await jsonGate;
+      return jsonResponse(redemption);
+    }
+    if (target === "https://web.twsa.org.tw/edoc2/default.aspx") {
+      return new Response("busy", { status: 503 });
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+
+  const pending = fetchCbSupplementalSources({ date: "2026-08-07", fetchImpl });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(calls.slice(0, 3), [
+    "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
+    "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+    "https://web.twsa.org.tw/edoc2/default.aspx",
+  ]);
+  releaseJson();
+  const result = await pending;
+
+  assert.equal(result.institution.status, "fulfilled");
+  assert.equal(result.redemption.status, "fulfilled");
+  assert.equal(result.underwriting.status, "rejected");
+  assert.match(result.underwriting.reason.message, /^HTTP_503:/);
+  assert.equal(
+    calls.filter((url) => url === "https://web.twsa.org.tw/edoc2/default.aspx").length,
+    3,
+  );
+  assert.equal(new Set(calls).size, 3);
+});
+
+test("supplemental redirect, content-type and schema failures reject only their named sources", async () => {
+  const fetchImpl = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/newCb3itrade")) {
+      return new Response("{}", {
+        status: 200,
+        headers: { "content-type": "text/plain" },
+      });
+    }
+    if (target.endsWith("/redeem")) {
+      return {
+        ok: true,
+        status: 200,
+        redirected: true,
+        headers: new Headers({ "content-type": "application/json" }),
+        body: new Response("{}").body,
+      };
+    }
+    return new Response("<html>wrong schema</html>", {
+      status: 200,
+      headers: { "content-type": "text/html" },
+    });
+  };
+
+  const result = await fetchCbSupplementalSources({ date: "2026-08-07", fetchImpl });
+
+  assert.equal(result.institution.status, "rejected");
+  assert.match(result.institution.reason.message, /^UNEXPECTED_CONTENT_TYPE:/);
+  assert.equal(result.redemption.status, "rejected");
+  assert.match(result.redemption.reason.message, /^REDIRECT_NOT_ALLOWED:/);
+  assert.equal(result.underwriting.status, "rejected");
+  assert.match(result.underwriting.reason.message, /page title is missing/);
+});
+
+test("supplemental rejects a media type that only contains the accepted Content-Type as a parameter", async () => {
+  const institution = await fixtureFromSource("cb-institution/daily-minimal.json");
+  const redemption = await fixtureFromSource("cb-redemption/year-minimal.json");
+  const underwriting = await fixtureFromSource("cb-underwriting/current-year-minimal.html");
+  const fetchImpl = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/newCb3itrade")) {
+      return new Response(institution, {
+        status: 200,
+        headers: { "content-type": "text/plain; profile=application/json" },
+      });
+    }
+    if (target.endsWith("/redeem")) return jsonResponse(redemption);
+    return new Response(underwriting, {
+      status: 200,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  };
+
+  const result = await fetchCbSupplementalSources({ date: "2026-08-07", fetchImpl });
+
+  assert.equal(result.institution.status, "rejected");
+  assert.match(result.institution.reason.message, /^UNEXPECTED_CONTENT_TYPE:/);
+  assert.equal(result.redemption.status, "fulfilled");
+  assert.equal(result.underwriting.status, "fulfilled");
+});
+
+test("supplemental response caps count actual UTF-8 bytes per source", async (t) => {
+  const institution = await fixtureFromSource("cb-institution/daily-minimal.json");
+  const redemption = await fixtureFromSource("cb-redemption/year-minimal.json");
+  const underwriting = await fixtureFromSource("cb-underwriting/current-year-minimal.html");
+  const cases = [
+    {
+      name: "institution JSON",
+      oversizeUrl: "/newCb3itrade",
+      oversizeBody: `{"padding":"${"界".repeat(166_667)}"}`,
+      contentType: "application/json",
+      source: "institution",
+      cap: 500_000,
+    },
+    {
+      name: "redemption JSON",
+      oversizeUrl: "/redeem",
+      oversizeBody: `{"padding":"${"界".repeat(166_667)}"}`,
+      contentType: "application/json",
+      source: "redemption",
+      cap: 500_000,
+    },
+    {
+      name: "underwriting HTML",
+      oversizeUrl: "web.twsa.org.tw",
+      oversizeBody: "界".repeat(333_334),
+      contentType: "text/html",
+      source: "underwriting",
+      cap: 1_000_000,
+    },
+  ];
+
+  for (const value of cases) {
+    await t.test(value.name, async () => {
+      const fetchImpl = async (url) => {
+        const target = String(url);
+        if (target.includes(value.oversizeUrl)) {
+          return new Response(value.oversizeBody, {
+            status: 200,
+            headers: { "content-type": value.contentType },
+          });
+        }
+        if (target.endsWith("/newCb3itrade")) return jsonResponse(institution);
+        if (target.endsWith("/redeem")) return jsonResponse(redemption);
+        return new Response(underwriting, {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        });
+      };
+
+      const result = await fetchCbSupplementalSources({ date: "2026-08-07", fetchImpl });
+
+      assert.equal(result[value.source].status, "rejected");
+      assert.match(result[value.source].reason.message, new RegExp(`RESPONSE_TOO_LARGE:.*:${value.cap}`));
+      for (const source of ["institution", "redemption", "underwriting"]) {
+        if (source !== value.source) assert.equal(result[source].status, "fulfilled");
+      }
+    });
+  }
+});
+
 function jsonResponse(text) {
   return new Response(text, {
     status: 200,
     headers: { "content-type": "application/json" },
   });
+}
+
+async function fixtureFromSource(name) {
+  return readFile(new URL(`fixtures/source-verification/${name}`, import.meta.url), "utf8");
+}
+
+function supplementalFixtureFetch({ institution, redemption, underwriting }) {
+  return async (url) => {
+    const target = String(url);
+    if (target.endsWith("/newCb3itrade")) return jsonResponse(institution);
+    if (target.endsWith("/redeem")) return jsonResponse(redemption);
+    if (target === "https://web.twsa.org.tw/edoc2/default.aspx") {
+      return new Response(underwriting, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+}
+
+function emptyRedemptionFixture(text, year) {
+  const payload = JSON.parse(text);
+  payload.date = `${year}0101`;
+  payload.tables[0].data = [];
+  payload.tables[0].totalCount = 0;
+  return JSON.stringify(payload);
+}
+
+function institutionFixtureForDate(text, date) {
+  const payload = JSON.parse(text);
+  const rocYear = Number(date.slice(0, 4)) - 1911;
+  payload.date = date.replaceAll("-", "");
+  payload.tables[0].date = `${rocYear}/${date.slice(5, 7)}/${date.slice(8, 10)}`;
+  return JSON.stringify(payload);
 }

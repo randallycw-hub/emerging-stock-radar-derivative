@@ -1,5 +1,6 @@
 import { formatDate, formatNumber } from "./site-shell.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
+import { defaultIpoStage, displayIpoStage, isActiveIpoRecord, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 
 const stageLabels = {
   A: "A 送件觀察",
@@ -11,14 +12,13 @@ const stageLabels = {
   delayed: "延期",
   cancelled: "已取消",
 };
-const snapshotStorageKey = "ipo-radar-snapshot:v1";
 const errorTarget = document.querySelector("[data-page-error]");
 const state = {
   rows: [],
   dataDate: null,
   query: "",
   market: "all",
-  stage: "all",
+  stage: "active",
   sortKey: "eventDate",
   direction: "asc",
   page: 1,
@@ -36,15 +36,8 @@ async function loadData() {
     snapshot = null;
   }
   if (snapshot) {
-    saveSnapshot(snapshot);
     applySnapshot(snapshot);
     if (snapshot.stale) showError("資料暫時未更新，顯示最近一次成功資料。");
-    return;
-  }
-  const priorSnapshot = readSavedSnapshot();
-  if (priorSnapshot) {
-    applySnapshot(priorSnapshot);
-    showError("資料暫時無法讀取，顯示最近一次成功資料。");
     return;
   }
   showUnavailable();
@@ -52,7 +45,7 @@ async function loadData() {
 
 function applySnapshot(snapshot) {
   state.dataDate = validDate(snapshot.dataDate) ? snapshot.dataDate : null;
-  state.rows = snapshot.records.map(normalizeRecord).filter((row) => row.companyCode && row.companyName);
+  state.rows = snapshot.records.map((record) => normalizeRecord(record, snapshot.sourceManifest)).filter((row) => row.companyCode && row.companyName);
   populateMarkets();
   applyStateToControls();
   render();
@@ -63,7 +56,7 @@ function initializeFromUrl() {
   const params = new URLSearchParams(location.search);
   state.query = params.get("q") ?? "";
   state.market = params.get("market") ?? "all";
-  state.stage = ["AB", "A", "B", "C", "D"].includes(params.get("stage")) ? params.get("stage") : "all";
+  state.stage = defaultIpoStage(params.get("stage"), { includeAB: true, activeOnly: true });
   state.sortKey = ["company", "stage", "eventDate", "days"].includes(params.get("sort")) ? params.get("sort") : "eventDate";
   state.direction = params.get("direction") === "desc" ? "desc" : "asc";
   state.page = positiveInteger(params.get("page"));
@@ -117,7 +110,7 @@ function bindControls() {
 }
 
 function applyStage(stage) {
-  state.stage = ["AB", "A", "B", "C", "D"].includes(stage) ? stage : "all";
+  state.stage = defaultIpoStage(stage, { includeAB: true, activeOnly: true });
   state.page = 1;
   syncUrl();
   applyStateToControls();
@@ -135,7 +128,7 @@ function render() {
   const pages = Math.max(1, Math.ceil(sorted.length / size));
   state.page = Math.min(state.page, pages);
   const visible = sorted.slice((state.page - 1) * size, state.page * size);
-  document.querySelector("#ipo-radar-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
+  document.querySelector("#ipo-radar-result-count").textContent = `${formatNumber(sorted.length)} 家公司`;
   document.querySelector("#ipo-radar-table-body").innerHTML = visible.length ? visible.map(tableRowHtml).join("") : emptyRow();
   document.querySelector("#ipo-radar-card-list").innerHTML = visible.length ? visible.map(cardHtml).join("") : emptyCard();
   document.querySelector("[data-radar-data-date]").textContent = formatDate(state.dataDate);
@@ -150,7 +143,7 @@ function filteredRows() {
   return state.rows.filter((row) => {
     const matchesQuery = !query || `${row.companyCode} ${row.companyName}`.toLocaleLowerCase("zh-Hant").includes(query);
     const matchesMarket = state.market === "all" || row.market === state.market;
-    const matchesStage = state.stage === "all" || (state.stage === "AB" ? ["A", "B"].includes(row.stage) : row.stage === state.stage);
+    const matchesStage = matchesIpoRecordStage(row, state.stage, state.dataDate);
     return matchesQuery && matchesMarket && matchesStage;
   });
 }
@@ -170,22 +163,23 @@ function sortRows(rows) {
 }
 
 function renderSummary() {
-  setSummary("AB", state.rows.filter((row) => ["A", "B"].includes(row.stage)).length);
-  setSummary("C", state.rows.filter((row) => row.stage === "C").length);
-  setSummary("D", state.rows.filter((row) => row.stage === "D").length);
+  const activeRows = state.rows.filter((row) => isActiveIpoRecord(row, state.dataDate));
+  setSummary("AB", activeRows.filter((row) => ["A", "B"].includes(row.stage)).length);
+  setSummary("C", activeRows.filter((row) => row.stage === "C").length);
+  setSummary("D", activeRows.filter((row) => row.stage === "D").length);
 }
 
 function renderUpcoming() {
-  const rows = state.rows.filter((row) => row.primaryEventDate).sort((left, right) => compareUpcoming(left, right)).slice(0, 6);
-  document.querySelector("#ipo-upcoming-grid").innerHTML = rows.length ? rows.map((row) => `<article class="ranking-panel"><p>${escapeHtml(row.market)}</p><h3>${companyLink(row)}</h3><strong>${escapeHtml(row.primaryEventLabel)}</strong><span>${formatDate(row.primaryEventDate)} · ${daysLabel(row.daysFromToday)}</span></article>`).join("") : "<p class=\"empty-cell\">目前沒有近期重要事件</p>";
+  const entries = projectActiveIpoEventEntries(state.rows, state.dataDate).sort(compareUpcomingEntries).slice(0, 6);
+  document.querySelector("#ipo-upcoming-grid").innerHTML = entries.length ? entries.map(({ row, event }) => `<article class="ranking-panel"><p>${escapeHtml(row.market)}</p><h3>${companyLink(row)}</h3><strong>${escapeHtml(event.label)}</strong><span>${formatDate(event.date)} · ${daysLabel(taipeiCalendarDistance(taipeiToday(), event.date))}</span></article>`).join("") : "<p class=\"empty-cell\">目前沒有近期重要事件</p>";
 }
 
 function tableRowHtml(row) {
-    return `<tr><th scope="row">${companyLink(row)}<small>${escapeHtml(row.market)}</small></th><td><span class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.daysFromToday)}</td><td>${escapeHtml(row.pricingStatus)}</td><td>${formatDate(state.dataDate)}</td></tr>`;
+    return `<tr><th scope="row">${companyLink(row)}<small>${escapeHtml(row.market)}</small></th><td><span class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.daysFromToday)}</td><td>${escapeHtml(row.pricingStatus)}</td><td>${formatDate(state.dataDate)}</td></tr>`;
 }
 
 function cardHtml(row) {
-  return `<article class="ipo-card"><header><div><span>${escapeHtml(row.market)}</span><h3>${companyLink(row)}</h3></div><strong class="ipo-status ipo-status-${escapeHtml(row.stage)}">${escapeHtml(stageLabel(row.stage))}</strong></header><dl><div><dt>最近事件</dt><dd>${escapeHtml(row.primaryEventLabel)}</dd></div><div><dt>事件日期</dt><dd>${formatDate(row.primaryEventDate)} · ${daysLabel(row.daysFromToday)}</dd></div></dl><details><summary>完整事件歷程</summary><ol class="ipo-timeline">${row.events.map((event) => `<li><span>${escapeHtml(event.label)}</span><time>${formatDate(event.date)}</time></li>`).join("")}</ol></details></article>`;
+  return `<article class="ipo-card"><header><div><span>${escapeHtml(row.market)}</span><h3>${companyLink(row)}</h3></div><strong class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</strong></header><dl><div><dt>最近事件</dt><dd>${escapeHtml(row.primaryEventLabel)}</dd></div><div><dt>事件日期</dt><dd>${formatDate(row.primaryEventDate)} · ${daysLabel(row.daysFromToday)}</dd></div></dl><details><summary>完整事件歷程</summary><ol class="ipo-timeline">${row.events.map((event) => `<li><span>${escapeHtml(event.label)}</span><time>${formatDate(event.date)}</time></li>`).join("") || "<li>尚無公開資料</li>"}</ol></details></article>`;
 }
 
 function renderPagination(total) {
@@ -223,25 +217,28 @@ function syncUrl() {
   const params = new URLSearchParams();
   if (state.query) params.set("q", state.query);
   if (state.market !== "all") params.set("market", state.market);
-  if (state.stage !== "all") params.set("stage", state.stage);
+  if (shouldWriteIpoStage(state.stage)) params.set("stage", state.stage);
   if (state.sortKey !== "eventDate") params.set("sort", state.sortKey);
   if (state.direction !== "asc") params.set("direction", state.direction);
   if (state.page > 1) params.set("page", String(state.page));
   history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
 }
 
-function normalizeRecord(record) {
-  const events = Array.isArray(record.events) ? record.events.filter((event) => validDate(event?.date) && event?.label).map((event) => ({ date: event.date, label: String(event.label) })) : [];
+function normalizeRecord(record, sourceManifest) {
+  const events = normalizeApprovedIpoEvents(record, sourceManifest);
   const primary = selectPrimaryEvent(events);
+  const stage = displayIpoStage(record.stage);
   return {
     companyCode: String(record.companyCode ?? "").trim(),
     companyName: String(record.companyName ?? "").trim(),
     market: String(record.market ?? "其他").trim(),
-    stage: stageLabels[record.stage] ? record.stage : "A",
-    pricingStatus: record.finalUnderwritingPrice ? "已定價" : record.provisionalUnderwritingPrice ? "暫定價" : "待公告",
+    stage,
+    exceptionStatus: record.exceptionStatus ?? null,
+    applicationDate: validDate(record.applicationDate) ? record.applicationDate : null,
+    pricingStatus: events.length === 0 ? "尚無公開資料" : record.finalUnderwritingPrice ? "已定價" : record.provisionalUnderwritingPrice ? "暫定價" : "待公告",
     events,
     primaryEventDate: primary?.date ?? null,
-    primaryEventLabel: primary?.label ?? "—",
+    primaryEventLabel: primary?.label ?? "尚無公開資料",
     daysFromToday: primary ? taipeiCalendarDistance(taipeiToday(), primary.date) : null,
   };
 }
@@ -280,21 +277,6 @@ function showError(message) {
   errorTarget.hidden = false;
 }
 
-function readSavedSnapshot() {
-  try {
-    const snapshot = JSON.parse(sessionStorage.getItem(snapshotStorageKey) ?? "null");
-    return snapshot?.schemaVersion === 1 && Array.isArray(snapshot.records) ? snapshot : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveSnapshot(snapshot) {
-  try {
-    sessionStorage.setItem(snapshotStorageKey, JSON.stringify(snapshot));
-  } catch {}
-}
-
 function compareDates(left, right) {
   if (!left && !right) return 0;
   if (!left) return 1;
@@ -309,16 +291,21 @@ function compareNumbers(left, right) {
   return left - right;
 }
 
-function compareUpcoming(left, right) {
-  const leftFuture = left.daysFromToday >= 0;
-  const rightFuture = right.daysFromToday >= 0;
+function compareUpcomingEntries(left, right) {
+  const today = taipeiToday();
+  const leftDays = taipeiCalendarDistance(today, left.event.date);
+  const rightDays = taipeiCalendarDistance(today, right.event.date);
+  const leftFuture = leftDays >= 0;
+  const rightFuture = rightDays >= 0;
   if (leftFuture !== rightFuture) return leftFuture ? -1 : 1;
-  return leftFuture ? compareDates(left.primaryEventDate, right.primaryEventDate) : compareDates(right.primaryEventDate, left.primaryEventDate);
+  const dateComparison = leftFuture ? compareDates(left.event.date, right.event.date) : compareDates(right.event.date, left.event.date);
+  return dateComparison || left.row.companyCode.localeCompare(right.row.companyCode);
 }
 
-function stageOrder(stage) { return ["A", "B", "C", "D", "listed", "withdrawn", "delayed", "cancelled"].indexOf(stage); }
-function stageLabel(stage) { return stageLabels[stage] ?? "—"; }
-function setSummary(key, value) { document.querySelector(`[data-radar-summary-count="${key}"]`).textContent = formatNumber(value); }
+function stageOrder(stage) { const index = ["A", "B", "C", "D", "listed", "withdrawn", "delayed", "cancelled"].indexOf(stage); return index < 0 ? 99 : index; }
+function stageLabel(stage) { return stageLabels[stage] ?? `未知階段（${stage}）`; }
+function stageClass(stage) { return Object.hasOwn(stageLabels, stage) ? escapeHtml(stage) : "unknown"; }
+function setSummary(key, value) { document.querySelector(`[data-radar-summary-count="${key}"]`).textContent = `${formatNumber(value)} 家公司`; }
 function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")); }
 function positiveInteger(value) { return Math.max(1, Number.parseInt(value ?? "1", 10) || 1); }
 function pageSize() { return matchMedia("(max-width: 900px)").matches ? 25 : 50; }

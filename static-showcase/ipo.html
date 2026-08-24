@@ -24,7 +24,7 @@
     <section id="ipo-calendar-root" class="ledger-section ipo-dashboard" data-page-root="ipo" data-ipo-dashboard="calendar" aria-labelledby="ipo-calendar-heading">
       <header class="section-heading"><div><p class="section-number">CALENDAR DESK / VERIFIED SNAPSHOT</p><h2 id="ipo-calendar-heading">完整時程</h2></div><p id="ipo-update-status" class="update-status" data-ipo-data-status aria-live="polite">資料讀取中</p></header>
 
-      <ol id="ipo-stage-flow" class="ipo-stage-flow ipo-dashboard-summary" data-ipo-summary aria-label="IPO 五階段流程">
+      <ol id="ipo-stage-flow" class="ipo-stage-flow ipo-dashboard-summary" data-ipo-summary aria-label="IPO 五階段公司數">
         <li data-stage="A" data-ipo-stage-count="A" role="button" tabindex="0"><span>01</span><strong>送件待審</strong><small>等待審議</small><b>—</b></li>
         <li data-stage="B" data-ipo-stage-count="B" role="button" tabindex="0"><span>02</span><strong>審議後</strong><small>等待董事會</small><b>—</b></li>
         <li data-stage="board" data-ipo-stage-count="board" role="button" tabindex="0"><span>03</span><strong>董事會後</strong><small>等待契約</small><b>—</b></li>
@@ -37,7 +37,7 @@
       <form id="ipo-filters" class="filters ipo-filters" aria-label="IPO 時程篩選">
         <label class="search-field"><span>搜尋</span><input id="ipo-search" name="q" type="search" placeholder="公司代碼、名稱或承銷商"></label>
         <label><span>市場</span><select id="ipo-market" name="market"><option value="all">全部市場</option></select></label>
-        <label><span>目前階段</span><select id="ipo-stage" name="stage"><option value="all">全部階段</option></select></label>
+        <label><span>目前階段</span><select id="ipo-stage" name="stage"><option value="active">進行中</option><option value="all">全部階段</option></select></label>
         <label><span>事件類型</span><select id="ipo-event" name="event"><option value="all">全部事件</option></select></label>
         <label><span>年份</span><select id="ipo-year" name="year"><option value="all">全部年份</option></select></label>
         <label class="mobile-sort-control"><span>排序欄位</span><select id="ipo-sort-field" name="sort"><option value="eventDate">主要事件日</option><option value="companyCode">公司</option><option value="stage">目前階段</option><option value="distanceDays">距今天</option><option value="auctionOpenDate">競拍日期</option><option value="listingDate">買賣日</option></select></label>
@@ -56,7 +56,7 @@
         <th aria-sort="none"><button type="button" data-ipo-sort="distanceDays">距今天 <span aria-hidden="true"></span></button></th>
         <th>定價狀態</th><th aria-sort="none"><button type="button" data-ipo-sort="auctionOpenDate">競拍進度 <span aria-hidden="true"></span></button></th>
         <th aria-sort="none"><button type="button" data-ipo-sort="listingDate">上市／上櫃買賣日 <span aria-hidden="true"></span></button></th>
-        <th>完整事件日期</th>
+        <th>完整事件日期與生命週期</th>
       </tr></thead><tbody id="ipo-table-body"><tr><td colspan="10" class="empty-cell">IPO 時程讀取中</td></tr></tbody></table></div>
       <div id="ipo-card-list" class="ipo-card-list" data-ipo-responsive-cards aria-live="polite"></div>
       <nav id="ipo-pagination" class="pagination" aria-label="IPO 時程分頁"></nav>

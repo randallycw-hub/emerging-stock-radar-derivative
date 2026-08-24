@@ -5,61 +5,54 @@ import test from "node:test";
 const root = new URL("../static-showcase/", import.meta.url);
 
 test("bond page exposes the complete sortable CB workbench", async () => {
-  const [home, bondsHtml, js, sortJs, css] = await Promise.all([
+  const [home, bondsHtml, js, detailJs, sortJs, css] = await Promise.all([
     readFile(new URL("index.html", root), "utf8"),
     readFile(new URL("bonds.html", root), "utf8"),
     readFile(new URL("assets/bonds-page.js", root), "utf8"),
+    readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
     readFile(new URL("assets/table-sort.js", root), "utf8"),
     readFile(new URL("assets/app.css", root), "utf8"),
   ]);
 
   for (const label of [
     "CB 代碼／名稱",
-    "CB 收盤價（盤後）",
-    "股票收盤價",
+    "CB 收盤",
+    "標的股收盤",
     "目前轉換價",
     "轉換價值",
     "轉換溢價率",
-    "CB 成交量",
-    "流通餘額",
-    "到期日",
-    "距到期／賣回",
-    "一鍵切換排序",
+    "流通餘額比例",
+    "下一事件",
+    "資料日期",
+    "資料品質",
   ]) {
     assert.match(bondsHtml + js, new RegExp(label));
-  }
-  for (const section of [
-    "交易摘要",
-    "價格日期與估值日",
-    "價格走勢",
-    "轉換與餘額",
-    "契約生命週期",
-    "發行條款",
-    "公告與文件",
-  ]) {
-    assert.match(js, new RegExp(section));
   }
   assert.match(home, /assets\/app\.css/);
   assert.doesNotMatch(home, /assets\/(?:app|bonds-page)\.js/);
   assert.match(bondsHtml, /id="bond-search"/);
-  assert.match(bondsHtml, /id="bond-preset"/);
-  assert.match(bondsHtml, /id="bond-sort-field"/);
-  assert.match(bondsHtml, /id="bond-sort-direction"/);
+  assert.match(bondsHtml, /id="bond-archive-toggle"/);
+  assert.match(bondsHtml, /id="bond-clear-filter"/);
   assert.match(bondsHtml, /id="bond-table-body"/);
   assert.match(bondsHtml, /id="bond-workbench"/);
+  assert.match(bondsHtml, /data-detail-url-param="bond"/);
   assert.match(bondsHtml, /assets\/site-shell\.js/);
   assert.match(bondsHtml, /assets\/bonds-page\.js/);
   assert.doesNotMatch(bondsHtml, /href="\.\/methodology\.html"/);
   assert.match(bondsHtml, /aria-label="可轉債分頁"/);
+  assert.match(bondsHtml, /data-sort-key="remainingRatio"/);
+  assert.match(bondsHtml, /data-sort-key="nextEventDate"/);
+  assert.doesNotMatch(bondsHtml, /data-sort-key="outstandingReductionRate"/);
+  assert.doesNotMatch(bondsHtml, /data-sort-key="nextPutDate"/);
   assert.match(js, /URLSearchParams/);
   assert.match(js, /maturityDate/);
   assert.match(js, /daysToMaturity/);
   assert.match(js, /cbPriceDate/);
-  assert.match(js, /官方目前餘額/);
-  assert.match(js, /共同估值日/);
   assert.match(js, /value === null \|\| value === undefined/);
   assert.match(js, /bond/);
-  assert.match(js, /sort/);
+  assert.match(js, /bond-list-page/);
+  assert.match(js, /bond-detail-page/);
+  assert.match(js, /bondWorkbench/);
   assert.match(js, /direction/);
   assert.match(js, /page/);
   assert.match(js, /history\.(?:pushState|replaceState)/);
@@ -77,9 +70,24 @@ test("bond page exposes the complete sortable CB workbench", async () => {
     /const history =[\s\S]*history\.replaceState/,
     "區域資料變數不可遮蔽瀏覽器 history 物件",
   );
-  assert.match(js, /drawHistoryChart/);
-  assert.match(js, /data-history-range="1M"/);
-  assert.match(js, /<canvas[^>]+bond-history-chart/);
+  assert.doesNotMatch(js, /function renderWorkbench|function drawHistoryChart/);
+  assert.match(js, /bindBondDetail\(target, closeDetail, \{ history: state\.history\.filter/);
+  assert.match(detailJs, /function noAdviceViolations/);
+  assert.match(detailJs, /FORBIDDEN_UI_PATTERNS/);
+  assert.match(detailJs, /bond-candlestick/);
+  assert.match(detailJs, /noopener noreferrer/);
+  assert.match(detailJs, /目前無核准公開資料／待確認/);
+});
+
+test("detail UI gate scans static presentation strings for prohibited public investment directions", async () => {
+  const [html, listJs] = await Promise.all([
+    readFile(new URL("bonds.html", root), "utf8"),
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
+  ]);
+  const { noAdviceViolations } = await import("../static-showcase/assets/bond-detail-page.js");
+  assert.deepEqual(noAdviceViolations(html + listJs), []);
+  assert.deepEqual(noAdviceViolations("條件符合"), []);
+  assert.deepEqual(noAdviceViolations("建議買進後下單"), ["recommendation", "buy-sell-short", "order"]);
 });
 
 test("static showcase keeps presentation out of generated runtime data", async () => {
@@ -88,4 +96,337 @@ test("static showcase keeps presentation out of generated runtime data", async (
   assert.match(runtime, /generationPointerUrl/);
   assert.doesNotMatch(runtime, /manifestUrl/);
   assert.doesNotMatch(runtime, /document\.querySelector|innerHTML|const val =/);
+});
+
+test("bond list module round-trips only supported list URL state", async () => {
+  const { parseBondListState, serializeBondListState } = await import("../static-showcase/assets/bond-list-page.js");
+  const state = parseBondListState("?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
+  assert.deepEqual(state, {
+    query: "甲", archived: true, sortKey: "cbClose", direction: "desc", page: 3,
+    event: "", quality: "", maturityBefore: "", remainingMax: null, secured: "",
+  });
+  assert.equal(serializeBondListState(state), "?q=%E7%94%B2&archived=1&sort=cbClose&direction=desc&page=3");
+});
+
+test("bond list state round-trips composable public event conditions and filters a matching record", async () => {
+  const { filterBondRecords, parseBondListState, serializeBondListState } = await import("../static-showcase/assets/bond-list-page.js");
+  const state = parseBondListState("?event=rights90&quality=pending&remainingMax=25&secured=%E7%84%A1%E6%93%94%E4%BF%9D");
+  assert.deepEqual(state, {
+    query: "",
+    archived: false,
+    sortKey: "bondCode",
+    direction: "asc",
+    page: 1,
+    event: "rights90",
+    quality: "pending",
+    maturityBefore: "",
+    remainingMax: 25,
+    secured: "無擔保",
+  });
+  assert.equal(
+    serializeBondListState(state),
+    "?event=rights90&quality=pending&remainingMax=25&secured=%E7%84%A1%E6%93%94%E4%BF%9D&sort=bondCode&direction=asc&page=1",
+  );
+  assert.deepEqual(filterBondRecords([{
+    bondCode: "90001",
+    daysToNextEvent: 90,
+    daysToMaturity: 365,
+    dataQuality: "partial",
+    remainingRatio: "25",
+    securedStatus: "無擔保",
+  }], state).map((record) => record.bondCode), ["90001"]);
+});
+
+test("event filters reject records with missing or invalid day counts", async () => {
+  const { filterBondRecords } = await import("../static-showcase/assets/bond-list-page.js");
+  const records = [
+    { bondCode: "rights-missing", daysToNextEvent: null, daysToMaturity: 30 },
+    { bondCode: "rights-invalid", daysToNextEvent: "unknown", daysToMaturity: 30 },
+    { bondCode: "rights-match", daysToNextEvent: 90, daysToMaturity: 30 },
+    { bondCode: "maturity-missing", daysToNextEvent: 30, daysToMaturity: null },
+    { bondCode: "maturity-invalid", daysToNextEvent: 30, daysToMaturity: "unknown" },
+    { bondCode: "maturity-match", daysToNextEvent: 30, daysToMaturity: 365 },
+  ];
+  assert.deepEqual(filterBondRecords(records, { event: "rights90" }).map((record) => record.bondCode), [
+    "rights-match", "maturity-missing", "maturity-invalid", "maturity-match",
+  ]);
+  assert.deepEqual(filterBondRecords(records, { event: "maturity365" }).map((record) => record.bondCode), [
+    "rights-missing", "rights-invalid", "rights-match", "maturity-match",
+  ]);
+});
+
+test("remaining-ratio upper bound rejects missing or invalid record values", async () => {
+  const { filterBondRecords } = await import("../static-showcase/assets/bond-list-page.js");
+  const records = [
+    { bondCode: "missing", remainingRatio: null },
+    { bondCode: "invalid", remainingRatio: "unknown" },
+    { bondCode: "match", remainingRatio: "25" },
+  ];
+  assert.deepEqual(filterBondRecords(records, { remainingMax: 25 }).map((record) => record.bondCode), ["match"]);
+});
+
+test("bond page provides composable public event controls and a clear-all empty state", async () => {
+  const [html, js, css] = await Promise.all([
+    readFile(new URL("bonds.html", root), "utf8"),
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
+    readFile(new URL("assets/app.css", root), "utf8"),
+  ]);
+  assert.match(html, /<fieldset class="bond-event-shortcuts"/);
+  assert.equal((html.match(/data-bond-shortcut=/g) ?? []).length, 4);
+  for (const id of ["bond-maturity-before", "bond-remaining-max", "bond-secured", "bond-quality"]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.match(js, /aria-pressed/);
+  assert.match(js, /清除所有條件/);
+  assert.match(css, /\.bond-event-shortcuts/);
+});
+
+test("page loader projects archived workbench identities into the searchable list by exact bond code", async () => {
+  const { buildBondListRecords } = await import("../static-showcase/assets/bonds-page.js");
+  const records = buildBondListRecords({
+    views: [{ bondCode: "90001", issuerCode: "9000", bondName: "舊名稱", cbClose: "101" }],
+    workbench: [
+      {
+        bondCode: "90001",
+        status: "archived",
+        archiveReason: "matured",
+        archivedAt: "2026-08-12",
+        term: { bondCode: "90001", issuerCode: "9000", issuerName: "公開發行人", bondName: "封存一" },
+        view: { bondCode: "90001", issuerCode: "9000", bondName: "封存一", cbClose: "101" },
+      },
+      {
+        bondCode: "90002",
+        status: "active",
+        archiveReason: null,
+        archivedAt: null,
+        term: { bondCode: "90002", issuerCode: "9000", issuerName: "公開發行人", bondName: "現行二" },
+        view: { bondCode: "90002", issuerCode: "9000", bondName: "現行二", cbClose: null },
+      },
+    ],
+  });
+
+  assert.deepEqual(records.map(({ bondCode, issuerName, archived }) => ({ bondCode, issuerName, archived })), [
+    { bondCode: "90001", issuerName: "公開發行人", archived: true },
+    { bondCode: "90002", issuerName: "公開發行人", archived: false },
+  ]);
+});
+
+test("detail evidence selects the conversion-price version effective on its valuation date", async () => {
+  const { detailWithValuationConversionEvidence } = await import("../static-showcase/assets/bonds-page.js");
+  const record = {
+    bondCode: "90001",
+    view: { valuationDate: "2026-08-12", currentConversionPrice: "31" },
+  };
+  const enriched = detailWithValuationConversionEvidence(record, [
+    { bondCode: "90001", currentConversionPrice: "35", effectiveDate: "2026-07-01" },
+    { bondCode: "90001", currentConversionPrice: "31", effectiveDate: "2026-08-13" },
+    { bondCode: "90001", currentConversionPrice: "36", effectiveDate: "2026-06-01" },
+  ]);
+  assert.equal(enriched.view.valuationConversionPrice, "35");
+  assert.equal(enriched.view.valuationConversionPriceEffectiveDate, "2026-07-01");
+  assert.equal(record.view.valuationConversionPrice, undefined);
+});
+
+test("page loader projects legacy market fields into canonical list fields until the next refresh", async () => {
+  const { buildBondListRecords } = await import("../static-showcase/assets/bonds-page.js");
+  const [record] = buildBondListRecords({
+    views: [{
+      bondCode: "90001",
+      issuerCode: "9000",
+      bondName: "舊格式一",
+      cbClose: "101",
+      missingReasons: [],
+      outstandingReductionRate: "17.93",
+      nextPutDate: "2027-09-21",
+      daysToNextPut: 394,
+      maturityDate: "2028-12-18",
+      daysToMaturity: 848,
+    }],
+  });
+
+  assert.deepEqual({
+    remainingRatio: record.remainingRatio,
+    nextEventType: record.nextEventType,
+    nextEventDate: record.nextEventDate,
+    daysToNextEvent: record.daysToNextEvent,
+    dataQuality: record.dataQuality,
+  }, {
+    remainingRatio: "82.07",
+    nextEventType: "put",
+    nextEventDate: "2027-09-21",
+    daysToNextEvent: 394,
+    dataQuality: "complete",
+  });
+});
+
+test("page loader preserves explicit canonical event nulls while filling only absent legacy fields", async () => {
+  const { buildBondListRecords } = await import("../static-showcase/assets/bonds-page.js");
+  const [record] = buildBondListRecords({
+    views: [{
+      bondCode: "90002",
+      issuerCode: "9000",
+      bondName: "混合格式二",
+      nextEventType: null,
+      nextPutDate: "2027-09-21",
+      daysToNextPut: 394,
+      maturityDate: "2028-12-18",
+      daysToMaturity: 848,
+    }],
+  });
+
+  assert.deepEqual({
+    nextEventType: record.nextEventType,
+    nextEventDate: record.nextEventDate,
+    daysToNextEvent: record.daysToNextEvent,
+  }, {
+    nextEventType: null,
+    nextEventDate: "2027-09-21",
+    daysToNextEvent: 394,
+  });
+});
+
+test("bond list presentation uses remaining ratio and canonical redemption event fields", async () => {
+  const { bondListPresentation } = await import("../static-showcase/assets/bonds-page.js");
+  assert.deepEqual(bondListPresentation({
+    remainingRatio: "82.07",
+    nextEventType: "redemption",
+    nextEventDate: "2026-09-21",
+    daysToNextEvent: 53,
+    dataQuality: "complete",
+    missingReasons: [],
+  }), {
+    remainingRatio: "82.07%",
+    eventLabel: "贖回 53 天",
+    eventDate: "2026-09-21",
+    qualityLabel: "可用",
+  });
+  assert.equal(bondListPresentation({
+    remainingRatio: null,
+    nextEventType: "maturity",
+    nextEventDate: "2028-07-29",
+    daysToNextEvent: 705,
+    dataQuality: "partial",
+    missingReasons: ["NO_CB_CLOSE"],
+  }).qualityLabel, "待補");
+});
+
+test("detail disclosures align with the 900px CSS breakpoint and initialize the selected desktop tab only", async () => {
+  const { syncBondDetailDisclosureMode } = await import("../static-showcase/assets/bond-detail-page.js");
+  const disclosures = [{ open: false }, { open: true }];
+  const panels = [
+    { dataset: { detailPanel: "overview" }, hidden: true },
+    { dataset: { detailPanel: "terms" }, hidden: false },
+  ];
+  const target = {
+    querySelector(selector) {
+      assert.equal(selector, "[data-detail-tab][aria-selected=\"true\"]");
+      return { dataset: { detailTab: "overview" } };
+    },
+    querySelectorAll(selector) {
+      if (selector === ".detail-mobile-area") return disclosures;
+      if (selector === "[data-detail-panel]") return panels;
+      assert.fail(`unexpected selector: ${selector}`);
+    },
+  };
+
+  syncBondDetailDisclosureMode(target, { compact: false });
+  assert.deepEqual(disclosures.map(({ open }) => open), [true, true]);
+  assert.deepEqual(panels.map(({ hidden }) => hidden), [false, true]);
+
+  syncBondDetailDisclosureMode(target, { compact: true });
+  assert.deepEqual(disclosures.map(({ open }) => open), [false, false]);
+  assert.deepEqual(panels.map(({ hidden }) => hidden), [false, false]);
+
+  const [page, detail] = await Promise.all([
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
+    readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
+  ]);
+  assert.match(detail, /matchMedia\?\.\("\(max-width: 900px\)"\)/);
+  assert.doesNotMatch(page, /max-width: 760px/);
+});
+
+test("detail close button handles Enter as one keyboard activation", async () => {
+  const { bindBondDetail } = await import("../static-showcase/assets/bond-detail-page.js");
+  const listeners = new Map();
+  const closeButton = {
+    addEventListener(type, listener) { listeners.set(type, listener); },
+  };
+  const target = {
+    querySelector(selector) {
+      if (selector === "[data-detail-close]") return closeButton;
+      return null;
+    },
+    querySelectorAll() { return []; },
+  };
+  let closeCount = 0;
+  bindBondDetail(target, () => { closeCount += 1; });
+  let prevented = false;
+
+  listeners.get("keydown")({
+    key: "Enter",
+    preventDefault() { prevented = true; },
+  });
+
+  assert.equal(prevented, true);
+  assert.equal(closeCount, 1);
+});
+
+test("mobile bond cards keep every list field and archived metadata visible", async () => {
+  const js = await readFile(new URL("assets/bonds-page.js", root), "utf8");
+  const card = js.slice(js.indexOf("function renderBondCard"), js.indexOf("function bindBondOpeners"));
+  for (const label of ["CB 收盤", "轉換價值", "轉換溢價率", "標的股收盤", "目前轉換價", "流通餘額比例", "下一事件", "資料日期", "資料品質"]) {
+    assert.match(card, new RegExp(label));
+  }
+  assert.match(card, /archiveReason/);
+  assert.match(card, /archiveDate/);
+  assert.match(card, /archivedAt/);
+});
+
+test("CB detail snapshot communicates evidence scope and unavailable comparisons", async () => {
+  const js = await readFile(new URL("assets/bond-detail-page.js", root), "utf8");
+
+  for (const label of ["目前資料快照", "可比較性", "目前無核准公開資料／待確認"]) {
+    assert.match(js, new RegExp(label));
+  }
+});
+
+test("CB snapshot fails closed for each value without its own approved evidence", async () => {
+  const { projectCbSnapshot } = await import("../static-showcase/assets/bond-detail-page.js");
+  const snapshot = projectCbSnapshot({
+    view: { valuationDate: "2026-08-24", outstandingAmount: "100000000", remainingRatio: "50" },
+    term: { maturityDate: "2028-12-31" },
+    events: [],
+  });
+
+  for (const [key, reason] of [
+    ["dataDate", "資料日期缺少核准公開來源"],
+    ["outstandingAmount", "流通餘額缺少核准公開來源"],
+    ["remainingRatio", "流通餘額比例缺少核准公開來源"],
+    ["maturity", "到期日缺少核准公開來源"],
+  ]) {
+    assert.equal(snapshot[key], `目前無核准公開資料／待確認（${reason}）`);
+  }
+});
+
+test("CB snapshot renders balance values only with exact approved 11406 evidence", async () => {
+  const { projectCbSnapshot } = await import("../static-showcase/assets/bond-detail-page.js");
+  const snapshot = projectCbSnapshot({
+    view: {
+      outstandingDataDate: "2026-08-24",
+      outstandingAmount: "100000000",
+      remainingRatio: "50",
+      outstandingSourceId: "11406",
+      outstandingSourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+    },
+  });
+
+  assert.deepEqual({
+    dataDate: snapshot.dataDate,
+    outstandingAmount: snapshot.outstandingAmount,
+    remainingRatio: snapshot.remainingRatio,
+  }, {
+    dataDate: "2026-08-24",
+    outstandingAmount: "100000000",
+    remainingRatio: "50",
+  });
 });

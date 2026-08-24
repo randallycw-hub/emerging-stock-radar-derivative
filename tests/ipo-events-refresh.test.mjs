@@ -43,6 +43,20 @@ test("downloads and validates all official IPO sources before producing a hashed
   assert.ok(snapshot.sourceManifest.every((source) => source.rowCount > 0));
 });
 
+test("static dashboard collection excludes completed listings before source evidence is merged", async () => {
+  const fetchImpl = await createOfficialFetch(() => undefined);
+
+  const snapshot = await refreshOfficialIpoSnapshot({
+    fetchImpl,
+    now,
+    excludeCompleted: true,
+  });
+
+  assert.equal(snapshot.records.some((record) => record.companyCode === "6945"), false);
+  assert.ok(snapshot.records.every((record) => record.listingDate === null || record.listingDate > snapshot.dataDate));
+  assert.equal(snapshot.sourceManifest.length, 5);
+});
+
 test("rejects the complete candidate when any required source fails", async () => {
   const fetchImpl = await createOfficialFetch((url) => {
     if (url === urls[2]) return new Response("unavailable", { status: 503 });

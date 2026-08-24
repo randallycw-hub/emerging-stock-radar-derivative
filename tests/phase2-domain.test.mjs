@@ -227,7 +227,7 @@ test("company identifier validates dates and rejects unknown fields", () => {
   );
 });
 
-test("decimal fields accept only non-negative plain decimal strings", () => {
+test("monthly current revenue accepts signed plain decimal strings", () => {
   const base = {
     companyId: company.id,
     yearMonth: "2026-06",
@@ -235,7 +235,13 @@ test("decimal fields accept only non-negative plain decimal strings", () => {
     sourceAttribution: officialAttribution,
   };
   assert.equal(MonthlyRevenueSchema.parse(base).currentMonthRevenue, "1200000.50");
-  for (const invalid of [1200000.5, Number.NaN, "-1", "1e6", "Infinity"]) {
+  assert.equal(MonthlyRevenueSchema.parse({ ...base, currentMonthRevenue: "-0.5" }).currentMonthRevenue, "-0.5");
+  assert.equal(
+    MonthlyRevenueSchema.parse({ ...base, currentMonthRevenue: "-1200000.5" })
+      .currentMonthRevenue,
+    "-1200000.5",
+  );
+  for (const invalid of [1200000.5, Number.NaN, "1e6", "Infinity", "+5", "-0", "-0.0", "-0.00", "01", "-01"]) {
     assert.throws(
       () => MonthlyRevenueSchema.parse({ ...base, currentMonthRevenue: invalid }),
       DomainValidationError,
@@ -243,11 +249,11 @@ test("decimal fields accept only non-negative plain decimal strings", () => {
   }
 });
 
-test("monthly revenue amounts are non-negative while growth percentages allow signed decimals", () => {
+test("monthly current revenue is signed while comparative and cumulative amounts remain non-negative", () => {
   const parsed = MonthlyRevenueSchema.parse({
     companyId: company.id,
     yearMonth: "2026-06",
-    currentMonthRevenue: "1200000",
+    currentMonthRevenue: "-1200000",
     monthOverMonthPercent: "-12.5",
     yearOverYearPercent: "+3.25",
     cumulativeYearOverYearPercent: "-0.5",
@@ -255,13 +261,17 @@ test("monthly revenue amounts are non-negative while growth percentages allow si
   });
   assert.equal(parsed.monthOverMonthPercent, "-12.5");
   assert.equal(parsed.yearOverYearPercent, "+3.25");
-  assert.throws(
-    () => MonthlyRevenueSchema.parse({
-      ...parsed,
-      currentMonthRevenue: "-1",
-    }),
-    /non-negative/,
-  );
+  assert.equal(parsed.currentMonthRevenue, "-1200000");
+  for (const field of [
+    "previousMonthRevenue",
+    "priorYearMonthRevenue",
+    "cumulativeRevenue",
+  ]) {
+    assert.throws(
+      () => MonthlyRevenueSchema.parse({ ...parsed, [field]: "-1" }),
+      /non-negative/,
+    );
+  }
 });
 
 test("approved end-of-day and contractual decimal field names are accepted", () => {

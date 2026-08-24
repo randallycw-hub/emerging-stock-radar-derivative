@@ -3,6 +3,11 @@ export type PipelineSourceId =
   | "94025"
   | "11586"
   | "28567"
+  | "data-gov-18420-listed-monthly-revenue"
+  | "data-gov-56510-otc-monthly-revenue"
+  | "tpex-cb-institution-daily"
+  | "tpex-cb-redemption-announcements"
+  | "twsa-cb-underwriting-announcements"
   | "tpex-applications"
   | "tpex-ipo-listings"
   | "twse-auctions"
@@ -16,7 +21,7 @@ export type IpoManifestSourceId =
 export type ResourceApprovalStatus =
   | "VERIFIED_FOR_IMPLEMENTATION"
   | "APPROVED_FOR_PRODUCTION";
-export type UsageRole = "primary_csv" | "primary_json";
+export type UsageRole = "primary_csv" | "primary_json" | "primary_html";
 
 export interface IpoEventPolicy {
   manifestSourceId: IpoManifestSourceId;
@@ -45,6 +50,11 @@ export type ApprovedIpoResource = ApprovedResource & { ipoEventPolicy: IpoEventP
 const resources: readonly ApprovedResource[] = [
   { sourceId: "11406", resourceId: "11406-csv", exactUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv", protocol: "https:", hostname: "www.tpex.org.tw", pathname: "/storage/bond_publish/ISSBD5_data.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 8_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_csv" },
   { sourceId: "94025", resourceId: "94025-csv", exactUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv", protocol: "https:", hostname: "mopsfin.twse.com.tw", pathname: "/opendata/t187ap05_R.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 8_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_csv" },
+  { sourceId: "data-gov-18420-listed-monthly-revenue", resourceId: "data-gov-18420-listed-monthly-revenue-csv", exactUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_L.csv", protocol: "https:", hostname: "mopsfin.twse.com.tw", pathname: "/opendata/t187ap05_L.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 2_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_csv" },
+  { sourceId: "data-gov-56510-otc-monthly-revenue", resourceId: "data-gov-56510-otc-monthly-revenue-csv", exactUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv", protocol: "https:", hostname: "mopsfin.twse.com.tw", pathname: "/opendata/t187ap05_O.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 2_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_csv" },
+  { sourceId: "tpex-cb-institution-daily", resourceId: "tpex-cb-institution-daily-json", exactUrl: "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade", protocol: "https:", hostname: "www.tpex.org.tw", pathname: "/www/zh-tw/bond/newCb3itrade", allowedContentTypes: ["application/json"], maxResponseBytes: 500_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_json" },
+  { sourceId: "tpex-cb-redemption-announcements", resourceId: "tpex-cb-redemption-announcements-json", exactUrl: "https://www.tpex.org.tw/www/zh-tw/bond/redeem", protocol: "https:", hostname: "www.tpex.org.tw", pathname: "/www/zh-tw/bond/redeem", allowedContentTypes: ["application/json"], maxResponseBytes: 500_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_json" },
+  { sourceId: "twsa-cb-underwriting-announcements", resourceId: "twsa-cb-underwriting-announcements-html", exactUrl: "https://web.twsa.org.tw/edoc2/default.aspx", protocol: "https:", hostname: "web.twsa.org.tw", pathname: "/edoc2/default.aspx", allowedContentTypes: ["text/html"], maxResponseBytes: 1_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_html" },
   {
     sourceId: "11586",
     resourceId: "11586-csv",

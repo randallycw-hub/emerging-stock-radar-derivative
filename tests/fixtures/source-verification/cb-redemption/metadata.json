@@ -1,0 +1,21 @@
+{
+  "sourceId": "tpex-cb-redemption-announcements",
+  "schemaVersion": "tpex-redeem-v1",
+  "fixtureVersion": "official-minimal-v1",
+  "resourceUrl": "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
+  "method": "POST",
+  "formBody": {
+    "date": "2026",
+    "id": "",
+    "response": "json"
+  },
+  "capturedAt": "2026-08-09T07:47:30.7428457Z",
+  "httpStatus": 200,
+  "httpContentType": "application/json;charset=UTF-8",
+  "sourceResponseSha256": "sha256:05e19631e1c73ab3aa83ede258891c1057634cd5e04634a7d7e3d205d800b282",
+  "sourceDate": "20260101",
+  "sourceStat": "ok",
+  "sourceRowCount": 34,
+  "fixtureRowCount": 2,
+  "samplingMethod": "Two exact rows retained from the controller-captured 2026 annual TPEx response; no live fetch is performed by this fixture."
+}
