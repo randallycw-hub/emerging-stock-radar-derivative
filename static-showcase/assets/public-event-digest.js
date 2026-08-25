@@ -23,6 +23,61 @@ function item(id, label, count, dates, href, state = "ready") {
   return { id, label, count, nearestDate: nearestDate(dates), href, state };
 }
 
+function publishedText(value) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function bondEventIdentity(event) {
+  const bondCode = publishedText(event?.bondCode);
+  const type = publishedText(event?.type);
+  const date = event?.date;
+  if (!bondCode || !type || !isPublishedIsoDate(date)) return null;
+
+  // An official URL is the preferred identity.  The source identifier is only
+  // used as a non-rendered fallback for legacy, already-verified snapshots.
+  const officialReference = publishedText(event?.sourceUrl)
+    ?? publishedText(event?.sourceId)
+    ?? "published-event";
+  return [bondCode, date, type, officialReference].join("\u001f");
+}
+
+/**
+ * Collapse equivalent events before they reach any public presentation.
+ * Source metadata remains internal to this helper; callers must project the
+ * returned records before rendering them.
+ */
+export function dedupeBondEvents(events) {
+  if (!Array.isArray(events)) return [];
+  const seen = new Set();
+  return events
+    .filter((event) => {
+      const identity = bondEventIdentity(event);
+      if (!identity || seen.has(identity)) return false;
+      seen.add(identity);
+      return true;
+    })
+    .slice()
+    .sort((left, right) => String(left.date).localeCompare(String(right.date))
+      || String(left.bondCode).localeCompare(String(right.bondCode))
+      || String(left.type).localeCompare(String(right.type)));
+}
+
+/**
+ * Create the deliberately small public event shape.  Internal evidence keys,
+ * source ids, and completeness state are never copied into the browser view.
+ */
+export function projectPublicBondEvents(events, asOfDate) {
+  if (!isPublishedIsoDate(asOfDate)) return [];
+  return dedupeBondEvents(events)
+    .filter((event) => event.date >= asOfDate)
+    .map((event) => ({
+      bondCode: event.bondCode,
+      type: event.type,
+      date: event.date,
+      title: publishedText(event.title) ?? "公開事件",
+    }));
+}
+
 export function buildPublicEventDigest(input = {}) {
   const asOfDate = input?.asOfDate;
   const hasAsOfDate = isPublishedIsoDate(asOfDate);

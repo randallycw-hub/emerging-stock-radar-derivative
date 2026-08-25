@@ -1,6 +1,38 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildPublicEventDigest } from "../static-showcase/assets/public-event-digest.js";
+import {
+  buildPublicEventDigest,
+  dedupeBondEvents,
+  projectPublicBondEvents,
+} from "../static-showcase/assets/public-event-digest.js";
+import { filterPublicBondEvents } from "../static-showcase/assets/bond-events-page.js";
+
+test("bond events dedupe by published bond, date, type and official reference", () => {
+  const events = [
+    { bondCode: "35221", type: "put", date: "2026-09-01", title: "賣回", sourceUrl: "https://www.tpex.org.tw/a", sourceId: "11406" },
+    { bondCode: "35221", type: "put", date: "2026-09-01", title: "賣回", sourceUrl: "https://www.tpex.org.tw/a", sourceId: "11406" },
+    { bondCode: "35221", type: "maturity", date: "2028-07-29", title: "到期", sourceUrl: "https://www.tpex.org.tw/a", sourceId: "11406" },
+  ];
+  assert.equal(dedupeBondEvents(events).length, 2);
+  assert.deepEqual(projectPublicBondEvents(events, "2026-08-25"), [
+    { bondCode: "35221", type: "put", date: "2026-09-01", title: "賣回" },
+    { bondCode: "35221", type: "maturity", date: "2028-07-29", title: "到期" },
+  ]);
+});
+
+test("public bond events can be limited to the next 30 calendar days", () => {
+  const rows = filterPublicBondEvents([
+    { bondCode: "35221", type: "put", date: "2026-08-25", title: "賣回", sourceId: "11406" },
+    { bondCode: "35221", type: "put", date: "2026-09-24", title: "賣回", sourceId: "11406" },
+    { bondCode: "35221", type: "maturity", date: "2026-09-25", title: "到期", sourceId: "11406" },
+  ], { asOfDate: "2026-08-25", days: 30 });
+
+  assert.deepEqual(rows, [
+    { bondCode: "35221", type: "put", date: "2026-08-25", title: "賣回" },
+    { bondCode: "35221", type: "put", date: "2026-09-24", title: "賣回" },
+  ]);
+  assert.equal(JSON.stringify(rows).includes("sourceId"), false);
+});
 
 test("event digest only publishes verified investor-facing events", () => {
   const digest = buildPublicEventDigest({

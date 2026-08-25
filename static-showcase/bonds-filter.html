@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="可轉債公開資料條件篩選">
+  <title>可轉債條件篩選｜市場資訊台</title>
+  <link rel="stylesheet" href="./assets/app.css">
+</head>
+<body data-page="bonds">
+  <a class="skip-link" href="#main-content">跳到主要內容</a>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-mark" href="./index.html" aria-label="市場資訊台首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a>
+    <button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"><span aria-hidden="true">☰</span><span>選單</span></button>
+    <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽"><a data-page-link="home" href="./index.html">首頁</a><a data-page-link="bonds" href="./bonds.html" aria-current="page">可轉債</a><a data-page-link="emerging" href="./emerging.html">興櫃市場</a><a data-page-link="ipo-radar" href="./ipo-radar.html">IPO 雷達</a><a data-page-link="ipo" href="./ipo.html">IPO 時程</a></nav>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
+  </div></header>
+  <main id="main-content" class="page-content" tabindex="-1">
+    <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / FILTER</p><h1>客觀條件篩選</h1><p>依公開條款與盤後數值縮小檢視範圍；結果不代表投資建議。</p></header>
+    <nav class="bond-context-nav" aria-label="可轉債功能"><a href="./bonds.html">市場總表</a><a href="./bonds-filter.html" aria-current="page">條件篩選</a><a href="./bonds-issuance.html">發行案件</a><a href="./bonds-events.html">公開事件</a></nav>
+    <section class="ledger-section" aria-labelledby="bond-filter-heading">
+      <header class="section-heading"><div><p class="section-number">PUBLIC FILTERS</p><h2 id="bond-filter-heading">可核對的條件</h2></div><p id="bond-filter-count" class="update-status" aria-live="polite">讀取中</p></header>
+      <form id="bond-filter-form" class="filters" aria-label="可轉債公開條件篩選">
+        <label><span>搜尋</span><input name="q" type="search" placeholder="代碼、債券名稱或發行人"></label>
+        <label><span>快速檢視</span><select name="screener"><option value="">全部</option><option value="recent90">近 90 日發行</option><option value="maturity365">365 日內到期</option><option value="converted75">已轉換逾 75%</option><option value="cheap">低 CB 收盤價</option><option value="conversion100">轉換價值接近 100</option><option value="lowPremium">低轉換溢價</option></select></label>
+      </form>
+      <div class="bond-table-shell"><table class="bond-table public-data-table"><thead><tr><th>CB 代碼／名稱</th><th>發行人</th><th>CB 收盤</th><th>轉換價值</th><th>轉換溢價率</th><th>流通餘額比例</th><th>下一事件</th></tr></thead><tbody id="bond-filter-body"><tr><td colspan="7" class="empty-cell">盤後資料讀取中</td></tr></tbody></table></div>
+      <p class="data-error" data-page-error hidden role="status"></p>
+    </section>
+  </main>
+  <footer class="footer">市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer>
+  <script type="module" src="./assets/site-shell.js"></script><script type="module" src="./assets/bond-filter-page.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="可轉債公開事件"><title>可轉債公開事件｜市場資訊台</title><link rel="stylesheet" href="./assets/app.css"></head>
+<body data-page="bonds">
+  <a class="skip-link" href="#main-content">跳到主要內容</a>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-mark" href="./index.html" aria-label="市場資訊台首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a><button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"><span aria-hidden="true">☰</span><span>選單</span></button>
+    <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽"><a data-page-link="home" href="./index.html">首頁</a><a data-page-link="bonds" href="./bonds.html" aria-current="page">可轉債</a><a data-page-link="emerging" href="./emerging.html">興櫃市場</a><a data-page-link="ipo-radar" href="./ipo-radar.html">IPO 雷達</a><a data-page-link="ipo" href="./ipo.html">IPO 時程</a></nav><button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
+  </div></header>
+  <main id="main-content" class="page-content" tabindex="-1">
+    <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / EVENTS</p><h1>公開事件</h1><p>將掛牌、賣回與到期等公開事件依官方依據去重後，依日期排列。</p></header>
+    <nav class="bond-context-nav" aria-label="可轉債功能"><a href="./bonds.html">市場總表</a><a href="./bonds-filter.html">條件篩選</a><a href="./bonds-issuance.html">發行案件</a><a href="./bonds-events.html" aria-current="page">公開事件</a></nav>
+    <section class="ledger-section" data-bond-events-root aria-labelledby="bond-events-heading"><header class="section-heading"><div><p class="section-number">VERIFIED EVENT DESK</p><h2 id="bond-events-heading">事件時程</h2></div><p id="bond-events-count" class="update-status" aria-live="polite">讀取中</p></header>
+      <form class="filters" aria-label="公開事件期間"><label><span>顯示範圍</span><select id="bond-event-range"><option value="">所有未來公開事件</option><option value="30">未來 30 日</option></select></label></form>
+      <div id="bond-events-list" aria-live="polite"><p class="empty-state">公開事件讀取中</p></div><p class="data-error" data-page-error hidden role="status"></p>
+    </section>
+  </main>
+  <footer class="footer">市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer><script type="module" src="./assets/site-shell.js"></script><script type="module" src="./assets/bond-events-page.js"></script>
+</body></html>
