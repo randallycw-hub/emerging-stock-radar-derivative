@@ -16,9 +16,11 @@ type LifecycleInput = Readonly<{
   exceptionStatus: string | null;
   applicationDate: string;
   events: readonly LifecycleEvent[];
-  auction: Readonly<{ bidStartDate?: string | null; bidEndDate?: string | null; auctionOpenDate?: string | null }> | null;
-  publicOffering: Readonly<{ subscriptionStartDate?: string | null; subscriptionEndDate?: string | null; drawDate?: string | null; listingDate?: string | null }> | null;
+  auction: Readonly<{ bidStartDate?: string | null; bidEndDate?: string | null; auctionOpenDate?: string | null; minimumBidPrice?: string | null; finalUnderwritingPrice?: string | null }> | null;
+  publicOffering: Readonly<{ subscriptionStartDate?: string | null; subscriptionEndDate?: string | null; drawDate?: string | null; listingDate?: string | null; provisionalUnderwritingPrice?: string | null; finalUnderwritingPrice?: string | null }> | null;
   listingDate: string | null;
+  finalUnderwritingPrice?: string | null;
+  provisionalUnderwritingPrice?: string | null;
   underwriter: string;
 }>;
 
@@ -52,6 +54,12 @@ export function projectOffering(record: LifecycleInput) {
     drawDate: validDateOrNull(record.publicOffering?.drawDate),
     listingDate: validDateOrNull(record.publicOffering?.listingDate) ?? validDateOrNull(record.listingDate),
     underwriter: record.underwriter.trim() || null,
+    underwritingPrice: validDecimalOrNull(record.finalUnderwritingPrice)
+      ?? validDecimalOrNull(record.auction?.finalUnderwritingPrice)
+      ?? validDecimalOrNull(record.publicOffering?.finalUnderwritingPrice)
+      ?? validDecimalOrNull(record.provisionalUnderwritingPrice)
+      ?? validDecimalOrNull(record.publicOffering?.provisionalUnderwritingPrice)
+      ?? validDecimalOrNull(record.auction?.minimumBidPrice),
   });
 }
 
@@ -75,6 +83,11 @@ function dedupeEvents(events: readonly LifecycleEvent[]): LifecycleEvent[] {
 
 function validDateOrNull(value: unknown): string | null {
   return typeof value === "string" && isIsoDate(value) ? value : null;
+}
+
+function validDecimalOrNull(value: unknown): string | null {
+  const text = typeof value === "string" ? value.trim() : "";
+  return /^\d+(?:\.\d+)?$/.test(text) ? text : null;
 }
 
 function calendarDistance(from: string, to: string): number {

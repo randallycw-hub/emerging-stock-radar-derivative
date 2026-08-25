@@ -21,9 +21,10 @@ function record(overrides = {}) {
     },
     publicOffering: {
       subscriptionStartDate: "2026-08-20", subscriptionEndDate: "2026-08-22", drawDate: "2026-08-25",
-      listingDate: "2026-08-30",
+      listingDate: "2026-08-30", provisionalUnderwritingPrice: "48", finalUnderwritingPrice: "50",
     },
     listingDate: "2026-08-30",
+    finalUnderwritingPrice: "50",
     ...overrides,
   };
 }
@@ -54,5 +55,6 @@ test("projects official auction and subscription dates into one offering record"
     drawDate: "2026-08-25",
     listingDate: "2026-08-30",
     underwriter: "承銷商",
+    underwritingPrice: "50",
   });
 });
