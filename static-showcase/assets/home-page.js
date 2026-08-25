@@ -1,15 +1,26 @@
 import { formatDate, safeJsonFetch } from "./site-shell.js";
 import { buildPublicEventDigest, isPublishedIsoDate } from "./public-event-digest.js";
 
-const updateTarget = document.querySelector("#last-successful-update");
-const coverageTarget = document.querySelector("#home-data-coverage");
-const eventStrip = document.querySelector("#home-event-strip");
+const updateTarget = globalThis.document?.querySelector("#last-successful-update") ?? null;
+const coverageTarget = globalThis.document?.querySelector("#home-data-coverage") ?? null;
+const eventStrip = globalThis.document?.querySelector("#home-event-strip") ?? null;
+const summaryTarget = globalThis.document?.querySelector("#home-market-summary") ?? null;
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
 };
 const pointerUrl = bootstrapConfig.generationPointerUrl;
 
-loadHomeData();
+if (globalThis.window && globalThis.document) loadHomeData();
+
+export function buildHomeSummary({ emerging, ipo, bonds } = {}) {
+  return {
+    emergingCount: Array.isArray(emerging) ? emerging.length : null,
+    ipoCount: Array.isArray(ipo?.records) ? ipo.records.length : null,
+    activeBondCount: Array.isArray(bonds?.records)
+      ? bonds.records.filter((record) => record?.status === "active").length
+      : null,
+  };
+}
 
 async function loadHomeData() {
   const pointer = await safeJsonFetch(pointerUrl, { errorTarget: updateTarget });
@@ -27,12 +38,16 @@ async function loadHomeData() {
   );
   const workbenchUrl = runtime.datasets?.bondWorkbench;
   const ipoEventsUrl = runtime.ipoEventsUrl;
-  const [workbench, ipo] = await Promise.all([
+  const emergingUrl = runtime.emergingMarketUrl;
+  const [workbench, ipo, emerging] = await Promise.all([
     typeof workbenchUrl === "string"
       ? safeJsonFetch(new URL(workbenchUrl, document.baseURI), { errorTarget: coverageTarget })
       : Promise.resolve(null),
     typeof ipoEventsUrl === "string"
       ? safeJsonFetch(new URL(ipoEventsUrl, document.baseURI), { errorTarget: coverageTarget })
+      : Promise.resolve(null),
+    typeof emergingUrl === "string"
+      ? safeJsonFetch(new URL(emergingUrl, document.baseURI), { errorTarget: coverageTarget })
       : Promise.resolve(null),
   ]);
 
@@ -47,14 +62,21 @@ async function loadHomeData() {
     ipoRecords: Array.isArray(ipo?.records) ? ipo.records : undefined,
     ipoSourceManifest: Array.isArray(ipo?.sourceManifest) ? ipo.sourceManifest : undefined,
   });
+  renderHomeSummary(buildHomeSummary({ emerging, ipo, bonds: workbench }));
 }
 
 function renderHomeEvents(input) {
   const digest = buildPublicEventDigest(input);
   const usableInputs = [input.bonds, input.ipoRecords].filter(Array.isArray).length;
   const dataDate = isPublishedIsoDate(input.asOfDate) ? formatDate(input.asOfDate) : "尚未提供";
-  coverageTarget.textContent = `資料日期 ${dataDate} · 可用來源輸入 ${usableInputs} 項`;
-  eventStrip.innerHTML = digest.map(eventCardHtml).join("");
+  if (coverageTarget) coverageTarget.textContent = `資料日期 ${dataDate} · 可用來源輸入 ${usableInputs} 項`;
+  if (eventStrip) eventStrip.innerHTML = digest.map(eventCardHtml).join("");
+}
+
+function renderHomeSummary(summary) {
+  if (!summaryTarget) return;
+  const count = (value) => value === null ? "—" : new Intl.NumberFormat("zh-TW").format(value);
+  summaryTarget.innerHTML = `<article><span>興櫃公開公司</span><strong>${count(summary.emergingCount)}</strong></article><article><span>IPO 公開紀錄</span><strong>${count(summary.ipoCount)}</strong></article><article><span>交易中可轉債</span><strong>${count(summary.activeBondCount)}</strong></article>`;
 }
 
 function eventCardHtml(event) {

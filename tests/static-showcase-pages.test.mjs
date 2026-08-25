@@ -5,18 +5,40 @@ import test from "node:test";
 const showcaseRoot = new URL("../static-showcase/", import.meta.url);
 const primaryPageFiles = [
   ["index.html", "首頁"],
-  ["bonds.html", "可轉債"],
   ["emerging.html", "興櫃市場"],
-  ["ipo-radar.html", "IPO 雷達"],
-  ["ipo.html", "IPO 時程"],
+  ["ipo-radar.html", "IPO"],
+  ["bonds.html", "可轉債"],
+  ["data-center.html", "資料中心"],
+];
+const v2Navigation = [
+  ["首頁", "./index.html"],
+  ["興櫃市場", "./emerging.html"],
+  ["IPO", "./ipo-radar.html"],
+  ["可轉債", "./bonds.html"],
+  ["資料中心", "./data-center.html"],
 ];
 
 async function readShowcaseFile(path) {
   return readFile(new URL(path, showcaseRoot), "utf8");
 }
 
+test("V2 主導覽在所有公開入口保持五個一致項目", async () => {
+  const pages = ["index.html", "emerging.html", "ipo-radar.html", "ipo.html", "bonds.html", "data-center.html"];
+  const shell = await readShowcaseFile("assets/site-shell.js");
+  assert.match(shell, /PUBLIC_PRIMARY_NAVIGATION/);
+  for (const page of pages) {
+    const html = await readShowcaseFile(page);
+    const navigation = html.match(/<nav id="primary-navigation"[\s\S]*?<\/nav>/)?.[0] ?? "";
+    for (const [label, href] of v2Navigation) {
+      assert.match(navigation, new RegExp(`href="${href.replace(".", "\\.")}"[^>]*>${label}<`));
+    }
+    assert.doesNotMatch(navigation, />IPO 時程</);
+    assert.doesNotMatch(navigation, />IPO 雷達</);
+  }
+});
+
 for (const [currentFile, pageName] of primaryPageFiles) {
-  test(`${pageName}具備共用四頁導覽與無障礙頁面骨架`, async () => {
+  test(`${pageName}具備共用五頁導覽與無障礙頁面骨架`, async () => {
     const html = await readShowcaseFile(currentFile);
 
     assert.match(html, /<html\s+lang="zh-Hant"/);
@@ -32,7 +54,8 @@ for (const [currentFile, pageName] of primaryPageFiles) {
       assert.match(html, new RegExp(`href="\\./${linkedFile}"`));
     }
 
-    assert.doesNotMatch(html, /href="\.\/methodology\.html"/);
+    const navigation = html.match(/<nav id="primary-navigation"[\s\S]*?<\/nav>/)?.[0] ?? "";
+    assert.doesNotMatch(navigation, /href="\.\/methodology\.html"/);
 
     assert.match(
       html,
@@ -42,7 +65,7 @@ for (const [currentFile, pageName] of primaryPageFiles) {
   });
 }
 
-test("資料方法直接頁保留主要導覽但不列出自己", async () => {
+test("資料方法直接頁保留五項主要導覽", async () => {
   const html = await readShowcaseFile("methodology.html");
   for (const [linkedFile] of primaryPageFiles) {
     assert.match(html, new RegExp(`href="\\./${linkedFile}"`));

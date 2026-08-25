@@ -29,6 +29,7 @@ import { bondTermSummariesFrom11406Rows } from "./lib/bond-inputs-from-11406.mjs
 const ROOT_FILES = new Set([
   ".nojekyll",
   "bonds.html",
+  "data-center.html",
   "bonds-events.html",
   "bonds-filter.html",
   "bonds-issuance.html",
@@ -50,6 +51,7 @@ const ASSET_FILES = new Set([
   "bond-public-data.js",
   "bond-technical-analysis.js",
   "bonds-page.js",
+  "data-center-page.js",
   "emerging-market-display.js",
   "emerging-detail-page.js",
   "emerging-page.js",
