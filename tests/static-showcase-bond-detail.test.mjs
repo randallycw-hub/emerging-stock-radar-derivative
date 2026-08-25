@@ -99,6 +99,10 @@ function fixture(patch = {}) {
       premiumRate: "5",
       valuationConversionPrice: "35",
       valuationConversionPriceEffectiveDate: "2026-08-01",
+      conversionPriceHistory: [
+        { effectiveDate: "2026-06-01", currentConversionPrice: "36" },
+        { effectiveDate: "2026-08-01", currentConversionPrice: "35" },
+      ],
       outstandingAmount: "400000000",
       outstandingDataDate: dataDate,
       remainingUnits: "4000",
@@ -146,6 +150,7 @@ test("complete fixture renders the public-only detail sections in order", () => 
     assert.match(html, new RegExp(label));
   }
   assert.match(html, /<details[^>]*class="formula-details"/);
+  assert.match(html, /轉換價格生效紀錄/);
   assert.match(html, /target="_blank" rel="noopener noreferrer"/);
 });
 

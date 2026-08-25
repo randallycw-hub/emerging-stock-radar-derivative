@@ -24,6 +24,7 @@ import {
   parseBondMarketHistory,
 } from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
+import { mergeConversionPriceVersions } from "../lib/market-data/conversion-price-history.ts";
 import { evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
 import {
   buildBondWorkbenchSnapshot,
@@ -147,6 +148,7 @@ export async function buildBondMarketSnapshot(options = {}) {
     : bondTermSummariesFrom11406Rows(sourceRows);
   const previousWorkbench = await readPreviousWorkbench(outputDir);
   const previousHistory = await readPreviousHistory(outputDir);
+  const previousConversionPrices = await readPreviousConversionPrices(outputDir);
   const previousSupplemental = await readPreviousSupplemental(outputDir);
   const validatedPreviousIssuerResearch = previousIssuerResearch === undefined
     ? await readPreviousIssuerResearch(outputDir)
@@ -196,12 +198,16 @@ export async function buildBondMarketSnapshot(options = {}) {
       : {}),
     ...(previousSupplemental === undefined ? {} : { previous: previousSupplemental }),
   });
+  const conversionPrices = mergeConversionPriceVersions(
+    previousConversionPrices,
+    collected.conversionPrices,
+  );
   const views = buildBondMarketViews({
     asOfDate,
     bonds: bondInputs,
     cbQuotes: collected.cbQuotes,
     stockCloses: collected.stockCloses,
-    conversionPrices: collected.conversionPrices,
+    conversionPrices,
     supplemental,
     issuerResearch: issuerResearch.records,
   });
@@ -219,7 +225,7 @@ export async function buildBondMarketSnapshot(options = {}) {
   const currentHistory = buildHistoryPoints({
     cbQuotes: collected.cbQuotes,
     stockCloses: collected.stockCloses,
-    conversionPrices: collected.conversionPrices,
+    conversionPrices,
   });
   const history = mergeBondMarketHistory(previousHistory, currentHistory);
   const latestCbPriceDate = latestTradingDate(collected.cbQuotes);
@@ -260,7 +266,7 @@ export async function buildBondMarketSnapshot(options = {}) {
     const documents = {
       cbQuotes: collected.cbQuotes,
       stockCloses: collected.stockCloses,
-      conversionPrices: collected.conversionPrices,
+      conversionPrices,
       supplemental,
       issuerResearch,
       views,
@@ -356,7 +362,7 @@ export async function buildBondMarketSnapshot(options = {}) {
           bonds: bondInputs.length,
           cbQuotes: collected.cbQuotes.length,
           stockCloses: collected.stockCloses.length,
-          conversionPrices: collected.conversionPrices.length,
+          conversionPrices: conversionPrices.length,
           supplemental: countSupplementalRecords(supplemental),
           issuerResearch: issuerResearch.records.length,
           views: views.length,
@@ -643,6 +649,15 @@ async function readPreviousHistory(outputDir) {
     return parseBondMarketHistory(value ?? []);
   } catch (error) {
     throw new TypeError(`previous bond market history is invalid: ${error.message}`);
+  }
+}
+
+async function readPreviousConversionPrices(outputDir) {
+  const value = await readOptionalJson(join(outputDir, "conversion-prices.json"));
+  try {
+    return mergeConversionPriceVersions([], value ?? []);
+  } catch (error) {
+    throw new TypeError(`previous conversion price versions are invalid: ${error.message}`);
   }
 }
 

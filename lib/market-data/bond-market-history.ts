@@ -1,5 +1,6 @@
 import { divideDecimal, multiplyDecimal, subtractDecimal } from "./decimal.ts";
 import { isIsoDate } from "../domain/dates.ts";
+import { selectEffectiveConversionPrice } from "./conversion-price-history.ts";
 import type {
   BondMarketHistoryPoint,
   CbQuote,
@@ -116,11 +117,9 @@ export function buildHistoryPoints(input: {
     for (const date of [...dates].sort()) {
       const quote = quoteByDate.get(date);
       const stock = stockByDate.get(date);
-      const effectiveVersion = versions.find(
-        (version) => version.effectiveDate <= date,
-      );
+      const effectiveVersion = selectEffectiveConversionPrice(versions, date);
       const conversionValue =
-        stock !== undefined && effectiveVersion !== undefined
+        stock !== undefined && effectiveVersion !== null
           ? multiplyDecimal(
             divideDecimal(
               stock.close,

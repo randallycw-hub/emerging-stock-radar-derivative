@@ -733,12 +733,27 @@ export function detailWithValuationConversionEvidence(record = {}, conversionPri
       ))
       .sort((left, right) => right.effectiveDate.localeCompare(left.effectiveDate))[0]
     : undefined;
+  const conversionPriceHistory = Array.isArray(conversionPrices)
+    ? conversionPrices
+      .filter((item) => (
+        String(item?.bondCode ?? "") === bondCode
+        && typeof item?.effectiveDate === "string"
+        && /^\d{4}-\d{2}-\d{2}$/.test(item.effectiveDate)
+        && typeof item?.currentConversionPrice === "string"
+      ))
+      .map((item) => ({
+        effectiveDate: item.effectiveDate,
+        currentConversionPrice: item.currentConversionPrice,
+      }))
+      .sort((left, right) => left.effectiveDate.localeCompare(right.effectiveDate))
+    : [];
   return {
     ...record,
     view: {
       ...view,
       valuationConversionPrice: applied?.currentConversionPrice ?? null,
       valuationConversionPriceEffectiveDate: applied?.effectiveDate ?? null,
+      conversionPriceHistory,
     },
   };
 }

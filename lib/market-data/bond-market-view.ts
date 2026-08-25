@@ -11,6 +11,7 @@ import {
 } from "./bond-supplemental.ts";
 import { divideDecimal, multiplyDecimal, subtractDecimal } from "./decimal.ts";
 import { resolveBondStatus } from "./bond-status.ts";
+import { selectEffectiveConversionPrice } from "./conversion-price-history.ts";
 import type {
   BondIssuerResearchView,
   BondMarketView,
@@ -128,8 +129,8 @@ function buildView(
     : undefined;
   const valuationDate = valuationCb?.tradingDate ?? null;
   const effectiveConversion = valuationDate === null
-    ? undefined
-    : conversionPrices.find((price) => price.effectiveDate <= valuationDate);
+    ? null
+    : selectEffectiveConversionPrice(conversionPrices, valuationDate);
 
   let conversionValue: string | null = null;
   let premiumRate: string | null = null;

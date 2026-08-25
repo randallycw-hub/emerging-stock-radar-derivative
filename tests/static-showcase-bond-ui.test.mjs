@@ -266,6 +266,11 @@ test("detail evidence selects the conversion-price version effective on its valu
   ]);
   assert.equal(enriched.view.valuationConversionPrice, "35");
   assert.equal(enriched.view.valuationConversionPriceEffectiveDate, "2026-07-01");
+  assert.deepEqual(enriched.view.conversionPriceHistory, [
+    { effectiveDate: "2026-06-01", currentConversionPrice: "36" },
+    { effectiveDate: "2026-07-01", currentConversionPrice: "35" },
+    { effectiveDate: "2026-08-13", currentConversionPrice: "31" },
+  ]);
   assert.equal(record.view.valuationConversionPrice, undefined);
 });
 

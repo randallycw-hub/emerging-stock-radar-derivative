@@ -377,7 +377,7 @@ async function validateCorrectionEvidence(correction, officialEvidence) {
 }
 
 function buildCapturedCorrectionPoint(before, capturedQuotes) {
-  const evidenceIssuerCode = "EVIDENCE";
+  const evidenceIssuerCode = "1234";
   const needsIssuerLink = (
     before.stockClose !== null
     || before.effectiveConversionPrice !== null

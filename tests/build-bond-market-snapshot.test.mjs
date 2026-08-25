@@ -915,6 +915,8 @@ test("a failed candidate leaves every published market file unchanged", async ()
       join(outputDir, name),
       name === "cb-issuer-research.json"
         ? `${JSON.stringify(previousIssuerResearch)}\n`
+        : name === "conversion-prices.json"
+          ? `${JSON.stringify(validCollectedMarketData.conversionPrices)}\n`
         : `{"previous":"${name}"}\n`,
     );
   }

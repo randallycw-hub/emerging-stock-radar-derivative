@@ -211,7 +211,14 @@ function candleSection(record) {
 }
 function parseChartData(value) { try { return JSON.parse(value ?? "{}"); } catch { return {}; } }
 function termsSection(term, view) {
-  return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}</dl>${formulaDetails(view)}`;
+  return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}</dl>${conversionPriceHistorySection(view.conversionPriceHistory)}${formulaDetails(view)}`;
+}
+function conversionPriceHistorySection(history) {
+  const rows = Array.isArray(history)
+    ? history.filter((item) => validIsoDate(item?.effectiveDate) && typeof item?.currentConversionPrice === "string")
+    : [];
+  if (rows.length === 0) return "";
+  return `<section class="conversion-price-history"><h4>轉換價格生效紀錄</h4><dl class="detail-facts">${rows.map((item) => fact(item.effectiveDate, item.currentConversionPrice)).join("")}</dl></section>`;
 }
 function dataSourceSection() {
   return `<h3>資料來源與授權範圍</h3><p>本工作台只列示可核對的公開資料；每項數值旁標註其資料日期。</p><dl class="detail-facts">${sourceFact("CB 盤後收盤與成交量", "tpex-cb-day-quotes", "TPEx 可轉債每日成交資訊")}${sourceFact("上市標的股盤後", "twse-stock-day-all", "TWSE 每日收盤資訊")}${sourceFact("上櫃標的股盤後", "tpex-stock-day-close", "TPEx 上櫃每日收盤資訊")}${sourceFact("條款、轉換價與流通餘額", "11406", "TPEx 可轉債公開清單")}${sourceFact("提前贖回公告", "tpex-cb-redemption-announcements", "TPEx 贖回公告")}</dl><p>不蒐集會員帳密、個人投資部位或交易資料。</p>`;
