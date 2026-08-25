@@ -141,3 +141,4 @@ function initializeShell() {
 }
 
 if (typeof document !== "undefined") initializeShell();
+if (typeof document !== "undefined") import("./site-search.js");

@@ -160,6 +160,13 @@ a { color: inherit; }
   height: 2px;
   background: var(--clay);
 }
+.site-search { position: relative; margin-left: auto; }
+.site-search input { width: min(180px, 18vw); min-height: 34px; border: 1px solid var(--line-strong); padding: 6px 9px; background: var(--panel); color: var(--ink); }
+.site-search__results { position: absolute; z-index: 12; right: 0; top: calc(100% + 4px); width: min(360px, 82vw); border: 1px solid var(--line-strong); background: var(--panel); box-shadow: var(--shadow); }
+.site-search__results a { display: block; padding: 9px 11px; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 12px; }
+.site-search__results a:last-child { border-bottom: 0; }
+.site-search__results a:hover, .site-search__results a:focus-visible { background: var(--violet-soft); color: var(--violet-ink); }
+.site-search__results span { margin-right: 6px; color: var(--muted); font-size: 10px; font-weight: 800; }
 .nav-toggle {
   display: none;
   border: 1px solid var(--line-strong);

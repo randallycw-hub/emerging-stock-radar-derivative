@@ -62,6 +62,7 @@ const ASSET_FILES = new Set([
   "ipo-stage-filter.js",
   "public-event-digest.js",
   "site-shell.js",
+  "site-search.js",
   "table-sort.js",
 ]);
 const DATA_ROOT_FILES = new Set([
