@@ -1,7 +1,16 @@
 const PAGE_SIZE = 50;
 const PUBLIC_BOND_SCREENERS = new Set([
   "recent90",
+  "issue90",
+  "maturity90",
   "maturity365",
+  "price110",
+  "price120",
+  "premium0to10",
+  "premium10to20",
+  "conversion90to110",
+  "remainingUnder50",
+  "event30",
   "converted75",
   "cheap",
   "conversion100",
@@ -131,7 +140,16 @@ export function applyPublicBondScreener(records, screener, { asOfDate = null } =
       return issueDate && issueDate >= lowerBound && issueDate <= asOf;
     }).sort((left, right) => String(right.issueDate).localeCompare(String(left.issueDate)));
   }
+  if (selected === "issue90") return applyPublicBondScreener(values, "recent90", { asOfDate });
+  if (selected === "maturity90") return numericScreener(values, "daysToMaturity", (value) => value >= 0 && value <= 90);
   if (selected === "maturity365") return numericScreener(values, "daysToMaturity", (value) => value >= 0 && value <= 365);
+  if (selected === "price110") return numericScreener(values, "cbClose", (value) => value <= 110);
+  if (selected === "price120") return numericScreener(values, "cbClose", (value) => value <= 120);
+  if (selected === "premium0to10") return numericScreener(values, "premiumRate", (value) => value >= 0 && value <= 10);
+  if (selected === "premium10to20") return numericScreener(values, "premiumRate", (value) => value >= 10 && value <= 20);
+  if (selected === "conversion90to110") return numericScreener(values, "conversionValue", (value) => value >= 90 && value <= 110);
+  if (selected === "remainingUnder50") return numericScreener(values, "remainingRatio", (value) => value >= 0 && value < 50);
+  if (selected === "event30") return numericScreener(values, "daysToNextEvent", (value) => value >= 0 && value <= 30);
   if (selected === "converted75") return numericScreener(values, "remainingRatio", (value) => value >= 0 && value <= 25);
   if (selected === "cheap") return numericSort(values, (record) => finiteRecordNumber(record?.cbClose));
   if (selected === "conversion100") return numericSort(values, (record) => {

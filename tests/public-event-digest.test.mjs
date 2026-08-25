@@ -35,6 +35,16 @@ test("public bond events can be limited to the next 30 calendar days", () => {
   assert.equal(JSON.stringify(rows).includes("sourceId"), false);
 });
 
+test("public bond events filter their supported factual categories", () => {
+  const rows = filterPublicBondEvents([
+    { bondCode: "35221", type: "conversion_price_adjustment", date: "2026-08-25", title: "轉換價調整", sourceId: "11406" },
+    { bondCode: "35221", type: "conversion_suspended", date: "2026-08-26", title: "停止轉換", sourceId: "11406" },
+    { bondCode: "35221", type: "put", date: "2026-08-27", title: "賣回", sourceId: "11406" },
+  ], { asOfDate: "2026-08-25", type: "conversion" });
+
+  assert.deepEqual(rows.map((row) => row.type), ["conversion_price_adjustment", "conversion_suspended"]);
+});
+
 test("event digest only publishes verified investor-facing events", () => {
   const digest = buildPublicEventDigest({
     asOfDate: "2026-08-24",

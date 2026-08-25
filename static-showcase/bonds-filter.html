@@ -22,7 +22,7 @@
       <header class="section-heading"><div><p class="section-number">PUBLIC FILTERS</p><h2 id="bond-filter-heading">可核對的條件</h2></div><p id="bond-filter-count" class="update-status" aria-live="polite">讀取中</p></header>
       <form id="bond-filter-form" class="filters" aria-label="可轉債公開條件篩選">
         <label><span>搜尋</span><input name="q" type="search" placeholder="代碼、債券名稱或發行人"></label>
-        <label><span>快速檢視</span><select name="screener"><option value="">全部</option><option value="recent90">近 90 日發行</option><option value="maturity365">365 日內到期</option><option value="converted75">已轉換逾 75%</option><option value="cheap">低 CB 收盤價</option><option value="conversion100">轉換價值接近 100</option><option value="lowPremium">低轉換溢價</option></select></label>
+        <label><span>快速檢視</span><select name="screener"><option value="">全部</option><option value="issue90">近期發行（90 日）</option><option value="maturity90">90 日內到期</option><option value="maturity365">365 日內到期</option><option value="price110">CB 價格 ≤ 110</option><option value="price120">CB 價格 ≤ 120</option><option value="premium0to10">溢價率 0～10%</option><option value="premium10to20">溢價率 10～20%</option><option value="conversion90to110">轉換價值 90～110</option><option value="remainingUnder50">剩餘比例 &lt; 50%</option><option value="event30">30 日內有事件</option></select></label>
       </form>
       <div class="bond-table-shell"><table class="bond-table public-data-table"><thead><tr><th>CB 代碼／名稱</th><th>發行人</th><th>CB 收盤</th><th>轉換價值</th><th>轉換溢價率</th><th>流通餘額比例</th><th>下一事件</th></tr></thead><tbody id="bond-filter-body"><tr><td colspan="7" class="empty-cell">盤後資料讀取中</td></tr></tbody></table></div>
       <p class="data-error" data-page-error hidden role="status"></p>

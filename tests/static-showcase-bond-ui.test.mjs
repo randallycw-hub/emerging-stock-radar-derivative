@@ -192,6 +192,28 @@ test("public CB screeners derive only reproducible views from verified public fi
   assert.deepEqual(applyPublicBondScreener(records, "unknown", { asOfDate: "2026-08-24" }).map((item) => item.bondCode), records.map((item) => item.bondCode));
 });
 
+test("PDF CB screeners use the exact public numeric ranges", async () => {
+  const { applyPublicBondScreener } = await import("../static-showcase/assets/bond-list-page.js");
+  const records = [
+    { bondCode: "issue", issueDate: "2026-08-01", daysToMaturity: 800, cbClose: "121", premiumRate: "25", conversionValue: "120", remainingRatio: "80", daysToNextEvent: 90 },
+    { bondCode: "near", issueDate: "2025-01-01", daysToMaturity: 90, cbClose: "110", premiumRate: "10", conversionValue: "90", remainingRatio: "49", daysToNextEvent: 30 },
+    { bondCode: "band", issueDate: "2025-01-01", daysToMaturity: 365, cbClose: "120", premiumRate: "20", conversionValue: "110", remainingRatio: "50", daysToNextEvent: 31 },
+    { bondCode: "other", issueDate: "2025-01-01", daysToMaturity: 366, cbClose: "120.01", premiumRate: "20.01", conversionValue: "110.01", remainingRatio: "50.01", daysToNextEvent: 31 },
+  ];
+  const ids = (screener) => applyPublicBondScreener(records, screener, { asOfDate: "2026-08-24" }).map((record) => record.bondCode);
+
+  assert.deepEqual(ids("issue90"), ["issue"]);
+  assert.deepEqual(ids("maturity90"), ["near"]);
+  assert.deepEqual(ids("maturity365"), ["near", "band"]);
+  assert.deepEqual(ids("price110"), ["near"]);
+  assert.deepEqual(ids("price120"), ["near", "band"]);
+  assert.deepEqual(ids("premium0to10"), ["near"]);
+  assert.deepEqual(ids("premium10to20"), ["near", "band"]);
+  assert.deepEqual(ids("conversion90to110"), ["near", "band"]);
+  assert.deepEqual(ids("remainingUnder50"), ["near"]);
+  assert.deepEqual(ids("event30"), ["near"]);
+});
+
 test("bond page provides composable public event controls and a clear-all empty state", async () => {
   const [html, js, css] = await Promise.all([
     readFile(new URL("bonds.html", root), "utf8"),

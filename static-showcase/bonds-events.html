@@ -11,7 +11,7 @@
     <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / EVENTS</p><h1>公開事件</h1><p>將掛牌、賣回與到期等公開事件依官方依據去重後，依日期排列。</p></header>
     <nav class="bond-context-nav" aria-label="可轉債功能"><a href="./bonds.html">市場總表</a><a href="./bonds-filter.html">條件篩選</a><a href="./bonds-issuance.html">發行案件</a><a href="./bonds-events.html" aria-current="page">公開事件</a></nav>
     <section class="ledger-section" data-bond-events-root aria-labelledby="bond-events-heading"><header class="section-heading"><div><p class="section-number">VERIFIED EVENT DESK</p><h2 id="bond-events-heading">事件時程</h2></div><p id="bond-events-count" class="update-status" aria-live="polite">讀取中</p></header>
-      <form class="filters" aria-label="公開事件期間"><label><span>顯示範圍</span><select id="bond-event-range"><option value="">所有未來公開事件</option><option value="30">未來 30 日</option></select></label></form>
+      <form class="filters" aria-label="公開事件篩選"><label><span>顯示範圍</span><select id="bond-event-range"><option value="">所有未來公開事件</option><option value="30">未來 30 日</option></select></label><label><span>事件類型</span><select id="bond-event-type"><option value="all">全部</option><option value="conversion-price">轉換價調整</option><option value="conversion-state">停止／恢復轉換</option><option value="put">賣回</option><option value="redemption">提前贖回</option><option value="maturity30">30 日內到期</option><option value="listing">新掛牌</option></select></label></form>
       <div id="bond-events-list" aria-live="polite"><p class="empty-state">公開事件讀取中</p></div><p class="data-error" data-page-error hidden role="status"></p>
     </section>
   </main>
