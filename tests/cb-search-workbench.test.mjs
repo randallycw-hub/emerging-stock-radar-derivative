@@ -66,6 +66,7 @@ test("fact dashboard keeps dates and evidence per field and never fabricates mis
   assert.deepEqual(
     dashboard.map((item) => [item.key, item.value, item.dataDate, item.evidenceState]),
     [
+      ["cbClose", unavailable, unavailable, "unavailable"],
       ["conversionPrice", unavailable, unavailable, "unavailable"],
       ["stockClose", unavailable, unavailable, "unavailable"],
       ["conversionValue", unavailable, unavailable, "unavailable"],
@@ -82,6 +83,7 @@ test("fact dashboard keeps dates and evidence per field and never fabricates mis
 
   const published = projectCbFactDashboard({
     view: {
+      cbClose: "101", cbPriceDate: "2026-08-12",
       currentConversionPrice: "35", conversionPriceEffectiveDate: "2026-08-01",
       stockClose: "38", stockPriceDate: "2026-08-12",
       conversionValue: "108.57", premiumRate: "5", valuationDate: "2026-08-12",
@@ -90,8 +92,8 @@ test("fact dashboard keeps dates and evidence per field and never fabricates mis
     fieldStates: { price: "complete", valuation: "complete", outstanding: "complete" },
   });
   assert.deepEqual(
-    published.slice(0, 5).map((item) => [item.value, item.evidenceState]),
-    [["35", "verified"], ["38", "verified"], ["108.57", "verified"], ["5", "verified"], ["80", "verified"]],
+    published.slice(0, 6).map((item) => [item.value, item.evidenceState]),
+    [["101", "verified"], ["35", "verified"], ["38", "verified"], ["108.57", "verified"], ["5", "verified"], ["80", "verified"]],
   );
 });
 

@@ -49,10 +49,15 @@ export function noAdviceViolations(text) {
 export function renderBondDetail(record, { asOfDate = null } = {}) {
   const view = record?.view ?? {};
   const term = record?.term ?? {};
+  const marketStatus = publicDetailMarketStatus(view);
+  const priorTradeDate = view.staleCbPrice === true && validIsoDate(view.cbPriceDate)
+    ? `<span>前次成交日：${text(view.cbPriceDate)}</span>`
+    : "";
   const html = `
-    <header class="bond-detail-head"><div><p class="section-number">${text(record?.bondCode)} / PUBLIC CB DETAIL</p><h2>${text(term.bondName ?? view.bondName)}</h2><p>${text(term.issuerName ?? view.issuerCode)}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債總表">← 返回總表</button></header>
+    <header class="bond-detail-head"><div><p class="section-number">${text(record?.bondCode)} / PUBLIC CB DETAIL</p><h2>${text(term.bondName ?? view.bondName)}</h2><p>${text(term.issuerName ?? view.issuerCode)}</p>${marketStatus ? `<p class="bond-market-status">${text(marketStatus)}${priorTradeDate}</p>` : ""}</div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債總表">← 返回總表</button></header>
     <p class="bond-detail-disclaimer">本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。</p>
     ${factDashboardSection(record, { asOfDate })}
+    ${detailDatesSection(record)}
     <nav class="detail-tabs" aria-label="詳細資料分頁" role="tablist">${tabButton("overview", "行情圖表", true)}${tabButton("terms", "條款與事件")}${tabButton("institutions", "法人")}${tabButton("company", "公司營運")}</nav>
     ${mobileArea("K 線圖", "overview", candleSection(record))}
     ${mobileArea("債券條款", "terms", termsSection(term, view))}
@@ -95,6 +100,7 @@ export function projectCbFactDashboard(record = {}, { asOfDate = null } = {}) {
     && validIsoDate(item.date) && verifiedSnapshotUrl(item.sourceUrl, item.sourceId));
   const balance = approved11406BalanceEvidence(view);
   return [
+    approvedField("cbClose", "CB 收盤", view.cbClose, view.cbPriceDate, fieldStates.price, view.cbPriceSourceId, view.cbPriceSourceUrl),
     approvedField("conversionPrice", "目前轉換價", view.currentConversionPrice, view.conversionPriceEffectiveDate, fieldStates.price, view.conversionPriceSourceId, view.conversionPriceSourceUrl),
     approvedField("stockClose", "標的股收盤", view.stockClose, view.stockPriceDate, fieldStates.price, view.stockPriceSourceId, view.stockPriceSourceUrl),
     approvedField("conversionValue", "轉換價值", view.conversionValue, view.valuationDate, fieldStates.valuation, view.valuationSourceId, view.valuationSourceUrl),
@@ -109,6 +115,37 @@ export function projectCbFactDashboard(record = {}, { asOfDate = null } = {}) {
       ? { key: "maturity", label: "到期日", value: term.maturityDate, dataDate: maturity.date, evidence: "已驗證公開來源", evidenceState: "verified" }
       : missing("maturity", "到期日"),
   ];
+}
+
+export function projectBondDetailDateFacts(record = {}) {
+  const view = record?.view ?? {};
+  const company = view?.issuerResearch;
+  const facts = [
+    ["CB 盤後日期", view.cbPriceDate, validIsoDate],
+    ["標的股盤後日期", view.stockPriceDate, validIsoDate],
+    ["轉換價生效日", view.conversionPriceEffectiveDate, validIsoDate],
+    ["估值日期", view.valuationDate, validIsoDate],
+    ["流通餘額資料日", view.outstandingDataDate, validIsoDate],
+    ["法人資料日", view.institutionDataDate, validIsoDate],
+    ["財務月份", company?.revenueMonth, validYearMonth],
+  ];
+  return facts.map(([label, value, validator]) => ({
+    label,
+    value: validator(value) ? value : MISSING_WORDING,
+  }));
+}
+
+export function publicDetailMarketStatus(view = {}) {
+  return {
+    ACTIVE: "交易中",
+    NO_TRADE: "今日無成交",
+    CONVERSION_SUSPENDED: "停止轉換",
+    TRADING_SUSPENDED: "暫停交易",
+    REDEMPTION_PROCESS: "贖回程序",
+    MATURED: "已到期",
+    DELISTED: "已下櫃",
+    STALE: "盤後未更新",
+  }[view?.marketStatus] ?? "";
 }
 
 export function detailRecordFromLegacy({ view = {}, term = {}, events = [] } = {}) {
@@ -210,6 +247,10 @@ function candleSection(record) {
   </section>`;
 }
 function parseChartData(value) { try { return JSON.parse(value ?? "{}"); } catch { return {}; } }
+function detailDatesSection(record) {
+  const values = projectBondDetailDateFacts(record);
+  return `<section class="detail-date-facts" aria-label="資料時間點"><h3>資料時間點</h3><dl class="detail-facts">${values.map((item) => fact(item.label, item.value)).join("")}</dl></section>`;
+}
 function termsSection(term, view) {
   return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}</dl>${conversionPriceHistorySection(view.conversionPriceHistory)}${formulaDetails(view)}`;
 }
@@ -247,6 +288,7 @@ function eventsSection(events) {
 }
 function sourceLink(value, sourceId) { const url = verifiedSnapshotUrl(value, sourceId); return url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">已驗證公開來源</a>` : ""; }
 function validIsoDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")); }
+function validYearMonth(value) { return /^\d{4}-\d{2}$/.test(String(value ?? "")); }
 function verifiedSnapshotUrl(value, sourceId) {
   if (typeof value !== "string" || APPROVED_EVENT_SOURCE_URLS.get(sourceId) !== value) return null;
   try { return new URL(value).protocol === "https:" ? value : null; } catch { return null; }

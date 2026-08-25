@@ -5,6 +5,7 @@ import {
   companyContextLinks,
   detailUrlForBond,
   noAdviceViolations,
+  projectBondDetailDateFacts,
   renderBondDetail,
 } from "../static-showcase/assets/bond-detail-page.js";
 
@@ -152,6 +153,40 @@ test("complete fixture renders the public-only detail sections in order", () => 
   assert.match(html, /<details[^>]*class="formula-details"/);
   assert.match(html, /轉換價格生效紀錄/);
   assert.match(html, /target="_blank" rel="noopener noreferrer"/);
+});
+
+test("detail separates factual data dates and labels a no-trade bond without advice", () => {
+  const record = fixture({
+    view: {
+      ...fixture().view,
+      marketStatus: "NO_TRADE",
+      cbPriceDate: "2026-08-11",
+      stockPriceDate: "2026-08-12",
+      conversionPriceEffectiveDate: "2026-08-01",
+      outstandingDataDate: "2026-08-10",
+      institutionDataDate: "2026-08-09",
+    },
+  });
+  assert.deepEqual(projectBondDetailDateFacts(record), [
+    { label: "CB 盤後日期", value: "2026-08-11" },
+    { label: "標的股盤後日期", value: "2026-08-12" },
+    { label: "轉換價生效日", value: "2026-08-01" },
+    { label: "估值日期", value: dataDate },
+    { label: "流通餘額資料日", value: "2026-08-10" },
+    { label: "法人資料日", value: "2026-08-09" },
+    { label: "財務月份", value: "2026-07" },
+  ]);
+  const html = renderBondDetail(record);
+  assert.match(html, /今日無成交/);
+  assert.match(html, /CB 盤後日期[\s\S]*2026-08-11/);
+  assert.match(html, /標的股盤後日期[\s\S]*2026-08-12/);
+  assert.match(html, /轉換價生效日[\s\S]*2026-08-01/);
+  assert.doesNotMatch(html, /前次成交日/);
+  const staleHtml = renderBondDetail(fixture({
+    view: { ...record.view, marketStatus: "STALE", staleCbPrice: true },
+  }));
+  assert.match(staleHtml, /前次成交日：2026-08-11/);
+  assert.deepEqual(noAdviceViolations(html), []);
 });
 
 test("detail never renders internal completeness, diagnostic, or rule-engine content", () => {

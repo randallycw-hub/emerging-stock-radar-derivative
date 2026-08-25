@@ -590,6 +590,10 @@ a { color: inherit; }
 .workbench[hidden] { display: none; }
 .bond-detail-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
 .bond-detail-head h2 { margin: 5px 0; font: 800 clamp(30px, 4vw, 54px)/1 Georgia, serif; }
+.bond-market-status { margin: 10px 0 0 !important; display: flex; flex-wrap: wrap; gap: 10px; color: var(--violet-ink); font-size: 13px; font-weight: 850; }
+.bond-market-status span { color: var(--muted); font-weight: 700; }
+.detail-date-facts { margin: 18px 0; padding: 15px; border: 1px solid var(--line); background: var(--paper); }
+.detail-date-facts h3 { margin: 0 0 10px; font: 800 18px/1.2 Georgia, "Noto Serif TC", serif; }
 .bond-detail-disclaimer { margin: 18px 0; padding: 12px 14px; border-left: 4px solid var(--violet); background: var(--violet-soft); font-weight: 750; }
 .status-matrix { margin: 20px 0; padding: 16px; border: 1px solid var(--line); background: var(--paper); }
 .status-matrix > header { display: flex; justify-content: space-between; gap: 20px; align-items: end; }
