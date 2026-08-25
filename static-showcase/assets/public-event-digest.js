@@ -78,6 +78,82 @@ export function projectPublicBondEvents(events, asOfDate) {
     }));
 }
 
+function publicEvent({ market, date, title, href, code = null }) {
+  if (!isPublishedIsoDate(date) || !publishedText(market) || !publishedText(title) || !publishedText(href)) return null;
+  return {
+    market,
+    date,
+    title: publishedText(title),
+    href,
+    code: publishedText(code),
+  };
+}
+
+/**
+ * Assemble a small public event timeline across the three markets.  The
+ * returned records intentionally exclude source references and completeness
+ * metadata; source provenance remains available through the relevant page.
+ */
+export function buildCrossMarketEventEntries(input = {}) {
+  const asOfDate = input?.asOfDate;
+  if (!isPublishedIsoDate(asOfDate)) return [];
+  const entries = [];
+
+  for (const event of Array.isArray(input?.emergingEvents) ? input.emergingEvents : []) {
+    const projected = publicEvent({
+      market: "emerging",
+      date: event?.date,
+      title: event?.title ?? event?.label ?? "公開異動",
+      href: event?.href ?? "./emerging.html",
+      code: event?.companyCode,
+    });
+    if (projected && projected.date >= asOfDate) entries.push(projected);
+  }
+
+  const ipoIsUsable = isPublishedIsoDate(input?.ipoDataDate)
+    && Array.isArray(input?.ipoRecords)
+    && Array.isArray(input?.ipoSourceManifest);
+  if (ipoIsUsable) {
+    const rows = input.ipoRecords.map((record) => ({
+      ...record,
+      events: normalizeApprovedIpoEvents(record, input.ipoSourceManifest),
+    }));
+    for (const { row, event } of projectActiveIpoEventEntries(rows, input.ipoDataDate)) {
+      const projected = publicEvent({
+        market: "ipo",
+        date: event?.date,
+        title: event?.label ?? "IPO 公開事件",
+        href: `./ipo.html?stage=market&sort=eventDate&direction=asc&q=${encodeURIComponent(String(row?.companyCode ?? ""))}`,
+        code: row?.companyCode,
+      });
+      if (projected && projected.date >= asOfDate) entries.push(projected);
+    }
+  }
+
+  for (const record of Array.isArray(input?.bonds) ? input.bonds : []) {
+    const bondCode = publishedText(record?.bondCode);
+    if (!bondCode) continue;
+    const events = (Array.isArray(record?.events) ? record.events : []).map((event) => ({ ...event, bondCode }));
+    for (const event of projectPublicBondEvents(events, asOfDate)) {
+      const projected = publicEvent({
+        market: "bonds",
+        date: event.date,
+        title: event.title,
+        href: `./bonds.html?bond=${encodeURIComponent(bondCode)}`,
+        code: bondCode,
+      });
+      if (projected) entries.push(projected);
+    }
+  }
+
+  return entries
+    .sort((left, right) => left.date.localeCompare(right.date)
+      || left.market.localeCompare(right.market)
+      || String(left.code ?? "").localeCompare(String(right.code ?? "")))
+    .filter((entry, index, all) => index === 0 || `${entry.market}\u001f${entry.date}\u001f${entry.title}\u001f${entry.code ?? ""}`
+      !== `${all[index - 1].market}\u001f${all[index - 1].date}\u001f${all[index - 1].title}\u001f${all[index - 1].code ?? ""}`);
+}
+
 export function buildPublicEventDigest(input = {}) {
   const asOfDate = input?.asOfDate;
   const hasAsOfDate = isPublishedIsoDate(asOfDate);

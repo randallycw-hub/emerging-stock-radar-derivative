@@ -107,19 +107,21 @@ test("首頁介紹文字在更新資訊列之上仍保有獨立的閱讀層級",
   assert.match(css, /\.home-hero > p:not\(\.kicker\)\s*(?:,|\{)/);
 });
 
-test("首頁以已發布資料提供事件列與覆蓋狀態", async () => {
+test("首頁以已發布資料提供跨市場事件與客觀排行", async () => {
   const [home, script, css] = await Promise.all([
     readShowcaseFile("index.html"), readShowcaseFile("assets/home-page.js"), readShowcaseFile("assets/app.css"),
   ]);
   assert.match(home, /id="home-event-strip"/);
   assert.match(home, /id="home-data-coverage"/);
-  assert.match(script, /buildPublicEventDigest/);
+  assert.match(home, /data-home-event-market="emerging"/);
+  assert.match(home, /id="home-rankings"/);
+  assert.match(script, /buildCrossMarketEventEntries/);
+  assert.match(script, /buildObjectiveRankings/);
   assert.match(script, /ipoEventsUrl/);
   assert.match(script, /bondWorkbench/);
-  assert.match(script, /event\.id === "ipo-recent" \? "筆事件" : "項"/);
-  assert.match(script, /\$\{event\.count\} \$\{unit\}/);
   assert.match(css, /\.home-event-strip/);
-  assert.doesNotMatch(home + script, /排行|推薦|買進|賣出|目標價/);
+  assert.match(css, /\.home-market-summary/);
+  assert.doesNotMatch(home + script, /推薦|買進|賣出|目標價/);
 });
 
 test("IPO 兩頁使用可辨識的桌機資料表與行動卡片版面語意", async () => {

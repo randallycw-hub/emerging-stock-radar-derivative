@@ -44,10 +44,10 @@
       </div>
     </section>
 
-    <section id="home-market-summary" class="summary-strip" aria-label="跨市場公開資料摘要" aria-live="polite">
-      <article><span>興櫃公開公司</span><strong>—</strong></article>
-      <article><span>IPO 公開紀錄</span><strong>—</strong></article>
-      <article><span>交易中可轉債</span><strong>—</strong></article>
+    <section id="home-market-summary" class="home-market-summary" aria-label="跨市場公開資料摘要" aria-live="polite">
+      <article class="home-summary-panel"><h3>興櫃市場</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
+      <article class="home-summary-panel"><h3>IPO</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
+      <article class="home-summary-panel"><h3>可轉債</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
     </section>
 
     <section class="home-modules" aria-label="市場資訊入口">
@@ -89,7 +89,18 @@
         </div>
         <p id="home-data-coverage" class="update-status" aria-live="polite">公開資料讀取中</p>
       </div>
+      <div class="home-event-filters" role="group" aria-label="近期公開事件市場篩選">
+        <button type="button" data-home-event-market="all" aria-pressed="true">全部</button>
+        <button type="button" data-home-event-market="emerging" aria-pressed="false">興櫃</button>
+        <button type="button" data-home-event-market="ipo" aria-pressed="false">IPO</button>
+        <button type="button" data-home-event-market="bonds" aria-pressed="false">CB</button>
+      </div>
       <div id="home-event-strip" class="home-event-strip" aria-live="polite"></div>
+    </section>
+
+    <section class="home-ranking-section" aria-labelledby="home-rankings-title">
+      <div class="section-heading"><div><p class="kicker">OBJECTIVE MARKET RANKINGS</p><h2 id="home-rankings-title">客觀市場排行</h2></div><p class="update-status">依公開盤後數值排序，不代表投資建議。</p></div>
+      <div id="home-rankings" class="ranking-grid" aria-live="polite"></div>
     </section>
   </main>
 

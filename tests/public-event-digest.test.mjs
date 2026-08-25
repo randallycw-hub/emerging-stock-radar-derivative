@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildPublicEventDigest,
+  buildCrossMarketEventEntries,
   dedupeBondEvents,
   projectPublicBondEvents,
 } from "../static-showcase/assets/public-event-digest.js";
@@ -124,4 +125,23 @@ test("IPO digest is unavailable without a valid IPO snapshot date", () => {
 test("missing CB inputs are unavailable instead of a fake count", () => {
   const digest = buildPublicEventDigest({ asOfDate: "2026-08-24", bonds: null, ipoRecords: [] });
   assert.equal(digest.find((item) => item.id === "bond-rights-90").state, "unavailable");
+});
+
+test("cross-market events are filtered by market without internal source metadata", () => {
+  const events = buildCrossMarketEventEntries({
+    asOfDate: "2026-08-24",
+    emergingEvents: [{ date: "2026-08-25", title: "新登錄", companyCode: "1260", sourceId: "internal" }],
+    ipoDataDate: "2026-08-24",
+    ipoSourceManifest: [{ sourceId: "twse-applications" }],
+    ipoRecords: [{ companyCode: "1234", stage: "D", events: [{ date: "2026-08-26", label: "競拍", sourceRecordIds: ["TWSE:2026:1234"] }] }],
+    bonds: [{ bondCode: "11011", events: [{ date: "2026-08-27", type: "put", title: "賣回", sourceId: "11406" }] }],
+  });
+
+  assert.deepEqual(events.map((event) => [event.market, event.date, event.title]), [
+    ["emerging", "2026-08-25", "新登錄"],
+    ["ipo", "2026-08-26", "競拍"],
+    ["bonds", "2026-08-27", "賣回"],
+  ]);
+  assert.deepEqual(events.filter((event) => event.market === "ipo").map((event) => event.title), ["競拍"]);
+  assert.equal(JSON.stringify(events).includes("sourceId"), false);
 });
