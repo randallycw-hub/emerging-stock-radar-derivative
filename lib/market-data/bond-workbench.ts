@@ -19,7 +19,8 @@ const RECORD_KEYS = ["bondCode", "status", "archiveReason", "archivedAt", "term"
 const TERM_KEYS = ["bondCode", "issuerCode", "bondName", "issuerName", "issueDate", "listingDate", "maturityDate", "issueAmount", "outstandingAmount", "outstandingDataDate", "initialConversionPrice", "conversionStartDate", "conversionEndDate", "putDates", "putPrice", "securedStatus", "underwriter", "trustee", "unitFaceValueTwd"];
 const EVENT_KEYS = ["bondCode", "eventId", "type", "date", "title", "sourceId", "sourceUrl"];
 const FIELD_STATE_KEYS = ["price", "valuation", "outstanding", "institutions", "company", "events", "history"];
-const VIEW_KEYS = ["bondCode", "issuerCode", "bondName", "issuerResearch", "cbClose", "cbPriceDate", "cbTradeUnits", "stockClose", "stockPriceDate", "currentConversionPrice", "conversionPriceEffectiveDate", "valuationDate", "valuationCbClose", "valuationStockClose", "conversionValue", "premiumRate", "outstandingAmount", "outstandingDataDate", "outstandingReductionRate", "remainingUnits", "remainingRatio", "dailyTurnoverRate", "institutionDataDate", "institutionNetUnits", "institutionNet5dUnits", "institutionNet20dUnits", "redemptionEvent", "maturityDate", "daysToMaturity", "nextPutDate", "daysToNextPut", "nextEventType", "nextEventDate", "daysToNextEvent", "dataQuality", "staleCbPrice", "missingReasons"];
+const VIEW_KEYS = ["bondCode", "issuerCode", "bondName", "issuerResearch", "cbClose", "cbPriceDate", "cbTradeUnits", "stockClose", "stockPriceDate", "currentConversionPrice", "conversionPriceEffectiveDate", "valuationDate", "valuationCbClose", "valuationStockClose", "conversionValue", "premiumRate", "outstandingAmount", "outstandingDataDate", "outstandingReductionRate", "remainingUnits", "remainingRatio", "dailyTurnoverRate", "institutionDataDate", "institutionNetUnits", "institutionNet5dUnits", "institutionNet20dUnits", "redemptionEvent", "maturityDate", "daysToMaturity", "nextPutDate", "daysToNextPut", "nextEventType", "nextEventDate", "daysToNextEvent", "marketStatus", "dataQuality", "staleCbPrice", "missingReasons"];
+const LEGACY_VIEW_KEYS = VIEW_KEYS.filter((key) => key !== "marketStatus");
 const ISSUER_RESEARCH_KEYS = ["market", "industryName", "revenueMonth", "sourcePublishedOn", "revenueUnit", "currentMonthRevenue", "monthOverMonthPercent", "yearOverYearPercent", "cumulativeRevenue", "cumulativeYearOverYearPercent"];
 const DECIMAL = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
 const SIGNED_DECIMAL = /^-?(?:0|[1-9]\d*)(?:\.\d+)?$/;
@@ -43,7 +44,7 @@ export function parseBondWorkbenchSnapshot(value: unknown): BondWorkbenchSnapsho
   if (snapshot.schemaVersion !== 1) throw new TypeError("bond workbench snapshot schemaVersion must be 1");
   assertTimestamp(snapshot.generatedAt, "bond workbench snapshot generatedAt");
   assertDate(snapshot.dataDate, "bond workbench snapshot dataDate");
-  const records = parseRecords(snapshot.records);
+  const records = parseRecords(snapshot.records, { allowLegacyMarketStatus: true });
   return deepFreeze({ schemaVersion: 1, generatedAt: snapshot.generatedAt, dataDate: snapshot.dataDate, records });
 }
 
@@ -185,9 +186,13 @@ function optionalSourceFieldState(
   return whenFresh();
 }
 
-function parseRecords(value: unknown): BondWorkbenchRecord[] {
+function parseRecords(value: unknown, options: { allowLegacyMarketStatus?: boolean } = {}): BondWorkbenchRecord[] {
   assertDenseArray(value, "bond workbench records");
-  const records = value.map((entry, index) => parseRecord(entry, `bond workbench record ${index}`));
+  const records = value.map((entry, index) => parseRecord(
+    entry,
+    `bond workbench record ${index}`,
+    options,
+  ));
   indexByCode(records, "bond workbench records");
   if (!records.every((record, index) => index === 0 || records[index - 1].bondCode < record.bondCode)) {
     throw new TypeError("bond workbench records must be sorted by bond code");
@@ -195,7 +200,11 @@ function parseRecords(value: unknown): BondWorkbenchRecord[] {
   return records;
 }
 
-function parseRecord(value: unknown, name: string): BondWorkbenchRecord {
+function parseRecord(
+  value: unknown,
+  name: string,
+  options: { allowLegacyMarketStatus?: boolean } = {},
+): BondWorkbenchRecord {
   const record = requireRecord(value, name);
   assertExactKeys(record, RECORD_KEYS, name);
   const bondCode = readBondCode(record.bondCode, `${name}.bondCode`);
@@ -206,7 +215,7 @@ function parseRecord(value: unknown, name: string): BondWorkbenchRecord {
   if (record.archivedAt !== null) assertDate(record.archivedAt, `${name}.archivedAt`);
   if ((status === "active") !== (archiveReason === null && record.archivedAt === null)) throw new TypeError(`${name} lifecycle fields are inconsistent`);
   const term = parseTerm(record.term, `${name}.term`);
-  const view = parseView(record.view, `${name}.view`);
+  const view = parseView(record.view, `${name}.view`, options);
   if (term.bondCode !== bondCode || view.bondCode !== bondCode) throw new TypeError(`${name} bond code mismatch`);
   const events = parseEvents(record.events);
   if (events.some((event) => event.bondCode !== bondCode)) throw new TypeError(`${name} event bond code mismatch`);
@@ -327,9 +336,14 @@ function parseViews(value: unknown): BondMarketView[] {
   return value.map((entry, index) => parseView(entry, `current view ${index}`));
 }
 
-function parseView(value: unknown, name: string): BondMarketView {
+function parseView(
+  value: unknown,
+  name: string,
+  options: { allowLegacyMarketStatus?: boolean } = {},
+): BondMarketView {
   const view = requireRecord(value, name);
-  assertExactKeys(view, VIEW_KEYS, name);
+  const legacyMarketStatus = options.allowLegacyMarketStatus === true && !("marketStatus" in view);
+  assertExactKeys(view, legacyMarketStatus ? LEGACY_VIEW_KEYS : VIEW_KEYS, name);
   const bondCode = readBondCode(view.bondCode, `${name}.bondCode`);
   const redemptionEvent = parseRedemptionEvent(view.redemptionEvent, `${name}.redemptionEvent`);
   if (redemptionEvent !== null && redemptionEvent.bondCode !== bondCode) {
@@ -370,10 +384,25 @@ function parseView(value: unknown, name: string): BondMarketView {
     nextEventType: readNextEventType(view.nextEventType, `${name}.nextEventType`),
     nextEventDate: readDate(view.nextEventDate, `${name}.nextEventDate`),
     daysToNextEvent: readInteger(view.daysToNextEvent, `${name}.daysToNextEvent`),
+    marketStatus: legacyMarketStatus
+      ? deriveLegacyBondMarketStatus(view, redemptionEvent, `${name}.view`)
+      : readBondMarketStatus(view.marketStatus, `${name}.marketStatus`),
     dataQuality: readDataQuality(view.dataQuality, `${name}.dataQuality`),
     staleCbPrice: readBoolean(view.staleCbPrice, `${name}.staleCbPrice`),
     missingReasons: readMissingReasons(view.missingReasons, `${name}.missingReasons`),
   };
+}
+
+function deriveLegacyBondMarketStatus(
+  view: Record<string, unknown>,
+  redemptionEvent: BondMarketView["redemptionEvent"],
+  name: string,
+): BondMarketView["marketStatus"] {
+  if (redemptionEvent !== null) return "REDEMPTION_PROCESS";
+  if (readInteger(view.daysToMaturity, `${name}.daysToMaturity`) <= 0) return "MATURED";
+  if (readBoolean(view.staleCbPrice, `${name}.staleCbPrice`)) return "STALE";
+  if (readNonNegativeInteger(view.cbTradeUnits, `${name}.cbTradeUnits`) === "0") return "NO_TRADE";
+  return "ACTIVE";
 }
 
 function parseIssuerResearch(value: unknown, name: string): BondMarketView["issuerResearch"] {
@@ -574,6 +603,21 @@ function readDataQuality(value: unknown, name: string): BondMarketView["dataQual
   if (value !== "complete" && value !== "partial" && value !== "date_mismatch") {
     throw new TypeError(`${name} is invalid`);
   }
+  return value;
+}
+
+function readBondMarketStatus(value: unknown, name: string): BondMarketView["marketStatus"] {
+  if (
+    value !== "ACTIVE"
+    && value !== "NO_TRADE"
+    && value !== "CONVERSION_SUSPENDED"
+    && value !== "TRADING_SUSPENDED"
+    && value !== "REDEMPTION_PROCESS"
+    && value !== "MATURED"
+    && value !== "DELISTED"
+    && value !== "DATA_CONFLICT"
+    && value !== "STALE"
+  ) throw new TypeError(`${name} is invalid`);
   return value;
 }
 

@@ -10,6 +10,7 @@ import {
   type CbSupplementalSnapshot,
 } from "./bond-supplemental.ts";
 import { divideDecimal, multiplyDecimal, subtractDecimal } from "./decimal.ts";
+import { resolveBondStatus } from "./bond-status.ts";
 import type {
   BondIssuerResearchView,
   BondMarketView,
@@ -104,6 +105,11 @@ function buildView(
     .sort((left, right) => right.effectiveDate.localeCompare(left.effectiveDate));
 
   const latestCb = cbQuotes[0];
+  const sameDayCbQuote = input.cbQuotes.find((quote) => (
+    quote.bondCode === bond.bondCode
+    && quote.tradingMode === "equivalent"
+    && quote.tradingDate === input.asOfDate
+  ));
   const sameDayCbWithoutClose = input.cbQuotes.some((quote) => (
     quote.bondCode === bond.bondCode
     && quote.tradingMode === "equivalent"
@@ -193,6 +199,18 @@ function buildView(
     : missingReasons.length > 0
       ? "partial"
       : "complete";
+  const marketStatus = resolveBondStatus({
+    maturityDate: bond.maturityDate,
+    delistingDate: redemptionEvent?.delistingDate ?? null,
+    redemptionDate: redemptionEvent?.announcementDate ?? null,
+    conversionSuspended: null,
+    tradingSuspended: null,
+    tradingUnits: sameDayCbQuote?.tradingUnits ?? latestCb?.tradingUnits ?? null,
+    quoteDate: sameDayCbQuote?.tradingDate ?? latestCb?.tradingDate ?? null,
+    // A balance/quote date mismatch is a valuation limitation, not contradictory
+    // market status. Explicit source conflicts are handled before publication.
+    dataConflict: false,
+  }, input.asOfDate);
   const outstandingReductionRate =
     bond.issueAmount !== null
     && bond.outstandingAmount !== null
@@ -247,6 +265,7 @@ function buildView(
     nextEventType: nextEvent.type,
     nextEventDate: nextEvent.date,
     daysToNextEvent: differenceCalendarDays(input.asOfDate, nextEvent.date),
+    marketStatus,
     dataQuality,
     staleCbPrice: latestCb !== undefined && latestCb.tradingDate !== input.asOfDate,
     missingReasons,

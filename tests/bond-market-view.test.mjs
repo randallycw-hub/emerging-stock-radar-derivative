@@ -198,6 +198,7 @@ test("enriches a view with exact remaining metrics, institutions and redemption 
   assert.equal(view.nextEventDate, "2026-09-21");
   assert.equal(view.daysToNextEvent, 53);
   assert.equal(view.dataQuality, "complete");
+  assert.equal(view.marketStatus, "REDEMPTION_PROCESS");
   assert.deepEqual(view.missingReasons, []);
 });
 
@@ -407,6 +408,7 @@ test("uses a common valuation date and keeps latest display prices separate", ()
   assert.equal(view.conversionValue, "108.97");
   assert.equal(view.premiumRate, "-5.02");
   assert.equal(view.staleCbPrice, true);
+  assert.equal(view.marketStatus, "STALE");
 });
 
 test("marks a same-day zero-trade null CB quote unusable even when an older close exists", () => {
@@ -429,6 +431,7 @@ test("marks a same-day zero-trade null CB quote unusable even when an older clos
 
   assert.equal(view.cbClose, "103.5");
   assert.equal(view.staleCbPrice, true);
+  assert.equal(view.marketStatus, "NO_TRADE");
   assert.ok(view.missingReasons.includes("NO_CB_CLOSE"));
   assert.notEqual(view.dataQuality, "complete");
 });

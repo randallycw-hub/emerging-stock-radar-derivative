@@ -398,7 +398,7 @@ function lifecycleView(bondCode, patch = {}) {
     institutionNet5dUnits: null, institutionNet20dUnits: null, redemptionEvent: null,
     maturityDate: "2028-07-29", daysToMaturity: 715, nextPutDate: "2027-08-30",
     daysToNextPut: 382, nextEventType: "put", nextEventDate: "2027-08-30",
-    daysToNextEvent: 382, dataQuality: "partial", staleCbPrice: false, missingReasons: [],
+    daysToNextEvent: 382, marketStatus: "ACTIVE", dataQuality: "partial", staleCbPrice: false, missingReasons: [],
     ...patch,
   };
 }

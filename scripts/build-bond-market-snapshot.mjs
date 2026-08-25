@@ -888,14 +888,25 @@ export function verifyWorkbenchConsistency({
   ) {
     throw new Error("VALIDATION_FAILED:WORKBENCH_CURRENT_BOND_CODES");
   }
+  const canonicalViews = [];
   for (const [bondCode, term] of termsByCode) {
     const view = viewsByCode.get(bondCode);
+    const publishedView = recordsByCode.get(bondCode)?.view;
     if (
+      publishedView === undefined
+      ||
       term.issuerCode !== view.issuerCode
       || term.bondName !== view.bondName
     ) {
       throw new Error(`VALIDATION_FAILED:WORKBENCH_CURRENT_MISMATCH:${bondCode}`);
     }
+    if (
+      !equalPlainJson(view, publishedView)
+      && !equalPlainJson(view, withoutMarketStatus(publishedView))
+    ) {
+      throw new Error(`VALIDATION_FAILED:WORKBENCH_VIEW_MISMATCH:${bondCode}`);
+    }
+    canonicalViews.push(publishedView);
   }
   if (parsedHistory.some((point) => !recordsByCode.has(point.bondCode))) {
     throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_BOND_CODE");
@@ -909,14 +920,14 @@ export function verifyWorkbenchConsistency({
     dataDate,
     asOfDate: requestedDate,
     currentTerms: terms,
-    currentViews: views,
+    currentViews: canonicalViews,
     currentEvents: buildBondWorkbenchEvents({ terms, supplemental }),
     currentSourceStates: buildWorkbenchSourceStates({
-      views,
+      views: canonicalViews,
       supplemental,
       issuerResearch,
     }),
-    currentAssessments: buildCandidateAssessments(views, parsedHistory),
+    currentAssessments: buildCandidateAssessments(canonicalViews, parsedHistory),
     previous: expectedPrevious,
   });
   if (!equalPlainJson(snapshot, expected)) {
@@ -938,9 +949,13 @@ export function verifyWorkbenchConsistency({
   )) {
     throw new Error("VALIDATION_FAILED:WORKBENCH_SOURCE_STATE");
   }
-  verifyIssuerResearchViewConsistency(issuerResearch, views);
-  verifySupplementalViewConsistency(supplemental, views, requestedDate, terms);
+  verifyIssuerResearchViewConsistency(issuerResearch, canonicalViews);
+  verifySupplementalViewConsistency(supplemental, canonicalViews, requestedDate, terms);
   return snapshot;
+}
+
+function withoutMarketStatus(view) {
+  return Object.fromEntries(Object.entries(view).filter(([key]) => key !== "marketStatus"));
 }
 
 export function summarizeWorkbenchSourceStates(workbench) {

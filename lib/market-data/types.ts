@@ -2,6 +2,17 @@ import type { CbRedemptionEvent } from "../source-verification/source-cb-redempt
 
 export type CbTradingMode = "equivalent" | "negotiated";
 
+export type BondMarketStatus =
+  | "ACTIVE"
+  | "NO_TRADE"
+  | "CONVERSION_SUSPENDED"
+  | "TRADING_SUSPENDED"
+  | "REDEMPTION_PROCESS"
+  | "MATURED"
+  | "DELISTED"
+  | "DATA_CONFLICT"
+  | "STALE";
+
 export type CbQuote = {
   bondCode: string;
   tradingDate: string;
@@ -85,6 +96,7 @@ export type BondMarketView = {
   nextEventType: "redemption" | "put" | "maturity";
   nextEventDate: string;
   daysToNextEvent: number;
+  marketStatus: BondMarketStatus;
   dataQuality: "complete" | "partial" | "date_mismatch";
   staleCbPrice: boolean;
   missingReasons: readonly string[];

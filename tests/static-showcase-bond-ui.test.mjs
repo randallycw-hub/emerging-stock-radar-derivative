@@ -292,12 +292,14 @@ test("page loader projects legacy market fields into canonical list fields until
     nextEventDate: record.nextEventDate,
     daysToNextEvent: record.daysToNextEvent,
     dataQuality: record.dataQuality,
+    marketStatus: record.marketStatus,
   }, {
     remainingRatio: "82.07",
     nextEventType: "put",
     nextEventDate: "2027-09-21",
     daysToNextEvent: 394,
     dataQuality: "complete",
+    marketStatus: "ACTIVE",
   });
 });
 
@@ -328,7 +330,7 @@ test("page loader preserves explicit canonical event nulls while filling only ab
 });
 
 test("bond list presentation uses remaining ratio and canonical redemption event fields", async () => {
-  const { bondListPresentation } = await import("../static-showcase/assets/bonds-page.js");
+  const { bondListPresentation, bondMarketStatusPresentation } = await import("../static-showcase/assets/bonds-page.js");
   assert.deepEqual(bondListPresentation({
     remainingRatio: "82.07",
     nextEventType: "redemption",
@@ -339,6 +341,8 @@ test("bond list presentation uses remaining ratio and canonical redemption event
     eventLabel: "贖回 53 天",
     eventDate: "2026-09-21",
   });
+  assert.equal(bondMarketStatusPresentation({ marketStatus: "REDEMPTION_PROCESS" }), "贖回程序");
+  assert.equal(bondMarketStatusPresentation({ marketStatus: "DATA_CONFLICT" }), "");
 });
 
 test("public CB list uses plain dashes for unavailable values and labels earlier official closes", async () => {

@@ -73,6 +73,7 @@ function view(bondCode = "35221", patch = {}) {
     nextEventType: "put",
     nextEventDate: "2027-08-30",
     daysToNextEvent: 382,
+    marketStatus: "ACTIVE",
     dataQuality: "partial",
     staleCbPrice: false,
     missingReasons: [],
@@ -135,6 +136,15 @@ test("builds a sorted, defensive active snapshot keyed only by bond code", () =>
   assert.ok(Object.isFrozen(result.records));
   assert.ok(Object.isFrozen(result.records[0].term));
   assert.throws(() => { result.records[0].term.bondName = "mutated"; }, TypeError);
+});
+
+test("migrates a published legacy view without weakening the current view contract", () => {
+  const snapshot = buildBondWorkbenchSnapshot(input());
+  const legacy = structuredClone(snapshot);
+  delete legacy.records[0].view.marketStatus;
+
+  const parsed = parseBondWorkbenchSnapshot(legacy);
+  assert.equal(parsed.records[0].view.marketStatus, "ACTIVE");
 });
 
 test("optional source outcomes override value presence in workbench field states", () => {

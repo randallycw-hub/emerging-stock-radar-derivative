@@ -1236,6 +1236,7 @@ function isolatedWorkbenchView(compact, scenario = "success") {
     nextEventType: "maturity",
     nextEventDate: "2026-12-18",
     daysToNextEvent: 141,
+    marketStatus: "STALE",
     missingReasons: [
       "NO_VERIFIED_FACE_VALUE",
       "BALANCE_TRADE_DATE_MISMATCH",

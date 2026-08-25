@@ -1229,6 +1229,15 @@ test("workbench cross-file verification uses exact bond codes, history and sourc
     sourceStateSummary: entry.sourceStateSummary,
   };
   assert.doesNotThrow(() => verifyWorkbenchConsistency(valid));
+  const publishedLegacyWorkbench = structuredClone(result.workbench);
+  delete publishedLegacyWorkbench.records[0].view.marketStatus;
+  const publishedLegacyViews = structuredClone(result.views);
+  delete publishedLegacyViews[0].marketStatus;
+  assert.doesNotThrow(() => verifyWorkbenchConsistency({
+    ...valid,
+    workbench: publishedLegacyWorkbench,
+    views: publishedLegacyViews,
+  }));
   const missingLoadedEvents = structuredClone(result.workbench);
   missingLoadedEvents.records[0].events = [];
   missingLoadedEvents.records[0].fieldStates.events = "missing";

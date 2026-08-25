@@ -981,7 +981,7 @@ function stageView() {
     institutionNetUnits: null, institutionNet5dUnits: null, institutionNet20dUnits: null,
     redemptionEvent: null, maturityDate: "2028-01-01", daysToMaturity: 519,
     nextPutDate: null, daysToNextPut: null, nextEventType: "maturity",
-    nextEventDate: "2028-01-01", daysToNextEvent: 519, dataQuality: "complete",
+    nextEventDate: "2028-01-01", daysToNextEvent: 519, marketStatus: "NO_TRADE", dataQuality: "complete",
     staleCbPrice: false, missingReasons: [],
   };
 }

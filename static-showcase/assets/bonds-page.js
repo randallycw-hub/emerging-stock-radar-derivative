@@ -297,6 +297,17 @@ function canonicalListFieldsForLegacyView(view) {
       && view.missingReasons.length === 0
         ? "complete"
         : "partial";
+  const marketStatus = has("marketStatus")
+    ? view.marketStatus
+    : view.redemptionEvent !== null && view.redemptionEvent !== undefined
+      ? "REDEMPTION_PROCESS"
+      : Number(view.daysToMaturity) <= 0
+        ? "MATURED"
+        : view.staleCbPrice === true
+          ? "STALE"
+          : String(view.cbTradeUnits ?? "") === "0"
+            ? "NO_TRADE"
+            : "ACTIVE";
   return {
     remainingRatio,
     nextEventType: has("nextEventType")
@@ -309,6 +320,7 @@ function canonicalListFieldsForLegacyView(view) {
       ? view.daysToNextEvent
       : legacyDaysToNextEvent,
     dataQuality,
+    marketStatus,
   };
 }
 
@@ -361,8 +373,13 @@ function renderBonds() {
 function renderBondRow(view) {
   const term = termFor(view.bondCode);
   const presentation = bondListPresentation(view);
+  const marketStatus = bondMarketStatusPresentation(view);
+  const issuerLabel = [
+    marketStatus,
+    `${view.issuerCode} ${term?.["機構名稱"] ?? ""}`.trim(),
+  ].filter(Boolean).join(" · ");
   return `<tr tabindex="0" data-bond-code="${escapeHtml(view.bondCode)}" aria-label="查看 ${escapeHtml(view.bondName)} 詳細資料">
-    <td>${metric(`${view.bondCode} · ${view.bondName}`, `${view.issuerCode} ${term?.["機構名稱"] ?? ""}`)}</td>
+    <td>${metric(`${view.bondCode} · ${view.bondName}`, issuerLabel)}</td>
     <td>${priceMetric(view.cbClose, view.cbPriceDate, view.staleCbPrice ? "前次成交" : "")}</td>
     <td>${priceMetric(view.conversionValue, view.valuationDate, "估值日", "metric-violet")}</td>
     <td>${rateMetric(view.premiumRate, view.valuationDate)}</td>
@@ -376,8 +393,9 @@ function renderBondRow(view) {
 
 function renderBondCard(view) {
   const presentation = bondListPresentation(view);
+  const marketStatus = bondMarketStatusPresentation(view);
   return `<button class="bond-card" type="button" data-bond-code="${escapeHtml(view.bondCode)}">
-    <header><strong>${escapeHtml(view.bondCode)} · ${escapeHtml(view.bondName)}</strong><span>${view.staleCbPrice ? "前次成交" : ""}</span></header>
+    <header><strong>${escapeHtml(view.bondCode)} · ${escapeHtml(view.bondName)}</strong><span>${escapeHtml(marketStatus)}</span></header>
     <span class="bond-card-grid">
       ${cardMetric("CB 收盤", valueOrDash(view.cbClose), view.cbPriceDate)}
       ${cardMetric("轉換價值", valueOrDash(view.conversionValue), view.valuationDate)}
@@ -685,6 +703,20 @@ export function bondListPresentation(view = {}) {
     eventLabel: view.nextEventDate ? eventLabel : "—",
     eventDate: view.nextEventDate ?? "—",
   };
+}
+
+export function bondMarketStatusPresentation(view = {}) {
+  const status = view.marketStatus;
+  return {
+    ACTIVE: "交易中",
+    NO_TRADE: "今日無成交",
+    CONVERSION_SUSPENDED: "停止轉換",
+    TRADING_SUSPENDED: "暫停交易",
+    REDEMPTION_PROCESS: "贖回程序",
+    MATURED: "已到期",
+    DELISTED: "已下櫃",
+    STALE: "盤後未更新",
+  }[status] ?? "";
 }
 
 export function detailWithValuationConversionEvidence(record = {}, conversionPrices = []) {
