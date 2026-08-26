@@ -144,8 +144,6 @@ function toIsoDate(value) {
   const match = /^(\d{3})(\d{2})(\d{2})$/.exec(textValue);
   if (!match) return null;
   const year = Number(match[1]) + 1911;
-  const month = Number(match[2]);
-  const day = Number(match[3]);
   const result = `${year}-${match[2]}-${match[3]}`;
   return validIsoDate(result);
 }

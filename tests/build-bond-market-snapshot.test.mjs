@@ -394,6 +394,37 @@ test("projects supported 11406 terms in English without requiring unavailable te
   });
 });
 
+test("omits incomplete official outstanding-balance change fields without dropping the bond", () => {
+  const base = {
+    債券代碼: "35221",
+    機構代碼: "3522",
+    機構名稱: "御嵿",
+    債券簡稱: "御嵿一",
+    到期日期: "1170729",
+    發行總額: "2000000",
+    目前餘額: "1500000",
+    賣回權日期: "",
+  };
+
+  const [dateOnly] = bondTermSummariesFrom11406Rows([{
+    ...base,
+    最近餘額變動日: "1150801",
+    最近餘額變動原因: "",
+  }]);
+  const [reasonOnly] = bondTermSummariesFrom11406Rows([{
+    ...base,
+    最近餘額變動日: "",
+    最近餘額變動原因: "轉換執行",
+  }]);
+
+  assert.equal(dateOnly.bondCode, "35221");
+  assert.equal(reasonOnly.bondCode, "35221");
+  assert.equal(dateOnly.outstandingChangeDate, null);
+  assert.equal(dateOnly.outstandingChangeReason, null);
+  assert.equal(reasonOnly.outstandingChangeDate, null);
+  assert.equal(reasonOnly.outstandingChangeReason, null);
+});
+
 test("maps the English 11406 DataDate alias without blocking identity-only rows", () => {
   const base = {
     債券代碼: "35221",

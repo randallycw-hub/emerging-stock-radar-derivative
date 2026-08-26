@@ -52,7 +52,7 @@ export function buildChartModel({ history = [], events = [], period = "day", ran
   return model;
 }
 
-export function selectVisibleCandles(candles, { range = "6M", viewport = null } = {}) {
+export function selectVisibleCandles(candles, { viewport = null } = {}) {
   const ranged = Array.isArray(candles) ? candles : [];
   const first = clampIndex(viewport?.start, ranged.length, 0);
   const last = clampIndex(viewport?.end, ranged.length, ranged.length - 1);
