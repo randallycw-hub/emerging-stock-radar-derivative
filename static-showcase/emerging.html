@@ -52,6 +52,8 @@
         <div id="market-breadth" class="market-breadth" aria-label="市場概況">
           <article><span>公司家數</span><strong data-breadth="companies">—</strong></article>
           <article><span>有效樣本</span><strong data-breadth="effective">—</strong></article>
+          <article><span>今日有交易</span><strong data-breadth="traded">—</strong></article>
+          <article><span>低流動性</span><strong data-breadth="low-liquidity">—</strong></article>
           <article><span>上漲／下跌／持平</span><strong data-breadth="directions">—</strong></article>
           <article><span>成交股數合計</span><strong data-breadth="volume">—</strong></article>
           <article><span>估算成交金額（盤後）</span><strong data-breadth="amount">—</strong></article>
@@ -77,6 +79,7 @@
               <th aria-sort="none"><button type="button" data-market-sort="companyCode" data-sort-type="text">公司代碼／名稱 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-market-sort="industryName" data-sort-type="text">產業 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-market-sort="dailyAveragePrice" data-sort-type="number">本日成交均價（盤後） <span aria-hidden="true"></span></button></th>
+              <th aria-sort="none"><button type="button" data-market-sort="previousAveragePrice" data-sort-type="number">前日成交均價（盤後） <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-market-sort="averageChangePercent" data-sort-type="number">均價漲跌 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-market-sort="dailyHighPrice" data-sort-type="number">最高 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-market-sort="dailyLowPrice" data-sort-type="number">最低 <span aria-hidden="true"></span></button></th>
@@ -85,7 +88,7 @@
               <th aria-sort="none"><button type="button" data-market-sort="applyingStatus" data-sort-type="text">申請狀態 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-market-sort="tradingDate" data-sort-type="text">資料日期 <span aria-hidden="true"></span></button></th>
             </tr></thead>
-            <tbody id="emerging-table-body"><tr><td colspan="10" class="empty-cell">盤後資料讀取中</td></tr></tbody>
+            <tbody id="emerging-table-body"><tr><td colspan="11" class="empty-cell">盤後資料讀取中</td></tr></tbody>
           </table>
         </div>
         <div id="emerging-card-list" class="market-card-list" aria-live="polite"></div>

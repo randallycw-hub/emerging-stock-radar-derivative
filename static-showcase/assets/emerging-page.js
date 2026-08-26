@@ -156,10 +156,14 @@ function renderBreadthAndRankings() {
   const rows = currentDateRows();
   const count = (direction) => rows.filter((row) => row.direction === direction).length;
   const effective = rows.filter((row) => row.dailyAveragePrice !== null).length;
+  const traded = rows.filter((row) => positiveNumber(row.transactionVolume)).length;
+  const lowLiquidity = rows.filter((row) => !positiveNumber(row.transactionVolume)).length;
   const totalVolume = sumDecimal(rows, "transactionVolume");
   const totalAmount = sumDecimal(rows, "estimatedTransactionAmount");
   setBreadth("companies", formatNumber(rows.length));
   setBreadth("effective", formatNumber(effective));
+  setBreadth("traded", formatNumber(traded));
+  setBreadth("low-liquidity", formatNumber(lowLiquidity));
   setBreadth("directions", `${count("up")}／${count("down")}／${count("flat")}`);
   setBreadth("volume", formatNumber(totalVolume));
   setBreadth("amount", formatNumber(totalAmount, { maximumFractionDigits: 0 }));
@@ -199,7 +203,7 @@ function renderMarketTable() {
   state.page = Math.min(state.page, pages);
   const visible = sorted.slice((state.page - 1) * size, state.page * size);
   document.querySelector("#emerging-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
-  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(10);
+  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(11);
   document.querySelector("#emerging-card-list").innerHTML = visible.map(marketCardHtml).join("");
   renderPagination("#emerging-pagination", state.page, pages, (page) => {
     state.page = page;
@@ -251,6 +255,7 @@ function marketRowHtml(row) {
     <th scope="row"><a href="./market.html?code=${encodeURIComponent(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a></th>
     <td>${escapeHtml(row.industryName ?? "未分類")}</td>
     <td>${formatEmergingDailyAverage(row)}</td>
+    <td>${formatNumber(row.previousAveragePrice, { maximumFractionDigits: 2 })}</td>
     <td class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}<small>${formatPercent(row.averageChangePercent)}</small></td>
     <td>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}</td>
     <td>${formatNumber(row.dailyLowPrice, { maximumFractionDigits: 2 })}</td>
@@ -264,6 +269,7 @@ function marketRowHtml(row) {
 function marketCardHtml(row) {
   return `<article class="market-card" id="card-${escapeHtml(row.companyCode)}"><header><strong>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</strong><span>${escapeHtml(row.industryName ?? "未分類")}</span></header><dl>
     <div><dt>本日成交均價（盤後）</dt><dd>${formatEmergingDailyAverage(row)}</dd></div>
+    <div><dt>前日成交均價（盤後）</dt><dd>${formatNumber(row.previousAveragePrice, { maximumFractionDigits: 2 })}</dd></div>
     <div><dt>均價漲跌</dt><dd class="market-${escapeHtml(row.direction)}">${formatSigned(row.averageChange)}／${formatPercent(row.averageChangePercent)}</dd></div>
     <div><dt>最高／最低</dt><dd>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}／${formatNumber(row.dailyLowPrice, { maximumFractionDigits: 2 })}</dd></div>
     <div><dt>成交股數</dt><dd>${formatNumber(row.transactionVolume)}</dd></div>
@@ -369,7 +375,7 @@ function normalizeRevenueRow(row) {
 
 function showUnavailable() {
   document.querySelector("#emerging-update-status").textContent = "盤後市場資料尚未發布";
-  document.querySelector("#emerging-table-body").innerHTML = emptyRow(10, "目前沒有可顯示的盤後市場資料");
+  document.querySelector("#emerging-table-body").innerHTML = emptyRow(11, "目前沒有可顯示的盤後市場資料");
   document.querySelector("#emerging-revenue-body").innerHTML = emptyRow(8, "目前沒有可顯示的月營收資料");
 }
 
@@ -386,6 +392,11 @@ function sumDecimal(rows, key) {
     const value = Number(String(row[key] ?? "").replaceAll(",", ""));
     return Number.isFinite(value) ? sum + value : sum;
   }, 0);
+}
+
+function positiveNumber(value) {
+  const number = Number(String(value ?? "").replaceAll(",", ""));
+  return Number.isFinite(number) && number > 0;
 }
 
 function formatSigned(value) {
