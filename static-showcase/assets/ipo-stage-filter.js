@@ -40,7 +40,7 @@ export function displayIpoStage(value) {
 export function isActiveIpoRecord(row, dataDate) {
   if (!activeStages.has(row?.stage) || row?.exceptionStatus || !validDate(dataDate)) return false;
   const evidenceDates = (Array.isArray(row?.events) ? row.events : [])
-    .filter((event) => approvedSourceIds.has(event?.sourceId) && validDate(event?.date))
+    .filter((event) => hasApprovedIpoEventEvidence(event) && validDate(event?.date))
     .map((event) => event.date);
   if (evidenceDates.length === 0) return false;
   const latestActivityDate = [row?.applicationDate, ...evidenceDates].filter(validDate).sort().at(-1);
@@ -55,25 +55,34 @@ export function normalizeApprovedIpoEvents(record, sourceManifest = []) {
     .filter((sourceId) => approvedSourceIds.has(sourceId)));
   return (Array.isArray(record?.events) ? record.events : [])
     .filter((event) => validDate(event?.date) && event?.label)
-    .map((event) => ({
-      date: event.date,
-      label: String(event.label),
-      kind: String(event.kind ?? event.type ?? event.label),
-      sourceId: approvedSourceIdForRecordIds(event.sourceRecordIds, manifestSourceIds),
-    }))
-    .filter((event) => event.sourceId !== null);
+    .map((event) => {
+      const sourceId = approvedSourceIdForRecordIds(event.sourceRecordIds, manifestSourceIds);
+      const verified = event?.verified === true || sourceId !== null;
+      return {
+        date: event.date,
+        label: String(event.label),
+        kind: String(event.kind ?? event.type ?? event.label),
+        ...(sourceId === null ? {} : { sourceId }),
+        verified,
+      };
+    })
+    .filter((event) => event.verified);
 }
 
 export function projectActiveIpoEventEntries(rows, dataDate) {
   return (Array.isArray(rows) ? rows : []).flatMap((row) => (
     isActiveIpoRecord(row, dataDate)
       ? row.events
-        .filter((event) => approvedSourceIds.has(event?.sourceId)
+        .filter((event) => hasApprovedIpoEventEvidence(event)
           && validDate(event?.date)
           && calendarDistance(event.date, dataDate) <= activeWindowDays)
         .map((event) => ({ row, event }))
       : []
   ));
+}
+
+function hasApprovedIpoEventEvidence(event) {
+  return event?.verified === true || approvedSourceIds.has(event?.sourceId);
 }
 
 export function shouldWriteIpoStage(stage) {

@@ -13,6 +13,7 @@ import {
   fetchOfficialCsvWithRetry,
   readPublishedBondHistory,
   readPublishedBondWorkbench,
+  readPublishedConversionPrices,
   readPublishedCbIssuerResearch,
   readPublishedCbSupplemental,
   refreshStaticShowcase,
@@ -387,6 +388,22 @@ test("refresh publishes a schema-validated emerging-market snapshot from one TPE
   const ipoEventsText = outcome.artifacts.active["ipo-events.json"];
   const ipoEvents = JSON.parse(ipoEventsText);
   assert.deepEqual(
+    ipoEvents.sourceManifest.map((source) => source.sourceId),
+    [
+      "twse-applications",
+      "tpex-applications",
+      "tpex-ipo-listings",
+      "twse-auctions",
+      "twse-public-offerings",
+    ],
+  );
+  assert.ok(
+    ipoEvents.records.some((record) => (
+      record.auction !== null || record.publicOffering !== null
+    )),
+    "static refresh must retain verified IPO auction or public-offering facts",
+  );
+  assert.deepEqual(
     manifest.market.files.filter((entry) => entry.name === "ipo-events.json"),
     [{
       name: "ipo-events.json",
@@ -464,6 +481,34 @@ test("refresh reads the prior generation bond history before staging a replaceme
   );
 
   assert.deepEqual(await readPublishedBondHistory(dataRoot), history);
+});
+
+test("refresh reads the prior conversion-price history before staging a replacement", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-conversion-prices-"));
+  const dataRoot = join(root, "data");
+  const generation = join(dataRoot, "generations", "abcdef");
+  const versions = [{
+    bondCode: "35221",
+    issuerCode: "3522",
+    initialConversionPrice: "40",
+    currentConversionPrice: "35",
+    effectiveDate: "2026-06-30",
+    officialDetailUrl: "https://mopsov.twse.com.tw/mops/web/t120sg01?bond_id=35221&issuer_stock_code=3522",
+  }];
+  await mkdir(generation, { recursive: true });
+  await writeFile(
+    join(dataRoot, "current.json"),
+    JSON.stringify({ schemaVersion: 1, generation: "generations/abcdef", runtimeUrl: "./data/generations/abcdef/runtime.json" }),
+    "utf8",
+  );
+  await writeFile(join(generation, "conversion-prices.json"), JSON.stringify(versions), "utf8");
+  await writeFile(
+    join(generation, "manifest.json"),
+    JSON.stringify({ market: { status: "verified", files: [] } }),
+    "utf8",
+  );
+
+  assert.deepEqual(await readPublishedConversionPrices(dataRoot), versions);
 });
 
 test("published history verifies and migrates a declared legacy active generation before merging cache", async () => {

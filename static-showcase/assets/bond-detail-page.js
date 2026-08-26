@@ -315,7 +315,12 @@ function sourceLink(value, sourceId) { const url = verifiedSnapshotUrl(value, so
 function validIsoDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")); }
 function validYearMonth(value) { return /^\d{4}-\d{2}$/.test(String(value ?? "")); }
 function verifiedSnapshotUrl(value, sourceId) {
-  if (typeof value !== "string" || APPROVED_EVENT_SOURCE_URLS.get(sourceId) !== value) return null;
+  if (typeof value !== "string") return null;
+  if (
+    sourceId != null
+      ? APPROVED_EVENT_SOURCE_URLS.get(sourceId) !== value
+      : ![...APPROVED_EVENT_SOURCE_URLS.values()].includes(value)
+  ) return null;
   try { return new URL(value).protocol === "https:" ? value : null; } catch { return null; }
 }
 function legacyFieldStates(view) {

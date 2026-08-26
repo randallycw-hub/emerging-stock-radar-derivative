@@ -145,7 +145,11 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     mergeSourceRow(record, "auction", row);
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "finalUnderwritingPrice", row.finalUnderwritingPrice);
-    mergeRecordValue(record, "underwriter", row.underwriter);
+    mergePricingUnderwriter(
+      record,
+      row.underwriter,
+      applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)),
+    );
     addEvent(record, "auction_bid_start", row.bidStartDate, row.sourceRecordId);
     addEvent(record, "auction_bid_end", row.bidEndDate, row.sourceRecordId);
     addEvent(record, "auction_open", row.auctionOpenDate, row.sourceRecordId);
@@ -162,7 +166,11 @@ export function buildIpoEventSnapshot(input: BuildIpoEventSnapshotInput): IpoEve
     mergeRecordValue(record, "listingDate", row.listingDate);
     mergeRecordValue(record, "provisionalUnderwritingPrice", row.provisionalUnderwritingPrice);
     mergeRecordValue(record, "finalUnderwritingPrice", row.finalUnderwritingPrice);
-    mergeRecordValue(record, "underwriter", row.underwriter);
+    mergePricingUnderwriter(
+      record,
+      row.underwriter,
+      applicationUnderwriterKeys.has(recordKey(row.companyCode, row.market)),
+    );
     addEvent(record, "public_subscription_start", row.subscriptionStartDate, row.sourceRecordId);
     addEvent(record, "public_subscription_end", row.subscriptionEndDate, row.sourceRecordId);
     addEvent(record, "public_draw", row.drawDate, row.sourceRecordId);
@@ -522,6 +530,27 @@ function mergeListingUnderwriter(
   else if (!isMissingValue(value) && isMissingValue(record.underwriter)) record.underwriter = value;
 }
 
+function mergePricingUnderwriter(
+  record: MutableRecord,
+  value: string,
+  hasApplicationUnderwriter: boolean,
+): void {
+  if (isMissingValue(value)) return;
+  if (!hasApplicationUnderwriter) {
+    mergeRecordValue(record, "underwriter", value);
+    return;
+  }
+  const auctionUnderwriter = record.auction?.underwriter;
+  if (
+    auctionUnderwriter !== undefined
+    && !isMissingValue(auctionUnderwriter)
+    && !equivalentUnderwriter(auctionUnderwriter, value)
+  ) {
+    throw new TypeError("IPO_SOURCE_CONFLICT:underwriter");
+  }
+  record.underwriter = value;
+}
+
 function mergeSourceRow(record: MutableRecord, field: "auction" | "publicOffering", row: IpoAuctionSourceRow | IpoPublicOfferingSourceRow): void {
   const existing = record[field];
   if (!existing) {
@@ -588,6 +617,11 @@ function equivalentDecimal(left: string, right: string): boolean {
   };
   const normalizedLeft = normalize(left);
   return normalizedLeft !== null && normalizedLeft === normalize(right);
+}
+
+function equivalentUnderwriter(left: string, right: string): boolean {
+  return left.normalize("NFKC").replaceAll(/\s+/gu, "")
+    === right.normalize("NFKC").replaceAll(/\s+/gu, "");
 }
 
 function compareEvents(left: IpoEvent, right: IpoEvent): number {

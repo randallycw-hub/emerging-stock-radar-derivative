@@ -1,4 +1,4 @@
-import { formatDate, safeJsonFetch } from "./site-shell.js";
+import { formatDate, formatNumber, safeJsonFetch } from "./site-shell.js";
 import { buildCrossMarketEventEntries, isPublishedIsoDate } from "./public-event-digest.js";
 
 const updateTarget = globalThis.document?.querySelector("#last-successful-update") ?? null;

@@ -5,6 +5,7 @@ import {
   readFile,
   readdir,
   rm,
+  writeFile,
 } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -36,6 +37,7 @@ const ROOT_FILES = new Set([
   "emerging.html",
   "market.html",
   "index.html",
+  "ipo-offering.html",
   "ipo-radar.html",
   "ipo.html",
   "methodology.html",
@@ -58,6 +60,7 @@ const ASSET_FILES = new Set([
   "home-page.js",
   "ipo-data.js",
   "ipo-page.js",
+  "ipo-offering-page.js",
   "ipo-radar-page.js",
   "ipo-stage-filter.js",
   "public-event-digest.js",
@@ -190,7 +193,7 @@ export async function stageStaticShowcase({
   if (declaresSupplemental) {
     await verifyDeclaredSupplemental({ source, manifest, runtime, base });
   }
-  await verifyDeclaredWorkbench({ source, manifest, runtime, base });
+  await verifyDeclaredWorkbenchWithContext({ source, manifest, runtime, base });
   await assertPublishedEventInputs({ manifest, runtime, root: source });
   const approvedFiles = await collectApprovedSourceFiles(source, pointer.generation);
   await rm(destination, { recursive: true, force: true });
@@ -199,6 +202,155 @@ export async function stageStaticShowcase({
     await mkdir(dirname(target), { recursive: true });
     await copyFile(join(source, ...relativePath.split("/")), target);
   }
+  await writePublicStaticArtifacts({ destination, generation: pointer.generation });
+  await writePublicRootArtifacts({ destination });
+}
+
+export function projectPublicBondArtifacts({ workbench, views, issuerResearch }) {
+  return {
+    workbench: {
+      ...workbench,
+      records: workbench.records.map((record) => ({
+        ...Object.fromEntries(Object.entries(record).filter(([key]) => key !== "assessment")),
+        view: omitPublicInternalFields(record.view, ["missingReasons"]),
+        events: record.events.map((event) => omitPublicInternalFields(event, ["sourceId"])),
+      })),
+    },
+    views: views.map((view) => omitPublicInternalFields(view, ["missingReasons"])),
+    issuerResearch: omitPublicInternalFields(issuerResearch, ["diagnostics"]),
+  };
+}
+
+export function projectPublicIpoSnapshot(snapshot) {
+  const approvedSourceIds = new Set((Array.isArray(snapshot?.sourceManifest)
+    ? snapshot.sourceManifest
+    : []).map((entry) => entry?.sourceId).filter(isNonEmptyText));
+  return {
+    ...omitPublicInternalFields(snapshot, ["sourceManifest"]),
+    records: (Array.isArray(snapshot?.records) ? snapshot.records : []).map((record) => ({
+      ...record,
+      ...(Object.hasOwn(record, "auction")
+        ? { auction: projectPublicIpoNestedFact(record.auction, approvedSourceIds) }
+        : {}),
+      ...(Object.hasOwn(record, "publicOffering")
+        ? { publicOffering: projectPublicIpoNestedFact(record.publicOffering, approvedSourceIds) }
+        : {}),
+      events: (Array.isArray(record?.events) ? record.events : []).map((event) => ({
+        ...omitPublicInternalFields(event, ["sourceRecordIds"]),
+        verified: hasApprovedIpoEvidence(event?.sourceRecordIds, approvedSourceIds),
+      })),
+    })),
+  };
+}
+
+function projectPublicIpoNestedFact(value, approvedSourceIds) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return value;
+  return {
+    ...omitPublicInternalFields(value, ["sourceRecordId"]),
+    verified: hasApprovedIpoEvidence([value.sourceRecordId], approvedSourceIds),
+  };
+}
+
+function hasApprovedIpoEvidence(recordIds, approvedSourceIds) {
+  return (Array.isArray(recordIds) ? recordIds : []).some((recordId) => {
+    const sourceId = sourceIdForIpoRecord(recordId);
+    return sourceId !== undefined && approvedSourceIds.has(sourceId);
+  });
+}
+
+const PUBLIC_INTERNAL_FIELD_NAMES = new Set([
+  "assessment",
+  "datasetId",
+  "diagnostics",
+  "missingReason",
+  "missingReasons",
+  "resourceId",
+  "sourceDatasetId",
+  "sourceId",
+  "sourceManifest",
+  "sourceRecordId",
+  "sourceRecordIdentity",
+  "sourceRecordIds",
+]);
+
+async function writePublicStaticArtifacts({ destination, generation }) {
+  const base = join(destination, "data", ...generation.split("/"));
+  const [workbench, views, issuerResearch, ipoSnapshot, manifest] = await Promise.all([
+    readJson(join(base, "bond-workbench.json"), "active generation public workbench is invalid"),
+    readJson(join(base, "bond-market-view.json"), "active generation public market view is invalid"),
+    readJson(join(base, "cb-issuer-research.json"), "active generation public issuer research is invalid"),
+    readJson(join(base, "ipo-events.json"), "active generation public IPO event snapshot is invalid"),
+    readJson(join(base, "manifest.json"), "active generation public manifest is invalid"),
+  ]);
+  const projectedBondArtifacts = projectPublicBondArtifacts({ workbench, views, issuerResearch });
+  const projectedArtifacts = new Map([
+    ["bond-workbench.json", projectedBondArtifacts.workbench],
+    ["bond-market-view.json", projectedBondArtifacts.views],
+    ["cb-issuer-research.json", projectedBondArtifacts.issuerResearch],
+    ["ipo-events.json", projectPublicIpoSnapshot(ipoSnapshot)],
+  ]);
+  const publicArtifactNames = (await readdir(base, { withFileTypes: true }))
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json") && entry.name !== "manifest.json" && entry.name !== "runtime.json")
+    .map((entry) => entry.name);
+  const updates = new Map();
+  for (const name of publicArtifactNames) {
+    const value = projectedArtifacts.has(name)
+      ? projectedArtifacts.get(name)
+      : await readJson(join(base, name), `active generation public ${name} is invalid`);
+    const publicValue = stripPublicInternalMetadata(value);
+    const text = `${JSON.stringify(publicValue, null, 2)}\n`;
+    await writeFile(join(base, name), text, "utf8");
+    updates.set(name, {
+      sha256: sha256Text(text),
+      rawBytes: Buffer.byteLength(text, "utf8"),
+      recordCount: publicRecordCount(publicValue),
+    });
+  }
+  const publicManifest = stripPublicInternalMetadata(manifest);
+  if (Array.isArray(publicManifest?.market?.files)) {
+    publicManifest.market.files = publicManifest.market.files.map((entry) => {
+      const update = updates.get(entry?.name);
+      if (update === undefined) return entry;
+      return {
+        ...entry,
+        ...update,
+        ...(update.recordCount === undefined ? {} : { recordCount: update.recordCount }),
+      };
+    });
+  }
+  await writeFile(join(base, "manifest.json"), `${JSON.stringify(publicManifest, null, 2)}\n`, "utf8");
+}
+
+async function writePublicRootArtifacts({ destination }) {
+  const base = join(destination, "data");
+  const entries = await readdir(base, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith(".json") || entry.name === "current.json") continue;
+    const value = await readJson(join(base, entry.name), `public root ${entry.name} is invalid`);
+    await writeFile(
+      join(base, entry.name),
+      `${JSON.stringify(stripPublicInternalMetadata(value), null, 2)}\n`,
+      "utf8",
+    );
+  }
+}
+
+function publicRecordCount(value) {
+  if (Array.isArray(value)) return value.length;
+  if (Array.isArray(value?.records)) return value.records.length;
+  return undefined;
+}
+
+export function stripPublicInternalMetadata(value) {
+  if (Array.isArray(value)) return value.map(stripPublicInternalMetadata);
+  if (value === null || typeof value !== "object") return value;
+  return Object.fromEntries(Object.entries(value)
+    .filter(([key]) => !PUBLIC_INTERNAL_FIELD_NAMES.has(key))
+    .map(([key, nested]) => [key, stripPublicInternalMetadata(nested)]));
+}
+
+function omitPublicInternalFields(value, fields) {
+  return Object.fromEntries(Object.entries(value).filter(([key]) => !fields.includes(key)));
 }
 
 export async function assertPublishedEventInputs({ manifest, runtime, root }) {
@@ -535,18 +687,22 @@ async function collectApprovedSourceFiles(source, activeGeneration) {
         });
       }
       if (declaresWorkbench && generation !== activeGeneration) {
-        await verifyDeclaredWorkbench({
+        await verifyDeclaredWorkbenchWithContext({
           source,
           manifest,
           runtime,
           base: `./data/${generation}`,
+          allowHistoricalAssessments: true,
         });
       }
     } else if (declaresResearch || declaresSupplemental || declaresWorkbench) {
       throw new Error(`static showcase source path is not approved: ${relativeGeneration}/runtime.json`);
     }
   }
-  return files.sort();
+  const activePrefix = `data/${activeGeneration}/`;
+  return files
+    .filter((path) => !path.startsWith("data/generations/") || path.startsWith(activePrefix))
+    .sort();
 }
 
 async function collectExactDirectory({
@@ -685,7 +841,13 @@ async function verifyDeclaredSupplemental({ source, manifest, runtime, base }) {
   );
 }
 
-async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
+async function verifyDeclaredWorkbench({
+  source,
+  manifest,
+  runtime,
+  base,
+  allowHistoricalAssessments = false,
+}) {
   const workbenchEntries = manifest.market.files.filter(
     (file) => file?.name === "bond-workbench.json",
   );
@@ -725,7 +887,8 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
   ) {
     throw new Error("active generation bond workbench hash is invalid");
   }
-  const workbench = parseBondWorkbenchSnapshot(JSON.parse(workbenchText));
+  const publishedWorkbench = JSON.parse(workbenchText);
+  const workbench = parseBondWorkbenchSnapshot(publishedWorkbench);
   assertApprovedWorkbenchEventSources(workbench);
   if (
     workbench.records.length !== entry.recordCount
@@ -797,10 +960,23 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
     join(source, `${base}/cb-issuer-research.json`.replace(/^\.\//, "")),
     "active generation bond workbench issuer research is invalid",
   ));
-  const terms = bondTermSummariesFrom11406Rows(issuanceRows).map((term) => ({
-    ...term,
-    unitFaceValueTwd: supplemental.unitFaceValueTwd,
-  }));
+  const legacyOutstandingChangeTerms = (
+    allowHistoricalAssessments
+    && publishedWorkbench.records.every((record) => (
+      !("outstandingChangeDate" in record.term)
+      && !("outstandingChangeReason" in record.term)
+    ))
+  );
+  const terms = bondTermSummariesFrom11406Rows(issuanceRows).map((term) => {
+    const enrichedTerm = {
+      ...term,
+      unitFaceValueTwd: supplemental.unitFaceValueTwd,
+    };
+    if (!legacyOutstandingChangeTerms) return enrichedTerm;
+    return Object.fromEntries(Object.entries(enrichedTerm).filter(([key]) => (
+      key !== "outstandingChangeDate" && key !== "outstandingChangeReason"
+    )));
+  });
   verifyWorkbenchConsistency({
     workbench,
     terms,
@@ -811,7 +987,17 @@ async function verifyDeclaredWorkbench({ source, manifest, runtime, base }) {
     requestedDate: manifest.market.requestedDate,
     dataDate: manifest.market.dataDate,
     sourceStateSummary: manifest.market.workbenchSourceStateSummary,
+    allowHistoricalAssessments,
   });
+}
+
+async function verifyDeclaredWorkbenchWithContext(options) {
+  try {
+    await verifyDeclaredWorkbench(options);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`static showcase workbench verification failed for ${options.base}: ${detail}`);
+  }
 }
 
 export function assertApprovedWorkbenchEventSources(workbench) {

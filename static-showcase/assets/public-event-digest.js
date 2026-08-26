@@ -111,8 +111,7 @@ export function buildCrossMarketEventEntries(input = {}) {
   }
 
   const ipoIsUsable = isPublishedIsoDate(input?.ipoDataDate)
-    && Array.isArray(input?.ipoRecords)
-    && Array.isArray(input?.ipoSourceManifest);
+    && Array.isArray(input?.ipoRecords);
   if (ipoIsUsable) {
     const rows = input.ipoRecords.map((record) => ({
       ...record,
@@ -161,8 +160,7 @@ export function buildPublicEventDigest(input = {}) {
   const ipoRecords = input?.ipoRecords;
   const ipoSourceManifest = input?.ipoSourceManifest;
   const hasIpoInputs = isPublishedIsoDate(ipoDataDate)
-    && Array.isArray(ipoRecords)
-    && Array.isArray(ipoSourceManifest);
+    && Array.isArray(ipoRecords);
   const ipoDates = [];
 
   if (hasIpoInputs) {

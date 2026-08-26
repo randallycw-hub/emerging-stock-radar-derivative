@@ -20,6 +20,7 @@ test("Sites staging copies the complete static showcase including the active gen
   await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
   await mkdir(join(source, "assets"), { recursive: true });
   await writeFile(join(source, "index.html"), "正式首頁", "utf8");
+  await writeFile(join(source, "ipo-offering.html"), "正式競拍申購頁", "utf8");
   await writeFile(join(source, "assets", "app.css"), "body{}", "utf8");
   await writeFile(
     join(source, "assets", "bond-technical-analysis.js"),
@@ -45,6 +46,7 @@ test("Sites staging copies the complete static showcase including the active gen
     "bond-list-page.js",
     "bond-detail-page.js",
     "bond-candlestick-chart.js",
+    "ipo-offering-page.js",
   ]) {
     await writeFile(
       join(source, "assets", file),
@@ -59,6 +61,7 @@ test("Sites staging copies the complete static showcase including the active gen
   ]);
 
   assert.equal(await readFile(join(destination, "index.html"), "utf8"), "正式首頁");
+  assert.equal(await readFile(join(destination, "ipo-offering.html"), "utf8"), "正式競拍申購頁");
   assert.equal(await readFile(join(destination, "assets", "app.css"), "utf8"), "body{}");
   assert.equal(
     await readFile(
@@ -83,6 +86,7 @@ test("Sites staging copies the complete static showcase including the active gen
     "bond-list-page.js",
     "bond-detail-page.js",
     "bond-candlestick-chart.js",
+    "ipo-offering-page.js",
   ]) {
     assert.equal(
       await readFile(join(destination, "assets", file), "utf8"),
@@ -309,7 +313,7 @@ test("Sites staging rejects every unknown generation evidence file", async (cont
   }
 });
 
-test("Sites staging preserves allowed legacy root data and multiple hex generations", async () => {
+test("Sites staging preserves allowed legacy root data without publishing inactive generations", async () => {
   const root = await mkdtemp(join(tmpdir(), "showcase-stage-legacy-"));
   const source = join(root, "source");
   const destination = join(root, "destination");
@@ -325,10 +329,30 @@ test("Sites staging preserves allowed legacy root data and multiple hex generati
   await stageStaticShowcase({ source, destination });
 
   assert.equal(await readFile(join(destination, "data/94025.json"), "utf8"), "[]\n");
-  assert.equal(
-    await readFile(join(destination, "data/generations/deadbeef/94025.json"), "utf8"),
-    "[]\n",
+  await assert.rejects(
+    readFile(join(destination, "data/generations/deadbeef/94025.json"), "utf8"),
+    { code: "ENOENT" },
   );
+});
+
+test("Sites staging projects legacy root JSON through the same public metadata boundary", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-root-boundary-"));
+  const source = join(root, "source");
+  const destination = join(root, "destination");
+  await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+  await writeFile(
+    join(source, "data", "bond-market-view.json"),
+    `${JSON.stringify([{ bondCode: "90001", missingReasons: ["INTERNAL"], sourceId: "private-source" }])}\n`,
+    "utf8",
+  );
+
+  await stageStaticShowcase({ source, destination });
+
+  const projected = JSON.parse(await readFile(
+    join(destination, "data", "bond-market-view.json"),
+    "utf8",
+  ));
+  assert.deepEqual(projected, [{ bondCode: "90001" }]);
 });
 
 test("Sites staging copies a declared validated CB supplemental artifact", async () => {
@@ -606,13 +630,14 @@ test("Sites staging copies a manifest-declared issuer research artifact", async 
     destination,
   ]);
 
-  assert.deepEqual(
-    JSON.parse(await readFile(
-      join(destination, "data/generations/abc123/cb-issuer-research.json"),
-      "utf8",
-    )),
-    emptyIssuerResearchSnapshot,
-  );
+  const publishedResearch = JSON.parse(await readFile(
+    join(destination, "data/generations/abc123/cb-issuer-research.json"),
+    "utf8",
+  ));
+  assert.deepEqual(publishedResearch, {
+    ...Object.fromEntries(Object.entries(emptyIssuerResearchSnapshot).filter(([key]) => key !== "diagnostics")),
+  });
+  assert.equal(Object.hasOwn(publishedResearch, "diagnostics"), false);
 });
 
 test("Sites staging rejects declared issuer research without its runtime dataset key", async () => {

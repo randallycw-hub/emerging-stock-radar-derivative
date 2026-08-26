@@ -155,6 +155,25 @@ test("IPO evidence restores a verified TWSE public-offering record", async () =>
   assert.equal(projectIpoEvidence(row).issuance, "公開申購");
 });
 
+test("IPO calendar retains release-stage verified evidence without source identifiers", async () => {
+  const { normalizeIpoRecord, projectIpoEvidence, projectIpoLifecycle } = await import("../static-showcase/assets/ipo-page.js");
+  const row = normalizeIpoRecord({
+    companyCode: "1234", companyName: "測試公司", market: "上市", stage: "D", applicationDate: "2026-08-01",
+    underwriter: "正式承銷商",
+    auction: { auctionOpenDate: "2026-09-10", verified: true },
+    publicOffering: { label: "公開申購", verified: true },
+    events: [{ kind: "application_submitted", date: "2026-08-01", label: "申請送件", verified: true }],
+  }, { dataDate: "2026-08-24" });
+
+  assert.equal(row.events.length, 1);
+  assert.deepEqual(projectIpoEvidence(row), {
+    underwriter: "正式承銷商",
+    issuance: "公開申購",
+    auction: "已開標 2026/09/10",
+  });
+  assert.equal(projectIpoLifecycle(row, "2026-08-24").find((step) => step.key === "submission").state, "complete");
+});
+
 test("IPO default active path excludes terminal and historically stale applications", async () => {
   const { matchesIpoCalendarStage } = await import("../static-showcase/assets/ipo-page.js");
   const today = "2026-08-24";

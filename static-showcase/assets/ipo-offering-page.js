@@ -15,8 +15,9 @@ function sourceIdForRecordId(value) {
   return null;
 }
 
-function officialRecord(recordId, sourceIds) {
-  const sourceId = sourceIdForRecordId(recordId);
+function officialRecord(record, sourceIds) {
+  if (record?.verified === true) return true;
+  const sourceId = sourceIdForRecordId(record?.sourceRecordId);
   return sourceId !== null && sourceIds.has(sourceId);
 }
 
@@ -51,8 +52,8 @@ export function projectPublicOfferings(snapshot = {}) {
     .filter((sourceId) => APPROVED_SOURCES.has(sourceId)));
   return snapshot.records.flatMap((record) => {
     if (record?.exceptionStatus === "withdrawn" || record?.exceptionStatus === "cancelled" || record?.stage === "withdrawn" || record?.stage === "cancelled") return [];
-    const auctionVerified = officialRecord(record?.auction?.sourceRecordId, sourceIds);
-    const subscriptionVerified = officialRecord(record?.publicOffering?.sourceRecordId, sourceIds);
+    const auctionVerified = officialRecord(record?.auction, sourceIds);
+    const subscriptionVerified = officialRecord(record?.publicOffering, sourceIds);
     if (!auctionVerified && !subscriptionVerified) return [];
     const hasOfficialFacts = auctionVerified || subscriptionVerified;
     const row = {

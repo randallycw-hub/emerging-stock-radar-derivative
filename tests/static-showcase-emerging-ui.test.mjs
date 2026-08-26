@@ -66,7 +66,7 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
   assert.doesNotMatch(html, /data-market-sort="lastTradedPrice"/);
   assert.doesNotMatch(html, /最後成交價（盤後）/);
   assert.match(display, /今日無成交/);
-  assert.match(js, /emptyRow\(10/);
+  assert.match(js, /emptyRow\(11/);
   assert.match(html, /盤後資料讀取中/);
   assert.match(js, /monthlyRevenue/);
   assert.match(css, /market-breadth/);

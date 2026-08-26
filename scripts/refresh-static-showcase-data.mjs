@@ -22,6 +22,7 @@ import {
   parseCbSupplementalSnapshot,
 } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
+import { mergeConversionPriceVersions } from "../lib/market-data/conversion-price-history.ts";
 import {
   buildBondWorkbenchSnapshot,
   parseBondWorkbenchSnapshot,
@@ -32,6 +33,7 @@ import { fetchCbIssuerResearchSources } from "../lib/source-verification/source-
 import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
 import { parseConversionIndex } from "../lib/source-verification/source-cb-market.ts";
 import { normalize94025Row, parse94025Csv } from "../lib/source-verification/source-94025.ts";
+import { refreshOfficialIpoSnapshot } from "../lib/ipo-events/refresh.ts";
 import {
   bondInputsFrom11406Rows,
   buildBondWorkbenchEvents,
@@ -43,11 +45,11 @@ import {
   verifyWorkbenchConsistency,
 } from "./build-bond-market-snapshot.mjs";
 import { bondTermSummariesFrom11406Rows } from "./lib/bond-inputs-from-11406.mjs";
+import { withTpex520Fallback } from "./lib/official-fetch-fallback.mjs";
 import {
   fetchCbSupplementalSources,
   fetchCurrentOfficialMarketData,
 } from "./lib/official-market-fetch.mjs";
-import { buildStaticIpoSnapshot } from "./static-ipo-fallback.mjs";
 
 export const OFFICIAL_SHOWCASE_SOURCES = {
   "94025": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
@@ -266,6 +268,9 @@ async function refreshStaticShowcaseCandidate({
     activeGeneration,
     paths.publishedHistoryCachePath,
   );
+  const previousConversionPrices = await readPublishedConversionPricesFromActive(
+    activeGeneration,
+  );
   const previousSupplemental = await readPublishedCbSupplementalFromActive(
     activeGeneration,
   );
@@ -275,13 +280,6 @@ async function refreshStaticShowcaseCandidate({
   const datasets = {};
   const datasetTexts = {};
   const manifestDatasets = [];
-  const tpexIpoApplicationSnapshot = await readFile(
-    paths.tpexIpoApplicationSnapshotPath,
-    "utf8",
-  )
-    .then((text) => JSON.parse(text))
-    .catch(() => []);
-
   for (const [datasetId, sourceUrl] of Object.entries(OFFICIAL_SHOWCASE_SOURCES)) {
     if (datasetId === "emergingMarket") continue;
     const response = await fetchOfficialCsvWithRetry(sourceUrl, fetchImpl);
@@ -394,6 +392,11 @@ async function refreshStaticShowcaseCandidate({
     rowCount: marketRows.length,
   });
 
+  const ipoSnapshot = await refreshOfficialIpoSnapshot({
+    fetchImpl: marketFetchImpl,
+    now,
+  });
+
   const generation = `generations/${createHash("sha256").update(JSON.stringify(manifestDatasets)).update(now.toISOString()).digest("hex").slice(0, 16)}`;
   const baseManifest = {
     kind: "official-source-snapshot",
@@ -412,6 +415,13 @@ async function refreshStaticShowcaseCandidate({
       `${JSON.stringify(previousHistory, null, 2)}\n`,
       "utf8",
     );
+    if (previousConversionPrices.length > 0) {
+      await writeFile(
+        join(stagingDataDirectory, "conversion-prices.json"),
+        `${JSON.stringify(previousConversionPrices, null, 2)}\n`,
+        "utf8",
+      );
+    }
     if (previousSupplemental !== undefined) {
       await writeFile(
         join(stagingDataDirectory, "bond-supplemental.json"),
@@ -439,12 +449,7 @@ async function refreshStaticShowcaseCandidate({
       `${JSON.stringify(emergingSnapshot, null, 2)}\n`,
       "utf8",
     );
-    const ipoEventsText = `${JSON.stringify(buildStaticIpoSnapshot({
-        twseRows: datasets["11586"],
-        tpexRows: tpexIpoApplicationSnapshot,
-        dataDate: emergingSnapshot.tradingDate,
-        generatedAt: now.toISOString(),
-      }), null, 2)}\n`;
+    const ipoEventsText = `${JSON.stringify(ipoSnapshot, null, 2)}\n`;
     await writeFile(join(stagingDataDirectory, "ipo-events.json"), ipoEventsText, "utf8");
 
     const marketResult = await marketBuilder({
@@ -616,6 +621,11 @@ export async function runIsolatedRefreshStaticShowcaseTestHarness(options = {}) 
                 url: String(url),
               });
             }
+            const ipoResponse = isolatedIpoFixtureResponse({
+              fixtureTexts,
+              url: String(url),
+            });
+            if (ipoResponse !== undefined) return ipoResponse;
             const datasetId = Object.entries(OFFICIAL_SHOWCASE_SOURCES)
               .find(([, sourceUrl]) => sourceUrl === String(url))?.[0];
             if (datasetId === undefined) {
@@ -671,11 +681,6 @@ function createRefreshPathBundle(workspaceRoot) {
   return Object.freeze({
     dataDirectory: join(absoluteRoot, "static-showcase", "data"),
     staticIndexPath: join(absoluteRoot, "static-showcase", "index.html"),
-    tpexIpoApplicationSnapshotPath: join(
-      absoluteRoot,
-      "lib",
-      "tpex-applicant-snapshot.json",
-    ),
     publishedHistoryCachePath: join(
       absoluteRoot,
       ".cache",
@@ -832,7 +837,26 @@ async function loadIsolatedHarnessFixtures() {
       .split(/\r?\n/)
       .filter((line, index) => index === 0 || line.includes('"35221"'))
       .join("\n"),
-    "11586": "companyCode\n1260\n",
+    "11586": await readFile(new URL(
+      "../tests/fixtures/source-verification/11586/csv-minimal.csv",
+      import.meta.url,
+    ), "utf8"),
+    tpexIpoApplicants: await readFile(new URL(
+      "../tests/fixtures/source-verification/ipo/tpex-applicants.json",
+      import.meta.url,
+    ), "utf8"),
+    tpexIpoListings: await readFile(new URL(
+      "../tests/fixtures/source-verification/ipo/tpex-ipo-no-limit.json",
+      import.meta.url,
+    ), "utf8"),
+    twseIpoAuctions: await readFile(new URL(
+      "../tests/fixtures/source-verification/ipo/twse-auction.json",
+      import.meta.url,
+    ), "utf8"),
+    twseIpoPublicOfferings: await readFile(new URL(
+      "../tests/fixtures/source-verification/ipo/twse-public-form.json",
+      import.meta.url,
+    ), "utf8"),
     emergingMarket: await readFile(new URL(
       "../tests/fixtures/source-verification/emerging-market/tpex-esb-latest-statistics.json",
       import.meta.url,
@@ -911,6 +935,25 @@ function nightlyRosterCsv(current) {
   ].map((value) => `"${value}"`).join(",")}\n`;
 }
 
+function isolatedIpoFixtureResponse({ fixtureTexts, url }) {
+  if (url === OFFICIAL_SHOWCASE_SOURCES["11586"]) {
+    return fixedResponse(fixtureTexts["11586"], url, "text/csv");
+  }
+  if (url === "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies") {
+    return fixedResponse(fixtureTexts.tpexIpoApplicants, url, "application/json");
+  }
+  if (url === "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit") {
+    return fixedResponse(fixtureTexts.tpexIpoListings, url, "application/json");
+  }
+  if (url === "https://www.twse.com.tw/announcement/auction?response=json&yy=2026") {
+    return fixedResponse(fixtureTexts.twseIpoAuctions, url, "application/json");
+  }
+  if (url === "https://www.twse.com.tw/announcement/publicForm?response=json&yy=2026") {
+    return fixedResponse(fixtureTexts.twseIpoPublicOfferings, url, "application/json");
+  }
+  return undefined;
+}
+
 function nightlyFixtureResponse({ fixtureTexts, init, scenario, url }) {
   if (url === OFFICIAL_SHOWCASE_SOURCES["11406"]) {
     if (scenario === "nightly-roster-http-failure") {
@@ -938,6 +981,18 @@ function nightlyFixtureResponse({ fixtureTexts, init, scenario, url }) {
       url,
       "application/json",
     );
+  }
+  if (url === "https://www.tpex.org.tw/openapi/v1/tpex_esb_applicant_companies") {
+    return fixedResponse(fixtureTexts.tpexIpoApplicants, url, "application/json");
+  }
+  if (url === "https://www.tpex.org.tw/openapi/v1/tpex_ipo_no_limit") {
+    return fixedResponse(fixtureTexts.tpexIpoListings, url, "application/json");
+  }
+  if (url === "https://www.twse.com.tw/announcement/auction?response=json&yy=2026") {
+    return fixedResponse(fixtureTexts.twseIpoAuctions, url, "application/json");
+  }
+  if (url === "https://www.twse.com.tw/announcement/publicForm?response=json&yy=2026") {
+    return fixedResponse(fixtureTexts.twseIpoPublicOfferings, url, "application/json");
   }
   if (url === OFFICIAL_ROSTER_CENSUS_SOURCE) {
     return fixedResponse(fixtureTexts.conversionIndex, url, "application/json");
@@ -1544,6 +1599,37 @@ export async function readPublishedBondHistory(
     await readActiveGeneration(dataDirectory),
     cachePath,
   );
+}
+
+export async function readPublishedConversionPrices(
+  dataDirectory = DATA_DIRECTORY,
+) {
+  return readPublishedConversionPricesFromActive(
+    await readActiveGeneration(dataDirectory),
+  );
+}
+
+async function readPublishedConversionPricesFromActive(active) {
+  if (active === undefined) return [];
+  try {
+    const text = await readFile(join(active.root, "conversion-prices.json"), "utf8");
+    const snapshot = mergeConversionPriceVersions([], JSON.parse(text));
+    validatePriorManifestFile(
+      active.manifest,
+      "conversion-prices.json",
+      text,
+      snapshot.length,
+    );
+    return snapshot;
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      if (declaresFile(active.manifest, "conversion-prices.json")) {
+        throw new Error("missing prior conversion-price snapshot");
+      }
+      return [];
+    }
+    throw new TypeError(`prior conversion-price snapshot is invalid: ${error.message}`);
+  }
 }
 
 async function readPublishedBondHistoryFromActive(active, cachePath) {
@@ -2184,6 +2270,8 @@ const entryUrl = process.argv[1]
   ? pathToFileURL(process.argv[1]).href
   : undefined;
 if (entryUrl === import.meta.url) {
-  const result = await refreshStaticShowcase();
+  const result = await refreshStaticShowcase({
+    fetchImpl: withTpex520Fallback(),
+  });
   console.log(JSON.stringify(result, null, 2));
 }

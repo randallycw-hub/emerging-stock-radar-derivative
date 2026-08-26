@@ -155,3 +155,20 @@ test("cross-market events are filtered by market without internal source metadat
   assert.deepEqual(events.filter((event) => event.market === "ipo").map((event) => event.title), ["競拍"]);
   assert.equal(JSON.stringify(events).includes("sourceId"), false);
 });
+
+test("release-stage IPO events remain available after source manifests are removed", () => {
+  const events = buildCrossMarketEventEntries({
+    asOfDate: "2026-08-24",
+    ipoDataDate: "2026-08-24",
+    ipoRecords: [{
+      companyCode: "1234",
+      stage: "D",
+      applicationDate: "2026-08-20",
+      events: [{ date: "2026-08-26", label: "競拍", kind: "auction", verified: true }],
+    }],
+  });
+
+  assert.deepEqual(events.map((event) => [event.market, event.date, event.title]), [
+    ["ipo", "2026-08-26", "競拍"],
+  ]);
+});

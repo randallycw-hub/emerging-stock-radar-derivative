@@ -6,6 +6,7 @@ import test from "node:test";
 import {
   buildHistoryPoints,
   mergeBondMarketHistory,
+  mergeBondMarketHistoryConservatively,
   parseBondMarketHistory,
 } from "../lib/market-data/bond-market-history.ts";
 
@@ -247,6 +248,28 @@ test("history merge is append-only and rejects same-day conflicts", () => {
     () => mergeBondMarketHistory(existing, [{ ...existing[0], cbChange: "1" }]),
     /conflict|correction/i,
   );
+});
+
+test("conservative merge retains verified history when a monthly CB response lacks same-day stock data", () => {
+  const existing = buildHistoryPoints({
+    cbQuotes,
+    stockCloses: [stockCloses[0]],
+    conversionPrices,
+  });
+  const current = buildHistoryPoints({
+    cbQuotes: [
+      cbQuotes[0],
+      { ...cbQuotes[0], tradingDate: "2026-07-30", close: "104", open: "104", high: "104", low: "104" },
+    ],
+    stockCloses: [stockCloses[1]],
+    conversionPrices,
+  });
+
+  const merged = mergeBondMarketHistoryConservatively(existing, current);
+
+  assert.equal(merged.length, 2);
+  assert.deepEqual(merged.find((point) => point.date === "2026-07-29"), existing[0]);
+  assert.equal(merged.find((point) => point.date === "2026-07-30")?.stockClose, "39");
 });
 
 test("migrated legacy history preserves all source values and represents unavailable fields as null", async () => {

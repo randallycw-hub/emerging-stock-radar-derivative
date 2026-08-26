@@ -7,7 +7,11 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { buildBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
 import { runIsolatedNightlyMarketRefreshTestHarness } from "../scripts/run-nightly-market-refresh.mjs";
-import { stageStaticShowcase } from "../scripts/stage-static-showcase.mjs";
+import {
+  projectPublicBondArtifacts,
+  stageStaticShowcase,
+  stripPublicInternalMetadata,
+} from "../scripts/stage-static-showcase.mjs";
 import {
   filterBondRecords,
   paginateBondRecords,
@@ -152,14 +156,22 @@ test("offline builder and outer refresh stage the same CB generation through the
       ...stagedRuntime.datasets.bondWorkbench.replace(/^\.\//, "").split("/"),
     );
     const stagedWorkbenchText = await readFile(stagedWorkbenchPath, "utf8");
-    assert.equal(stagedWorkbenchText, outcome.artifacts.active["bond-workbench.json"]);
+    const expectedPublicBondArtifacts = projectPublicBondArtifacts({
+      workbench,
+      views: JSON.parse(outcome.artifacts.active["bond-market-view.json"]),
+      issuerResearch: JSON.parse(outcome.artifacts.active["cb-issuer-research.json"]),
+    });
+    assert.deepEqual(
+      JSON.parse(stagedWorkbenchText),
+      stripPublicInternalMetadata(expectedPublicBondArtifacts.workbench),
+    );
     const stagedHistoryPath = join(
       destination,
       ...stagedRuntime.datasets.bondHistory.replace(/^\.\//, "").split("/"),
     );
-    assert.equal(
-      await readFile(stagedHistoryPath, "utf8"),
-      outcome.artifacts.active["bond-market-history.json"],
+    assert.deepEqual(
+      JSON.parse(await readFile(stagedHistoryPath, "utf8")),
+      stripPublicInternalMetadata(JSON.parse(outcome.artifacts.active["bond-market-history.json"])),
     );
 
     const page = await runStagedBondPage(destination);

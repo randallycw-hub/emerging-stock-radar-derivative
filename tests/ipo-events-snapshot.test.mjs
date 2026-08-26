@@ -541,7 +541,7 @@ test("aggregates exact code and market evidence without fuzzy company-name match
   assert.equal(record.auction.sourceRecordId, auctionVariant.sourceRecordId);
 });
 
-test("fails closed when application, auction, or public-offering underwriters conflict", () => {
+test("uses the later pricing notice when an application underwriter has changed", () => {
   const baseApplication = {
     ...application,
     listingDate: null,
@@ -579,13 +579,23 @@ test("fails closed when application, auction, or public-offering underwriters co
   for (const patch of [
     { tpexApplications: [baseApplication], auctions: [{ ...baseAuction, underwriter: "承銷商乙" }], publicOfferings: [] },
     { tpexApplications: [baseApplication], auctions: [], publicOfferings: [{ ...basePublicOffering, underwriter: "承銷商乙" }] },
-    { tpexApplications: [], auctions: [baseAuction], publicOfferings: [{ ...basePublicOffering, underwriter: "承銷商乙" }] },
   ]) {
-    assert.throws(
-      () => buildIpoEventSnapshot(snapshotInput({ tpexListings: [], ...patch })),
-      /IPO_SOURCE_CONFLICT:underwriter/,
-    );
+    const [record] = buildIpoEventSnapshot(snapshotInput({
+      tpexListings: [],
+      ...patch,
+    })).records;
+    assert.equal(record.underwriter, "承銷商乙");
   }
+
+  assert.throws(
+    () => buildIpoEventSnapshot(snapshotInput({
+      tpexApplications: [],
+      tpexListings: [],
+      auctions: [baseAuction],
+      publicOfferings: [{ ...basePublicOffering, underwriter: "承銷商乙" }],
+    })),
+    /IPO_SOURCE_CONFLICT:underwriter/,
+  );
 });
 
 test("accepts numerically equal official underwriting prices without rewriting them", () => {

@@ -122,8 +122,9 @@ function sameVersion(left: ConversionPriceVersion, right: ConversionPriceVersion
     && left.issuerCode === right.issuerCode
     && left.initialConversionPrice === right.initialConversionPrice
     && left.currentConversionPrice === right.currentConversionPrice
-    && left.effectiveDate === right.effectiveDate
-    && left.officialDetailUrl === right.officialDetailUrl;
+    // MOPS updates the report-month query parameter in its detail URL on every
+    // refresh.  It is a locator, not a conversion-price fact.
+    && left.effectiveDate === right.effectiveDate;
 }
 
 function compareVersions(

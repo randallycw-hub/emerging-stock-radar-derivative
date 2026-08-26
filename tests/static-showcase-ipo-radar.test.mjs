@@ -49,3 +49,17 @@ test("IPO 雷達排除撤件與取消案件，且公開表格標示各階段欄�
   }
   assert.doesNotMatch(html, /來源 ID|缺漏原因|目前無核准公開資料／待確認/);
 });
+
+test("IPO 雷達保留發布階段已驗證競拍與申購日期", async () => {
+  const { projectIpoRadarRecord } = await import("../static-showcase/assets/ipo-radar-page.js");
+  const row = projectIpoRadarRecord({
+    companyCode: "1234", companyName: "測試公司", market: "上市", stage: "D",
+    auction: { bidStartDate: "2026-08-20", verified: true },
+    publicOffering: { subscriptionStartDate: "2026-08-25", verified: true },
+    events: [{ date: "2026-08-20", kind: "auction_bid_start", label: "競拍投標開始", verified: true }],
+  }, { dataDate: "2026-08-24" });
+
+  assert.equal(row.auctionBidStartDate, "2026-08-20");
+  assert.equal(row.subscriptionStartDate, "2026-08-25");
+  assert.equal(row.primaryEventDate, "2026-08-20");
+});

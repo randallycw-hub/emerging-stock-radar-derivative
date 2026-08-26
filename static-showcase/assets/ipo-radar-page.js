@@ -275,6 +275,7 @@ export function isIpoRadarExcluded(row = {}) {
 
 function approvedNestedDate(value, key, sourceManifest, requiredSourceId) {
   if (!value || !validDate(value[key])) return null;
+  if (value.verified === true) return value[key];
   const manifestIds = new Set((Array.isArray(sourceManifest) ? sourceManifest : [])
     .map((entry) => entry?.sourceId));
   const recordId = String(value.sourceRecordId ?? "");

@@ -69,7 +69,7 @@ export async function refreshOfficialIpoSnapshot({ fetchImpl, now, excludeComple
         listingDate: normalized.listingDate ?? null,
         underwriter: normalized.underwriters.join("、"),
         note: normalized.note,
-        sourceRecordId: normalized.sourceRecordId,
+        sourceRecordId: `TWSE:${normalized.companyCode}:${normalized.applicationDate}`,
       };
     });
   });

@@ -1333,6 +1333,32 @@ test("workbench cross-file verification uses exact bond codes, history and sourc
     }),
     /WORKBENCH_HISTORY_ASSESSMENT/,
   );
+  assert.doesNotThrow(() => verifyWorkbenchConsistency({
+    ...valid,
+    workbench: forgedAssessment,
+    allowHistoricalAssessments: true,
+  }));
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      workbench: forgedAssessment,
+      allowHistoricalAssessments: true,
+      sourceStateSummary: {
+        ...entry.sourceStateSummary,
+        lifecycle: { active: 0, archived: 1 },
+      },
+    }),
+    /WORKBENCH_SOURCE_STATE/,
+  );
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      workbench: missingLoadedEvents,
+      sourceStateSummary: summarizeWorkbenchSourceStates(missingLoadedEvents),
+      allowHistoricalAssessments: true,
+    }),
+    /WORKBENCH_CANDIDATE_MISMATCH/,
+  );
 
   const institutionFixture = JSON.parse(await readFile(new URL(
     "./fixtures/source-verification/cb-institution/daily-minimal.json",

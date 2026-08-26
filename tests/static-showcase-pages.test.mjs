@@ -113,6 +113,7 @@ test("首頁以已發布資料提供跨市場事件與客觀排行", async () =>
   ]);
   assert.match(home, /id="home-event-strip"/);
   assert.match(home, /id="home-data-coverage"/);
+  assert.match(script, /import \{ formatDate, formatNumber, safeJsonFetch \} from "\.\/site-shell\.js"/);
   assert.match(home, /data-home-event-market="emerging"/);
   assert.match(home, /id="home-rankings"/);
   assert.match(script, /buildCrossMarketEventEntries/);

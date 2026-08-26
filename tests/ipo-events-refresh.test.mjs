@@ -41,6 +41,15 @@ test("downloads and validates all official IPO sources before producing a hashed
   assert.equal(snapshot.sourceManifest.length, 5);
   assert.match(snapshot.sourceManifest[0].sha256, /^sha256:[a-f0-9]{64}$/);
   assert.ok(snapshot.sourceManifest.every((source) => source.rowCount > 0));
+  const twseApplicationIds = snapshot.records
+    .flatMap((record) => record.events)
+    .flatMap((event) => event.sourceRecordIds)
+    .filter((id) => id.startsWith("TWSE:") && !id.startsWith("TWSE:auction:"))
+    .filter((id) => !id.startsWith("TWSE:public-offering:"));
+  assert.ok(
+    twseApplicationIds.every((id) => /^TWSE:\d{4}:\d{4}-\d{2}-\d{2}$/.test(id)),
+    "TWSE application records must carry the dated identity required by release staging",
+  );
 });
 
 test("static dashboard collection excludes completed listings before source evidence is merged", async () => {

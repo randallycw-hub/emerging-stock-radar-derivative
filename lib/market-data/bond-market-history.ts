@@ -183,6 +183,57 @@ export function mergeBondMarketHistory(
   ));
 }
 
+/**
+ * A TPEx monthly CB response includes earlier CB dates, while the scheduled
+ * refresh only fetches the current stock close.  Those earlier candidates lack
+ * their same-day stock context and must not erase verified historical valuation
+ * facts.  Keep the strict merge for every actual source difference.
+ */
+export function mergeBondMarketHistoryConservatively(
+  previous: unknown,
+  current: unknown,
+): readonly BondMarketHistoryPoint[] {
+  const prior = parseBondMarketHistory(previous);
+  const priorByIdentity = new Map(prior.map((point) => [historyIdentity(point), point]));
+  const appendable = parseBondMarketHistory(current).filter((candidate) => {
+    const existing = priorByIdentity.get(historyIdentity(candidate));
+    return existing === undefined || !isMissingOnlyHistoricalStockContext(existing, candidate);
+  });
+  return mergeBondMarketHistory(prior, appendable);
+}
+
+function isMissingOnlyHistoricalStockContext(
+  existing: BondMarketHistoryPoint,
+  candidate: BondMarketHistoryPoint,
+): boolean {
+  if (
+    existing.stockClose === null
+    || candidate.stockClose !== null
+    || candidate.conversionValue !== null
+    || candidate.premiumRate !== null
+  ) return false;
+  for (const key of [
+    "bondCode",
+    "date",
+    "cbOpen",
+    "cbHigh",
+    "cbLow",
+    "cbClose",
+    "cbAverage",
+    "cbChange",
+    "cbTradingUnits",
+    "cbTurnover",
+    "effectiveConversionPrice",
+  ] as const) {
+    if (existing[key] !== candidate[key]) return false;
+  }
+  return true;
+}
+
+function historyIdentity(point: Pick<BondMarketHistoryPoint, "bondCode" | "date">): string {
+  return `${point.bondCode}\u001f${point.date}`;
+}
+
 function nullCandle(): Pick<BondMarketHistoryPoint, "cbOpen" | "cbHigh" | "cbLow" | "cbClose"> {
   return { cbOpen: null, cbHigh: null, cbLow: null, cbClose: null };
 }

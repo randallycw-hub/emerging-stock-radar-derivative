@@ -37,6 +37,13 @@ test("merges immutable versions by bond identity and rejects an effective-date c
     mergeConversionPriceVersions(previous, current).map((item) => item.effectiveDate),
     ["2026-01-01", "2026-07-01"],
   );
+  const relocatedOfficialDetail = version("2026-01-01", "40", {
+    officialDetailUrl: "https://mopsov.twse.com.tw/mops/web/t120sg01?bond_id=35221&issuer_stock_code=3522&monyr_reg=202608",
+  });
+  assert.deepEqual(
+    mergeConversionPriceVersions(previous, [relocatedOfficialDetail]),
+    [relocatedOfficialDetail],
+  );
   assert.throws(
     () => mergeConversionPriceVersions(previous, [version("2026-01-01", "39")]),
     /conflicting conversion price version/i,

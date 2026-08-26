@@ -20,7 +20,7 @@ import {
 import { deriveBondRemainingMetrics } from "../lib/market-data/bond-derived-metrics.ts";
 import {
   buildHistoryPoints,
-  mergeBondMarketHistory,
+  mergeBondMarketHistoryConservatively,
   parseBondMarketHistory,
 } from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
@@ -227,7 +227,7 @@ export async function buildBondMarketSnapshot(options = {}) {
     stockCloses: collected.stockCloses,
     conversionPrices,
   });
-  const history = mergeBondMarketHistory(previousHistory, currentHistory);
+  const history = mergeBondMarketHistoryConservatively(previousHistory, currentHistory);
   const latestCbPriceDate = latestTradingDate(collected.cbQuotes);
   const latestStockPriceDate = latestTradingDate(collected.stockCloses);
   const dataDate = [latestCbPriceDate, latestStockPriceDate]
@@ -882,6 +882,7 @@ export function verifyWorkbenchConsistency({
   dataDate,
   sourceStateSummary,
   previous,
+  allowHistoricalAssessments = false,
 }) {
   const snapshot = parseBondWorkbenchSnapshot(workbench);
   const parsedHistory = parseBondMarketHistory(history);
@@ -946,17 +947,31 @@ export function verifyWorkbenchConsistency({
     previous: expectedPrevious,
   });
   if (!equalPlainJson(snapshot, expected)) {
-    const expectedByCode = new Map(expected.records.map((record) => [
-      record.bondCode,
-      record,
-    ]));
-    if (snapshot.records.some((record) => (
-      termsByCode.has(record.bondCode)
-      && !equalPlainJson(record.assessment, expectedByCode.get(record.bondCode)?.assessment)
-    ))) {
-      throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_ASSESSMENT");
+    const historicalAssessmentDrift = (
+      allowHistoricalAssessments
+      && equalPlainJson(
+        withoutWorkbenchAssessments(snapshot),
+        withoutWorkbenchAssessments(expected),
+      )
+    );
+    if (!historicalAssessmentDrift) {
+      const expectedByCode = new Map(expected.records.map((record) => [
+        record.bondCode,
+        record,
+      ]));
+      if (snapshot.records.some((record) => (
+        termsByCode.has(record.bondCode)
+        && !equalPlainJson(record.assessment, expectedByCode.get(record.bondCode)?.assessment)
+      ))) {
+        throw new Error("VALIDATION_FAILED:WORKBENCH_HISTORY_ASSESSMENT");
+      }
+      throw new Error(
+        `VALIDATION_FAILED:WORKBENCH_CANDIDATE_MISMATCH:${firstJsonDifference(
+          allowHistoricalAssessments ? withoutWorkbenchAssessments(snapshot) : snapshot,
+          allowHistoricalAssessments ? withoutWorkbenchAssessments(expected) : expected,
+        )}`,
+      );
     }
-    throw new Error("VALIDATION_FAILED:WORKBENCH_CANDIDATE_MISMATCH");
   }
   if (!equalPlainJson(
     sourceStateSummary,
@@ -971,6 +986,43 @@ export function verifyWorkbenchConsistency({
 
 function withoutMarketStatus(view) {
   return Object.fromEntries(Object.entries(view).filter(([key]) => key !== "marketStatus"));
+}
+
+function withoutWorkbenchAssessments(workbench) {
+  return {
+    ...workbench,
+    records: workbench.records.map((record) => Object.fromEntries(
+      Object.entries(record).filter(([key]) => key !== "assessment"),
+    )),
+  };
+}
+
+function firstJsonDifference(left, right, path = "$") {
+  if (Object.is(left, right)) return "unknown";
+  if (Array.isArray(left) && Array.isArray(right)) {
+    if (left.length !== right.length) return `${path}.length`;
+    for (let index = 0; index < left.length; index += 1) {
+      const difference = firstJsonDifference(left[index], right[index], `${path}[${index}]`);
+      if (difference !== "unknown") return difference;
+    }
+    return "unknown";
+  }
+  if (
+    left !== null
+    && right !== null
+    && typeof left === "object"
+    && typeof right === "object"
+  ) {
+    const leftKeys = Object.keys(left).sort();
+    const rightKeys = Object.keys(right).sort();
+    if (!equalPlainJson(leftKeys, rightKeys)) return `${path}.keys`;
+    for (const key of leftKeys) {
+      const difference = firstJsonDifference(left[key], right[key], `${path}.${key}`);
+      if (difference !== "unknown") return difference;
+    }
+    return "unknown";
+  }
+  return path;
 }
 
 export function summarizeWorkbenchSourceStates(workbench) {

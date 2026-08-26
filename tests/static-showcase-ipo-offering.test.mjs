@@ -56,3 +56,21 @@ test("IPO offering route exposes all required public columns", async () => {
     assert.match(source, new RegExp(label));
   }
 });
+
+test("public offering projection accepts release-stage verified nested facts without source identifiers", () => {
+  const rows = projectPublicOfferings({
+    dataDate: "2026-08-24",
+    records: [{
+      companyCode: "1234",
+      companyName: "測試公司",
+      market: "上市",
+      underwriter: "測試承銷商",
+      auction: { bidStartDate: "2026-08-26", verified: true },
+      publicOffering: { subscriptionStartDate: "2026-08-31", verified: true },
+    }],
+  });
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].bidStartDate, "2026-08-26");
+  assert.equal(rows[0].subscriptionStartDate, "2026-08-31");
+});

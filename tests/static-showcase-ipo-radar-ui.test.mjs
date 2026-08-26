@@ -118,6 +118,24 @@ test("IPO radar default active excludes a stale evidenced A record while all pre
   assert.equal(matchesIpoRecordStage(unapproved, "all", "2026-08-24"), true);
 });
 
+test("IPO active filters accept the release-stage verified marker without source identifiers", async () => {
+  const { isActiveIpoRecord, projectActiveIpoEventEntries } = await import(stageFilterPath);
+  const row = {
+    stage: "A",
+    exceptionStatus: null,
+    applicationDate: "2026-08-20",
+    events: [{
+      date: "2026-08-20",
+      label: "申請送件",
+      kind: "application_submitted",
+      verified: true,
+    }],
+  };
+
+  assert.equal(isActiveIpoRecord(row, "2026-08-24"), true);
+  assert.equal(projectActiveIpoEventEntries([row], "2026-08-24").length, 1);
+});
+
 test("unknown IPO stages stay visible as unknown history but never enter any default active surface", async () => {
   const [calendarJs, radarJs] = await Promise.all([
     readFile(new URL("../static-showcase/assets/ipo-page.js", import.meta.url), "utf8"),

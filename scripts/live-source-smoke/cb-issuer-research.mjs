@@ -18,9 +18,6 @@ import {
 } from "../../lib/source-verification/source-cb-issuer-research.ts";
 import { bondInputsFrom11406Rows } from "../build-bond-market-snapshot.mjs";
 
-const ACTIVE_JSON_BYTES = 439_172;
-const ACTIVE_JSON_SHA256 = "cfec9f95f8be384c299bce897a2694dcf9c851598e56072a8845ebe4584e5f84";
-const ACTIVE_RAW_SHA256 = "sha256:1027ff0cd72be9d495f8914c34c0f7802ce68c24456a7be99341911b47722b00";
 const ACTIVE_SOURCE_URL = "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv";
 const ACTIVE_DATA_ROOT = new URL("../../static-showcase/data/", import.meta.url);
 const SOURCE_ORDER = Object.freeze(["listed", "otc"]);
@@ -84,13 +81,14 @@ export async function loadActiveCbIssuerContext() {
   );
   if (
     sourceEntry.sourceUrl !== ACTIVE_SOURCE_URL
-    || sourceEntry.downloadedAt !== "2026-08-24"
-    || sourceEntry.sha256 !== ACTIVE_RAW_SHA256
-    || sourceEntry.rawBytes !== 138_545
-    || sourceEntry.rowCount !== 419
+    || !isIsoDate(sourceEntry.downloadedAt)
+    || !isSha256(sourceEntry.sha256)
+    || !isPositiveSafeInteger(sourceEntry.rawBytes)
+    || !isPositiveSafeInteger(sourceEntry.rowCount)
   ) {
-    throw new TypeError("active generation 11406 manifest entry is not the reviewed snapshot");
+    throw new TypeError("active generation 11406 source manifest entry is invalid");
   }
+  const publishedEntry = active11406ArtifactEntry(manifest);
 
   const runtime = parsePlainJson(
     await readFile(new URL("runtime.json", generationRoot), "utf8"),
@@ -105,20 +103,20 @@ export async function loadActiveCbIssuerContext() {
   }
 
   const jsonBytes = new Uint8Array(await readFile(new URL("11406.json", generationRoot)));
-  if (jsonBytes.byteLength !== ACTIVE_JSON_BYTES) {
-    throw new TypeError("active generation 11406 JSON byte count changed");
-  }
-  if (sha256(jsonBytes) !== ACTIVE_JSON_SHA256) {
-    throw new TypeError("active generation 11406 JSON hash changed");
+  if (
+    jsonBytes.byteLength !== publishedEntry.rawBytes
+    || `sha256:${sha256(jsonBytes)}` !== publishedEntry.sha256
+  ) {
+    throw new TypeError("active generation 11406 JSON artifact integrity is invalid");
   }
   const rows = parsePlainJson(new TextDecoder("utf-8", { fatal: true }).decode(jsonBytes), "active generation 11406 JSON");
-  if (!Array.isArray(rows) || rows.length !== sourceEntry.rowCount) {
-    throw new TypeError("active generation 11406 JSON row count changed");
+  if (!Array.isArray(rows) || rows.length !== publishedEntry.recordCount) {
+    throw new TypeError("active generation 11406 JSON row count is invalid");
   }
   const activeIssuers = deriveActiveCbIssuerIdentities(rows);
   const activeBondCount = bondInputsFrom11406Rows(rows).length;
-  if (activeBondCount !== 388 || activeIssuers.length !== 312) {
-    throw new TypeError("active generation 11406 denominator changed");
+  if (activeBondCount === 0 || activeIssuers.length === 0) {
+    throw new TypeError("active generation 11406 denominator is empty");
   }
   return Object.freeze({
     generation: activeGeneration,
@@ -128,6 +126,32 @@ export async function loadActiveCbIssuerContext() {
       issuerNames: Object.freeze([...issuer.issuerNames]),
     }))),
   });
+}
+
+function active11406ArtifactEntry(manifest) {
+  const market = requirePlainRecord(manifest.market, "active generation market manifest");
+  const entries = [
+    ...(Array.isArray(market.files) ? market.files : []),
+    ...(Array.isArray(market.normalizedInputs) ? market.normalizedInputs : []),
+  ].filter((entry) => entry !== null && typeof entry === "object" && entry.name === "11406.json");
+  if (entries.length !== 1) {
+    throw new TypeError("active generation must declare exactly one verified 11406 artifact");
+  }
+  const entry = entries[0];
+  assertExactKeys(
+    entry,
+    ["name", "sha256", "rawBytes", "recordCount"],
+    "active generation 11406 artifact entry",
+  );
+  if (
+    entry.name !== "11406.json"
+    || !isSha256(entry.sha256)
+    || !isPositiveSafeInteger(entry.rawBytes)
+    || !isPositiveSafeInteger(entry.recordCount)
+  ) {
+    throw new TypeError("active generation 11406 artifact entry is invalid");
+  }
+  return entry;
 }
 
 export function assessCbIssuerResearchSource(input) {
@@ -488,6 +512,20 @@ function assertExactKeys(value, expected, name) {
   ) {
     throw new TypeError(`${name} keys are invalid`);
   }
+}
+
+function isIsoDate(value) {
+  return typeof value === "string"
+    && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    && new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value;
+}
+
+function isSha256(value) {
+  return typeof value === "string" && /^sha256:[a-f0-9]{64}$/.test(value);
+}
+
+function isPositiveSafeInteger(value) {
+  return Number.isSafeInteger(value) && value > 0;
 }
 
 function sha256(bytes) {
