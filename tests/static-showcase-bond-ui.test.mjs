@@ -275,6 +275,51 @@ test("page loader projects archived workbench identities into the searchable lis
   ]);
 });
 
+test("market list projects verified trading and term fields without estimating turnover", async () => {
+  const { buildBondListRecords } = await import("../static-showcase/assets/bonds-page.js");
+  const [row] = buildBondListRecords({
+    workbench: [{
+      bondCode: "90001",
+      status: "active",
+      archiveReason: null,
+      archivedAt: null,
+      term: {
+        bondCode: "90001", issuerCode: "9000", issuerName: "公開發行人", bondName: "公開一",
+        issueAmount: "500000000", outstandingAmount: "400000000", outstandingDataDate: "2026-08-24",
+        maturityDate: "2028-08-24",
+      },
+      view: { bondCode: "90001", issuerCode: "9000", bondName: "公開一", cbClose: "101", cbPriceDate: "2026-08-24", cbTradeUnits: "42" },
+    }],
+    history: [{ bondCode: "90001", date: "2026-08-24", cbTurnover: "4242000" }],
+  });
+
+  assert.deepEqual(
+    {
+      cbTradeUnits: row.cbTradeUnits,
+      cbTurnoverAmount: row.cbTurnoverAmount,
+      issueAmount: row.issueAmount,
+      outstandingAmount: row.outstandingAmount,
+      outstandingDataDate: row.outstandingDataDate,
+      maturityDate: row.maturityDate,
+    },
+    {
+      cbTradeUnits: "42",
+      cbTurnoverAmount: "4242000",
+      issueAmount: "500000000",
+      outstandingAmount: "400000000",
+      outstandingDataDate: "2026-08-24",
+      maturityDate: "2028-08-24",
+    },
+  );
+});
+
+test("static CB market table presents all verified market and term columns", async () => {
+  const html = await readFile(new URL("bonds.html", root), "utf8");
+  for (const label of ["成交量", "成交金額", "流通餘額", "到期日", "發行總額"]) {
+    assert.match(html, new RegExp(label));
+  }
+});
+
 test("detail evidence selects the conversion-price version effective on its valuation date", async () => {
   const { detailWithValuationConversionEvidence } = await import("../static-showcase/assets/bonds-page.js");
   const record = {

@@ -96,6 +96,7 @@ async function loadAndRender() {
     : buildBondListRecords({
       workbench: state.workbench,
       bondTerms: state.bondTerms,
+      history: state.history,
     });
   updateSearchSuggestions();
   renderRoute();
@@ -235,7 +236,16 @@ function validPublishedDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""));
 }
 
-export function buildBondListRecords({ views = [], workbench = [], bondTerms = [] } = {}) {
+export function buildBondListRecords({ views = [], workbench = [], bondTerms = [], history = [] } = {}) {
+  const turnoverByBondDate = new Map(
+    arrayValue(history)
+      .filter((point) => (
+        /^\d{5,6}$/.test(String(point?.bondCode ?? ""))
+        && validPublishedDate(point?.date)
+        && /^\d+$/.test(String(point?.cbTurnover ?? ""))
+      ))
+      .map((point) => [`${point.bondCode}:${point.date}`, String(point.cbTurnover)]),
+  );
   const termsByBondCode = new Map(
     arrayValue(bondTerms)
       .filter((term) => /^\d{5,6}$/.test(String(term?.["債券代碼"] ?? "")))
@@ -253,6 +263,11 @@ export function buildBondListRecords({ views = [], workbench = [], bondTerms = [
         issuerCode: term.issuerCode ?? view.issuerCode,
         issuerName: term.issuerName ?? legacyTerm?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
         bondName: term.bondName ?? view.bondName,
+        issueAmount: term.issueAmount ?? null,
+        outstandingAmount: term.outstandingAmount ?? view.outstandingAmount ?? null,
+        outstandingDataDate: term.outstandingDataDate ?? view.outstandingDataDate ?? null,
+        maturityDate: term.maturityDate ?? view.maturityDate ?? null,
+        cbTurnoverAmount: turnoverByBondDate.get(`${record.bondCode}:${view.cbPriceDate}`) ?? null,
         status: record.status,
         archived: record.status === "archived",
         archiveReason: record.archiveReason,
@@ -267,6 +282,11 @@ export function buildBondListRecords({ views = [], workbench = [], bondTerms = [
       ...view,
       ...canonicalListFieldsForLegacyView(view),
       issuerName: term?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
+      issueAmount: term?.["發行總額"] ?? null,
+      outstandingAmount: term?.["目前餘額"] ?? view.outstandingAmount ?? null,
+      outstandingDataDate: term?.["餘額資料日期"] ?? view.outstandingDataDate ?? null,
+      maturityDate: term?.["到期日期"] ?? view.maturityDate ?? null,
+      cbTurnoverAmount: turnoverByBondDate.get(`${view.bondCode}:${view.cbPriceDate}`) ?? null,
     };
   });
 }
@@ -329,7 +349,7 @@ function renderBonds() {
     const message = "可轉債工作台資料目前無法使用；請稍後再試。";
     setText("#bond-result-count", "資料無法使用");
     document.querySelector("#bond-clear-filter").hidden = true;
-    document.querySelector("#bond-table-body").innerHTML = `<tr><td colspan="10" class="empty-cell">${message}</td></tr>`;
+    document.querySelector("#bond-table-body").innerHTML = `<tr><td colspan="14" class="empty-cell">${message}</td></tr>`;
     document.querySelector("#bond-card-list").innerHTML = `<p class="empty-cell">${message}</p>`;
     document.querySelector("#bond-pagination").innerHTML = "";
     return;
@@ -360,7 +380,7 @@ function renderBonds() {
     : "沒有符合條件的可轉債；可清除搜尋條件後再試。";
   document.querySelector("#bond-table-body").innerHTML = visible.length
     ? visible.map(renderBondRow).join("")
-    : `<tr><td colspan="10" class="empty-cell">${escapeHtml(emptyMessage)}</td></tr>`;
+    : `<tr><td colspan="14" class="empty-cell">${escapeHtml(emptyMessage)}</td></tr>`;
   document.querySelector("#bond-card-list").innerHTML = visible.length
     ? visible.map(renderBondCard).join("")
     : `<p class="empty-cell">${escapeHtml(emptyMessage)}</p>`;
@@ -381,11 +401,16 @@ function renderBondRow(view) {
   return `<tr tabindex="0" data-bond-code="${escapeHtml(view.bondCode)}" aria-label="查看 ${escapeHtml(view.bondName)} 詳細資料">
     <td>${metric(`${view.bondCode} · ${view.bondName}`, issuerLabel)}</td>
     <td>${priceMetric(view.cbClose, view.cbPriceDate, view.staleCbPrice ? "前次成交" : "")}</td>
+    <td>${quantityMetric(view.cbTradeUnits, "張", view.cbPriceDate)}</td>
+    <td>${amountMetric(view.cbTurnoverAmount, view.cbPriceDate)}</td>
     <td>${priceMetric(view.conversionValue, view.valuationDate, "估值日", "metric-violet")}</td>
     <td>${rateMetric(view.premiumRate, view.valuationDate)}</td>
     <td>${priceMetric(view.stockClose, view.stockPriceDate)}</td>
     <td>${priceMetric(view.currentConversionPrice, view.conversionPriceEffectiveDate, "生效日")}</td>
+    <td>${amountMetric(view.outstandingAmount, view.outstandingDataDate, "流通餘額")}</td>
     <td>${metric(presentation.remainingRatio, "流通餘額比例")}</td>
+    <td>${metric(view.maturityDate, "到期日")}</td>
+    <td>${amountMetric(view.issueAmount, null, "發行總額")}</td>
     <td>${eventMetric(view)}</td>
     <td>${metric(view.valuationDate ?? view.cbPriceDate, "資料日期")}</td>
   </tr>`;
@@ -398,11 +423,16 @@ function renderBondCard(view) {
     <header><strong>${escapeHtml(view.bondCode)} · ${escapeHtml(view.bondName)}</strong><span>${escapeHtml(marketStatus)}</span></header>
     <span class="bond-card-grid">
       ${cardMetric("CB 收盤", valueOrDash(view.cbClose), view.cbPriceDate)}
+      ${cardMetric("成交量", quantityText(view.cbTradeUnits, "張"), view.cbPriceDate)}
+      ${cardMetric("成交金額", numberText(view.cbTurnoverAmount), view.cbPriceDate)}
       ${cardMetric("轉換價值", valueOrDash(view.conversionValue), view.valuationDate)}
       ${cardMetric("轉換溢價率", view.premiumRate === null ? "—" : signedRate(view.premiumRate), view.valuationDate)}
       ${cardMetric("標的股收盤", valueOrDash(view.stockClose), view.stockPriceDate)}
       ${cardMetric("目前轉換價", valueOrDash(view.currentConversionPrice), view.conversionPriceEffectiveDate)}
+      ${cardMetric("流通餘額", numberText(view.outstandingAmount), view.outstandingDataDate)}
       ${cardMetric("流通餘額比例", presentation.remainingRatio, "流通餘額比例")}
+      ${cardMetric("到期日", view.maturityDate, "到期日")}
+      ${cardMetric("發行總額", numberText(view.issueAmount), "發行總額")}
       ${cardMetric("下一事件", presentation.eventLabel, presentation.eventDate)}
       ${cardMetric("資料日期", view.valuationDate ?? view.cbPriceDate, "資料日期")}
     </span>
@@ -687,6 +717,14 @@ function rateMetric(value, date) {
   return metric(`${icon} ${signedRate(value)}`, date ? `估值日 ${date}` : "", number > 0 ? "metric-alert" : "metric-violet");
 }
 
+function quantityMetric(value, unit, date) {
+  return metric(quantityText(value, unit), date ?? "");
+}
+
+function amountMetric(value, date, note = "") {
+  return metric(numberText(value), [date, note].filter(Boolean).join(" · "));
+}
+
 function eventMetric(view) {
   const presentation = bondListPresentation(view);
   return metric(presentation.eventLabel, presentation.eventDate);
@@ -782,6 +820,16 @@ function plainRate(value) {
 
 function valueOrDash(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
+}
+
+function quantityText(value, unit) {
+  const number = Number(value);
+  return Number.isFinite(number) ? `${number.toLocaleString("zh-TW")} ${unit}` : "—";
+}
+
+function numberText(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toLocaleString("zh-TW", { maximumFractionDigits: 2 }) : "—";
 }
 
 function setText(selector, value) {
