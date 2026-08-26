@@ -24,6 +24,11 @@ export function bondTermSummariesFrom11406Rows(rows) {
     const bondName = requiredSourceText(row, "債券簡稱", index);
     const optionalDate = (key, aliases = []) => optionalOfficialDate(row, key, index, aliases);
     const optionalAmount = (key) => optionalOfficialAmount(row, key, index);
+    const outstandingChangeDate = optionalDate("最近餘額變動日");
+    const outstandingChangeReason = optionalSourceText(row, "最近餘額變動原因");
+    if ((outstandingChangeDate === null) !== (outstandingChangeReason === null)) {
+      throw new TypeError(`11406 row ${index + 1} outstanding change fields must be present as a pair`);
+    }
     return [{
       bondCode,
       issuerCode: requiredSourceText(row, "機構代碼", index),
@@ -52,6 +57,8 @@ export function bondTermSummariesFrom11406Rows(rows) {
       securedStatus: optionalSourceText(row, "有無擔保"),
       underwriter: optionalSourceText(row, "承銷機構"),
       trustee: optionalSourceText(row, "受託人"),
+      outstandingChangeDate,
+      outstandingChangeReason,
       unitFaceValueTwd: null,
     }];
   });

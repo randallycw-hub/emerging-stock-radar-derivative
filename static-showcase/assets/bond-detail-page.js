@@ -46,6 +46,25 @@ export function noAdviceViolations(text) {
   return FORBIDDEN_UI_PATTERNS.filter(([, pattern]) => pattern.test(String(text))).map(([code]) => code);
 }
 
+export function projectCbMarketRelationship(view = {}) {
+  const stockClose = publicFiniteNumber(view?.stockClose);
+  const conversionPrice = publicFiniteNumber(view?.currentConversionPrice);
+  if (!Number.isFinite(stockClose) || !Number.isFinite(conversionPrice) || conversionPrice <= 0) return null;
+  const distance = ((stockClose / conversionPrice) - 1) * 100;
+  if (!Number.isFinite(distance)) return null;
+  return {
+    label: distance >= 0 ? "標的股高於轉換價" : "標的股低於轉換價",
+    distancePercent: `${distance.toFixed(2)}%`,
+    state: distance >= 0 ? "above" : "below",
+  };
+}
+
+function publicFiniteNumber(value) {
+  if ((typeof value !== "number" && typeof value !== "string") || String(value).trim() === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
 export function renderBondDetail(record, { asOfDate = null } = {}) {
   const view = record?.view ?? {};
   const term = record?.term ?? {};
@@ -163,12 +182,17 @@ export function detailRecordFromLegacy({ view = {}, term = {}, events = [] } = {
       maturityDate: term["到期日期"] ?? view.maturityDate ?? null,
       issueAmount: term["發行總額"] ?? null,
       outstandingAmount: term["目前餘額"] ?? view.outstandingAmount ?? null,
+      outstandingChangeDate: term["最近餘額變動日"] ?? null,
+      outstandingChangeReason: term["最近餘額變動原因"] ?? null,
       initialConversionPrice: term["發行時轉換價格"] ?? null,
       conversionStartDate: term["轉換期間起"] ?? null,
       conversionEndDate: term["迄"] ?? null,
       putDates: term["賣回權日期"] ? [term["賣回權日期"]] : [],
       putPrice: null,
       securedStatus: term["債券擔保情形"] ?? null,
+      underwriter: term["承銷機構"] ?? null,
+      trustee: term["受託人"] ?? null,
+      unitFaceValueTwd: term["每張面額"] ?? null,
     },
     view,
     fieldStates: legacyFieldStates(view),
@@ -252,7 +276,8 @@ function detailDatesSection(record) {
   return `<section class="detail-date-facts" aria-label="資料時間點"><h3>資料時間點</h3><dl class="detail-facts">${values.map((item) => fact(item.label, item.value)).join("")}</dl></section>`;
 }
 function termsSection(term, view) {
-  return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}</dl>${conversionPriceHistorySection(view.conversionPriceHistory)}${formulaDetails(view)}`;
+  const relationship = projectCbMarketRelationship(view);
+  return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("最近餘額異動日", term.outstandingChangeDate)}${fact("最近餘額異動原因", term.outstandingChangeReason)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("標的股相對轉換價", relationship ? `${relationship.label}（${relationship.distancePercent}）` : null)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}${fact("承銷機構", term.underwriter)}${fact("受託人", term.trustee)}${fact("每張面額", term.unitFaceValueTwd)}</dl>${conversionPriceHistorySection(view.conversionPriceHistory)}${formulaDetails(view)}`;
 }
 function conversionPriceHistorySection(history) {
   const rows = Array.isArray(history)

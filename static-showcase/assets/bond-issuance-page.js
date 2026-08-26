@@ -14,6 +14,9 @@ export function buildBondIssuanceRows(workbench) {
       maturityDate: record.maturityDate,
       issueAmount: record.issueAmount,
       securedStatus: record.securedStatus,
+      underwriter: record.underwriter,
+      trustee: record.trustee,
+      progress: record.listingDate ? "已掛牌" : record.issueDate ? "已發行" : "已公告公開條款",
     }));
 }
 
@@ -25,7 +28,7 @@ function escapeHtml(value) {
 
 function renderRows(target, rows) {
   if (!rows.length) {
-    target.innerHTML = '<tr><td colspan="6" class="empty-cell">目前沒有可顯示的公開發行案件。</td></tr>';
+    target.innerHTML = '<tr><td colspan="10" class="empty-cell">目前沒有可顯示的公開發行案件。</td></tr>';
     return;
   }
   target.innerHTML = rows.map((row) => `<tr>
@@ -35,6 +38,10 @@ function renderRows(target, rows) {
     <td>${dateValue(row.listingDate)}</td>
     <td>${dateValue(row.maturityDate)}</td>
     <td>${numberValue(row.issueAmount, 0)}</td>
+    <td>${escapeHtml(row.securedStatus ?? "—")}</td>
+    <td>${escapeHtml(row.underwriter ?? "—")}</td>
+    <td>${escapeHtml(row.trustee ?? "—")}</td>
+    <td>${escapeHtml(row.progress)}</td>
   </tr>`).join("");
 }
 

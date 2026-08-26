@@ -320,6 +320,30 @@ test("static CB market table presents all verified market and term columns", asy
   }
 });
 
+test("bond detail projects the neutral stock-to-conversion relationship only from matched public facts", async () => {
+  const { projectCbMarketRelationship } = await import("../static-showcase/assets/bond-detail-page.js");
+  assert.deepEqual(
+    projectCbMarketRelationship({ stockClose: "110", currentConversionPrice: "100" }),
+    { label: "標的股高於轉換價", distancePercent: "10.00%", state: "above" },
+  );
+  assert.equal(projectCbMarketRelationship({ stockClose: null, currentConversionPrice: "100" }), null);
+  assert.equal(projectCbMarketRelationship({ stockClose: "110", currentConversionPrice: "0" }), null);
+});
+
+test("static CB detail and issuance pages surface public term facts without diagnostic metadata", async () => {
+  const [detail, issuance] = await Promise.all([
+    readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
+    readFile(new URL("bonds-issuance.html", root), "utf8"),
+  ]);
+  for (const label of ["承銷機構", "受託人", "最近餘額異動日", "最近餘額異動原因", "標的股相對轉換價"]) {
+    assert.match(detail, new RegExp(label));
+  }
+  for (const label of ["目前進度", "擔保", "承銷機構", "受託人"]) {
+    assert.match(issuance, new RegExp(label));
+  }
+  assert.doesNotMatch(detail + issuance, /來源 ID|缺漏原因|目前無核准公開資料／待確認/);
+});
+
 test("detail evidence selects the conversion-price version effective on its valuation date", async () => {
   const { detailWithValuationConversionEvidence } = await import("../static-showcase/assets/bonds-page.js");
   const record = {

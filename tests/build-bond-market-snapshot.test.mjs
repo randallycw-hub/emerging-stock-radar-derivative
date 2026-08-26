@@ -375,7 +375,8 @@ test("projects supported 11406 terms in English without requiring unavailable te
     maturityDate: "2028-07-29", issueAmount: "2000000", outstandingAmount: "1500000",
     outstandingDataDate: "2026-07-30", initialConversionPrice: "40", conversionStartDate: "2024-03-19",
     conversionEndDate: "2028-07-29", putDates: ["2026-08-30"], putPrice: "101",
-    securedStatus: "2", underwriter: "兆豐證券", trustee: "彰化銀行", unitFaceValueTwd: null,
+    securedStatus: "2", underwriter: "兆豐證券", trustee: "彰化銀行",
+    outstandingChangeDate: null, outstandingChangeReason: null, unitFaceValueTwd: null,
   };
   assert.deepEqual(bondTermSummariesFrom11406Rows([row]), [expected]);
   assert.deepEqual(bondInputsFrom11406Rows([row]), pureBondInputsFrom11406Rows([row]));
@@ -388,6 +389,7 @@ test("projects supported 11406 terms in English without requiring unavailable te
     issueAmount: "2000000", outstandingAmount: "1500000", outstandingDataDate: null,
     initialConversionPrice: null, conversionStartDate: null, conversionEndDate: null,
     putDates: [], putPrice: null, securedStatus: null, underwriter: null, trustee: null,
+    outstandingChangeDate: null, outstandingChangeReason: null,
     unitFaceValueTwd: null,
   });
 });

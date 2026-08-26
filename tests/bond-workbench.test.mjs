@@ -138,6 +138,27 @@ test("builds a sorted, defensive active snapshot keyed only by bond code", () =>
   assert.throws(() => { result.records[0].term.bondName = "mutated"; }, TypeError);
 });
 
+test("preserves the official outstanding-balance change pair in published bond terms", () => {
+  const result = buildBondWorkbenchSnapshot(input({
+    currentTerms: [term("35221", {
+      outstandingChangeDate: "2026-08-01",
+      outstandingChangeReason: "轉換執行",
+    })],
+  }));
+
+  assert.deepEqual(
+    {
+      outstandingChangeDate: result.records[0].term.outstandingChangeDate,
+      outstandingChangeReason: result.records[0].term.outstandingChangeReason,
+    },
+    {
+      outstandingChangeDate: "2026-08-01",
+      outstandingChangeReason: "轉換執行",
+    },
+  );
+  assert.equal(parseBondWorkbenchSnapshot(result).records[0].term.outstandingChangeReason, "轉換執行");
+});
+
 test("migrates a published legacy view without weakening the current view contract", () => {
   const snapshot = buildBondWorkbenchSnapshot(input());
   const legacy = structuredClone(snapshot);

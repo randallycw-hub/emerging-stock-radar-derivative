@@ -192,6 +192,8 @@ export type BondTermSummary = {
   securedStatus: string | null;
   underwriter: string | null;
   trustee: string | null;
+  outstandingChangeDate: string | null;
+  outstandingChangeReason: string | null;
   unitFaceValueTwd: string | null;
 };
 

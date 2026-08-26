@@ -16,7 +16,8 @@ import { CB_RESEARCH_RULES, evaluateBondAssessment } from "./bond-strategy-asses
 
 const SNAPSHOT_KEYS = ["schemaVersion", "generatedAt", "dataDate", "records"];
 const RECORD_KEYS = ["bondCode", "status", "archiveReason", "archivedAt", "term", "view", "events", "fieldStates", "assessment"];
-const TERM_KEYS = ["bondCode", "issuerCode", "bondName", "issuerName", "issueDate", "listingDate", "maturityDate", "issueAmount", "outstandingAmount", "outstandingDataDate", "initialConversionPrice", "conversionStartDate", "conversionEndDate", "putDates", "putPrice", "securedStatus", "underwriter", "trustee", "unitFaceValueTwd"];
+const LEGACY_TERM_KEYS = ["bondCode", "issuerCode", "bondName", "issuerName", "issueDate", "listingDate", "maturityDate", "issueAmount", "outstandingAmount", "outstandingDataDate", "initialConversionPrice", "conversionStartDate", "conversionEndDate", "putDates", "putPrice", "securedStatus", "underwriter", "trustee", "unitFaceValueTwd"];
+const TERM_KEYS = [...LEGACY_TERM_KEYS, "outstandingChangeDate", "outstandingChangeReason"];
 const EVENT_KEYS = ["bondCode", "eventId", "type", "date", "title", "sourceId", "sourceUrl"];
 const FIELD_STATE_KEYS = ["price", "valuation", "outstanding", "institutions", "company", "events", "history"];
 const VIEW_KEYS = ["bondCode", "issuerCode", "bondName", "issuerResearch", "cbClose", "cbPriceDate", "cbTradeUnits", "stockClose", "stockPriceDate", "currentConversionPrice", "conversionPriceEffectiveDate", "valuationDate", "valuationCbClose", "valuationStockClose", "conversionValue", "premiumRate", "outstandingAmount", "outstandingDataDate", "outstandingReductionRate", "remainingUnits", "remainingRatio", "dailyTurnoverRate", "institutionDataDate", "institutionNetUnits", "institutionNet5dUnits", "institutionNet20dUnits", "redemptionEvent", "maturityDate", "daysToMaturity", "nextPutDate", "daysToNextPut", "nextEventType", "nextEventDate", "daysToNextEvent", "marketStatus", "dataQuality", "staleCbPrice", "missingReasons"];
@@ -303,7 +304,8 @@ function parseTerms(value: unknown): BondTermSummary[] {
 
 function parseTerm(value: unknown, name: string): BondTermSummary {
   const term = requireRecord(value, name);
-  assertExactKeys(term, TERM_KEYS, name);
+  const hasBalanceChangeFields = "outstandingChangeDate" in term || "outstandingChangeReason" in term;
+  assertExactKeys(term, hasBalanceChangeFields ? TERM_KEYS : LEGACY_TERM_KEYS, name);
   const result = {
     bondCode: readBondCode(term.bondCode, `${name}.bondCode`),
     issuerCode: readText(term.issuerCode, `${name}.issuerCode`),
@@ -323,11 +325,14 @@ function parseTerm(value: unknown, name: string): BondTermSummary {
     securedStatus: readOptionalText(term.securedStatus, `${name}.securedStatus`),
     underwriter: readOptionalText(term.underwriter, `${name}.underwriter`),
     trustee: readOptionalText(term.trustee, `${name}.trustee`),
+    outstandingChangeDate: hasBalanceChangeFields ? readOptionalDate(term.outstandingChangeDate, `${name}.outstandingChangeDate`) : null,
+    outstandingChangeReason: hasBalanceChangeFields ? readOptionalText(term.outstandingChangeReason, `${name}.outstandingChangeReason`) : null,
     unitFaceValueTwd: readOptionalDecimal(term.unitFaceValueTwd, `${name}.unitFaceValueTwd`),
   };
   if (result.issueDate !== null && result.issueDate > result.maturityDate) throw new TypeError(`${name}.issueDate exceeds maturityDate`);
   if (result.listingDate !== null && (result.issueDate !== null && result.listingDate < result.issueDate || result.listingDate > result.maturityDate)) throw new TypeError(`${name}.listingDate is outside lifecycle`);
   if (result.conversionStartDate !== null && result.conversionEndDate !== null && result.conversionStartDate > result.conversionEndDate) throw new TypeError(`${name}.conversion period is invalid`);
+  if ((result.outstandingChangeDate === null) !== (result.outstandingChangeReason === null)) throw new TypeError(`${name}.outstanding change fields must be present as a pair`);
   return result;
 }
 
