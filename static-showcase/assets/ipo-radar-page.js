@@ -12,7 +12,7 @@ const stageLabels = {
   delayed: "延期",
   cancelled: "已取消",
 };
-const errorTarget = document.querySelector("[data-page-error]");
+const errorTarget = globalThis.document?.querySelector("[data-page-error]") ?? null;
 const state = {
   rows: [],
   dataDate: null,
@@ -24,9 +24,11 @@ const state = {
   page: 1,
 };
 
-initializeFromUrl();
-bindControls();
-await loadData();
+if (globalThis.window && globalThis.document) {
+  initializeFromUrl();
+  bindControls();
+  await loadData();
+}
 
 async function loadData() {
   let snapshot = null;
@@ -45,7 +47,9 @@ async function loadData() {
 
 function applySnapshot(snapshot) {
   state.dataDate = validDate(snapshot.dataDate) ? snapshot.dataDate : null;
-  state.rows = snapshot.records.map((record) => normalizeRecord(record, snapshot.sourceManifest)).filter((row) => row.companyCode && row.companyName);
+  state.rows = snapshot.records
+    .map((record) => projectIpoRadarRecord(record, snapshot))
+    .filter((row) => row.companyCode && row.companyName && !isIpoRadarExcluded(row));
   populateMarkets();
   applyStateToControls();
   render();
@@ -175,11 +179,11 @@ function renderUpcoming() {
 }
 
 function tableRowHtml(row) {
-    return `<tr><th scope="row">${companyLink(row)}<small>${escapeHtml(row.market)}</small></th><td><span class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.daysFromToday)}</td><td>${escapeHtml(row.pricingStatus)}</td><td>${formatDate(state.dataDate)}</td></tr>`;
+    return `<tr><th scope="row">${companyLink(row)}<small>${escapeHtml(row.market)}</small></th><td><span class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.daysFromToday)}</td><td>${escapeHtml(row.pricingStatus)}</td><td>${formatDate(row.applicationDate)}</td><td>${formatDate(row.reviewDate)}</td><td>${formatDate(row.boardDate)}</td><td>${formatDate(row.contractDate)}</td><td>${formatDate(row.auctionBidStartDate)}</td><td>${formatDate(row.subscriptionStartDate)}</td><td>${formatDate(row.listingDate)}</td><td>${daysLabel(row.daysInStage)}</td><td>${formatDate(state.dataDate)}</td></tr>`;
 }
 
 function cardHtml(row) {
-  return `<article class="ipo-card"><header><div><span>${escapeHtml(row.market)}</span><h3>${companyLink(row)}</h3></div><strong class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</strong></header><dl><div><dt>最近事件</dt><dd>${escapeHtml(row.primaryEventLabel)}</dd></div><div><dt>事件日期</dt><dd>${formatDate(row.primaryEventDate)} · ${daysLabel(row.daysFromToday)}</dd></div></dl><details><summary>完整事件歷程</summary><ol class="ipo-timeline">${row.events.map((event) => `<li><span>${escapeHtml(event.label)}</span><time>${formatDate(event.date)}</time></li>`).join("") || "<li>尚無公開資料</li>"}</ol></details></article>`;
+  return `<article class="ipo-card"><header><div><span>${escapeHtml(row.market)}</span><h3>${companyLink(row)}</h3></div><strong class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</strong></header><dl><div><dt>最近事件</dt><dd>${escapeHtml(row.primaryEventLabel)}</dd></div><div><dt>事件日期</dt><dd>${formatDate(row.primaryEventDate)} · ${daysLabel(row.daysFromToday)}</dd></div><div><dt>階段經過</dt><dd>${daysLabel(row.daysInStage)}</dd></div></dl><details><summary>階段日期與完整事件歷程</summary>${stageDateFacts(row)}<ol class="ipo-timeline">${row.events.map((event) => `<li><span>${escapeHtml(event.label)}</span><time>${formatDate(event.date)}</time></li>`).join("") || "<li>尚無公開資料</li>"}</ol></details></article>`;
 }
 
 function renderPagination(total) {
@@ -224,10 +228,24 @@ function syncUrl() {
   history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
 }
 
-function normalizeRecord(record, sourceManifest) {
+export function projectIpoRadarRecord(record = {}, { dataDate = null, sourceManifest = [] } = {}) {
   const events = normalizeApprovedIpoEvents(record, sourceManifest);
   const primary = selectPrimaryEvent(events);
   const stage = displayIpoStage(record.stage);
+  const auctionBidStartDate = approvedNestedDate(record.auction, "bidStartDate", sourceManifest, "twse-auctions");
+  const subscriptionStartDate = approvedNestedDate(record.publicOffering, "subscriptionStartDate", sourceManifest, "twse-public-offerings");
+  const stageDates = [
+    validDate(record.applicationDate) ? record.applicationDate : null,
+    validDate(record.reviewDate) ? record.reviewDate : null,
+    validDate(record.boardDate) ? record.boardDate : null,
+    validDate(record.contractDate) ? record.contractDate : null,
+    auctionBidStartDate,
+    subscriptionStartDate,
+    validDate(record.listingDate) ? record.listingDate : null,
+  ];
+  const stageAnchor = validDate(dataDate)
+    ? stageDates.filter((date) => date && date <= dataDate).sort().at(-1) ?? null
+    : null;
   return {
     companyCode: String(record.companyCode ?? "").trim(),
     companyName: String(record.companyName ?? "").trim(),
@@ -235,12 +253,35 @@ function normalizeRecord(record, sourceManifest) {
     stage,
     exceptionStatus: record.exceptionStatus ?? null,
     applicationDate: validDate(record.applicationDate) ? record.applicationDate : null,
+    reviewDate: validDate(record.reviewDate) ? record.reviewDate : null,
+    boardDate: validDate(record.boardDate) ? record.boardDate : null,
+    contractDate: validDate(record.contractDate) ? record.contractDate : null,
+    auctionBidStartDate,
+    subscriptionStartDate,
+    listingDate: validDate(record.listingDate) ? record.listingDate : null,
+    daysInStage: stageAnchor ? taipeiCalendarDistance(stageAnchor, dataDate) : null,
     pricingStatus: events.length === 0 ? "尚無公開資料" : record.finalUnderwritingPrice ? "已定價" : record.provisionalUnderwritingPrice ? "暫定價" : "待公告",
     events,
     primaryEventDate: primary?.date ?? null,
     primaryEventLabel: primary?.label ?? "尚無公開資料",
     daysFromToday: primary ? taipeiCalendarDistance(taipeiToday(), primary.date) : null,
   };
+}
+
+export function isIpoRadarExcluded(row = {}) {
+  const terminal = new Set(["withdrawn", "cancelled"]);
+  return terminal.has(String(row.stage ?? "")) || terminal.has(String(row.exceptionStatus ?? ""));
+}
+
+function approvedNestedDate(value, key, sourceManifest, requiredSourceId) {
+  if (!value || !validDate(value[key])) return null;
+  const manifestIds = new Set((Array.isArray(sourceManifest) ? sourceManifest : [])
+    .map((entry) => entry?.sourceId));
+  const recordId = String(value.sourceRecordId ?? "");
+  const sourceMatches = requiredSourceId === "twse-auctions"
+    ? /^TWSE:auction:\d{4}:/.test(recordId)
+    : /^TWSE:(?:public|public-offering):\d{4}:/.test(recordId);
+  return sourceMatches && manifestIds.has(requiredSourceId) ? value[key] : null;
 }
 
 function selectPrimaryEvent(events) {
@@ -310,7 +351,11 @@ function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""
 function positiveInteger(value) { return Math.max(1, Number.parseInt(value ?? "1", 10) || 1); }
 function pageSize() { return matchMedia("(max-width: 900px)").matches ? 25 : 50; }
 function daysLabel(days) { return Number.isFinite(days) ? `${days > 0 ? "+" : ""}${formatNumber(days)} 天` : "—"; }
-function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="7" class="empty-cell">${message}</td></tr>`; }
+function stageDateFacts(row) {
+  const facts = [["送件日", row.applicationDate], ["審議日", row.reviewDate], ["董事會日", row.boardDate], ["契約日", row.contractDate], ["競拍日", row.auctionBidStartDate], ["申購日", row.subscriptionStartDate], ["掛牌日", row.listingDate]];
+  return `<dl class="ipo-card-details">${facts.map(([label, date]) => `<div><dt>${label}</dt><dd>${formatDate(date)}</dd></div>`).join("")}</dl>`;
+}
+function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="15" class="empty-cell">${message}</td></tr>`; }
 function emptyCard(message = "沒有符合條件的資料") { return `<p class="empty-cell">${message}</p>`; }
 function selectExistingValue(selector, value) { const select = document.querySelector(selector); select.value = [...select.options].some((option) => option.value === value) ? value : "all"; }
 function companyLink(row) { return `<a href="./ipo.html?q=${encodeURIComponent(row.companyCode)}">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</a>`; }
