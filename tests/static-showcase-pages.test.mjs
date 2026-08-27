@@ -4,15 +4,15 @@ import test from "node:test";
 
 const showcaseRoot = new URL("../static-showcase/", import.meta.url);
 const primaryPageFiles = [
-  ["index.html", "首頁"],
-  ["emerging.html", "興櫃市場"],
+  ["index.html", "總覽"],
+  ["emerging.html", "興櫃"],
   ["ipo-radar.html", "IPO"],
   ["bonds.html", "可轉債"],
   ["data-center.html", "資料中心"],
 ];
 const v2Navigation = [
-  ["首頁", "./index.html"],
-  ["興櫃市場", "./emerging.html"],
+  ["總覽", "./index.html"],
+  ["興櫃", "./emerging.html"],
   ["IPO", "./ipo-radar.html"],
   ["可轉債", "./bonds.html"],
   ["資料中心", "./data-center.html"],
@@ -35,6 +35,16 @@ test("V2 主導覽在所有公開入口保持五個一致項目", async () => {
     assert.doesNotMatch(navigation, />IPO 時程</);
     assert.doesNotMatch(navigation, />IPO 雷達</);
   }
+});
+
+test("V2 提供附加的公司整合頁與行動五項導覽容器", async () => {
+  const [company, shell] = await Promise.all([
+    readShowcaseFile("company.html"),
+    readShowcaseFile("assets/site-shell.js"),
+  ]);
+  assert.match(company, /公司整合頁/);
+  assert.match(shell, /renderMobileNavigation/);
+  assert.match(shell, /data-mobile-navigation/);
 });
 
 for (const [currentFile, pageName] of primaryPageFiles) {
