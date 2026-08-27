@@ -161,13 +161,12 @@ test("does not retain unused market-price UI selectors", async () => {
   assert.doesNotMatch(stylesheet, /\.quote-(?:clock|source-bar|panel)\b/);
 });
 
-test("V2 public navigation and presentation vocabulary stay research-only", async () => {
+test("V4 public navigation and presentation vocabulary stay research-only", async () => {
   assert.deepEqual(PUBLIC_PRIMARY_NAVIGATION.map((item) => item.label), [
-    "總覽",
+    "首頁",
     "興櫃",
     "IPO",
     "可轉債",
-    "資料中心",
   ]);
 
   const publicFiles = await filesUnder("static-showcase");

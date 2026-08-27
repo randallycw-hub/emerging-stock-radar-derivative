@@ -4,40 +4,39 @@ import test from "node:test";
 
 const showcaseRoot = new URL("../static-showcase/", import.meta.url);
 const primaryPageFiles = [
-  ["index.html", "總覽"],
+  ["index.html", "首頁"],
   ["emerging.html", "興櫃"],
   ["ipo-radar.html", "IPO"],
   ["bonds.html", "可轉債"],
-  ["data-center.html", "資料中心"],
 ];
-const v2Navigation = [
-  ["總覽", "./index.html"],
+const v4Navigation = [
+  ["首頁", "./index.html"],
   ["興櫃", "./emerging.html"],
   ["IPO", "./ipo-radar.html"],
   ["可轉債", "./bonds.html"],
-  ["資料中心", "./data-center.html"],
 ];
 
 async function readShowcaseFile(path) {
   return readFile(new URL(path, showcaseRoot), "utf8");
 }
 
-test("V2 主導覽在所有公開入口保持五個一致項目", async () => {
-  const pages = ["index.html", "emerging.html", "ipo-radar.html", "ipo.html", "bonds.html", "data-center.html"];
+test("V4 主導覽在所有公開入口保持四個研究入口", async () => {
+  const pages = ["index.html", "emerging.html", "ipo-radar.html", "ipo.html", "bonds.html", "company.html"];
   const shell = await readShowcaseFile("assets/site-shell.js");
   assert.match(shell, /PUBLIC_PRIMARY_NAVIGATION/);
   for (const page of pages) {
     const html = await readShowcaseFile(page);
     const navigation = html.match(/<nav id="primary-navigation"[\s\S]*?<\/nav>/)?.[0] ?? "";
-    for (const [label, href] of v2Navigation) {
+    for (const [label, href] of v4Navigation) {
       assert.match(navigation, new RegExp(`href="${href.replace(".", "\\.")}"[^>]*>${label}<`));
     }
+    assert.doesNotMatch(navigation, /資料中心/);
     assert.doesNotMatch(navigation, />IPO 時程</);
     assert.doesNotMatch(navigation, />IPO 雷達</);
   }
 });
 
-test("V2 提供附加的公司整合頁與行動五項導覽容器", async () => {
+test("V4 提供附加的公司整合頁與行動五項導覽容器", async () => {
   const [company, shell] = await Promise.all([
     readShowcaseFile("company.html"),
     readShowcaseFile("assets/site-shell.js"),
@@ -45,6 +44,7 @@ test("V2 提供附加的公司整合頁與行動五項導覽容器", async () =>
   assert.match(company, /公司整合頁/);
   assert.match(shell, /renderMobileNavigation/);
   assert.match(shell, /data-mobile-navigation/);
+  assert.match(shell, /label: "更多"/);
 });
 
 for (const [currentFile, pageName] of primaryPageFiles) {
@@ -75,12 +75,12 @@ for (const [currentFile, pageName] of primaryPageFiles) {
   });
 }
 
-test("資料方法直接頁保留五項主要導覽", async () => {
+test("資料方法直接頁保留四項主要導覽", async () => {
   const html = await readShowcaseFile("methodology.html");
   for (const [linkedFile] of primaryPageFiles) {
     assert.match(html, new RegExp(`href="\\./${linkedFile}"`));
   }
-  assert.doesNotMatch(html, /href="\.\/methodology\.html"/);
+  assert.doesNotMatch(html, /資料中心/);
 });
 
 test("首頁提供市場與 IPO 雙入口以及最後成功更新狀態", async () => {

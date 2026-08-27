@@ -1,19 +1,19 @@
 <!doctype html>
 <html lang="zh-Hant" data-theme="light">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="市場資訊台資料營運與品質中心"><title>資料中心｜市場資訊台</title><link rel="stylesheet" href="./assets/app.css"></head>
-<body data-page="data-center" class="data-center-page">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="description" content="市場資訊台系統資料狀態"><title>系統資料狀態｜市場資訊台</title><link rel="stylesheet" href="./assets/app.css"></head>
+<body data-page="system-status" class="data-center-page">
   <a class="skip-link" href="#main-content">跳到主要內容</a>
   <header class="site-header"><div class="site-header__inner">
     <a class="site-mark" href="./index.html" aria-label="市場資訊台首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a><button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"><span aria-hidden="true">☰</span><span>選單</span></button>
-    <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽"><a data-page-link="home" href="./index.html">總覽</a><a data-page-link="emerging" href="./emerging.html">興櫃</a><a data-page-link="ipo" href="./ipo-radar.html">IPO</a><a data-page-link="bonds" href="./bonds.html">可轉債</a><a data-page-link="data-center" href="./data-center.html" aria-current="page">資料中心</a></nav><button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
+    <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽"><a data-page-link="home" href="./index.html">首頁</a><a data-page-link="emerging" href="./emerging.html">興櫃</a><a data-page-link="ipo" href="./ipo-radar.html">IPO</a><a data-page-link="bonds" href="./bonds.html">可轉債</a></nav><button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
   </div></header>
   <main id="main-content" class="page-content data-center-page-content" tabindex="-1">
-    <header class="page-heading"><p class="kicker">DATA CENTER / OPERATIONS</p><h1>資料營運中心</h1><p>查看公開市場資料的健康度、更新狀態、建置期檢核、官方來源與既有方法定義。資料不足時以「—」顯示，不以推測補值。</p></header>
+    <header class="page-heading"><p class="kicker">SYSTEM STATUS / LEGACY ROUTE</p><h1>系統資料狀態</h1><p>此為既有連結，已保留相同的公開資料查核功能。<a href="./system-status.html">前往系統資料狀態</a>。</p></header>
     <section class="data-center-dashboard" aria-label="資料營運與品質中心">
       <p id="data-center-update" class="update-status" aria-live="polite">目前顯示最近安全快照。</p>
       <div id="data-center-static-summary"><!-- DATA_CENTER_STATIC_SUMMARY --></div>
       <script id="data-center-bootstrap" type="application/json"><!-- DATA_CENTER_BOOTSTRAP --></script>
     </section>
   </main>
-  <footer class="footer">市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer><script type="module" src="./assets/site-shell.js"></script><script type="module" src="./assets/data-center-page.js"></script>
+  <footer class="footer public-footer" data-public-footer>市場資訊台</footer><script type="module" src="./assets/site-shell.js"></script><script type="module" src="./assets/data-center-page.js"></script>
 </body></html>

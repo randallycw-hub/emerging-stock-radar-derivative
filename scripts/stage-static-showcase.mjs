@@ -36,6 +36,7 @@ const ROOT_FILES = new Set([
   "bonds.html",
   "company.html",
   "data-center.html",
+  "system-status.html",
   "bonds-events.html",
   "bonds-filter.html",
   "bonds-issuance.html",
@@ -273,23 +274,25 @@ function inferRevenuePeriod(rows) {
 }
 
 async function injectDataCenterBootstrap({ destination, status }) {
-  const path = join(destination, "data-center.html");
-  let html;
-  try {
-    html = await readFile(path, "utf8");
-  } catch {
-    return;
-  }
-  if (!html.includes("<!-- DATA_CENTER_STATIC_SUMMARY -->") || !html.includes("<!-- DATA_CENTER_BOOTSTRAP -->")) return;
   const bootstrap = JSON.stringify(status)
     .replace(/</g, "\\u003c")
     .replace(/>/g, "\\u003e")
     .replace(/&/g, "\\u0026")
     .replace(/\u2028/g, "\\u2028")
     .replace(/\u2029/g, "\\u2029");
-  await writeFile(path, html
-    .replace("<!-- DATA_CENTER_STATIC_SUMMARY -->", renderDataCenterBootstrap(status))
-    .replace("<!-- DATA_CENTER_BOOTSTRAP -->", bootstrap), "utf8");
+  for (const fileName of ["data-center.html", "system-status.html"]) {
+    const path = join(destination, fileName);
+    let html;
+    try {
+      html = await readFile(path, "utf8");
+    } catch {
+      continue;
+    }
+    if (!html.includes("<!-- DATA_CENTER_STATIC_SUMMARY -->") || !html.includes("<!-- DATA_CENTER_BOOTSTRAP -->")) continue;
+    await writeFile(path, html
+      .replace("<!-- DATA_CENTER_STATIC_SUMMARY -->", renderDataCenterBootstrap(status))
+      .replace("<!-- DATA_CENTER_BOOTSTRAP -->", bootstrap), "utf8");
+  }
 }
 
 export function projectPublicBondArtifacts({ workbench, views, issuerResearch }) {

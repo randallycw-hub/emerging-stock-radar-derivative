@@ -1,17 +1,37 @@
 const themeStorageKey = "market-theme";
 
 export const PUBLIC_PRIMARY_NAVIGATION = Object.freeze([
-  Object.freeze({ key: "home", label: "總覽", href: "./index.html" }),
+  Object.freeze({ key: "home", label: "首頁", href: "./index.html" }),
   Object.freeze({ key: "emerging", label: "興櫃", href: "./emerging.html" }),
   Object.freeze({ key: "ipo", label: "IPO", href: "./ipo-radar.html" }),
   Object.freeze({ key: "bonds", label: "可轉債", href: "./bonds.html" }),
-  Object.freeze({ key: "data-center", label: "資料中心", href: "./data-center.html" }),
 ]);
 
-export function renderMobileNavigation(activePage = "") {
+const MOBILE_PRIMARY_NAVIGATION = Object.freeze([
+  ...PUBLIC_PRIMARY_NAVIGATION,
+  Object.freeze({ key: "more", label: "更多", href: "./methodology.html" }),
+]);
+
+export function renderPrimaryNavigation(activePage = "") {
   return PUBLIC_PRIMARY_NAVIGATION.map(({ key, label, href }) => (
+    `<a data-page-link="${key}" href="${href}"${key === activePage ? ' aria-current="page"' : ""}>${label}</a>`
+  )).join("");
+}
+
+export function renderMobileNavigation(activePage = "") {
+  return MOBILE_PRIMARY_NAVIGATION.map(({ key, label, href }) => (
     `<a href="${href}"${key === activePage ? ' aria-current="page"' : ""}>${label}</a>`
   )).join("");
+}
+
+export function renderPublicFooter() {
+  return [
+    '<div class="public-footer__main">',
+    '<div><strong>台灣盤後市場資訊台</strong><p>以已發布公開資料整理興櫃、IPO 與可轉債資訊。</p></div>',
+    '<nav aria-label="頁尾導覽"><a href="./methodology.html">資料與方法</a><a href="./system-status.html">系統資料狀態</a></nav>',
+    '</div>',
+    '<p class="public-footer__notice">資料僅供研究參考，不構成投資建議。</p>',
+  ].join("");
 }
 
 export function marketDetailHref(companyCode) {
@@ -144,6 +164,12 @@ function initializeActivePage() {
   }
 }
 
+function initializePrimaryNavigation() {
+  const navigation = document.querySelector("#primary-navigation");
+  if (!navigation) return;
+  navigation.innerHTML = renderPrimaryNavigation(document.body.dataset.page);
+}
+
 function initializeMobileNavigation() {
   if (document.querySelector("[data-mobile-navigation]")) return;
   const navigation = document.createElement("nav");
@@ -154,11 +180,19 @@ function initializeMobileNavigation() {
   document.body.append(navigation);
 }
 
+function initializePublicFooter() {
+  const footer = document.querySelector("[data-public-footer]");
+  if (!footer) return;
+  footer.innerHTML = renderPublicFooter();
+}
+
 function initializeShell() {
   initializeTheme();
+  initializePrimaryNavigation();
   initializeNavigation();
   initializeActivePage();
   initializeMobileNavigation();
+  initializePublicFooter();
 }
 
 if (typeof document !== "undefined") initializeShell();
