@@ -114,6 +114,30 @@ test("Sites staging copies the complete static showcase including the active gen
   assert.ok(manifest.market.files.some((entry) => entry.name === "ipo-events.json"));
 });
 
+test("Sites staging writes a public Data Center status artifact and safe HTML bootstrap", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-data-center-v3-"));
+  const source = join(root, "source");
+  const destination = join(root, "dist", "client", "market-site");
+  await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
+  await writeFile(
+    join(source, "data-center.html"),
+    '<main><section id="data-center-system"><div id="data-center-static-summary"><!-- DATA_CENTER_STATIC_SUMMARY --></div><script id="data-center-bootstrap" type="application/json"><!-- DATA_CENTER_BOOTSTRAP --></script></section></main>',
+    "utf8",
+  );
+
+  await stageStaticShowcase({ source, destination });
+
+  const status = JSON.parse(await readFile(
+    join(destination, "data", "generations", "abc123", "data-status.json"),
+    "utf8",
+  ));
+  const html = await readFile(join(destination, "data-center.html"), "utf8");
+  assert.equal(status.snapshotId, "abc123");
+  assert.match(html, /id="data-center-bootstrap"/);
+  assert.match(html, /系統資料狀態/);
+  assert.doesNotMatch(html, /sourceId|missingReasons|更新資訊讀取中/);
+});
+
 test("Sites staging still rejects an unknown presentation asset", async () => {
   const root = await mkdtemp(join(tmpdir(), "showcase-stage-unknown-asset-"));
   const source = join(root, "source");
