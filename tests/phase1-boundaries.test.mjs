@@ -163,8 +163,8 @@ test("does not retain unused market-price UI selectors", async () => {
 
 test("V2 public navigation and presentation vocabulary stay research-only", async () => {
   assert.deepEqual(PUBLIC_PRIMARY_NAVIGATION.map((item) => item.label), [
-    "首頁",
-    "興櫃市場",
+    "總覽",
+    "興櫃",
     "IPO",
     "可轉債",
     "資料中心",

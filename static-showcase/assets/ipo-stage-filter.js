@@ -81,6 +81,22 @@ export function projectActiveIpoEventEntries(rows, dataDate) {
   ));
 }
 
+export function selectPublishedUpcomingEvents(entries, dataDate, days = 7) {
+  if (!validDate(dataDate)) return [];
+  return (Array.isArray(entries) ? entries : [])
+    .filter(({ event }) => validDate(event?.date))
+    .filter(({ event }) => {
+      const distance = calendarDistance(dataDate, event.date);
+      return distance >= 0 && distance <= days;
+    })
+    .sort((left, right) => left.event.date.localeCompare(right.event.date)
+      || String(left.row?.companyCode ?? "").localeCompare(String(right.row?.companyCode ?? "")));
+}
+
+export function publicIpoTimelineHref(companyCode) {
+  return `./ipo.html?q=${encodeURIComponent(String(companyCode ?? "").trim())}`;
+}
+
 function hasApprovedIpoEventEvidence(event) {
   return event?.verified === true || approvedSourceIds.has(event?.sourceId);
 }

@@ -1,4 +1,4 @@
-import { formatDate, formatNumber, safeJsonFetch } from "./site-shell.js";
+import { formatDate, formatNumber, marketDetailHref, safeJsonFetch } from "./site-shell.js";
 import { emergingDailyAverageLabel } from "./emerging-market-display.js";
 import { sortRows } from "./table-sort.js";
 
@@ -55,7 +55,7 @@ async function loadData() {
 
 function initializeFromUrl() {
   const params = new URLSearchParams(location.search);
-  state.view = params.get("view") === "revenue" ? "revenue" : "market";
+  state.view = ["rankings", "market", "revenue"].includes(params.get("view")) ? params.get("view") : "market";
   state.query = params.get("q") ?? "";
   state.industry = params.get("industry") ?? "all";
   state.application = params.get("application") ?? "all";
@@ -137,16 +137,18 @@ function bindControls() {
 }
 
 function render() {
+  const rankingsSelected = state.view === "rankings";
   const marketSelected = state.view === "market";
+  document.querySelector("#rankings-view").hidden = !rankingsSelected;
   document.querySelector("#market-view").hidden = !marketSelected;
-  document.querySelector("#revenue-view").hidden = marketSelected;
+  document.querySelector("#revenue-view").hidden = state.view !== "revenue";
   for (const button of document.querySelectorAll("[data-emerging-view]")) {
     button.setAttribute("aria-selected", String(button.dataset.emergingView === state.view));
     button.tabIndex = button.dataset.emergingView === state.view ? 0 : -1;
   }
-  if (marketSelected) {
+  if (rankingsSelected || marketSelected) {
     renderBreadthAndRankings();
-    renderMarketTable();
+    if (marketSelected) renderMarketTable();
   } else {
     renderRevenue();
   }
@@ -252,7 +254,7 @@ function filteredMarketRows() {
 
 function marketRowHtml(row) {
   return `<tr id="company-${escapeHtml(row.companyCode)}">
-    <th scope="row"><a href="./market.html?code=${encodeURIComponent(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a></th>
+    <th scope="row"><a href="${marketDetailHref(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a></th>
     <td>${escapeHtml(row.industryName ?? "未分類")}</td>
     <td>${formatEmergingDailyAverage(row)}</td>
     <td>${formatNumber(row.previousAveragePrice, { maximumFractionDigits: 2 })}</td>

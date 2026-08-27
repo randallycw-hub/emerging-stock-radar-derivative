@@ -67,9 +67,9 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.doesNotMatch(js, /location\.hash|hashchange/);
   assert.doesNotMatch(js, /資料來源|擷取版本/);
   assert.match(sortJs, /export function sortRows/);
-  assert.match(css, /--clay:\s*#b96849/);
-  assert.match(css, /--clay-ink:\s*#8b412d/);
-  assert.match(css, /--violet:\s*#7a638f/);
+  assert.match(css, /--clay:\s*#2456a6/);
+  assert.match(css, /--clay-ink:\s*#194584/);
+  assert.match(css, /--violet:\s*#7352b8/);
   assert.match(css, /color:\s*var\(--clay-ink\)/);
   assert.match(css, /\[data-theme="dark"\]/);
   assert.match(css, /@media\s*\(max-width:\s*900px\)/);
@@ -220,6 +220,7 @@ test("bond page provides composable public event controls and a clear-all empty 
     readFile(new URL("assets/bonds-page.js", root), "utf8"),
     readFile(new URL("assets/app.css", root), "utf8"),
   ]);
+  assert.match(html, /data-bond-quick-observation/);
   assert.match(html, /<fieldset class="bond-event-shortcuts"/);
   assert.equal((html.match(/data-bond-shortcut=/g) ?? []).length, 7);
   for (const label of ["新發行", "低溢價", "接近轉換價值", "低 CB 收盤價", "90 日內權利事件"]) {
@@ -228,9 +229,12 @@ test("bond page provides composable public event controls and a clear-all empty 
   for (const id of ["bond-maturity-before", "bond-remaining-max", "bond-secured"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
+  assert.match(html, /<details data-bond-advanced-filters>/);
+  assert.match(html, /<summary>進階篩選<\/summary>/);
   assert.match(js, /aria-pressed/);
   assert.match(js, /清除所有條件/);
   assert.match(css, /\.bond-event-shortcuts/);
+  assert.match(css, /\.bond-advanced-filter-grid/);
 });
 
 test("bond page keeps public screeners and official sources without unavailable licensed-data notices", async () => {

@@ -1,12 +1,22 @@
 const themeStorageKey = "market-theme";
 
 export const PUBLIC_PRIMARY_NAVIGATION = Object.freeze([
-  Object.freeze({ key: "home", label: "首頁", href: "./index.html" }),
-  Object.freeze({ key: "emerging", label: "興櫃市場", href: "./emerging.html" }),
+  Object.freeze({ key: "home", label: "總覽", href: "./index.html" }),
+  Object.freeze({ key: "emerging", label: "興櫃", href: "./emerging.html" }),
   Object.freeze({ key: "ipo", label: "IPO", href: "./ipo-radar.html" }),
   Object.freeze({ key: "bonds", label: "可轉債", href: "./bonds.html" }),
   Object.freeze({ key: "data-center", label: "資料中心", href: "./data-center.html" }),
 ]);
+
+export function renderMobileNavigation(activePage = "") {
+  return PUBLIC_PRIMARY_NAVIGATION.map(({ key, label, href }) => (
+    `<a href="${href}"${key === activePage ? ' aria-current="page"' : ""}>${label}</a>`
+  )).join("");
+}
+
+export function marketDetailHref(companyCode) {
+  return `./market.html?code=${encodeURIComponent(String(companyCode ?? "").trim())}`;
+}
 
 export function formatDate(value) {
   if (!value) return "—";
@@ -134,10 +144,21 @@ function initializeActivePage() {
   }
 }
 
+function initializeMobileNavigation() {
+  if (document.querySelector("[data-mobile-navigation]")) return;
+  const navigation = document.createElement("nav");
+  navigation.className = "mobile-bottom-navigation";
+  navigation.dataset.mobileNavigation = "";
+  navigation.setAttribute("aria-label", "行動版主要導覽");
+  navigation.innerHTML = renderMobileNavigation(document.body.dataset.page);
+  document.body.append(navigation);
+}
+
 function initializeShell() {
   initializeTheme();
   initializeNavigation();
   initializeActivePage();
+  initializeMobileNavigation();
 }
 
 if (typeof document !== "undefined") initializeShell();

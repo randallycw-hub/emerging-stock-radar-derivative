@@ -20,8 +20,8 @@
         <span>選單</span>
       </button>
       <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽">
-        <a data-page-link="home" href="./index.html">首頁</a>
-        <a data-page-link="emerging" href="./emerging.html">興櫃市場</a>
+        <a data-page-link="home" href="./index.html">總覽</a>
+        <a data-page-link="emerging" href="./emerging.html">興櫃</a>
         <a data-page-link="ipo" href="./ipo-radar.html">IPO</a>
         <a data-page-link="bonds" href="./bonds.html" aria-current="page">可轉債</a>
         <a data-page-link="data-center" href="./data-center.html">資料中心</a>
@@ -60,19 +60,26 @@
           </label>
           <label class="archive-toggle"><input id="bond-archive-toggle" name="archived" type="checkbox"> 顯示封存可轉債</label>
           <label><span>公開資料快速檢視</span><select id="bond-public-screener" name="screener"><option value="">全部可轉債</option><option value="recent90">近 90 日發行</option><option value="maturity365">365 日內到期</option><option value="converted75">已轉換逾 75%</option><option value="cheap">低 CB 收盤價</option><option value="conversion100">轉換價值接近 100</option><option value="lowPremium">低轉換溢價</option></select></label>
-          <fieldset class="bond-event-shortcuts">
-            <legend>公開資料客觀條件</legend>
-            <button type="button" data-bond-shortcut="recent-issue" aria-pressed="false">新發行</button>
-            <button type="button" data-bond-shortcut="low-premium" aria-pressed="false">低溢價</button>
-            <button type="button" data-bond-shortcut="near-conversion" aria-pressed="false">接近轉換價值</button>
-            <button type="button" data-bond-shortcut="low-price" aria-pressed="false">低 CB 收盤價</button>
-            <button type="button" data-bond-shortcut="upcoming-rights" aria-pressed="false">90 日內權利事件</button>
-            <button type="button" data-bond-shortcut="maturity365" aria-pressed="false">365 日內到期</button>
-            <button type="button" data-bond-shortcut="clear" aria-pressed="false">清除所有條件</button>
-          </fieldset>
-          <label><span>到期日不晚於</span><input id="bond-maturity-before" name="maturityBefore" type="date"></label>
-          <label><span>流通餘額比例上限 (%)</span><input id="bond-remaining-max" name="remainingMax" type="number" min="0" max="100" step="0.01" inputmode="decimal"></label>
-          <label><span>擔保情形</span><select id="bond-secured" name="secured"><option value="">不限</option><option value="無擔保">無擔保</option><option value="有擔保">有擔保</option></select></label>
+          <section class="bond-quick-observation" data-bond-quick-observation aria-label="可轉債快速觀察">
+            <fieldset class="bond-event-shortcuts">
+              <legend>快速觀察</legend>
+              <button type="button" data-bond-shortcut="recent-issue" aria-pressed="false">新發行</button>
+              <button type="button" data-bond-shortcut="low-premium" aria-pressed="false">低溢價</button>
+              <button type="button" data-bond-shortcut="near-conversion" aria-pressed="false">接近轉換價值</button>
+              <button type="button" data-bond-shortcut="low-price" aria-pressed="false">低 CB 收盤價</button>
+              <button type="button" data-bond-shortcut="upcoming-rights" aria-pressed="false">90 日內權利事件</button>
+              <button type="button" data-bond-shortcut="maturity365" aria-pressed="false">365 日內到期</button>
+              <button type="button" data-bond-shortcut="clear" aria-pressed="false">清除所有條件</button>
+            </fieldset>
+          </section>
+          <details data-bond-advanced-filters>
+            <summary>進階篩選</summary>
+            <div class="bond-advanced-filter-grid">
+              <label><span>到期日不晚於</span><input id="bond-maturity-before" name="maturityBefore" type="date"></label>
+              <label><span>流通餘額比例上限 (%)</span><input id="bond-remaining-max" name="remainingMax" type="number" min="0" max="100" step="0.01" inputmode="decimal"></label>
+              <label><span>擔保情形</span><select id="bond-secured" name="secured"><option value="">不限</option><option value="無擔保">無擔保</option><option value="有擔保">有擔保</option></select></label>
+            </div>
+          </details>
           <button id="bond-clear-filter" type="button" hidden>清除所有條件</button>
           <output id="bond-result-count" aria-live="polite">—</output>
         </form>

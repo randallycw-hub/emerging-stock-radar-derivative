@@ -20,6 +20,7 @@ test("Sites staging copies the complete static showcase including the active gen
   await seedDeclaredIssuerResearchGeneration(source, { includeRuntimeKey: true });
   await mkdir(join(source, "assets"), { recursive: true });
   await writeFile(join(source, "index.html"), "正式首頁", "utf8");
+  await writeFile(join(source, "company.html"), "正式公司整合頁", "utf8");
   await writeFile(join(source, "ipo-offering.html"), "正式競拍申購頁", "utf8");
   await writeFile(join(source, "assets", "app.css"), "body{}", "utf8");
   await writeFile(
@@ -46,6 +47,7 @@ test("Sites staging copies the complete static showcase including the active gen
     "bond-list-page.js",
     "bond-detail-page.js",
     "bond-candlestick-chart.js",
+    "company-overview.js",
     "ipo-offering-page.js",
   ]) {
     await writeFile(
@@ -61,6 +63,7 @@ test("Sites staging copies the complete static showcase including the active gen
   ]);
 
   assert.equal(await readFile(join(destination, "index.html"), "utf8"), "正式首頁");
+  assert.equal(await readFile(join(destination, "company.html"), "utf8"), "正式公司整合頁");
   assert.equal(await readFile(join(destination, "ipo-offering.html"), "utf8"), "正式競拍申購頁");
   assert.equal(await readFile(join(destination, "assets", "app.css"), "utf8"), "body{}");
   assert.equal(
@@ -86,6 +89,7 @@ test("Sites staging copies the complete static showcase including the active gen
     "bond-list-page.js",
     "bond-detail-page.js",
     "bond-candlestick-chart.js",
+    "company-overview.js",
     "ipo-offering-page.js",
   ]) {
     assert.equal(

@@ -51,6 +51,9 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
     assert.match(html, new RegExp(`id="${id}"`));
   }
 
+  assert.match(html, /data-emerging-view="rankings"/);
+  assert.match(html, /排行榜/);
+
   assert.match(html, /assets\/emerging-page\.js/);
   assert.match(js, /URLSearchParams/);
   assert.match(js, /const marketSortKeys = new Set/);

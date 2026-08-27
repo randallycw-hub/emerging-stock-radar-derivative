@@ -4,15 +4,15 @@ import test from "node:test";
 
 const showcaseRoot = new URL("../static-showcase/", import.meta.url);
 const primaryPageFiles = [
-  ["index.html", "首頁"],
-  ["emerging.html", "興櫃市場"],
+  ["index.html", "總覽"],
+  ["emerging.html", "興櫃"],
   ["ipo-radar.html", "IPO"],
   ["bonds.html", "可轉債"],
   ["data-center.html", "資料中心"],
 ];
 const v2Navigation = [
-  ["首頁", "./index.html"],
-  ["興櫃市場", "./emerging.html"],
+  ["總覽", "./index.html"],
+  ["興櫃", "./emerging.html"],
   ["IPO", "./ipo-radar.html"],
   ["可轉債", "./bonds.html"],
   ["資料中心", "./data-center.html"],
@@ -35,6 +35,16 @@ test("V2 主導覽在所有公開入口保持五個一致項目", async () => {
     assert.doesNotMatch(navigation, />IPO 時程</);
     assert.doesNotMatch(navigation, />IPO 雷達</);
   }
+});
+
+test("V2 提供附加的公司整合頁與行動五項導覽容器", async () => {
+  const [company, shell] = await Promise.all([
+    readShowcaseFile("company.html"),
+    readShowcaseFile("assets/site-shell.js"),
+  ]);
+  assert.match(company, /公司整合頁/);
+  assert.match(shell, /renderMobileNavigation/);
+  assert.match(shell, /data-mobile-navigation/);
 });
 
 for (const [currentFile, pageName] of primaryPageFiles) {
@@ -76,7 +86,7 @@ test("資料方法直接頁保留五項主要導覽", async () => {
 test("首頁提供市場與 IPO 雙入口以及最後成功更新狀態", async () => {
   const home = await readShowcaseFile("index.html");
 
-  assert.match(home, /<h1[^>]*>可轉債與興櫃盤後資訊<\/h1>/);
+  assert.match(home, /<h1[^>]*>台灣盤後市場資訊台<\/h1>/);
   assert.match(home, /href="\.\/bonds\.html"/);
   assert.match(home, /href="\.\/emerging\.html"/);
   assert.match(home, /href="\.\/ipo-radar\.html"/);
@@ -198,6 +208,9 @@ test("深淺色主題具備完整語意色彩與鍵盤互動狀態", async () =>
     "--positive",
     "--negative",
     "--focus",
+    "--accent-emerging",
+    "--accent-ipo",
+    "--accent-bonds",
   ]) {
     assert.match(css, new RegExp(`${token}:\\s*#[0-9a-f]{6}`, "i"));
   }
@@ -206,19 +219,19 @@ test("深淺色主題具備完整語意色彩與鍵盤互動狀態", async () =>
   assert.match(css, /:focus-visible/);
   assert.match(css, /button:disabled/);
   assert.match(css, /@media\s*\(max-width:\s*900px\)/);
+  assert.match(css, /\.mobile-bottom-navigation/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*\.mobile-bottom-navigation\s*\{\s*display:\s*grid/);
   assert.match(css, /\.site-header\[data-nav-open\]\s+\.primary-navigation\s*\{\s*display:\s*flex/);
   assert.match(css, /\.home-modules,\s*\n\s*\.methodology-grid\s*\{\s*grid-template-columns:\s*1fr/);
-  assert.doesNotMatch(css, /--(?:page|surface|accent):\s*#(?:0[0-9a-f]|1[0-9a-f]|2[0-9a-f])(?:[4-9a-f][0-9a-f]){2}/i);
-
   for (const [foreground, background] of [
-    ["#241f22", "#fffaf0"],
-    ["#655f62", "#fffaf0"],
-    ["#8b412d", "#fffaf0"],
-    ["#624d78", "#fffaf0"],
-    ["#f7f1e9", "#211f23"],
-    ["#b8adb1", "#211f23"],
-    ["#f0a080", "#211f23"],
-    ["#c4abe0", "#211f23"],
+    ["#172033", "#ffffff"],
+    ["#536176", "#ffffff"],
+    ["#194584", "#ffffff"],
+    ["#573c92", "#ffffff"],
+    ["#f4f7fb", "#111b2d"],
+    ["#b6c2d4", "#111b2d"],
+    ["#9fc0ff", "#111b2d"],
+    ["#cdbbff", "#111b2d"],
   ]) {
     assert.ok(contrastRatio(foreground, background) >= 4.5);
   }

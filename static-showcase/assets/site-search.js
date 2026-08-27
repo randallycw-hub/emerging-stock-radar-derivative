@@ -1,3 +1,5 @@
+import { marketDetailHref } from "./site-shell.js";
+
 const MAX_RESULTS = 8;
 
 export function normalizePublicSearch(value = "") {
@@ -15,10 +17,25 @@ function recordMatches(query, values) {
 export function searchPublicRecords(query, indexes = {}) {
   const needle = normalizePublicSearch(query);
   if (!needle) return [];
+  const companyRows = [
+    ...(Array.isArray(indexes.emerging) ? indexes.emerging : []).map((record) => ({
+      code: safeText(record?.companyCode), label: safeText(record?.companyName),
+    })),
+    ...(Array.isArray(indexes.ipo) ? indexes.ipo : []).map((record) => ({
+      code: safeText(record?.companyCode), label: safeText(record?.companyName),
+    })),
+    ...(Array.isArray(indexes.bonds) ? indexes.bonds : []).map((record) => ({
+      code: safeText(record?.issuerCode), label: safeText(record?.issuerName),
+    })),
+  ].filter((row) => /^\d{4}$/.test(row.code) && row.label && recordMatches(needle, [row.code, row.label]));
+  const companies = companyRows.filter((row, index, rows) => rows.findIndex((candidate) => candidate.code === row.code) === index).map((row) => ({
+    kind: "公司", ...row, href: `./company.html?code=${encodeURIComponent(row.code)}`,
+  }));
   const rows = [
+    ...companies,
     ...(Array.isArray(indexes.emerging) ? indexes.emerging : []).map((record) => ({
       kind: "興櫃", code: safeText(record?.companyCode), label: safeText(record?.companyName),
-      href: `./market.html?code=${encodeURIComponent(safeText(record?.companyCode))}`,
+      href: marketDetailHref(safeText(record?.companyCode)),
     })),
     ...(Array.isArray(indexes.ipo) ? indexes.ipo : []).map((record) => ({
       kind: "IPO", code: safeText(record?.companyCode), label: safeText(record?.companyName),
@@ -76,10 +93,27 @@ async function initializeSiteSearch() {
   form.className = "site-search";
   form.dataset.siteSearch = "";
   form.setAttribute("role", "search");
-  form.innerHTML = '<label><span class="sr-only">搜尋公開代碼或名稱</span><input type="search" autocomplete="off" placeholder="搜尋代碼或名稱" aria-controls="site-search-results" aria-expanded="false"></label><div id="site-search-results" class="site-search__results" role="listbox" hidden></div>';
+  form.innerHTML = '<button type="button" class="site-search__mobile-trigger" aria-label="開啟全站搜尋" aria-controls="site-search-results" aria-expanded="false">搜尋</button><label><span class="sr-only">搜尋公開代碼或名稱</span><input type="search" autocomplete="off" placeholder="搜尋代碼或名稱" aria-controls="site-search-results" aria-expanded="false"></label><div id="site-search-results" class="site-search__results" role="listbox" hidden></div>';
   header.insertBefore(form, header.querySelector("#theme-toggle"));
   const input = form.querySelector("input");
   const results = form.querySelector("#site-search-results");
+  const mobileTrigger = form.querySelector(".site-search__mobile-trigger");
+  const closeMobileSearch = () => {
+    delete form.dataset.mobileOpen;
+    mobileTrigger.setAttribute("aria-expanded", "false");
+  };
+  mobileTrigger.addEventListener("click", () => {
+    form.dataset.mobileOpen = "";
+    mobileTrigger.setAttribute("aria-expanded", "true");
+    input.focus();
+  });
+  form.addEventListener("submit", (event) => event.preventDefault());
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMobileSearch();
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!form.contains(event.target)) closeMobileSearch();
+  });
   const indexes = await loadIndexes();
   input.addEventListener("input", () => {
     const rows = searchPublicRecords(input.value, indexes);
