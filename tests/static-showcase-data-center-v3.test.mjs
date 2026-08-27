@@ -14,7 +14,7 @@ function verifiedFixture({ evaluatedAt = "2026-08-26T18:20:00+08:00" } = {}) {
     manifest: {
       generatedAt: "2026-08-26",
       datasets: [
-        { datasetId: "94025", sourceUrl: "https://mops.example/revenue.csv", downloadedAt: "2026-08-26", rowCount: 12 },
+        { datasetId: "94025", sourceUrl: "https://mopsfin.twse.com.tw/opendata/revenue.csv", downloadedAt: "2026-08-26", rowCount: 12 },
         { datasetId: "11406", sourceUrl: "https://tpex.example/cb.csv", downloadedAt: "2026-08-26", rowCount: 20 },
       ],
       market: {
@@ -35,7 +35,7 @@ function verifiedFixture({ evaluatedAt = "2026-08-26T18:20:00+08:00" } = {}) {
         dataDate: "2026-08-26",
         generatedAt: "2026-08-26T18:08:00+08:00",
         sourceManifest: [
-          { sourceId: "twse-applications", sourceUrl: "https://twse.example/applications" },
+          { sourceId: "twse-applications", sourceUrl: "https://www.twse.com.tw/company/applications" },
           { sourceId: "tpex-applications", sourceUrl: "https://tpex.example/applications" },
         ],
         records: [{ companyCode: "1234" }],
@@ -63,6 +63,10 @@ test("Data Center V3 projects only verified public inputs into an OK health reco
   assert.equal(status.snapshot.current, "abc123");
   assert.equal(JSON.stringify(status).includes("sourceId"), false);
   assert.equal(JSON.stringify(status).includes("missingReasons"), false);
+  const twse = status.sources.find((source) => source.name === "臺灣證券交易所");
+  const mops = status.sources.find((source) => source.name === "公開資訊觀測站");
+  assert.ok(twse.urls.every((url) => !new URL(url).hostname.startsWith("mopsfin.")));
+  assert.ok(mops.urls.every((url) => new URL(url).hostname.startsWith("mopsfin.")));
 });
 
 test("Data Center V3 distinguishes waiting, delayed, fallback, error, and non-trading states", () => {

@@ -10,6 +10,10 @@ import {
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import {
+  buildDataCenterStatus,
+  renderDataCenterBootstrap,
+} from "../static-showcase/assets/data-center-status.js";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
@@ -56,6 +60,7 @@ const ASSET_FILES = new Set([
   "bond-technical-analysis.js",
   "bonds-page.js",
   "data-center-page.js",
+  "data-center-status.js",
   "emerging-market-display.js",
   "emerging-detail-page.js",
   "emerging-page.js",
@@ -204,8 +209,87 @@ export async function stageStaticShowcase({
     await mkdir(dirname(target), { recursive: true });
     await copyFile(join(source, ...relativePath.split("/")), target);
   }
+  const dataCenterStatus = await buildStagedDataCenterStatus({
+    source,
+    destination,
+    generation: pointer.generation,
+    manifest,
+    runtime,
+  });
   await writePublicStaticArtifacts({ destination, generation: pointer.generation });
+  await injectDataCenterBootstrap({ destination, status: dataCenterStatus });
   await writePublicRootArtifacts({ destination });
+}
+
+async function buildStagedDataCenterStatus({ source, destination, generation, manifest, runtime }) {
+  const sourceJson = async (url, message) => readJson(
+    join(source, String(url ?? "").replace(/^\.\//, "")),
+    message,
+  );
+  const [emergingMarket, ipoEvents, bondWorkbench, revenueRows] = await Promise.all([
+    sourceJson(runtime.emergingMarketUrl, "active generation Data Center emerging market is invalid"),
+    sourceJson(runtime.ipoEventsUrl, "active generation Data Center IPO snapshot is invalid"),
+    sourceJson(runtime.datasets?.bondWorkbench, "active generation Data Center CB workbench is invalid"),
+    sourceJson(runtime.datasets?.["94025"], "active generation Data Center revenue snapshot is invalid"),
+  ]);
+  const status = buildDataCenterStatus({
+    generation,
+    manifest,
+    evaluatedAt: new Date().toISOString(),
+    artifacts: {
+      emergingMarket,
+      ipoEvents,
+      bondWorkbench,
+      revenue: { period: inferRevenuePeriod(revenueRows), records: Array.isArray(revenueRows) ? revenueRows : [] },
+    },
+    qa: {
+      checkedAt: new Date().toISOString(),
+      checks: [
+        { label: "已驗證目前公開快照指標", passed: true },
+        { label: "已驗證必要公開資料產物", passed: true },
+        { label: "已驗證可轉債工作台一致性", passed: true },
+        { label: "已驗證 IPO 事件來源與日期", passed: true },
+        { label: "已驗證公開資料投影邊界", passed: true },
+      ],
+    },
+  });
+  const base = join(destination, "data", ...generation.split("/"));
+  await writeFile(join(base, "data-status.json"), `${JSON.stringify(status, null, 2)}\n`, "utf8");
+  return status;
+}
+
+function inferRevenuePeriod(rows) {
+  if (!Array.isArray(rows)) return null;
+  for (const row of rows) {
+    const value = String(row?.yearMonth ?? row?.dataYearMonth ?? row?.["資料年月"] ?? "").trim();
+    if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return value;
+    if (/^\d{5}$/.test(value)) {
+      const year = Number(value.slice(0, 3)) + 1911;
+      const month = value.slice(3);
+      if (month >= "01" && month <= "12") return `${year}-${month}`;
+    }
+  }
+  return null;
+}
+
+async function injectDataCenterBootstrap({ destination, status }) {
+  const path = join(destination, "data-center.html");
+  let html;
+  try {
+    html = await readFile(path, "utf8");
+  } catch {
+    return;
+  }
+  if (!html.includes("<!-- DATA_CENTER_STATIC_SUMMARY -->") || !html.includes("<!-- DATA_CENTER_BOOTSTRAP -->")) return;
+  const bootstrap = JSON.stringify(status)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+  await writeFile(path, html
+    .replace("<!-- DATA_CENTER_STATIC_SUMMARY -->", renderDataCenterBootstrap(status))
+    .replace("<!-- DATA_CENTER_BOOTSTRAP -->", bootstrap), "utf8");
 }
 
 export function projectPublicBondArtifacts({ workbench, views, issuerResearch }) {

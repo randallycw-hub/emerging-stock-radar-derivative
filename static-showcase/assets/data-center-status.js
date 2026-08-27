@@ -183,11 +183,11 @@ function officialSourceRegistry(manifest, ipoSnapshot) {
   const direct = Array.isArray(manifest?.datasets) ? manifest.datasets : [];
   const ipo = sourceUrls(ipoSnapshot?.sourceManifest);
   const allUrls = [...sourceUrls(direct), ...ipo];
-  const matching = (pattern) => allUrls.filter((url) => pattern.test(new URL(url).hostname));
+  const matching = (predicate) => allUrls.filter((url) => predicate(new URL(url).hostname));
   const entries = [
-    { name: "TPEx 櫃買中心", purpose: "興櫃市場與可轉債公開資料", urls: matching(/tpex/i) },
-    { name: "臺灣證券交易所", purpose: "IPO 申請、承銷與掛牌公開事件", urls: matching(/twse/i) },
-    { name: "公開資訊觀測站", purpose: "公司月營收公開資料", urls: matching(/mops/i) },
+    { name: "TPEx 櫃買中心", purpose: "興櫃市場與可轉債公開資料", urls: matching((hostname) => /tpex/i.test(hostname)) },
+    { name: "臺灣證券交易所", purpose: "IPO 申請、承銷與掛牌公開事件", urls: matching((hostname) => /(^|\.)twse\.com\.tw$/i.test(hostname) && !/^mopsfin\./i.test(hostname)) },
+    { name: "公開資訊觀測站", purpose: "公司月營收公開資料", urls: matching((hostname) => /^mopsfin\./i.test(hostname)) },
   ].map((entry) => ({ ...entry, urls: [...new Set(entry.urls)] }))
     .filter((entry) => entry.urls.length > 0);
   return entries;
@@ -296,4 +296,25 @@ export function buildDataCenterStatus({
       { label: "使用前次快照", description: "今日未能安全發布新版本時保留最近有效資料。" },
     ],
   };
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[character]));
+}
+
+function publicDate(value) {
+  if (typeof value !== "string" || !value) return "—";
+  const date = strictIsoDate(value.slice(0, 10));
+  return date ? date.replaceAll("-", "/") : escapeHtml(value);
+}
+
+export function renderDataCenterBootstrap(status = {}) {
+  const system = status?.system ?? {};
+  const snapshot = status?.snapshot ?? {};
+  const statusId = Object.hasOwn(DATA_CENTER_STATUS_LABELS, system.status)
+    ? system.status
+    : DATA_CENTER_STATUS.ERROR;
+  return `<section class="data-center-safe-summary" aria-labelledby="data-center-safe-title"><div><p class="section-number">DATA CENTER / SAFE SNAPSHOT</p><h2 id="data-center-safe-title">資料營運中心</h2><p><span class="data-status data-status--${escapeHtml(statusId.toLowerCase())}">${escapeHtml(DATA_CENTER_STATUS_LABELS[statusId])}</span> ${escapeHtml(system.statusReason ?? "—")}</p></div><dl class="data-center-safe-facts"><div><dt>市場資料日</dt><dd>${publicDate(status?.dataDate)}</dd></div><div><dt>最後完整更新</dt><dd>${publicDate(system.lastCompleteUpdateAt)}</dd></div><div><dt>最後 QA</dt><dd>${publicDate(system.lastQaAt)}</dd></div><div><dt>正常資料集</dt><dd>${Number.isInteger(system.normalDatasetCount) && Number.isInteger(system.totalDatasetCount) ? `${system.normalDatasetCount} / ${system.totalDatasetCount}` : "—"}</dd></div><div><dt>快照</dt><dd>${escapeHtml(snapshot.current ?? "—")}</dd></div></dl></section>`;
 }
