@@ -5,13 +5,14 @@ import test from "node:test";
 import { projectDatasetHealth } from "../static-showcase/assets/data-center-page.js";
 
 test("資料中心只呈現公開可理解的更新與檢核摘要", async () => {
-  const [html, script] = await Promise.all([
+  const [html, script, statusModule] = await Promise.all([
     readFile(new URL("../static-showcase/data-center.html", import.meta.url), "utf8"),
     readFile(new URL("../static-showcase/assets/data-center-page.js", import.meta.url), "utf8"),
+    readFile(new URL("../static-showcase/assets/data-center-status.js", import.meta.url), "utf8"),
   ]);
-  for (const label of ["最近更新", "公開資料檢核", "資料範圍"]) assert.match(html, new RegExp(label));
-  assert.match(script, /generatedAt/);
-  assert.doesNotMatch(html + script, /來源 ID|缺漏原因|response_hash|sha256/);
+  for (const label of ["最後完整更新", "公開資料檢核", "資料狀態說明"]) assert.match(statusModule, new RegExp(label));
+  assert.match(script, /chooseStatusSnapshot/);
+  assert.doesNotMatch(html + script + statusModule, /來源 ID|缺漏原因|response_hash|sha256/);
 });
 
 test("資料中心僅投影可理解的公開資料狀態與更新日期", () => {
@@ -30,13 +31,16 @@ test("資料中心僅投影可理解的公開資料狀態與更新日期", () =>
 });
 
 test("資料中心頁面提供資料集狀態與更新紀錄，且不含內部診斷欄位", async () => {
-  const [html, script] = await Promise.all([
+  const [html, script, statusModule] = await Promise.all([
     readFile(new URL("../static-showcase/data-center.html", import.meta.url), "utf8"),
     readFile(new URL("../static-showcase/assets/data-center-page.js", import.meta.url), "utf8"),
+    readFile(new URL("../static-showcase/assets/data-center-status.js", import.meta.url), "utf8"),
   ]);
-  assert.match(html, /id="data-center-datasets"/);
-  assert.match(html, /id="data-center-update-log"/);
-  assert.doesNotMatch(html + script, /sourceId|missingReasons|approved_cb_history|目前無核准公開資料|待確認/);
+  assert.match(html, /id="data-center-static-summary"/);
+  assert.match(html, /id="data-center-bootstrap"/);
+  assert.match(statusModule, /Dataset Health/);
+  assert.match(statusModule, /更新紀錄/);
+  assert.doesNotMatch(html + script + statusModule, /sourceId|missingReasons|approved_cb_history|目前無核准公開資料|待確認/);
 });
 
 test("方法論定義來源優先、衝突處理與資料刷新邊界", async () => {

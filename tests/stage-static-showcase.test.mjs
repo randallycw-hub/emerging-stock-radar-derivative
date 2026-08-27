@@ -134,7 +134,7 @@ test("Sites staging writes a public Data Center status artifact and safe HTML bo
   const html = await readFile(join(destination, "data-center.html"), "utf8");
   assert.equal(status.snapshotId, "abc123");
   assert.match(html, /id="data-center-bootstrap"/);
-  assert.match(html, /資料營運中心/);
+  assert.match(html, /系統資料狀態/);
   assert.doesNotMatch(html, /sourceId|missingReasons|更新資訊讀取中/);
 });
 

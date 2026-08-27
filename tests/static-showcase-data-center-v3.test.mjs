@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
   DATA_CENTER_STATUS,
   buildDataCenterStatus,
   projectDatasetStatus,
+  renderDataCenterBootstrap,
 } from "../static-showcase/assets/data-center-status.js";
+import { chooseStatusSnapshot } from "../static-showcase/assets/data-center-page.js";
 
 function verifiedFixture({ evaluatedAt = "2026-08-26T18:20:00+08:00" } = {}) {
   return {
@@ -116,4 +119,25 @@ test("Data Center V3 keeps unknown values unavailable instead of changing them t
   assert.equal(revenue.recordCount, 0);
   assert.equal(revenue.dataDate, null);
   assert.equal(revenue.status, DATA_CENTER_STATUS.ERROR);
+});
+
+test("Data Center V3 keeps the embedded safe snapshot when an enhanced refresh is absent or invalid", () => {
+  const bootstrap = buildDataCenterStatus(verifiedFixture());
+  const refreshed = { ...bootstrap, generatedAt: "2026-08-26T19:00:00+08:00" };
+
+  assert.equal(chooseStatusSnapshot(bootstrap, null), bootstrap);
+  assert.equal(chooseStatusSnapshot(bootstrap, { schemaVersion: 2 }), bootstrap);
+  assert.equal(chooseStatusSnapshot(bootstrap, refreshed), refreshed);
+});
+
+test("Data Center V3 exposes operational sections without internal diagnostics", async () => {
+  const [html, script] = await Promise.all([
+    readFile(new URL("../static-showcase/data-center.html", import.meta.url), "utf8"),
+    readFile(new URL("../static-showcase/assets/data-center-page.js", import.meta.url), "utf8"),
+  ]);
+  const rendered = renderDataCenterBootstrap(buildDataCenterStatus(verifiedFixture()));
+  for (const label of ["Dataset Health", "公開資料檢核", "更新紀錄", "異常與勘誤", "官方來源", "資料狀態說明"]) {
+    assert.match(rendered, new RegExp(label));
+  }
+  assert.doesNotMatch(html + script + rendered, /sourceId|missingReasons|response_hash|sha256/);
 });

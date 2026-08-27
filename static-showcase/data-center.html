@@ -1,18 +1,19 @@
 <!doctype html>
 <html lang="zh-Hant" data-theme="light">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="市場資訊台資料中心"><title>資料中心｜市場資訊台</title><link rel="stylesheet" href="./assets/app.css"></head>
-<body data-page="data-center">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="市場資訊台資料營運與品質中心"><title>資料中心｜市場資訊台</title><link rel="stylesheet" href="./assets/app.css"></head>
+<body data-page="data-center" class="data-center-page">
   <a class="skip-link" href="#main-content">跳到主要內容</a>
   <header class="site-header"><div class="site-header__inner">
     <a class="site-mark" href="./index.html" aria-label="市場資訊台首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a><button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"><span aria-hidden="true">☰</span><span>選單</span></button>
     <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽"><a data-page-link="home" href="./index.html">總覽</a><a data-page-link="emerging" href="./emerging.html">興櫃</a><a data-page-link="ipo" href="./ipo-radar.html">IPO</a><a data-page-link="bonds" href="./bonds.html">可轉債</a><a data-page-link="data-center" href="./data-center.html" aria-current="page">資料中心</a></nav><button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
   </div></header>
-  <main id="main-content" class="page-content" tabindex="-1">
-    <header class="page-heading"><p class="kicker">DATA CENTER</p><h1>資料中心</h1><p>公開資料的來源範圍、資料日期與使用方法。資料不足時以「—」顯示，不以推測補值。</p></header>
-    <section class="ledger-section" aria-labelledby="data-center-status"><header class="section-heading"><div><p class="section-number">PUBLISHED SNAPSHOT</p><h2 id="data-center-status">目前公開資料</h2></div><p id="data-center-update" class="update-status" aria-live="polite">已載入最近安全快照</p></header><div id="data-center-static-summary"><!-- DATA_CENTER_STATIC_SUMMARY --></div><dl id="data-center-summary" class="detail-facts"><div><dt>市場資料日期</dt><dd>—</dd></div><div><dt>最近更新</dt><dd>—</dd></div><div><dt>公開資料檢核</dt><dd>—</dd></div><div><dt>資料範圍</dt><dd>興櫃、IPO、可轉債與公司月營收</dd></div></dl><script id="data-center-bootstrap" type="application/json"><!-- DATA_CENTER_BOOTSTRAP --></script></section>
-    <section class="ledger-section" aria-labelledby="data-center-dataset-heading"><header class="section-heading"><div><p class="section-number">DATASET STATUS</p><h2 id="data-center-dataset-heading">資料集狀態</h2></div></header><div id="data-center-datasets" class="data-dataset-grid" aria-live="polite"><p class="empty-state">公開資料讀取中</p></div></section>
-    <section class="ledger-section data-center-log" aria-labelledby="data-center-log-heading"><header class="section-heading"><div><p class="section-number">UPDATE LOG</p><h2 id="data-center-log-heading">資料更新紀錄</h2></div></header><ol id="data-center-update-log" aria-live="polite"><li><span>更新資訊讀取中</span></li></ol></section>
-    <section class="source-section" aria-labelledby="data-center-sources"><p class="section-number">PUBLIC SOURCES</p><h2 id="data-center-sources">公開資料來源</h2><div class="source-grid"><article><h3>可轉債</h3><p>TPEx 可轉債公開清單、盤後成交與公告。</p></article><article><h3>興櫃市場</h3><p>TPEx 興櫃盤後公開資料。</p></article><article><h3>IPO</h3><p>TWSE／TPEx 已公告的申請、承銷與掛牌事件。</p></article><article><h3>公司營運</h3><p>公開資訊觀測站月營收資料。</p></article></div><p>僅使用核對後的公開資料，不蒐集帳密、個人資料或投資部位。</p><p><a href="./methodology.html">查看資料方法與計算原則 →</a></p></section>
+  <main id="main-content" class="page-content data-center-page-content" tabindex="-1">
+    <header class="page-heading"><p class="kicker">DATA CENTER / OPERATIONS</p><h1>資料營運中心</h1><p>查看公開市場資料的健康度、更新狀態、建置期檢核、官方來源與既有方法定義。資料不足時以「—」顯示，不以推測補值。</p></header>
+    <section class="data-center-dashboard" aria-label="資料營運與品質中心">
+      <p id="data-center-update" class="update-status" aria-live="polite">目前顯示最近安全快照。</p>
+      <div id="data-center-static-summary"><!-- DATA_CENTER_STATIC_SUMMARY --></div>
+      <script id="data-center-bootstrap" type="application/json"><!-- DATA_CENTER_BOOTSTRAP --></script>
+    </section>
   </main>
   <footer class="footer">市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer><script type="module" src="./assets/site-shell.js"></script><script type="module" src="./assets/data-center-page.js"></script>
 </body></html>
