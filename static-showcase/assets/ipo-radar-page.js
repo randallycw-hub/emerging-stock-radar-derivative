@@ -1,6 +1,6 @@
 import { formatDate, formatNumber } from "./site-shell.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
-import { defaultIpoStage, displayIpoStage, isActiveIpoRecord, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, shouldWriteIpoStage } from "./ipo-stage-filter.js";
+import { defaultIpoStage, displayIpoStage, isActiveIpoRecord, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, publicIpoTimelineHref, selectPublishedUpcomingEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 
 const stageLabels = {
   A: "A 送件觀察",
@@ -174,8 +174,8 @@ function renderSummary() {
 }
 
 function renderUpcoming() {
-  const entries = projectActiveIpoEventEntries(state.rows, state.dataDate).sort(compareUpcomingEntries).slice(0, 6);
-  document.querySelector("#ipo-upcoming-grid").innerHTML = entries.length ? entries.map(({ row, event }) => `<article class="ranking-panel"><p>${escapeHtml(row.market)}</p><h3>${companyLink(row)}</h3><strong>${escapeHtml(event.label)}</strong><span>${formatDate(event.date)} · ${daysLabel(taipeiCalendarDistance(taipeiToday(), event.date))}</span></article>`).join("") : "<p class=\"empty-cell\">目前沒有近期重要事件</p>";
+  const entries = selectPublishedUpcomingEvents(projectActiveIpoEventEntries(state.rows, state.dataDate), state.dataDate).slice(0, 6);
+  document.querySelector("#ipo-upcoming-grid").innerHTML = entries.length ? entries.map(({ row, event }) => `<article class="ranking-panel"><p>${escapeHtml(row.market)}</p><h3>${companyLink(row)}</h3><strong>${escapeHtml(event.label)}</strong><span>${formatDate(event.date)} · ${daysLabel(taipeiCalendarDistance(state.dataDate, event.date))}</span></article>`).join("") : "<p class=\"empty-cell\">目前沒有未來 7 日公開事件</p>";
 }
 
 function tableRowHtml(row) {
@@ -333,17 +333,6 @@ function compareNumbers(left, right) {
   return left - right;
 }
 
-function compareUpcomingEntries(left, right) {
-  const today = taipeiToday();
-  const leftDays = taipeiCalendarDistance(today, left.event.date);
-  const rightDays = taipeiCalendarDistance(today, right.event.date);
-  const leftFuture = leftDays >= 0;
-  const rightFuture = rightDays >= 0;
-  if (leftFuture !== rightFuture) return leftFuture ? -1 : 1;
-  const dateComparison = leftFuture ? compareDates(left.event.date, right.event.date) : compareDates(right.event.date, left.event.date);
-  return dateComparison || left.row.companyCode.localeCompare(right.row.companyCode);
-}
-
 function stageOrder(stage) { const index = ["A", "B", "C", "D", "listed", "withdrawn", "delayed", "cancelled"].indexOf(stage); return index < 0 ? 99 : index; }
 function stageLabel(stage) { return stageLabels[stage] ?? `未知階段（${stage}）`; }
 function stageClass(stage) { return Object.hasOwn(stageLabels, stage) ? escapeHtml(stage) : "unknown"; }
@@ -359,5 +348,5 @@ function stageDateFacts(row) {
 function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="15" class="empty-cell">${message}</td></tr>`; }
 function emptyCard(message = "沒有符合條件的資料") { return `<p class="empty-cell">${message}</p>`; }
 function selectExistingValue(selector, value) { const select = document.querySelector(selector); select.value = [...select.options].some((option) => option.value === value) ? value : "all"; }
-function companyLink(row) { return `<a href="./ipo.html?q=${encodeURIComponent(row.companyCode)}">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</a>`; }
+function companyLink(row) { return `<a href="${publicIpoTimelineHref(row.companyCode)}">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</a>`; }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]); }

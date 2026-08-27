@@ -16,6 +16,12 @@ if (globalThis.window && globalThis.document) loadHomeData();
 const DAY_MS = 24 * 60 * 60 * 1000;
 const ACTIVE_IPO_STAGES = new Set(["A", "B", "C", "D"]);
 
+export function buildDashboardHealth({ dataDate = null, dataAvailable = false } = {}) {
+  return dataAvailable && isPublishedIsoDate(dataDate)
+    ? { label: "資料已發布", detail: `資料日期 ${dataDate}` }
+    : { label: "資料讀取中", detail: "公開資料正在讀取" };
+}
+
 function recordsOf(value) {
   if (Array.isArray(value)) return value;
   return Array.isArray(value?.records) ? value.records : null;
@@ -153,6 +159,10 @@ async function loadHomeData() {
     ? `最後成功更新：${formatDate(date)}`
     : "更新時間尚未提供";
   const asOfDate = manifest?.market?.dataDate;
+  renderDashboardHealth(buildDashboardHealth({
+    dataDate: asOfDate,
+    dataAvailable: Boolean(workbench && ipo && emerging),
+  }));
   renderHomeEvents({
     asOfDate,
     bonds: Array.isArray(workbench?.records) ? workbench.records : undefined,
@@ -163,6 +173,12 @@ async function loadHomeData() {
   });
   renderHomeSummary(buildHomeSummary({ emerging, ipo, bonds: workbench, asOfDate }));
   renderHomeRankings(buildObjectiveRankings({ emerging, bonds: workbench }));
+}
+
+function renderDashboardHealth(health) {
+  const target = document.querySelector("#dashboard-health");
+  if (!target) return;
+  target.textContent = `${health.label} · ${isPublishedIsoDate(health.detail.slice(-10)) ? formatDate(health.detail.slice(-10)) : health.detail}`;
 }
 
 function renderHomeEvents(input) {

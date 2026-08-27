@@ -86,7 +86,7 @@ test("資料方法直接頁保留五項主要導覽", async () => {
 test("首頁提供市場與 IPO 雙入口以及最後成功更新狀態", async () => {
   const home = await readShowcaseFile("index.html");
 
-  assert.match(home, /<h1[^>]*>可轉債與興櫃盤後資訊<\/h1>/);
+  assert.match(home, /<h1[^>]*>台灣盤後市場資訊台<\/h1>/);
   assert.match(home, /href="\.\/bonds\.html"/);
   assert.match(home, /href="\.\/emerging\.html"/);
   assert.match(home, /href="\.\/ipo-radar\.html"/);
@@ -208,6 +208,9 @@ test("深淺色主題具備完整語意色彩與鍵盤互動狀態", async () =>
     "--positive",
     "--negative",
     "--focus",
+    "--accent-emerging",
+    "--accent-ipo",
+    "--accent-bonds",
   ]) {
     assert.match(css, new RegExp(`${token}:\\s*#[0-9a-f]{6}`, "i"));
   }
@@ -216,19 +219,19 @@ test("深淺色主題具備完整語意色彩與鍵盤互動狀態", async () =>
   assert.match(css, /:focus-visible/);
   assert.match(css, /button:disabled/);
   assert.match(css, /@media\s*\(max-width:\s*900px\)/);
+  assert.match(css, /\.mobile-bottom-navigation/);
+  assert.match(css, /@media\s*\(max-width:\s*900px\)[\s\S]*\.mobile-bottom-navigation\s*\{\s*display:\s*grid/);
   assert.match(css, /\.site-header\[data-nav-open\]\s+\.primary-navigation\s*\{\s*display:\s*flex/);
   assert.match(css, /\.home-modules,\s*\n\s*\.methodology-grid\s*\{\s*grid-template-columns:\s*1fr/);
-  assert.doesNotMatch(css, /--(?:page|surface|accent):\s*#(?:0[0-9a-f]|1[0-9a-f]|2[0-9a-f])(?:[4-9a-f][0-9a-f]){2}/i);
-
   for (const [foreground, background] of [
-    ["#241f22", "#fffaf0"],
-    ["#655f62", "#fffaf0"],
-    ["#8b412d", "#fffaf0"],
-    ["#624d78", "#fffaf0"],
-    ["#f7f1e9", "#211f23"],
-    ["#b8adb1", "#211f23"],
-    ["#f0a080", "#211f23"],
-    ["#c4abe0", "#211f23"],
+    ["#172033", "#ffffff"],
+    ["#536176", "#ffffff"],
+    ["#194584", "#ffffff"],
+    ["#573c92", "#ffffff"],
+    ["#f4f7fb", "#111b2d"],
+    ["#b6c2d4", "#111b2d"],
+    ["#9fc0ff", "#111b2d"],
+    ["#cdbbff", "#111b2d"],
   ]) {
     assert.ok(contrastRatio(foreground, background) >= 4.5);
   }

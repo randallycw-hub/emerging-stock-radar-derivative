@@ -1,7 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildHomeSummary, buildObjectiveRankings } from "../static-showcase/assets/home-page.js";
+import { buildDashboardHealth, buildHomeSummary, buildObjectiveRankings } from "../static-showcase/assets/home-page.js";
+
+test("dashboard health translates published availability without technical diagnostics", () => {
+  assert.deepEqual(buildDashboardHealth({ dataDate: "2026-08-26", dataAvailable: true }), {
+    label: "資料已發布",
+    detail: "資料日期 2026-08-26",
+  });
+  assert.deepEqual(buildDashboardHealth({ dataDate: null, dataAvailable: false }), {
+    label: "資料讀取中",
+    detail: "公開資料正在讀取",
+  });
+});
 
 test("home summary provides the PDF's objective market metrics", () => {
   assert.deepEqual(buildHomeSummary({

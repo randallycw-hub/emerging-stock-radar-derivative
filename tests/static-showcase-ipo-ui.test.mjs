@@ -12,7 +12,10 @@ test("IPO 時程頁由正式事件快照提供五階段、篩選與完整時程"
   ]);
   const source = html + js;
 
-  for (const label of ["IPO 時程", "送件待審", "審議後", "董事會後", "契約後", "競拍／買賣", "未來關鍵事件", "清單檢視", "月份檢視", "定價狀態", "競拍進度"]) {
+  for (const label of ["IPO 時程", "送件待審", "審議後", "董事會後", "契約後", "競拍／買賣", "清單檢視", "月份檢視", "定價狀態", "競拍進度"]) {
+    assert.match(source, new RegExp(label));
+  }
+  for (const label of ["IPO Pipeline", "完整時程", "競拍／公開申購", "未來 7 日公開事件"]) {
     assert.match(source, new RegExp(label));
   }
   for (const id of [
@@ -59,6 +62,17 @@ test("IPO 時程頁由正式事件快照提供五階段、篩選與完整時程"
   assert.doesNotMatch(source, /暫定承銷價|實際承銷價|承銷價格|漲跌幅|報酬率/);
 });
 
+test("IPO 未來事件僅保留資料日後七日內的已發布事件", async () => {
+  const { selectPublishedUpcomingEvents } = await import("../static-showcase/assets/ipo-page.js");
+  const entries = [
+    { row: { companyCode: "1234" }, event: { date: "2026-08-26", label: "當日" } },
+    { row: { companyCode: "2345" }, event: { date: "2026-09-02", label: "第七日" } },
+    { row: { companyCode: "3456" }, event: { date: "2026-09-03", label: "第八日" } },
+    { row: { companyCode: "4567" }, event: { date: "2026-08-25", label: "過去" } },
+  ];
+  assert.deepEqual(selectPublishedUpcomingEvents(entries, "2026-08-26").map(({ row }) => row.companyCode), ["1234", "2345"]);
+});
+
 test("IPO 時程的未來與月份檢視在事件層共用目前篩選", async () => {
   const js = await readFile(new URL("assets/ipo-page.js", root), "utf8");
 
@@ -66,6 +80,7 @@ test("IPO 時程的未來與月份檢視在事件層共用目前篩選", async (
   assert.match(js, /const filteredEvents = filteredEventEntries\(filtered, state, state\.dataDate\);/);
   assert.match(js, /renderUpcoming\(filteredEvents\);/);
   assert.match(js, /renderMonthView\(filteredEvents\);/);
+  assert.match(js, /function renderUpcoming[\s\S]*taipeiCalendarDistance\(state\.dataDate, event\.date\)/);
   assert.match(js, /function filteredEventEntries[\s\S]*event\.kind === filters\.event[\s\S]*event\.date\.slice\(0, 4\) === filters\.year/);
 });
 
