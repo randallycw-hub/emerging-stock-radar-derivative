@@ -272,6 +272,67 @@ test("conservative merge retains verified history when a monthly CB response lac
   assert.equal(merged.find((point) => point.date === "2026-07-30")?.stockClose, "39");
 });
 
+test("conservative merge retains verified valuation when a later official no-trade row only adds zero activity", () => {
+  const existing = buildHistoryPoints({
+    cbQuotes: [],
+    stockCloses: [stockCloses[0]],
+    conversionPrices,
+  });
+  const current = buildHistoryPoints({
+    cbQuotes: [{
+      ...cbQuotes[0],
+      close: null,
+      change: null,
+      open: null,
+      high: null,
+      low: null,
+      average: null,
+      tradingUnits: "0",
+      turnover: "0",
+    }],
+    stockCloses: [],
+    conversionPrices,
+  });
+
+  assert.deepEqual(
+    mergeBondMarketHistoryConservatively(existing, current),
+    existing,
+  );
+});
+
+test("conservative merge combines complementary official CB activity with verified stock valuation", () => {
+  const existing = buildHistoryPoints({
+    cbQuotes: [],
+    stockCloses: [stockCloses[0]],
+    conversionPrices,
+  });
+  const current = buildHistoryPoints({
+    cbQuotes,
+    stockCloses: [],
+    conversionPrices,
+  });
+
+  assert.deepEqual(
+    mergeBondMarketHistoryConservatively(existing, current),
+    [{
+      bondCode: "35221",
+      date: "2026-07-29",
+      cbOpen: "103.5",
+      cbHigh: "103.5",
+      cbLow: "103.5",
+      cbClose: "103.5",
+      cbAverage: "103.5",
+      cbChange: "0",
+      cbTradingUnits: "1",
+      cbTurnover: "103500",
+      stockClose: "36.21",
+      effectiveConversionPrice: "35",
+      conversionValue: "103.46",
+      premiumRate: "0.04",
+    }],
+  );
+});
+
 test("migrated legacy history preserves all source values and represents unavailable fields as null", async () => {
   const history = JSON.parse(await readFile(
     new URL("../static-showcase/data/bond-market-history.json", import.meta.url),

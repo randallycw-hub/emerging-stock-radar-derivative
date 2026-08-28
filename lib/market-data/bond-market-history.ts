@@ -194,12 +194,84 @@ export function mergeBondMarketHistoryConservatively(
   current: unknown,
 ): readonly BondMarketHistoryPoint[] {
   const prior = parseBondMarketHistory(previous);
-  const priorByIdentity = new Map(prior.map((point) => [historyIdentity(point), point]));
-  const appendable = parseBondMarketHistory(current).filter((candidate) => {
-    const existing = priorByIdentity.get(historyIdentity(candidate));
-    return existing === undefined || !isMissingOnlyHistoricalStockContext(existing, candidate);
-  });
-  return mergeBondMarketHistory(prior, appendable);
+  const mergedByIdentity = new Map(
+    prior.map((point) => [historyIdentity(point), point]),
+  );
+  for (const candidate of parseBondMarketHistory(current)) {
+    const identity = historyIdentity(candidate);
+    const existing = mergedByIdentity.get(identity);
+    if (existing === undefined) {
+      mergedByIdentity.set(identity, candidate);
+      continue;
+    }
+    if (JSON.stringify(existing) === JSON.stringify(candidate)) continue;
+    if (isMissingOnlyHistoricalStockContext(existing, candidate)) continue;
+    const merged = mergeComplementaryHistoricalPoint(existing, candidate);
+    if (merged === undefined) {
+      throw new TypeError(`bond market history conflict requires correction evidence: ${identity}`);
+    }
+    mergedByIdentity.set(identity, merged);
+  }
+  return parseBondMarketHistory([...mergedByIdentity.values()].sort(
+    (left, right) => left.date.localeCompare(right.date) || left.bondCode.localeCompare(right.bondCode),
+  ));
+}
+
+function mergeComplementaryHistoricalPoint(
+  existing: BondMarketHistoryPoint,
+  candidate: BondMarketHistoryPoint,
+): BondMarketHistoryPoint | undefined {
+  const fields = {
+    cbOpen: mergeHistoricalFact(existing.cbOpen, candidate.cbOpen),
+    cbHigh: mergeHistoricalFact(existing.cbHigh, candidate.cbHigh),
+    cbLow: mergeHistoricalFact(existing.cbLow, candidate.cbLow),
+    cbClose: mergeHistoricalFact(existing.cbClose, candidate.cbClose),
+    cbAverage: mergeHistoricalFact(existing.cbAverage, candidate.cbAverage),
+    cbChange: mergeHistoricalFact(existing.cbChange, candidate.cbChange),
+    cbTradingUnits: mergeHistoricalFact(existing.cbTradingUnits, candidate.cbTradingUnits),
+    cbTurnover: mergeHistoricalFact(existing.cbTurnover, candidate.cbTurnover),
+    stockClose: mergeHistoricalFact(existing.stockClose, candidate.stockClose),
+    effectiveConversionPrice: mergeHistoricalFact(
+      existing.effectiveConversionPrice,
+      candidate.effectiveConversionPrice,
+    ),
+  };
+  if (Object.values(fields).some((value) => value === undefined)) return undefined;
+  const merged = fields as Record<keyof typeof fields, string | null>;
+  const conversionValue = (
+    merged.stockClose !== null
+    && merged.effectiveConversionPrice !== null
+  )
+    ? multiplyDecimal(
+      divideDecimal(merged.stockClose, merged.effectiveConversionPrice, 8),
+      "100",
+      2,
+    )
+    : null;
+  const premiumRate = merged.cbClose !== null && conversionValue !== null
+    ? multiplyDecimal(
+      subtractDecimal(divideDecimal(merged.cbClose, conversionValue, 8), "1", 8),
+      "100",
+      2,
+    )
+    : null;
+  return {
+    bondCode: existing.bondCode,
+    date: existing.date,
+    ...merged,
+    conversionValue,
+    premiumRate,
+  };
+}
+
+function mergeHistoricalFact(
+  existing: string | null,
+  candidate: string | null,
+): string | null | undefined {
+  if (existing !== null && candidate !== null && existing !== candidate) {
+    return undefined;
+  }
+  return existing ?? candidate;
 }
 
 function isMissingOnlyHistoricalStockContext(
@@ -225,9 +297,20 @@ function isMissingOnlyHistoricalStockContext(
     "cbTurnover",
     "effectiveConversionPrice",
   ] as const) {
+    if (
+      (key === "cbTradingUnits" || key === "cbTurnover")
+      && isOfficialNoTradeZero(existing[key], candidate[key])
+    ) continue;
     if (existing[key] !== candidate[key]) return false;
   }
   return true;
+}
+
+function isOfficialNoTradeZero(
+  existing: string | null,
+  candidate: string | null,
+): boolean {
+  return existing === candidate || (existing === null && candidate === "0");
 }
 
 function historyIdentity(point: Pick<BondMarketHistoryPoint, "bondCode" | "date">): string {

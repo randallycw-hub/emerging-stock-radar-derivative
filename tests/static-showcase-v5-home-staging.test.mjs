@@ -13,10 +13,21 @@ test("V5.1 staging writes the verified research workbench into the static first 
   const root = await mkdtemp(join(tmpdir(), "v5-home-stage-"));
   const destination = join(root, "market-site");
   try {
+    const pointer = JSON.parse(await readFile(
+      join(source, "data", "current.json"),
+      "utf8",
+    ));
+    const manifest = JSON.parse(await readFile(
+      join(source, "data", ...pointer.generation.split("/"), "manifest.json"),
+      "utf8",
+    ));
     await stageStaticShowcase({ source, destination });
     const home = await readFile(join(destination, "index.html"), "utf8");
 
-    assert.match(home, /資料日 2026\/08\/26/);
+    assert.match(
+      home,
+      new RegExp(`資料日 ${manifest.market.dataDate.replaceAll("-", "\\/")}`),
+    );
     assert.match(home, /今天從這裡開始/);
     assert.match(home, /可轉債標的股漲幅/);
     assert.doesNotMatch(home, /讀取中|載入後顯示|資料日將依|HOME_STATIC_|HOME_V51_|資料狀態/);
