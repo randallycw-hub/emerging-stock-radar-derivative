@@ -194,12 +194,7 @@ test("offline builder and outer refresh stage the same CB generation through the
       assert.equal(page.location.search, "?bond=35221");
       assert.match(page.document.element("bond-workbench").innerHTML, /御嵿一/);
       assert.equal(page.document.activeElement, page.document.closeButton);
-      const activeHistory = history.filter((point) => point.bondCode === "35221");
-      assert.ok(activeHistory.length > 0);
-      assert.match(
-        page.document.chartTable.innerHTML,
-        new RegExp(activeHistory.at(-1).date),
-      );
+      assert.match(page.document.element("bond-workbench").innerHTML, /data-bond-kline-host/);
 
       page.document.closeButton.dispatch("keydown", { key: "Enter" });
       assert.equal(page.location.search, "");
@@ -581,7 +576,6 @@ class AcceptanceDetailElement extends AcceptanceElement {
       ) ?? null;
     }
     if (selector === "[data-chart-data]") return null;
-    if (selector === "[data-bond-candlestick-chart]") return this.ownerDocument.chartRoot;
     return null;
   }
 
@@ -591,24 +585,6 @@ class AcceptanceDetailElement extends AcceptanceElement {
     if (selector === "[data-detail-tab]") return this.ownerDocument.detailTabs;
     return [];
   }
-}
-
-class AcceptanceChartRoot extends AcceptanceElement {
-  constructor(document) {
-    super(document, "chart-root");
-    this.clientWidth = 720;
-  }
-
-  querySelector(selector) {
-    if (selector === "canvas") return null;
-    if (selector === "[data-chart-summary]") return this.ownerDocument.chartSummary;
-    if (selector === "[data-chart-table-body]") return this.ownerDocument.chartTable;
-    if (selector === "[data-chart-advanced-values]") return this.ownerDocument.chartAdvanced;
-    if (selector === "[data-chart-events]") return this.ownerDocument.chartEvents;
-    return null;
-  }
-
-  querySelectorAll() { return []; }
 }
 
 class AcceptanceDocument {
@@ -629,11 +605,6 @@ class AcceptanceDocument {
     this.detailTabs = [];
     this.detailAreas = [];
     this.detailPanels = [];
-    this.chartRoot = new AcceptanceChartRoot(this);
-    this.chartSummary = new AcceptanceElement(this, "chart-summary");
-    this.chartTable = new AcceptanceElement(this, "chart-table");
-    this.chartAdvanced = new AcceptanceElement(this, "chart-advanced");
-    this.chartEvents = new AcceptanceElement(this, "chart-events");
   }
 
   element(id) { return this.elements.get(id); }

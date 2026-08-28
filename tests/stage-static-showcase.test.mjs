@@ -46,7 +46,7 @@ test("Sites staging copies the complete static showcase including the active gen
   for (const file of [
     "bond-list-page.js",
     "bond-detail-page.js",
-    "bond-candlestick-chart.js",
+    "klinechart-adapter.js",
     "company-overview.js",
     "ipo-offering-page.js",
   ]) {
@@ -88,7 +88,7 @@ test("Sites staging copies the complete static showcase including the active gen
   for (const file of [
     "bond-list-page.js",
     "bond-detail-page.js",
-    "bond-candlestick-chart.js",
+    "klinechart-adapter.js",
     "company-overview.js",
     "ipo-offering-page.js",
   ]) {

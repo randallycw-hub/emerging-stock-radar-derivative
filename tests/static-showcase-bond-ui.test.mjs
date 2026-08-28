@@ -82,7 +82,7 @@ test("bond page exposes the complete sortable CB workbench", async () => {
   assert.match(js, /bindBondDetail\(target, closeDetail, \{ history: state\.history\.filter/);
   assert.match(detailJs, /function noAdviceViolations/);
   assert.match(detailJs, /FORBIDDEN_UI_PATTERNS/);
-  assert.match(detailJs, /bond-candlestick/);
+  assert.match(detailJs, /data-bond-kline-host/);
   assert.match(detailJs, /noopener noreferrer/);
   assert.doesNotMatch(detailJs, /目前無核准公開資料／待確認/);
   assert.doesNotMatch(bondsHtml + js + detailJs, /資料品質|待補／待確認資料|CBAS 權利金|TCRI 信用評等/);

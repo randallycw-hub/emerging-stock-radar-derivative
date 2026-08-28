@@ -296,14 +296,15 @@ test("mobile detail areas are collapsed by default", () => {
   assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 6);
 });
 
-test("detail exposes an accessible, collapsed candlestick workbench without a trading direction", () => {
+test("V5 detail exposes an accessible KLineChart workbench without a trading direction", () => {
   const html = renderBondDetail(fixture());
-  assert.match(html, /data-bond-candlestick-chart/);
+  assert.match(html, /data-bond-kline-host/);
   assert.match(html, /data-chart-period="day"/);
   assert.match(html, /data-chart-range="6M"[^>]*aria-pressed="true"/);
-  assert.match(html, /data-chart-advanced/);
-  assert.match(html, /Bollinger\(20,2\).*RSI\(14\).*KD\(9,3,3\).*MACD\(12,26,9\)/s);
-  assert.match(html, /data-chart-table/);
+  assert.match(html, /data-chart-indicator="MACD"[^>]*aria-pressed="true"/);
+  assert.match(html, /MA5／10／20／60 · VOL/);
+  assert.match(html, /data-chart-crosshair/);
+  assert.doesNotMatch(html, /<canvas/);
   assert.doesNotMatch(html, /(?:買點|賣點|buy|sell|signal)/i);
 });
 

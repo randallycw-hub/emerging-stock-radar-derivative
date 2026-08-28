@@ -1,3 +1,5 @@
+import { mountKlineChart } from "./klinechart-adapter.js";
+
 function text(value) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -141,6 +143,21 @@ function fact(label, value) {
   return `<div class="company-fact"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`;
 }
 
+function companyTechnicalSection(bonds) {
+  if (bonds.length === 0) {
+    return '<h3>技術圖表</h3><p class="company-empty">目前沒有可轉債公開資料，因此無法提供可核對的 OHLCV 圖表。</p>';
+  }
+  const options = bonds.map((bond) => (
+    `<option value="${escapeHtml(bond.bondCode)}">${escapeHtml(`${bond.bondCode} ${bond.bondName}`)}</option>`
+  )).join("");
+  return `<h3>技術圖表</h3><p>圖表使用本公司已掛牌可轉債的已驗證 OHLCV；缺漏交易日不插補。</p>
+    <div class="company-chart-toolbar"><label>可轉債 <select data-company-chart-bond aria-label="選擇可轉債技術圖表">${options}</select></label><a data-company-chart-detail href="./bonds.html?bond=${encodeURIComponent(bonds[0].bondCode)}">開啟完整債券頁 →</a></div>
+    <div class="chart-controls" aria-label="技術圖表控制項"><fieldset><legend>週期</legend><button type="button" data-company-chart-period="day" aria-pressed="true">日K</button><button type="button" data-company-chart-period="week" aria-pressed="false">週K</button><button type="button" data-company-chart-period="month" aria-pressed="false">月K</button></fieldset><fieldset><legend>區間</legend><button type="button" data-company-chart-range="3M" aria-pressed="false">3月</button><button type="button" data-company-chart-range="6M" aria-pressed="true">6月</button><button type="button" data-company-chart-range="1Y" aria-pressed="false">1年</button><button type="button" data-company-chart-range="ALL" aria-pressed="false">全部</button></fieldset><fieldset><legend>副圖</legend><button type="button" data-company-chart-indicator="MACD" aria-pressed="true">MACD</button><button type="button" data-company-chart-indicator="RSI" aria-pressed="false">RSI</button><button type="button" data-company-chart-indicator="KDJ" aria-pressed="false">KD</button><button type="button" data-company-chart-indicator="BOLL" aria-pressed="false">BOLL</button></fieldset><button type="button" data-company-chart-latest>回到最新</button><button type="button" data-company-chart-retry>重新載入</button></div>
+    <p class="chart-legend"><span class="chart-legend-up">上漲／收高</span><span class="chart-legend-down">下跌／收低</span><span>MA5／10／20／60 · VOL</span></p>
+    <p class="chart-crosshair" data-company-chart-crosshair aria-live="polite">移動游標可查看日期、開高低收與成交量。</p>
+    <div class="klinechart-host" data-company-kline-host aria-label="公司可轉債真實 OHLCV K 線圖"></div>`;
+}
+
 export function renderCompanyOverviewHtml(overview, activeTab = "overview") {
   if (!overview) {
     return '<h2>請輸入 4 碼公司代號</h2><p>可從全站搜尋，或在網址加上 <code>?code=1234</code> 開啟公司整合頁。</p>';
@@ -159,17 +176,18 @@ export function renderCompanyOverviewHtml(overview, activeTab = "overview") {
       <button type="button" role="tab" aria-selected="${selectedTab === "overview"}" aria-controls="company-panel-overview" data-company-tab="overview">總覽</button><button type="button" role="tab" aria-selected="${selectedTab === "technical"}" aria-controls="company-panel-technical" data-company-tab="technical">技術圖表</button><button type="button" role="tab" aria-selected="${selectedTab === "ipo"}" aria-controls="company-panel-ipo" data-company-tab="ipo">IPO</button><button type="button" role="tab" aria-selected="${selectedTab === "bonds"}" aria-controls="company-panel-bonds" data-company-tab="bonds">可轉債</button><button type="button" role="tab" aria-selected="${selectedTab === "revenue"}" aria-controls="company-panel-revenue" data-company-tab="revenue">月營收</button><button type="button" role="tab" aria-selected="${selectedTab === "events"}" aria-controls="company-panel-events" data-company-tab="events">公開事件</button>
     </div>
     <section id="company-panel-overview" class="company-overview-card company-overview-card--emerging" role="tabpanel" data-company-panel="overview"${selectedTab === "overview" ? "" : " hidden"}><h3>興櫃市場</h3><dl>${fact("產業", display(overview.emerging?.industryName))}${fact("當日均價", formatCompanyNumber(overview.emerging?.dailyAveragePrice))}${fact("成交量", formatCompanyNumber(overview.emerging?.transactionVolume))}</dl>${overview.emerging ? `<a href="./market.html?code=${encodeURIComponent(overview.code)}">查看興櫃明細</a>` : ""}</section>
-    <section id="company-panel-technical" class="company-overview-card company-overview-card--technical" role="tabpanel" data-company-panel="technical"${selectedTab === "technical" ? "" : " hidden"}><h3>技術圖表</h3><p>僅顯示已驗證的實際 OHLCV 資料；缺漏交易日不插補。</p><div class="company-kline-state" data-company-kline data-company-code="${escapeHtml(overview.code)}"><p>開啟此分頁後載入圖表。</p></div></section>
+    <section id="company-panel-technical" class="company-overview-card company-overview-card--technical" role="tabpanel" data-company-panel="technical"${selectedTab === "technical" ? "" : " hidden"}>${companyTechnicalSection(bonds)}</section>
     <section id="company-panel-ipo" class="company-overview-card company-overview-card--ipo" role="tabpanel" data-company-panel="ipo"${selectedTab === "ipo" ? "" : " hidden"}><h3>IPO 時程</h3><dl>${fact("市場", display(overview.ipo?.market))}${fact("目前階段", display(overview.ipo?.stage))}</dl>${ipoEvents.length ? `<ol class="company-event-list">${ipoEvents.map((event) => `<li><time>${escapeHtml(formatDate(event.date))}</time><span>${escapeHtml(event.label)}</span></li>`).join("")}</ol>` : '<p class="company-empty">目前沒有 IPO 公開資料。</p>'}${overview.ipo ? `<a href="./ipo-radar.html?q=${encodeURIComponent(overview.code)}">查看 IPO 明細</a>` : ""}</section>
     <section id="company-panel-bonds" class="company-overview-card company-overview-card--bonds" role="tabpanel" data-company-panel="bonds"${selectedTab === "bonds" ? "" : " hidden"}><h3>相關可轉債</h3>${bonds.length ? `<div class="company-bond-list">${bonds.map((bond) => `<a href="./bonds.html?bond=${encodeURIComponent(bond.bondCode)}"><strong>${escapeHtml(bond.bondCode)} ${escapeHtml(bond.bondName)}</strong><span>收盤 ${escapeHtml(formatCompanyNumber(bond.cbClose))}　資料日 ${escapeHtml(formatDate(bond.cbPriceDate))}　溢價 ${escapeHtml(formatCompanyPercent(bond.premiumRate))}</span></a>`).join("")}</div>` : '<p class="company-empty">目前沒有可轉債公開資料。</p>'}</section>
     <section id="company-panel-revenue" class="company-overview-card" role="tabpanel" data-company-panel="revenue"${selectedTab === "revenue" ? "" : " hidden"}><h3>月營收</h3><dl>${fact("資料年月", display(overview.revenue?.yearMonth))}${fact("當月營收", formatCompanyNumber(overview.revenue?.currentMonthRevenue))}${fact("月增率", formatCompanyPercent(overview.revenue?.monthOverMonthPercent))}${fact("年增率", formatCompanyPercent(overview.revenue?.yearOverYearPercent))}</dl>${overview.revenue ? `<a href="./emerging.html?view=revenue&q=${encodeURIComponent(overview.code)}">查看月營收明細</a>` : '<p class="company-empty">目前沒有月營收公開資料。</p>'}</section>
     <section id="company-panel-events" class="company-overview-card" role="tabpanel" data-company-panel="events"${selectedTab === "events" ? "" : " hidden"}><h3>公開事件</h3>${events.length ? `<ol class="company-event-list">${events.map((event) => `<li><time>${escapeHtml(formatDate(event.date))}</time><span>${escapeHtml(event.market)} · ${escapeHtml(event.label)}</span></li>`).join("")}</ol>` : '<p class="company-empty">目前沒有公開事件。</p>'}</section>`;
 }
 
-function renderOverview(target, overview, activeTab = "overview") {
+function renderOverview(target, overview, activeTab = "overview", { history = [] } = {}) {
   target.innerHTML = renderCompanyOverviewHtml(overview, activeTab);
   if (!overview) return;
-  bindCompanyTabs(target, parseCompanyTab(activeTab));
+  const activateTechnicalChart = bindCompanyTechnicalChart(target, { history });
+  bindCompanyTabs(target, parseCompanyTab(activeTab), { onActivate: activateTechnicalChart });
 }
 
 function syncCompanyTab(activeTab) {
@@ -180,13 +198,14 @@ function syncCompanyTab(activeTab) {
   globalThis.history.replaceState(globalThis.history.state, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
-function bindCompanyTabs(target, initialTab) {
+function bindCompanyTabs(target, initialTab, { onActivate = () => {} } = {}) {
   const tabs = [...target.querySelectorAll("[data-company-tab]")];
   const activate = (button, { sync = true } = {}) => {
     const active = parseCompanyTab(button.dataset.companyTab);
     for (const control of tabs) control.setAttribute("aria-selected", String(control === button));
     for (const panel of target.querySelectorAll("[data-company-panel]")) panel.hidden = panel.dataset.companyPanel !== active;
     if (sync) syncCompanyTab(active);
+    onActivate(active);
   };
   for (const [index, button] of tabs.entries()) {
     button.addEventListener("click", () => activate(button));
@@ -202,6 +221,75 @@ function bindCompanyTabs(target, initialTab) {
   }
   const current = tabs.find((tab) => tab.dataset.companyTab === initialTab) ?? tabs[0];
   if (current) activate(current, { sync: false });
+}
+
+function bindCompanyTechnicalChart(target, { history = [] } = {}) {
+  const host = target.querySelector("[data-company-kline-host]");
+  const selector = target.querySelector("[data-company-chart-bond]");
+  if (!host || !selector) return () => {};
+
+  const chartState = { period: "day", range: "6M", extraIndicator: "MACD" };
+  let controller = null;
+  const detailLink = target.querySelector("[data-company-chart-detail]");
+  const crosshairTarget = target.querySelector("[data-company-chart-crosshair]");
+  const updateCrosshair = (data) => {
+    if (!crosshairTarget) return;
+    crosshairTarget.textContent = data
+      ? `日期 ${new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei" }).format(new Date(data.timestamp))} · 開 ${data.open} · 高 ${data.high} · 低 ${data.low} · 收 ${data.close} · 成交量 ${data.volume ?? "—"}`
+      : "移動游標可查看日期、開高低收與成交量。";
+  };
+  const syncControls = () => {
+    for (const button of target.querySelectorAll("[data-company-chart-period]")) button.setAttribute("aria-pressed", String(button.dataset.companyChartPeriod === chartState.period));
+    for (const button of target.querySelectorAll("[data-company-chart-range]")) button.setAttribute("aria-pressed", String(button.dataset.companyChartRange === chartState.range));
+    for (const button of target.querySelectorAll("[data-company-chart-indicator]")) button.setAttribute("aria-pressed", String(button.dataset.companyChartIndicator === chartState.extraIndicator));
+  };
+  const mount = async () => {
+    controller?.dispose();
+    updateCrosshair(null);
+    const bondCode = selector.value;
+    if (detailLink) detailLink.href = `./bonds.html?bond=${encodeURIComponent(bondCode)}`;
+    controller = await mountKlineChart({
+      host,
+      points: arrayValue(history).filter((point) => text(point?.bondCode) === bondCode),
+      bondCode,
+      period: chartState.period,
+      range: chartState.range,
+      extraIndicator: chartState.extraIndicator,
+      onCrosshair: updateCrosshair,
+    });
+  };
+  selector.addEventListener("change", () => void mount());
+  for (const button of target.querySelectorAll("[data-company-chart-period]")) {
+    button.addEventListener("click", () => {
+      chartState.period = button.dataset.companyChartPeriod ?? "day";
+      syncControls();
+      void mount();
+    });
+  }
+  for (const button of target.querySelectorAll("[data-company-chart-range]")) {
+    button.addEventListener("click", () => {
+      chartState.range = button.dataset.companyChartRange ?? "6M";
+      syncControls();
+      void mount();
+    });
+  }
+  for (const button of target.querySelectorAll("[data-company-chart-indicator]")) {
+    button.addEventListener("click", () => {
+      chartState.extraIndicator = button.dataset.companyChartIndicator ?? "MACD";
+      syncControls();
+      void mount();
+    });
+  }
+  target.querySelector("[data-company-chart-retry]")?.addEventListener("click", () => void mount());
+  target.querySelector("[data-company-chart-latest]")?.addEventListener("click", () => controller?.scrollToLatest());
+  syncControls();
+  return (activeTab) => {
+    if (activeTab === "technical") void mount();
+    else {
+      controller?.dispose();
+      controller = null;
+    }
+  };
 }
 
 async function fetchJson(url) {
@@ -225,11 +313,12 @@ async function loadCompanyOverview() {
     target.innerHTML = '<p class="empty-state">公司公開資料暫時無法載入，請稍後再試。</p>';
     return;
   }
-  const [market, ipo, revenue, workbench] = await Promise.all([
+  const [market, ipo, revenue, workbench, history] = await Promise.all([
     runtime.emergingMarketUrl ? fetchJson(new URL(runtime.emergingMarketUrl, document.baseURI)) : null,
     runtime.ipoEventsUrl ? fetchJson(new URL(runtime.ipoEventsUrl, document.baseURI)) : null,
     runtime.datasets?.["94025"] ? fetchJson(new URL(runtime.datasets["94025"], document.baseURI)) : null,
     runtime.datasets?.bondWorkbench ? fetchJson(new URL(runtime.datasets.bondWorkbench, document.baseURI)) : null,
+    runtime.datasets?.bondHistory ? fetchJson(new URL(runtime.datasets.bondHistory, document.baseURI)) : null,
   ]);
   renderOverview(target, buildCompanyOverview({
     code,
@@ -237,7 +326,7 @@ async function loadCompanyOverview() {
     ipo: ipo?.records,
     revenue,
     workbench: workbench?.records,
-  }), parseCompanyTab(new URLSearchParams(location.search).get("tab")));
+  }), parseCompanyTab(new URLSearchParams(location.search).get("tab")), { history });
 }
 
 if (globalThis.window && globalThis.document) loadCompanyOverview();

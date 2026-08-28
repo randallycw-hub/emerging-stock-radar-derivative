@@ -8,7 +8,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   buildDataCenterStatus,
@@ -50,7 +50,6 @@ const ROOT_FILES = new Set([
 ]);
 const ASSET_FILES = new Set([
   "app.css",
-  "bond-candlestick-chart.js",
   "company-overview.js",
   "bond-detail-page.js",
   "bond-events-page.js",
@@ -71,11 +70,15 @@ const ASSET_FILES = new Set([
   "ipo-offering-page.js",
   "ipo-radar-page.js",
   "ipo-stage-filter.js",
+  "klinechart-adapter.js",
   "public-event-digest.js",
   "site-shell.js",
   "site-search.js",
   "table-sort.js",
 ]);
+const KLINECHART_VENDOR_SOURCE = fileURLToPath(
+  new URL("../node_modules/klinecharts/dist/index.esm.js", import.meta.url),
+);
 const DATA_ROOT_FILES = new Set([
   "11406.json",
   "11586.json",
@@ -210,6 +213,9 @@ export async function stageStaticShowcase({
     await mkdir(dirname(target), { recursive: true });
     await copyFile(join(source, ...relativePath.split("/")), target);
   }
+  const vendorTarget = join(destination, "assets", "vendor", "klinecharts.esm.js");
+  await mkdir(dirname(vendorTarget), { recursive: true });
+  await copyFile(KLINECHART_VENDOR_SOURCE, vendorTarget);
   const dataCenterStatus = await buildStagedDataCenterStatus({
     source,
     destination,

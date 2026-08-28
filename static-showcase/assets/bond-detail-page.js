@@ -1,4 +1,4 @@
-import { bindCandlestickChart } from "./bond-candlestick-chart.js";
+import { mountKlineChart } from "./klinechart-adapter.js";
 
 const MISSING_WORDING = "—";
 const APPROVED_EVENT_SOURCE_URLS = new Map([
@@ -214,6 +214,38 @@ export function bindBondDetail(target, onClose, chartOptions = {}) {
     event.preventDefault();
     onClose();
   });
+  const stored = target.querySelector("[data-chart-data]")?.textContent;
+  const chartData = parseChartData(stored);
+  const chartState = { period: "day", range: "6M", extraIndicator: "MACD" };
+  let chartController = null;
+  const crosshairTarget = target.querySelector("[data-chart-crosshair]");
+  const updateCrosshair = (data) => {
+    if (!crosshairTarget) return;
+    crosshairTarget.textContent = data
+      ? `日期 ${new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei" }).format(new Date(data.timestamp))} · 開 ${data.open} · 高 ${data.high} · 低 ${data.low} · 收 ${data.close} · 成交量 ${data.volume ?? "—"}`
+      : "移動游標可查看日期、開高低收與成交量。";
+  };
+  const syncChartControls = () => {
+    for (const button of target.querySelectorAll("[data-chart-period]")) button.setAttribute("aria-pressed", String(button.dataset.chartPeriod === chartState.period));
+    for (const button of target.querySelectorAll("[data-chart-range]")) button.setAttribute("aria-pressed", String(button.dataset.chartRange === chartState.range));
+    for (const button of target.querySelectorAll("[data-chart-indicator]")) button.setAttribute("aria-pressed", String(button.dataset.chartIndicator === chartState.extraIndicator));
+  };
+  const mountChart = async () => {
+    const host = target.querySelector("[data-bond-kline-host]");
+    if (!host) return;
+    chartController?.dispose();
+    updateCrosshair(null);
+    chartController = await mountKlineChart({
+      host,
+      points: Array.isArray(chartData.history) ? chartData.history : [],
+      bondCode: chartData.bondCode,
+      period: chartState.period,
+      range: chartState.range,
+      extraIndicator: chartState.extraIndicator,
+      onCrosshair: updateCrosshair,
+      ...chartOptions,
+    });
+  };
   for (const button of target.querySelectorAll("[data-detail-tab]")) {
     button.addEventListener("click", () => {
       const tab = button.dataset.detailTab;
@@ -223,13 +255,37 @@ export function bindBondDetail(target, onClose, chartOptions = {}) {
         item.tabIndex = selected ? 0 : -1;
       });
       target.querySelectorAll("[data-detail-panel]").forEach((panel) => { panel.hidden = panel.dataset.detailPanel !== tab; });
+      if (tab === "overview") void mountChart();
     });
   }
-  const stored = target.querySelector("[data-chart-data]")?.textContent;
-  const disposeChart = bindCandlestickChart(target, { ...parseChartData(stored), ...chartOptions });
+  for (const button of target.querySelectorAll("[data-chart-period]")) {
+    button.addEventListener("click", () => {
+      chartState.period = button.dataset.chartPeriod ?? "day";
+      syncChartControls();
+      void mountChart();
+    });
+  }
+  for (const button of target.querySelectorAll("[data-chart-range]")) {
+    button.addEventListener("click", () => {
+      chartState.range = button.dataset.chartRange ?? "6M";
+      syncChartControls();
+      void mountChart();
+    });
+  }
+  for (const button of target.querySelectorAll("[data-chart-indicator]")) {
+    button.addEventListener("click", () => {
+      chartState.extraIndicator = button.dataset.chartIndicator ?? "MACD";
+      syncChartControls();
+      void mountChart();
+    });
+  }
+  target.querySelector("[data-chart-retry]")?.addEventListener("click", () => void mountChart());
+  target.querySelector("[data-chart-latest]")?.addEventListener("click", () => chartController?.scrollToLatest());
+  syncChartControls();
+  void mountChart();
   return () => {
     compactQuery?.removeEventListener("change", syncDisclosureMode);
-    disposeChart();
+    chartController?.dispose();
   };
 }
 
@@ -254,20 +310,16 @@ function approved11406BalanceEvidence(view) {
 }
 function candleSection(record) {
   const chartData = JSON.stringify({
+    bondCode: record?.bondCode ?? record?.view?.bondCode ?? "",
     history: Array.isArray(record?.history) ? record.history : [],
-    events: Array.isArray(record?.events) ? record.events : [],
-    archived: record?.status === "archived",
   }).replaceAll("<", "\\u003c");
-  return `<h3>K 線圖</h3><section id="bond-candlestick" class="bond-candlestick" data-bond-candlestick-chart aria-label="可轉債 K 線與成交量圖表">
-    <div class="chart-controls"><fieldset><legend>週期</legend><button type="button" data-chart-period="day" aria-pressed="true">日</button><button type="button" data-chart-period="week" aria-pressed="false">週</button><button type="button" data-chart-period="month" aria-pressed="false">月</button></fieldset><fieldset><legend>區間</legend><button type="button" data-chart-range="1M" aria-pressed="false">1M</button><button type="button" data-chart-range="3M" aria-pressed="false">3M</button><button type="button" data-chart-range="6M" aria-pressed="true">6M</button><button type="button" data-chart-range="1Y" aria-pressed="false">1Y</button><button type="button" data-chart-range="3Y" aria-pressed="false">3Y</button></fieldset></div>
-    <p class="chart-legend"><span class="chart-legend-up">空心：收高</span><span class="chart-legend-down">實心：收低</span><span>均線 MA5／20／60</span></p>
-    <canvas tabindex="0" role="img" aria-describedby="bond-chart-summary" aria-label="可轉債 K 線與成交量；左右方向鍵可逐筆檢視"></canvas>
-    <p id="bond-chart-summary" data-chart-summary class="chart-screen-summary" aria-live="polite">資料累積中</p>
-    <details data-chart-advanced><summary>進階數值（不提供交易訊號）</summary><p>Bollinger(20,2) · RSI(14) · KD(9,3,3) · MACD(12,26,9)</p><output data-chart-advanced-values>資料累積中</output></details>
-    <details data-chart-table><summary>顯示 OHLC 資料表</summary><div class="chart-table-wrap"><table><thead><tr><th>日期</th><th>開</th><th>高</th><th>低</th><th>收</th><th>成交量</th></tr></thead><tbody data-chart-table-body></tbody></table></div></details>
-    <section class="chart-events" aria-label="圖表事件標記"><h4>公開事件標記</h4><ul data-chart-events><li>此視窗無公開事件標記</li></ul></section>
+  return `<h3>專業 K 線圖</h3><section id="bond-candlestick" class="bond-candlestick" aria-label="可轉債 K 線與成交量圖表">
+    <div class="chart-controls" aria-label="技術圖表控制項"><fieldset><legend>週期</legend><button type="button" data-chart-period="day" aria-pressed="true">日K</button><button type="button" data-chart-period="week" aria-pressed="false">週K</button><button type="button" data-chart-period="month" aria-pressed="false">月K</button></fieldset><fieldset><legend>區間</legend><button type="button" data-chart-range="3M" aria-pressed="false">3月</button><button type="button" data-chart-range="6M" aria-pressed="true">6月</button><button type="button" data-chart-range="1Y" aria-pressed="false">1年</button><button type="button" data-chart-range="ALL" aria-pressed="false">全部</button></fieldset><fieldset><legend>副圖</legend><button type="button" data-chart-indicator="MACD" aria-pressed="true">MACD</button><button type="button" data-chart-indicator="RSI" aria-pressed="false">RSI</button><button type="button" data-chart-indicator="KDJ" aria-pressed="false">KD</button><button type="button" data-chart-indicator="BOLL" aria-pressed="false">BOLL</button></fieldset><button type="button" data-chart-latest>回到最新</button><button type="button" data-chart-retry>重新載入</button></div>
+    <p class="chart-legend"><span class="chart-legend-up">上漲／收高</span><span class="chart-legend-down">下跌／收低</span><span>MA5／10／20／60 · VOL</span></p>
+    <p class="chart-crosshair" data-chart-crosshair aria-live="polite">移動游標可查看日期、開高低收與成交量。</p>
+    <div class="klinechart-host" data-bond-kline-host aria-label="可轉債真實 OHLCV K 線圖"></div>
     <script type="application/json" data-chart-data>${chartData}</script>
-    <p>僅呈現已驗證 OHLC 資料；缺漏日期不插補，資料不足時顯示資料累積中。</p>
+    <p>圖表僅呈現已驗證 OHLCV；缺漏交易日不插補、不以收盤價補造蠟燭圖。</p>
   </section>`;
 }
 function parseChartData(value) { try { return JSON.parse(value ?? "{}"); } catch { return {}; } }

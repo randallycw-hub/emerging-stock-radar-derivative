@@ -36,12 +36,12 @@ test("V4 主導覽在所有公開入口保持四個研究入口", async () => {
   }
 });
 
-test("V4 提供附加的公司整合頁與行動五項導覽容器", async () => {
+test("V5 提供公司研究頁與行動導覽容器", async () => {
   const [company, shell] = await Promise.all([
     readShowcaseFile("company.html"),
     readShowcaseFile("assets/site-shell.js"),
   ]);
-  assert.match(company, /公司整合頁/);
+  assert.match(company, /公司研究/);
   assert.match(shell, /renderMobileNavigation/);
   assert.match(shell, /data-mobile-navigation/);
   assert.match(shell, /label: "更多"/);
@@ -117,7 +117,8 @@ test("首頁以已發布資料提供跨市場事件與客觀排行", async () =>
   ]);
   assert.match(home, /id="home-event-strip"/);
   assert.match(home, /id="home-data-coverage"/);
-  assert.match(script, /import \{ formatDate, formatNumber, safeJsonFetch \} from "\.\/site-shell\.js"/);
+  assert.match(script, /renderMarketStatusLine/);
+  assert.match(script, /safeJsonFetch/);
   assert.match(home, /data-home-event-market="emerging"/);
   assert.match(home, /id="home-emerging-rankings"/);
   assert.match(script, /buildCrossMarketEventEntries/);
@@ -190,23 +191,20 @@ test("共用格式與安全讀取工具提供可預期的顯示結果", async ()
   assert.match(target.textContent, /資料暫時無法讀取/);
 });
 
-test("深淺色主題具備完整語意色彩與鍵盤互動狀態", async () => {
+test("V5 深淺色主題具備規格色彩與鍵盤互動狀態", async () => {
   const css = await readShowcaseFile("assets/app.css");
-  for (const token of [
-    "--page",
-    "--surface",
-    "--text",
-    "--muted",
-    "--border",
-    "--accent",
-    "--positive",
-    "--negative",
-    "--focus",
-    "--accent-emerging",
-    "--accent-ipo",
-    "--accent-bonds",
+  for (const [token, value] of [
+    ["--color-bg", "#f5f7fa"],
+    ["--color-surface", "#ffffff"],
+    ["--color-subtle", "#f8fafc"],
+    ["--color-text", "#162033"],
+    ["--color-muted", "#667085"],
+    ["--color-border", "#dde3ea"],
+    ["--color-primary", "#2563eb"],
+    ["--color-up", "#c62828"],
+    ["--color-down", "#078a55"],
   ]) {
-    assert.match(css, new RegExp(`${token}:\\s*#[0-9a-f]{6}`, "i"));
+    assert.match(css, new RegExp(`${token}:\\s*${value}`, "i"));
   }
   assert.match(css, /\[data-theme="dark"\][\s\S]*--focus:/);
   assert.match(css, /button:hover/);
@@ -237,7 +235,7 @@ test("可轉債工作台在桌機與手機維持局部捲動、分頁與鍵盤�
     readShowcaseFile("assets/app.css"),
     readShowcaseFile("assets/bonds-page.js"),
     readShowcaseFile("assets/bond-detail-page.js"),
-    readShowcaseFile("assets/bond-candlestick-chart.js"),
+    readShowcaseFile("assets/klinechart-adapter.js"),
   ]);
   assert.match(html, /<html[^>]+data-theme="light"/);
   assert.match(css, /body\s*\{[\s\S]*?overflow-x:\s*hidden/);
@@ -249,8 +247,9 @@ test("可轉債工作台在桌機與手機維持局部捲動、分頁與鍵盤�
   assert.match(detail, /role="tablist"/);
   assert.match(detail, /<details class="detail-mobile-area"/);
   assert.match(list, /event\.key === "Enter" \|\| event\.key === " "/);
-  assert.match(chart, /event\.key !== "ArrowLeft" && event\.key !== "ArrowRight"/);
-  assert.match(detail, /id="bond-chart-summary"[^>]+aria-live="polite"/);
+  assert.match(chart, /mountKlineChart/);
+  assert.match(chart, /ResizeObserver/);
+  assert.match(detail, /data-chart-crosshair[^>]+aria-live="polite"/);
 });
 
 function contrastRatio(foreground, background) {
