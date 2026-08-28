@@ -5,6 +5,7 @@ export const PUBLIC_PRIMARY_NAVIGATION = Object.freeze([
   Object.freeze({ key: "emerging", label: "興櫃", href: "./emerging.html" }),
   Object.freeze({ key: "ipo", label: "IPO", href: "./ipo-radar.html" }),
   Object.freeze({ key: "bonds", label: "可轉債", href: "./bonds.html" }),
+  Object.freeze({ key: "events", label: "市場事件", href: "./events.html" }),
 ]);
 
 const MOBILE_PRIMARY_NAVIGATION = Object.freeze([
@@ -29,7 +30,7 @@ export function renderPublicFooter() {
     '<div class="public-footer__main">',
     '<div><strong>台灣盤後市場資訊台</strong><p>以已發布公開資料整理興櫃、IPO 與可轉債資訊。</p></div>',
     '<div class="public-footer__links">',
-    '<nav aria-label="市場"><strong>市場</strong><a href="./index.html">首頁</a><a href="./emerging.html">興櫃</a><a href="./ipo-radar.html">IPO</a><a href="./bonds.html">可轉債</a></nav>',
+    '<nav aria-label="市場"><strong>市場</strong><a href="./index.html">首頁</a><a href="./emerging.html">興櫃</a><a href="./ipo-radar.html">IPO</a><a href="./bonds.html">可轉債</a><a href="./events.html">市場事件</a></nav>',
     '<nav aria-label="使用"><strong>使用</strong><a href="./methodology.html#usage">如何使用</a><a href="./methodology.html#methodology">資料與方法</a><a href="./methodology.html#updates">更新紀錄</a></nav>',
     '<nav aria-label="本站"><strong>本站</strong><a href="./methodology.html#about">關於本站</a><a href="./methodology.html#feedback">意見回饋</a><a href="./methodology.html#disclaimer">免責聲明</a><a href="./methodology.html#privacy">隱私權</a></nav>',
     '<nav aria-label="資料來源"><strong>來源</strong><a href="https://www.twse.com.tw/" rel="noopener noreferrer" target="_blank">TWSE</a><a href="https://www.tpex.org.tw/" rel="noopener noreferrer" target="_blank">TPEx</a><a href="https://mops.twse.com.tw/" rel="noopener noreferrer" target="_blank">MOPS</a></nav>',

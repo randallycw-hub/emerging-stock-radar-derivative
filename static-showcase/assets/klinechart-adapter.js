@@ -49,6 +49,9 @@ const PERIOD_MAP = Object.freeze({
   month: "month",
 });
 const RANGE_DAYS = Object.freeze({
+  "1D": 1,
+  "5D": 5,
+  "1M": 31,
   "3M": 92,
   "6M": 184,
   "1Y": 366,
@@ -56,7 +59,7 @@ const RANGE_DAYS = Object.freeze({
 });
 const EXTRA_INDICATORS = new Set(["MACD", "RSI", "KDJ", "BOLL"]);
 
-function rangeData(data, range) {
+export function rangeKlineData(data, range) {
   const days = RANGE_DAYS[range] ?? null;
   if (days === null || data.length === 0) return data;
   const cutoff = data.at(-1).timestamp - days * 24 * 60 * 60 * 1000;
@@ -121,7 +124,7 @@ export async function mountKlineChart({
 } = {}) {
   const chartPeriod = PERIOD_MAP[period] ?? "day";
   const fullData = toKlineData(points, { period: chartPeriod });
-  const data = rangeData(fullData, range);
+  const data = rangeKlineData(fullData, range);
   const noop = () => {};
   if (!host) return Object.freeze({ state: "unavailable", dispose: noop, scrollToLatest: noop });
   if (data.length === 0) {
@@ -134,12 +137,13 @@ export async function mountKlineChart({
     const { dispose, init, registerLocale } = await import("./vendor/klinecharts.esm.js");
     registerLocale("zh-TW", TAIWAN_KLINE_LOCALE);
     host.replaceChildren();
+    const paneHeight = typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches ? 360 : 520;
     const chart = init(host, {
       locale: "zh-TW",
       timezone: "Asia/Taipei",
       zoomAnchor: "last_bar",
       styles: klineStyles(),
-      layout: { pane: { height: 400, minHeight: 180 } },
+      layout: { pane: { height: paneHeight, minHeight: 180 } },
     });
     if (!chart) throw new Error("KLINECHART_INIT_FAILED");
     chart.setSymbol({ ticker: String(bondCode || "CB"), pricePrecision: 2, volumePrecision: 0 });

@@ -7,8 +7,8 @@ import {
   renderPublicFooter,
 } from "../static-showcase/assets/site-shell.js";
 
-test("V5 shell keeps four research destinations and groups public source links in the footer", () => {
-  assert.deepEqual(PUBLIC_PRIMARY_NAVIGATION.map((item) => item.label), ["首頁", "興櫃", "IPO", "可轉債"]);
+test("UX 2.0 shell keeps research destinations and groups public source links in the footer", () => {
+  assert.deepEqual(PUBLIC_PRIMARY_NAVIGATION.map((item) => item.label), ["首頁", "興櫃", "IPO", "可轉債", "市場事件"]);
   assert.doesNotMatch(renderPrimaryNavigation(), /資料中心/);
 
   const footer = renderPublicFooter();

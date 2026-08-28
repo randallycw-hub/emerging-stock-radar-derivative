@@ -179,7 +179,7 @@ function renderUpcoming() {
 }
 
 function tableRowHtml(row) {
-    return `<tr><th scope="row">${companyLink(row)}<small>${escapeHtml(row.market)}</small></th><td><span class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.daysFromToday)}</td><td>${escapeHtml(row.pricingStatus)}</td><td>${formatDate(row.applicationDate)}</td><td>${formatDate(row.reviewDate)}</td><td>${formatDate(row.boardDate)}</td><td>${formatDate(row.contractDate)}</td><td>${formatDate(row.auctionBidStartDate)}</td><td>${formatDate(row.subscriptionStartDate)}</td><td>${formatDate(row.listingDate)}</td><td>${daysLabel(row.daysInStage)}</td><td>${formatDate(state.dataDate)}</td></tr>`;
+    return `<tr><th scope="row">${companyLink(row)}<small>${escapeHtml(row.market)}</small></th><td><span class="ipo-status ipo-status-${stageClass(row.stage)}">${escapeHtml(stageLabel(row.stage))}</span></td><td>${escapeHtml(row.primaryEventLabel)}</td><td>${formatDate(row.primaryEventDate)}</td><td>${daysLabel(row.daysFromToday)}</td><td>${escapeHtml(row.pricingStatus)}</td><td>${formatDate(row.applicationDate)}</td><td>${formatDate(row.reviewDate)}</td><td>${formatDate(row.boardDate)}</td><td>${formatDate(row.contractDate)}</td><td>${formatDate(row.auctionBidStartDate)}</td><td>${formatDate(row.subscriptionStartDate)}</td><td>${formatDate(row.listingDate)}</td><td>${daysLabel(row.daysInStage)}</td></tr>`;
 }
 
 function cardHtml(row) {
@@ -345,7 +345,7 @@ function stageDateFacts(row) {
   const facts = [["送件日", row.applicationDate], ["審議日", row.reviewDate], ["董事會日", row.boardDate], ["契約日", row.contractDate], ["競拍日", row.auctionBidStartDate], ["申購日", row.subscriptionStartDate], ["掛牌日", row.listingDate]];
   return `<dl class="ipo-card-details">${facts.map(([label, date]) => `<div><dt>${label}</dt><dd>${formatDate(date)}</dd></div>`).join("")}</dl>`;
 }
-function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="15" class="empty-cell">${message}</td></tr>`; }
+function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="14" class="empty-cell">${message}</td></tr>`; }
 function emptyCard(message = "沒有符合條件的資料") { return `<p class="empty-cell">${message}</p>`; }
 function selectExistingValue(selector, value) { const select = document.querySelector(selector); select.value = [...select.options].some((option) => option.value === value) ? value : "all"; }
 function companyLink(row) { return `<a href="${publicCompanyHref(row.companyCode)}">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</a>`; }

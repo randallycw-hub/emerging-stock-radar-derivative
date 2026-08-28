@@ -199,7 +199,7 @@ function renderHomeEvents(input) {
   if (coverageTarget) coverageTarget.textContent = `資料日期 ${dataDate}`;
   if (!eventStrip) return events;
   const render = (market = "all") => {
-    const selected = market === "all" ? events : events.filter((event) => event.market === market);
+    const selected = (market === "all" ? events : events.filter((event) => event.market === market)).slice(0, 8);
     eventStrip.innerHTML = selected.length
       ? selected.map(eventTimelineHtml).join("")
       : '<p class="empty-state">目前沒有近期已發布事件。</p>';

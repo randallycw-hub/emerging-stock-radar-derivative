@@ -4,12 +4,12 @@ import test from "node:test";
 
 import { buildCompanyOverview, parseCompanyTab } from "../static-showcase/assets/company-overview.js";
 
-test("V5 公司頁提供六個公開資料分頁並將未提供值保留為破折號", async () => {
+test("UX 2.0 公司頁以事件、IPO／CB 與技術分析組織完整公開資料", async () => {
   const [html, script] = await Promise.all([
     readFile(new URL("../static-showcase/company.html", import.meta.url), "utf8"),
     readFile(new URL("../static-showcase/assets/company-overview.js", import.meta.url), "utf8"),
   ]);
-  for (const label of ["總覽", "技術圖表", "IPO", "可轉債", "月營收", "公開事件"]) {
+  for (const label of ["總覽", "事件", "IPO／CB", "技術分析", "月營收"]) {
     assert.match(script, new RegExp(`>${label}<`));
   }
   assert.match(script, /data-company-panel/);
@@ -30,8 +30,9 @@ test("V4 公司事件只投影已公開的標籤、日期與市場", () => {
   assert.equal(JSON.stringify(overview.events).includes("sourceId"), false);
 });
 
-test("V4 公司頁只接受已定義的分頁，並可由網址還原目前分頁", () => {
-  assert.equal(parseCompanyTab("ipo"), "ipo");
+test("UX 2.0 公司頁維持舊 IPO／CB 分頁網址，並還原到合併研究分頁", () => {
+  assert.equal(parseCompanyTab("ipo"), "securities");
+  assert.equal(parseCompanyTab("bonds"), "securities");
   assert.equal(parseCompanyTab("events"), "events");
   assert.equal(parseCompanyTab("unknown"), "overview");
 });

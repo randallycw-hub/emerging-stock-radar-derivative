@@ -1691,3 +1691,362 @@ body {
   .public-footer { padding-inline: 12px; }
   .public-footer__links { grid-template-columns: 1fr; }
 }
+
+/* Market Event Radar UX 2.0: dense, date-first public event workspace. */
+:root {
+  --bg: #F6F8FB;
+  --surface: #FFFFFF;
+  --ink: #142033;
+  --muted: #667085;
+  --border: #D9E1EA;
+  --brand: #5B3FD3;
+  --info: #2D5BFF;
+  --success: #1B8A5A;
+  --warning: #D97706;
+  --danger: #C2413B;
+}
+
+[data-theme="dark"] {
+  --bg: #0D1524;
+  --surface: #141F31;
+  --ink: #F3F6FC;
+  --muted: #AAB6C8;
+  --border: #2B3A51;
+  --brand: #B9A7FF;
+  --info: #8EA8FF;
+  --success: #69D5A0;
+  --warning: #F7BE70;
+  --danger: #FFAAA4;
+}
+
+.market-events-page {
+  width: min(1360px, calc(100% - 48px));
+  padding-top: 28px;
+  color: var(--ink);
+}
+.market-events-heading {
+  max-width: none;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.market-events-heading .update-status {
+  flex: 0 0 auto;
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.market-events-heading h1 { margin-bottom: 8px; color: var(--ink); }
+.market-events-heading > div > p:last-child { max-width: 720px; font-size: 15px; }
+
+.market-event-metric-strip {
+  margin: 0 0 24px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.market-event-metric-strip button {
+  min-height: 86px;
+  padding: 13px 16px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  border: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.market-event-metric-strip button:last-child { border-right: 0; }
+.market-event-metric-strip button:hover,
+.market-event-metric-strip button:focus-visible { background: color-mix(in srgb, var(--brand) 8%, var(--surface)); }
+.market-event-metric-strip button span { color: var(--muted); font-size: 12px; font-weight: 700; }
+.market-event-metric-strip button strong { font: 800 28px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.market-event-metric-strip button small { color: var(--muted); font-size: 11px; }
+.market-event-metric-strip button[data-event-metric="today"] strong { color: var(--danger); }
+.market-event-metric-strip button[data-event-metric="tomorrow"] strong,
+.market-event-metric-strip button[data-event-metric="next7"] strong { color: var(--warning); }
+.market-event-metric-strip button[data-event-metric="ipo"] strong { color: var(--brand); }
+.market-event-metric-strip button[data-event-metric="bonds"] strong { color: var(--info); }
+
+.market-event-workspace {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.market-event-workspace > .section-heading { align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.market-event-workspace > .section-heading h2 { margin: 3px 0 0; font-size: 21px; }
+.market-event-workspace > .section-heading output { color: var(--muted); font-size: 13px; font-weight: 700; }
+.market-event-filter-bar {
+  display: grid;
+  grid-template-columns: minmax(236px, 1.5fr) repeat(3, minmax(120px, .75fr)) minmax(190px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg) 68%, var(--surface));
+}
+.market-event-filter-bar label,
+.market-event-filter-group { min-width: 0; margin: 0; display: grid; gap: 5px; border: 0; padding: 0; }
+.market-event-filter-bar label > span,
+.market-event-filter-group legend { padding: 0; color: var(--muted); font-size: 11px; font-weight: 700; }
+.market-event-filter-bar select,
+.market-event-filter-bar input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 9px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+}
+.filter-chip-group { min-height: 38px; display: flex; gap: 5px; align-items: center; }
+.filter-chip-group button,
+.market-event-viewbar button {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.filter-chip-group button[aria-pressed="true"],
+.market-event-viewbar button[aria-pressed="true"] { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, var(--surface)); color: var(--brand); }
+.market-event-custom-range { display: contents; }
+.market-event-custom-range[hidden] { display: none; }
+.secondary-button,
+.primary-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 11px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+}
+.primary-button { border-color: var(--brand); background: var(--brand); color: #fff; }
+.market-event-viewbar { margin: 16px 0; display: flex; flex-wrap: wrap; gap: 7px; }
+
+.market-event-date-group + .market-event-date-group { margin-top: 18px; }
+.market-event-date-group > header {
+  padding: 0 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: var(--muted);
+}
+.market-event-date-group h3 { margin: 0; color: var(--ink); font-size: 15px; }
+.market-event-date-group time { font-size: 12px; font-variant-numeric: tabular-nums; }
+.market-event-date-group > div { border-top: 1px solid var(--border); }
+.market-event-row {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 92px 50px minmax(150px, 1.05fr) minmax(180px, 1.2fr) 72px auto;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-top: 0;
+  background: var(--surface);
+  cursor: pointer;
+}
+.market-event-row:first-child { border-top-left-radius: 8px; border-top-right-radius: 8px; }
+.market-event-row:last-child { border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+.market-event-row:hover,
+.market-event-row:focus-visible { position: relative; z-index: 1; border-color: var(--brand); background: color-mix(in srgb, var(--brand) 5%, var(--surface)); outline: 0; }
+.market-event-row.is-today { border-left: 3px solid var(--danger); }
+.market-event-row.is-soon { border-left: 3px solid var(--warning); }
+.market-event-row.is-complete { opacity: .66; }
+.market-event-row > time { display: grid; gap: 1px; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.market-event-row > time strong { color: var(--ink); font-size: 13px; }
+.market-type-badge { justify-self: start; display: inline-flex; align-items: center; min-height: 24px; border-radius: 999px; padding: 3px 8px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.market-type-badge--ipo { color: var(--brand); background: color-mix(in srgb, var(--brand) 11%, var(--surface)); }
+.market-type-badge--bonds { color: var(--info); background: color-mix(in srgb, var(--info) 11%, var(--surface)); }
+.market-event-row__identity,
+.market-event-row__event { min-width: 0; display: grid; gap: 2px; }
+.market-event-row__identity strong,
+.market-event-row__event strong { overflow: hidden; color: var(--ink); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.market-event-row__identity span,
+.market-event-row__event span { overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.market-event-time { justify-self: start; display: inline-flex; min-height: 25px; align-items: center; border-radius: 6px; padding: 3px 7px; background: color-mix(in srgb, var(--muted) 12%, var(--surface)); color: var(--muted); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.market-event-time.is-today { background: color-mix(in srgb, var(--danger) 13%, var(--surface)); color: var(--danger); }
+.market-event-time.is-soon { background: color-mix(in srgb, var(--warning) 13%, var(--surface)); color: var(--warning); }
+.market-event-row > a { justify-self: end; color: var(--brand); font-size: 12px; font-weight: 800; text-decoration: none; white-space: nowrap; }
+
+.market-event-calendar { padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--bg) 36%, var(--surface)); }
+.market-event-calendar > header { margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+.market-event-calendar h3 { margin: 0; color: var(--ink); font-size: 17px; }
+.market-event-calendar-nav { display: flex; align-items: center; gap: 9px; }
+.market-event-calendar-nav button { width: 34px; min-height: 34px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.market-event-calendar-nav strong { min-width: 92px; color: var(--ink); font-size: 13px; text-align: center; }
+.market-event-calendar__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
+.market-event-calendar__weekday,
+.market-event-calendar__blank,
+.market-event-calendar__day { min-height: 94px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.market-event-calendar__weekday { min-height: 30px; display: grid; place-items: center; background: color-mix(in srgb, var(--muted) 7%, var(--surface)); color: var(--muted); font-size: 11px; font-weight: 800; }
+.market-event-calendar__day { padding: 8px; display: grid; align-content: start; gap: 4px; background: var(--surface); color: var(--ink); text-align: left; }
+button.market-event-calendar__day { cursor: pointer; }
+button.market-event-calendar__day:hover,
+button.market-event-calendar__day:focus-visible { position: relative; z-index: 1; outline: 2px solid var(--brand); background: color-mix(in srgb, var(--brand) 7%, var(--surface)); }
+.market-event-calendar__day > strong { font-size: 13px; }
+.market-event-calendar__day > span { color: var(--brand); font-size: 12px; font-weight: 800; }
+.market-event-calendar__day > small { color: var(--muted); font-size: 10px; }
+.market-event-calendar__day.is-today { box-shadow: inset 3px 0 0 var(--danger); }
+.market-event-calendar__day.is-empty { color: var(--muted); }
+.market-event-calendar__agenda { display: none; }
+
+.market-event-clusters { display: grid; gap: 12px; }
+.market-event-cluster { padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.market-event-cluster > header { display: flex; justify-content: space-between; gap: 16px; align-items: start; }
+.market-event-cluster h3 { margin: 7px 0 2px; color: var(--ink); font-size: 17px; }
+.market-event-cluster h3 small { color: var(--muted); font-size: 12px; font-weight: 700; }
+.market-event-cluster p { margin: 0; color: var(--muted); font-size: 12px; }
+.market-event-cluster > header a { color: var(--brand); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.market-event-cluster ol,
+.market-event-drawer__timeline ol { margin: 16px 0 12px; padding: 0 0 0 16px; list-style: none; border-left: 2px solid var(--border); }
+.market-event-cluster li,
+.market-event-drawer__timeline li { position: relative; min-height: 34px; display: grid; grid-template-columns: 90px 1fr auto; gap: 12px; align-items: center; padding: 6px 0 6px 15px; }
+.market-event-cluster li::before,
+.market-event-drawer__timeline li::before { content: ""; position: absolute; top: 17px; left: -6px; width: 9px; height: 9px; border-radius: 99px; background: var(--border); }
+.market-event-cluster li.is-current::before,
+.market-event-drawer__timeline li.is-current::before { background: var(--danger); }
+.market-event-cluster li.is-upcoming::before,
+.market-event-drawer__timeline li.is-upcoming::before { background: var(--brand); }
+.market-event-cluster li.is-complete,
+.market-event-drawer__timeline li.is-complete { color: var(--muted); opacity: .7; }
+.market-event-cluster time,
+.market-event-drawer__timeline time { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.market-event-cluster li strong,
+.market-event-drawer__timeline li strong { color: var(--ink); font-size: 13px; }
+.market-event-cluster li span { color: var(--muted); font-size: 11px; }
+.link-button { min-height: 34px; border: 0; padding: 0; background: none; color: var(--brand); font-size: 12px; font-weight: 800; cursor: pointer; }
+
+.market-event-drawer { width: min(620px, calc(100% - 32px)); max-height: min(760px, calc(100vh - 32px)); border: 1px solid var(--border); border-radius: 12px; padding: 0; background: var(--surface); color: var(--ink); box-shadow: 0 18px 54px rgb(20 32 51 / 24%); }
+.market-event-drawer::backdrop { background: rgb(20 32 51 / 42%); }
+.market-event-drawer__header { padding: 18px 20px; display: flex; align-items: start; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--border); }
+.market-event-drawer__header h2 { margin: 3px 0 0; font-size: 20px; }
+.market-event-drawer__header button { width: 36px; min-height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 22px; line-height: 1; cursor: pointer; }
+.market-event-drawer__facts { margin: 0; padding: 18px 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; border-bottom: 1px solid var(--border); }
+.market-event-drawer__facts > div:last-child { grid-column: 1 / -1; }
+.market-event-drawer__facts dt { color: var(--muted); font-size: 11px; font-weight: 700; }
+.market-event-drawer__facts dd { margin: 3px 0 0; color: var(--ink); font-size: 13px; font-weight: 750; }
+.market-event-drawer__timeline { padding: 18px 20px 4px; }
+.market-event-drawer__timeline h3 { margin: 0; color: var(--ink); font-size: 15px; }
+.market-event-drawer__timeline li { grid-template-columns: 90px 1fr; }
+.market-event-drawer__timeline li div { display: grid; gap: 2px; }
+.market-event-drawer__timeline li span { color: var(--muted); font-size: 11px; }
+.market-event-drawer__actions { padding: 16px 20px 20px; display: flex; flex-wrap: wrap; gap: 9px; }
+
+/* Home follows the same briefing order: snapshot, attention items, then research modules. */
+.home-event-section { margin: 0 0 24px; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.home-event-section .section-heading { align-items: start; margin-bottom: 10px; }
+.home-event-section .section-heading h2 { margin: 3px 0 0; color: var(--ink); font-size: 20px; }
+.home-event-section__meta { display: grid; justify-items: end; gap: 5px; }
+.home-event-section__meta .update-status { margin: 0; color: var(--muted); font-size: 12px; }
+.home-event-section__meta a { color: var(--brand); font-size: 13px; font-weight: 800; text-decoration: none; }
+.home-event-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; border-top: 1px solid var(--border); }
+.home-event-card { min-height: 56px; padding: 10px 2px; display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; align-items: center; gap: 10px; border: 0; border-bottom: 1px solid var(--border); box-shadow: none; background: transparent; }
+.home-event-card > time { color: var(--muted); font: 700 12px/1.2 var(--font-sans); }
+.home-event-card > p { overflow: hidden; color: var(--ink); font: 700 13px/1.3 var(--font-sans); letter-spacing: 0; text-overflow: ellipsis; white-space: nowrap; }
+.home-event-card > strong { grid-column: 2; margin-top: -9px; color: var(--muted); font: 700 11px/1.2 var(--font-sans); }
+.home-event-card > span:last-child { grid-column: 3; grid-row: 1 / span 2; color: var(--brand); font-size: 15px; }
+.home-event-card:hover, .home-event-card:focus-visible { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 5%, var(--surface)); transform: none; }
+
+/* Company research keeps every public module but makes the event path primary. */
+.company-overview-heading { padding: 2px 0 16px; border-bottom: 1px solid var(--border); }
+.company-overview-heading h2 { margin: 5px 0 7px; color: var(--ink); font: 800 clamp(25px, 3vw, 32px)/1.2 var(--font-sans); }
+.company-overview-heading h2 span { margin-right: 9px; color: var(--muted); font-size: .62em; font-variant-numeric: tabular-nums; vertical-align: .12em; }
+.company-overview-heading > p:last-child { margin: 0; color: var(--muted); font-size: 13px; }
+.company-tabs { margin-top: 16px; }
+.company-overview-card { border-color: var(--border); background: var(--surface); box-shadow: none; }
+.company-overview-card h3 { color: var(--ink); font-size: 18px; }
+.company-overview-card h4 { margin: 0 0 12px; color: var(--ink); font-size: 14px; }
+.company-securities-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.company-securities-grid > section + section { padding-left: 20px; border-left: 1px solid var(--border); }
+.company-event-timeline { border-left: 2px solid var(--border); }
+.company-event-timeline li { position: relative; display: grid; grid-template-columns: 90px 46px minmax(0, 1fr); gap: 9px; align-items: start; padding: 7px 0 7px 15px; }
+.company-event-timeline li::before { content: ""; position: absolute; top: 15px; left: -6px; width: 9px; height: 9px; border-radius: 99px; background: var(--brand); }
+.company-event-timeline time { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.company-event-market { color: var(--brand); font-size: 11px; font-weight: 800; }
+.company-event-timeline strong { color: var(--ink); font-size: 13px; }
+
+@media (max-width: 1100px) {
+  .market-event-filter-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .market-event-filter-group { grid-column: span 2; }
+  .market-event-search { grid-column: span 2; }
+  .market-event-row { grid-template-columns: 84px 48px minmax(130px, 1fr) minmax(150px, 1.2fr) 68px auto; gap: 9px; }
+}
+
+@media (max-width: 768px) {
+  .market-events-page { width: min(100% - 32px, 720px); padding-top: 22px; }
+  .market-events-heading { margin-bottom: 18px; display: grid; gap: 9px; }
+  .market-events-heading .update-status { margin: 0; }
+  .market-event-metric-strip { display: flex; overflow-x: auto; border-radius: 10px; }
+  .market-event-metric-strip button { min-width: 132px; min-height: 78px; border-right: 1px solid var(--border); }
+  .market-event-workspace { padding: 14px; border-radius: 10px; }
+  .market-event-filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px; }
+  .market-event-filter-group,
+  .market-event-search { grid-column: 1 / -1; }
+  .market-event-filter-bar .secondary-button { min-height: 44px; }
+  .market-event-row { min-height: 72px; grid-template-columns: 66px 42px minmax(0, 1fr) auto; gap: 8px; padding: 10px; }
+  .market-event-row__event { grid-column: 3 / -1; }
+  .market-event-time { grid-column: 4; grid-row: 1; }
+  .market-event-row > a { grid-column: 4; grid-row: 2; align-self: end; }
+  .market-event-row__identity strong,
+  .market-event-row__event strong { font-size: 13px; }
+  .market-event-row > time strong { font-size: 11px; }
+  .market-event-calendar__grid { display: none; }
+  .market-event-calendar__agenda { display: grid; gap: 8px; }
+  .market-event-calendar__agenda > button { width: 100%; min-height: 62px; display: grid; grid-template-columns: 98px 1fr; gap: 3px 12px; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 10px; background: var(--surface); color: var(--ink); text-align: left; cursor: pointer; }
+  .market-event-calendar__agenda time { grid-row: span 2; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .market-event-calendar__agenda strong { font-size: 13px; }
+  .market-event-calendar__agenda span { overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  .market-event-cluster > header { display: grid; }
+  .market-event-cluster li { grid-template-columns: 78px minmax(0, 1fr); gap: 7px; }
+  .market-event-cluster li span { grid-column: 2; }
+  .market-event-drawer { width: 100%; max-width: none; max-height: min(92vh, 760px); margin: auto 0 0; border-radius: 14px 14px 0 0; }
+  .home-event-strip { grid-template-columns: 1fr; }
+  .home-event-section__meta { justify-items: start; }
+  .company-securities-grid { grid-template-columns: 1fr; gap: 18px; }
+  .company-securities-grid > section + section { padding: 18px 0 0; border-top: 1px solid var(--border); border-left: 0; }
+}
+
+@media (max-width: 480px) {
+  .market-events-page { width: min(100% - 24px, 480px); }
+  .market-event-filter-bar { grid-template-columns: 1fr; }
+  .market-event-filter-group,
+  .market-event-search { grid-column: auto; }
+  .market-event-filter-bar label { min-width: 0; }
+  .filter-chip-group button { flex: 1; min-height: 40px; }
+  .market-event-row { grid-template-columns: 59px 37px minmax(0, 1fr); }
+  .market-event-time { display: none; }
+  .market-event-row > a { grid-column: 3; grid-row: 3; justify-self: start; }
+  .market-event-row__event { grid-column: 3; }
+  .market-event-row > time span { display: none; }
+  .market-event-row__identity span { font-size: 10px; }
+  .market-event-date-group > header { padding-inline: 0; }
+  .market-event-drawer__facts { grid-template-columns: 1fr; }
+  .market-event-drawer__facts > div:last-child { grid-column: auto; }
+  .market-event-drawer__timeline li { grid-template-columns: 76px minmax(0, 1fr); gap: 8px; }
+  .home-event-section { padding: 14px; }
+  .home-event-section .section-heading { display: grid; gap: 9px; }
+}

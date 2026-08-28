@@ -349,7 +349,7 @@ function renderBonds() {
     const message = "可轉債工作台資料目前無法使用；請稍後再試。";
     setText("#bond-result-count", "資料無法使用");
     document.querySelector("#bond-clear-filter").hidden = true;
-    document.querySelector("#bond-table-body").innerHTML = `<tr><td colspan="14" class="empty-cell">${message}</td></tr>`;
+    document.querySelector("#bond-table-body").innerHTML = `<tr><td colspan="13" class="empty-cell">${message}</td></tr>`;
     document.querySelector("#bond-card-list").innerHTML = `<p class="empty-cell">${message}</p>`;
     document.querySelector("#bond-pagination").innerHTML = "";
     return;
@@ -380,7 +380,7 @@ function renderBonds() {
     : "沒有符合條件的可轉債；可清除搜尋條件後再試。";
   document.querySelector("#bond-table-body").innerHTML = visible.length
     ? visible.map(renderBondRow).join("")
-    : `<tr><td colspan="14" class="empty-cell">${escapeHtml(emptyMessage)}</td></tr>`;
+    : `<tr><td colspan="13" class="empty-cell">${escapeHtml(emptyMessage)}</td></tr>`;
   document.querySelector("#bond-card-list").innerHTML = visible.length
     ? visible.map(renderBondCard).join("")
     : `<p class="empty-cell">${escapeHtml(emptyMessage)}</p>`;
@@ -416,7 +416,6 @@ function renderBondRow(view) {
     <td>${metric(view.maturityDate, "到期日")}</td>
     <td>${amountMetric(view.issueAmount, null, "發行總額")}</td>
     <td>${eventMetric(view)}</td>
-    <td>${metric(view.valuationDate ?? view.cbPriceDate, "資料日期")}</td>
   </tr>`;
 }
 
@@ -438,7 +437,6 @@ function renderBondCard(view) {
       ${cardMetric("到期日", view.maturityDate, "到期日")}
       ${cardMetric("發行總額", numberText(view.issueAmount), "發行總額")}
       ${cardMetric("下一事件", presentation.eventLabel, presentation.eventDate)}
-      ${cardMetric("資料日期", view.valuationDate ?? view.cbPriceDate, "資料日期")}
     </span>
   </button>`;
 }

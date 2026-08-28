@@ -161,12 +161,13 @@ test("does not retain unused market-price UI selectors", async () => {
   assert.doesNotMatch(stylesheet, /\.quote-(?:clock|source-bar|panel)\b/);
 });
 
-test("V4 public navigation and presentation vocabulary stay research-only", async () => {
+test("UX 2.0 public navigation keeps research destinations and adds the market event desk", async () => {
   assert.deepEqual(PUBLIC_PRIMARY_NAVIGATION.map((item) => item.label), [
     "首頁",
     "興櫃",
     "IPO",
     "可轉債",
+    "市場事件",
   ]);
 
   const publicFiles = await filesUnder("static-showcase");

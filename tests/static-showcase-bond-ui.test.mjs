@@ -32,7 +32,6 @@ test("bond page exposes the complete sortable CB workbench", async () => {
     "轉換溢價率",
     "流通餘額比例",
     "下一事件",
-    "資料日期",
   ]) {
     assert.match(bondsHtml + js, new RegExp(label));
   }
@@ -520,11 +519,12 @@ test("detail close button handles Enter as one keyboard activation", async () =>
   assert.equal(closeCount, 1);
 });
 
-test("mobile bond cards keep public market fields without archive diagnostics", async () => {
+test("mobile bond cards keep key public market fields without redundant date or archive diagnostics", async () => {
   const js = await readFile(new URL("assets/bonds-page.js", root), "utf8");
   const card = js.slice(js.indexOf("function renderBondCard"), js.indexOf("function bindBondOpeners"));
-  for (const label of ["CB 收盤", "轉換價值", "轉換溢價率", "標的股收盤", "目前轉換價", "流通餘額比例", "下一事件", "資料日期"]) {
+  for (const label of ["CB 收盤", "轉換價值", "轉換溢價率", "標的股收盤", "目前轉換價", "流通餘額比例", "下一事件"]) {
     assert.match(card, new RegExp(label));
   }
+  assert.doesNotMatch(card, /資料日期/);
   assert.doesNotMatch(card, /archiveReason|archiveDate|archivedAt|資料品質/);
 });

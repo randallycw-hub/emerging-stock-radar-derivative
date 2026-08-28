@@ -31,7 +31,6 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
     "最高",
     "最低",
     "申請狀態",
-    "資料日期",
     "月營收",
   ]) {
     assert.match(source, new RegExp(label));
@@ -71,16 +70,17 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
   assert.doesNotMatch(html, /data-market-sort="lastTradedPrice"/);
   assert.doesNotMatch(html, /最後成交價（盤後）/);
   assert.match(display, /今日無成交/);
-  assert.match(js, /emptyRow\(11/);
+  assert.match(js, /emptyRow\(10/);
   assert.match(html, /盤後資料讀取中/);
   assert.match(js, /monthlyRevenue/);
   assert.match(css, /market-breadth/);
   assert.match(css, /ranking-grid/);
   assert.match(css, /market-table/);
   assert.match(js, /marketCardHtml/);
-  for (const mobileLabel of ["最高／最低", "成交股數", "估算成交金額（盤後）", "資料日期"]) {
+  for (const mobileLabel of ["最高／最低", "成交股數", "估算成交金額（盤後）"]) {
     assert.match(js, new RegExp(mobileLabel));
   }
+  assert.doesNotMatch(js.slice(js.indexOf("function marketCardHtml"), js.indexOf("function renderMarketTable")), /資料日期/);
 
   assert.doesNotMatch(html, /即時|最新價|買進價|賣出價|買進量|賣出量|WebSocket|自動更新/);
   assert.doesNotMatch(html, /興櫃[^<]{0,12}收盤價|興櫃收盤價/);

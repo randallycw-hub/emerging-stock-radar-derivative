@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="台灣興櫃、IPO 與可轉債的近期公開市場事件">
+  <link rel="canonical" href="https://emerging-stock-radar-derivative-20260720.chiayu333.chatgpt.site/market-site/events.html">
+  <title>市場事件｜台灣盤後市場資訊台</title>
+  <link rel="stylesheet" href="./assets/app.css">
+</head>
+<body data-page="events">
+  <a class="skip-link" href="#main-content">跳到主要內容</a>
+  <header class="site-header"><div class="site-header__inner">
+    <a class="site-mark" href="./index.html" aria-label="台灣盤後市場資訊台首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a>
+    <button id="nav-toggle" class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation"><span aria-hidden="true">☰</span><span>選單</span></button>
+    <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽"><a data-page-link="home" href="./index.html">首頁</a><a data-page-link="emerging" href="./emerging.html">興櫃</a><a data-page-link="ipo" href="./ipo-radar.html">IPO</a><a data-page-link="bonds" href="./bonds.html">可轉債</a><a data-page-link="events" href="./events.html" aria-current="page">市場事件</a></nav>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
+  </div></header>
+
+  <main id="main-content" class="page-content market-events-page" tabindex="-1">
+    <header class="page-heading market-events-heading">
+      <div><p class="kicker">MARKET EVENT RADAR / VERIFIED PUBLIC DATA</p><h1>市場事件</h1><p>依已發布公開資料整理 IPO 與可轉債的日期、事件與公司脈絡；優先呈現今日、明日與近期需留意事項。</p></div>
+      <p id="market-event-update" class="update-status" aria-live="polite">資料讀取中</p>
+    </header>
+
+    <section class="market-event-metric-strip" aria-label="市場事件摘要">
+      <button type="button" data-event-metric="today"><span>今天</span><strong data-event-metric-count="today">—</strong><small>今日公開事件</small></button>
+      <button type="button" data-event-metric="tomorrow"><span>明天</span><strong data-event-metric-count="tomorrow">—</strong><small>明日公開事件</small></button>
+      <button type="button" data-event-metric="next7"><span>未來 7 日</span><strong data-event-metric-count="next7">—</strong><small>近期公開事件</small></button>
+      <button type="button" data-event-metric="ipo"><span>IPO</span><strong data-event-metric-count="ipo">—</strong><small>未來 30 日</small></button>
+      <button type="button" data-event-metric="bonds"><span>CB</span><strong data-event-metric-count="bonds">—</strong><small>未來 30 日</small></button>
+    </section>
+
+    <section class="market-event-workspace" aria-labelledby="market-event-workspace-heading">
+      <header class="section-heading"><div><p class="section-number">EVENT DESK</p><h2 id="market-event-workspace-heading">公開事件列表</h2></div><output id="market-event-result-count" aria-live="polite">—</output></header>
+      <form id="market-event-filters" class="market-event-filter-bar" aria-label="市場事件篩選">
+        <fieldset class="market-event-filter-group"><legend>市場</legend><div class="filter-chip-group" role="group" aria-label="市場類型"><button type="button" data-event-market="all" aria-pressed="true">全部</button><button type="button" data-event-market="ipo" aria-pressed="false">IPO</button><button type="button" data-event-market="bonds" aria-pressed="false">CB</button></div></fieldset>
+        <label><span>時間</span><select id="market-event-period" name="range"><option value="today">今天</option><option value="tomorrow">明天</option><option value="7">未來 7 日</option><option value="30" selected>未來 30 日</option><option value="all">全部歷程</option><option value="custom">自訂日期</option></select></label>
+        <label><span>事件</span><select id="market-event-type" name="type"><option value="all">全部事件</option></select></label>
+        <label><span>狀態</span><select id="market-event-status" name="status"><option value="all">全部狀態</option><option value="ongoing">今天</option><option value="upcoming">即將發生</option><option value="completed">已完成</option></select></label>
+        <label class="market-event-search"><span>搜尋</span><input id="market-event-search" name="q" type="search" autocomplete="off" placeholder="代碼、公司、CB 或事件"></label>
+        <div class="market-event-custom-range" data-market-event-custom-range hidden><label><span>開始</span><input id="market-event-start" type="date"></label><label><span>結束</span><input id="market-event-end" type="date"></label></div>
+        <button id="market-event-clear" class="secondary-button" type="reset">清除篩選</button>
+      </form>
+
+      <div class="market-event-viewbar" role="group" aria-label="事件檢視方式"><button type="button" data-event-view="list" aria-pressed="true">清單</button><button type="button" data-event-view="calendar" aria-pressed="false">日曆</button><button type="button" data-event-view="cluster" aria-pressed="false">依公司</button></div>
+      <div id="market-event-list" class="market-event-list" aria-live="polite"><p class="empty-state">公開事件讀取中</p></div>
+      <section id="market-event-calendar" class="market-event-calendar" hidden aria-labelledby="market-event-calendar-heading"><header><h3 id="market-event-calendar-heading">事件日曆</h3><div class="market-event-calendar-nav"><button type="button" data-calendar-nav="previous" aria-label="前一個月">‹</button><strong id="market-event-calendar-title">—</strong><button type="button" data-calendar-nav="next" aria-label="下一個月">›</button></div></header><div id="market-event-calendar-content"></div></section>
+      <div id="market-event-clusters" class="market-event-clusters" hidden aria-live="polite"></div>
+      <p class="data-error" data-page-error hidden role="status"></p>
+    </section>
+  </main>
+
+  <dialog id="market-event-drawer" class="market-event-drawer" aria-labelledby="market-event-drawer-title"><div class="market-event-drawer__header"><div><p class="kicker">EVENT DETAIL</p><h2 id="market-event-drawer-title">事件明細</h2></div><button type="button" data-event-drawer-close aria-label="關閉事件明細">×</button></div><div id="market-event-drawer-content"></div></dialog>
+  <footer class="footer public-footer" data-public-footer>市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer>
+  <script src="./data/runtime.js"></script>
+  <script type="module" src="./assets/site-shell.js"></script>
+  <script type="module" src="./assets/market-events-page.js"></script>
+</body>
+</html>

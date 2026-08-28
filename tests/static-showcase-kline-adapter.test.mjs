@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   chartDataState,
+  rangeKlineData,
   toKlineData,
 } from "../static-showcase/assets/klinechart-adapter.js";
 
@@ -38,6 +39,14 @@ test("KLineChart adapter refuses to initialize a chart without verified OHLCV", 
   assert.equal(chartDataState([]), "empty");
   assert.equal(chartDataState([point("2026-08-03")]), "ready");
   assert.equal(chartDataState([point("2026-08-03", { cbOpen: null })]), "empty");
+});
+
+test("KLineChart adapter supports short factual 1D、5D、1M ranges without creating candles", () => {
+  const data = Array.from({ length: 12 }, (_, index) => ({ timestamp: Date.parse(`2026-08-${String(index + 1).padStart(2, "0")}T00:00:00+08:00`) }));
+  assert.equal(rangeKlineData(data, "1D").length, 2);
+  assert.equal(rangeKlineData(data, "5D").length, 6);
+  assert.equal(rangeKlineData(data, "1M").length, 12);
+  assert.equal(rangeKlineData(data, "ALL").length, 12);
 });
 
 test("KLineChart adapter registers a Traditional Chinese locale before initializing the chart", async () => {

@@ -227,7 +227,7 @@ function renderMarketTable() {
   state.page = Math.min(state.page, pages);
   const visible = sorted.slice((state.page - 1) * size, state.page * size);
   document.querySelector("#emerging-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
-  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(11);
+  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(10);
   document.querySelector("#emerging-card-list").innerHTML = visible.map(marketCardHtml).join("");
   renderPagination("#emerging-pagination", state.page, pages, (page) => {
     state.page = page;
@@ -286,7 +286,6 @@ function marketRowHtml(row) {
     <td>${formatNumber(row.transactionVolume)}</td>
     <td>${formatNumber(row.estimatedTransactionAmount, { maximumFractionDigits: 0 })}</td>
     <td>${escapeHtml(row.applyingStatus || "未申請")}</td>
-    <td>${formatDate(row.tradingDate)}</td>
   </tr>`;
 }
 
@@ -298,7 +297,6 @@ function marketCardHtml(row) {
     <div><dt>最高／最低</dt><dd>${formatNumber(row.dailyHighPrice, { maximumFractionDigits: 2 })}／${formatNumber(row.dailyLowPrice, { maximumFractionDigits: 2 })}</dd></div>
     <div><dt>成交股數</dt><dd>${formatNumber(row.transactionVolume)}</dd></div>
     <div><dt>估算成交金額（盤後）</dt><dd>${formatNumber(row.estimatedTransactionAmount, { maximumFractionDigits: 0 })}</dd></div>
-    <div><dt>資料日期</dt><dd>${formatDate(row.tradingDate)}</dd></div>
   </dl></article>`;
 }
 
@@ -399,7 +397,7 @@ function normalizeRevenueRow(row) {
 
 function showUnavailable() {
   document.querySelector("#emerging-update-status").textContent = "盤後市場資料尚未發布";
-  document.querySelector("#emerging-table-body").innerHTML = emptyRow(11, "目前沒有可顯示的盤後市場資料");
+  document.querySelector("#emerging-table-body").innerHTML = emptyRow(10, "目前沒有可顯示的盤後市場資料");
   document.querySelector("#emerging-revenue-body").innerHTML = emptyRow(8, "目前沒有可顯示的月營收資料");
 }
 

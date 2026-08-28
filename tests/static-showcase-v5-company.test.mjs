@@ -6,7 +6,7 @@ import {
   renderCompanyOverviewHtml,
 } from "../static-showcase/assets/company-overview.js";
 
-test("V5 company overview retains a technical tab and uses neutral copy when a module is absent", () => {
+test("UX 2.0 company overview retains a technical analysis tab and uses neutral copy when a module is absent", () => {
   assert.equal(parseCompanyTab("technical"), "technical");
 
   const html = renderCompanyOverviewHtml({
@@ -19,7 +19,7 @@ test("V5 company overview retains a technical tab and uses neutral copy when a m
     events: [],
   });
 
-  assert.match(html, />技術圖表</);
+  assert.match(html, />技術分析</);
   assert.match(html, /目前沒有可轉債公開資料/);
   assert.match(html, /目前沒有 IPO 公開資料/);
 });
