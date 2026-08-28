@@ -9,6 +9,7 @@ import {
   selectVisibleCandles,
 } from "../static-showcase/assets/bond-candlestick-chart.js";
 import { bindBondDetail, renderBondDetail } from "../static-showcase/assets/bond-detail-page.js";
+import { summarizeVerifiedOhlcv } from "../static-showcase/assets/bond-technical-analysis.js";
 
 function point(date, values = {}) {
   return {
@@ -36,6 +37,21 @@ test("chart model preserves missing-OHLC dates as gaps and exposes hover payload
   });
   assert.equal(model.movingAverages.ma5[2], null);
   assert.equal(model.status, "資料累積中");
+});
+
+test("V5 only permits complete verified OHLCV points into a chart adapter", () => {
+  assert.deepEqual(summarizeVerifiedOhlcv([
+    point("2026-01-05"),
+    point("2026-01-06", {
+      cbOpen: null,
+      cbHigh: null,
+      cbLow: null,
+      cbClose: "102",
+    }),
+  ]), {
+    completePoints: 1,
+    dateRange: ["2026-01-05", "2026-01-05"],
+  });
 });
 
 test("chart model uses the shared indicator implementation for period aggregation and unavailable values", () => {

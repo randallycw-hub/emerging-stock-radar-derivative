@@ -23,6 +23,16 @@ export function verifiedDailyCandles(points) {
     .sort((left, right) => left.periodStart.localeCompare(right.periodStart));
 }
 
+export function summarizeVerifiedOhlcv(points) {
+  const candles = verifiedDailyCandles(points);
+  return Object.freeze({
+    completePoints: candles.length,
+    dateRange: candles.length === 0
+      ? null
+      : Object.freeze([candles[0].periodStart, candles.at(-1).periodEnd]),
+  });
+}
+
 export function aggregateCandles(candles, period) {
   if (!Array.isArray(candles)) throw new TypeError("candles must be an array");
   if (period !== "week" && period !== "month") {
