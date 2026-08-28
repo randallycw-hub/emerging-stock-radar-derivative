@@ -1,4 +1,9 @@
-import { formatDate, formatNumber, safeJsonFetch } from "./site-shell.js";
+import {
+  formatDate,
+  formatNumber,
+  renderMarketStatusLine,
+  safeJsonFetch,
+} from "./site-shell.js";
 import { buildCrossMarketEventEntries, buildPublicEventDigest, isPublishedIsoDate } from "./public-event-digest.js";
 
 const updateTarget = globalThis.document?.querySelector("#last-successful-update") ?? null;
@@ -157,9 +162,10 @@ async function loadHomeData() {
   ]);
 
   const date = manifest?.market?.dataDate ?? manifest?.generatedAt;
-  updateTarget.textContent = isPublishedIsoDate(date)
-    ? `最後成功更新：${formatDate(date)}`
-    : "更新時間尚未提供";
+  updateTarget.textContent = renderMarketStatusLine({
+    dataDate: isPublishedIsoDate(date) ? date : undefined,
+    updatedAt: manifest?.market?.generatedAt,
+  });
   const asOfDate = manifest?.market?.dataDate;
   renderDashboardHealth(buildDashboardHealth({
     dataDate: asOfDate,

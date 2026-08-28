@@ -38,7 +38,14 @@ function formatDate(value) {
   return date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date.replaceAll("-", "/") : "—";
 }
 
-const COMPANY_TABS = Object.freeze(["overview", "ipo", "revenue", "bonds", "events"]);
+export const COMPANY_TABS = Object.freeze([
+  "overview",
+  "technical",
+  "ipo",
+  "bonds",
+  "revenue",
+  "events",
+]);
 
 export function parseCompanyCode(value) {
   const code = text(value);
@@ -134,30 +141,35 @@ function fact(label, value) {
   return `<div class="company-fact"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`;
 }
 
-function renderOverview(target, overview, activeTab = "overview") {
+export function renderCompanyOverviewHtml(overview, activeTab = "overview") {
   if (!overview) {
-    target.innerHTML = '<h2>請輸入 4 碼公司代號</h2><p>可從全站搜尋，或在網址加上 <code>?code=1234</code> 開啟公司整合頁。</p>';
-    return;
+    return '<h2>請輸入 4 碼公司代號</h2><p>可從全站搜尋，或在網址加上 <code>?code=1234</code> 開啟公司整合頁。</p>';
   }
   const ipoEvents = overview.ipo?.events ?? [];
   const events = overview.events;
   const bonds = overview.bonds;
   const selectedTab = parseCompanyTab(activeTab);
-  target.innerHTML = `
+  return `
     <header class="company-overview-heading">
       <p class="section-number">COMPANY ${escapeHtml(overview.code)}</p>
       <h2>${escapeHtml(overview.name)}</h2>
       <p>以相同公司代碼彙整各市場公開資料。</p>
     </header>
     <div class="company-tabs" role="tablist" aria-label="公司公開資料分頁">
-      <button type="button" role="tab" aria-selected="${selectedTab === "overview"}" aria-controls="company-panel-overview" data-company-tab="overview">總覽</button><button type="button" role="tab" aria-selected="${selectedTab === "ipo"}" aria-controls="company-panel-ipo" data-company-tab="ipo">IPO</button><button type="button" role="tab" aria-selected="${selectedTab === "revenue"}" aria-controls="company-panel-revenue" data-company-tab="revenue">月營收</button><button type="button" role="tab" aria-selected="${selectedTab === "bonds"}" aria-controls="company-panel-bonds" data-company-tab="bonds">可轉債</button><button type="button" role="tab" aria-selected="${selectedTab === "events"}" aria-controls="company-panel-events" data-company-tab="events">事件</button>
+      <button type="button" role="tab" aria-selected="${selectedTab === "overview"}" aria-controls="company-panel-overview" data-company-tab="overview">總覽</button><button type="button" role="tab" aria-selected="${selectedTab === "technical"}" aria-controls="company-panel-technical" data-company-tab="technical">技術圖表</button><button type="button" role="tab" aria-selected="${selectedTab === "ipo"}" aria-controls="company-panel-ipo" data-company-tab="ipo">IPO</button><button type="button" role="tab" aria-selected="${selectedTab === "bonds"}" aria-controls="company-panel-bonds" data-company-tab="bonds">可轉債</button><button type="button" role="tab" aria-selected="${selectedTab === "revenue"}" aria-controls="company-panel-revenue" data-company-tab="revenue">月營收</button><button type="button" role="tab" aria-selected="${selectedTab === "events"}" aria-controls="company-panel-events" data-company-tab="events">公開事件</button>
     </div>
     <section id="company-panel-overview" class="company-overview-card company-overview-card--emerging" role="tabpanel" data-company-panel="overview"${selectedTab === "overview" ? "" : " hidden"}><h3>興櫃市場</h3><dl>${fact("產業", display(overview.emerging?.industryName))}${fact("當日均價", formatCompanyNumber(overview.emerging?.dailyAveragePrice))}${fact("成交量", formatCompanyNumber(overview.emerging?.transactionVolume))}</dl>${overview.emerging ? `<a href="./market.html?code=${encodeURIComponent(overview.code)}">查看興櫃明細</a>` : ""}</section>
-    <section id="company-panel-ipo" class="company-overview-card company-overview-card--ipo" role="tabpanel" data-company-panel="ipo"${selectedTab === "ipo" ? "" : " hidden"}><h3>IPO 時程</h3><dl>${fact("市場", display(overview.ipo?.market))}${fact("目前階段", display(overview.ipo?.stage))}</dl>${ipoEvents.length ? `<ol class="company-event-list">${ipoEvents.map((event) => `<li><time>${escapeHtml(formatDate(event.date))}</time><span>${escapeHtml(event.label)}</span></li>`).join("")}</ol>` : '<p class="company-empty">—</p>'}${overview.ipo ? `<a href="./ipo-radar.html?q=${encodeURIComponent(overview.code)}">查看 IPO 明細</a>` : ""}</section>
-    <section id="company-panel-revenue" class="company-overview-card" role="tabpanel" data-company-panel="revenue"${selectedTab === "revenue" ? "" : " hidden"}><h3>月營收</h3><dl>${fact("資料年月", display(overview.revenue?.yearMonth))}${fact("當月營收", formatCompanyNumber(overview.revenue?.currentMonthRevenue))}${fact("月增率", formatCompanyPercent(overview.revenue?.monthOverMonthPercent))}${fact("年增率", formatCompanyPercent(overview.revenue?.yearOverYearPercent))}</dl>${overview.revenue ? `<a href="./emerging.html?view=revenue&q=${encodeURIComponent(overview.code)}">查看月營收明細</a>` : ""}</section>
-    <section id="company-panel-bonds" class="company-overview-card company-overview-card--bonds" role="tabpanel" data-company-panel="bonds"${selectedTab === "bonds" ? "" : " hidden"}><h3>相關可轉債</h3>${bonds.length ? `<div class="company-bond-list">${bonds.map((bond) => `<a href="./bonds.html?bond=${encodeURIComponent(bond.bondCode)}"><strong>${escapeHtml(bond.bondCode)} ${escapeHtml(bond.bondName)}</strong><span>收盤 ${escapeHtml(formatCompanyNumber(bond.cbClose))}　資料日 ${escapeHtml(formatDate(bond.cbPriceDate))}　溢價 ${escapeHtml(formatCompanyPercent(bond.premiumRate))}</span></a>`).join("")}</div>` : '<p class="company-empty">—</p>'}</section>
-    <section id="company-panel-events" class="company-overview-card" role="tabpanel" data-company-panel="events"${selectedTab === "events" ? "" : " hidden"}><h3>公開事件</h3>${events.length ? `<ol class="company-event-list">${events.map((event) => `<li><time>${escapeHtml(formatDate(event.date))}</time><span>${escapeHtml(event.market)} · ${escapeHtml(event.label)}</span></li>`).join("")}</ol>` : '<p class="company-empty">—</p>'}</section>`;
-  bindCompanyTabs(target, selectedTab);
+    <section id="company-panel-technical" class="company-overview-card company-overview-card--technical" role="tabpanel" data-company-panel="technical"${selectedTab === "technical" ? "" : " hidden"}><h3>技術圖表</h3><p>僅顯示已驗證的實際 OHLCV 資料；缺漏交易日不插補。</p><div class="company-kline-state" data-company-kline data-company-code="${escapeHtml(overview.code)}"><p>開啟此分頁後載入圖表。</p></div></section>
+    <section id="company-panel-ipo" class="company-overview-card company-overview-card--ipo" role="tabpanel" data-company-panel="ipo"${selectedTab === "ipo" ? "" : " hidden"}><h3>IPO 時程</h3><dl>${fact("市場", display(overview.ipo?.market))}${fact("目前階段", display(overview.ipo?.stage))}</dl>${ipoEvents.length ? `<ol class="company-event-list">${ipoEvents.map((event) => `<li><time>${escapeHtml(formatDate(event.date))}</time><span>${escapeHtml(event.label)}</span></li>`).join("")}</ol>` : '<p class="company-empty">目前沒有 IPO 公開資料。</p>'}${overview.ipo ? `<a href="./ipo-radar.html?q=${encodeURIComponent(overview.code)}">查看 IPO 明細</a>` : ""}</section>
+    <section id="company-panel-bonds" class="company-overview-card company-overview-card--bonds" role="tabpanel" data-company-panel="bonds"${selectedTab === "bonds" ? "" : " hidden"}><h3>相關可轉債</h3>${bonds.length ? `<div class="company-bond-list">${bonds.map((bond) => `<a href="./bonds.html?bond=${encodeURIComponent(bond.bondCode)}"><strong>${escapeHtml(bond.bondCode)} ${escapeHtml(bond.bondName)}</strong><span>收盤 ${escapeHtml(formatCompanyNumber(bond.cbClose))}　資料日 ${escapeHtml(formatDate(bond.cbPriceDate))}　溢價 ${escapeHtml(formatCompanyPercent(bond.premiumRate))}</span></a>`).join("")}</div>` : '<p class="company-empty">目前沒有可轉債公開資料。</p>'}</section>
+    <section id="company-panel-revenue" class="company-overview-card" role="tabpanel" data-company-panel="revenue"${selectedTab === "revenue" ? "" : " hidden"}><h3>月營收</h3><dl>${fact("資料年月", display(overview.revenue?.yearMonth))}${fact("當月營收", formatCompanyNumber(overview.revenue?.currentMonthRevenue))}${fact("月增率", formatCompanyPercent(overview.revenue?.monthOverMonthPercent))}${fact("年增率", formatCompanyPercent(overview.revenue?.yearOverYearPercent))}</dl>${overview.revenue ? `<a href="./emerging.html?view=revenue&q=${encodeURIComponent(overview.code)}">查看月營收明細</a>` : '<p class="company-empty">目前沒有月營收公開資料。</p>'}</section>
+    <section id="company-panel-events" class="company-overview-card" role="tabpanel" data-company-panel="events"${selectedTab === "events" ? "" : " hidden"}><h3>公開事件</h3>${events.length ? `<ol class="company-event-list">${events.map((event) => `<li><time>${escapeHtml(formatDate(event.date))}</time><span>${escapeHtml(event.market)} · ${escapeHtml(event.label)}</span></li>`).join("")}</ol>` : '<p class="company-empty">目前沒有公開事件。</p>'}</section>`;
+}
+
+function renderOverview(target, overview, activeTab = "overview") {
+  target.innerHTML = renderCompanyOverviewHtml(overview, activeTab);
+  if (!overview) return;
+  bindCompanyTabs(target, parseCompanyTab(activeTab));
 }
 
 function syncCompanyTab(activeTab) {
@@ -210,7 +222,7 @@ async function loadCompanyOverview() {
   const pointer = await fetchJson(new URL("../data/current.json", import.meta.url));
   const runtime = pointer?.runtimeUrl ? await fetchJson(new URL(pointer.runtimeUrl, document.baseURI)) : null;
   if (!runtime) {
-    target.innerHTML = '<p class="empty-state">公開資料讀取中</p>';
+    target.innerHTML = '<p class="empty-state">公司公開資料暫時無法載入，請稍後再試。</p>';
     return;
   }
   const [market, ipo, revenue, workbench] = await Promise.all([

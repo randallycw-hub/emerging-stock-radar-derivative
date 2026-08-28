@@ -4,16 +4,16 @@ import test from "node:test";
 
 import { buildCompanyOverview, parseCompanyTab } from "../static-showcase/assets/company-overview.js";
 
-test("V4 公司頁提供五個公開資料分頁並將未提供值保留為破折號", async () => {
+test("V5 公司頁提供六個公開資料分頁並將未提供值保留為破折號", async () => {
   const [html, script] = await Promise.all([
     readFile(new URL("../static-showcase/company.html", import.meta.url), "utf8"),
     readFile(new URL("../static-showcase/assets/company-overview.js", import.meta.url), "utf8"),
   ]);
-  for (const label of ["總覽", "IPO", "月營收", "可轉債", "事件"]) {
+  for (const label of ["總覽", "技術圖表", "IPO", "可轉債", "月營收", "公開事件"]) {
     assert.match(script, new RegExp(`>${label}<`));
   }
   assert.match(script, /data-company-panel/);
-  assert.match(html, /公司整合頁/);
+  assert.match(html, /公司研究/);
   assert.doesNotMatch(html + script, /來源 ID|缺漏原因|待確認/);
 });
 
