@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -37,4 +38,10 @@ test("KLineChart adapter refuses to initialize a chart without verified OHLCV", 
   assert.equal(chartDataState([]), "empty");
   assert.equal(chartDataState([point("2026-08-03")]), "ready");
   assert.equal(chartDataState([point("2026-08-03", { cbOpen: null })]), "empty");
+});
+
+test("KLineChart adapter registers a Traditional Chinese locale before initializing the chart", async () => {
+  const source = await readFile(new URL("../static-showcase/assets/klinechart-adapter.js", import.meta.url), "utf8");
+  assert.match(source, /registerLocale\("zh-TW"/);
+  assert.match(source, /locale: "zh-TW"/);
 });

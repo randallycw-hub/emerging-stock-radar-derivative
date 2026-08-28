@@ -5,13 +5,13 @@ import test from "node:test";
 const showcaseRoot = new URL("../static-showcase/", import.meta.url);
 const read = (path) => readFile(new URL(path, showcaseRoot), "utf8");
 
-test("V4 興櫃以五個研究分頁串接同一份市場資料", async () => {
+test("V5 興櫃以緊湊研究分頁串接同一份市場資料", async () => {
   const [html, script] = await Promise.all([
     read("emerging.html"),
     read("assets/emerging-page.js"),
   ]);
 
-  for (const label of ["市場摘要", "漲跌幅", "成交量", "月營收", "全部公司"]) {
+  for (const label of ["市場概況", "漲跌排行", "成交排行", "月營收", "全部公司"]) {
     assert.match(html, new RegExp(`>${label}<`));
   }
   for (const view of ["summary", "price", "volume", "revenue", "all"]) {
@@ -23,13 +23,13 @@ test("V4 興櫃以五個研究分頁串接同一份市場資料", async () => {
   assert.match(script, /marketDetailHref/);
 });
 
-test("V4 IPO 將雷達、完整時程與競拍申購維持同一產品群組", async () => {
+test("V5 IPO 將進度、時程與競拍申購維持同一產品群組", async () => {
   const pages = await Promise.all(["ipo-radar.html", "ipo.html", "ipo-offering.html"].map(read));
   for (const html of pages) {
     assert.match(html, /class="ipo-context-nav bond-context-nav"/);
-    assert.match(html, />進度雷達</);
-    assert.match(html, />完整時程</);
-    assert.match(html, />競拍／申購／掛牌</);
+    assert.match(html, />進度</);
+    assert.match(html, />時程</);
+    assert.match(html, />競拍與申購</);
     assert.match(html, /href="\.\/ipo-radar\.html"/);
     assert.match(html, /href="\.\/ipo\.html"/);
     assert.match(html, /href="\.\/ipo-offering\.html"/);

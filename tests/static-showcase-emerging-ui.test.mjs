@@ -54,7 +54,7 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
   for (const view of ["summary", "price", "volume", "revenue", "all"]) {
     assert.match(html, new RegExp(`data-emerging-view="${view}"`));
   }
-  assert.match(html, /市場摘要/);
+  assert.match(html, /市場概況/);
 
   assert.match(html, /assets\/emerging-page\.js/);
   assert.match(js, /URLSearchParams/);

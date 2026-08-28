@@ -4,6 +4,23 @@ import {
 } from "./bond-technical-analysis.js";
 
 const TAIPEI_UTC_OFFSET = "+08:00";
+const TAIWAN_KLINE_LOCALE = Object.freeze({
+  time: "時間：",
+  open: "開：",
+  high: "高：",
+  low: "低：",
+  close: "收：",
+  volume: "成交量：",
+  turnover: "成交額：",
+  change: "漲跌幅：",
+  second: "秒",
+  minute: "",
+  hour: "小時",
+  day: "日",
+  week: "週",
+  month: "月",
+  year: "年",
+});
 
 function taipeiStartOfDay(date) {
   return Date.parse(`${date}T00:00:00${TAIPEI_UTC_OFFSET}`);
@@ -114,7 +131,8 @@ export async function mountKlineChart({
 
   renderState(host, "loading", "技術圖表載入中…");
   try {
-    const { dispose, init } = await import("./vendor/klinecharts.esm.js");
+    const { dispose, init, registerLocale } = await import("./vendor/klinecharts.esm.js");
+    registerLocale("zh-TW", TAIWAN_KLINE_LOCALE);
     host.replaceChildren();
     const chart = init(host, {
       locale: "zh-TW",

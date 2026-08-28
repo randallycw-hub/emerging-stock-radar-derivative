@@ -4,12 +4,12 @@ import test from "node:test";
 
 const root = new URL("../static-showcase/", import.meta.url);
 
-test("V4 頁尾提供人類可讀的方法、使用、修正、免責與隱私入口", async () => {
+test("V5 頁尾提供人類可讀的使用、方法、更新、免責與隱私入口", async () => {
   const [shell, methodology] = await Promise.all([
     readFile(new URL("assets/site-shell.js", root), "utf8"),
     readFile(new URL("methodology.html", root), "utf8"),
   ]);
-  for (const label of ["資料與方法", "使用說明", "更新與修正", "免責聲明", "隱私權", "系統資料狀態"]) {
+  for (const label of ["如何使用", "資料與方法", "更新紀錄", "關於本站", "意見回饋", "免責聲明", "隱私權"]) {
     assert.match(shell, new RegExp(`>${label}<`));
   }
   for (const id of ["methodology", "usage", "updates", "disclaimer", "privacy"]) {

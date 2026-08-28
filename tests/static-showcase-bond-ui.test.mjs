@@ -79,7 +79,9 @@ test("bond page exposes the complete sortable CB workbench", async () => {
     "區域資料變數不可遮蔽瀏覽器 history 物件",
   );
   assert.doesNotMatch(js, /function renderWorkbench|function drawHistoryChart/);
-  assert.match(js, /bindBondDetail\(target, closeDetail, \{ history: state\.history\.filter/);
+  assert.match(js, /const detailHistory = state\.history\.filter\(\(point\) => point\.bondCode === code\);/);
+  assert.match(js, /renderBondDetail\(\{ \.\.\.detail, history: detailHistory \}/);
+  assert.match(js, /bindBondDetail\(target, closeDetail\);/);
   assert.match(detailJs, /function noAdviceViolations/);
   assert.match(detailJs, /FORBIDDEN_UI_PATTERNS/);
   assert.match(detailJs, /data-bond-kline-host/);

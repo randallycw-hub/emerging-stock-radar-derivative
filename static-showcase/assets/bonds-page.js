@@ -686,8 +686,9 @@ function renderRoute() {
   const detailRecord = state.workbench.find((candidate) => candidate.bondCode === code)
     ?? detailRecordFromLegacy({ view, term: termFor(view.bondCode) ?? {}, events: [] });
   const detail = detailWithValuationConversionEvidence(detailRecord, state.conversionPrices);
-  target.innerHTML = renderBondDetail(detail, { asOfDate: state.workbenchAsOfDate });
-  disposeDetail = bindBondDetail(target, closeDetail, { history: state.history.filter((point) => point.bondCode === code), events: detail.events, archived: detail.status === "archived" });
+  const detailHistory = state.history.filter((point) => point.bondCode === code);
+  target.innerHTML = renderBondDetail({ ...detail, history: detailHistory }, { asOfDate: state.workbenchAsOfDate });
+  disposeDetail = bindBondDetail(target, closeDetail);
   target.hidden = false;
   list.hidden = true;
   target.querySelector("[data-detail-close]")?.focus();

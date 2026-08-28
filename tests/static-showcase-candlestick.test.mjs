@@ -63,3 +63,9 @@ test("V5 detail binding lazy-loads the KLineChart adapter and keeps serialized v
   assert.match(html, /"cbOpen":"100"/);
   assert.doesNotMatch(html, /<canvas/);
 });
+
+test("V5 bond detail supplies the selected bond's verified history to the serialized K-line payload", async () => {
+  const page = await readFile(new URL("../static-showcase/assets/bonds-page.js", import.meta.url), "utf8");
+  assert.match(page, /const detailHistory = state\.history\.filter\(\(point\) => point\.bondCode === code\);/);
+  assert.match(page, /renderBondDetail\(\{ \.\.\.detail, history: detailHistory \}/);
+});
