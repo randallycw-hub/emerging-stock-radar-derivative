@@ -6,7 +6,7 @@ import { sortRows } from "./table-sort.js";
 const stageLabels = { active: "進行中", market: "交易事件優先", A: "送件待審", B: "審議後", C: "契約後", D: "競拍／買賣", listed: "已掛牌", withdrawn: "已撤件", delayed: "延期", cancelled: "已取消" };
 const stageOrder = { A: 1, B: 2, C: 4, D: 5, listed: 6, withdrawn: 7, delayed: 7, cancelled: 7 };
 const errorTarget = globalThis.document?.querySelector("[data-page-error]") ?? null;
-const state = { rows: [], dataDate: null, query: "", market: "all", stage: "market", event: "all", year: "all", view: "list", sortKey: "eventDate", direction: "asc", page: 1 };
+const state = { rows: [], dataDate: null, query: "", market: "all", stage: "market", event: "all", year: "all", dateRange: "all", view: "list", sortKey: "eventDate", direction: "asc", page: 1 };
 const sortTypes = { companyCode: "text", stage: "number", eventDate: "text", distanceDays: "number", auctionOpenDate: "text", listingDate: "text" };
 const lifecycleDefinitions = [
   ["announcement", "公告", /(?:announcement|公告)/iu],
@@ -20,6 +20,12 @@ const approvedIpoSourceIds = new Set(["twse-applications", "tpex-applications", 
 const activeIpoStages = new Set(["A", "B", "C", "D"]);
 
 export { selectPublishedUpcomingEvents };
+
+export const IPO_DATE_RANGES = Object.freeze(["week", "next-week", "30-days", "all"]);
+
+export function normalizeIpoDateRange(value) {
+  return IPO_DATE_RANGES.includes(value) ? value : "all";
+}
 
 if (globalThis.document) {
   initializeFromUrl();
@@ -55,6 +61,7 @@ function initializeFromUrl() {
   state.stage = defaultIpoStage(params.get("stage"), { marketFirst: true });
   state.event = params.get("event") ?? "all";
   state.year = /^\d{4}$/.test(params.get("year") ?? "") ? params.get("year") : "all";
+  state.dateRange = normalizeIpoDateRange(params.get("range"));
   state.view = params.get("view") === "month" ? "month" : "list";
   state.sortKey = Object.hasOwn(sortTypes, params.get("sort")) ? params.get("sort") : "eventDate";
   state.direction = params.get("direction") === "desc" ? "desc" : "asc";
@@ -72,6 +79,14 @@ function bindControls() {
   }
   for (const button of document.querySelectorAll("[data-ipo-view]")) {
     button.addEventListener("click", () => { state.view = button.dataset.ipoView; syncUrl(); render(); });
+  }
+  for (const button of document.querySelectorAll("[data-ipo-date-filter]")) {
+    button.addEventListener("click", () => {
+      state.dateRange = normalizeIpoDateRange(button.dataset.ipoDateFilter);
+      state.page = 1;
+      syncUrl();
+      render();
+    });
   }
   window.addEventListener("popstate", () => { initializeFromUrl(); applyStateToControls(); render(); });
 }
@@ -138,9 +153,10 @@ export function filterIpoCalendarRows(rows, filters, dataDate) {
       && (filters.market === "all" || row.market === filters.market)
       && matchesIpoCalendarStage(row, filters.stage, dataDate);
     if (!matchesCompany) return false;
-    if (filters.event === "all" && filters.year === "all") return true;
+    if (filters.event === "all" && filters.year === "all" && normalizeIpoDateRange(filters.dateRange) === "all") return true;
     return row.events.some((event) => (filters.event === "all" || event.kind === filters.event)
-      && (filters.year === "all" || event.date.slice(0, 4) === filters.year));
+      && (filters.year === "all" || event.date.slice(0, 4) === filters.year)
+      && matchesIpoDateRange(event.date, filters.dateRange, dataDate));
   });
 }
 
@@ -149,7 +165,8 @@ function filteredEventEntries(rows, filters, dataDate) {
     ? rows.flatMap((row) => row.events.map((event) => ({ row, event })))
     : projectActiveIpoEventEntries(rows, dataDate);
   return entries.filter(({ event }) => (filters.event === "all" || event.kind === filters.event)
-    && (filters.year === "all" || event.date.slice(0, 4) === filters.year));
+    && (filters.year === "all" || event.date.slice(0, 4) === filters.year)
+    && matchesIpoDateRange(event.date, filters.dateRange, dataDate));
 }
 
 function renderUpcoming(entries) {
@@ -234,13 +251,15 @@ function auctionStatus(row) { if (!row.auction || !row.auctionVerified) return "
 function populateFilters() { replaceOptions("#ipo-market", "全部市場", unique(state.rows.map((row) => row.market))); replaceOptions("#ipo-stage", "全部歷程", ["market", "active", ...unique(state.rows.map((row) => row.stage).filter((stage) => activeIpoStages.has(stage)))], stageLabels); replaceOptions("#ipo-event", "全部事件", unique(state.rows.flatMap((row) => row.events.map((event) => event.kind))), Object.fromEntries(state.rows.flatMap((row) => row.events.map((event) => [event.kind, event.label])))); replaceOptions("#ipo-year", "全部年份", unique(state.rows.flatMap((row) => row.events.map((event) => event.date.slice(0, 4)))).sort().reverse()); }
 function replaceOptions(selector, allLabel, values, labels = {}) { document.querySelector(selector).innerHTML = `<option value="all">${allLabel}</option>${values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(labels[value] ?? value)}</option>`).join("")}`; }
 function renderPagination(total) { const target = document.querySelector("#ipo-pagination"); target.innerHTML = `<button type="button" ${state.page === 1 ? "disabled" : ""} data-page="${state.page - 1}">上一頁</button><span>第 ${state.page}／${total} 頁</span><button type="button" ${state.page === total ? "disabled" : ""} data-page="${state.page + 1}">下一頁</button>`; for (const button of target.querySelectorAll("[data-page]")) button.addEventListener("click", () => { state.page = Number(button.dataset.page); syncUrl(); render(); }); }
-function applyStateToControls() { document.querySelector("#ipo-search").value = state.query; selectExistingValue("#ipo-market", state.market); selectExistingValue("#ipo-stage", state.stage); selectExistingValue("#ipo-event", state.event); selectExistingValue("#ipo-year", state.year); updateSortControls(); }
+function applyStateToControls() { document.querySelector("#ipo-search").value = state.query; selectExistingValue("#ipo-market", state.market); selectExistingValue("#ipo-stage", state.stage); selectExistingValue("#ipo-event", state.event); selectExistingValue("#ipo-year", state.year); for (const button of document.querySelectorAll("[data-ipo-date-filter]")) button.setAttribute("aria-pressed", String(button.dataset.ipoDateFilter === state.dateRange)); updateSortControls(); }
 function updateSortControls() { document.querySelector("#ipo-sort-field").value = state.sortKey; const button = document.querySelector("#ipo-sort-direction"); button.dataset.direction = state.direction; button.textContent = state.direction === "asc" ? "近到遠 ↑" : "遠到近 ↓"; for (const sortButton of document.querySelectorAll("[data-ipo-sort]")) { const active = sortButton.dataset.ipoSort === state.sortKey; sortButton.closest("th").setAttribute("aria-sort", active ? (state.direction === "asc" ? "ascending" : "descending") : "none"); sortButton.querySelector("span").textContent = active ? (state.direction === "asc" ? "↑" : "↓") : ""; } for (const viewButton of document.querySelectorAll("[data-ipo-view]")) viewButton.setAttribute("aria-selected", String(viewButton.dataset.ipoView === state.view)); document.querySelector("#ipo-list-view").hidden = state.view !== "list"; document.querySelector("#ipo-month-view").hidden = state.view !== "month"; }
-function syncUrl() { const params = new URLSearchParams(); if (state.query) params.set("q", state.query); if (state.market !== "all") params.set("market", state.market); if (shouldWriteIpoStage(state.stage)) params.set("stage", state.stage); if (state.event !== "all") params.set("event", state.event); if (state.year !== "all") params.set("year", state.year); if (state.view !== "list") params.set("view", state.view); if (state.sortKey !== "eventDate") params.set("sort", state.sortKey); if (state.direction !== "asc") params.set("direction", state.direction); if (state.page > 1) params.set("page", String(state.page)); history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`); }
+function syncUrl() { const params = new URLSearchParams(); if (state.query) params.set("q", state.query); if (state.market !== "all") params.set("market", state.market); if (shouldWriteIpoStage(state.stage)) params.set("stage", state.stage); if (state.event !== "all") params.set("event", state.event); if (state.year !== "all") params.set("year", state.year); if (state.dateRange !== "all") params.set("range", state.dateRange); if (state.view !== "list") params.set("view", state.view); if (state.sortKey !== "eventDate") params.set("sort", state.sortKey); if (state.direction !== "asc") params.set("direction", state.direction); if (state.page > 1) params.set("page", String(state.page)); history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`); }
 function showUnavailable() { document.querySelector("#ipo-update-status").textContent = "IPO 事件資料尚未發布"; document.querySelector("#ipo-table-body").innerHTML = emptyRow("目前沒有可顯示的 IPO 時程資料"); document.querySelector("#ipo-card-list").innerHTML = emptyCard("目前沒有可顯示的 IPO 時程資料"); document.querySelector("#ipo-upcoming-grid").innerHTML = "<p class=\"empty-cell\">目前沒有未來 7 日公開事件</p>"; showError("資料暫時無法讀取，目前沒有可顯示的資料。"); }
 function showError(message) { if (errorTarget) { errorTarget.textContent = message; errorTarget.hidden = false; } }
 function taipeiToday() { const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date()); const value = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value])); return `${value.year}-${value.month}-${value.day}`; }
 function taipeiCalendarDistance(today, date) { return Math.round((Date.UTC(...date.split("-").map(Number).map((value, index) => index === 1 ? value - 1 : value)) - Date.UTC(...today.split("-").map(Number).map((value, index) => index === 1 ? value - 1 : value))) / 86_400_000); }
+function addTaipeiCalendarDays(date, days) { const value = new Date(`${date}T00:00:00Z`); value.setUTCDate(value.getUTCDate() + days); return value.toISOString().slice(0, 10); }
+export function matchesIpoDateRange(date, range, dataDate) { const selected = normalizeIpoDateRange(range); if (selected === "all") return true; if (!validDate(date) || !validDate(dataDate)) return false; const bounds = selected === "week" ? [dataDate, addTaipeiCalendarDays(dataDate, 6)] : selected === "next-week" ? [addTaipeiCalendarDays(dataDate, 7), addTaipeiCalendarDays(dataDate, 13)] : [dataDate, addTaipeiCalendarDays(dataDate, 30)]; return date >= bounds[0] && date <= bounds[1]; }
 function stageLabel(stage) { return stageLabels[stage] ?? `未知階段（${stage}）`; }
 function stageClass(stage) { return Object.hasOwn(stageLabels, stage) ? escapeHtml(stage) : "unknown"; }
 function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")); }

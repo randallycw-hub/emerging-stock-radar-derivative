@@ -1613,6 +1613,12 @@ body {
 .company-chart-toolbar label { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 700; }
 .company-chart-toolbar select { min-height: 36px; max-width: min(100%, 320px); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; background: var(--color-surface); color: var(--color-text); }
 .company-chart-toolbar a { color: var(--color-primary); font-size: 13px; font-weight: 700; text-decoration: none; }
+.ipo-date-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0; padding: 10px 0; border-block: 1px solid var(--line); }
+.ipo-date-filters > span { margin-right: 4px; color: var(--muted); font-size: 12px; font-weight: 700; }
+.ipo-date-filters button { min-height: 34px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; background: var(--color-surface); color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; }
+.ipo-date-filters button[aria-pressed="true"] { border-color: var(--color-primary); background: var(--clay-soft); color: var(--color-primary); }
+.market-table th:not(:first-child), .market-table td:not(:first-child), .ipo-table th:not(:first-child), .ipo-table td:not(:first-child), .bond-table th:not(:first-child), .bond-table td:not(:first-child) { text-align: right; }
+.market-table th, .market-table td, .ipo-table th, .ipo-table td, .bond-table th, .bond-table td { min-height: var(--table-row-height); }
 .bond-metric-help { margin: 10px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--color-surface); }
 .bond-metric-help summary { padding: 9px 11px; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 700; }
 .bond-metric-help dl { margin: 0; padding: 0 11px 11px; display: grid; gap: 8px; }
@@ -1675,6 +1681,8 @@ body {
   .chart-controls > button { flex: 0 0 auto; }
   .company-chart-toolbar { align-items: stretch; }
   .company-chart-toolbar label { display: grid; }
+  .ipo-date-filters { flex-wrap: nowrap; overflow-x: auto; padding-inline: 2px; }
+  .ipo-date-filters > span, .ipo-date-filters button { flex: 0 0 auto; }
 }
 
 @media (max-width: 480px) {
