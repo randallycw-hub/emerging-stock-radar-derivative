@@ -26,7 +26,7 @@ const ACTIVE_IPO_STAGES = new Set(["A", "B", "C", "D"]);
 export function buildDashboardHealth({ dataDate = null, dataAvailable = false } = {}) {
   return dataAvailable && isPublishedIsoDate(dataDate)
     ? { label: "資料已發布", detail: `資料日期 ${dataDate}` }
-    : { label: "資料讀取中", detail: "公開資料正在讀取" };
+    : { label: "公開資料尚未提供", detail: "資料日期 —" };
 }
 
 function recordsOf(value) {
@@ -195,7 +195,7 @@ function renderDashboardHealth(health) {
 
 function renderHomeEvents(input) {
   const events = buildCrossMarketEventEntries(input);
-  const dataDate = isPublishedIsoDate(input.asOfDate) ? formatDate(input.asOfDate) : "尚未提供";
+  const dataDate = isPublishedIsoDate(input.asOfDate) ? formatDate(input.asOfDate) : "—";
   if (coverageTarget) coverageTarget.textContent = `資料日期 ${dataDate}`;
   if (!eventStrip) return events;
   const render = (market = "all") => {
@@ -225,9 +225,9 @@ function renderHomeSummary(summary) {
   const metric = (label, value) => `<div><dt>${escapeHtml(label)}</dt><dd>${count(value)}</dd></div>`;
   const panel = (title, metrics) => `<article class="home-summary-panel"><h3>${escapeHtml(title)}</h3><dl>${metrics.map(([label, value]) => metric(label, value)).join("")}</dl></article>`;
   summaryTarget.innerHTML = [
-    summary.emerging === null ? panel("興櫃市場", [["資料狀態", null]]) : panel("興櫃市場", [["市場家數", summary.emerging.marketCount], ["今日有交易", summary.emerging.tradedCount], ["今日成交總額", summary.emerging.totalTurnover], ["上漲／下跌", `${summary.emerging.upCount}／${summary.emerging.downCount}`], ["新登錄", summary.emerging.newListingCount], ["低流動性", summary.emerging.lowLiquidityCount]]),
-    summary.ipo === null ? panel("IPO 進度", [["資料狀態", null]]) : panel("IPO 進度", [["進行中案件", summary.ipo.activeCases], ["近期審議", summary.ipo.upcomingReviews], ["7 日內競拍／申購", summary.ipo.auctionOrSubscription7d], ["30 日內預計掛牌", summary.ipo.plannedListings30d]]),
-    summary.bonds === null ? panel("可轉債事件", [["資料狀態", null]]) : panel("可轉債事件", [["有效 CB", summary.bonds.activeCount], ["今日有成交", summary.bonds.tradedCount], ["30 日內事件", summary.bonds.events30d], ["近期新掛牌", summary.bonds.recentListings]]),
+    summary.emerging === null ? panel("興櫃市場", [["市場家數", null]]) : panel("興櫃市場", [["市場家數", summary.emerging.marketCount], ["今日有交易", summary.emerging.tradedCount], ["今日成交總額", summary.emerging.totalTurnover], ["上漲／下跌", `${summary.emerging.upCount}／${summary.emerging.downCount}`], ["新登錄", summary.emerging.newListingCount], ["低流動性", summary.emerging.lowLiquidityCount]]),
+    summary.ipo === null ? panel("IPO 進度", [["進行中案件", null]]) : panel("IPO 進度", [["進行中案件", summary.ipo.activeCases], ["近期審議", summary.ipo.upcomingReviews], ["7 日內競拍／申購", summary.ipo.auctionOrSubscription7d], ["30 日內預計掛牌", summary.ipo.plannedListings30d]]),
+    summary.bonds === null ? panel("可轉債事件", [["有效 CB", null]]) : panel("可轉債事件", [["有效 CB", summary.bonds.activeCount], ["今日有成交", summary.bonds.tradedCount], ["30 日內事件", summary.bonds.events30d], ["近期新掛牌", summary.bonds.recentListings]]),
   ].join("");
 }
 

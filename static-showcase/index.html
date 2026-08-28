@@ -45,15 +45,13 @@
       </form>
       <div class="home-hero__meta" aria-label="資料更新狀態">
         <span>每日公開資料研究入口</span>
-        <p id="last-successful-update" class="update-status" aria-live="polite">資料日將依已發布快照顯示</p>
+        <p id="last-successful-update" class="update-status" aria-live="polite"><!-- HOME_STATIC_STATUS --></p>
       </div>
     </section>
 
     <section id="home-today-grid" class="home-today-grid" aria-label="今日市場摘要">
       <div id="home-market-summary" class="home-market-summary" aria-live="polite">
-        <article class="home-summary-panel"><h3>興櫃市場</h3><dl><div><dt>公開資料</dt><dd>載入後顯示</dd></div></dl></article>
-        <article class="home-summary-panel"><h3>IPO 進度</h3><dl><div><dt>公開資料</dt><dd>載入後顯示</dd></div></dl></article>
-        <article class="home-summary-panel"><h3>可轉債事件</h3><dl><div><dt>公開資料</dt><dd>載入後顯示</dd></div></dl></article>
+        <!-- HOME_STATIC_SUMMARY -->
       </div>
     </section>
 
@@ -63,7 +61,7 @@
           <p class="kicker">TODAY BRIEF / PUBLISHED EVENT DESK</p>
           <h2 id="home-events-title">近期公開事件</h2>
         </div>
-        <span class="home-event-section__meta"><p id="home-data-coverage" class="update-status" aria-live="polite">資料日將依已發布快照顯示</p><a href="./events.html">查看市場事件 →</a></span>
+        <span class="home-event-section__meta"><p id="home-data-coverage" class="update-status" aria-live="polite"><!-- HOME_STATIC_COVERAGE --></p><a href="./events.html">查看市場事件 →</a></span>
       </div>
       <div class="home-event-filters" role="group" aria-label="近期公開事件市場篩選">
         <button type="button" data-home-event-market="all" aria-pressed="true">全部</button>
@@ -71,7 +69,7 @@
         <button type="button" data-home-event-market="ipo" aria-pressed="false">IPO</button>
         <button type="button" data-home-event-market="bonds" aria-pressed="false">CB</button>
       </div>
-      <div id="home-event-strip" class="home-event-strip" aria-live="polite"></div>
+      <div id="home-event-strip" class="home-event-strip" aria-live="polite"><!-- HOME_STATIC_EVENTS --></div>
     </section>
 
     <section class="home-quick-grid" aria-label="每日研究捷徑">

@@ -9,8 +9,8 @@ test("dashboard health translates published availability without technical diagn
     detail: "資料日期 2026-08-26",
   });
   assert.deepEqual(buildDashboardHealth({ dataDate: null, dataAvailable: false }), {
-    label: "資料讀取中",
-    detail: "公開資料正在讀取",
+    label: "公開資料尚未提供",
+    detail: "資料日期 —",
   });
 });
 

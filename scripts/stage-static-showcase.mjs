@@ -14,6 +14,7 @@ import {
   buildDataCenterStatus,
   renderDataCenterBootstrap,
 } from "../static-showcase/assets/data-center-status.js";
+import { buildHomeStaticFallback } from "../static-showcase/assets/home-static-fallback.js";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
@@ -67,6 +68,7 @@ const ASSET_FILES = new Set([
   "emerging-page.js",
   "market-event-model.js",
   "market-events-page.js",
+  "home-static-fallback.js",
   "home-page.js",
   "ipo-data.js",
   "ipo-page.js",
@@ -227,8 +229,41 @@ export async function stageStaticShowcase({
     runtime,
   });
   await writePublicStaticArtifacts({ destination, generation: pointer.generation });
+  await injectHomeStaticFallback({ source, destination, manifest, runtime });
   await injectDataCenterBootstrap({ destination, status: dataCenterStatus });
   await writePublicRootArtifacts({ destination });
+}
+
+async function injectHomeStaticFallback({ source, destination, manifest, runtime }) {
+  const sourceJson = (url, message) => readJson(
+    join(source, String(url ?? "").replace(/^\.\//, "")),
+    message,
+  );
+  const [emerging, ipo, bonds] = await Promise.all([
+    sourceJson(runtime.emergingMarketUrl, "active generation homepage emerging market is invalid"),
+    sourceJson(runtime.ipoEventsUrl, "active generation homepage IPO snapshot is invalid"),
+    sourceJson(runtime.datasets?.bondWorkbench, "active generation homepage CB workbench is invalid"),
+  ]);
+  const fallback = buildHomeStaticFallback({ emerging, ipo, bonds, manifest });
+  const path = join(destination, "index.html");
+  let html;
+  try {
+    html = await readFile(path, "utf8");
+  } catch {
+    return;
+  }
+  const markers = [
+    "<!-- HOME_STATIC_STATUS -->",
+    "<!-- HOME_STATIC_SUMMARY -->",
+    "<!-- HOME_STATIC_EVENTS -->",
+    "<!-- HOME_STATIC_COVERAGE -->",
+  ];
+  if (!markers.every((marker) => html.includes(marker))) return;
+  await writeFile(path, html
+    .replace(markers[0], fallback.statusText)
+    .replace(markers[1], fallback.summaryHtml)
+    .replace(markers[2], fallback.eventHtml)
+    .replace(markers[3], fallback.coverageText), "utf8");
 }
 
 async function buildStagedDataCenterStatus({ source, destination, generation, manifest, runtime }) {
