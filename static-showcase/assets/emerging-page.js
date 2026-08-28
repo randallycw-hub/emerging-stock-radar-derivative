@@ -5,10 +5,19 @@ import { sortRows } from "./table-sort.js";
 const pointerUrl = new URL("../data/current.json", import.meta.url);
 const errorTarget = document.querySelector("[data-page-error]");
 const marketSortKeys = new Set([...document.querySelectorAll("[data-market-sort]")].map((button) => button.dataset.marketSort));
+export const viewAliases = Object.freeze({
+  rankings: "summary",
+  market: "all",
+  summary: "summary",
+  price: "price",
+  volume: "volume",
+  revenue: "revenue",
+  all: "all",
+});
 const state = {
   market: [],
   monthlyRevenue: [],
-  view: "market",
+  view: "summary",
   query: "",
   industry: "all",
   application: "all",
@@ -55,7 +64,7 @@ async function loadData() {
 
 function initializeFromUrl() {
   const params = new URLSearchParams(location.search);
-  state.view = ["rankings", "market", "revenue"].includes(params.get("view")) ? params.get("view") : "market";
+  state.view = viewAliases[params.get("view")] ?? "summary";
   state.query = params.get("q") ?? "";
   state.industry = params.get("industry") ?? "all";
   state.application = params.get("application") ?? "all";
@@ -67,12 +76,14 @@ function initializeFromUrl() {
   state.revenueSortDirection = params.get("revenueDirectionSort") === "desc" ? "desc" : "asc";
   state.page = positiveInteger(params.get("page"));
   state.revenuePage = positiveInteger(params.get("revenuePage"));
+  if (!sortKey) applyViewPreset();
 }
 
 function bindControls() {
   for (const button of document.querySelectorAll("[data-emerging-view]")) {
     button.addEventListener("click", () => {
       state.view = button.dataset.emergingView;
+      applyViewPreset();
       syncUrl();
       render();
     });
@@ -137,9 +148,9 @@ function bindControls() {
 }
 
 function render() {
-  const rankingsSelected = state.view === "rankings";
-  const marketSelected = state.view === "market";
-  document.querySelector("#rankings-view").hidden = !rankingsSelected;
+  const rankingsSelected = state.view === "summary";
+  const marketSelected = state.view === "price" || state.view === "volume" || state.view === "all";
+  document.querySelector("#summary-view").hidden = !rankingsSelected;
   document.querySelector("#market-view").hidden = !marketSelected;
   document.querySelector("#revenue-view").hidden = state.view !== "revenue";
   for (const button of document.querySelectorAll("[data-emerging-view]")) {
@@ -151,6 +162,17 @@ function render() {
     if (marketSelected) renderMarketTable();
   } else {
     renderRevenue();
+  }
+}
+
+function applyViewPreset() {
+  if (state.view === "price") {
+    state.sortKey = "averageChangePercent";
+    state.sortDirection = "desc";
+  }
+  if (state.view === "volume") {
+    state.sortKey = "transactionVolume";
+    state.sortDirection = "desc";
   }
 }
 
@@ -329,7 +351,7 @@ function updateSortControls() {
 
 function syncUrl() {
   const params = new URLSearchParams();
-  if (state.view !== "market") params.set("view", state.view);
+  if (state.view !== "summary") params.set("view", state.view);
   if (state.query) params.set("q", state.query);
   if (state.industry !== "all") params.set("industry", state.industry);
   if (state.application !== "all") params.set("application", state.application);

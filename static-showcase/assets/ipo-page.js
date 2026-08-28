@@ -1,6 +1,6 @@
 import { formatDate, formatNumber } from "./site-shell.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
-import { defaultIpoStage, displayIpoStage, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, publicIpoTimelineHref, selectPublishedUpcomingEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
+import { defaultIpoStage, displayIpoStage, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, publicCompanyHref, selectPublishedUpcomingEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 import { sortRows } from "./table-sort.js";
 
 const stageLabels = { active: "進行中", market: "交易事件優先", A: "送件待審", B: "審議後", C: "契約後", D: "競拍／買賣", listed: "已掛牌", withdrawn: "已撤件", delayed: "延期", cancelled: "已取消" };
@@ -228,7 +228,7 @@ export function projectIpoEvidence(row) {
 function timelineFacts(row, extra = "") { return `<dl class="ipo-card-details"><div><dt>最近事件</dt><dd>${eventSummary(row, "recent")}</dd></div><div><dt>下一已知事件</dt><dd>${eventSummary(row, "next")}</dd></div><div><dt>資料日期</dt><dd>${formatDate(row.dataDate)}</dd></div>${extra}</dl>`; }
 
 function selectPrimaryEvent(events) { const today = taipeiToday(); const future = events.filter((event) => event.date >= today).sort((left, right) => left.date.localeCompare(right.date)); return future[0] ?? [...events].sort((left, right) => right.date.localeCompare(left.date))[0] ?? null; }
-function companyLink(row) { return `<a href="${publicIpoTimelineHref(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a>`; }
+function companyLink(row) { return `<a href="${publicCompanyHref(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a>`; }
 function pricingStatus(row) { if (!hasOfficialEvidence(row)) return "尚無公開資料"; return row.hasFinalPricing ? "已公告" : row.hasProvisionalPricing ? "暫定公告" : "—"; }
 function auctionStatus(row) { if (!row.auction || !row.auctionVerified) return "尚無公開資料"; if (row.auction.cancelled) return "已取消"; if (validDate(row.auction.auctionOpenDate)) return `已開標 ${formatDate(row.auction.auctionOpenDate)}`; if (validDate(row.auction.bidStartDate)) return `投標 ${formatDate(row.auction.bidStartDate)}`; return "待公告"; }
 function populateFilters() { replaceOptions("#ipo-market", "全部市場", unique(state.rows.map((row) => row.market))); replaceOptions("#ipo-stage", "全部歷程", ["market", "active", ...unique(state.rows.map((row) => row.stage).filter((stage) => activeIpoStages.has(stage)))], stageLabels); replaceOptions("#ipo-event", "全部事件", unique(state.rows.flatMap((row) => row.events.map((event) => event.kind))), Object.fromEntries(state.rows.flatMap((row) => row.events.map((event) => [event.kind, event.label])))); replaceOptions("#ipo-year", "全部年份", unique(state.rows.flatMap((row) => row.events.map((event) => event.date.slice(0, 4)))).sort().reverse()); }

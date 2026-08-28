@@ -398,8 +398,12 @@ function renderBondRow(view) {
     marketStatus,
     `${view.issuerCode} ${term?.["機構名稱"] ?? ""}`.trim(),
   ].filter(Boolean).join(" · ");
+  const issuerCode = String(view.issuerCode ?? "").trim();
+  const issuerContext = /^\d{4}$/.test(issuerCode)
+    ? `<a data-company-context href="./company.html?code=${encodeURIComponent(issuerCode)}">${escapeHtml(issuerLabel)}</a>`
+    : escapeHtml(issuerLabel);
   return `<tr tabindex="0" data-bond-code="${escapeHtml(view.bondCode)}" aria-label="查看 ${escapeHtml(view.bondName)} 詳細資料">
-    <td>${metric(`${view.bondCode} · ${view.bondName}`, issuerLabel)}</td>
+    <td><span class="metric-main">${escapeHtml(valueOrDash(`${view.bondCode} · ${view.bondName}`))}</span><span class="metric-sub">${issuerContext}</span></td>
     <td>${priceMetric(view.cbClose, view.cbPriceDate, view.staleCbPrice ? "前次成交" : "")}</td>
     <td>${quantityMetric(view.cbTradeUnits, "張", view.cbPriceDate)}</td>
     <td>${amountMetric(view.cbTurnoverAmount, view.cbPriceDate)}</td>
@@ -441,9 +445,13 @@ function renderBondCard(view) {
 
 function bindBondOpeners() {
   for (const element of document.querySelectorAll("[data-bond-code]")) {
-    const open = () => openBond(element.dataset.bondCode, element);
+    const open = (event) => {
+      if (event?.target?.closest("[data-company-context]")) return;
+      openBond(element.dataset.bondCode, element);
+    };
     element.addEventListener("click", open);
     element.addEventListener("keydown", (event) => {
+      if (event.target.closest("[data-company-context]")) return;
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         open();

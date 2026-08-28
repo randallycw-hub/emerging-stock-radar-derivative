@@ -1,6 +1,6 @@
 import { formatDate, formatNumber } from "./site-shell.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
-import { defaultIpoStage, displayIpoStage, isActiveIpoRecord, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, publicIpoTimelineHref, selectPublishedUpcomingEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
+import { defaultIpoStage, displayIpoStage, isActiveIpoRecord, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, publicCompanyHref, selectPublishedUpcomingEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 
 const stageLabels = {
   A: "A 送件觀察",
@@ -348,5 +348,5 @@ function stageDateFacts(row) {
 function emptyRow(message = "沒有符合條件的資料") { return `<tr><td colspan="15" class="empty-cell">${message}</td></tr>`; }
 function emptyCard(message = "沒有符合條件的資料") { return `<p class="empty-cell">${message}</p>`; }
 function selectExistingValue(selector, value) { const select = document.querySelector(selector); select.value = [...select.options].some((option) => option.value === value) ? value : "all"; }
-function companyLink(row) { return `<a href="${publicIpoTimelineHref(row.companyCode)}">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</a>`; }
+function companyLink(row) { return `<a href="${publicCompanyHref(row.companyCode)}">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</a>`; }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]); }

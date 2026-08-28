@@ -15,7 +15,7 @@ test("IPO 時程頁由正式事件快照提供五階段、篩選與完整時程"
   for (const label of ["IPO 時程", "送件待審", "審議後", "董事會後", "契約後", "競拍／買賣", "清單檢視", "月份檢視", "定價狀態", "競拍進度"]) {
     assert.match(source, new RegExp(label));
   }
-  for (const label of ["IPO Pipeline", "完整時程", "競拍／公開申購", "未來 7 日公開事件"]) {
+  for (const label of ["進度雷達", "完整時程", "競拍／申購／掛牌", "未來 7 日公開事件"]) {
     assert.match(source, new RegExp(label));
   }
   for (const id of [

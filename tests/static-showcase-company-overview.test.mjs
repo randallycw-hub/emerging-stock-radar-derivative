@@ -40,6 +40,7 @@ test("company overview combines public modules by exact code without exposing di
     ipo: { market: "上櫃", stage: "A", events: [{ label: "申請送件", date: "2026-08-01" }] },
     revenue: { yearMonth: "11507", currentMonthRevenue: "448516", monthOverMonthPercent: "-2.6", yearOverYearPercent: "12.1" },
     bonds: [{ bondCode: "12601", bondName: "富味鄉一", cbClose: "101.5", cbPriceDate: "2026-08-24", premiumRate: null }],
+    events: [{ market: "IPO", label: "申請送件", date: "2026-08-01" }],
   });
   assert.equal(JSON.stringify(overview).includes("private"), false);
   assert.equal(JSON.stringify(overview).includes("missingReasons"), false);
@@ -47,7 +48,7 @@ test("company overview combines public modules by exact code without exposing di
 
 test("company overview gives null modules for a valid public code without records", () => {
   assert.deepEqual(buildCompanyOverview({ code: "9999" }), {
-    code: "9999", name: "—", emerging: null, ipo: null, revenue: null, bonds: [],
+    code: "9999", name: "—", emerging: null, ipo: null, revenue: null, bonds: [], events: [],
   });
 });
 

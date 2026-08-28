@@ -97,6 +97,10 @@ export function publicIpoTimelineHref(companyCode) {
   return `./ipo.html?q=${encodeURIComponent(String(companyCode ?? "").trim())}`;
 }
 
+export function publicCompanyHref(companyCode) {
+  return `./company.html?code=${encodeURIComponent(String(companyCode ?? "").trim())}`;
+}
+
 function hasApprovedIpoEventEvidence(event) {
   return event?.verified === true || approvedSourceIds.has(event?.sourceId);
 }

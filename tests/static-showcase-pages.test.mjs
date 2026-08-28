@@ -97,18 +97,12 @@ test("首頁提供市場與 IPO 雙入口以及最後成功更新狀態", async 
   assert.doesNotMatch(home, /<table\b/);
 });
 
-test("首頁將四個市場入口同層呈現，IPO 時程不再是孤立文字連結", async () => {
+test("首頁使用每日研究捷徑，並保留 IPO 雷達與完整時程入口", async () => {
   const home = await readShowcaseFile("index.html");
-  const moduleLinks = [...home.matchAll(/<a class="market-module[^>]+href="(\.\/[^\"]+)"/g)]
-    .map((match) => match[1]);
-
-  assert.deepEqual(moduleLinks, [
-    "./bonds.html",
-    "./emerging.html",
-    "./ipo-radar.html",
-    "./ipo.html",
-  ]);
-  assert.doesNotMatch(home, /class="home-ipo-schedule-link"/);
+  assert.match(home, /class="home-quick-grid"/);
+  assert.match(home, /href="\.\/ipo-radar\.html"/);
+  assert.match(home, /href="\.\/ipo\.html"/);
+  assert.doesNotMatch(home, /class="market-module/);
 });
 
 test("首頁介紹文字在更新資訊列之上仍保有獨立的閱讀層級", async () => {
@@ -125,7 +119,7 @@ test("首頁以已發布資料提供跨市場事件與客觀排行", async () =>
   assert.match(home, /id="home-data-coverage"/);
   assert.match(script, /import \{ formatDate, formatNumber, safeJsonFetch \} from "\.\/site-shell\.js"/);
   assert.match(home, /data-home-event-market="emerging"/);
-  assert.match(home, /id="home-rankings"/);
+  assert.match(home, /id="home-emerging-rankings"/);
   assert.match(script, /buildCrossMarketEventEntries/);
   assert.match(script, /buildObjectiveRankings/);
   assert.match(script, /ipoEventsUrl/);

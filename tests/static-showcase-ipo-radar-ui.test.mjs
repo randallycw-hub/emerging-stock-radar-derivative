@@ -10,7 +10,7 @@ const stageFilterPath = new URL("../static-showcase/assets/ipo-stage-filter.js",
 
 test("IPO radar page exposes filters, sorting, and responsive views", async () => {
   const [html, js] = await Promise.all([readFile(htmlPath, "utf8"), readFile(pagePath, "utf8")]);
-  for (const text of ["IPO 進度雷達", "IPO Pipeline", "未來 7 日公開事件", "競拍／公開申購", "A 送件觀察", "B 審議進程", "C 契約／時程", "D 定價／掛牌"]) {
+  for (const text of ["IPO 進度雷達", "進度雷達", "未來 7 日公開事件", "競拍／申購／掛牌", "A 送件觀察", "B 審議進程", "C 契約／時程", "D 定價／掛牌"]) {
     assert.match(html, new RegExp(text));
   }
   for (const id of ["ipo-radar-search", "ipo-radar-market", "ipo-radar-stage", "ipo-radar-sort-field", "ipo-radar-sort-direction", "ipo-radar-table-body", "ipo-radar-pagination"]) {

@@ -28,7 +28,7 @@ export function renderPublicFooter() {
   return [
     '<div class="public-footer__main">',
     '<div><strong>台灣盤後市場資訊台</strong><p>以已發布公開資料整理興櫃、IPO 與可轉債資訊。</p></div>',
-    '<nav aria-label="頁尾導覽"><a href="./methodology.html">資料與方法</a><a href="./system-status.html">系統資料狀態</a></nav>',
+    '<div class="public-footer__links"><nav aria-label="資料與使用"><a href="./methodology.html#methodology">資料與方法</a><a href="./methodology.html#usage">使用說明</a><a href="./methodology.html#updates">更新與修正</a></nav><nav aria-label="公開資訊政策"><a href="./methodology.html#disclaimer">免責聲明</a><a href="./methodology.html#privacy">隱私權</a><a href="./system-status.html">系統資料狀態</a></nav></div>',
     '</div>',
     '<p class="public-footer__notice">資料僅供研究參考，不構成投資建議。</p>',
   ].join("");

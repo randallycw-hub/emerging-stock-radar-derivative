@@ -1,6 +1,8 @@
 import { marketDetailHref } from "./site-shell.js";
 
 const MAX_RESULTS = 8;
+const RESULT_KIND_ORDER = Object.freeze({ 公司: 0, 興櫃: 1, IPO: 2, 可轉債: 3 });
+const RESULT_GROUP_LABELS = Object.freeze({ 公司: "公司總覽", 興櫃: "興櫃", IPO: "IPO", 可轉債: "可轉債" });
 
 export function normalizePublicSearch(value = "") {
   return String(value).normalize("NFC").trim().toUpperCase();
@@ -51,7 +53,7 @@ export function searchPublicRecords(query, indexes = {}) {
   return rows
     .sort((left, right) => (normalizePublicSearch(left.code) === needle ? -1 : 0)
       - (normalizePublicSearch(right.code) === needle ? -1 : 0)
-      || left.kind.localeCompare(right.kind, "zh-Hant")
+      || RESULT_KIND_ORDER[left.kind] - RESULT_KIND_ORDER[right.kind]
       || left.code.localeCompare(right.code, "zh-Hant"))
     .slice(0, MAX_RESULTS);
 }
@@ -86,23 +88,46 @@ async function loadIndexes() {
   };
 }
 
-async function initializeSiteSearch() {
-  const header = document.querySelector(".site-header__inner");
-  if (!header || document.querySelector("[data-site-search]")) return;
+export function isGlobalSearchShortcut(event = {}) {
+  return Boolean((event.ctrlKey || event.metaKey)
+    && !event.altKey
+    && String(event.key ?? "").toLowerCase() === "k");
+}
+
+function renderSearchResults(results, rows) {
+  const matches = searchPublicRecords(results.value, rows);
+  results.hidden = matches.length === 0;
+  results.innerHTML = Object.entries(RESULT_GROUP_LABELS).map(([kind, label]) => {
+    const groupRows = matches.filter((row) => row.kind === kind);
+    if (!groupRows.length) return "";
+    return `<div class="search-result-group" role="group" aria-label="${escapeHtml(label)}"><p>${escapeHtml(label)}</p>${groupRows.map((row) => `<a role="option" href="${escapeHtml(row.href)}"><strong>${escapeHtml(row.code)}</strong> ${escapeHtml(row.label)}</a>`).join("")}</div>`;
+  }).join("");
+  return matches.length;
+}
+
+function createHeaderSearch(header) {
+  if (header.querySelector("[data-site-search]")) return header.querySelector("[data-site-search]");
   const form = document.createElement("form");
   form.className = "site-search";
   form.dataset.siteSearch = "";
   form.setAttribute("role", "search");
-  form.innerHTML = '<button type="button" class="site-search__mobile-trigger" aria-label="開啟全站搜尋" aria-controls="site-search-results" aria-expanded="false">搜尋</button><label><span class="sr-only">搜尋公開代碼或名稱</span><input type="search" autocomplete="off" placeholder="搜尋代碼或名稱" aria-controls="site-search-results" aria-expanded="false"></label><div id="site-search-results" class="site-search__results" role="listbox" hidden></div>';
+  form.innerHTML = '<button type="button" class="site-search__mobile-trigger" aria-label="開啟全站搜尋" aria-controls="site-search-results" aria-expanded="false">搜尋</button><label><span class="sr-only">搜尋公司、股票代碼、CB</span><input type="search" autocomplete="off" placeholder="搜尋公司、股票代碼、CB" aria-controls="site-search-results" aria-expanded="false"></label><div id="site-search-results" class="site-search__results" data-site-search-results role="listbox" hidden></div>';
   header.insertBefore(form, header.querySelector("#theme-toggle"));
+  return form;
+}
+
+function bindSearchSurface(form, indexes) {
+  if (!form || form.dataset.searchBound === "true") return null;
   const input = form.querySelector("input");
-  const results = form.querySelector("#site-search-results");
+  const results = form.querySelector("[data-site-search-results]");
   const mobileTrigger = form.querySelector(".site-search__mobile-trigger");
+  if (!input || !results) return null;
+  form.dataset.searchBound = "true";
   const closeMobileSearch = () => {
     delete form.dataset.mobileOpen;
-    mobileTrigger.setAttribute("aria-expanded", "false");
+    mobileTrigger?.setAttribute("aria-expanded", "false");
   };
-  mobileTrigger.addEventListener("click", () => {
+  mobileTrigger?.addEventListener("click", () => {
     form.dataset.mobileOpen = "";
     mobileTrigger.setAttribute("aria-expanded", "true");
     input.focus();
@@ -114,12 +139,30 @@ async function initializeSiteSearch() {
   document.addEventListener("pointerdown", (event) => {
     if (!form.contains(event.target)) closeMobileSearch();
   });
-  const indexes = await loadIndexes();
   input.addEventListener("input", () => {
-    const rows = searchPublicRecords(input.value, indexes);
-    results.hidden = rows.length === 0;
-    input.setAttribute("aria-expanded", String(rows.length > 0));
-    results.innerHTML = rows.map((row) => `<a role="option" href="${escapeHtml(row.href)}"><span>${escapeHtml(row.kind)}</span><strong>${escapeHtml(row.code)}</strong> ${escapeHtml(row.label)}</a>`).join("");
+    const count = renderSearchResults(input, indexes);
+    input.setAttribute("aria-expanded", String(count > 0));
+  });
+  return { form, input, close: closeMobileSearch };
+}
+
+async function initializeSiteSearch() {
+  const header = document.querySelector(".site-header__inner");
+  if (!header) return;
+  const headerForm = createHeaderSearch(header);
+  const indexes = await loadIndexes();
+  const surfaces = [
+    bindSearchSurface(headerForm, indexes),
+    bindSearchSurface(document.querySelector("#home-primary-search"), indexes),
+  ].filter(Boolean);
+  const headerSurface = surfaces[0];
+  document.addEventListener("keydown", (event) => {
+    if (!isGlobalSearchShortcut(event)) return;
+    event.preventDefault();
+    if (headerSurface) {
+      headerSurface.form.dataset.mobileOpen = "";
+      headerSurface.input.focus();
+    }
   });
 }
 

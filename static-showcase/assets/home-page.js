@@ -1,11 +1,13 @@
 import { formatDate, formatNumber, safeJsonFetch } from "./site-shell.js";
-import { buildCrossMarketEventEntries, isPublishedIsoDate } from "./public-event-digest.js";
+import { buildCrossMarketEventEntries, buildPublicEventDigest, isPublishedIsoDate } from "./public-event-digest.js";
 
 const updateTarget = globalThis.document?.querySelector("#last-successful-update") ?? null;
 const coverageTarget = globalThis.document?.querySelector("#home-data-coverage") ?? null;
 const eventStrip = globalThis.document?.querySelector("#home-event-strip") ?? null;
 const summaryTarget = globalThis.document?.querySelector("#home-market-summary") ?? null;
-const rankingTarget = globalThis.document?.querySelector("#home-rankings") ?? null;
+const rankingTarget = globalThis.document?.querySelector("#home-emerging-rankings") ?? null;
+const ipoEventsTarget = globalThis.document?.querySelector("#home-ipo-events") ?? null;
+const cbQuickTarget = globalThis.document?.querySelector("#home-cb-quick") ?? null;
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
 };
@@ -163,16 +165,20 @@ async function loadHomeData() {
     dataDate: asOfDate,
     dataAvailable: Boolean(workbench && ipo && emerging),
   }));
-  renderHomeEvents({
+  const eventInput = {
     asOfDate,
     bonds: Array.isArray(workbench?.records) ? workbench.records : undefined,
     emergingEvents: Array.isArray(emerging?.events) ? emerging.events : undefined,
     ipoDataDate: ipo?.dataDate,
     ipoRecords: Array.isArray(ipo?.records) ? ipo.records : undefined,
     ipoSourceManifest: Array.isArray(ipo?.sourceManifest) ? ipo.sourceManifest : undefined,
-  });
-  renderHomeSummary(buildHomeSummary({ emerging, ipo, bonds: workbench, asOfDate }));
-  renderHomeRankings(buildObjectiveRankings({ emerging, bonds: workbench }));
+  };
+  const summary = buildHomeSummary({ emerging, ipo, bonds: workbench, asOfDate });
+  const rankings = buildObjectiveRankings({ emerging, bonds: workbench });
+  const events = renderHomeEvents(eventInput);
+  renderHomeSummary(summary);
+  renderHomeRankings(rankings);
+  renderHomeQuickResearch({ events, digest: buildPublicEventDigest(eventInput), rankings });
 }
 
 function renderDashboardHealth(health) {
@@ -185,7 +191,7 @@ function renderHomeEvents(input) {
   const events = buildCrossMarketEventEntries(input);
   const dataDate = isPublishedIsoDate(input.asOfDate) ? formatDate(input.asOfDate) : "尚未提供";
   if (coverageTarget) coverageTarget.textContent = `資料日期 ${dataDate}`;
-  if (!eventStrip) return;
+  if (!eventStrip) return events;
   const render = (market = "all") => {
     const selected = market === "all" ? events : events.filter((event) => event.market === market);
     eventStrip.innerHTML = selected.length
@@ -200,6 +206,7 @@ function renderHomeEvents(input) {
     });
   }
   render();
+  return events;
 }
 
 function renderHomeSummary(summary) {
@@ -213,14 +220,35 @@ function renderHomeSummary(summary) {
   const panel = (title, metrics) => `<article class="home-summary-panel"><h3>${escapeHtml(title)}</h3><dl>${metrics.map(([label, value]) => metric(label, value)).join("")}</dl></article>`;
   summaryTarget.innerHTML = [
     summary.emerging === null ? panel("興櫃市場", [["資料狀態", null]]) : panel("興櫃市場", [["市場家數", summary.emerging.marketCount], ["今日有交易", summary.emerging.tradedCount], ["今日成交總額", summary.emerging.totalTurnover], ["上漲／下跌", `${summary.emerging.upCount}／${summary.emerging.downCount}`], ["新登錄", summary.emerging.newListingCount], ["低流動性", summary.emerging.lowLiquidityCount]]),
-    summary.ipo === null ? panel("IPO", [["資料狀態", null]]) : panel("IPO", [["進行中案件", summary.ipo.activeCases], ["近期審議", summary.ipo.upcomingReviews], ["7 日內競拍／申購", summary.ipo.auctionOrSubscription7d], ["30 日內預計掛牌", summary.ipo.plannedListings30d]]),
-    summary.bonds === null ? panel("可轉債", [["資料狀態", null]]) : panel("可轉債", [["有效 CB", summary.bonds.activeCount], ["今日有成交", summary.bonds.tradedCount], ["今日成交總額", summary.bonds.totalTurnover], ["30 日內事件", summary.bonds.events30d], ["近期新掛牌", summary.bonds.recentListings]]),
+    summary.ipo === null ? panel("IPO 進度", [["資料狀態", null]]) : panel("IPO 進度", [["進行中案件", summary.ipo.activeCases], ["近期審議", summary.ipo.upcomingReviews], ["7 日內競拍／申購", summary.ipo.auctionOrSubscription7d], ["30 日內預計掛牌", summary.ipo.plannedListings30d]]),
+    summary.bonds === null ? panel("可轉債事件", [["資料狀態", null]]) : panel("可轉債事件", [["有效 CB", summary.bonds.activeCount], ["今日有成交", summary.bonds.tradedCount], ["30 日內事件", summary.bonds.events30d], ["近期新掛牌", summary.bonds.recentListings]]),
   ].join("");
 }
 
 function renderHomeRankings(rankings) {
   if (!rankingTarget) return;
-  rankingTarget.innerHTML = rankings.map((ranking) => `<section class="ranking-panel"><h3>${escapeHtml(ranking.label)}</h3><ol>${ranking.entries.map((entry) => `<li><span>${escapeHtml(entry.code)} ${escapeHtml(entry.name)}</span><strong>${formatNumber(entry.value)}</strong></li>`).join("") || '<li class="empty-cell">—</li>'}</ol></section>`).join("");
+  rankingTarget.innerHTML = rankings.slice(0, 2).map((ranking) => `<section class="ranking-panel"><h3>${escapeHtml(ranking.label)}</h3><ol>${ranking.entries.slice(0, 5).map((entry) => `<li><span>${escapeHtml(entry.code)} ${escapeHtml(entry.name)}</span><strong>${formatNumber(entry.value)}</strong></li>`).join("") || '<li class="empty-cell">—</li>'}</ol></section>`).join("");
+}
+
+function renderHomeQuickResearch({ events = [], digest = [], rankings = [] } = {}) {
+  if (ipoEventsTarget) {
+    const ipoEvents = events.filter((event) => event.market === "ipo").slice(0, 5);
+    ipoEventsTarget.innerHTML = ipoEvents.length
+      ? ipoEvents.map((event) => compactEventHtml(event, "IPO")).join("")
+      : '<p class="empty-state">目前沒有近期已發布的 IPO 進度事件。</p>';
+  }
+  if (cbQuickTarget) {
+    const cbDigest = digest.filter((item) => item.id.startsWith("bond-"));
+    const lowPremium = rankings.find((item) => item.label === "CB 轉換溢價率排序");
+    cbQuickTarget.innerHTML = [
+      ...cbDigest.map((item) => `<a href="${escapeAttribute(item.href)}"><span>${escapeHtml(item.label)}</span><strong>${item.count === null ? "—" : formatNumber(item.count)}</strong>${item.nearestDate ? `<small>最近 ${formatDate(item.nearestDate)}</small>` : ""}</a>`),
+      lowPremium ? `<a href="./bonds.html?screener=lowPremium"><span>低轉換溢價率</span><strong>${formatNumber(lowPremium.entries.length)}</strong><small>以已發布盤後資料排序</small></a>` : "",
+    ].join("") || '<p class="empty-state">可轉債公開條件尚未提供。</p>';
+  }
+}
+
+function compactEventHtml(event, marketLabel) {
+  return `<a class="home-compact-event" href="${escapeAttribute(event.href)}"><time datetime="${escapeAttribute(event.date)}">${formatDate(event.date)}</time><span>${escapeHtml(marketLabel)} · ${escapeHtml(event.title)}</span><strong>${escapeHtml(event.code ?? "—")}</strong></a>`;
 }
 
 function eventTimelineHtml(event) {

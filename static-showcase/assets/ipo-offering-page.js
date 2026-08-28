@@ -92,8 +92,16 @@ function dateRange(start, end) {
   return values.length === 2 ? `${formatDate(values[0])} ～ ${formatDate(values[1])}` : values.length === 1 ? formatDate(values[0]) : "—";
 }
 
+function companyCell(row) {
+  const label = `${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}`;
+  const companyHref = /^\d{4}$/.test(row.companyCode)
+    ? `<a href="./company.html?code=${encodeURIComponent(row.companyCode)}">${label}</a>`
+    : label;
+  return `${companyHref}<small>${escapeHtml(row.market)}</small>`;
+}
+
 function rowHtml(row) {
-  return `<tr><th scope="row">${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}<small>${escapeHtml(row.market)}</small></th><td>${formatDate(row.bidStartDate)}</td><td>${formatDate(row.bidEndDate)}</td><td>${formatDate(row.auctionOpenDate)}</td><td>${priceValue(row.underwritingPrice)}</td><td>${dateRange(row.subscriptionStartDate, row.subscriptionEndDate)}</td><td>${formatDate(row.drawDate)}</td><td>${formatDate(row.listingDate)}</td><td>${escapeHtml(row.underwriter ?? "—")}</td><td>${formatDate(row.asOfDate)}</td></tr>`;
+  return `<tr><th scope="row">${companyCell(row)}</th><td>${formatDate(row.bidStartDate)}</td><td>${formatDate(row.bidEndDate)}</td><td>${formatDate(row.auctionOpenDate)}</td><td>${priceValue(row.underwritingPrice)}</td><td>${dateRange(row.subscriptionStartDate, row.subscriptionEndDate)}</td><td>${formatDate(row.drawDate)}</td><td>${formatDate(row.listingDate)}</td><td>${escapeHtml(row.underwriter ?? "—")}</td><td>${formatDate(row.asOfDate)}</td></tr>`;
 }
 
 async function initialize() {

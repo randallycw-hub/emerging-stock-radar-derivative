@@ -31,3 +31,10 @@ test("site search provides a keyboard-accessible mobile trigger and overlay stat
   assert.match(css, /\.site-search__mobile-trigger/);
   assert.match(css, /\.site-search\[data-mobile-open\]/);
 });
+
+test("V4 搜尋結果以公司優先並依公開市場類型分組", async () => {
+  const js = await readFile(new URL("../static-showcase/assets/site-search.js", import.meta.url), "utf8");
+  assert.match(js, /const RESULT_KIND_ORDER/);
+  assert.match(js, /search-result-group/);
+  assert.match(js, /公司總覽/);
+});

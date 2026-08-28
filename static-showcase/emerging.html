@@ -43,17 +43,15 @@
       </header>
 
       <div class="view-tabs" role="tablist" aria-label="興櫃資料檢視">
-        <button id="rankings-tab" type="button" role="tab" aria-selected="false" aria-controls="rankings-view" data-emerging-view="rankings">排行榜</button>
-        <button id="market-tab" type="button" role="tab" aria-selected="true" aria-controls="market-view" data-emerging-view="market">完整資料</button>
+        <button id="summary-tab" type="button" role="tab" aria-selected="true" aria-controls="summary-view" data-emerging-view="summary">市場摘要</button>
+        <button id="price-tab" type="button" role="tab" aria-selected="false" aria-controls="market-view" data-emerging-view="price">漲跌幅</button>
+        <button id="volume-tab" type="button" role="tab" aria-selected="false" aria-controls="market-view" data-emerging-view="volume">成交量</button>
         <button id="revenue-tab" type="button" role="tab" aria-selected="false" aria-controls="revenue-view" data-emerging-view="revenue">月營收</button>
+        <button id="all-tab" type="button" role="tab" aria-selected="false" aria-controls="market-view" data-emerging-view="all">全部公司</button>
       </div>
 
-      <section id="rankings-view" role="tabpanel" aria-labelledby="rankings-tab" hidden>
-        <header class="subsection-heading"><div><p class="section-number">OBJECTIVE RANKINGS</p><h3>市場排行</h3></div><p>依已發布盤後資料排序</p></header>
-        <div id="emerging-rankings" class="ranking-grid" aria-label="市場排行"></div>
-      </section>
-
-      <section id="market-view" role="tabpanel" aria-labelledby="market-tab">
+      <section id="summary-view" role="tabpanel" aria-labelledby="summary-tab">
+        <header class="subsection-heading"><div><p class="section-number">MARKET SUMMARY</p><h3>市場摘要與排行</h3></div><p>依已發布盤後資料整理</p></header>
         <div id="market-breadth" class="market-breadth" aria-label="市場概況">
           <article><span>公司家數</span><strong data-breadth="companies">—</strong></article>
           <article><span>有效樣本</span><strong data-breadth="effective">—</strong></article>
@@ -63,6 +61,10 @@
           <article><span>成交股數合計</span><strong data-breadth="volume">—</strong></article>
           <article><span>估算成交金額（盤後）</span><strong data-breadth="amount">—</strong></article>
         </div>
+        <div id="emerging-rankings" class="ranking-grid" aria-label="市場排行"></div>
+      </section>
+
+      <section id="market-view" role="tabpanel" aria-labelledby="all-tab" hidden>
         <form id="emerging-filters" class="filters emerging-filters" aria-label="興櫃市場篩選">
           <label class="search-field"><span>搜尋</span><input id="emerging-search" name="q" type="search" placeholder="公司代碼或名稱"></label>
           <label><span>產業</span><select id="emerging-industry" name="industry"><option value="all">全部產業</option></select></label>

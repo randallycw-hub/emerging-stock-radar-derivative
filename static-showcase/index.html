@@ -36,49 +36,30 @@
     <section class="home-hero" aria-labelledby="home-title">
       <p class="kicker">TAIWAN POST-CLOSE MARKET DESK</p>
       <h1 id="home-title">台灣盤後市場資訊台</h1>
-      <p>集中查看興櫃、IPO 與可轉債公開資訊，以已發布的公開數值與客觀整理為主。</p>
+      <p>從盤後數據、IPO 進度與可轉債事件開始，每日快速定位值得進一步研究的公開資訊。</p>
+      <form id="home-primary-search" class="home-primary-search" data-site-search role="search">
+        <label><span class="sr-only">搜尋公司、股票代碼、CB</span><input type="search" autocomplete="off" placeholder="搜尋公司、股票代碼、CB" aria-controls="home-search-results" aria-expanded="false"></label>
+        <kbd>Ctrl / ⌘ K</kbd>
+        <div id="home-search-results" class="site-search__results" data-site-search-results role="listbox" hidden></div>
+      </form>
       <div class="home-hero__meta" aria-label="資料更新狀態">
-        <span>公開市場資訊整理</span>
+        <span>每日公開資料研究入口</span>
         <p id="last-successful-update" class="update-status" aria-live="polite">更新資訊讀取中</p>
-        <p id="dashboard-health" class="update-status dashboard-health" aria-live="polite">公開資料正在讀取</p>
       </div>
     </section>
 
-    <section id="home-market-summary" class="home-market-summary" aria-label="跨市場公開資料摘要" aria-live="polite">
-      <article class="home-summary-panel"><h3>興櫃市場</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
-      <article class="home-summary-panel"><h3>IPO</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
-      <article class="home-summary-panel"><h3>可轉債</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
+    <section id="home-today-grid" class="home-today-grid" aria-label="今日市場摘要">
+      <div id="home-market-summary" class="home-market-summary" aria-live="polite">
+        <article class="home-summary-panel"><h3>興櫃市場</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
+        <article class="home-summary-panel"><h3>IPO 進度</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
+        <article class="home-summary-panel"><h3>可轉債事件</h3><dl><div><dt>資料狀態</dt><dd>讀取中</dd></div></dl></article>
+      </div>
     </section>
 
-    <section class="home-modules" aria-label="市場工作區入口">
-      <a class="market-module market-module--clay" href="./bonds.html" aria-describedby="bonds-module-copy">
-        <span class="market-module__number">01</span>
-        <p>CONVERTIBLE BONDS</p>
-        <h2>可轉債盤後</h2>
-        <span id="bonds-module-copy" class="market-module__copy">查看盤後、發行條件與可核對的資料狀態。</span>
-        <span>前往可轉債 <span aria-hidden="true">→</span></span>
-      </a>
-      <a class="market-module market-module--violet" href="./emerging.html" aria-describedby="emerging-module-copy">
-        <span class="market-module__number">02</span>
-        <p>EMERGING MARKET</p>
-        <h2>興櫃市場</h2>
-        <span id="emerging-module-copy" class="market-module__copy">瀏覽興櫃公司盤後行情與公開資訊。</span>
-        <span>前往興櫃市場 <span aria-hidden="true">→</span></span>
-      </a>
-      <a class="market-module market-module--ipo" href="./ipo-radar.html" aria-describedby="ipo-module-copy">
-        <span class="market-module__number">03</span>
-        <p>IPO EVENT DESK</p>
-        <h2>IPO 進度雷達</h2>
-        <span id="ipo-module-copy" class="market-module__copy">先看近期送件、審議、契約與定價事件。</span>
-        <span>查看進度雷達 <span aria-hidden="true">→</span></span>
-      </a>
-      <a class="market-module market-module--schedule" href="./ipo.html" aria-describedby="ipo-schedule-module-copy">
-        <span class="market-module__number">04</span>
-        <p>IPO SCHEDULE</p>
-        <h2>IPO 時程</h2>
-        <span id="ipo-schedule-module-copy" class="market-module__copy">依公司查看承銷、審議與掛牌的完整日期。</span>
-        <span>查看完整時程 <span aria-hidden="true">→</span></span>
-      </a>
+    <section class="home-quick-grid" aria-label="每日研究捷徑">
+      <section class="home-research-panel" aria-labelledby="home-emerging-rankings-title"><div class="section-heading"><div><p class="kicker">EMERGING MARKET</p><h2 id="home-emerging-rankings-title">興櫃排行</h2></div><a href="./emerging.html">查看全部</a></div><div id="home-emerging-rankings" class="ranking-grid" aria-live="polite"></div></section>
+      <section class="home-research-panel" aria-labelledby="home-ipo-events-title"><div class="section-heading"><div><p class="kicker">IPO EVENT DESK</p><h2 id="home-ipo-events-title">近期 IPO 進度</h2></div><span class="home-panel-links"><a href="./ipo-radar.html">查看雷達</a><a href="./ipo.html">完整時程</a></span></div><div id="home-ipo-events" class="home-compact-events" aria-live="polite"></div></section>
+      <section class="home-research-panel" aria-labelledby="home-cb-quick-title"><div class="section-heading"><div><p class="kicker">CONVERTIBLE BONDS</p><h2 id="home-cb-quick-title">可轉債快速條件</h2></div><a href="./bonds.html">查看總表</a></div><div id="home-cb-quick" class="home-cb-quick" aria-live="polite"></div></section>
     </section>
 
     <section class="home-event-section" aria-labelledby="home-events-title">
@@ -98,10 +79,6 @@
       <div id="home-event-strip" class="home-event-strip" aria-live="polite"></div>
     </section>
 
-    <section class="home-ranking-section" aria-labelledby="home-rankings-title">
-      <div class="section-heading"><div><p class="kicker">OBJECTIVE MARKET RANKINGS</p><h2 id="home-rankings-title">客觀市場排行</h2></div><p class="update-status">依公開盤後數值排序，不代表投資建議。</p></div>
-      <div id="home-rankings" class="ranking-grid" aria-live="polite"></div>
-    </section>
   </main>
 
   <footer class="footer public-footer" data-public-footer>市場資訊台 · 僅整理公開資訊，不構成投資建議。</footer>
