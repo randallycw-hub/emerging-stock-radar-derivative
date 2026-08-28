@@ -14,7 +14,8 @@ import {
   buildDataCenterStatus,
   renderDataCenterBootstrap,
 } from "../static-showcase/assets/data-center-status.js";
-import { buildHomeStaticFallback } from "../static-showcase/assets/home-static-fallback.js";
+import { buildV51HomeStaticFallback } from "../static-showcase/assets/home-static-fallback.js";
+import { buildPublicMarketResearch } from "../static-showcase/assets/public-market-research.js";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
@@ -69,6 +70,7 @@ const ASSET_FILES = new Set([
   "market-event-model.js",
   "market-events-page.js",
   "home-static-fallback.js",
+  "public-market-research.js",
   "home-page.js",
   "ipo-data.js",
   "ipo-page.js",
@@ -229,22 +231,55 @@ export async function stageStaticShowcase({
     runtime,
   });
   await writePublicStaticArtifacts({ destination, generation: pointer.generation });
-  await injectHomeStaticFallback({ source, destination, manifest, runtime });
+  const marketResearch = await writePublicMarketResearch({ destination, generation: pointer.generation });
+  await injectHomeStaticFallback({ destination, marketResearch });
   await injectDataCenterBootstrap({ destination, status: dataCenterStatus });
   await writePublicRootArtifacts({ destination });
 }
 
-async function injectHomeStaticFallback({ source, destination, manifest, runtime }) {
-  const sourceJson = (url, message) => readJson(
-    join(source, String(url ?? "").replace(/^\.\//, "")),
-    message,
-  );
-  const [emerging, ipo, bonds] = await Promise.all([
-    sourceJson(runtime.emergingMarketUrl, "active generation homepage emerging market is invalid"),
-    sourceJson(runtime.ipoEventsUrl, "active generation homepage IPO snapshot is invalid"),
-    sourceJson(runtime.datasets?.bondWorkbench, "active generation homepage CB workbench is invalid"),
+async function writePublicMarketResearch({ destination, generation }) {
+  const base = join(destination, "data", ...generation.split("/"));
+  const [manifest, emerging, ipo, workbench, stockCloses, history] = await Promise.all([
+    readJson(join(base, "manifest.json"), "active generation public manifest is invalid"),
+    readJson(join(base, "emerging-market.json"), "active generation public emerging market is invalid"),
+    readJson(join(base, "ipo-events.json"), "active generation public IPO snapshot is invalid"),
+    readJson(join(base, "bond-workbench.json"), "active generation public CB workbench is invalid"),
+    readPublicOptionalJson(join(base, "stock-closes.json"), "active generation public stock closes are invalid", []),
+    readPublicOptionalJson(join(base, "bond-market-history.json"), "active generation public CB history is invalid", []),
   ]);
-  const fallback = buildHomeStaticFallback({ emerging, ipo, bonds, manifest });
+  const research = buildPublicMarketResearch({
+    manifest,
+    emerging,
+    ipo,
+    workbench,
+    stockCloses,
+    history,
+  });
+  await writeFile(
+    join(base, "market-research.json"),
+    `${JSON.stringify(research, null, 2)}\n`,
+    "utf8",
+  );
+  return research;
+}
+
+async function readPublicOptionalJson(path, message, fallback) {
+  let text;
+  try {
+    text = await readFile(path, "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") return fallback;
+    throw new Error(message);
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(message);
+  }
+}
+
+async function injectHomeStaticFallback({ destination, marketResearch }) {
+  const fallback = buildV51HomeStaticFallback(marketResearch);
   const path = join(destination, "index.html");
   let html;
   try {
@@ -257,13 +292,15 @@ async function injectHomeStaticFallback({ source, destination, manifest, runtime
     "<!-- HOME_STATIC_SUMMARY -->",
     "<!-- HOME_STATIC_EVENTS -->",
     "<!-- HOME_STATIC_COVERAGE -->",
+    "<!-- HOME_V51_WORKBENCH -->",
   ];
   if (!markers.every((marker) => html.includes(marker))) return;
   await writeFile(path, html
     .replace(markers[0], fallback.statusText)
-    .replace(markers[1], fallback.summaryHtml)
+    .replace(markers[1], fallback.startHtml)
     .replace(markers[2], fallback.eventHtml)
-    .replace(markers[3], fallback.coverageText), "utf8");
+    .replace(markers[3], fallback.coverageText)
+    .replace(markers[4], fallback.workbenchHtml), "utf8");
 }
 
 async function buildStagedDataCenterStatus({ source, destination, generation, manifest, runtime }) {

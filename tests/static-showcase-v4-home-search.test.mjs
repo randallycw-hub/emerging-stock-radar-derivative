@@ -10,7 +10,7 @@ async function readShowcaseFile(path) {
   return readFile(new URL(path, showcaseRoot), "utf8");
 }
 
-test("V4 首頁以每日研究入口取代大型市場入口卡", async () => {
+test("V5.1 首頁以可驗證研究工作台取代舊版每日捷徑", async () => {
   const [home, css] = await Promise.all([
     readShowcaseFile("index.html"),
     readShowcaseFile("assets/app.css"),
@@ -18,13 +18,13 @@ test("V4 首頁以每日研究入口取代大型市場入口卡", async () => {
 
   assert.match(home, /id="home-primary-search"/);
   assert.match(home, /id="home-today-grid"/);
-  assert.match(home, /id="home-emerging-rankings"/);
-  assert.match(home, /id="home-ipo-events"/);
-  assert.match(home, /id="home-cb-quick"/);
+  assert.match(home, /class="home-v51-workbench-section"/);
+  assert.match(home, /HOME_V51_WORKBENCH/);
   assert.doesNotMatch(home, /class="market-module/);
   assert.match(css, /\.home-primary-search/);
   assert.match(css, /\.home-today-grid/);
-  assert.match(css, /\.home-quick-grid/);
+  assert.match(css, /\.home-v51-start-grid/);
+  assert.match(css, /\.home-v51-workbench/);
 });
 
 test("V4 全站搜尋使用研究詞彙並支援 Ctrl 或 Cmd 加 K", async () => {

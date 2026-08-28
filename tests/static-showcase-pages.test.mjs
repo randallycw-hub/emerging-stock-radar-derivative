@@ -97,9 +97,9 @@ test("首頁提供市場與 IPO 雙入口以及最後成功更新狀態", async 
   assert.doesNotMatch(home, /<table\b/);
 });
 
-test("首頁使用每日研究捷徑，並保留 IPO 雷達與完整時程入口", async () => {
+test("V5.1 首頁使用研究工作台，並保留 IPO 雷達與完整時程入口", async () => {
   const home = await readShowcaseFile("index.html");
-  assert.match(home, /class="home-quick-grid"/);
+  assert.match(home, /class="home-v51-workbench-section"/);
   assert.match(home, /href="\.\/ipo-radar\.html"/);
   assert.match(home, /href="\.\/ipo\.html"/);
   assert.doesNotMatch(home, /class="market-module/);
@@ -111,7 +111,7 @@ test("首頁介紹文字在更新資訊列之上仍保有獨立的閱讀層級",
   assert.match(css, /\.home-hero > p:not\(\.kicker\)\s*(?:,|\{)/);
 });
 
-test("首頁以已發布資料提供跨市場事件與客觀排行", async () => {
+test("V5.1 首頁以 canonical 公開資料提供跨市場事件與客觀排行", async () => {
   const [home, script, css] = await Promise.all([
     readShowcaseFile("index.html"), readShowcaseFile("assets/home-page.js"), readShowcaseFile("assets/app.css"),
   ]);
@@ -119,14 +119,15 @@ test("首頁以已發布資料提供跨市場事件與客觀排行", async () =>
   assert.match(home, /id="home-data-coverage"/);
   assert.match(script, /renderMarketStatusLine/);
   assert.match(script, /safeJsonFetch/);
-  assert.match(home, /data-home-event-market="emerging"/);
-  assert.match(home, /id="home-emerging-rankings"/);
+  assert.match(home, /HOME_V51_WORKBENCH/);
+  assert.match(home, /HOME_V51_WORKBENCH/);
   assert.match(script, /buildCrossMarketEventEntries/);
   assert.match(script, /buildObjectiveRankings/);
+  assert.match(script, /marketResearchUrl/);
   assert.match(script, /ipoEventsUrl/);
   assert.match(script, /bondWorkbench/);
   assert.match(css, /\.home-event-strip/);
-  assert.match(css, /\.home-market-summary/);
+  assert.match(css, /\.home-v51-start-grid/);
   assert.doesNotMatch(home + script, /推薦|買進|賣出|目標價/);
 });
 

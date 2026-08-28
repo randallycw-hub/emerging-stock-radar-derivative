@@ -45,11 +45,12 @@
       </form>
       <div class="home-hero__meta" aria-label="資料更新狀態">
         <span>每日公開資料研究入口</span>
+        <a href="./ipo.html">完整 IPO 時程</a>
         <p id="last-successful-update" class="update-status" aria-live="polite"><!-- HOME_STATIC_STATUS --></p>
       </div>
     </section>
 
-    <section id="home-today-grid" class="home-today-grid" aria-label="今日市場摘要">
+    <section id="home-today-grid" class="home-today-grid" aria-label="今日研究起點">
       <div id="home-market-summary" class="home-market-summary" aria-live="polite">
         <!-- HOME_STATIC_SUMMARY -->
       </div>
@@ -59,23 +60,15 @@
       <div class="section-heading">
         <div>
           <p class="kicker">TODAY BRIEF / PUBLISHED EVENT DESK</p>
-          <h2 id="home-events-title">近期公開事件</h2>
+          <h2 id="home-events-title">最新公開事件</h2>
         </div>
         <span class="home-event-section__meta"><p id="home-data-coverage" class="update-status" aria-live="polite"><!-- HOME_STATIC_COVERAGE --></p><a href="./events.html">查看市場事件 →</a></span>
-      </div>
-      <div class="home-event-filters" role="group" aria-label="近期公開事件市場篩選">
-        <button type="button" data-home-event-market="all" aria-pressed="true">全部</button>
-        <button type="button" data-home-event-market="emerging" aria-pressed="false">興櫃</button>
-        <button type="button" data-home-event-market="ipo" aria-pressed="false">IPO</button>
-        <button type="button" data-home-event-market="bonds" aria-pressed="false">CB</button>
       </div>
       <div id="home-event-strip" class="home-event-strip" aria-live="polite"><!-- HOME_STATIC_EVENTS --></div>
     </section>
 
-    <section class="home-quick-grid" aria-label="每日研究捷徑">
-      <section class="home-research-panel" aria-labelledby="home-emerging-rankings-title"><div class="section-heading"><div><p class="kicker">EMERGING MARKET</p><h2 id="home-emerging-rankings-title">興櫃排行</h2></div><a href="./emerging.html">查看全部</a></div><div id="home-emerging-rankings" class="ranking-grid" aria-live="polite"></div></section>
-      <section class="home-research-panel" aria-labelledby="home-ipo-events-title"><div class="section-heading"><div><p class="kicker">IPO EVENT DESK</p><h2 id="home-ipo-events-title">近期 IPO 進度</h2></div><span class="home-panel-links"><a href="./ipo-radar.html">查看雷達</a><a href="./ipo.html">完整時程</a></span></div><div id="home-ipo-events" class="home-compact-events" aria-live="polite"></div></section>
-      <section class="home-research-panel" aria-labelledby="home-cb-quick-title"><div class="section-heading"><div><p class="kicker">CONVERTIBLE BONDS</p><h2 id="home-cb-quick-title">可轉債快速條件</h2></div><a href="./bonds.html">查看總表</a></div><div id="home-cb-quick" class="home-cb-quick" aria-live="polite"></div></section>
+    <section class="home-v51-workbench-section" aria-label="可轉債與 IPO 研究工作台">
+      <!-- HOME_V51_WORKBENCH -->
     </section>
 
   </main>

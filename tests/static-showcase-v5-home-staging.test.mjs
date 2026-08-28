@@ -9,7 +9,7 @@ import { stageStaticShowcase } from "../scripts/stage-static-showcase.mjs";
 
 const source = fileURLToPath(new URL("../static-showcase", import.meta.url));
 
-test("V5 staging writes the verified home snapshot into the static first screen", async () => {
+test("V5.1 staging writes the verified research workbench into the static first screen", async () => {
   const root = await mkdtemp(join(tmpdir(), "v5-home-stage-"));
   const destination = join(root, "market-site");
   try {
@@ -17,8 +17,9 @@ test("V5 staging writes the verified home snapshot into the static first screen"
     const home = await readFile(join(destination, "index.html"), "utf8");
 
     assert.match(home, /資料日 2026\/08\/26/);
-    assert.match(home, /市場家數/);
-    assert.doesNotMatch(home, /讀取中|載入後顯示|資料日將依|HOME_STATIC_|資料狀態/);
+    assert.match(home, /今天從這裡開始/);
+    assert.match(home, /可轉債標的股漲幅/);
+    assert.doesNotMatch(home, /讀取中|載入後顯示|資料日將依|HOME_STATIC_|HOME_V51_|資料狀態/);
     assert.doesNotMatch(home, /sourceId|missingReasons|Snapshot ID|Dataset Health/);
   } finally {
     await rm(root, { recursive: true, force: true });

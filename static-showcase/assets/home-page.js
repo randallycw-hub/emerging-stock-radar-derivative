@@ -132,6 +132,37 @@ export function buildObjectiveRankings({ emerging, bonds } = {}) {
   ];
 }
 
+function bindV51HomeInteractions() {
+  const buttons = [...document.querySelectorAll("[data-home-v51-ranking-tab]")];
+  const panels = [...document.querySelectorAll("[data-home-v51-ranking-panel]")];
+  if (!buttons.length || !panels.length) return;
+  const select = (key) => {
+    for (const button of buttons) {
+      button.setAttribute("aria-selected", String(button.dataset.homeV51RankingTab === key));
+      button.tabIndex = button.dataset.homeV51RankingTab === key ? 0 : -1;
+    }
+    for (const panel of panels) panel.hidden = panel.dataset.homeV51RankingPanel !== key;
+  };
+  for (const button of buttons) {
+    if (button.dataset.homeV51Bound === "true") continue;
+    button.dataset.homeV51Bound = "true";
+    button.addEventListener("click", () => select(button.dataset.homeV51RankingTab));
+    button.addEventListener("keydown", (event) => {
+      if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const current = buttons.indexOf(button);
+      const nextIndex = event.key === "Home" ? 0
+        : event.key === "End" ? buttons.length - 1
+          : (current + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
+      const next = buttons[nextIndex];
+      select(next.dataset.homeV51RankingTab);
+      next.focus();
+    });
+  }
+  const selected = buttons.find((button) => button.getAttribute("aria-selected") === "true") ?? buttons[0];
+  select(selected.dataset.homeV51RankingTab);
+}
+
 async function loadHomeData() {
   const pointer = await safeJsonFetch(pointerUrl, { errorTarget: updateTarget });
   if (!pointer?.runtimeUrl) return renderHomeEvents({});
@@ -141,6 +172,25 @@ async function loadHomeData() {
     { errorTarget: updateTarget },
   );
   if (!runtime?.manifestUrl) return renderHomeEvents({});
+
+  const marketResearchUrl = runtime.marketResearchUrl
+    ?? runtime.searchIndexUrl
+    ?? (typeof pointer.generation === "string" ? `./data/${pointer.generation}/market-research.json` : null);
+  if (typeof marketResearchUrl === "string") {
+    const research = await safeJsonFetch(
+      new URL(marketResearchUrl, document.baseURI),
+      { errorTarget: updateTarget },
+    );
+    if (research?.home && research?.meta) {
+      const dataDate = research.meta.dataDate;
+      if (updateTarget && isPublishedIsoDate(dataDate)) {
+        updateTarget.textContent = renderMarketStatusLine({ dataDate, updatedAt: research.meta.updatedAt });
+      }
+      if (coverageTarget && isPublishedIsoDate(dataDate)) coverageTarget.textContent = `資料日期 ${formatDate(dataDate)}`;
+      bindV51HomeInteractions();
+      return;
+    }
+  }
 
   const manifest = await safeJsonFetch(
     new URL(runtime.manifestUrl, document.baseURI),
