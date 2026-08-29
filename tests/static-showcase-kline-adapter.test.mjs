@@ -17,6 +17,7 @@ function point(date, values = {}) {
     cbLow: "99",
     cbClose: "102",
     cbTradingUnits: "9",
+    cbTurnover: "918",
     ...values,
   };
 }

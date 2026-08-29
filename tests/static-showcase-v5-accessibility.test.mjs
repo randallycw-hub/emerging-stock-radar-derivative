@@ -22,16 +22,14 @@ test("V5 public pages carry route-specific canonical metadata without internal d
   }
 });
 
-test("V5 chart and primary controls preserve visible focus and mobile-safe dimensions", async () => {
+test("V5.2 primary controls preserve visible focus and dynamic status accessibility", async () => {
   const css = await readFile(new URL("assets/app.css", root), "utf8");
   const [detail, company] = await Promise.all([
     readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
     readFile(new URL("assets/company-overview.js", root), "utf8"),
   ]);
 
-  assert.match(css, /\.klinechart-host\s*\{[^}]*min-height:\s*500px/);
-  assert.match(css, /@media \(max-width: 560px\)[\s\S]*\.klinechart-host\s*\{[^}]*min-height:\s*360px/);
   assert.match(css, /:focus-visible/);
   assert.match(detail, /aria-live="polite"/);
-  assert.match(company, /data-company-chart-bond aria-label=/);
+  assert.doesNotMatch(company, /data-company-chart-bond|klinechart|MACD|RSI|KDJ|BOLL/i);
 });

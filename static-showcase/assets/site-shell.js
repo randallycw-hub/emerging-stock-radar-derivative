@@ -58,7 +58,7 @@ export function renderMarketStatusLine({ dataDate, updatedAt } = {}) {
 }
 
 export function marketDetailHref(companyCode) {
-  return `./market.html?code=${encodeURIComponent(String(companyCode ?? "").trim())}`;
+  return `./company.html?code=${encodeURIComponent(String(companyCode ?? "").trim())}`;
 }
 
 export function formatDate(value) {
@@ -95,7 +95,7 @@ export async function safeJsonFetch(
   url,
   {
     errorTarget = null,
-    errorMessage = "資料暫時無法讀取，請稍後再試。",
+    errorMessage = "資料暫時無法取得",
     fetchImpl = globalThis.fetch,
   } = {},
 ) {

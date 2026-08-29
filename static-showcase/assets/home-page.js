@@ -5,6 +5,7 @@ import {
   safeJsonFetch,
 } from "./site-shell.js";
 import { buildCrossMarketEventEntries, buildPublicEventDigest, isPublishedIsoDate } from "./public-event-digest.js";
+import { countPublishedPositive, publicNumber, sumPublishedValues } from "./public-data-state.js";
 
 const updateTarget = globalThis.document?.querySelector("#last-successful-update") ?? null;
 const coverageTarget = globalThis.document?.querySelector("#home-data-coverage") ?? null;
@@ -34,16 +35,28 @@ function recordsOf(value) {
   return Array.isArray(value?.records) ? value.records : null;
 }
 
-function number(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+function firstPublishedNumber(record, fields) {
+  return fields.map((field) => publicNumber(record?.[field])).find((candidate) => candidate !== null) ?? null;
 }
 
 function sum(records, fields) {
-  return records.reduce((total, record) => {
-    const value = fields.map((field) => number(record?.[field])).find((candidate) => candidate !== null);
-    return total + (value ?? 0);
-  }, 0);
+  return sumPublishedValues(records, (record) => firstPublishedNumber(record, fields));
+}
+
+function countPublishedFieldPositive(records, fields) {
+  return countPublishedPositive(records, (record) => firstPublishedNumber(record, fields));
+}
+
+export function publishedMarketDates(manifest = {}) {
+  const dataDate = isPublishedIsoDate(manifest?.market?.dataDate)
+    ? manifest.market.dataDate
+    : null;
+  const updatedAt = typeof manifest?.market?.generatedAt === "string"
+    ? manifest.market.generatedAt
+    : typeof manifest?.generatedAt === "string"
+      ? manifest.generatedAt
+      : null;
+  return { dataDate, updatedAt };
 }
 
 function daysFrom(asOfDate, date) {
@@ -76,7 +89,7 @@ export function buildHomeSummary({ emerging, ipo, bonds, asOfDate = null } = {})
   return {
     emerging: emergingRecords === null ? null : {
       marketCount: emergingRecords.length,
-      tradedCount: emergingRecords.filter((record) => (number(record?.transactionVolume) ?? 0) > 0).length,
+      tradedCount: countPublishedFieldPositive(emergingRecords, ["transactionVolume"]),
       totalTurnover: sum(emergingRecords, ["estimatedTransactionAmount", "transactionAmount"]),
       upCount: emergingRecords.filter((record) => record?.direction === "up").length,
       downCount: emergingRecords.filter((record) => record?.direction === "down").length,
@@ -91,7 +104,7 @@ export function buildHomeSummary({ emerging, ipo, bonds, asOfDate = null } = {})
     },
     bonds: bondRecords === null ? null : {
       activeCount: activeBondRecords.length,
-      tradedCount: activeBondRecords.filter((record) => (number(record?.cbTradeUnits) ?? number(record?.transactionVolume) ?? 0) > 0).length,
+      tradedCount: countPublishedFieldPositive(activeBondRecords, ["cbTradeUnits", "transactionVolume"]),
       totalTurnover: sum(activeBondRecords, ["cbTurnoverAmount", "transactionAmount", "turnoverAmount"]),
       events30d: countUpcomingEvents(activeBondRecords, asOfDate, /./u, 30),
       recentListings: activeBondRecords.filter((record) => {
@@ -110,7 +123,7 @@ function ranked(records, { label, code, name, metric, direction = "desc" }) {
     label,
     metric,
     entries: records
-      .map((record) => ({ code: String(record?.[code] ?? "").trim(), name: String(record?.[name] ?? "").trim(), value: number(record?.[metric]) }))
+      .map((record) => ({ code: String(record?.[code] ?? "").trim(), name: String(record?.[name] ?? "").trim(), value: publicNumber(record?.[metric]) }))
       .filter((record) => record.code && record.value !== null)
       .sort((left, right) => direction === "asc" ? left.value - right.value : right.value - left.value)
       .slice(0, 10),
@@ -174,7 +187,6 @@ async function loadHomeData() {
   if (!runtime?.manifestUrl) return renderHomeEvents({});
 
   const marketResearchUrl = runtime.marketResearchUrl
-    ?? runtime.searchIndexUrl
     ?? (typeof pointer.generation === "string" ? `./data/${pointer.generation}/market-research.json` : null);
   if (typeof marketResearchUrl === "string") {
     const research = await safeJsonFetch(
@@ -211,12 +223,10 @@ async function loadHomeData() {
       : Promise.resolve(null),
   ]);
 
-  const date = manifest?.market?.dataDate ?? manifest?.generatedAt;
-  updateTarget.textContent = renderMarketStatusLine({
-    dataDate: isPublishedIsoDate(date) ? date : undefined,
-    updatedAt: manifest?.market?.generatedAt,
-  });
-  const asOfDate = manifest?.market?.dataDate;
+  const { dataDate: asOfDate, updatedAt } = publishedMarketDates(manifest);
+  updateTarget.textContent = asOfDate
+    ? renderMarketStatusLine({ dataDate: asOfDate, updatedAt })
+    : "資料暫時無法取得";
   renderDashboardHealth(buildDashboardHealth({
     dataDate: asOfDate,
     dataAvailable: Boolean(workbench && ipo && emerging),

@@ -28,7 +28,8 @@ test("靜態可轉債詳情保留公開市場資訊與行動版摺疊介面", as
     readFile(new URL("../static-showcase/assets/app.css", import.meta.url), "utf8"),
   ]);
   assert.match(html, /data-detail-url-param="bond"/);
-  for (const label of ["可轉債重點", "K 線圖", "債券條款", "資料來源與授權範圍", "事件時間軸"]) assert.match(detail, new RegExp(label));
+  for (const label of ["可轉債重點", "行情摘要", "債券條款", "資料來源與授權範圍", "事件時間軸"]) assert.match(detail, new RegExp(label));
+  assert.doesNotMatch(detail, /K 線圖|data-bond-kline-host|klinechart/iu);
   assert.match(detail, /本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。/);
   assert.doesNotMatch(detail, /目前無核准公開資料／待確認|來源 ID|缺漏原因|資料狀態矩陣/);
   assert.match(detail, /https:/);

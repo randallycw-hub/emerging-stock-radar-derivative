@@ -78,12 +78,12 @@ test("bond page exposes the complete sortable CB workbench", async () => {
     "區域資料變數不可遮蔽瀏覽器 history 物件",
   );
   assert.doesNotMatch(js, /function renderWorkbench|function drawHistoryChart/);
-  assert.match(js, /const detailHistory = state\.history\.filter\(\(point\) => point\.bondCode === code\);/);
-  assert.match(js, /renderBondDetail\(\{ \.\.\.detail, history: detailHistory \}/);
+  assert.doesNotMatch(js, /const detailHistory = state\.history\.filter\(\(point\) => point\.bondCode === code\);/);
+  assert.doesNotMatch(js, /renderBondDetail\(\{ \.\.\.detail, history: detailHistory \}/);
   assert.match(js, /bindBondDetail\(target, closeDetail\);/);
   assert.match(detailJs, /function noAdviceViolations/);
   assert.match(detailJs, /FORBIDDEN_UI_PATTERNS/);
-  assert.match(detailJs, /data-bond-kline-host/);
+  assert.doesNotMatch(detailJs, /data-bond-kline-host|mountKlineChart|\bMACD\b|\bRSI\b|\bKDJ\b|\bBOLL\b/);
   assert.match(detailJs, /noopener noreferrer/);
   assert.doesNotMatch(detailJs, /目前無核准公開資料／待確認/);
   assert.doesNotMatch(bondsHtml + js + detailJs, /資料品質|待補／待確認資料|CBAS 權利金|TCRI 信用評等/);

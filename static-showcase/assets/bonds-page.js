@@ -8,6 +8,7 @@ import {
   sortBondRecords,
 } from "./bond-list-page.js";
 import { bindBondDetail, detailRecordFromLegacy, renderBondDetail } from "./bond-detail-page.js";
+import { applyCanonicalBondIdentity, indexCanonicalBonds } from "./canonical-identity.js";
 
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
@@ -19,6 +20,7 @@ const state = {
   views: [],
   history: [],
   conversionPrices: [],
+  canonicalBonds: new Map(),
   workbench: [],
   sortKey: null,
   sortDirection: "asc",
@@ -69,7 +71,7 @@ async function loadAndRender() {
     config.datasets ?? {},
     "bondWorkbench",
   );
-  const [manifest, bondTerms, history, conversionPrices, workbenchResult] =
+  const [manifest, bondTerms, history, conversionPrices, workbenchResult, cbMaster] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
       loadJson(config.datasets["11406"], []),
@@ -78,13 +80,17 @@ async function loadAndRender() {
       workbenchDeclared
         ? loadDeclaredWorkbench(config.datasets.bondWorkbench)
         : Promise.resolve({ ok: true, value: null }),
+      typeof config.cbMasterUrl === "string"
+        ? loadJson(config.cbMasterUrl, [])
+        : Promise.resolve([]),
     ]);
   state.manifest = manifest;
   state.bondTerms = arrayValue(bondTerms);
   state.history = arrayValue(history);
   state.conversionPrices = arrayValue(conversionPrices);
+  state.canonicalBonds = indexCanonicalBonds(cbMaster);
   state.workbenchDeclared = workbenchDeclared;
-  state.workbenchUnavailable = !workbenchDeclared || !workbenchResult.ok;
+  state.workbenchUnavailable = !workbenchDeclared || !workbenchResult.ok || state.canonicalBonds.size === 0;
   state.workbenchAsOfDate = validPublishedDate(workbenchResult.value?.dataDate)
     ? workbenchResult.value.dataDate
     : null;
@@ -97,13 +103,14 @@ async function loadAndRender() {
       workbench: state.workbench,
       bondTerms: state.bondTerms,
       history: state.history,
+      cbMaster,
     });
   updateSearchSuggestions();
   renderRoute();
   const marketDate = state.manifest?.market?.dataDate;
   document.querySelector("#bond-update-status").textContent = marketDate
     ? `盤後資料日 ${marketDate}`
-    : `資料版本 ${state.manifest?.generatedAt ?? "讀取完成"}`;
+    : "資料暫時無法取得";
 }
 
 function initializeFromUrl() {
@@ -236,7 +243,13 @@ function validPublishedDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""));
 }
 
-export function buildBondListRecords({ views = [], workbench = [], bondTerms = [], history = [] } = {}) {
+export function buildBondListRecords({ views = [], workbench = [], bondTerms = [], history = [], cbMaster = [] } = {}) {
+  const canonicalBonds = indexCanonicalBonds(cbMaster);
+  const canonicalIdentity = (record) => {
+    if (canonicalBonds.size === 0) return record;
+    const identity = applyCanonicalBondIdentity(record, canonicalBonds);
+    return identity ? { ...record, ...identity } : null;
+  };
   const turnoverByBondDate = new Map(
     arrayValue(history)
       .filter((point) => (
@@ -256,7 +269,7 @@ export function buildBondListRecords({ views = [], workbench = [], bondTerms = [
       const view = record?.view ?? {};
       const term = record?.term ?? {};
       const legacyTerm = termsByBondCode.get(record?.bondCode);
-      return {
+      return canonicalIdentity({
         ...view,
         ...canonicalListFieldsForLegacyView(view),
         bondCode: record.bondCode,
@@ -273,12 +286,12 @@ export function buildBondListRecords({ views = [], workbench = [], bondTerms = [
         archiveReason: record.archiveReason,
         archivedAt: record.archivedAt,
         archiveDate: record.archivedAt,
-      };
-    });
+      });
+    }).filter(Boolean);
   }
   return arrayValue(views).map((view) => {
     const term = termsByBondCode.get(view.bondCode);
-    return {
+    return canonicalIdentity({
       ...view,
       ...canonicalListFieldsForLegacyView(view),
       issuerName: term?.["機構名稱"] ?? view.issuerName ?? view.issuerCode,
@@ -287,8 +300,8 @@ export function buildBondListRecords({ views = [], workbench = [], bondTerms = [
       outstandingDataDate: term?.["餘額資料日期"] ?? view.outstandingDataDate ?? null,
       maturityDate: term?.["到期日期"] ?? view.maturityDate ?? null,
       cbTurnoverAmount: turnoverByBondDate.get(`${view.bondCode}:${view.cbPriceDate}`) ?? null,
-    };
-  });
+    });
+  }).filter(Boolean);
 }
 
 function canonicalListFieldsForLegacyView(view) {
@@ -683,9 +696,17 @@ function renderRoute() {
   }
   const detailRecord = state.workbench.find((candidate) => candidate.bondCode === code)
     ?? detailRecordFromLegacy({ view, term: termFor(view.bondCode) ?? {}, events: [] });
-  const detail = detailWithValuationConversionEvidence(detailRecord, state.conversionPrices);
-  const detailHistory = state.history.filter((point) => point.bondCode === code);
-  target.innerHTML = renderBondDetail({ ...detail, history: detailHistory }, { asOfDate: state.workbenchAsOfDate });
+  const identity = applyCanonicalBondIdentity(detailRecord, state.canonicalBonds);
+  const canonicalDetail = identity
+    ? {
+      ...detailRecord,
+      bondCode: identity.bondCode,
+      term: { ...detailRecord.term, bondName: identity.bondName, issuerCode: identity.issuerCode, issuerName: identity.issuerName },
+      view: { ...detailRecord.view, bondName: identity.bondName, issuerCode: identity.issuerCode, issuerName: identity.issuerName, market: identity.market },
+    }
+    : detailRecord;
+  const detail = detailWithValuationConversionEvidence(canonicalDetail, state.conversionPrices);
+  target.innerHTML = renderBondDetail(detail, { asOfDate: state.workbenchAsOfDate });
   disposeDetail = bindBondDetail(target, closeDetail);
   target.hidden = false;
   list.hidden = true;

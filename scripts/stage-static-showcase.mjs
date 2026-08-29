@@ -15,7 +15,10 @@ import {
   renderDataCenterBootstrap,
 } from "../static-showcase/assets/data-center-status.js";
 import { buildV51HomeStaticFallback } from "../static-showcase/assets/home-static-fallback.js";
-import { buildPublicMarketResearch } from "../static-showcase/assets/public-market-research.js";
+import {
+  buildCanonicalPublicMasters,
+  buildPublicMarketResearch,
+} from "../static-showcase/assets/public-market-research.js";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
@@ -53,6 +56,7 @@ const ROOT_FILES = new Set([
 ]);
 const ASSET_FILES = new Set([
   "app.css",
+  "canonical-identity.js",
   "company-overview.js",
   "bond-detail-page.js",
   "bond-events-page.js",
@@ -79,6 +83,7 @@ const ASSET_FILES = new Set([
   "ipo-stage-filter.js",
   "klinechart-adapter.js",
   "public-event-digest.js",
+  "public-data-state.js",
   "site-shell.js",
   "site-search.js",
   "table-sort.js",
@@ -239,14 +244,23 @@ export async function stageStaticShowcase({
 
 async function writePublicMarketResearch({ destination, generation }) {
   const base = join(destination, "data", ...generation.split("/"));
-  const [manifest, emerging, ipo, workbench, stockCloses, history] = await Promise.all([
+  const [manifest, emerging, ipo, workbench, stockCloses, history, revenue] = await Promise.all([
     readJson(join(base, "manifest.json"), "active generation public manifest is invalid"),
     readJson(join(base, "emerging-market.json"), "active generation public emerging market is invalid"),
     readJson(join(base, "ipo-events.json"), "active generation public IPO snapshot is invalid"),
     readJson(join(base, "bond-workbench.json"), "active generation public CB workbench is invalid"),
     readPublicOptionalJson(join(base, "stock-closes.json"), "active generation public stock closes are invalid", []),
     readPublicOptionalJson(join(base, "bond-market-history.json"), "active generation public CB history is invalid", []),
+    readPublicOptionalJson(join(base, "94025.json"), "active generation public revenue snapshot is invalid", []),
   ]);
+  const masters = buildCanonicalPublicMasters({
+    manifest,
+    emerging,
+    ipo,
+    workbench,
+    stockCloses,
+    revenue,
+  });
   const research = buildPublicMarketResearch({
     manifest,
     emerging,
@@ -254,12 +268,25 @@ async function writePublicMarketResearch({ destination, generation }) {
     workbench,
     stockCloses,
     history,
+    revenue,
   });
-  await writeFile(
-    join(base, "market-research.json"),
-    `${JSON.stringify(research, null, 2)}\n`,
-    "utf8",
-  );
+  const companyMaster = { schemaVersion: 1, meta: masters.meta, records: masters.companyMaster };
+  const cbMaster = { schemaVersion: 1, meta: masters.meta, records: masters.cbMaster };
+  const searchIndex = { schemaVersion: 1, meta: masters.meta, records: masters.searchIndex };
+  await Promise.all([
+    writeFile(join(base, "market-research.json"), `${JSON.stringify(research, null, 2)}\n`, "utf8"),
+    writeFile(join(base, "company-master.json"), `${JSON.stringify(companyMaster, null, 2)}\n`, "utf8"),
+    writeFile(join(base, "cb-master.json"), `${JSON.stringify(cbMaster, null, 2)}\n`, "utf8"),
+    writeFile(join(base, "search-index.json"), `${JSON.stringify(searchIndex, null, 2)}\n`, "utf8"),
+  ]);
+  const runtimePath = join(base, "runtime.json");
+  const runtime = await readJson(runtimePath, "active generation public runtime is invalid");
+  await writeFile(runtimePath, `${JSON.stringify({
+    ...runtime,
+    companyMasterUrl: `./data/${generation}/company-master.json`,
+    cbMasterUrl: `./data/${generation}/cb-master.json`,
+    searchIndexUrl: `./data/${generation}/search-index.json`,
+  }, null, 2)}\n`, "utf8");
   return research;
 }
 

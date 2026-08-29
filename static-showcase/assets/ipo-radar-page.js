@@ -1,4 +1,5 @@
 import { formatDate, formatNumber } from "./site-shell.js";
+import { applyCanonicalCompanyIdentity, loadCanonicalPublicMasters } from "./canonical-identity.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
 import { defaultIpoStage, displayIpoStage, isActiveIpoRecord, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, publicCompanyHref, selectPublishedUpcomingEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 
@@ -37,19 +38,23 @@ async function loadData() {
   } catch {
     snapshot = null;
   }
-  if (snapshot) {
-    applySnapshot(snapshot);
+  const masters = await loadCanonicalPublicMasters({ includeBonds: false });
+  if (snapshot && masters?.companies?.size) {
+    applySnapshot(snapshot, masters.companies);
     if (snapshot.stale) showError("資料暫時未更新，顯示最近一次成功資料。");
     return;
   }
   showUnavailable();
 }
 
-function applySnapshot(snapshot) {
+function applySnapshot(snapshot, companies) {
   state.dataDate = validDate(snapshot.dataDate) ? snapshot.dataDate : null;
   state.rows = snapshot.records
-    .map((record) => projectIpoRadarRecord(record, snapshot))
-    .filter((row) => row.companyCode && row.companyName && !isIpoRadarExcluded(row));
+    .map((record) => {
+      const identity = applyCanonicalCompanyIdentity(record, companies);
+      return identity ? { ...projectIpoRadarRecord(record, snapshot), ...identity } : null;
+    })
+    .filter((row) => row?.companyCode && row.companyName && !isIpoRadarExcluded(row));
   populateMarkets();
   applyStateToControls();
   render();
@@ -311,7 +316,7 @@ function showUnavailable() {
   document.querySelector("#ipo-radar-update-status").textContent = "IPO 事件資料尚未發布";
   document.querySelector("#ipo-radar-table-body").innerHTML = emptyRow("目前沒有可顯示的 IPO 進度資料");
   document.querySelector("#ipo-upcoming-grid").innerHTML = "<p class=\"empty-cell\">目前沒有近期重要事件</p>";
-  showError("資料暫時無法讀取，目前沒有可顯示的資料。");
+  showError("資料暫時無法取得");
 }
 
 function showError(message) {

@@ -1,3 +1,5 @@
+import { publicNumber } from "./public-data-state.js";
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function recordsOf(value) {
@@ -9,9 +11,14 @@ function text(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function number(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+function isPositiveNumber(value) {
+  const parsed = publicNumber(value);
+  return parsed !== null && parsed > 0;
+}
+
+function isNegativeNumber(value) {
+  const parsed = publicNumber(value);
+  return parsed !== null && parsed < 0;
 }
 
 function isIsoDate(value) {
@@ -44,6 +51,208 @@ function activeBond(record) {
   return text(record?.status).toLowerCase() === "active";
 }
 
+function marketLabel(value) {
+  const market = text(value).toLowerCase();
+  if (market === "listed" || market === "twse" || value === "上市") return "上市";
+  if (market === "otc" || market === "tpex" || value === "上櫃") return "上櫃";
+  if (market === "emerging" || value === "興櫃") return "興櫃";
+  return null;
+}
+
+function validStockCode(value) {
+  return /^\d{4}$/.test(text(value));
+}
+
+function validBondCode(value) {
+  return /^\d{5,6}$/.test(text(value));
+}
+
+function preferredValue(current, next, rank) {
+  const value = text(next);
+  if (!value) return current;
+  if (!current || rank < current.rank) return { value, rank };
+  return current;
+}
+
+function preferredMarket(current, next, rank) {
+  const value = marketLabel(next);
+  if (!value) return current;
+  if (!current || rank < current.rank) return { value, rank };
+  return current;
+}
+
+function preferredIpoStage(current, next) {
+  const value = text(next);
+  if (!value) return current;
+  const rank = /^[ABCD]$/.test(value) ? 0 : 1;
+  if (!current || rank < current.rank) return { value, rank };
+  return current;
+}
+
+function companyCandidate(map, stockCode) {
+  const code = text(stockCode);
+  if (!validStockCode(code)) return null;
+  if (!map.has(code)) {
+    map.set(code, {
+      stockCode: code,
+      companyName: null,
+      market: null,
+      industry: null,
+      ipoStage: null,
+      bonds: [],
+    });
+  }
+  return map.get(code);
+}
+
+/**
+ * Produces the three public identity datasets from the validated generation.
+ * Company identity is always keyed by the formal four-digit code; CB links are
+ * accepted only when the term's issuerCode is a matching four-digit code.
+ */
+export function buildCanonicalPublicMasters({
+  manifest = null,
+  emerging = [],
+  ipo = [],
+  workbench = [],
+  stockCloses = [],
+  revenue = [],
+} = {}) {
+  const dataDate = isIsoDate(manifest?.market?.dataDate) ? manifest.market.dataDate : null;
+  const companies = new Map();
+  const register = ({ stockCode, companyName, market, industry, ipoStage, rank }) => {
+    const candidate = companyCandidate(companies, stockCode);
+    if (!candidate) return null;
+    candidate.companyName = preferredValue(candidate.companyName, companyName, rank);
+    candidate.market = preferredMarket(candidate.market, market, rank);
+    candidate.industry = preferredValue(candidate.industry, industry, rank);
+    candidate.ipoStage = preferredIpoStage(candidate.ipoStage, ipoStage);
+    return candidate;
+  };
+
+  for (const record of recordsOf(stockCloses)) {
+    register({ stockCode: record?.companyCode, market: record?.market, rank: 0 });
+  }
+  for (const record of recordsOf(emerging)) {
+    register({
+      stockCode: record?.companyCode,
+      companyName: record?.companyName,
+      market: "興櫃",
+      industry: record?.industryName,
+      rank: 0,
+    });
+  }
+  // Archive records remain in the canonical CB master so an explicitly opened
+  // historical bond can be resolved by its exact code; active-only views still
+  // apply their own status filter before rendering.
+  for (const record of recordsOf(workbench)) {
+    const issuer = record?.term?.issuerCode;
+    const issuerResearch = record?.view?.issuerResearch;
+    const company = register({
+      stockCode: issuer,
+      companyName: record?.term?.issuerName,
+      market: issuerResearch?.market,
+      industry: issuerResearch?.industryName,
+      rank: 1,
+    });
+    const bondCode = text(record?.bondCode ?? record?.term?.bondCode);
+    const bondName = text(record?.term?.bondName ?? record?.view?.bondName);
+    if (!company || !validBondCode(bondCode) || !bondName) continue;
+    if (!company.bonds.some((bond) => bond.bondCode === bondCode)) {
+      company.bonds.push({ bondCode, bondName });
+    }
+  }
+  for (const record of recordsOf(revenue)) {
+    register({
+      stockCode: record?.["公司代號"],
+      companyName: record?.["公司名稱"],
+      industry: record?.["產業別"],
+      rank: 2,
+    });
+  }
+  for (const record of recordsOf(ipo)) {
+    register({
+      stockCode: record?.companyCode,
+      companyName: record?.companyName,
+      market: record?.market,
+      ipoStage: record?.stage,
+      rank: 3,
+    });
+  }
+
+  const companyMaster = [...companies.values()]
+    .filter((company) => company.companyName?.value)
+    .map((company) => {
+      const bonds = [...company.bonds].sort((left, right) => left.bondCode.localeCompare(right.bondCode));
+      return {
+        stockCode: company.stockCode,
+        companyName: company.companyName.value,
+        market: company.market?.value ?? "—",
+        industry: company.industry?.value ?? "—",
+        cbCodes: bonds.map((bond) => bond.bondCode),
+        cbNames: bonds.map((bond) => bond.bondName),
+        aliases: [],
+        ipoStage: company.ipoStage?.value ?? null,
+        dataDate,
+      };
+    })
+    .sort((left, right) => left.stockCode.localeCompare(right.stockCode));
+  const companyByCode = new Map(companyMaster.map((company) => [company.stockCode, company]));
+  const cbMaster = companyMaster.flatMap((company) => company.cbCodes.map((bondCode, index) => ({
+    bondCode,
+    bondName: company.cbNames[index],
+    stockCode: company.stockCode,
+    companyName: company.companyName,
+    market: company.market,
+    dataDate,
+  }))).sort((left, right) => left.bondCode.localeCompare(right.bondCode));
+  const searchIndex = [
+    ...companyMaster.map((company) => ({
+      id: `company:${company.stockCode}`,
+      type: "company",
+      stockCode: company.stockCode,
+      companyName: company.companyName,
+      cbCode: null,
+      cbName: null,
+      market: company.market,
+      industry: company.industry,
+      cbCodes: company.cbCodes,
+      cbNames: company.cbNames,
+      aliases: company.aliases,
+      ipoStage: company.ipoStage,
+      url: canonicalCompanyRoute(company.stockCode),
+      dataDate,
+    })),
+    ...cbMaster.map((bond) => ({
+      id: `cb:${bond.bondCode}`,
+      type: "cb",
+      stockCode: bond.stockCode,
+      companyName: bond.companyName,
+      cbCode: bond.bondCode,
+      cbName: bond.bondName,
+      market: bond.market,
+      industry: companyByCode.get(bond.stockCode)?.industry ?? "—",
+      cbCodes: [bond.bondCode],
+      cbNames: [bond.bondName],
+      aliases: [],
+      ipoStage: companyByCode.get(bond.stockCode)?.ipoStage ?? null,
+      url: canonicalBondRoute(bond.bondCode),
+      dataDate,
+    })),
+  ].sort((left, right) => left.id.localeCompare(right.id, "zh-Hant"));
+
+  return {
+    meta: {
+      dataDate,
+      recordCount: companyMaster.length + cbMaster.length,
+      status: dataDate ? "ok" : "unavailable",
+    },
+    companyMaster,
+    cbMaster,
+    searchIndex,
+  };
+}
+
 function publicMeta(manifest, dataDate, counts) {
   const sourceUrls = [...new Set((Array.isArray(manifest?.datasets) ? manifest.datasets : [])
     .map((dataset) => text(dataset?.sourceUrl))
@@ -59,82 +268,11 @@ function publicMeta(manifest, dataDate, counts) {
   };
 }
 
-function buildSearchIndex({ emerging, ipo, workbench, stockCloses }, dataDate) {
-  const companies = new Map();
-  const registerCompany = ({ stockCode, companyName, market = "公司" }) => {
-    const code = text(stockCode);
-    const name = text(companyName);
-    if (!/^\d{4}$/.test(code) || !name) return;
-    const current = companies.get(code);
-    if (current === undefined || current.companyName.length < name.length) {
-      companies.set(code, { stockCode: code, companyName: name, market });
-    }
-  };
-  for (const record of recordsOf(emerging)) {
-    registerCompany({ stockCode: record?.companyCode, companyName: record?.companyName, market: "興櫃" });
-  }
-  for (const record of recordsOf(ipo)) {
-    registerCompany({ stockCode: record?.companyCode, companyName: record?.companyName, market: "IPO" });
-  }
-  const closeMarkets = new Map(recordsOf(stockCloses).map((record) => [
-    text(record?.companyCode), text(record?.market) === "listed" ? "TWSE" : "TPEx",
-  ]));
-  const activeBonds = recordsOf(workbench).filter(activeBond);
-  for (const record of activeBonds) {
-    registerCompany({
-      stockCode: record?.term?.issuerCode,
-      companyName: record?.term?.issuerName,
-      market: closeMarkets.get(text(record?.term?.issuerCode)) ?? "CB",
-    });
-  }
-  const companyEntries = [...companies.values()].map((company) => ({
-    id: `company:${company.stockCode}`,
-    type: "company",
-    stockCode: company.stockCode,
-    companyName: company.companyName,
-    cbCode: null,
-    cbName: null,
-    market: company.market,
-    aliases: [],
-    url: canonicalCompanyRoute(company.stockCode),
-    dataDate,
-  }));
-  const cbEntries = activeBonds.map((record) => ({
-    id: `cb:${text(record?.bondCode)}`,
-    type: "cb",
-    stockCode: text(record?.term?.issuerCode),
-    companyName: text(record?.term?.issuerName),
-    cbCode: text(record?.bondCode),
-    cbName: text(record?.term?.bondName),
-    market: "CB",
-    aliases: [],
-    url: canonicalBondRoute(text(record?.bondCode)),
-    dataDate,
-  })).filter((entry) => /^\d{5,6}$/.test(entry.cbCode) && /^\d{4}$/.test(entry.stockCode) && entry.cbName && entry.companyName);
-  const ipoEntries = recordsOf(ipo).filter((record) => {
-    const stage = text(record?.stage).toLowerCase();
-    return !["withdrawn", "listed", "cancelled"].includes(stage);
-  }).map((record) => ({
-    id: `ipo:${text(record?.companyCode)}`,
-    type: "ipo",
-    stockCode: text(record?.companyCode),
-    companyName: text(record?.companyName),
-    cbCode: null,
-    cbName: null,
-    market: "IPO",
-    aliases: [],
-    url: canonicalIpoRoute(text(record?.companyCode)),
-    dataDate,
-  })).filter((entry) => /^\d{4}$/.test(entry.stockCode) && entry.companyName);
-  return [...companyEntries, ...ipoEntries, ...cbEntries]
-    .sort((left, right) => left.id.localeCompare(right.id, "zh-Hant"));
-}
-
 function rankedEntries(records, { metric, label, descending = true, dataDate }) {
   return records.map((record) => ({
     code: text(record?.companyCode),
     name: text(record?.companyName),
-    value: number(record?.[metric]),
+    value: publicNumber(record?.[metric]),
   })).filter((entry) => /^\d{4}$/.test(entry.code) && entry.name && entry.value !== null)
     .sort((left, right) => descending ? right.value - left.value : left.value - right.value)
     .slice(0, 5)
@@ -155,13 +293,13 @@ function buildEmergingRankings(emerging, dataDate) {
   if (!dataDate || records.length === 0) {
     return { state: "data_unavailable", dataDate: dataDate ?? null, tabs: {} };
   }
-  const traded = records.filter((record) => (number(record?.transactionVolume) ?? 0) > 0);
+  const traded = records.filter((record) => isPositiveNumber(record?.transactionVolume));
   return {
     state: "ready",
     dataDate,
     tabs: {
-      gainers: { label: "漲幅", entries: rankedEntries(traded.filter((record) => (number(record?.averageChangePercent) ?? 0) > 0), { metric: "averageChangePercent", label: "漲跌幅", dataDate }) },
-      losers: { label: "跌幅", entries: rankedEntries(traded.filter((record) => (number(record?.averageChangePercent) ?? 0) < 0), { metric: "averageChangePercent", label: "漲跌幅", descending: false, dataDate }) },
+      gainers: { label: "漲幅", entries: rankedEntries(traded.filter((record) => isPositiveNumber(record?.averageChangePercent)), { metric: "averageChangePercent", label: "漲跌幅", dataDate }) },
+      losers: { label: "跌幅", entries: rankedEntries(traded.filter((record) => isNegativeNumber(record?.averageChangePercent)), { metric: "averageChangePercent", label: "漲跌幅", descending: false, dataDate }) },
       turnover: { label: "成交額", entries: rankedEntries(traded, { metric: "estimatedTransactionAmount", label: "成交額", dataDate }) },
       volume: { label: "成交量", entries: rankedEntries(traded, { metric: "transactionVolume", label: "成交量", dataDate }) },
       revenueYoY: { label: "營收 YoY", entries: [], state: "not_available" },
@@ -184,8 +322,8 @@ function buildCbStockLeaders(workbench, stockCloses, dataDate) {
   const entries = rows.map((record) => {
     const code = text(record?.companyCode);
     const related = bondsByIssuer.get(code);
-    const close = number(record?.close);
-    const change = number(record?.change);
+    const close = publicNumber(record?.close);
+    const change = publicNumber(record?.change);
     if (!related || close === null || change === null || close - change === 0) return null;
     return {
       code,
@@ -214,7 +352,7 @@ function bondMetadata(workbench) {
 function turnoverEntries(points, metadata, dataDate) {
   const totals = new Map();
   for (const point of points) {
-    const units = number(point?.cbTradingUnits);
+    const units = publicNumber(point?.cbTradingUnits);
     const bondCode = text(point?.bondCode);
     if (units === null || units <= 0 || !metadata.has(bondCode)) continue;
     const current = totals.get(bondCode) ?? { tradingUnits: 0, point };
@@ -230,8 +368,8 @@ function turnoverEntries(points, metadata, dataDate) {
       issuerCode: meta.issuerCode,
       issuerName: meta.issuerName,
       tradingUnits: total.tradingUnits,
-      close: number(total.point?.cbClose),
-      premiumRate: number(total.point?.premiumRate),
+      close: publicNumber(total.point?.cbClose),
+      premiumRate: publicNumber(total.point?.premiumRate),
       route: canonicalBondRoute(bondCode),
       companyRoute: canonicalCompanyRoute(meta.issuerCode),
       dataDate,
@@ -247,7 +385,7 @@ function buildCbTurnover(workbench, history, dataDate) {
       weekly: { state: "no_verified_data", dataDate: dataDate ?? null, periodStart: null, periodEnd: null, entries: [] },
     };
   }
-  const verified = recordsOf(history).filter((point) => metadata.has(text(point?.bondCode)) && isIsoDate(point?.date) && number(point?.cbTradingUnits) !== null && number(point?.cbTradingUnits) >= 0);
+  const verified = recordsOf(history).filter((point) => metadata.has(text(point?.bondCode)) && isIsoDate(point?.date) && publicNumber(point?.cbTradingUnits) !== null && publicNumber(point?.cbTradingUnits) >= 0);
   const dailyPoints = verified.filter((point) => point.date === dataDate);
   const dailyEntries = turnoverEntries(dailyPoints, metadata, dataDate);
   const daily = dailyPoints.length === 0
@@ -280,8 +418,8 @@ function buildCbIssuance(workbench, dataDate) {
       companyName: text(term.issuerName),
       cbCode: code,
       cbName: text(term.bondName),
-      issueAmount: number(term.issueAmount),
-      conversionPrice: number(record?.view?.currentConversionPrice),
+      issueAmount: publicNumber(term.issueAmount),
+      conversionPrice: publicNumber(record?.view?.currentConversionPrice),
       stage: listingDate ? "已公告掛牌" : "已公告發行",
       nextDate: listingDate ?? issueDate,
       route: canonicalBondRoute(code),
@@ -376,13 +514,21 @@ function buildLatestEvents({ emerging, ipo, workbench }, dataDate) {
   return { state: entries.length ? "ready" : "not_published", dataDate: dataDate ?? null, entries };
 }
 
-export function buildPublicMarketResearch({ manifest, emerging, ipo, workbench, stockCloses, history } = {}) {
+export function buildPublicMarketResearch({ manifest, emerging, ipo, workbench, stockCloses, history, revenue } = {}) {
   const dataDate = isIsoDate(manifest?.market?.dataDate) ? manifest.market.dataDate : null;
   const counts = [recordsOf(emerging).length, recordsOf(ipo).length, recordsOf(workbench).length, recordsOf(stockCloses).length, recordsOf(history).length];
+  const masters = buildCanonicalPublicMasters({
+    manifest,
+    emerging,
+    ipo,
+    workbench,
+    stockCloses,
+    revenue,
+  });
   return {
     schemaVersion: 1,
     meta: publicMeta(manifest, dataDate, counts),
-    searchIndex: buildSearchIndex({ emerging, ipo, workbench, stockCloses }, dataDate),
+    searchIndex: masters.searchIndex,
     home: {
       cbStockLeaders: buildCbStockLeaders(workbench, stockCloses, dataDate),
       emergingRankings: buildEmergingRankings(emerging, dataDate),

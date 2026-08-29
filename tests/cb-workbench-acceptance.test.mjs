@@ -145,8 +145,14 @@ test("offline builder and outer refresh stage the same CB generation through the
       ...stagedPointer.runtimeUrl.replace(/^\.\//, "").split("/"),
     );
     const stagedRuntimeText = await readFile(stagedRuntimePath, "utf8");
-    assert.equal(stagedRuntimeText, outcome.artifacts.active["runtime.json"]);
     const stagedRuntime = JSON.parse(stagedRuntimeText);
+    const expectedRuntime = JSON.parse(outcome.artifacts.active["runtime.json"]);
+    Object.assign(expectedRuntime, {
+      companyMasterUrl: `./data/${expectedRuntime.generation}/company-master.json`,
+      cbMasterUrl: `./data/${expectedRuntime.generation}/cb-master.json`,
+      searchIndexUrl: `./data/${expectedRuntime.generation}/search-index.json`,
+    });
+    assert.deepEqual(stagedRuntime, expectedRuntime);
     assert.equal(
       stagedRuntime.datasets.bondWorkbench,
       `./data/${stagedRuntime.generation}/bond-workbench.json`,
@@ -181,7 +187,7 @@ test("offline builder and outer refresh stage the same CB generation through the
         new Set([
           "current.json", "runtime.json", "manifest.json", "11406.json",
           "bond-market-history.json",
-          "conversion-prices.json", "bond-workbench.json",
+          "conversion-prices.json", "bond-workbench.json", "cb-master.json",
         ]),
       );
       assert.match(page.document.element("bond-table-body").innerHTML, /35221/);
@@ -194,7 +200,7 @@ test("offline builder and outer refresh stage the same CB generation through the
       assert.equal(page.location.search, "?bond=35221");
       assert.match(page.document.element("bond-workbench").innerHTML, /御嵿一/);
       assert.equal(page.document.activeElement, page.document.closeButton);
-      assert.match(page.document.element("bond-workbench").innerHTML, /data-bond-kline-host/);
+      assert.doesNotMatch(page.document.element("bond-workbench").innerHTML, /data-bond-kline-host|klinechart/i);
 
       page.document.closeButton.dispatch("keydown", { key: "Enter" });
       assert.equal(page.location.search, "");

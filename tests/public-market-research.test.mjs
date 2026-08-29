@@ -51,7 +51,7 @@ const ipo = {
   }],
 };
 
-test("V5.1 builds one public index and same-date home modules without internal fields", () => {
+test("V5.2 builds a safe canonical index and same-date home modules without internal fields", () => {
   const research = buildPublicMarketResearch({
     manifest,
     emerging: { records: [{
@@ -77,8 +77,12 @@ test("V5.1 builds one public index and same-date home modules without internal f
     companyName: "聯電",
     cbCode: "23031",
     cbName: "聯電一",
-    market: "CB",
+    market: "—",
+    industry: "—",
+    cbCodes: ["23031"],
+    cbNames: ["聯電一"],
     aliases: [],
+    ipoStage: null,
     url: "./bonds.html?bond=23031",
     dataDate: "2026-08-26",
   });

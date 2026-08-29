@@ -8,7 +8,7 @@ export function verifiedDailyCandles(points) {
   if (!Array.isArray(points)) throw new TypeError("points must be an array");
 
   return points
-    .filter((point) => [point.cbOpen, point.cbHigh, point.cbLow, point.cbClose]
+    .filter((point) => [point.cbOpen, point.cbHigh, point.cbLow, point.cbClose, point.cbTradingUnits, point.cbTurnover]
       .every((value) => typeof value === "string"))
     .map((point) => ({
       periodStart: point.date,
@@ -17,8 +17,8 @@ export function verifiedDailyCandles(points) {
       high: canonicalDecimal(point.cbHigh),
       low: canonicalDecimal(point.cbLow),
       close: canonicalDecimal(point.cbClose),
-      tradingUnits: nullableQuantity(point.cbTradingUnits),
-      turnover: nullableQuantity(point.cbTurnover),
+      tradingUnits: canonicalDecimal(point.cbTradingUnits),
+      turnover: canonicalDecimal(point.cbTurnover),
     }))
     .sort((left, right) => left.periodStart.localeCompare(right.periodStart));
 }
@@ -319,10 +319,6 @@ function smooth(previous, current, period) {
 
 function nullBollinger() {
   return { middle: null, upper: null, lower: null };
-}
-
-function nullableQuantity(value) {
-  return value === null || value === undefined ? "0" : canonicalDecimal(value);
 }
 
 function addDecimals(left, right) {

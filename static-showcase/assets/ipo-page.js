@@ -1,4 +1,5 @@
 import { formatDate, formatNumber } from "./site-shell.js";
+import { applyCanonicalCompanyIdentity, loadCanonicalPublicMasters } from "./canonical-identity.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
 import { defaultIpoStage, displayIpoStage, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, publicCompanyHref, selectPublishedUpcomingEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 import { sortRows } from "./table-sort.js";
@@ -37,17 +38,27 @@ if (globalThis.document) {
 async function loadData() {
   let snapshot = null;
   try { snapshot = await loadIpoSnapshot(); } catch { snapshot = null; }
-  if (snapshot) {
-    applySnapshot(snapshot);
+  const masters = await loadCanonicalPublicMasters({ includeBonds: false });
+  if (snapshot && masters?.companies?.size) {
+    applySnapshot(snapshot, masters.companies);
     if (snapshot.stale) showError("資料暫時未更新，顯示最近一次成功資料。");
     return;
   }
   showUnavailable();
 }
 
-function applySnapshot(snapshot) {
+function applySnapshot(snapshot, companies) {
   state.dataDate = validDate(snapshot.dataDate) ? snapshot.dataDate : null;
-  state.rows = snapshot.records.map((record) => normalizeIpoRecord(record, { dataDate: state.dataDate, sourceManifest: snapshot.sourceManifest })).filter((row) => row.companyCode && row.companyName);
+  state.rows = snapshot.records
+    .map((record) => {
+      const identity = applyCanonicalCompanyIdentity(record, companies);
+      if (!identity) return null;
+      return {
+        ...normalizeIpoRecord(record, { dataDate: state.dataDate, sourceManifest: snapshot.sourceManifest }),
+        ...identity,
+      };
+    })
+    .filter((row) => row?.companyCode && row.companyName);
   populateFilters();
   applyStateToControls();
   render();
@@ -254,7 +265,7 @@ function renderPagination(total) { const target = document.querySelector("#ipo-p
 function applyStateToControls() { document.querySelector("#ipo-search").value = state.query; selectExistingValue("#ipo-market", state.market); selectExistingValue("#ipo-stage", state.stage); selectExistingValue("#ipo-event", state.event); selectExistingValue("#ipo-year", state.year); for (const button of document.querySelectorAll("[data-ipo-date-filter]")) button.setAttribute("aria-pressed", String(button.dataset.ipoDateFilter === state.dateRange)); updateSortControls(); }
 function updateSortControls() { document.querySelector("#ipo-sort-field").value = state.sortKey; const button = document.querySelector("#ipo-sort-direction"); button.dataset.direction = state.direction; button.textContent = state.direction === "asc" ? "近到遠 ↑" : "遠到近 ↓"; for (const sortButton of document.querySelectorAll("[data-ipo-sort]")) { const active = sortButton.dataset.ipoSort === state.sortKey; sortButton.closest("th").setAttribute("aria-sort", active ? (state.direction === "asc" ? "ascending" : "descending") : "none"); sortButton.querySelector("span").textContent = active ? (state.direction === "asc" ? "↑" : "↓") : ""; } for (const viewButton of document.querySelectorAll("[data-ipo-view]")) viewButton.setAttribute("aria-selected", String(viewButton.dataset.ipoView === state.view)); document.querySelector("#ipo-list-view").hidden = state.view !== "list"; document.querySelector("#ipo-month-view").hidden = state.view !== "month"; }
 function syncUrl() { const params = new URLSearchParams(); if (state.query) params.set("q", state.query); if (state.market !== "all") params.set("market", state.market); if (shouldWriteIpoStage(state.stage)) params.set("stage", state.stage); if (state.event !== "all") params.set("event", state.event); if (state.year !== "all") params.set("year", state.year); if (state.dateRange !== "all") params.set("range", state.dateRange); if (state.view !== "list") params.set("view", state.view); if (state.sortKey !== "eventDate") params.set("sort", state.sortKey); if (state.direction !== "asc") params.set("direction", state.direction); if (state.page > 1) params.set("page", String(state.page)); history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`); }
-function showUnavailable() { document.querySelector("#ipo-update-status").textContent = "IPO 事件資料尚未發布"; document.querySelector("#ipo-table-body").innerHTML = emptyRow("目前沒有可顯示的 IPO 時程資料"); document.querySelector("#ipo-card-list").innerHTML = emptyCard("目前沒有可顯示的 IPO 時程資料"); document.querySelector("#ipo-upcoming-grid").innerHTML = "<p class=\"empty-cell\">目前沒有未來 7 日公開事件</p>"; showError("資料暫時無法讀取，目前沒有可顯示的資料。"); }
+function showUnavailable() { document.querySelector("#ipo-update-status").textContent = "資料暫時無法取得"; document.querySelector("#ipo-table-body").innerHTML = emptyRow("目前沒有可顯示的 IPO 時程資料"); document.querySelector("#ipo-card-list").innerHTML = emptyCard("目前沒有可顯示的 IPO 時程資料"); document.querySelector("#ipo-upcoming-grid").innerHTML = "<p class=\"empty-cell\">目前沒有未來 7 日公開事件</p>"; showError("資料暫時無法取得"); }
 function showError(message) { if (errorTarget) { errorTarget.textContent = message; errorTarget.hidden = false; } }
 function taipeiToday() { const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date()); const value = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value])); return `${value.year}-${value.month}-${value.day}`; }
 function taipeiCalendarDistance(today, date) { return Math.round((Date.UTC(...date.split("-").map(Number).map((value, index) => index === 1 ? value - 1 : value)) - Date.UTC(...today.split("-").map(Number).map((value, index) => index === 1 ? value - 1 : value))) / 86_400_000); }

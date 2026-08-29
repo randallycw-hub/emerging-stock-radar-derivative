@@ -12,6 +12,11 @@ function recordMatches(query, values) {
   return values.some((value) => normalizePublicSearch(value).includes(query));
 }
 
+function entriesOf(index) {
+  if (Array.isArray(index)) return index;
+  return Array.isArray(index?.records) ? index.records : [];
+}
+
 function companyCodeOf(record) {
   return safeText(record?.companyCode ?? record?.issuerCode ?? record?.term?.issuerCode);
 }
@@ -88,17 +93,24 @@ function canonicalSearchValues(entry = {}) {
     entry.companyName,
     entry.cbCode,
     entry.cbName,
+    ...(Array.isArray(entry.cbCodes) ? entry.cbCodes : []),
+    ...(Array.isArray(entry.cbNames) ? entry.cbNames : []),
     ...(Array.isArray(entry.aliases) ? entry.aliases : []),
   ];
 }
 
 function canonicalSearchPriority(entry = {}, needle) {
   const isExact = (value) => normalizePublicSearch(value) === needle;
-  if (entry.type === "cb" && isExact(entry.cbCode)) return 0;
-  if (isExact(entry.stockCode)) return 1;
-  if (entry.type === "company" && isExact(entry.companyName)) return 2;
+  const isPrefix = (value) => {
+    const normalized = normalizePublicSearch(value);
+    return normalized.length > needle.length && normalized.startsWith(needle);
+  };
+  if (entry.type === "cb" && /^\d{5,6}$/.test(needle) && isExact(entry.cbCode)) return 0;
+  if (entry.type !== "cb" && isExact(entry.stockCode)) return 1;
+  if (isExact(entry.companyName) || (Array.isArray(entry.aliases) && entry.aliases.some(isExact))) return 2;
   if (entry.type === "cb" && isExact(entry.cbName)) return 3;
-  if (isExact(entry.companyName)) return 4;
+  if (isExact(entry.stockCode)) return 4;
+  if (canonicalSearchValues(entry).some(isPrefix)) return 4;
   return 5;
 }
 
@@ -109,8 +121,9 @@ function canonicalSearchPriority(entry = {}, needle) {
  */
 export function searchCanonicalIndex(query, index = []) {
   const needle = normalizePublicSearch(query);
-  if (!needle || !Array.isArray(index)) return [];
-  return index
+  const entries = entriesOf(index);
+  if (!needle || entries.length === 0) return [];
+  return entries
     .filter((entry) => entry && recordMatches(needle, canonicalSearchValues(entry)))
     .map((entry) => ({
       id: safeText(entry.id),
@@ -120,6 +133,7 @@ export function searchCanonicalIndex(query, index = []) {
       cbCode: safeText(entry.cbCode),
       cbName: safeText(entry.cbName),
       market: safeText(entry.market),
+      industry: safeText(entry.industry),
       url: safeText(entry.url),
       dataDate: safeText(entry.dataDate),
     }))
@@ -129,30 +143,66 @@ export function searchCanonicalIndex(query, index = []) {
     .slice(0, MAX_RESULTS);
 }
 
+export function searchStateMessage(state) {
+  switch (state) {
+    case "no_results": return "查無結果";
+    case "not_ready": return "搜尋服務尚未就緒";
+    case "load_error": return "搜尋資料載入失敗";
+    case "network_error": return "暫時無法搜尋，請稍後再試";
+    default: return "暫時無法搜尋，請稍後再試";
+  }
+}
+
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
   }[character]));
 }
 
-async function fetchJson(url) {
+async function fetchJson(url, fetchImpl = globalThis.fetch) {
   try {
-    const response = await fetch(url, { cache: "no-store" });
-    return response.ok ? await response.json() : null;
-  } catch { return null; }
+    const response = await fetchImpl(url, { cache: "no-store" });
+    if (!response.ok) return { state: "load_error", data: null };
+    try {
+      return { state: "ready", data: await response.json() };
+    } catch {
+      return { state: "load_error", data: null };
+    }
+  } catch {
+    return { state: "network_error", data: null };
+  }
+}
+
+export async function loadCanonicalSearchIndex({
+  pointerUrl = "./data/current.json",
+  baseUrl = globalThis.document?.baseURI ?? globalThis.location?.href,
+  fetchImpl = globalThis.fetch,
+} = {}) {
+  if (typeof pointerUrl !== "string" || typeof baseUrl !== "string" || typeof fetchImpl !== "function") {
+    return { state: "not_ready", entries: [] };
+  }
+  const pointerResponse = await fetchJson(pointerUrl, fetchImpl);
+  if (pointerResponse.state !== "ready") return { state: pointerResponse.state, entries: [] };
+  const pointer = pointerResponse.data;
+  if (!pointer?.runtimeUrl) return { state: "not_ready", entries: [] };
+  const runtimeResponse = await fetchJson(new URL(pointer.runtimeUrl, baseUrl), fetchImpl);
+  if (runtimeResponse.state !== "ready") return { state: runtimeResponse.state, entries: [] };
+  const searchUrl = runtimeResponse.data?.searchIndexUrl;
+  if (!searchUrl) return { state: "not_ready", entries: [] };
+  const searchResponse = await fetchJson(new URL(searchUrl, baseUrl), fetchImpl);
+  if (searchResponse.state !== "ready") return { state: searchResponse.state, entries: [] };
+  const entries = entriesOf(searchResponse.data);
+  return entries.length || Array.isArray(searchResponse.data?.records)
+    ? { state: "ready", entries }
+    : { state: "load_error", entries: [] };
 }
 
 async function loadIndexes() {
   const config = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? { generationPointerUrl: "./data/current.json" };
-  const pointer = await fetchJson(config.generationPointerUrl);
-  const runtime = pointer?.runtimeUrl ? await fetchJson(new URL(pointer.runtimeUrl, document.baseURI)) : null;
-  const searchUrl = runtime?.searchIndexUrl
-    ?? runtime?.marketResearchUrl
-    ?? (typeof pointer?.generation === "string" ? `./data/${pointer.generation}/market-research.json` : null);
-  if (!searchUrl) return { state: "error", entries: [] };
-  const research = await fetchJson(new URL(searchUrl, document.baseURI));
-  const entries = Array.isArray(research?.searchIndex) ? research.searchIndex : null;
-  return entries ? { state: "ready", entries } : { state: "error", entries: [] };
+  return loadCanonicalSearchIndex({
+    pointerUrl: config.generationPointerUrl,
+    baseUrl: document.baseURI,
+  });
 }
 
 export function isGlobalSearchShortcut(event = {}) {
@@ -173,23 +223,34 @@ function canonicalResultSubtitle(row, entries) {
   return bondCount ? `公司研究・${bondCount} 檔可轉債` : "公司研究";
 }
 
-function renderSearchResults(results, indexState) {
-  const needle = normalizePublicSearch(results.value);
+export function buildSearchResultMarkup(query, indexState) {
+  const needle = normalizePublicSearch(query);
   if (!needle) {
-    results.hidden = true;
-    results.innerHTML = "";
-    return 0;
+    return { count: 0, hidden: true, html: "" };
   }
   if (indexState?.state !== "ready") {
-    results.hidden = false;
-    results.innerHTML = '<p class="search-result-state search-result-state--error" role="status">搜尋服務暫時無法取得，請稍後再試。</p>';
-    return 0;
+    return {
+      count: 0,
+      hidden: false,
+      html: `<p class="search-result-state search-result-state--error" role="status">${escapeHtml(searchStateMessage(indexState?.state))}</p>`,
+    };
   }
   const entries = indexState.entries ?? [];
   const matches = searchCanonicalIndex(needle, entries);
-  results.hidden = matches.length === 0;
-  results.innerHTML = matches.map((row) => `<article class="search-result-card"><a role="option" href="${escapeHtml(row.url)}"><strong>${escapeHtml(canonicalResultTitle(row))}</strong><span>${escapeHtml(canonicalResultSubtitle(row, entries))}</span></a></article>`).join("");
-  return matches.length;
+  return {
+    count: matches.length,
+    hidden: false,
+    html: matches.length
+      ? matches.map((row) => `<article class="search-result-card"><a role="option" href="${escapeHtml(row.url)}"><strong>${escapeHtml(canonicalResultTitle(row))}</strong><span>${escapeHtml(canonicalResultSubtitle(row, entries))}</span></a></article>`).join("")
+      : `<p class="search-result-state" role="status">${escapeHtml(searchStateMessage("no_results"))}</p>`,
+  };
+}
+
+function renderSearchResults(input, results, indexState) {
+  const model = buildSearchResultMarkup(input?.value, indexState);
+  results.hidden = model.hidden;
+  results.innerHTML = model.html;
+  return model.count;
 }
 
 function createHeaderSearch(header) {
@@ -231,7 +292,7 @@ function bindSearchSurface(form, indexes) {
     if (!form.contains(event.target)) closeMobileSearch();
   });
   input.addEventListener("input", () => {
-    const count = renderSearchResults(input, indexes);
+    const count = renderSearchResults(input, results, indexes);
     activeResultIndex = -1;
     input.setAttribute("aria-expanded", String(count > 0));
   });
@@ -266,7 +327,6 @@ async function initializeSiteSearch() {
   const indexes = await loadIndexes();
   const surfaces = [
     bindSearchSurface(headerForm, indexes),
-    bindSearchSurface(document.querySelector("#home-primary-search"), indexes),
   ].filter(Boolean);
   const headerSurface = surfaces[0];
   document.addEventListener("keydown", (event) => {

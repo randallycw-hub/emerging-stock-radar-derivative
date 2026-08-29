@@ -1,4 +1,6 @@
 import { formatDate, formatNumber, marketDetailHref, safeJsonFetch } from "./site-shell.js";
+import { applyCanonicalCompanyIdentity, indexCanonicalCompanies } from "./canonical-identity.js";
+import { countPublishedPositive, publicNumber, sumPublishedValues } from "./public-data-state.js";
 import { emergingDailyAverageLabel } from "./emerging-market-display.js";
 import { sortRows } from "./table-sort.js";
 
@@ -46,12 +48,31 @@ async function loadData() {
     return;
   }
 
-  const [marketArtifact, monthlyRevenue] = await Promise.all([
+  const [marketArtifact, monthlyRevenue, companyMaster] = await Promise.all([
     safeJsonFetch(new URL(runtime.emergingMarketUrl, document.baseURI), { errorTarget }),
     safeJsonFetch(new URL(runtime.datasets?.["94025"], document.baseURI), { errorTarget }),
+    typeof runtime.companyMasterUrl === "string"
+      ? safeJsonFetch(new URL(runtime.companyMasterUrl, document.baseURI), { errorTarget })
+      : Promise.resolve(null),
   ]);
-  state.market = arrayValue(marketArtifact?.records ?? marketArtifact);
-  state.monthlyRevenue = arrayValue(monthlyRevenue).map(normalizeRevenueRow);
+  const companies = indexCanonicalCompanies(companyMaster);
+  if (companies.size === 0) {
+    showUnavailable();
+    return;
+  }
+  state.market = arrayValue(marketArtifact?.records ?? marketArtifact)
+    .map((row) => {
+      const identity = applyCanonicalCompanyIdentity(row, companies);
+      return identity ? { ...row, ...identity } : null;
+    })
+    .filter(Boolean);
+  state.monthlyRevenue = arrayValue(monthlyRevenue)
+    .map(normalizeRevenueRow)
+    .map((row) => {
+      const identity = applyCanonicalCompanyIdentity(row, companies);
+      return identity ? { ...row, ...identity } : null;
+    })
+    .filter(Boolean);
   populateFilterOptions();
   applyStateToControls();
   render();
@@ -179,9 +200,11 @@ function applyViewPreset() {
 function renderBreadthAndRankings() {
   const rows = currentDateRows();
   const count = (direction) => rows.filter((row) => row.direction === direction).length;
-  const effective = rows.filter((row) => row.dailyAveragePrice !== null).length;
-  const traded = rows.filter((row) => positiveNumber(row.transactionVolume)).length;
-  const lowLiquidity = rows.filter((row) => !positiveNumber(row.transactionVolume)).length;
+  const effective = rows.every((row) => publicNumber(row.dailyAveragePrice) !== null)
+    ? rows.length
+    : null;
+  const traded = countPublishedPositive(rows, (row) => row.transactionVolume);
+  const lowLiquidity = traded === null ? null : rows.length - traded;
   const totalVolume = sumDecimal(rows, "transactionVolume");
   const totalAmount = sumDecimal(rows, "estimatedTransactionAmount");
   setBreadth("companies", formatNumber(rows.length));
@@ -193,8 +216,11 @@ function renderBreadthAndRankings() {
   setBreadth("amount", formatNumber(totalAmount, { maximumFractionDigits: 0 }));
 
   const rankings = [
-    ["漲幅排行", ranked(rows.filter((row) => Number(row.averageChangePercent) > 0), "averageChangePercent", "desc"), "percent"],
-    ["跌幅排行", ranked(rows.filter((row) => Number(row.averageChangePercent) < 0), "averageChangePercent", "asc"), "percent"],
+    ["漲幅排行", ranked(rows.filter((row) => positiveNumber(row.averageChangePercent)), "averageChangePercent", "desc"), "percent"],
+    ["跌幅排行", ranked(rows.filter((row) => {
+      const value = publicNumber(row.averageChangePercent);
+      return value !== null && value < 0;
+    }), "averageChangePercent", "asc"), "percent"],
     ["成交股數排行", ranked(rows, "transactionVolume", "desc"), "number"],
     ["估算成交金額排行", ranked(rows, "estimatedTransactionAmount", "desc"), "number"],
   ];
@@ -410,15 +436,16 @@ function latestTradingDate(rows) {
 }
 
 function sumDecimal(rows, key) {
-  return rows.reduce((sum, row) => {
-    const value = Number(String(row[key] ?? "").replaceAll(",", ""));
-    return Number.isFinite(value) ? sum + value : sum;
-  }, 0);
+  return sumPublishedValues(rows, (row) => {
+    const value = row?.[key];
+    return typeof value === "string" ? value.replaceAll(",", "") : value;
+  });
 }
 
 function positiveNumber(value) {
-  const number = Number(String(value ?? "").replaceAll(",", ""));
-  return Number.isFinite(number) && number > 0;
+  const normalized = typeof value === "string" ? value.replaceAll(",", "") : value;
+  const number = publicNumber(normalized);
+  return number !== null && number > 0;
 }
 
 function formatSigned(value) {

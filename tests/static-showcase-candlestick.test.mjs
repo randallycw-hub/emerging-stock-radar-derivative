@@ -51,21 +51,18 @@ test("V5 weekly and monthly chart data aggregate only verified daily candles", (
   assert.equal(toKlineData(history, { period: "month" }).length, 1);
 });
 
-test("V5 detail binding lazy-loads the KLineChart adapter and keeps serialized verified history", async () => {
+test("V5.2 detail binding does not expose a technical chart or serialized price history", async () => {
   const script = await readFile(new URL("../static-showcase/assets/bond-detail-page.js", import.meta.url), "utf8");
-  assert.match(script, /mountKlineChart/);
-  assert.match(script, /data-bond-kline-host/);
-  assert.doesNotMatch(script, /bindCandlestickChart/);
+  assert.doesNotMatch(script, /mountKlineChart|data-bond-kline-host|data-chart-data|\bMACD\b|\bRSI\b|\bKDJ\b|\bBOLL\b/);
 
   const cleanup = bindBondDetail({ querySelector: () => null, querySelectorAll: () => [] }, () => {});
   assert.equal(typeof cleanup, "function");
   const html = renderBondDetail({ bondCode: "35221", history: [point("2026-01-05")], events: [], view: {}, term: {}, assessment: {} });
-  assert.match(html, /"cbOpen":"100"/);
-  assert.doesNotMatch(html, /<canvas/);
+  assert.doesNotMatch(html, /"cbOpen":"100"|K 線|技術圖表/);
 });
 
-test("V5 bond detail supplies the selected bond's verified history to the serialized K-line payload", async () => {
+test("V5.2 bond page keeps raw history out of the public detail payload", async () => {
   const page = await readFile(new URL("../static-showcase/assets/bonds-page.js", import.meta.url), "utf8");
-  assert.match(page, /const detailHistory = state\.history\.filter\(\(point\) => point\.bondCode === code\);/);
-  assert.match(page, /renderBondDetail\(\{ \.\.\.detail, history: detailHistory \}/);
+  assert.doesNotMatch(page, /const detailHistory = state\.history\.filter\(\(point\) => point\.bondCode === code\);/);
+  assert.doesNotMatch(page, /renderBondDetail\(\{ \.\.\.detail, history: detailHistory \}/);
 });

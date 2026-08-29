@@ -189,7 +189,7 @@ test("共用格式與安全讀取工具提供可預期的顯示結果", async ()
   });
   assert.equal(result, null);
   assert.equal(target.hidden, false);
-  assert.match(target.textContent, /資料暫時無法讀取/);
+  assert.equal(target.textContent, "資料暫時無法取得");
 });
 
 test("V5 深淺色主題具備規格色彩與鍵盤互動狀態", async () => {
@@ -250,7 +250,7 @@ test("可轉債工作台在桌機與手機維持局部捲動、分頁與鍵盤�
   assert.match(list, /event\.key === "Enter" \|\| event\.key === " "/);
   assert.match(chart, /mountKlineChart/);
   assert.match(chart, /ResizeObserver/);
-  assert.match(detail, /data-chart-crosshair[^>]+aria-live="polite"/);
+  assert.doesNotMatch(detail, /data-chart-crosshair|mountKlineChart|K線|\bMACD\b|\bRSI\b|\bKDJ\b|\bBOLL\b/);
 });
 
 function contrastRatio(foreground, background) {

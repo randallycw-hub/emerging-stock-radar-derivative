@@ -9,7 +9,7 @@ import { stageStaticShowcase } from "../scripts/stage-static-showcase.mjs";
 
 const source = fileURLToPath(new URL("../static-showcase", import.meta.url));
 
-test("V5.1 staging writes one public canonical research model after generation validation", async () => {
+test("V5.2 staging extends the public research model with canonical search pointers", async () => {
   const root = await mkdtemp(join(tmpdir(), "v51-research-stage-"));
   const destination = join(root, "market-site");
   try {
@@ -20,7 +20,9 @@ test("V5.1 staging writes one public canonical research model after generation v
     const home = await readFile(join(destination, "index.html"), "utf8");
 
     assert.equal(Object.hasOwn(runtime, "marketResearchUrl"), false);
-    assert.equal(Object.hasOwn(runtime, "searchIndexUrl"), false);
+    assert.equal(runtime.searchIndexUrl, `./data/${pointer.generation}/search-index.json`);
+    assert.equal(runtime.companyMasterUrl, `./data/${pointer.generation}/company-master.json`);
+    assert.equal(runtime.cbMasterUrl, `./data/${pointer.generation}/cb-master.json`);
     assert.equal(research.meta.status, "ok");
     assert.match(research.meta.dataDate, /^\d{4}-\d{2}-\d{2}$/);
     assert.equal(research.searchIndex.length > 0, true);

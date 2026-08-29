@@ -117,7 +117,7 @@ async function initialize() {
   count.textContent = `${formatNumber(rows.length)} 家公司`;
   body.innerHTML = rows.length ? rows.map(rowHtml).join("") : '<tr><td colspan="10" class="empty-cell">目前沒有可顯示的競拍／申購公開資料。</td></tr>';
   if (!snapshot && error) {
-    error.textContent = "資料暫時無法讀取，目前沒有可顯示的資料。";
+    error.textContent = "資料暫時無法取得";
     error.hidden = false;
   }
 }

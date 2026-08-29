@@ -35,7 +35,7 @@ export function toKlineData(points, { period = "day" } = {}) {
     high: Number(candle.high),
     low: Number(candle.low),
     close: Number(candle.close),
-    volume: Number(candle.tradingUnits ?? 0),
+    volume: Number(candle.tradingUnits),
   }));
 }
 

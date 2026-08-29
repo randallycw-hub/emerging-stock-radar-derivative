@@ -20,7 +20,7 @@ test("company context links retain the issuer code across public market desks", 
 const dataDate = "2026-08-12";
 const orderedSections = [
   "可轉債重點",
-  "K 線圖",
+  "行情摘要",
   "債券條款",
   "法人 1／5／20 日",
   "公司營運與公開財務",
@@ -225,7 +225,7 @@ test("partial fixture keeps public sections but hides unavailable rule checks", 
   const html = renderBondDetail(record);
   assert.doesNotMatch(html, /目前無核准公開資料／待確認/);
   assert.doesNotMatch(html, /TTM|六項策略條件|UNVERIFIED_PUBLIC_FINANCIALS/);
-  assert.match(html, /K 線圖/);
+  assert.match(html, /行情摘要/);
 });
 
 test("date-mismatch fixture does not expose technical states", () => {
@@ -296,15 +296,10 @@ test("mobile detail areas are collapsed by default", () => {
   assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 6);
 });
 
-test("V5 detail exposes an accessible KLineChart workbench without a trading direction", () => {
+test("V5.2 detail keeps factual market data but removes unverified technical analysis", () => {
   const html = renderBondDetail(fixture());
-  assert.match(html, /data-bond-kline-host/);
-  assert.match(html, /data-chart-period="day"/);
-  assert.match(html, /data-chart-range="6M"[^>]*aria-pressed="true"/);
-  assert.match(html, /data-chart-indicator="MACD"[^>]*aria-pressed="true"/);
-  assert.match(html, /MA5／10／20／60 · VOL/);
-  assert.match(html, /data-chart-crosshair/);
-  assert.doesNotMatch(html, /<canvas/);
+  assert.match(html, /行情摘要/);
+  assert.doesNotMatch(html, /K 線|技術圖表|data-bond-kline-host|data-chart-period|MACD|RSI|KDJ|BOLL|MA5/);
   assert.doesNotMatch(html, /(?:買點|賣點|buy|sell|signal)/i);
 });
 

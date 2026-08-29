@@ -303,7 +303,7 @@ function closeDrawer() {
 }
 
 function showUnavailable() {
-  document.querySelector("#market-event-update").textContent = "公開事件資料暫時無法讀取";
+  document.querySelector("#market-event-update").textContent = "資料暫時無法取得";
   document.querySelector("#market-event-list").innerHTML = '<p class="empty-state">目前沒有可顯示的已發布公開事件。</p>';
 }
 

@@ -114,10 +114,11 @@ test("月營收八個欄位可獨立排序並保留網址狀態", async () => {
   assert.match(js, /querySelectorAll\("\[data-revenue-sort\]"\)/);
 });
 
-test("興櫃公司詳情使用安全代碼路由與已發布 IPO 事件", async () => {
-  const [html, page] = await Promise.all([
+test("V5.2 興櫃公司列統一導向 canonical 公司頁，舊網址安全轉址", async () => {
+  const [html, page, company] = await Promise.all([
     readFile(new URL("market.html", root), "utf8"),
     readFile(new URL("assets/emerging-detail-page.js", root), "utf8"),
+    readFile(new URL("company.html", root), "utf8"),
   ]);
   const { parsePublicCompanyCode } = await import(new URL(
     "../static-showcase/assets/emerging-detail-page.js",
@@ -129,11 +130,7 @@ test("興櫃公司詳情使用安全代碼路由與已發布 IPO 事件", async 
   assert.equal(parsePublicCompanyCode("<img src=x>"), null);
   assert.equal(parsePublicCompanyCode("126"), null);
   assert.match(html, /id="emerging-detail-root"/);
-  assert.match(source, /本日成交均價（盤後）/);
-  assert.match(source, /IPO 進度/);
-  assert.match(source, /5 日/);
-  assert.match(page, /runtime\.emergingMarketUrl/);
-  assert.match(page, /runtime\.ipoEventsUrl/);
-  assert.match(page, /escapeHtml/);
-  assert.doesNotMatch(source, /sourceId|缺漏原因|目前無核准公開資料/);
+  assert.match(company, /id="company-overview-root"/);
+  assert.match(page, /company\.html\?code=/);
+  assert.doesNotMatch(source, /歷史區間資料|K 線|MACD|RSI|來源 ID|缺漏原因|目前無核准公開資料/);
 });
