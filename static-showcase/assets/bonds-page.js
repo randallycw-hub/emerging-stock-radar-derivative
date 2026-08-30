@@ -10,6 +10,7 @@ import {
 import { bindBondDetail, detailRecordFromLegacy, renderBondDetail } from "./bond-detail-page.js";
 import { applyCanonicalBondIdentity, indexCanonicalBonds } from "./canonical-identity.js";
 import { RANKING_METRICS, renderMarketOverview } from "./cb-workbench-ui.js";
+import { bindCbDetailV53, renderCbDetailV53 } from "./cb-detail-v53.js";
 
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
@@ -718,8 +719,15 @@ function renderRoute() {
     }
     : detailRecord;
   const detail = detailWithValuationConversionEvidence(canonicalDetail, state.conversionPrices);
-  target.innerHTML = renderBondDetail(detail, { asOfDate: state.workbenchAsOfDate });
-  disposeDetail = bindBondDetail(target, closeDetail);
+  const v53Record = state.v53Model?.records?.find((candidate) => candidate.cbCode === code) ?? null;
+  if (v53Record) {
+    const companyBonds = state.v53Model.records.filter((candidate) => candidate.stockCode === v53Record.stockCode && candidate.status === "active");
+    target.innerHTML = renderCbDetailV53(v53Record, { companyBonds });
+    disposeDetail = bindCbDetailV53(target, closeDetail);
+  } else {
+    target.innerHTML = renderBondDetail(detail, { asOfDate: state.workbenchAsOfDate });
+    disposeDetail = bindBondDetail(target, closeDetail);
+  }
   target.hidden = false;
   list.hidden = true;
   target.querySelector("[data-detail-close]")?.focus();
@@ -756,7 +764,7 @@ function closeDetail() {
     element.dataset.bondCode === origin?.bondCode
     && (origin.tagName === null || element.tagName === origin.tagName)
     && element.getClientRects().length > 0
-  )) ?? document.querySelector("#bond-search");
+  )) ?? document.querySelector("[data-cb-overview-metric]") ?? document.querySelector("#bond-search");
   focusTarget?.focus();
 }
 

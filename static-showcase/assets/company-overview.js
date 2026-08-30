@@ -12,6 +12,11 @@ function publicText(value) {
   return normalized && normalized !== "-" ? normalized : null;
 }
 
+function publicScalar(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return publicText(value);
+}
+
 function display(value) {
   return publicText(value) ?? "—";
 }
@@ -78,14 +83,17 @@ function revenueRecord(records, code) {
 function exactBondRecords(records, code) {
   return recordsOf(records)
     .filter((record) => text(record?.status).toLowerCase() === "active")
-    .filter((record) => text(record?.term?.issuerCode ?? record?.view?.issuerCode) === code)
-    .map((record) => ({
-      bondCode: publicText(record?.term?.bondCode ?? record?.view?.bondCode),
-      bondName: publicText(record?.term?.bondName ?? record?.view?.bondName),
-      cbClose: publicText(record?.view?.cbClose),
-      cbPriceDate: publicText(record?.view?.cbPriceDate),
-      premiumRate: publicText(record?.view?.premiumRate),
-    }))
+    .filter((record) => text(record?.stockCode ?? record?.term?.issuerCode ?? record?.view?.issuerCode) === code)
+    .map((record) => {
+      const quote = record?.quote ?? record?.view ?? {};
+      return {
+        bondCode: publicText(record?.cbCode ?? record?.term?.bondCode ?? record?.view?.bondCode),
+        bondName: publicText(record?.cbName ?? record?.term?.bondName ?? record?.view?.bondName),
+        cbClose: publicScalar(quote.cbClose),
+        cbPriceDate: publicText(quote.dataDate ?? quote.cbPriceDate),
+        premiumRate: publicScalar(quote.premiumRate),
+      };
+    })
     .filter((record) => record.bondCode && record.bondName)
     .sort((left, right) => left.bondCode.localeCompare(right.bondCode));
 }
@@ -120,7 +128,7 @@ function companyEvents(ipoRecord, workbench, code) {
   const ipoEvents = publicEvents(ipoRecord).map((event) => ({ market: "IPO", ...event }));
   const bondEvents = recordsOf(workbench)
     .filter((record) => text(record?.status).toLowerCase() === "active")
-    .filter((record) => text(record?.term?.issuerCode ?? record?.view?.issuerCode) === code)
+    .filter((record) => text(record?.stockCode ?? record?.term?.issuerCode ?? record?.view?.issuerCode) === code)
     .flatMap((record) => publicEvents(record).map((event) => ({ market: "CB", ...event })));
   return [...ipoEvents, ...bondEvents]
     .sort((left, right) => left.date.localeCompare(right.date)
@@ -280,12 +288,13 @@ async function loadCompanyOverview() {
     target.innerHTML = '<p class="empty-state">公司公開資料暫時無法載入，請稍後再試。</p>';
     return;
   }
-  const [companyMaster, market, ipo, revenue, workbench] = await Promise.all([
+  const [companyMaster, market, ipo, revenue, workbench, v53Model] = await Promise.all([
     fetchJson(new URL(runtime.companyMasterUrl, document.baseURI)),
     runtime.emergingMarketUrl ? fetchJson(new URL(runtime.emergingMarketUrl, document.baseURI)) : null,
     runtime.ipoEventsUrl ? fetchJson(new URL(runtime.ipoEventsUrl, document.baseURI)) : null,
     runtime.datasets?.["94025"] ? fetchJson(new URL(runtime.datasets["94025"], document.baseURI)) : null,
     runtime.datasets?.bondWorkbench ? fetchJson(new URL(runtime.datasets.bondWorkbench, document.baseURI)) : null,
+    runtime.cbWorkbenchV53Url ? fetchJson(new URL(runtime.cbWorkbenchV53Url, document.baseURI)) : null,
   ]);
   if (!Array.isArray(companyMaster?.records)) {
     target.innerHTML = '<p class="empty-state">公司公開資料暫時無法載入，請稍後再試。</p>';
@@ -297,7 +306,7 @@ async function loadCompanyOverview() {
     emerging: market,
     ipo,
     revenue,
-    workbench,
+    workbench: Array.isArray(v53Model?.records) ? v53Model.records : workbench,
   }), parseCompanyTab(new URLSearchParams(location.search).get("tab")));
 }
 

@@ -11,6 +11,7 @@ import test from "node:test";
 import { stageStaticShowcase } from "../scripts/stage-static-showcase.mjs";
 import { buildBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
 import { summarizeWorkbenchSourceStates } from "../scripts/build-bond-market-snapshot.mjs";
+import { selectV53QaSamples } from "../static-showcase/assets/cb-workbench-v53.js";
 
 const execFileAsync = promisify(execFile);
 const showcaseSource = fileURLToPath(new URL("../static-showcase/", import.meta.url));
@@ -33,6 +34,10 @@ test("V5.3 staging publishes one validated CB workbench projection through runti
   assert.ok(model.records.length > 300);
   assert.equal(model.records.filter((row) => row.status === "active").length, new Set(model.records.filter((row) => row.status === "active").map((row) => row.cbCode)).size);
   assert.ok(model.events.every((event) => /^https:\/\/(?:www\.)?(?:tpex\.org\.tw|twse\.com\.tw)/.test(event.sourceUrl)));
+  const qa = selectV53QaSamples(model);
+  assert.equal(qa.active.length, 20);
+  assert.equal(qa.issuance.length, 5);
+  assert.equal(qa.events.length, 5);
 });
 
 test("Sites staging copies the complete static showcase including the active generation", async () => {

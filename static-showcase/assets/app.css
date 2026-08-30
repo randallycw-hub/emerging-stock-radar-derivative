@@ -737,6 +737,31 @@ a { color: inherit; }
 .cb-calendar-days ol { display: grid; gap: 4px; margin-top: 7px; }
 .cb-calendar-days ol li { min-width: 0; }
 .cb-calendar-days a { display: block; overflow: hidden; color: var(--clay-ink); text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 800; }
+.cb-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.cb-stats-panel { border: 1px solid var(--line); background: var(--panel); padding: 18px; }
+.cb-stats-panel header { margin-bottom: 14px; }
+.cb-stats-panel h2 { margin: 4px 0 0; font-size: 21px; }
+.cb-stats-current { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.cb-stats-current > div { border-top: 1px solid var(--line); padding-top: 10px; }
+.cb-stats-current dt { color: var(--muted); font-size: 11px; }
+.cb-stats-current dd { margin: 5px 0 0; font: 800 22px/1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+.cb-distribution { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.cb-distribution li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.cb-distribution span { color: var(--muted); }
+.cb-distribution strong { font-variant-numeric: tabular-nums; }
+.cb-detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.cb-detail-head h2, .cb-detail-head p { margin: 0; }
+.cb-detail-head h2 { margin-top: 6px; font-size: 34px; }
+.cb-detail-head h2 + p { margin-top: 8px; color: var(--muted); }
+.cb-detail-tabs { margin: 0 0 18px; }
+.cb-detail-panel { border: 1px solid var(--line); background: var(--panel); padding: 20px; }
+.cb-detail-panel h3 { margin: 0 0 16px; font-size: 20px; }
+.cb-detail-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cb-company-link { color: var(--clay-ink); font-weight: 800; }
+.cb-company-bonds { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.cb-company-bonds h4 { margin: 0 0 9px; font-size: 14px; }
+.cb-company-bonds ol { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.cb-company-bonds a { display: inline-block; border: 1px solid var(--line); padding: 7px 9px; color: var(--ink); font-size: 12px; }
 .public-event-list { border-top: 1px solid var(--line); }
 .public-event-list article { padding: 15px 4px; display: grid; grid-template-columns: 120px 1fr; gap: 16px; border-bottom: 1px solid var(--line); }
 .public-event-list time { color: var(--violet-ink); font-weight: 850; font-variant-numeric: tabular-nums; }
@@ -2173,6 +2198,7 @@ a.home-v51-row:hover, a.home-v51-row:focus-visible { background: color-mix(in sr
   .cb-event-list small { grid-column: 1 / -1; }
   .cb-official-link { grid-column: 2; justify-self: end; }
   .cb-calendar-days > li { min-height: 94px; }
+  .cb-detail-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 560px) {
@@ -2188,4 +2214,8 @@ a.home-v51-row:hover, a.home-v51-row:focus-visible { background: color-mix(in sr
   .cb-calendar-weekdays li { padding: 6px 2px; font-size: 10px; }
   .cb-calendar-days > li { min-height: 72px; padding: 5px; }
   .cb-calendar-days a { font-size: 9px; }
+  .cb-stats-grid, .cb-stats-current, .cb-detail-facts { grid-template-columns: 1fr; }
+  .cb-detail-head { display: grid; }
+  .cb-detail-head h2 { font-size: 28px; }
+  .cb-detail-panel { padding: 14px; }
 }

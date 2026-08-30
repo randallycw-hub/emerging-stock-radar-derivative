@@ -54,6 +54,23 @@ test("company overview does not infer a company without its canonical public mas
   assert.equal(buildCompanyOverview({ code: "9999" }), null);
 });
 
+test("V5.3 company page groups every active CB from the V5.3 canonical projection", () => {
+  const overview = buildCompanyOverview({
+    code: "1260",
+    companyMaster: [{ stockCode: "1260", companyName: "富味鄉", market: "興櫃", industry: "食品", dataDate: "2026-08-28" }],
+    workbench: [
+      { status: "active", stockCode: "1260", cbCode: "12601", cbName: "富味鄉一", quote: { cbClose: 101.5, dataDate: "2026-08-28", premiumRate: 3.2 }, events: [{ label: "賣回", date: "2027-01-01" }] },
+      { status: "active", stockCode: "1260", cbCode: "12602", cbName: "富味鄉二", quote: { cbClose: 99, dataDate: "2026-08-28", premiumRate: null }, events: [] },
+    ],
+  });
+
+  assert.deepEqual(overview.bonds, [
+    { bondCode: "12601", bondName: "富味鄉一", cbClose: "101.5", cbPriceDate: "2026-08-28", premiumRate: "3.2" },
+    { bondCode: "12602", bondName: "富味鄉二", cbClose: "99", cbPriceDate: "2026-08-28", premiumRate: null },
+  ]);
+  assert.deepEqual(overview.events, [{ market: "CB", label: "賣回", date: "2027-01-01" }]);
+});
+
 test("company page uses the public overview module and never contains diagnostic labels", async () => {
   const [html, js] = await Promise.all([
     readFile(new URL("company.html", root), "utf8"),
