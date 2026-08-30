@@ -16,6 +16,10 @@ import {
 } from "../static-showcase/assets/data-center-status.js";
 import { buildV51HomeStaticFallback } from "../static-showcase/assets/home-static-fallback.js";
 import {
+  buildCbWorkbenchV53,
+  validateCbWorkbenchV53,
+} from "../static-showcase/assets/cb-workbench-v53.js";
+import {
   buildCanonicalPublicMasters,
   buildPublicMarketResearch,
 } from "../static-showcase/assets/public-market-research.js";
@@ -59,6 +63,7 @@ const ASSET_FILES = new Set([
   "canonical-identity.js",
   "company-overview.js",
   "bond-detail-page.js",
+  "cb-workbench-v53.js",
   "bond-events-page.js",
   "bond-filter-page.js",
   "bond-issuance-page.js",
@@ -273,11 +278,19 @@ async function writePublicMarketResearch({ destination, generation }) {
   const companyMaster = { schemaVersion: 1, meta: masters.meta, records: masters.companyMaster };
   const cbMaster = { schemaVersion: 1, meta: masters.meta, records: masters.cbMaster };
   const searchIndex = { schemaVersion: 1, meta: masters.meta, records: masters.searchIndex };
+  const cbWorkbenchV53 = buildCbWorkbenchV53({
+    workbench,
+    history,
+    cbMaster: masters.cbMaster,
+    companyMaster: masters.companyMaster,
+  });
+  validateCbWorkbenchV53(cbWorkbenchV53);
   await Promise.all([
     writeFile(join(base, "market-research.json"), `${JSON.stringify(research, null, 2)}\n`, "utf8"),
     writeFile(join(base, "company-master.json"), `${JSON.stringify(companyMaster, null, 2)}\n`, "utf8"),
     writeFile(join(base, "cb-master.json"), `${JSON.stringify(cbMaster, null, 2)}\n`, "utf8"),
     writeFile(join(base, "search-index.json"), `${JSON.stringify(searchIndex, null, 2)}\n`, "utf8"),
+    writeFile(join(base, "cb-workbench-v53.json"), `${JSON.stringify(cbWorkbenchV53, null, 2)}\n`, "utf8"),
   ]);
   const runtimePath = join(base, "runtime.json");
   const runtime = await readJson(runtimePath, "active generation public runtime is invalid");
@@ -286,6 +299,7 @@ async function writePublicMarketResearch({ destination, generation }) {
     companyMasterUrl: `./data/${generation}/company-master.json`,
     cbMasterUrl: `./data/${generation}/cb-master.json`,
     searchIndexUrl: `./data/${generation}/search-index.json`,
+    cbWorkbenchV53Url: `./data/${generation}/cb-workbench-v53.json`,
   }, null, 2)}\n`, "utf8");
   return research;
 }

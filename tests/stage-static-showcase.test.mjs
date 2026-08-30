@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import test from "node:test";
 
@@ -12,6 +13,27 @@ import { buildBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts
 import { summarizeWorkbenchSourceStates } from "../scripts/build-bond-market-snapshot.mjs";
 
 const execFileAsync = promisify(execFile);
+const showcaseSource = fileURLToPath(new URL("../static-showcase/", import.meta.url));
+
+test("V5.3 staging publishes one validated CB workbench projection through runtime", async () => {
+  const root = await mkdtemp(join(tmpdir(), "showcase-stage-v53-cb-"));
+  const destination = join(root, "dist", "client", "market-site");
+
+  await stageStaticShowcase({ source: showcaseSource, destination });
+
+  const current = JSON.parse(await readFile(join(destination, "data", "current.json"), "utf8"));
+  const runtime = JSON.parse(await readFile(join(destination, current.runtimeUrl.replace(/^\.\//, "")), "utf8"));
+  const model = JSON.parse(await readFile(
+    join(destination, runtime.cbWorkbenchV53Url.replace(/^\.\//, "")),
+    "utf8",
+  ));
+
+  assert.equal(model.schemaVersion, 1);
+  assert.equal(model.dataDate, "2026-08-28");
+  assert.ok(model.records.length > 300);
+  assert.equal(model.records.filter((row) => row.status === "active").length, new Set(model.records.filter((row) => row.status === "active").map((row) => row.cbCode)).size);
+  assert.ok(model.events.every((event) => /^https:\/\/(?:www\.)?(?:tpex\.org\.tw|twse\.com\.tw)/.test(event.sourceUrl)));
+});
 
 test("Sites staging copies the complete static showcase including the active generation", async () => {
   const root = await mkdtemp(join(tmpdir(), "showcase-stage-"));
