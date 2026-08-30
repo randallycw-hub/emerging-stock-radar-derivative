@@ -14,6 +14,7 @@ const summaryTarget = globalThis.document?.querySelector("#home-market-summary")
 const rankingTarget = globalThis.document?.querySelector("#home-emerging-rankings") ?? null;
 const ipoEventsTarget = globalThis.document?.querySelector("#home-ipo-events") ?? null;
 const cbQuickTarget = globalThis.document?.querySelector("#home-cb-quick") ?? null;
+const cbRightsTarget = globalThis.document?.querySelector("#home-cb-rights-events") ?? null;
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
 };
@@ -118,6 +119,33 @@ export function buildHomeSummary({ emerging, ipo, bonds, asOfDate = null } = {})
   };
 }
 
+export function buildHomeCbRightsEvents({ events = [], asOfDate } = {}) {
+  if (!isPublishedIsoDate(asOfDate)) return { counts: null, events: [] };
+  const relevant = (Array.isArray(events) ? events : [])
+    .filter((event) => event?.marketScope === "cb" && ["early_redemption", "suspension", "put", "maturity", "conversion_price_adjustment", "listing"].includes(event?.eventType))
+    .map((event) => ({
+      ...event,
+      keyDate: event?.deadlineDate ?? event?.effectiveDate ?? event?.startDate ?? event?.announcementDate ?? null,
+    }))
+    .filter((event) => isPublishedIsoDate(event.keyDate));
+  const within = (event, days) => {
+    const distance = daysFrom(asOfDate, event.keyDate);
+    return distance !== null && distance >= 0 && distance <= days;
+  };
+  return {
+    counts: {
+      redemptions: relevant.filter((event) => event.eventType === "early_redemption" && ["active", "deadline_soon"].includes(event.status)).length,
+      suspensions: relevant.filter((event) => event.eventType === "suspension" && event.status !== "completed").length,
+      puts: relevant.filter((event) => event.eventType === "put" && within(event, 30)).length,
+      maturity90: relevant.filter((event) => event.eventType === "maturity" && within(event, 90)).length,
+    },
+    events: relevant
+      .filter((event) => event.status !== "completed" && within(event, 90))
+      .sort((left, right) => left.keyDate.localeCompare(right.keyDate) || String(left.cbCode).localeCompare(String(right.cbCode)))
+      .slice(0, 5),
+  };
+}
+
 function ranked(records, { label, code, name, metric, direction = "desc" }) {
   return {
     label,
@@ -186,6 +214,11 @@ async function loadHomeData() {
   );
   if (!runtime?.manifestUrl) return renderHomeEvents({});
 
+  const canonicalUrl = runtime.canonicalEventsV55Url ?? runtime.canonicalEventsV54Url ?? null;
+  const canonicalEvents = typeof canonicalUrl === "string"
+    ? await safeJsonFetch(new URL(canonicalUrl, document.baseURI), { errorTarget: coverageTarget })
+    : null;
+
   const marketResearchUrl = runtime.marketResearchUrl
     ?? (typeof pointer.generation === "string" ? `./data/${pointer.generation}/market-research.json` : null);
   if (typeof marketResearchUrl === "string") {
@@ -199,6 +232,7 @@ async function loadHomeData() {
         updateTarget.textContent = renderMarketStatusLine({ dataDate, updatedAt: research.meta.updatedAt });
       }
       if (coverageTarget && isPublishedIsoDate(dataDate)) coverageTarget.textContent = `資料日期 ${formatDate(dataDate)}`;
+      renderHomeCbRightsEvents({ canonicalEvents, asOfDate: dataDate });
       bindV51HomeInteractions();
       return;
     }
@@ -242,9 +276,44 @@ async function loadHomeData() {
   const summary = buildHomeSummary({ emerging, ipo, bonds: workbench, asOfDate });
   const rankings = buildObjectiveRankings({ emerging, bonds: workbench });
   const events = renderHomeEvents(eventInput);
+  renderHomeCbRightsEvents({ canonicalEvents, asOfDate });
   renderHomeSummary(summary);
   renderHomeRankings(rankings);
   renderHomeQuickResearch({ events, digest: buildPublicEventDigest(eventInput), rankings });
+}
+
+function renderHomeCbRightsEvents({ canonicalEvents, asOfDate }) {
+  if (!cbRightsTarget) return;
+  const { counts, events } = buildHomeCbRightsEvents({
+    events: Array.isArray(canonicalEvents?.records) ? canonicalEvents.records : [],
+    asOfDate,
+  });
+  if (counts === null) {
+    cbRightsTarget.innerHTML = '<p class="empty-state">可轉債事件資料讀取中。</p>';
+    return;
+  }
+  const metric = (label, value) => `<div><dt>${escapeHtml(label)}</dt><dd>${formatNumber(value)}</dd></div>`;
+  const eventList = events.length
+    ? `<ol>${events.map((event) => `<li><a href="./bonds.html?bond=${encodeURIComponent(event.cbCode)}"><time datetime="${escapeAttribute(event.keyDate)}">${formatDate(event.keyDate)}</time><strong>${escapeHtml(event.cbCode)} ${escapeHtml(event.cbName ?? event.instrumentName)}</strong><span>${escapeHtml(homeCbEventLabel(event.eventType))} · ${escapeHtml(homeEventStatusLabel(event.status))}</span></a>${isOfficialSourceUrl(event.sourceUrl) ? `<a class="cb-official-link" href="${escapeAttribute(event.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a>` : ""}</li>`).join("")}</ol>`
+    : '<p class="empty-state">未來 90 日沒有已發布的可轉債關鍵事件。</p>';
+  cbRightsTarget.innerHTML = `<dl class="home-cb-rights-metrics">${metric("進行中／期限將近提前贖回", counts.redemptions)}${metric("停止轉換", counts.suspensions)}${metric("30 日內賣回", counts.puts)}${metric("90 日內到期", counts.maturity90)}</dl>${eventList}`;
+}
+
+function homeCbEventLabel(type) {
+  return ({ early_redemption: "提前贖回", suspension: "停止轉換", put: "賣回權", maturity: "到期日", conversion_price_adjustment: "轉換價調整", listing: "掛牌" })[type] ?? "可轉債事件";
+}
+
+function homeEventStatusLabel(status) {
+  return ({ active: "進行中", deadline_soon: "期限將近", upcoming: "即將發生" })[status] ?? "即將發生";
+}
+
+function isOfficialSourceUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && new Set(["www.tpex.org.tw", "mopsov.twse.com.tw", "mops.twse.com.tw", "www.twse.com.tw"]).has(url.hostname);
+  } catch {
+    return false;
+  }
 }
 
 function renderDashboardHealth(health) {

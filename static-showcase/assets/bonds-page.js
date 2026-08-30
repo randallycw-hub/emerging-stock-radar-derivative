@@ -87,8 +87,8 @@ async function loadAndRender() {
       typeof config.cbMasterUrl === "string"
         ? loadJson(config.cbMasterUrl, [])
         : Promise.resolve([]),
-      typeof (config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url) === "string"
-        ? loadJson(config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url, null)
+      typeof (config.cbWorkbenchV55Url ?? config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url) === "string"
+        ? loadJson(config.cbWorkbenchV55Url ?? config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url, null)
         : Promise.resolve(null),
     ]);
   state.manifest = manifest;
@@ -112,7 +112,7 @@ async function loadAndRender() {
       history: state.history,
       cbMaster,
     });
-  state.v53Model = v53Model?.schemaVersion === 1 && Array.isArray(v53Model?.records)
+  state.v53Model = (v53Model?.schemaVersion === 1 || v53Model?.schemaVersion === 2) && Array.isArray(v53Model?.records)
     ? v53Model
     : null;
   updateSearchSuggestions();
@@ -727,7 +727,7 @@ function renderRoute() {
   const v53Record = state.v53Model?.records?.find((candidate) => candidate.cbCode === code) ?? null;
   if (v53Record) {
     const companyBonds = state.v53Model.records.filter((candidate) => candidate.stockCode === v53Record.stockCode && candidate.status === "active");
-    target.innerHTML = renderCbDetailV53(v53Record, { companyBonds });
+    target.innerHTML = renderCbDetailV53(v53Record, { companyBonds, rightsEvents: state.v53Model.events });
     disposeDetail = bindCbDetailV53(target, closeDetail);
   } else {
     target.innerHTML = renderBondDetail(detail, { asOfDate: state.workbenchAsOfDate });

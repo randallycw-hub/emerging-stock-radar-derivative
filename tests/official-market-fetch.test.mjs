@@ -444,6 +444,12 @@ test("supplemental fetches only the three exact resources and parses their verif
         headers: { "content-type": "text/html; charset=utf-8" },
       });
     }
+    if (String(url).startsWith("https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?")) {
+      return new Response(mopsRedemptionDetail(String(url)), {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
     throw new Error(`unexpected request: ${url}`);
   };
 
@@ -452,7 +458,7 @@ test("supplemental fetches only the three exact resources and parses their verif
     fetchImpl,
   });
 
-  assert.deepEqual(requests, [
+  assert.deepEqual(requests.slice(0, 3), [
     {
       url: "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade",
       method: "POST",
@@ -478,6 +484,13 @@ test("supplemental fetches only the three exact resources and parses their verif
       redirect: "error",
     },
   ]);
+  assert.equal(requests.length, 5);
+  assert.ok(requests.slice(3).every((request) => (
+    request.url.startsWith("https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?")
+    && request.method === "GET"
+    && request.accept === "text/html,application/xhtml+xml"
+    && request.redirect === "error"
+  )));
   assert.equal(result.institution.status, "fulfilled");
   assert.equal(result.institution.value.tradingDate, "2026-08-07");
   assert.equal(result.institution.value.records[1].bondCode, "54642");
@@ -485,6 +498,8 @@ test("supplemental fetches only the three exact resources and parses their verif
   assert.equal(result.redemption.value[0].announcementDate, "2026-08-04");
   assert.equal(result.underwriting.status, "fulfilled");
   assert.equal(result.underwriting.value.records[0].guaranteeType, "unsecured");
+  assert.equal(result.redemptionDetails.status, "fulfilled");
+  assert.equal(result.redemptionDetails.value.length, 2);
 });
 
 test("supplemental binds each parsed response to the requested collection period", async (t) => {
@@ -600,7 +615,7 @@ test("supplemental sources settle independently when underwriting remains unavai
     calls.filter((url) => url === "https://web.twsa.org.tw/edoc2/default.aspx").length,
     3,
   );
-  assert.equal(new Set(calls).size, 3);
+  assert.equal(new Set(calls).size, 4);
 });
 
 test("supplemental redirect, content-type and schema failures reject only their named sources", async () => {
@@ -746,8 +761,31 @@ function supplementalFixtureFetch({ institution, redemption, underwriting }) {
         headers: { "content-type": "text/html; charset=utf-8" },
       });
     }
+    if (target.startsWith("https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?")) {
+      return new Response(mopsRedemptionDetail(target), {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
     throw new Error(`unexpected request: ${target}`);
   };
+}
+
+function mopsRedemptionDetail(url) {
+  const sequence = new URL(url).searchParams.get("seq_no");
+  const bondCode = sequence === "1" ? "31311" : "31312";
+  const bondName = sequence === "1" ? "弘塑一" : "弘塑二";
+  return `
+    公司代號：3131 公司簡稱：弘塑 債券代碼：${bondCode} 債券簡稱：${bondName}
+    依據：依發行及轉換辦法第十八條規定辦理。
+    發行公司於115/08/05至115/09/20行使債券贖回權，贖回權價格為債券面額之100.0000%。
+    通知及受理轉換公司債收回期間：115年8月5日起至115年9月20日止
+    證券商受理期間：115年8月4日起至115年9月19日止
+    轉換公司債收回基準日：115年9月20日
+    轉換公司債終止櫃檯買賣日期：115年9月21日
+    每張債券收回價格：新台幣100,000元整。
+    請求轉換之最後期限應於115年9月22日前提出申請。
+  `;
 }
 
 function emptyRedemptionFixture(text, year) {

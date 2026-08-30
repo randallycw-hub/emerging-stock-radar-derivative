@@ -249,6 +249,8 @@ async function withOfflineProductionFetch(run, { failUnderwriting = false } = {}
     ],
     [CB_ISSUER_RESEARCH_SOURCE_POLICIES.otc.url, otc],
   ]);
+  const redemptionDetailUrls = JSON.parse(redemption)
+    .tables[0].data.map((row) => row[4]);
   const calls = [];
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (url, init = {}) => {
@@ -277,6 +279,12 @@ async function withOfflineProductionFetch(run, { failUnderwriting = false } = {}
         headers: { "content-type": "application/json;charset=UTF-8" },
       });
     }
+    if (target.startsWith("https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?")) {
+      return new Response(mopsRedemptionDetail(target), {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
     if (target === "https://web.twsa.org.tw/edoc2/default.aspx") {
       if (failUnderwriting) return new Response("unavailable", { status: 503 });
       return new Response(underwriting, {
@@ -296,8 +304,26 @@ async function withOfflineProductionFetch(run, { failUnderwriting = false } = {}
       "https://www.tpex.org.tw/www/zh-tw/bond/redeem",
       ...Array(failUnderwriting ? 3 : 1)
         .fill("https://web.twsa.org.tw/edoc2/default.aspx"),
+      ...redemptionDetailUrls,
     ]);
   }
+}
+
+function mopsRedemptionDetail(url) {
+  const sequence = new URL(url).searchParams.get("seq_no");
+  const bondCode = sequence === "1" ? "31311" : "31312";
+  const bondName = sequence === "1" ? "弘塑一" : "弘塑二";
+  return `
+    公司代號：3131 公司簡稱：弘塑 債券代碼：${bondCode} 債券簡稱：${bondName}
+    依據：依發行及轉換辦法第十八條規定辦理。
+    發行公司於115/08/05至115/09/20行使債券贖回權，贖回權價格為債券面額之100.0000%。
+    通知及受理轉換公司債收回期間：115年8月5日起至115年9月20日止
+    證券商受理期間：115年8月4日起至115年9月19日止
+    轉換公司債收回基準日：115年9月20日
+    轉換公司債終止櫃檯買賣日期：115年9月21日
+    每張債券收回價格：新台幣100,000元整。
+    請求轉換之最後期限應於115年9月22日前提出申請。
+  `;
 }
 
 async function previousSupplementalFromFixtures() {
@@ -1007,7 +1033,7 @@ test("a valid candidate publishes verified files and appends exact-date history"
   }));
 
   assert.equal(result.status, "published");
-  assert.equal(result.files.length, 8);
+  assert.equal(result.files.length, 9);
   assert.equal(result.manifest.market.generatedAt, "2026-07-30T12:30:00.000Z");
   assert.equal(result.manifest.market.status, "verified");
   assert.equal(result.manifest.market.requestedDate, "2026-07-30");

@@ -24,6 +24,10 @@ import {
   parseBondMarketHistory,
 } from "../lib/market-data/bond-market-history.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
+import {
+  buildCbRightsEventSnapshot,
+  parseCbRightsEventSnapshot,
+} from "../lib/market-data/cb-rights-events.ts";
 import { mergeConversionPriceVersions } from "../lib/market-data/conversion-price-history.ts";
 import { evaluateBondAssessment } from "../lib/market-data/bond-strategy-assessment.ts";
 import {
@@ -55,6 +59,7 @@ const MARKET_FILE_ENTRIES = [
   ["stock-closes.json", "stockCloses"],
   ["conversion-prices.json", "conversionPrices"],
   ["bond-supplemental.json", "supplemental"],
+  ["cb-rights-events.json", "rightsEvents"],
   ["cb-issuer-research.json", "issuerResearch"],
   ["bond-market-view.json", "views"],
   ["bond-market-history.json", "history"],
@@ -150,6 +155,7 @@ export async function buildBondMarketSnapshot(options = {}) {
   const previousHistory = await readPreviousHistory(outputDir);
   const previousConversionPrices = await readPreviousConversionPrices(outputDir);
   const previousSupplemental = await readPreviousSupplemental(outputDir);
+  const previousRightsEvents = await readPreviousRightsEvents(outputDir);
   const validatedPreviousIssuerResearch = previousIssuerResearch === undefined
     ? await readPreviousIssuerResearch(outputDir)
     : parseCbIssuerResearchSnapshot(previousIssuerResearch);
@@ -197,6 +203,14 @@ export async function buildBondMarketSnapshot(options = {}) {
       ? { underwriting: supplementalSourceResults.underwriting.value }
       : {}),
     ...(previousSupplemental === undefined ? {} : { previous: previousSupplemental }),
+  });
+  const rightsEvents = buildCbRightsEventSnapshot({
+    generatedAt: generatedDate.toISOString(),
+    dataDate: asOfDate,
+    ...(supplementalSourceResults.redemptionDetails.status === "fulfilled"
+      ? { current: supplementalSourceResults.redemptionDetails.value }
+      : {}),
+    ...(previousRightsEvents === undefined ? {} : { previous: previousRightsEvents }),
   });
   const conversionPrices = mergeConversionPriceVersions(
     previousConversionPrices,
@@ -268,6 +282,7 @@ export async function buildBondMarketSnapshot(options = {}) {
       stockCloses: collected.stockCloses,
       conversionPrices,
       supplemental,
+      rightsEvents,
       issuerResearch,
       views,
       history,
@@ -287,6 +302,8 @@ export async function buildBondMarketSnapshot(options = {}) {
           ? documents[key].records.length
           : key === "supplemental"
             ? countSupplementalRecords(documents[key])
+            : key === "rightsEvents"
+              ? documents[key].events.length
             : key === "workbench"
               ? documents[key].records.length
               : documents[key].length,
@@ -316,6 +333,7 @@ export async function buildBondMarketSnapshot(options = {}) {
         latestStockPriceDate,
         dataDate,
         supplementalSources: supplemental.sources,
+        cbRightsEventSource: rightsEvents.source,
         workbenchSourceStateSummary,
         ...(normalized11406Text === undefined ? {} : {
           normalizedInputs: [{
@@ -349,6 +367,7 @@ export async function buildBondMarketSnapshot(options = {}) {
       files: files.map((file) => file.name),
       manifest,
       supplemental,
+      rightsEvents,
       issuerResearch,
       views,
       workbench,
@@ -364,6 +383,7 @@ export async function buildBondMarketSnapshot(options = {}) {
           stockCloses: collected.stockCloses.length,
           conversionPrices: conversionPrices.length,
           supplemental: countSupplementalRecords(supplemental),
+          rightsEvents: rightsEvents.events.length,
           issuerResearch: issuerResearch.records.length,
           views: views.length,
           workbench: workbench.records.length,
@@ -412,6 +432,7 @@ async function settleProductionCbSupplementalSources(date, sourceResults, author
       return {
         institution: { status: "rejected", reason: error },
         redemption: { status: "rejected", reason: error },
+        redemptionDetails: { status: "rejected", reason: error },
         underwriting: { status: "rejected", reason: error },
       };
     }
@@ -424,6 +445,9 @@ async function settleProductionCbSupplementalSources(date, sourceResults, author
       : rejectedAuthorization(authorization.institution),
     redemption: authorization.redemption.approved
       ? settled.redemption
+      : rejectedAuthorization(authorization.redemption),
+    redemptionDetails: authorization.redemption.approved
+      ? settled.redemptionDetails
       : rejectedAuthorization(authorization.redemption),
     underwriting: authorization.underwriting.approved
       ? settled.underwriting
@@ -443,13 +467,19 @@ function validateSettledSupplementalSources(value) {
     value === null
     || typeof value !== "object"
     || Array.isArray(value)
-    || !hasExactEnumerableKeys(value, ["institution", "redemption", "underwriting"])
+    || !(
+      hasExactEnumerableKeys(value, ["institution", "redemption", "underwriting"])
+      || hasExactEnumerableKeys(value, ["institution", "redemption", "underwriting", "redemptionDetails"])
+    )
   ) {
     throw new TypeError("CB supplemental source results must contain exact source results");
   }
   return {
     institution: validateOpaqueSettledResult(value.institution, "institution"),
     redemption: validateOpaqueSettledResult(value.redemption, "redemption"),
+    redemptionDetails: Object.prototype.hasOwnProperty.call(value, "redemptionDetails")
+      ? validateOpaqueSettledResult(value.redemptionDetails, "redemptionDetails")
+      : { status: "rejected", reason: new Error("CB_REDEMPTION_DETAILS_UNAVAILABLE") },
     underwriting: validateOpaqueSettledResult(value.underwriting, "underwriting"),
   };
 }
@@ -643,6 +673,16 @@ async function readPreviousSupplemental(outputDir) {
   }
 }
 
+async function readPreviousRightsEvents(outputDir) {
+  const value = await readOptionalJson(join(outputDir, "cb-rights-events.json"));
+  if (value === undefined) return undefined;
+  try {
+    return parseCbRightsEventSnapshot(value);
+  } catch (error) {
+    throw new TypeError(`previous CB rights event snapshot is invalid: ${error.message}`);
+  }
+}
+
 async function readPreviousHistory(outputDir) {
   const value = await readOptionalJson(join(outputDir, "bond-market-history.json"));
   try {
@@ -716,6 +756,7 @@ async function verifyStagedFiles(
 ) {
   let stagedIssuerResearch;
   let stagedSupplemental;
+  let stagedRightsEvents;
   let stagedHistory;
   let stagedViews;
   let stagedWorkbench;
@@ -733,6 +774,11 @@ async function verifyStagedFiles(
     } else if (file.name === "bond-supplemental.json") {
       stagedSupplemental = parseCbSupplementalSnapshot(parsed);
       if (countSupplementalRecords(stagedSupplemental) !== file.recordCount) {
+        throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
+      }
+    } else if (file.name === "cb-rights-events.json") {
+      stagedRightsEvents = parseCbRightsEventSnapshot(parsed);
+      if (stagedRightsEvents.events.length !== file.recordCount) {
         throw new Error(`VALIDATION_FAILED:STAGED_COUNT_MISMATCH:${file.name}`);
       }
     } else if (file.name === "bond-market-history.json") {
@@ -778,6 +824,7 @@ async function verifyStagedFiles(
   if (
     stagedIssuerResearch === undefined
     || stagedSupplemental === undefined
+    || stagedRightsEvents === undefined
     || stagedHistory === undefined
     || stagedViews === undefined
     || stagedWorkbench === undefined

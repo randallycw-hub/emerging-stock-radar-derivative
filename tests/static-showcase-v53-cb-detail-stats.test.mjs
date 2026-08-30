@@ -74,6 +74,34 @@ test("V5.4 CB detail presents verified redemption facts without inventing an amo
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|待確認/);
 });
 
+test("V5.5 CB detail presents an active official redemption with actual acceptance dates", () => {
+  const html = renderCbDetailV53(records[0], {
+    companyBonds: records,
+    rightsEvents: [{
+      eventId: "mops-redemption:90001:2026-08-13:1",
+      eventType: "early_redemption",
+      marketScope: "cb",
+      cbCode: "90001",
+      announcementDate: "2026-08-13",
+      startDate: "2026-08-20",
+      endDate: "2026-08-31",
+      deadlineDate: "2026-08-31",
+      lastConversionDate: "2026-09-02",
+      lastTradingDate: "2026-09-01",
+      recordDate: "2026-08-31",
+      price: "100000",
+      reason: "依發行及轉換辦法第十八條規定辦理。",
+      status: "deadline_soon",
+      title: "甲一提前贖回",
+      sourceUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?co_id=9000",
+      eventDetails: { redemptionPricePercent: "100" },
+    }],
+  });
+
+  for (const label of ["提前贖回", "期限將近", "受理期間", "最後轉換日", "收回基準日", "收回價格", "100,000 元"]) assert.match(html, new RegExp(label));
+  assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|待確認/);
+});
+
 test("V5.3 market statistics is a staged five-function destination", async () => {
   const [page, stageScript] = await Promise.all([
     readFile(new URL("bonds-stats.html", root), "utf8"),

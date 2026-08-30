@@ -65,7 +65,7 @@ export async function loadPublicBondWorkbench({ errorTarget = null } = {}) {
 }
 
 export async function loadPublicCbWorkbenchV53({ errorTarget = null } = {}) {
-  return loadPublicCbWorkbenchV54({ errorTarget });
+  return loadPublicCbWorkbenchV55({ errorTarget });
 }
 
 export async function loadPublicCbWorkbenchV54({ errorTarget = null } = {}) {
@@ -74,6 +74,16 @@ export async function loadPublicCbWorkbenchV54({ errorTarget = null } = {}) {
     ? await safeJsonFetch(new URL(pointer.runtimeUrl, globalThis.document?.baseURI), { errorTarget })
     : bootstrapConfig;
   const url = config?.cbWorkbenchV54Url ?? config?.cbWorkbenchV53Url;
+  if (typeof url !== "string" || !url) return null;
+  return safeJsonFetch(new URL(url, globalThis.document?.baseURI), { errorTarget });
+}
+
+export async function loadPublicCbWorkbenchV55({ errorTarget = null } = {}) {
+  const pointer = await safeJsonFetch(bootstrapConfig.generationPointerUrl, { errorTarget });
+  const config = pointer?.runtimeUrl
+    ? await safeJsonFetch(new URL(pointer.runtimeUrl, globalThis.document?.baseURI), { errorTarget })
+    : bootstrapConfig;
+  const url = config?.cbWorkbenchV55Url ?? config?.cbWorkbenchV54Url ?? config?.cbWorkbenchV53Url;
   if (typeof url !== "string" || !url) return null;
   return safeJsonFetch(new URL(url, globalThis.document?.baseURI), { errorTarget });
 }

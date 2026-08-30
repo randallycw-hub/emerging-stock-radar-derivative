@@ -12,7 +12,11 @@ import {
   filterV53CbRecords,
 } from "../static-showcase/assets/bond-filter-page.js";
 import { buildV53IssuancePipeline } from "../static-showcase/assets/bond-issuance-page.js";
-import { filterV53CbEvents, groupV53CbEventsByDate } from "../static-showcase/assets/bond-events-page.js";
+import {
+  filterV53CbEvents,
+  groupV53CbEventsByDate,
+  parseV55BondEventFilters,
+} from "../static-showcase/assets/bond-events-page.js";
 
 const root = new URL("../static-showcase/", import.meta.url);
 
@@ -167,4 +171,15 @@ test("V5.4 event stream maps official CB event dates into the existing public ca
     ["90002", "redemption", "2026-09-03", "提前贖回"],
   ]);
   assert.equal(JSON.stringify(filtered).match(/eventId|missingReason|sourceId/u), null);
+});
+
+test("V5.5 CB event calendar restores only supported public URL filters", () => {
+  assert.deepEqual(
+    parseV55BondEventFilters("?range=history&type=redemption&status=active&q=%E5%A4%A7%E9%87%8F"),
+    { range: "history", type: "redemption", status: "active", query: "大量" },
+  );
+  assert.deepEqual(
+    parseV55BondEventFilters("?range=unsafe&type=private&status=unknown&q=%20"),
+    { range: "30", type: "all", status: "all", query: "" },
+  );
 });

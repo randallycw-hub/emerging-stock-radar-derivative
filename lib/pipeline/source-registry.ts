@@ -7,6 +7,7 @@ export type PipelineSourceId =
   | "data-gov-56510-otc-monthly-revenue"
   | "tpex-cb-institution-daily"
   | "tpex-cb-redemption-announcements"
+  | "mops-cb-redemption-detail"
   | "twsa-cb-underwriting-announcements"
   | "tpex-applications"
   | "tpex-ipo-listings"
@@ -54,6 +55,7 @@ const resources: readonly ApprovedResource[] = [
   { sourceId: "data-gov-56510-otc-monthly-revenue", resourceId: "data-gov-56510-otc-monthly-revenue-csv", exactUrl: "https://mopsfin.twse.com.tw/opendata/t187ap05_O.csv", protocol: "https:", hostname: "mopsfin.twse.com.tw", pathname: "/opendata/t187ap05_O.csv", allowedContentTypes: ["text/csv"], maxResponseBytes: 2_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_csv" },
   { sourceId: "tpex-cb-institution-daily", resourceId: "tpex-cb-institution-daily-json", exactUrl: "https://www.tpex.org.tw/www/zh-tw/bond/newCb3itrade", protocol: "https:", hostname: "www.tpex.org.tw", pathname: "/www/zh-tw/bond/newCb3itrade", allowedContentTypes: ["application/json"], maxResponseBytes: 500_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_json" },
   { sourceId: "tpex-cb-redemption-announcements", resourceId: "tpex-cb-redemption-announcements-json", exactUrl: "https://www.tpex.org.tw/www/zh-tw/bond/redeem", protocol: "https:", hostname: "www.tpex.org.tw", pathname: "/www/zh-tw/bond/redeem", allowedContentTypes: ["application/json"], maxResponseBytes: 500_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_json" },
+  { sourceId: "mops-cb-redemption-detail", resourceId: "mops-cb-redemption-detail-html", exactUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?", protocol: "https:", hostname: "mopsov.twse.com.tw", pathname: "/mops/web/ajax_t120sb23", allowedContentTypes: ["text/html"], maxResponseBytes: 500_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_html" },
   { sourceId: "twsa-cb-underwriting-announcements", resourceId: "twsa-cb-underwriting-announcements-html", exactUrl: "https://web.twsa.org.tw/edoc2/default.aspx", protocol: "https:", hostname: "web.twsa.org.tw", pathname: "/edoc2/default.aspx", allowedContentTypes: ["text/html"], maxResponseBytes: 1_000_000, timeoutMs: 30_000, approvalStatus: "APPROVED_FOR_PRODUCTION", usageRole: "primary_html" },
   {
     sourceId: "11586",

@@ -1,8 +1,25 @@
-import { loadPublicCbWorkbenchV53 } from "./bond-public-data.js";
+import { loadPublicCbWorkbenchV55 } from "./bond-public-data.js";
 import { EVENT_TYPE_LABELS, isOfficialSourceUrl } from "./cb-workbench-v53.js";
 import { projectPublicBondEvents } from "./public-event-digest.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const V55_EVENT_RANGES = new Set(["today", "7", "30", "month", "history"]);
+const V55_EVENT_TYPES = new Set(["all", "conversion_suspension", "redemption", "put", "maturity", "conversion_adjustment", "listing"]);
+const V55_EVENT_STATUSES = new Set(["all", "upcoming", "active", "deadline_soon", "completed"]);
+
+export function parseV55BondEventFilters(search = "") {
+  const params = new URLSearchParams(String(search ?? ""));
+  const range = params.get("range") ?? "30";
+  const type = params.get("type") ?? "all";
+  const status = params.get("status") ?? "all";
+  const query = String(params.get("q") ?? "").trim().slice(0, 80);
+  return {
+    range: V55_EVENT_RANGES.has(range) ? range : "30",
+    type: V55_EVENT_TYPES.has(type) ? type : "all",
+    status: V55_EVENT_STATUSES.has(status) ? status : "all",
+    query,
+  };
+}
 
 function matchesPublicEventType(event, type) {
   if (!type || type === "all") return true;
@@ -42,18 +59,20 @@ export function buildPublicBondEventRows(records, asOfDate, { days = null, type 
   }));
 }
 
-export function filterV53CbEvents(events, { asOfDate, days = null, type = "all", query = "" } = {}) {
+export function filterV53CbEvents(events, { asOfDate, days = null, type = "all", status = "all", history = false, query = "" } = {}) {
   const today = isoDate(asOfDate);
   const maxDays = Number.isInteger(days) && days >= 0 ? days : null;
   const needle = normalizeQuery(query);
   if (!today) return [];
   return arrayValue(events)
-    .map(projectV54CbEvent)
+    .map(projectCanonicalCbEvent)
     .filter(Boolean)
     .filter((event) => {
       const date = isoDate(event?.date);
-      if (!date || date < today || !isOfficialSourceUrl(event?.sourceUrl) || !matchesV53EventType(event, type)) return false;
-      if (maxDays !== null && daysBetween(today, date) > maxDays) return false;
+      if (!date || !isOfficialSourceUrl(event?.sourceUrl) || !matchesV53EventType(event, type)) return false;
+      if (history ? date >= today : date < today) return false;
+      if (maxDays !== null && !history && daysBetween(today, date) > maxDays) return false;
+      if (status !== "all" && event.status !== status) return false;
       return !needle || [event.cbCode, event.cbName, event.stockCode, event.companyName, event.label, event.title]
         .some((value) => normalizeQuery(value).includes(needle));
     })
@@ -61,11 +80,11 @@ export function filterV53CbEvents(events, { asOfDate, days = null, type = "all",
     .sort((left, right) => left.date.localeCompare(right.date) || String(left.cbCode).localeCompare(String(right.cbCode), "zh-Hant") || String(left.type).localeCompare(String(right.type)));
 }
 
-function projectV54CbEvent(event) {
+function projectCanonicalCbEvent(event) {
   if (isoDate(event?.date)) return event;
   if (event?.marketScope !== "cb") return null;
-  const date = isoDate(event?.effectiveDate ?? event?.announcementDate ?? event?.startDate ?? event?.endDate ?? event?.deadlineDate);
-  const type = v54EventType(event?.eventType);
+  const date = isoDate(event?.deadlineDate ?? event?.effectiveDate ?? event?.startDate ?? event?.endDate ?? event?.announcementDate);
+  const type = canonicalEventType(event?.eventType);
   const cbCode = String(event?.cbCode ?? "").trim();
   const cbName = String(event?.instrumentName ?? "").trim();
   const companyName = String(event?.companyName ?? "").trim();
@@ -80,10 +99,14 @@ function projectV54CbEvent(event) {
     date,
     title: String(event?.title ?? "").trim() || null,
     sourceUrl: event.sourceUrl,
+    status: canonicalStatus(event?.status),
+    dateLabel: event?.eventType === "early_redemption" ? "受理截止" : null,
+    summary: String(event?.summary ?? event?.reason ?? "").trim() || null,
+    eventDetails: event?.eventDetails ?? {},
   };
 }
 
-function v54EventType(value) {
+function canonicalEventType(value) {
   const mapping = {
     cb_listing: "listing",
     cb_early_redemption: "redemption",
@@ -91,8 +114,20 @@ function v54EventType(value) {
     cb_maturity: "maturity",
     cb_conversion_suspension: "conversion_suspension",
     cb_conversion_price_change: "conversion_adjustment",
+    early_redemption: "redemption",
+    suspension: "conversion_suspension",
+    conversion_price_adjustment: "conversion_adjustment",
+    listing: "listing",
+    put: "put",
+    maturity: "maturity",
   };
   return mapping[String(value ?? "").trim()] ?? null;
+}
+
+function canonicalStatus(value) {
+  return ["upcoming", "active", "deadline_soon", "completed"].includes(String(value ?? ""))
+    ? String(value)
+    : "upcoming";
 }
 
 export function groupV53CbEventsByDate(events) {
@@ -116,7 +151,7 @@ function renderList(target, events) {
     target.innerHTML = '<p class="empty-state">目前沒有符合條件的公開事件。</p>';
     return;
   }
-  target.innerHTML = `<div class="cb-event-list">${groupV53CbEventsByDate(events).map(({ date, events: sameDay }) => `<section><h3><time datetime="${date}">${dateLabel(date)}</time></h3><ol>${sameDay.map((event) => `<li><a href="./bonds.html?bond=${encodeURIComponent(event.cbCode)}"><strong>${escapeHtml(event.cbCode)} ${escapeHtml(event.cbName)}</strong></a><span>${escapeHtml(event.companyName)} · ${escapeHtml(event.label ?? EVENT_TYPE_LABELS[event.type] ?? "公開事件")}</span>${event.title ? `<small>${escapeHtml(event.title)}</small>` : ""}<a class="cb-official-link" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a></li>`).join("")}</ol></section>`).join("")}</div>`;
+  target.innerHTML = `<div class="cb-event-list">${groupV53CbEventsByDate(events).map(({ date, events: sameDay }) => `<section><h3><time datetime="${date}">${dateLabel(date)}</time></h3><ol>${sameDay.map((event) => `<li><a href="./bonds.html?bond=${encodeURIComponent(event.cbCode)}"><strong>${escapeHtml(event.cbCode)} ${escapeHtml(event.cbName)}</strong></a><span>${escapeHtml(event.companyName)} · ${escapeHtml(event.label ?? EVENT_TYPE_LABELS[event.type] ?? "公開事件")}</span><small>${escapeHtml(event.dateLabel ?? "事件日期")} · ${escapeHtml(statusLabel(event.status))}${event.summary ? ` · ${escapeHtml(event.summary)}` : ""}</small><a class="cb-official-link" href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a></li>`).join("")}</ol></section>`).join("")}</div>`;
 }
 
 function renderCalendar(target, events, asOfDate) {
@@ -143,21 +178,29 @@ async function initialize() {
   const viewTabs = document.querySelector("#bond-event-view-tabs");
   const errorTarget = document.querySelector("[data-page-error]");
   if (!root || !target || !count || !form || !viewTabs) return;
-  const model = await loadPublicCbWorkbenchV53({ errorTarget });
+  const model = await loadPublicCbWorkbenchV55({ errorTarget });
   if (!model?.dataDate || !Array.isArray(model.events)) {
     count.textContent = "資料暫時無法取得";
     target.innerHTML = '<p class="empty-state">資料暫時無法取得</p>';
     return;
   }
+  const initialFilters = parseV55BondEventFilters(window.location.search);
+  form.elements.range.value = initialFilters.range;
+  form.elements.type.value = initialFilters.type;
+  form.elements.status.value = initialFilters.status;
+  form.elements.q.value = initialFilters.query;
   let view = "list";
   const render = () => {
     const values = new FormData(form);
     const range = String(values.get("range") ?? "30");
-    const days = range === "today" ? 0 : range === "7" ? 7 : range === "30" ? 30 : daysToMonthEnd(model.dataDate);
+    const history = range === "history";
+    const days = range === "today" ? 0 : range === "7" ? 7 : range === "30" ? 30 : range === "month" ? daysToMonthEnd(model.dataDate) : null;
     const events = filterV53CbEvents(model.events, {
       asOfDate: model.dataDate,
       days,
       type: String(values.get("type") ?? "all"),
+      status: String(values.get("status") ?? "all"),
+      history,
       query: values.get("q") ?? "",
     });
     count.textContent = `${events.length} 筆 · 資料日 ${dateLabel(model.dataDate)}`;
@@ -188,6 +231,10 @@ function daysToMonthEnd(value) {
 
 function dateLabel(value) {
   return isoDate(value)?.replaceAll("-", "/") ?? "—";
+}
+
+function statusLabel(value) {
+  return ({ upcoming: "即將發生", active: "進行中", deadline_soon: "期限將近", completed: "已完成" })[value] ?? "即將發生";
 }
 
 function isoDate(value) {

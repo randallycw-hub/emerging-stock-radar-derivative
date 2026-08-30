@@ -183,9 +183,19 @@ Verified root contract: `date`, `tables`, `stat`; the annual 2026 response root 
 
 Evidence captured by the controller at `2026-08-09T07:47:30.7428457Z`: HTTP 200, `application/json;charset=UTF-8`, 34 source rows, and raw-response SHA-256 `05e19631e1c73ab3aa83ede258891c1057634cd5e04634a7d7e3d205d800b282`. The offline fixture preserves two exact rows only; it is not a live-fetch substitute.
 
-The `內容` detail URL must be HTTPS with host `mopsov.twse.com.tw`, path `/mops/web/ajax_t120sb23`, no credentials, `co_id` equal to the source issuer code, and `date1` equal to the normalized announcement date. The linked MOPS detail URL is a validation boundary only; this amendment does not authorize fetching it.
+The `內容` detail URL must be HTTPS with host `mopsov.twse.com.tw`, path `/mops/web/ajax_t120sb23`, no credentials, `co_id` equal to the source issuer code, and `date1` equal to the normalized announcement date. Its detail-fetch authorization is defined by the V5.5 amendment below; no other MOPS detail route is implied.
 
 Allowed use is alert-only: validated redemption and delisting events can enter the CB event-review queue, but must not publish a trading decision, use a third-party source, or fall back to another resource. On HTTP, payload, schema, date, subject, URL, or duplicate-key failure, reject the response, retain failure evidence, and raise a source-drift alert; do not retry through a fallback or use stale data as a replacement.
+
+## MOPS CB 權利事件明細正式公開核准 amendment（2026-08-30）
+
+Resource ID: `mops-cb-redemption-detail-html`
+Endpoint: `GET https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?`
+Status: `APPROVED_FOR_PRODUCTION`
+
+本次核准僅限由已驗證的 TPEx 贖回公告逐筆發現、再以嚴格合約驗證後取得的可轉債權利事件明細。每一個請求都必須使用 HTTPS、無帳密、無 fragment，且 query key 必須**剛好**為 `TYPEK=otc`、四碼 `co_id`、八碼 `date1`、正整數 `seq_no`、`pub_class=0`、`firstin=1`；`co_id`、日期、債券代號與公告主旨必須回綁到 TPEx 發現列。禁止依公司名稱猜測、禁止掃描或任意組合 URL、禁止第三方替代來源與登入來源。
+
+允許內容類型為 `text/html`，單筆上限 500 KB，30 秒逾時，拒絕重新導向。只正規化公告日、受理期間、最後轉換日、收回基準日、終止櫃檯買賣日、贖回價格／比例及理由等公開欄位。原始 HTML、雜湊、來源識別碼、解析診斷與缺漏原因留在內部快照，絕不進入前台或公開產物。抓取或解析失敗時，只保留最後一次完整成功快照；沒有完整快照則不顯示該事件，絕不以零、推測值或「待確認」補值。
 
 ## CB issuer research monthly-revenue production approval amendment (2026-08-11)
 

@@ -20,7 +20,8 @@
     "snapshot:ipo": "node scripts/refresh-static-ipo-snapshot.mjs",
     "snapshot:cb-market": "node scripts/build-bond-market-snapshot.mjs",
     "snapshot:cb-history": "node scripts/backfill-bond-market-history.mjs",
-    "audit:v54": "node scripts/v54-data-audit.mjs"
+    "audit:v54": "node scripts/v54-data-audit.mjs",
+    "audit:v55": "node scripts/v55-rights-event-qa.mjs"
   },
   "dependencies": {
     "klinecharts": "10.0.3",

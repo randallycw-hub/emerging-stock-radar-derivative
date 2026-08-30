@@ -8,7 +8,7 @@ export const CB_DETAIL_TABS = Object.freeze([
   ["company", "公司"],
 ]);
 
-export function renderCbDetailV53(record = {}, { companyBonds = [] } = {}) {
+export function renderCbDetailV53(record = {}, { companyBonds = [], rightsEvents = [] } = {}) {
   const code = text(record.cbCode);
   const name = text(record.cbName) || "—";
   const quote = record.quote ?? {};
@@ -18,16 +18,20 @@ export function renderCbDetailV53(record = {}, { companyBonds = [] } = {}) {
     .filter((item) => item?.status === "active" && text(item?.stockCode) === text(record.stockCode) && text(item?.cbCode) !== code)
     .sort((left, right) => text(left.cbCode).localeCompare(text(right.cbCode)));
   return `<header class="cb-detail-head"><div><p class="section-number">${escapeHtml(code)} / CB WORKBENCH</p><h2>${escapeHtml(name)}</h2><p>${escapeHtml(text(record.stockCode))} ${escapeHtml(text(record.companyName))}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債市場總覽">← 返回市場總覽</button></header>
-    ${redemptionNotice(record.rights?.redemption)}
+    ${redemptionNotice(record.rights?.redemption, rightsEvents, code)}
     <nav class="detail-tabs cb-detail-tabs" aria-label="可轉債詳細資料分頁" role="tablist">${CB_DETAIL_TABS.map(([key, label], index) => tabButton(key, label, index === 0)).join("")}</nav>
     ${tabPanel("quote", quotePanel(quote))}
     ${tabPanel("liquidity", liquidityPanel(quote, liquidity))}
     ${tabPanel("terms", termsPanel(terms))}
-    ${tabPanel("events", eventsPanel(record.events))}
+    ${tabPanel("events", eventsPanel(record.events, rightsEvents, code))}
     ${tabPanel("company", companyPanel(record, siblings))}`;
 }
 
-function redemptionNotice(right) {
+function redemptionNotice(right, rightsEvents, cbCode) {
+  const active = arrayValue(rightsEvents)
+    .filter((event) => event?.marketScope === "cb" && text(event?.cbCode) === cbCode && event?.eventType === "early_redemption" && ["active", "deadline_soon"].includes(text(event?.status)) && isOfficialSourceUrl(event?.sourceUrl))
+    .sort((left, right) => primaryEventDate(left).localeCompare(primaryEventDate(right)))[0] ?? null;
+  if (active) return redemptionEventNotice(active);
   if (!right || !isOfficialSourceUrl(right.sourceUrl) || !isoDate(right.announcementDate)) return "";
   const facts = [
     ["公告日", date(right.announcementDate)],
@@ -37,6 +41,20 @@ function redemptionNotice(right) {
     ["流通餘額", amount(right.outstandingBalance)],
   ].filter(([, value]) => value !== "—");
   return `<aside class="cb-redemption-notice" role="note"><h3>提前贖回公告</h3>${right.summary ? `<p>${escapeHtml(right.summary)}</p>` : ""}${facts.length ? `<dl class="detail-facts cb-detail-facts">${facts.map(([label, value]) => fact(label, value)).join("")}</dl>` : ""}<p><a href="${escapeHtml(right.sourceUrl)}" target="_blank" rel="noopener noreferrer">查看官方公告</a></p></aside>`;
+}
+
+function redemptionEventNotice(event) {
+  const details = event?.eventDetails ?? {};
+  const facts = [
+    ["公告日", date(event.announcementDate)],
+    ["受理期間", dateRange(event.startDate, event.endDate)],
+    ["最後轉換日", date(event.lastConversionDate)],
+    ["收回基準日", date(event.recordDate)],
+    ["最後交易日", date(event.lastTradingDate)],
+    ["收回價格", price(event.price)],
+    ["收回比例", percent(details.redemptionPricePercent)],
+  ].filter(([, value]) => value !== "—");
+  return `<aside class="cb-redemption-notice is-${escapeHtml(text(event.status))}" role="alert"><h3>提前贖回${escapeHtml(statusLabel(event.status))}</h3>${event.reason ? `<p>${escapeHtml(event.reason)}</p>` : ""}${facts.length ? `<dl class="detail-facts cb-detail-facts">${facts.map(([label, value]) => fact(label, value)).join("")}</dl>` : ""}<p><a href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener noreferrer">查看官方公告</a></p></aside>`;
 }
 
 export function bindCbDetailV53(target, onClose) {
@@ -84,10 +102,45 @@ function termsPanel(terms) {
   return `<h3>條款</h3><dl class="detail-facts cb-detail-facts">${fact("發行日", date(terms.issueDate))}${fact("掛牌日", date(terms.listingDate))}${fact("到期日", date(terms.maturityDate))}${fact("發行總額", amount(terms.issueAmount))}${fact("流通餘額", amount(terms.outstandingAmount))}${fact("餘額資料日", date(terms.outstandingDataDate))}${fact("流通餘額比例", percent(terms.remainingRatio))}${fact("擔保", text(terms.securedStatus) || "—")}${fact("承銷機構", text(terms.underwriter) || "—")}${fact("受託人", text(terms.trustee) || "—")}${fact("轉換期間", dateRange(terms.conversionStartDate, terms.conversionEndDate))}${fact("賣回日", putDates)}${fact("賣回價格", price(terms.putPrice))}</dl>`;
 }
 
-function eventsPanel(events) {
-  const rows = arrayValue(events).filter((event) => isOfficialSourceUrl(event?.sourceUrl));
+function eventsPanel(events, rightsEvents, cbCode) {
+  const canonical = arrayValue(rightsEvents)
+    .filter((event) => event?.marketScope === "cb" && text(event?.cbCode) === cbCode && isOfficialSourceUrl(event?.sourceUrl))
+    .map((event) => ({
+      id: text(event.eventId),
+      date: primaryEventDate(event),
+      label: canonicalEventLabel(event.eventType),
+      title: text(event.title) || null,
+      status: text(event.status),
+      sourceUrl: event.sourceUrl,
+    }))
+    .filter((event) => event.id && isoDate(event.date));
+  const knownTypes = new Set(canonical.map((event) => `${event.date}:${event.label}`));
+  const legacy = arrayValue(events)
+    .filter((event) => isOfficialSourceUrl(event?.sourceUrl))
+    .map((event) => ({ ...event, status: "" }))
+    .filter((event) => !knownTypes.has(`${event.date}:${event.label ?? EVENT_TYPE_LABELS[event.type] ?? "公開事件"}`));
+  const rows = [...canonical, ...legacy].sort((left, right) => String(left.date).localeCompare(String(right.date)) || String(left.label).localeCompare(String(right.label)));
   if (!rows.length) return "<h3>事件</h3><p class=\"empty-state\">目前沒有已公布的可轉債事件。</p>";
-  return `<h3>事件</h3><ol class="detail-event-timeline">${rows.map((event) => `<li><time>${escapeHtml(date(event.date))}</time><strong>${escapeHtml(event.label ?? EVENT_TYPE_LABELS[event.type] ?? "公開事件")}</strong>${event.title ? `<span>${escapeHtml(event.title)}</span>` : ""}<a href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a></li>`).join("")}</ol>`;
+  return `<h3>事件</h3><ol class="detail-event-timeline">${rows.map((event) => `<li><time>${escapeHtml(date(event.date))}</time><strong>${escapeHtml(event.label ?? EVENT_TYPE_LABELS[event.type] ?? "公開事件")}</strong>${event.status ? `<span>${escapeHtml(statusLabel(event.status))}</span>` : ""}${event.title ? `<span>${escapeHtml(event.title)}</span>` : ""}<a href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a></li>`).join("")}</ol>`;
+}
+
+function primaryEventDate(event) {
+  return isoDate(event?.deadlineDate) ?? isoDate(event?.effectiveDate) ?? isoDate(event?.startDate) ?? isoDate(event?.endDate) ?? isoDate(event?.announcementDate) ?? "";
+}
+
+function canonicalEventLabel(type) {
+  return ({
+    early_redemption: "提前贖回",
+    suspension: "停止轉換",
+    put: "賣回",
+    maturity: "到期",
+    conversion_price_adjustment: "轉換價調整",
+    listing: "掛牌",
+  })[text(type)] ?? "公開事件";
+}
+
+function statusLabel(status) {
+  return ({ active: "進行中", deadline_soon: "（期限將近）", upcoming: "（即將發生）", completed: "（已完成）" })[text(status)] ?? "";
 }
 
 function companyPanel(record, siblings) {

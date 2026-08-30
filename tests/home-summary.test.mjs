@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildDashboardHealth, buildHomeSummary, buildObjectiveRankings } from "../static-showcase/assets/home-page.js";
+import { buildDashboardHealth, buildHomeCbRightsEvents, buildHomeSummary, buildObjectiveRankings } from "../static-showcase/assets/home-page.js";
 
 test("dashboard health translates published availability without technical diagnostics", () => {
   assert.deepEqual(buildDashboardHealth({ dataDate: "2026-08-26", dataAvailable: true }), {
@@ -88,4 +88,19 @@ test("objective rankings name the ordered public metric and never issue advice",
     "CB 流通餘額變化排序",
   ]);
   assert.equal(JSON.stringify(rankings).match(/推薦|買進|賣出|評分/) === null, true);
+});
+
+test("首頁 CB 關鍵事件只統計已發布事件，並保留實際權利日期", () => {
+  const result = buildHomeCbRightsEvents({
+    asOfDate: "2026-08-30",
+    events: [
+      { marketScope: "cb", eventType: "early_redemption", status: "deadline_soon", cbCode: "31672", cbName: "大量二", deadlineDate: "2026-09-30", sourceUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23" },
+      { marketScope: "cb", eventType: "early_redemption", status: "upcoming", cbCode: "31673", cbName: "大量三", deadlineDate: "2026-10-12", sourceUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23" },
+      { marketScope: "cb", eventType: "maturity", status: "upcoming", cbCode: "90001", cbName: "甲一", effectiveDate: "2026-10-20", sourceUrl: "https://www.tpex.org.tw/a" },
+      { marketScope: "cb", eventType: "put", status: "completed", cbCode: "90002", cbName: "乙一", effectiveDate: "2026-08-20", sourceUrl: "https://www.tpex.org.tw/a" },
+    ],
+  });
+
+  assert.deepEqual(result.counts, { redemptions: 1, suspensions: 0, puts: 0, maturity90: 1 });
+  assert.deepEqual(result.events.map((event) => event.cbCode), ["31672", "31673", "90001"]);
 });

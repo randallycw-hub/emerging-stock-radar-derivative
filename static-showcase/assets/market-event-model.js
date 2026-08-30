@@ -3,8 +3,8 @@ import { projectPublicBondEvents } from "./public-event-digest.js";
 
 const DAY_MS = 86_400_000;
 const MARKET_VALUES = new Set(["all", "ipo", "bonds"]);
-const PERIOD_VALUES = new Set(["all", "today", "tomorrow", "7", "30", "custom"]);
-const STATUS_VALUES = new Set(["all", "ongoing", "upcoming", "completed"]);
+const PERIOD_VALUES = new Set(["all", "history", "today", "tomorrow", "7", "30", "custom"]);
+const STATUS_VALUES = new Set(["all", "ongoing", "active", "deadline_soon", "upcoming", "completed"]);
 
 export const EVENT_TYPE_LABELS = Object.freeze({
   application_submitted: "送件",
@@ -61,12 +61,16 @@ function projectCanonicalEvents(snapshot, asOfDate) {
         : href,
       officialUrl: isOfficialUrl(event?.sourceUrl) ? event.sourceUrl : null,
       asOfDate,
+      id: text(event?.eventId) || null,
+      status: canonicalStatus(event?.status, date, asOfDate),
+      dateLabel: canonicalDateLabel(event),
+      details: publicCanonicalDetails(event),
     });
   }).filter(Boolean);
 }
 
 function canonicalEventDate(event) {
-  const values = [event?.effectiveDate, event?.announcementDate, event?.startDate, event?.endDate, event?.deadlineDate];
+  const values = [event?.deadlineDate, event?.effectiveDate, event?.startDate, event?.endDate, event?.announcementDate];
   return values.find(isIsoDate) ?? null;
 }
 
@@ -79,6 +83,9 @@ function canonicalEventType(value) {
     cb_maturity: "maturity",
     cb_conversion_suspension: "conversion_suspended",
     cb_conversion_price_change: "conversion_price_adjustment",
+    early_redemption: "redemption",
+    suspension: "conversion_suspended",
+    conversion_price_adjustment: "conversion_price_adjustment",
     ipo_filing: "application_submitted",
     ipo_review: "review",
     ipo_contract: "contract",
@@ -87,6 +94,40 @@ function canonicalEventType(value) {
     ipo_listing: "listing",
   };
   return mapping[type] ?? "public_event";
+}
+
+function canonicalStatus(value, date, asOfDate) {
+  const status = text(value);
+  if (["active", "deadline_soon", "upcoming", "completed"].includes(status)) return status;
+  const distance = calendarDistance(asOfDate, date);
+  if (distance === null) return "upcoming";
+  if (distance < 0) return "completed";
+  if (distance === 0) return "active";
+  return "upcoming";
+}
+
+function canonicalDateLabel(event) {
+  if (event?.eventType === "early_redemption") return "受理截止";
+  if (event?.eventType === "put") return "賣回日";
+  if (event?.eventType === "maturity") return "到期日";
+  if (event?.eventType === "listing") return "掛牌日";
+  return "事件日期";
+}
+
+function publicCanonicalDetails(event) {
+  const details = event?.eventDetails && typeof event.eventDetails === "object" ? event.eventDetails : {};
+  return {
+    acceptanceStartDate: isIsoDate(event?.startDate) ? event.startDate : null,
+    acceptanceEndDate: isIsoDate(event?.endDate) ? event.endDate : null,
+    lastConversionDate: isIsoDate(event?.lastConversionDate) ? event.lastConversionDate : null,
+    lastTradingDate: isIsoDate(event?.lastTradingDate) ? event.lastTradingDate : null,
+    recordDate: isIsoDate(event?.recordDate) ? event.recordDate : null,
+    price: typeof event?.price === "string" && /^\d+(?:\.\d+)?$/u.test(event.price) ? event.price : null,
+    reason: text(event?.reason) || null,
+    redemptionPricePercent: typeof details.redemptionPricePercent === "string" && /^\d+(?:\.\d+)?$/u.test(details.redemptionPricePercent)
+      ? details.redemptionPricePercent
+      : null,
+  };
 }
 
 function projectIpoEvents(snapshot, asOfDate) {
@@ -154,9 +195,9 @@ function projectBondEvents(records, asOfDate) {
   return entries;
 }
 
-function publicEvent({ market, date, code, companyName, entityKey, entityName, subtitle, title, eventType, href, detailHref, officialUrl = null, asOfDate }) {
+function publicEvent({ market, date, code, companyName, entityKey, entityName, subtitle, title, eventType, href, detailHref, officialUrl = null, asOfDate, id = null, status = null, dateLabel = null, details = null }) {
   return {
-    id: [market, entityKey, date, eventType, title].join(":"),
+    id: id || [market, entityKey, date, eventType, title].join(":"),
     market,
     date,
     code,
@@ -171,6 +212,9 @@ function publicEvent({ market, date, code, companyName, entityKey, entityName, s
     detailHref,
     officialUrl,
     updatedAt: asOfDate,
+    status: canonicalStatus(status, date, asOfDate),
+    dateLabel: dateLabel || "事件日期",
+    details: details && typeof details === "object" ? details : {},
   };
 }
 
@@ -212,7 +256,7 @@ export function filterMarketEvents(events, {
     if (selectedMarket !== "all" && event.market !== selectedMarket) return false;
     if (eventType !== "all" && event.eventType !== eventType) return false;
     if (!matchesPeriod(event.date, distance, selectedPeriod, customStart, customEnd)) return false;
-    if (!matchesStatus(distance, selectedStatus)) return false;
+    if (!matchesStatus(event, selectedStatus)) return false;
     return !queryText || [event.code, event.companyName, event.entityName, event.title, event.eventTypeLabel]
       .filter(Boolean)
       .join(" ")
@@ -223,6 +267,7 @@ export function filterMarketEvents(events, {
 
 function matchesPeriod(date, distance, period, customStart, customEnd) {
   if (period === "all") return true;
+  if (period === "history") return distance < 0;
   if (period === "today") return distance === 0;
   if (period === "tomorrow") return distance === 1;
   if (period === "7") return distance >= 0 && distance <= 7;
@@ -232,11 +277,10 @@ function matchesPeriod(date, distance, period, customStart, customEnd) {
     && (!isIsoDate(customEnd) || date <= customEnd);
 }
 
-function matchesStatus(distance, status) {
+function matchesStatus(event, status) {
   if (status === "all") return true;
-  if (status === "ongoing") return distance === 0;
-  if (status === "upcoming") return distance > 0;
-  return distance < 0;
+  if (status === "ongoing") return event.status === "active";
+  return event.status === status;
 }
 
 export function groupMarketEventsByDate(events) {

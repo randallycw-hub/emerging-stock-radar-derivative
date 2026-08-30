@@ -28,6 +28,7 @@ import {
   parseBondWorkbenchSnapshot,
 } from "../lib/market-data/bond-workbench.ts";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
+import { validateApprovedCbRedemptionDetailUrl } from "../lib/source-verification/source-cb-rights-event.ts";
 import { parseCsv } from "../lib/source-verification/csv.ts";
 import { fetchCbIssuerResearchSources } from "../lib/source-verification/source-cb-issuer-research.ts";
 import { parseEmergingMarketSource } from "../lib/source-verification/source-emerging-market.ts";
@@ -738,13 +739,24 @@ function createApprovedOptionalFetch(fetchImpl, authorization) {
   ];
   return async (url, init) => {
     const policy = policies.find((item) => item?.exactUrl === String(url));
-    if (policy?.approved !== true) {
+    const approvedRedemptionDetail = authorization?.supplemental?.redemption?.approved === true
+      && isApprovedCbRedemptionDetail(url);
+    if (policy?.approved !== true && !approvedRedemptionDetail) {
       throw new Error(
         policy?.reason ?? `OPTIONAL_RESOURCE_NOT_APPROVED:${String(url)}`,
       );
     }
     return fetchImpl(url, init);
   };
+}
+
+function isApprovedCbRedemptionDetail(url) {
+  try {
+    validateApprovedCbRedemptionDetailUrl(String(url));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function verifyRequiredCoreMarketDate({

@@ -38,13 +38,13 @@ async function loadEvents() {
   const runtime = pointer?.runtimeUrl
     ? await safeJsonFetch(new URL(pointer.runtimeUrl, location.href), { errorTarget })
     : null;
-  if (!runtime?.canonicalEventsV54Url && (!runtime?.ipoEventsUrl || !runtime?.datasets?.bondWorkbench)) {
+  if (!runtime?.canonicalEventsV55Url && !runtime?.canonicalEventsV54Url && (!runtime?.ipoEventsUrl || !runtime?.datasets?.bondWorkbench)) {
     showUnavailable();
     return;
   }
   const [canonicalEvents, ipoSnapshot, bondWorkbench] = await Promise.all([
-    runtime.canonicalEventsV54Url
-      ? safeJsonFetch(new URL(runtime.canonicalEventsV54Url, location.href), { errorTarget })
+    (runtime.canonicalEventsV55Url ?? runtime.canonicalEventsV54Url)
+      ? safeJsonFetch(new URL(runtime.canonicalEventsV55Url ?? runtime.canonicalEventsV54Url, location.href), { errorTarget })
       : null,
     runtime.ipoEventsUrl ? safeJsonFetch(new URL(runtime.ipoEventsUrl, location.href), { errorTarget }) : null,
     runtime.datasets?.bondWorkbench ? safeJsonFetch(new URL(runtime.datasets.bondWorkbench, location.href), { errorTarget }) : null,
@@ -128,9 +128,9 @@ function bindControls() {
 function initializeFromUrl() {
   const params = new URLSearchParams(location.search);
   state.market = ["all", "ipo", "bonds"].includes(params.get("market")) ? params.get("market") : "all";
-  state.period = ["all", "today", "tomorrow", "7", "30", "custom"].includes(params.get("range")) ? params.get("range") : "30";
+  state.period = ["all", "history", "today", "tomorrow", "7", "30", "custom"].includes(params.get("range")) ? params.get("range") : "30";
   state.eventType = params.get("type") ?? "all";
-  state.status = ["all", "ongoing", "upcoming", "completed"].includes(params.get("status")) ? params.get("status") : "all";
+  state.status = ["all", "active", "deadline_soon", "upcoming", "completed"].includes(params.get("status")) ? params.get("status") : "all";
   state.query = params.get("q") ?? "";
   state.customStart = validDate(params.get("start")) ? params.get("start") : null;
   state.customEnd = validDate(params.get("end")) ? params.get("end") : null;
@@ -220,7 +220,7 @@ function renderList(events) {
 function eventRowHtml(event) {
   const distance = calendarDistance(state.asOfDate, event.date);
   const className = distance === 0 ? "is-today" : distance !== null && distance > 0 && distance <= 3 ? "is-soon" : distance !== null && distance < 0 ? "is-complete" : "";
-  return `<article class="market-event-row ${className}" data-market-event-id="${escapeAttribute(event.id)}" role="button" tabindex="0" aria-label="查看 ${escapeAttribute(event.entityName)} ${escapeAttribute(event.title)} 明細"><time datetime="${escapeAttribute(event.date)}"><strong>${formatDate(event.date)}</strong><span>${dateWeekday(event.date)}</span></time><span class="market-type-badge market-type-badge--${escapeAttribute(event.market)}">${event.market === "ipo" ? "IPO" : "CB"}</span><div class="market-event-row__identity"><strong>${escapeHtml(event.entityName)}</strong><span>${escapeHtml(event.code)}${event.subtitle ? ` · ${escapeHtml(event.subtitle)}` : ""}</span></div><div class="market-event-row__event"><strong>${escapeHtml(event.title)}</strong><span>${escapeHtml(event.eventTypeLabel)}</span></div><span class="market-event-time ${className}">${escapeHtml(eventTimeLabel(event.date, state.asOfDate))}</span><a href="${escapeAttribute(event.detailHref)}" aria-label="前往 ${escapeAttribute(event.entityName)} 詳情">詳情 <span aria-hidden="true">→</span></a></article>`;
+  return `<article class="market-event-row ${className}" data-market-event-id="${escapeAttribute(event.id)}" role="button" tabindex="0" aria-label="查看 ${escapeAttribute(event.entityName)} ${escapeAttribute(event.title)} 明細"><time datetime="${escapeAttribute(event.date)}"><strong>${formatDate(event.date)}</strong><span>${dateWeekday(event.date)}</span></time><span class="market-type-badge market-type-badge--${escapeAttribute(event.market)}">${event.market === "ipo" ? "IPO" : "CB"}</span><div class="market-event-row__identity"><strong>${escapeHtml(event.entityName)}</strong><span>${escapeHtml(event.code)}${event.subtitle ? ` · ${escapeHtml(event.subtitle)}` : ""}</span></div><div class="market-event-row__event"><strong>${escapeHtml(event.title)}</strong><span>${escapeHtml(event.eventTypeLabel)} · ${escapeHtml(event.dateLabel ?? "事件日期")}</span></div><span class="market-event-time ${className}">${escapeHtml(eventStatusLabel(event.status))}<small>${escapeHtml(eventTimeLabel(event.date, state.asOfDate))}</small></span><a href="${escapeAttribute(event.detailHref)}" aria-label="前往 ${escapeAttribute(event.entityName)} 詳情">詳情 <span aria-hidden="true">→</span></a></article>`;
 }
 
 function renderClusters(events) {
@@ -294,7 +294,7 @@ function openDrawer(event, relatedEvents) {
   const title = document.querySelector("#market-event-drawer-title");
   if (!drawer || !target || !title) return;
   title.textContent = `${event.entityName} · 事件明細`;
-  target.innerHTML = `<dl class="market-event-drawer__facts"><div><dt>日期</dt><dd>${formatDate(event.date)}（${dateWeekday(event.date)}）</dd></div><div><dt>市場</dt><dd>${event.market === "ipo" ? "IPO" : "可轉債"}</dd></div><div><dt>事件</dt><dd>${escapeHtml(event.title)}</dd></div><div><dt>資料日期</dt><dd>${formatDate(event.updatedAt)}</dd></div><div><dt>公開資料</dt><dd>${event.market === "ipo" ? "TWSE／TPEx 已發布資料" : "TPEx 已發布可轉債資料"}</dd></div></dl><section class="market-event-drawer__timeline"><h3>同一標的事件脈絡</h3><ol>${relatedEvents.sort((left, right) => left.date.localeCompare(right.date)).map((item) => `<li class="${timelineClass(item)}"><time>${formatDate(item.date)}</time><div><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(eventTimeLabel(item.date, state.asOfDate))}</span></div></li>`).join("")}</ol></section><div class="market-event-drawer__actions"><a class="primary-button" href="${escapeAttribute(event.href)}">查看 ${event.market === "ipo" ? "IPO 時程" : "CB 資料"}</a><a class="secondary-button" href="${escapeAttribute(event.detailHref)}">前往個別詳情</a>${officialSourceAction(event)}</div>`;
+  target.innerHTML = `<dl class="market-event-drawer__facts"><div><dt>${escapeHtml(event.dateLabel ?? "日期")}</dt><dd>${formatDate(event.date)}（${dateWeekday(event.date)}）</dd></div><div><dt>狀態</dt><dd>${escapeHtml(eventStatusLabel(event.status))}</dd></div><div><dt>市場</dt><dd>${event.market === "ipo" ? "IPO" : "可轉債"}</dd></div><div><dt>事件</dt><dd>${escapeHtml(event.title)}</dd></div>${eventDetailFacts(event)}<div><dt>資料日期</dt><dd>${formatDate(event.updatedAt)}</dd></div><div><dt>公開資料</dt><dd>${event.market === "ipo" ? "TWSE／TPEx 已發布資料" : "TPEx／MOPS 已發布資料"}</dd></div></dl><section class="market-event-drawer__timeline"><h3>同一標的事件脈絡</h3><ol>${relatedEvents.sort((left, right) => left.date.localeCompare(right.date)).map((item) => `<li class="${timelineClass(item)}"><time>${formatDate(item.date)}</time><div><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(eventStatusLabel(item.status))} · ${escapeHtml(eventTimeLabel(item.date, state.asOfDate))}</span></div></li>`).join("")}</ol></section><div class="market-event-drawer__actions"><a class="primary-button" href="${escapeAttribute(event.href)}">查看 ${event.market === "ipo" ? "IPO 時程" : "CB 資料"}</a><a class="secondary-button" href="${escapeAttribute(event.detailHref)}">前往個別詳情</a>${officialSourceAction(event)}</div>`;
   if (typeof drawer.showModal === "function") drawer.showModal();
   else drawer.setAttribute("open", "");
 }
@@ -310,6 +310,25 @@ function officialSourceAction(event) {
   return isAllowedOfficialUrl(event?.officialUrl)
     ? `<a class="secondary-button" href="${escapeAttribute(event.officialUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a>`
     : "";
+}
+
+function eventDetailFacts(event) {
+  const details = event?.details ?? {};
+  const rows = [
+    ["受理開始", details.acceptanceStartDate],
+    ["受理截止", details.acceptanceEndDate],
+    ["最後轉換日", details.lastConversionDate],
+    ["最後交易日", details.lastTradingDate],
+    ["收回基準日", details.recordDate],
+    ["收回價格", details.price ? `${formatNumber(details.price)} 元` : null],
+    ["收回比例", details.redemptionPricePercent ? `${formatNumber(details.redemptionPricePercent)}%` : null],
+    ["公告依據", details.reason],
+  ].filter(([, value]) => value !== null && value !== undefined && value !== "");
+  return rows.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(validDate(value) ? formatDate(value) : value)}</dd></div>`).join("");
+}
+
+function eventStatusLabel(status) {
+  return ({ active: "進行中", deadline_soon: "期限將近", upcoming: "即將發生", completed: "已完成" })[status] ?? "即將發生";
 }
 
 function isAllowedOfficialUrl(value) {

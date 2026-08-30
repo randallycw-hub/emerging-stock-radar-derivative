@@ -1,6 +1,10 @@
 import { isIsoDate } from "../../lib/domain/dates.ts";
 import { parseCbInstitutionDaily } from "../../lib/source-verification/source-cb-institution.ts";
 import { parseCbRedemptionAnnouncements } from "../../lib/source-verification/source-cb-redemption.ts";
+import {
+  parseCbRedemptionDetail,
+  validateApprovedCbRedemptionDetailUrl,
+} from "../../lib/source-verification/source-cb-rights-event.ts";
 import { parseCbUnderwritingHtml } from "../../lib/source-verification/source-cb-underwriting.ts";
 import {
   normalizeCbQuoteRow,
@@ -66,8 +70,7 @@ export async function fetchCbSupplementalSources({
     id: "",
     response: "json",
   });
-  const requests = [
-    fetchJsonWithRetry(
+  const institutionRequest = fetchJsonWithRetry(
       TPEX_CB_INSTITUTION,
       supplementalPostOptions(institutionBody),
       fetchImpl,
@@ -78,8 +81,8 @@ export async function fetchCbSupplementalSources({
         throw new TypeError("SUPPLEMENTAL_INSTITUTION_DATE_MISMATCH");
       }
       return parsed;
-    }),
-    fetchJsonWithRetry(
+    });
+  const redemptionRequest = fetchJsonWithRetry(
       TPEX_CB_REDEMPTION,
       supplementalPostOptions(redemptionBody),
       fetchImpl,
@@ -90,8 +93,8 @@ export async function fetchCbSupplementalSources({
         throw new TypeError("SUPPLEMENTAL_REDEMPTION_YEAR_MISMATCH");
       }
       return parsed;
-    }),
-    fetchTextWithRetry(
+    });
+  const underwritingRequest = fetchTextWithRetry(
       TWSA_CB_UNDERWRITING,
       {
         method: "GET",
@@ -110,10 +113,19 @@ export async function fetchCbSupplementalSources({
         throw new TypeError("SUPPLEMENTAL_UNDERWRITING_YEAR_MISMATCH");
       }
       return parsed;
-    }),
-  ];
-  const [institution, redemption, underwriting] = await Promise.allSettled(requests);
-  return { institution, redemption, underwriting };
+    });
+  // Detail pages are only requested from already parsed TPEx discovery rows.  The
+  // function below validates the MOPS URL contract again before every request.
+  const redemptionDetailsRequest = redemptionRequest.then((entries) =>
+    fetchCbRedemptionDetails(entries, fetchImpl),
+  );
+  const [institution, redemption, underwriting, redemptionDetails] = await Promise.allSettled([
+    institutionRequest,
+    redemptionRequest,
+    underwritingRequest,
+    redemptionDetailsRequest,
+  ]);
+  return { institution, redemption, underwriting, redemptionDetails };
 }
 
 export async function fetchMopsDetail(
@@ -132,6 +144,46 @@ export async function fetchMopsDetail(
     fetchImpl,
     "text/html",
   );
+}
+
+export async function fetchMopsRedemptionDetail(
+  officialDetailUrl,
+  fetchImpl = fetch,
+) {
+  validateApprovedCbRedemptionDetailUrl(officialDetailUrl);
+  return fetchTextWithRetry(
+    officialDetailUrl,
+    {
+      method: "GET",
+      redirect: "error",
+      headers: {
+        accept: "text/html,application/xhtml+xml",
+        "user-agent": "EmergingStockRadar/1.0 official-eod-collector",
+      },
+    },
+    fetchImpl,
+    "text/html",
+    HTML_RESPONSE_MAX_BYTES,
+  );
+}
+
+export async function fetchCbRedemptionDetails(
+  entries,
+  fetchImpl = fetch,
+  now = () => new Date().toISOString(),
+) {
+  if (!Array.isArray(entries)) throw new TypeError("CB_REDEMPTION_DISCOVERY_INVALID");
+  const fetchedAt = now();
+  const results = [];
+  // The official endpoint is deliberately kept sequential: a source failure makes
+  // this dataset fall back to its last-known-good snapshot rather than publishing
+  // a partial set of rights events.
+  for (const entry of entries) {
+    validateApprovedCbRedemptionDetailUrl(entry.detailUrl);
+    const html = await fetchMopsRedemptionDetail(entry.detailUrl, fetchImpl);
+    results.push(parseCbRedemptionDetail(html, entry, fetchedAt));
+  }
+  return Object.freeze(results);
 }
 
 export async function fetchMopsConversionPrice(

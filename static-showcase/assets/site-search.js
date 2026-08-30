@@ -136,6 +136,8 @@ export function searchCanonicalIndex(query, index = []) {
       industry: safeText(entry.industry),
       url: safeText(entry.url),
       dataDate: safeText(entry.dataDate),
+      activeEventLabel: safeText(entry.activeEventLabel),
+      activeEventDate: safeText(entry.activeEventDate),
     }))
     .sort((left, right) => canonicalSearchPriority(left, needle) - canonicalSearchPriority(right, needle)
       || left.type.localeCompare(right.type, "zh-Hant")
@@ -217,7 +219,12 @@ function canonicalResultTitle(row) {
 }
 
 function canonicalResultSubtitle(row, entries) {
-  if (row.type === "cb") return `可轉債・標的 ${row.stockCode} ${row.companyName}`.trim();
+  if (row.type === "cb") {
+    const event = row.activeEventLabel
+      ? `・${row.activeEventLabel}${row.activeEventDate ? ` ${row.activeEventDate.replaceAll("-", "/")}` : ""}`
+      : "";
+    return `可轉債・標的 ${row.stockCode} ${row.companyName}${event}`.trim();
+  }
   const bondCount = entries.filter((entry) => entry.type === "cb" && entry.stockCode === row.stockCode).length;
   if (row.type === "ipo") return "IPO／公開發行研究";
   return bondCount ? `公司研究・${bondCount} 檔可轉債` : "公司研究";

@@ -43,6 +43,15 @@ test("central registry pins every approved CB supplemental resource", () => {
     maxResponseBytes: 500_000,
     usageRole: "primary_json",
   }, {
+    sourceId: "mops-cb-redemption-detail",
+    resourceId: "mops-cb-redemption-detail-html",
+    exactUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?",
+    hostname: "mopsov.twse.com.tw",
+    pathname: "/mops/web/ajax_t120sb23",
+    allowedContentTypes: ["text/html"],
+    maxResponseBytes: 500_000,
+    usageRole: "primary_html",
+  }, {
     sourceId: "twsa-cb-underwriting-announcements",
     resourceId: "twsa-cb-underwriting-announcements-html",
     exactUrl: "https://web.twsa.org.tw/edoc2/default.aspx",
