@@ -46,6 +46,34 @@ test("V5.3 CB detail has exactly five public tabs and keeps company CB crosslink
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|買點|推薦|風險/);
 });
 
+test("V5.4 CB detail presents verified redemption facts without inventing an amount or date", () => {
+  const record = {
+    ...records[0],
+    rights: {
+      redemption: {
+        announcementDate: "2026-08-13",
+        lastTradingDate: "2026-10-01",
+        redemptionDate: null,
+        redemptionPrice: null,
+        outstandingBalance: null,
+        sourceUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?co_id=9000",
+        summary: "公司公告行使債券贖回權暨訂於115年10月01日終止櫃檯買賣。",
+      },
+      puts: [],
+      maturity: null,
+    },
+  };
+  const html = renderCbDetailV53(record, { companyBonds: records });
+
+  assert.match(html, /提前贖回公告/);
+  assert.match(html, /公告日/);
+  assert.match(html, /最後交易日/);
+  assert.match(html, /2026\/08\/13/);
+  assert.match(html, /2026\/10\/01/);
+  assert.doesNotMatch(html, /贖回價格|贖回金額|流通餘額：/);
+  assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|待確認/);
+});
+
 test("V5.3 market statistics is a staged five-function destination", async () => {
   const [page, stageScript] = await Promise.all([
     readFile(new URL("bonds-stats.html", root), "utf8"),

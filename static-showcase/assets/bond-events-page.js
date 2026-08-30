@@ -48,6 +48,8 @@ export function filterV53CbEvents(events, { asOfDate, days = null, type = "all",
   const needle = normalizeQuery(query);
   if (!today) return [];
   return arrayValue(events)
+    .map(projectV54CbEvent)
+    .filter(Boolean)
     .filter((event) => {
       const date = isoDate(event?.date);
       if (!date || date < today || !isOfficialSourceUrl(event?.sourceUrl) || !matchesV53EventType(event, type)) return false;
@@ -57,6 +59,40 @@ export function filterV53CbEvents(events, { asOfDate, days = null, type = "all",
     })
     .slice()
     .sort((left, right) => left.date.localeCompare(right.date) || String(left.cbCode).localeCompare(String(right.cbCode), "zh-Hant") || String(left.type).localeCompare(String(right.type)));
+}
+
+function projectV54CbEvent(event) {
+  if (isoDate(event?.date)) return event;
+  if (event?.marketScope !== "cb") return null;
+  const date = isoDate(event?.effectiveDate ?? event?.announcementDate ?? event?.startDate ?? event?.endDate ?? event?.deadlineDate);
+  const type = v54EventType(event?.eventType);
+  const cbCode = String(event?.cbCode ?? "").trim();
+  const cbName = String(event?.instrumentName ?? "").trim();
+  const companyName = String(event?.companyName ?? "").trim();
+  if (!date || !type || !cbCode || !cbName || !companyName || !isOfficialSourceUrl(event?.sourceUrl)) return null;
+  return {
+    cbCode,
+    cbName,
+    stockCode: String(event?.stockCode ?? "").trim(),
+    companyName,
+    type,
+    label: EVENT_TYPE_LABELS[type] ?? "公開事件",
+    date,
+    title: String(event?.title ?? "").trim() || null,
+    sourceUrl: event.sourceUrl,
+  };
+}
+
+function v54EventType(value) {
+  const mapping = {
+    cb_listing: "listing",
+    cb_early_redemption: "redemption",
+    cb_put: "put",
+    cb_maturity: "maturity",
+    cb_conversion_suspension: "conversion_suspension",
+    cb_conversion_price_change: "conversion_adjustment",
+  };
+  return mapping[String(value ?? "").trim()] ?? null;
 }
 
 export function groupV53CbEventsByDate(events) {

@@ -30,13 +30,14 @@ const PIPELINE_STAGE_KEYS = Object.freeze([
 
 export { EVENT_TYPE_LABELS, OFFICIAL_SOURCE_HOSTS, PIPELINE_STAGE_KEYS };
 
-export function buildCbWorkbenchV53({ workbench, history = [], cbMaster = [], companyMaster = [] } = {}) {
+export function buildCbWorkbenchV53({ workbench, history = [], cbMaster = [], companyMaster = [], supplemental = null } = {}) {
   const snapshot = requiredRecord(workbench, "workbench");
   const dataDate = isoDate(snapshot.dataDate);
   if (!dataDate || !Array.isArray(snapshot.records)) throw new TypeError("workbench must contain dataDate and records");
   const masters = indexMasters(cbMaster, companyMaster);
   const historyByBond = indexHistory(history);
-  const records = snapshot.records.map((input) => projectRecord(input, dataDate, masters, historyByBond));
+  const redemptionsByBond = indexRedemptions(supplemental, dataDate);
+  const records = snapshot.records.map((input) => projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond));
   assertUniqueActiveCodes(records);
   const events = records.flatMap((record) => record.events)
     .sort((left, right) => left.date.localeCompare(right.date) || left.cbCode.localeCompare(right.cbCode));
@@ -97,7 +98,7 @@ export function isOfficialSourceUrl(value) {
   }
 }
 
-function projectRecord(input, dataDate, masters, historyByBond) {
+function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond) {
   const raw = requiredRecord(input, "workbench record");
   const term = requiredRecord(raw.term, "workbench term");
   const view = requiredRecord(raw.view, "workbench view");
@@ -108,7 +109,11 @@ function projectRecord(input, dataDate, masters, historyByBond) {
   const company = masters.companyByCode.get(stockCode);
   const history = historyByBond.get(cbCode) ?? [];
   const quote = projectQuote(view, history, dataDate);
-  const events = projectEvents(raw.events, { cbCode, bondName: master.bondName, stockCode, companyName: master.companyName });
+  const redemption = redemptionsByBond.get(cbCode) ?? null;
+  const events = projectEvents([
+    ...arrayValue(raw.events),
+    ...(redemption === null ? [] : [redemptionEvent(redemption)]),
+  ], { cbCode, bondName: master.bondName, stockCode, companyName: master.companyName });
   const terms = projectTerms(term, view);
   const issuance = projectIssuance({ cbCode, bondName: master.bondName, stockCode, companyName: master.companyName, terms, events, sourceDataDate: dataDate });
   return {
@@ -122,8 +127,48 @@ function projectRecord(input, dataDate, masters, historyByBond) {
     terms,
     quote,
     liquidity: projectLiquidity(history, dataDate),
+    rights: { redemption },
     events,
     issuance,
+  };
+}
+
+function indexRedemptions(supplemental, dataDate) {
+  const indexed = new Map();
+  for (const entry of arrayValue(supplemental?.redemptions)) {
+    const cbCode = text(entry?.bondCode);
+    const announcementDate = isoDate(entry?.announcementDate);
+    const lastTradingDate = isoDate(entry?.delistingDate);
+    const sourceUrl = typeof entry?.detailUrl === "string" && isOfficialSourceUrl(entry.detailUrl)
+      ? entry.detailUrl
+      : null;
+    const summary = optionalText(entry?.subject);
+    if (!cbCode || !announcementDate || !lastTradingDate || !sourceUrl || !summary || indexed.has(cbCode)) continue;
+    indexed.set(cbCode, {
+      eventId: `mops-redemption:${cbCode}:${announcementDate}`,
+      state: announcementDate <= dataDate && dataDate <= lastTradingDate
+        ? "active"
+        : dataDate < announcementDate ? "upcoming" : "completed",
+      announcementDate,
+      lastTradingDate,
+      redemptionDate: null,
+      redemptionPrice: null,
+      outstandingBalance: null,
+      sourceUrl,
+      dataDate,
+      summary,
+    });
+  }
+  return indexed;
+}
+
+function redemptionEvent(redemption) {
+  return {
+    eventId: redemption.eventId,
+    type: "redemption",
+    date: redemption.announcementDate,
+    title: redemption.summary,
+    sourceUrl: redemption.sourceUrl,
   };
 }
 

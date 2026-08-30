@@ -294,7 +294,9 @@ async function loadCompanyOverview() {
     runtime.ipoEventsUrl ? fetchJson(new URL(runtime.ipoEventsUrl, document.baseURI)) : null,
     runtime.datasets?.["94025"] ? fetchJson(new URL(runtime.datasets["94025"], document.baseURI)) : null,
     runtime.datasets?.bondWorkbench ? fetchJson(new URL(runtime.datasets.bondWorkbench, document.baseURI)) : null,
-    runtime.cbWorkbenchV53Url ? fetchJson(new URL(runtime.cbWorkbenchV53Url, document.baseURI)) : null,
+    runtime.cbWorkbenchV54Url || runtime.cbWorkbenchV53Url
+      ? fetchJson(new URL(runtime.cbWorkbenchV54Url ?? runtime.cbWorkbenchV53Url, document.baseURI))
+      : null,
   ]);
   if (!Array.isArray(companyMaster?.records)) {
     target.innerHTML = '<p class="empty-state">公司公開資料暫時無法載入，請稍後再試。</p>';

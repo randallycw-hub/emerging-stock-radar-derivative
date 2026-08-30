@@ -22,12 +22,71 @@ export const EVENT_TYPE_LABELS = Object.freeze({
   maturity: "到期",
 });
 
-export function projectMarketEvents({ asOfDate, ipoSnapshot, bonds } = {}) {
+export function projectMarketEvents({ asOfDate, ipoSnapshot, bonds, canonicalEvents = null } = {}) {
   if (!isIsoDate(asOfDate)) return [];
+  const canonical = projectCanonicalEvents(canonicalEvents, asOfDate);
+  if (canonical.length) return canonical.sort(compareEvents);
   return [
     ...projectIpoEvents(ipoSnapshot, asOfDate),
     ...projectBondEvents(bonds, asOfDate),
   ].sort(compareEvents);
+}
+
+function projectCanonicalEvents(snapshot, asOfDate) {
+  const records = Array.isArray(snapshot?.records) ? snapshot.records : [];
+  return records.map((event) => {
+    const market = event?.marketScope === "ipo" ? "ipo" : event?.marketScope === "cb" ? "bonds" : null;
+    const date = canonicalEventDate(event);
+    const code = text(market === "bonds" ? event?.cbCode : event?.stockCode);
+    const companyName = text(event?.companyName);
+    const entityName = text(market === "bonds" ? event?.instrumentName : event?.companyName) || code;
+    if (!market || !isIsoDate(date) || !code || !companyName || !entityName) return null;
+    const eventType = canonicalEventType(event?.eventType);
+    const href = market === "ipo"
+      ? `./ipo.html?q=${encodeURIComponent(code)}`
+      : `./bonds.html?bond=${encodeURIComponent(code)}`;
+    return publicEvent({
+      market,
+      date,
+      code,
+      companyName,
+      entityKey: `${market === "ipo" ? "ipo" : "bond"}:${code}`,
+      entityName,
+      subtitle: market === "bonds" ? [text(event?.stockCode), companyName].filter(Boolean).join(" ") : null,
+      title: text(event?.title) || "公開事件",
+      eventType,
+      href,
+      detailHref: market === "ipo"
+        ? `./company.html?code=${encodeURIComponent(code)}`
+        : href,
+      officialUrl: isOfficialUrl(event?.sourceUrl) ? event.sourceUrl : null,
+      asOfDate,
+    });
+  }).filter(Boolean);
+}
+
+function canonicalEventDate(event) {
+  const values = [event?.effectiveDate, event?.announcementDate, event?.startDate, event?.endDate, event?.deadlineDate];
+  return values.find(isIsoDate) ?? null;
+}
+
+function canonicalEventType(value) {
+  const type = text(value);
+  const mapping = {
+    cb_listing: "listing",
+    cb_early_redemption: "redemption",
+    cb_put: "put",
+    cb_maturity: "maturity",
+    cb_conversion_suspension: "conversion_suspended",
+    cb_conversion_price_change: "conversion_price_adjustment",
+    ipo_filing: "application_submitted",
+    ipo_review: "review",
+    ipo_contract: "contract",
+    ipo_auction: "auction",
+    ipo_subscription: "subscription",
+    ipo_listing: "listing",
+  };
+  return mapping[type] ?? "public_event";
 }
 
 function projectIpoEvents(snapshot, asOfDate) {
@@ -95,7 +154,7 @@ function projectBondEvents(records, asOfDate) {
   return entries;
 }
 
-function publicEvent({ market, date, code, companyName, entityKey, entityName, subtitle, title, eventType, href, detailHref, asOfDate }) {
+function publicEvent({ market, date, code, companyName, entityKey, entityName, subtitle, title, eventType, href, detailHref, officialUrl = null, asOfDate }) {
   return {
     id: [market, entityKey, date, eventType, title].join(":"),
     market,
@@ -110,6 +169,7 @@ function publicEvent({ market, date, code, companyName, entityKey, entityName, s
     eventTypeLabel: EVENT_TYPE_LABELS[eventType] ?? "公開事件",
     href,
     detailHref,
+    officialUrl,
     updatedAt: asOfDate,
   };
 }
@@ -270,4 +330,20 @@ function isIsoDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""))) return false;
   const timestamp = Date.parse(`${value}T00:00:00Z`);
   return Number.isFinite(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === value;
+}
+
+function isOfficialUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && new Set([
+      "www.tpex.org.tw",
+      "www.twse.com.tw",
+      "openapi.twse.com.tw",
+      "mops.twse.com.tw",
+      "mopsov.twse.com.tw",
+      "www.tdcc.com.tw",
+    ]).has(url.hostname);
+  } catch {
+    return false;
+  }
 }

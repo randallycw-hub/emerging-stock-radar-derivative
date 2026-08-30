@@ -38,15 +38,19 @@ async function loadEvents() {
   const runtime = pointer?.runtimeUrl
     ? await safeJsonFetch(new URL(pointer.runtimeUrl, location.href), { errorTarget })
     : null;
-  if (!runtime?.ipoEventsUrl || !runtime?.datasets?.bondWorkbench) {
+  if (!runtime?.canonicalEventsV54Url && (!runtime?.ipoEventsUrl || !runtime?.datasets?.bondWorkbench)) {
     showUnavailable();
     return;
   }
-  const [ipoSnapshot, bondWorkbench] = await Promise.all([
-    safeJsonFetch(new URL(runtime.ipoEventsUrl, location.href), { errorTarget }),
-    safeJsonFetch(new URL(runtime.datasets.bondWorkbench, location.href), { errorTarget }),
+  const [canonicalEvents, ipoSnapshot, bondWorkbench] = await Promise.all([
+    runtime.canonicalEventsV54Url
+      ? safeJsonFetch(new URL(runtime.canonicalEventsV54Url, location.href), { errorTarget })
+      : null,
+    runtime.ipoEventsUrl ? safeJsonFetch(new URL(runtime.ipoEventsUrl, location.href), { errorTarget }) : null,
+    runtime.datasets?.bondWorkbench ? safeJsonFetch(new URL(runtime.datasets.bondWorkbench, location.href), { errorTarget }) : null,
   ]);
-  const asOfDate = validDate(ipoSnapshot?.dataDate) ? ipoSnapshot.dataDate
+  const asOfDate = validDate(canonicalEvents?.dataDate) ? canonicalEvents.dataDate
+    : validDate(ipoSnapshot?.dataDate) ? ipoSnapshot.dataDate
     : validDate(bondWorkbench?.dataDate) ? bondWorkbench.dataDate
       : null;
   if (!asOfDate) {
@@ -55,7 +59,7 @@ async function loadEvents() {
   }
   state.asOfDate = asOfDate;
   state.calendarMonth = validMonth(state.calendarMonth) ? state.calendarMonth : asOfDate.slice(0, 7);
-  state.allEvents = projectMarketEvents({ asOfDate, ipoSnapshot, bonds: bondWorkbench?.records });
+  state.allEvents = projectMarketEvents({ asOfDate, canonicalEvents, ipoSnapshot, bonds: bondWorkbench?.records });
   populateEventTypes();
   applyStateToControls();
   render();
@@ -290,7 +294,7 @@ function openDrawer(event, relatedEvents) {
   const title = document.querySelector("#market-event-drawer-title");
   if (!drawer || !target || !title) return;
   title.textContent = `${event.entityName} · 事件明細`;
-  target.innerHTML = `<dl class="market-event-drawer__facts"><div><dt>日期</dt><dd>${formatDate(event.date)}（${dateWeekday(event.date)}）</dd></div><div><dt>市場</dt><dd>${event.market === "ipo" ? "IPO" : "可轉債"}</dd></div><div><dt>事件</dt><dd>${escapeHtml(event.title)}</dd></div><div><dt>資料日期</dt><dd>${formatDate(event.updatedAt)}</dd></div><div><dt>公開資料</dt><dd>${event.market === "ipo" ? "TWSE／TPEx 已發布資料" : "TPEx 已發布可轉債資料"}</dd></div></dl><section class="market-event-drawer__timeline"><h3>同一標的事件脈絡</h3><ol>${relatedEvents.sort((left, right) => left.date.localeCompare(right.date)).map((item) => `<li class="${timelineClass(item)}"><time>${formatDate(item.date)}</time><div><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(eventTimeLabel(item.date, state.asOfDate))}</span></div></li>`).join("")}</ol></section><div class="market-event-drawer__actions"><a class="primary-button" href="${escapeAttribute(event.href)}">查看 ${event.market === "ipo" ? "IPO 時程" : "CB 資料"}</a><a class="secondary-button" href="${escapeAttribute(event.detailHref)}">前往個別詳情</a></div>`;
+  target.innerHTML = `<dl class="market-event-drawer__facts"><div><dt>日期</dt><dd>${formatDate(event.date)}（${dateWeekday(event.date)}）</dd></div><div><dt>市場</dt><dd>${event.market === "ipo" ? "IPO" : "可轉債"}</dd></div><div><dt>事件</dt><dd>${escapeHtml(event.title)}</dd></div><div><dt>資料日期</dt><dd>${formatDate(event.updatedAt)}</dd></div><div><dt>公開資料</dt><dd>${event.market === "ipo" ? "TWSE／TPEx 已發布資料" : "TPEx 已發布可轉債資料"}</dd></div></dl><section class="market-event-drawer__timeline"><h3>同一標的事件脈絡</h3><ol>${relatedEvents.sort((left, right) => left.date.localeCompare(right.date)).map((item) => `<li class="${timelineClass(item)}"><time>${formatDate(item.date)}</time><div><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(eventTimeLabel(item.date, state.asOfDate))}</span></div></li>`).join("")}</ol></section><div class="market-event-drawer__actions"><a class="primary-button" href="${escapeAttribute(event.href)}">查看 ${event.market === "ipo" ? "IPO 時程" : "CB 資料"}</a><a class="secondary-button" href="${escapeAttribute(event.detailHref)}">前往個別詳情</a>${officialSourceAction(event)}</div>`;
   if (typeof drawer.showModal === "function") drawer.showModal();
   else drawer.setAttribute("open", "");
 }
@@ -300,6 +304,24 @@ function closeDrawer() {
   if (!drawer) return;
   if (typeof drawer.close === "function") drawer.close();
   else drawer.removeAttribute("open");
+}
+
+function officialSourceAction(event) {
+  return isAllowedOfficialUrl(event?.officialUrl)
+    ? `<a class="secondary-button" href="${escapeAttribute(event.officialUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a>`
+    : "";
+}
+
+function isAllowedOfficialUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && new Set([
+      "www.tpex.org.tw", "www.twse.com.tw", "openapi.twse.com.tw",
+      "mops.twse.com.tw", "mopsov.twse.com.tw", "www.tdcc.com.tw",
+    ]).has(url.hostname);
+  } catch {
+    return false;
+  }
 }
 
 function showUnavailable() {

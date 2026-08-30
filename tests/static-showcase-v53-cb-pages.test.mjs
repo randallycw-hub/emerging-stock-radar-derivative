@@ -146,3 +146,25 @@ test("V5.3 event calendar filters a verified date range and groups same-day CB c
   assert.deepEqual(filtered.map((event) => event.cbCode), ["90001", "90002"]);
   assert.deepEqual(groupV53CbEventsByDate(filtered), [{ date: "2026-09-03", events: filtered }]);
 });
+
+test("V5.4 event stream maps official CB event dates into the existing public calendar", () => {
+  const events = [{
+    eventId: "mops-redemption:90002:2026-09-03",
+    eventType: "cb_early_redemption",
+    marketScope: "cb",
+    cbCode: "90002",
+    instrumentName: "乙一",
+    stockCode: "9000",
+    companyName: "乙公司",
+    announcementDate: "2026-09-03",
+    effectiveDate: null,
+    sourceUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?co_id=9000",
+    title: "乙公司公告提前贖回",
+  }];
+  const filtered = filterV53CbEvents(events, { asOfDate: "2026-09-01", days: 7, type: "redemption" });
+
+  assert.deepEqual(filtered.map((event) => [event.cbCode, event.type, event.date, event.label]), [
+    ["90002", "redemption", "2026-09-03", "提前贖回"],
+  ]);
+  assert.equal(JSON.stringify(filtered).match(/eventId|missingReason|sourceId/u), null);
+});

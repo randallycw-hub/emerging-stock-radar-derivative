@@ -94,3 +94,52 @@ test("市場事件篩選同時支援市場、期間、狀態、類型與搜尋�
   assert.equal(events.length, 4);
   assert.deepEqual(filterMarketEvents(events, { asOfDate: "2026-08-26", period: "tomorrow" }).map((event) => event.code), ["11011"]);
 });
+
+test("市場事件優先採用 V5.4 canonical stream，並保留官方公告連結而不暴露內部欄位", () => {
+  const events = projectMarketEvents({
+    asOfDate: "2026-08-26",
+    canonicalEvents: {
+      dataDate: "2026-08-26",
+      records: [{
+        eventId: "mops-redemption:11011:2026-08-27",
+        eventType: "cb_early_redemption",
+        marketScope: "cb",
+        stockCode: "1101",
+        cbCode: "11011",
+        companyName: "台泥",
+        instrumentName: "台泥一永",
+        announcementDate: "2026-08-27",
+        effectiveDate: null,
+        startDate: null,
+        endDate: null,
+        deadlineDate: null,
+        title: "台泥公告提前贖回",
+        sourceUrl: "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?co_id=1101",
+        sourceId: "must-not-project",
+        missingReason: "must-not-project",
+      }, {
+        eventId: "ipo:1234:listing:2026-08-28",
+        eventType: "ipo_listing",
+        marketScope: "ipo",
+        stockCode: "1234",
+        cbCode: null,
+        companyName: "測試公司",
+        instrumentName: "測試公司",
+        announcementDate: null,
+        effectiveDate: "2026-08-28",
+        startDate: null,
+        endDate: null,
+        deadlineDate: null,
+        title: "上市買賣",
+        sourceUrl: "https://www.twse.com.tw/zh/announcement/auction.html",
+      }],
+    },
+  });
+
+  assert.deepEqual(events.map((event) => [event.market, event.date, event.code, event.eventType]), [
+    ["bonds", "2026-08-27", "11011", "redemption"],
+    ["ipo", "2026-08-28", "1234", "listing"],
+  ]);
+  assert.equal(events[0].officialUrl, "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?co_id=1101");
+  assert.equal(JSON.stringify(events).match(/sourceId|missingReason|eventId/u), null);
+});

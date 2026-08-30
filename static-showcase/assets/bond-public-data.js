@@ -65,11 +65,15 @@ export async function loadPublicBondWorkbench({ errorTarget = null } = {}) {
 }
 
 export async function loadPublicCbWorkbenchV53({ errorTarget = null } = {}) {
+  return loadPublicCbWorkbenchV54({ errorTarget });
+}
+
+export async function loadPublicCbWorkbenchV54({ errorTarget = null } = {}) {
   const pointer = await safeJsonFetch(bootstrapConfig.generationPointerUrl, { errorTarget });
   const config = pointer?.runtimeUrl
     ? await safeJsonFetch(new URL(pointer.runtimeUrl, globalThis.document?.baseURI), { errorTarget })
     : bootstrapConfig;
-  const url = config?.cbWorkbenchV53Url;
+  const url = config?.cbWorkbenchV54Url ?? config?.cbWorkbenchV53Url;
   if (typeof url !== "string" || !url) return null;
   return safeJsonFetch(new URL(url, globalThis.document?.baseURI), { errorTarget });
 }

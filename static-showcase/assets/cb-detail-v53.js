@@ -18,6 +18,7 @@ export function renderCbDetailV53(record = {}, { companyBonds = [] } = {}) {
     .filter((item) => item?.status === "active" && text(item?.stockCode) === text(record.stockCode) && text(item?.cbCode) !== code)
     .sort((left, right) => text(left.cbCode).localeCompare(text(right.cbCode)));
   return `<header class="cb-detail-head"><div><p class="section-number">${escapeHtml(code)} / CB WORKBENCH</p><h2>${escapeHtml(name)}</h2><p>${escapeHtml(text(record.stockCode))} ${escapeHtml(text(record.companyName))}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債市場總覽">← 返回市場總覽</button></header>
+    ${redemptionNotice(record.rights?.redemption)}
     <nav class="detail-tabs cb-detail-tabs" aria-label="可轉債詳細資料分頁" role="tablist">${CB_DETAIL_TABS.map(([key, label], index) => tabButton(key, label, index === 0)).join("")}</nav>
     ${tabPanel("quote", quotePanel(quote))}
     ${tabPanel("liquidity", liquidityPanel(quote, liquidity))}
@@ -26,9 +27,26 @@ export function renderCbDetailV53(record = {}, { companyBonds = [] } = {}) {
     ${tabPanel("company", companyPanel(record, siblings))}`;
 }
 
+function redemptionNotice(right) {
+  if (!right || !isOfficialSourceUrl(right.sourceUrl) || !isoDate(right.announcementDate)) return "";
+  const facts = [
+    ["公告日", date(right.announcementDate)],
+    ["最後交易日", date(right.lastTradingDate)],
+    ["贖回日", date(right.redemptionDate)],
+    ["贖回價格", price(right.redemptionPrice)],
+    ["流通餘額", amount(right.outstandingBalance)],
+  ].filter(([, value]) => value !== "—");
+  return `<aside class="cb-redemption-notice" role="note"><h3>提前贖回公告</h3>${right.summary ? `<p>${escapeHtml(right.summary)}</p>` : ""}${facts.length ? `<dl class="detail-facts cb-detail-facts">${facts.map(([label, value]) => fact(label, value)).join("")}</dl>` : ""}<p><a href="${escapeHtml(right.sourceUrl)}" target="_blank" rel="noopener noreferrer">查看官方公告</a></p></aside>`;
+}
+
 export function bindCbDetailV53(target, onClose) {
   const close = target.querySelector("[data-detail-close]");
   close?.addEventListener("click", onClose);
+  close?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    onClose();
+  });
   for (const button of target.querySelectorAll("[data-cb-detail-tab]")) {
     button.addEventListener("click", () => activateTab(target, button.dataset.cbDetailTab));
   }

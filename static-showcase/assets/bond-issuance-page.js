@@ -51,7 +51,7 @@ function filterIssuance(records, { query = "", stage = "", days = "" } = {}, dat
 
 function renderRows(target, records) {
   if (!records.length) {
-    target.innerHTML = '<tr><td colspan="9" class="empty-cell">目前沒有符合條件的已公布發行案件。</td></tr>';
+    target.innerHTML = '<tr><td colspan="10" class="empty-cell">目前沒有符合條件的已公布發行案件。</td></tr>';
     return;
   }
   target.innerHTML = records.map((record) => {
@@ -65,6 +65,7 @@ function renderRows(target, records) {
       <td>${publicAmount(record.terms?.issueAmount)}</td>
       <td>${escapeHtml(record.terms?.securedStatus ?? "—")}</td>
       <td>${escapeHtml(record.terms?.underwriter ?? "—")}</td>
+      <td>${escapeHtml(record.terms?.trustee ?? "—")}</td>
       <td>${dateLabel(record.terms?.issueDate)}</td>
       <td>${dateLabel(record.stages?.listingDate)}</td>
       <td>${dateLabel(record.terms?.maturityDate)}</td>
@@ -82,7 +83,7 @@ async function initialize() {
   const model = await loadPublicCbWorkbenchV53({ errorTarget });
   if (!model?.dataDate || !Array.isArray(model.issuance)) {
     count.textContent = "資料暫時無法取得";
-    target.innerHTML = '<tr><td class="empty-cell">資料暫時無法取得</td></tr>';
+    target.innerHTML = '<tr><td colspan="10" class="empty-cell">資料暫時無法取得</td></tr>';
     return;
   }
   const render = () => {

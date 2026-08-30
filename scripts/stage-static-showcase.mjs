@@ -20,6 +20,10 @@ import {
   validateCbWorkbenchV53,
 } from "../static-showcase/assets/cb-workbench-v53.js";
 import {
+  buildV54CanonicalData,
+  validateV54CanonicalData,
+} from "../static-showcase/assets/v54-canonical-data.js";
+import {
   buildCanonicalPublicMasters,
   buildPublicMarketResearch,
 } from "../static-showcase/assets/public-market-research.js";
@@ -66,6 +70,7 @@ const ASSET_FILES = new Set([
   "bond-detail-page.js",
   "cb-detail-v53.js",
   "cb-workbench-v53.js",
+  "v54-canonical-data.js",
   "cb-workbench-ui.js",
   "cb-stats-page.js",
   "bond-events-page.js",
@@ -253,7 +258,7 @@ export async function stageStaticShowcase({
 
 async function writePublicMarketResearch({ destination, generation }) {
   const base = join(destination, "data", ...generation.split("/"));
-  const [manifest, emerging, ipo, workbench, stockCloses, history, revenue] = await Promise.all([
+  const [manifest, emerging, ipo, workbench, stockCloses, history, revenue, supplemental, conversionPrices] = await Promise.all([
     readJson(join(base, "manifest.json"), "active generation public manifest is invalid"),
     readJson(join(base, "emerging-market.json"), "active generation public emerging market is invalid"),
     readJson(join(base, "ipo-events.json"), "active generation public IPO snapshot is invalid"),
@@ -261,6 +266,8 @@ async function writePublicMarketResearch({ destination, generation }) {
     readPublicOptionalJson(join(base, "stock-closes.json"), "active generation public stock closes are invalid", []),
     readPublicOptionalJson(join(base, "bond-market-history.json"), "active generation public CB history is invalid", []),
     readPublicOptionalJson(join(base, "94025.json"), "active generation public revenue snapshot is invalid", []),
+    readPublicOptionalJson(join(base, "bond-supplemental.json"), "active generation public CB supplemental snapshot is invalid", { redemptions: [] }),
+    readPublicOptionalJson(join(base, "conversion-prices.json"), "active generation public conversion prices are invalid", []),
   ]);
   const masters = buildCanonicalPublicMasters({
     manifest,
@@ -287,14 +294,36 @@ async function writePublicMarketResearch({ destination, generation }) {
     history,
     cbMaster: masters.cbMaster,
     companyMaster: masters.companyMaster,
+    supplemental,
   });
   validateCbWorkbenchV53(cbWorkbenchV53);
+  const cbWorkbenchV54 = buildV54CanonicalData({
+    manifest,
+    workbench,
+    history,
+    cbMaster: masters.cbMaster,
+    companyMaster: masters.companyMaster,
+    supplemental,
+    conversionPrices,
+    ipo,
+    emerging,
+    revenue,
+  });
+  validateV54CanonicalData(cbWorkbenchV54);
+  const canonicalEventsV54 = {
+    schemaVersion: 1,
+    dataDate: cbWorkbenchV54.dataDate,
+    generatedAt: cbWorkbenchV54.generatedAt,
+    records: cbWorkbenchV54.events,
+  };
   await Promise.all([
     writeFile(join(base, "market-research.json"), `${JSON.stringify(research, null, 2)}\n`, "utf8"),
     writeFile(join(base, "company-master.json"), `${JSON.stringify(companyMaster, null, 2)}\n`, "utf8"),
     writeFile(join(base, "cb-master.json"), `${JSON.stringify(cbMaster, null, 2)}\n`, "utf8"),
     writeFile(join(base, "search-index.json"), `${JSON.stringify(searchIndex, null, 2)}\n`, "utf8"),
     writeFile(join(base, "cb-workbench-v53.json"), `${JSON.stringify(cbWorkbenchV53, null, 2)}\n`, "utf8"),
+    writeFile(join(base, "cb-workbench-v54.json"), `${JSON.stringify(cbWorkbenchV54, null, 2)}\n`, "utf8"),
+    writeFile(join(base, "canonical-events-v54.json"), `${JSON.stringify(canonicalEventsV54, null, 2)}\n`, "utf8"),
   ]);
   const runtimePath = join(base, "runtime.json");
   const runtime = await readJson(runtimePath, "active generation public runtime is invalid");
@@ -304,6 +333,8 @@ async function writePublicMarketResearch({ destination, generation }) {
     cbMasterUrl: `./data/${generation}/cb-master.json`,
     searchIndexUrl: `./data/${generation}/search-index.json`,
     cbWorkbenchV53Url: `./data/${generation}/cb-workbench-v53.json`,
+    cbWorkbenchV54Url: `./data/${generation}/cb-workbench-v54.json`,
+    canonicalEventsV54Url: `./data/${generation}/canonical-events-v54.json`,
   }, null, 2)}\n`, "utf8");
   return research;
 }

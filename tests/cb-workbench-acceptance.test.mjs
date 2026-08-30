@@ -151,6 +151,9 @@ test("offline builder and outer refresh stage the same CB generation through the
       companyMasterUrl: `./data/${expectedRuntime.generation}/company-master.json`,
       cbMasterUrl: `./data/${expectedRuntime.generation}/cb-master.json`,
       searchIndexUrl: `./data/${expectedRuntime.generation}/search-index.json`,
+      cbWorkbenchV53Url: `./data/${expectedRuntime.generation}/cb-workbench-v53.json`,
+      cbWorkbenchV54Url: `./data/${expectedRuntime.generation}/cb-workbench-v54.json`,
+      canonicalEventsV54Url: `./data/${expectedRuntime.generation}/canonical-events-v54.json`,
     });
     assert.deepEqual(stagedRuntime, expectedRuntime);
     assert.equal(
@@ -188,6 +191,7 @@ test("offline builder and outer refresh stage the same CB generation through the
           "current.json", "runtime.json", "manifest.json", "11406.json",
           "bond-market-history.json",
           "conversion-prices.json", "bond-workbench.json", "cb-master.json",
+          "cb-workbench-v54.json",
         ]),
       );
       assert.match(page.document.element("bond-table-body").innerHTML, /35221/);

@@ -87,8 +87,8 @@ async function loadAndRender() {
       typeof config.cbMasterUrl === "string"
         ? loadJson(config.cbMasterUrl, [])
         : Promise.resolve([]),
-      typeof config.cbWorkbenchV53Url === "string"
-        ? loadJson(config.cbWorkbenchV53Url, null)
+      typeof (config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url) === "string"
+        ? loadJson(config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url, null)
         : Promise.resolve(null),
     ]);
   state.manifest = manifest;
@@ -684,11 +684,16 @@ function renderRoute() {
     target.hidden = true;
     target.innerHTML = "";
     list.hidden = true;
-    overview.hidden = false;
-    renderOverview();
+    if (overview) {
+      overview.hidden = false;
+      renderOverview();
+    } else {
+      list.hidden = false;
+      renderBonds();
+    }
     return;
   }
-  overview.hidden = true;
+  if (overview) overview.hidden = true;
   if (state.workbenchUnavailable) {
     target.hidden = false;
     list.hidden = true;
