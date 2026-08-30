@@ -262,7 +262,14 @@ function projectIssuance({ cbCode, bondName, stockCode, companyName, terms, even
     stockCode,
     companyName,
     stages,
-    currentStage: listing ? "listing" : "unannounced",
+    terms: {
+      issueDate: terms.issueDate,
+      maturityDate: terms.maturityDate,
+      issueAmount: terms.issueAmount,
+      securedStatus: terms.securedStatus,
+      underwriter: terms.underwriter,
+    },
+    currentStage: [...PIPELINE_STAGE_KEYS].reverse().find((stage) => stages[stage]) ?? "unannounced",
     sourceUrl: listing?.sourceUrl ?? null,
     dataDate: sourceDataDate,
   };
@@ -275,13 +282,16 @@ function projectLiquidity(history, dataDate) {
     return slice.length === size ? round(slice.reduce((sum, point) => sum + point.tradingUnits, 0) / size) : null;
   };
   const monday = isoWeekMonday(dataDate);
-  const weekly = valid.filter((point) => point.date >= monday && point.date <= dataDate);
+  const weekly = history.filter((point) => point.date >= monday && point.date <= dataDate);
+  const hasWeeklyVolume = weekly.length > 0 && weekly.every((point) => point.tradingUnits !== null);
+  const hasWeeklyTurnover = weekly.length > 0 && weekly.every((point) => point.turnover !== null);
   return {
     average5: average(5),
     average20: average(20),
     sample5: Math.min(valid.length, 5),
     sample20: Math.min(valid.length, 20),
-    weekVolume: weekly.length ? round(weekly.reduce((sum, point) => sum + point.tradingUnits, 0)) : null,
+    weekVolume: hasWeeklyVolume ? round(weekly.reduce((sum, point) => sum + point.tradingUnits, 0)) : null,
+    weekTurnover: hasWeeklyTurnover ? round(weekly.reduce((sum, point) => sum + point.turnover, 0)) : null,
     tradedDays20: valid.slice(-20).filter((point) => point.tradingUnits > 0).length,
   };
 }
@@ -290,12 +300,12 @@ function buildSummary(records, dataDate) {
   const active = records.filter((record) => record.status === "active");
   const hasCompleteTradeCoverage = active.every((record) => record.quote.volume !== null && record.quote.isLatestSnapshot);
   const hasCompleteTurnoverCoverage = active.every((record) => record.quote.turnoverAmount !== null && record.quote.isLatestSnapshot);
-  const hasCompleteWeeklyCoverage = active.every((record) => record.liquidity.weekVolume !== null);
+  const hasCompleteWeeklyCoverage = active.every((record) => record.liquidity.weekTurnover !== null);
   return {
     activeCount: active.length,
     tradedCount: hasCompleteTradeCoverage ? active.filter((record) => record.quote.volume > 0).length : null,
     turnoverAmount: hasCompleteTurnoverCoverage ? round(active.reduce((sum, record) => sum + record.quote.turnoverAmount, 0)) : null,
-    weekTurnoverAmount: hasCompleteWeeklyCoverage ? round(active.reduce((sum, record) => sum + record.liquidity.weekVolume, 0)) : null,
+    weekTurnoverAmount: hasCompleteWeeklyCoverage ? round(active.reduce((sum, record) => sum + record.liquidity.weekTurnover, 0)) : null,
     weekPeriod: `${isoWeekMonday(dataDate)} 至 ${dataDate}`,
   };
 }

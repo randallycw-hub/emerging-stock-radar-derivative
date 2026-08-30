@@ -9,6 +9,7 @@ import {
 } from "./bond-list-page.js";
 import { bindBondDetail, detailRecordFromLegacy, renderBondDetail } from "./bond-detail-page.js";
 import { applyCanonicalBondIdentity, indexCanonicalBonds } from "./canonical-identity.js";
+import { RANKING_METRICS, renderMarketOverview } from "./cb-workbench-ui.js";
 
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
@@ -34,6 +35,8 @@ const state = {
   workbenchDeclared: false,
   workbenchUnavailable: false,
   workbenchAsOfDate: null,
+  v53Model: null,
+  overviewMetric: "volume",
   detailOrigin: null,
   suggestions: [],
   highlightedSuggestion: -1,
@@ -71,7 +74,7 @@ async function loadAndRender() {
     config.datasets ?? {},
     "bondWorkbench",
   );
-  const [manifest, bondTerms, history, conversionPrices, workbenchResult, cbMaster] =
+  const [manifest, bondTerms, history, conversionPrices, workbenchResult, cbMaster, v53Model] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
       loadJson(config.datasets["11406"], []),
@@ -83,6 +86,9 @@ async function loadAndRender() {
       typeof config.cbMasterUrl === "string"
         ? loadJson(config.cbMasterUrl, [])
         : Promise.resolve([]),
+      typeof config.cbWorkbenchV53Url === "string"
+        ? loadJson(config.cbWorkbenchV53Url, null)
+        : Promise.resolve(null),
     ]);
   state.manifest = manifest;
   state.bondTerms = arrayValue(bondTerms);
@@ -105,6 +111,9 @@ async function loadAndRender() {
       history: state.history,
       cbMaster,
     });
+  state.v53Model = v53Model?.schemaVersion === 1 && Array.isArray(v53Model?.records)
+    ? v53Model
+    : null;
   updateSearchSuggestions();
   renderRoute();
   const marketDate = state.manifest?.market?.dataDate;
@@ -667,15 +676,18 @@ function renderRoute() {
   const code = new URLSearchParams(location.search).get("bond");
   const target = document.querySelector("#bond-workbench");
   const list = document.querySelector("#bond-list-view");
+  const overview = document.querySelector("#cb-market-overview");
   disposeDetail();
   disposeDetail = () => {};
   if (!code) {
     target.hidden = true;
     target.innerHTML = "";
-    list.hidden = false;
-    renderBonds();
+    list.hidden = true;
+    overview.hidden = false;
+    renderOverview();
     return;
   }
+  overview.hidden = true;
   if (state.workbenchUnavailable) {
     target.hidden = false;
     list.hidden = true;
@@ -711,6 +723,24 @@ function renderRoute() {
   target.hidden = false;
   list.hidden = true;
   target.querySelector("[data-detail-close]")?.focus();
+}
+
+function renderOverview() {
+  const root = document.querySelector("#cb-market-overview");
+  if (!root) return;
+  if (!state.v53Model) {
+    root.innerHTML = '<p class="empty-state">資料暫時無法取得</p>';
+    return;
+  }
+  root.innerHTML = renderMarketOverview(state.v53Model, { metric: state.overviewMetric });
+  for (const control of root.querySelectorAll("[data-cb-overview-metric]")) {
+    control.addEventListener("click", () => {
+      const metric = control.dataset.cbOverviewMetric;
+      if (!Object.hasOwn(RANKING_METRICS, metric)) return;
+      state.overviewMetric = metric;
+      renderOverview();
+    });
+  }
 }
 
 function closeDetail() {

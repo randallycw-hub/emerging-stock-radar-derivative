@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant" data-theme="light">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="可轉債公開事件"><title>可轉債公開事件｜市場資訊台</title><link rel="stylesheet" href="./assets/app.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="可轉債公開事件行事曆"><title>CB 事件行事曆｜市場資訊台</title><link rel="stylesheet" href="./assets/app.css"></head>
 <body data-page="bonds">
   <a class="skip-link" href="#main-content">跳到主要內容</a>
   <header class="site-header"><div class="site-header__inner">
@@ -8,10 +8,11 @@
     <nav id="primary-navigation" class="primary-navigation" aria-label="主要導覽"><a data-page-link="home" href="./index.html">首頁</a><a data-page-link="emerging" href="./emerging.html">興櫃</a><a data-page-link="ipo" href="./ipo-radar.html">IPO</a><a data-page-link="bonds" href="./bonds.html" aria-current="page">可轉債</a></nav><button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
   </div></header>
   <main id="main-content" class="page-content" tabindex="-1">
-    <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / EVENTS</p><h1>公開事件</h1><p>將掛牌、賣回與到期等公開事件依官方依據去重後，依日期排列。</p></header>
-    <nav class="bond-context-nav" aria-label="可轉債功能"><a href="./bonds.html">市場總表</a><a href="./bonds-filter.html">條件篩選</a><a href="./bonds-issuance.html">發行案件</a><a href="./bonds-events.html" aria-current="page">公開事件</a></nav>
-    <section class="ledger-section" data-bond-events-root aria-labelledby="bond-events-heading"><header class="section-heading"><div><p class="section-number">VERIFIED EVENT DESK</p><h2 id="bond-events-heading">事件時程</h2></div><p id="bond-events-count" class="update-status" aria-live="polite">讀取中</p></header>
-      <form class="filters" aria-label="公開事件篩選"><label><span>顯示範圍</span><select id="bond-event-range"><option value="">所有未來公開事件</option><option value="30">未來 30 日</option></select></label><label><span>事件類型</span><select id="bond-event-type"><option value="all">全部</option><option value="conversion-price">轉換價調整</option><option value="conversion-state">停止／恢復轉換</option><option value="put">賣回</option><option value="redemption">提前贖回</option><option value="maturity30">30 日內到期</option><option value="listing">新掛牌</option></select></label></form>
+    <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / EVENT CALENDAR</p><h1>事件行事曆</h1><p>集中查看停止轉換、提前贖回、賣回、到期、轉換價調整、Reset 與新掛牌等已公布事件。</p></header>
+    <nav class="bond-context-nav" aria-label="可轉債功能"><a href="./bonds.html">市場總覽</a><a href="./bonds-filter.html">全部 CB</a><a href="./bonds-issuance.html">發行進度</a><a href="./bonds-events.html" aria-current="page">事件行事曆</a><a href="./bonds-stats.html">市場統計</a></nav>
+    <section class="ledger-section" data-bond-events-root aria-labelledby="bond-events-heading"><header class="section-heading"><div><p class="section-number">VERIFIED EVENT DESK</p><h2 id="bond-events-heading">可轉債事件</h2></div><p id="bond-events-count" class="update-status" aria-live="polite">讀取中</p></header>
+      <form id="bond-events-form" class="filters cb-event-filters" role="search" aria-label="可轉債事件篩選"><label><span>顯示範圍</span><select name="range"><option value="today">今日</option><option value="7">未來 7 日</option><option value="30" selected>未來 30 日</option><option value="month">本月</option></select></label><label><span>事件類型</span><select name="type"><option value="all">全部事件</option><option value="conversion_suspension">停止轉換</option><option value="redemption">提前贖回</option><option value="put">賣回</option><option value="maturity">到期</option><option value="conversion_adjustment">轉換價調整</option><option value="reset">Reset</option><option value="listing">新掛牌</option></select></label><label><span>搜尋</span><input name="q" type="search" inputmode="search" autocomplete="off" placeholder="CB 代碼、名稱或公司"></label></form>
+      <div id="bond-event-view-tabs" class="view-tabs cb-event-view-tabs" aria-label="事件檢視方式"><button type="button" data-event-view="list" aria-pressed="true">清單</button><button type="button" data-event-view="calendar" aria-pressed="false">月曆</button></div>
       <div id="bond-events-list" aria-live="polite"><p class="empty-state">公開事件讀取中</p></div><p class="data-error" data-page-error hidden role="status"></p>
     </section>
   </main>

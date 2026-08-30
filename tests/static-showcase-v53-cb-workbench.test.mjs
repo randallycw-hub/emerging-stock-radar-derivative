@@ -78,10 +78,10 @@ function record({
   };
 }
 
-function buildModel(records) {
+function buildModel(records, history = []) {
   return buildCbWorkbenchV53({
     workbench: { schemaVersion: 1, dataDate: "2026-08-28", records },
-    history: [],
+    history,
     cbMaster: records.map((item) => ({
       bondCode: item.bondCode,
       bondName: item.term.bondName,
@@ -126,6 +126,13 @@ test("V5.3 read model retains official event URLs and leaves unknown issuance st
     listingDate: "2025-08-28",
     asoDate: null,
   });
+  assert.deepEqual(model.issuance[0].terms, {
+    issueDate: "2025-08-28",
+    maturityDate: "2028-08-28",
+    issueAmount: 500000000,
+    securedStatus: "無擔保",
+    underwriter: "測試承銷商",
+  });
 });
 
 test("V5.3 market summary preserves official zero-trade state instead of collapsing unavailable data to zero", () => {
@@ -139,6 +146,16 @@ test("V5.3 market summary preserves official zero-trade state instead of collaps
   assert.equal(model.summary.turnoverAmount, null);
   assert.equal(model.records[0].quote.tradeState, "no_trade");
   assert.equal(model.records[1].quote.tradeState, "unavailable");
+});
+
+test("V5.3 market summary never labels trading units as turnover amount", () => {
+  const model = buildModel([record()], [
+    { bondCode: "90001", date: "2026-08-28", cbTradingUnits: "20", cbTurnover: "22000" },
+  ]);
+
+  assert.equal(model.records[0].liquidity.weekVolume, 20);
+  assert.equal(model.records[0].liquidity.weekTurnover, 22000);
+  assert.equal(model.summary.weekTurnoverAmount, 22000);
 });
 
 test("V5.3 QA selection covers up to twenty active CBs and only official event samples", () => {

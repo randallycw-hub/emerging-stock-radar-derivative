@@ -64,6 +64,7 @@ const ASSET_FILES = new Set([
   "company-overview.js",
   "bond-detail-page.js",
   "cb-workbench-v53.js",
+  "cb-workbench-ui.js",
   "bond-events-page.js",
   "bond-filter-page.js",
   "bond-issuance-page.js",

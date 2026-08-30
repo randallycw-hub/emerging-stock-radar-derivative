@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="可轉債公開資料條件篩選">
-  <title>可轉債條件篩選｜市場資訊台</title>
+  <meta name="description" content="全部可轉債公開資料庫">
+  <title>全部可轉債｜市場資訊台</title>
   <link rel="stylesheet" href="./assets/app.css">
 </head>
 <body data-page="bonds">
@@ -16,15 +16,17 @@
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
   </div></header>
   <main id="main-content" class="page-content" tabindex="-1">
-    <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / FILTER</p><h1>客觀條件篩選</h1><p>依公開條款與盤後數值縮小檢視範圍；結果不代表投資建議。</p></header>
-    <nav class="bond-context-nav" aria-label="可轉債功能"><a href="./bonds.html">市場總表</a><a href="./bonds-filter.html" aria-current="page">條件篩選</a><a href="./bonds-issuance.html">發行案件</a><a href="./bonds-events.html">公開事件</a></nav>
+    <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / DATABASE</p><h1>全部 CB</h1><p>依行情、條款、事件與流動性分組瀏覽已驗證的可轉債公開資料。</p></header>
+    <nav class="bond-context-nav" aria-label="可轉債功能"><a href="./bonds.html">市場總覽</a><a href="./bonds-filter.html" aria-current="page">全部 CB</a><a href="./bonds-issuance.html">發行進度</a><a href="./bonds-events.html">事件行事曆</a><a href="./bonds-stats.html">市場統計</a></nav>
     <section class="ledger-section" aria-labelledby="bond-filter-heading">
-      <header class="section-heading"><div><p class="section-number">PUBLIC FILTERS</p><h2 id="bond-filter-heading">可核對的條件</h2></div><p id="bond-filter-count" class="update-status" aria-live="polite">讀取中</p></header>
+      <header class="section-heading"><div><p class="section-number">PUBLIC DATABASE</p><h2 id="bond-filter-heading">可轉債資料庫</h2></div><p id="bond-filter-count" class="update-status" aria-live="polite">讀取中</p></header>
+      <nav id="bond-view-tabs" class="view-tabs cb-view-tabs" aria-label="全部 CB 檢視"><button type="button" data-cb-view="quote" aria-selected="true">行情</button><button type="button" data-cb-view="terms" aria-selected="false">條款</button><button type="button" data-cb-view="events" aria-selected="false">事件</button><button type="button" data-cb-view="liquidity" aria-selected="false">流動性</button></nav>
       <form id="bond-filter-form" class="filters" aria-label="可轉債公開條件篩選">
-        <label><span>搜尋</span><input name="q" type="search" placeholder="代碼、債券名稱或發行人"></label>
-        <label><span>快速檢視</span><select name="screener"><option value="">全部</option><option value="issue90">近期發行（90 日）</option><option value="maturity90">90 日內到期</option><option value="maturity365">365 日內到期</option><option value="price110">CB 價格 ≤ 110</option><option value="price120">CB 價格 ≤ 120</option><option value="premium0to10">溢價率 0～10%</option><option value="premium10to20">溢價率 10～20%</option><option value="conversion90to110">轉換價值 90～110</option><option value="remainingUnder50">剩餘比例 &lt; 50%</option><option value="event30">30 日內有事件</option></select></label>
+        <label><span>搜尋</span><input name="q" type="search" autocomplete="off" placeholder="股票／CB 代碼、名稱"></label>
+        <label><span>快速條件</span><select name="quickFilter"><option value="">全部</option><option value="newIssue">新發行</option><option value="lowPremium">低溢價</option><option value="nearConversion">接近轉換價值</option><option value="rights90">90 日內權利事件</option><option value="maturity365">365 日內到期</option><option value="recentPut">近期賣回</option><option value="recentRedemption">近期強贖</option><option value="conversionSuspended">停止轉換中</option></select></label>
+        <button id="bond-filter-clear" type="button" hidden>清除條件</button>
       </form>
-      <div class="bond-table-shell"><table class="bond-table public-data-table"><thead><tr><th>CB 代碼／名稱</th><th>發行人</th><th>CB 收盤</th><th>轉換價值</th><th>轉換溢價率</th><th>流通餘額比例</th><th>下一事件</th></tr></thead><tbody id="bond-filter-body"><tr><td colspan="7" class="empty-cell">盤後資料讀取中</td></tr></tbody></table></div>
+      <div class="bond-table-shell"><table class="bond-table public-data-table"><thead id="bond-filter-head"></thead><tbody id="bond-filter-body"><tr><td class="empty-cell">盤後資料讀取中</td></tr></tbody></table></div>
       <p class="data-error" data-page-error hidden role="status"></p>
     </section>
   </main>

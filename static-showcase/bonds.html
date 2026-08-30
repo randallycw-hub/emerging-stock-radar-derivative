@@ -36,22 +36,25 @@
   <main id="main-content" class="page-content" tabindex="-1">
     <header class="page-heading">
       <p class="kicker">CONVERTIBLE BONDS</p>
-      <h1>可轉債盤後資訊</h1>
-      <p>整理可轉債條款、盤後行情與同日估值結果。</p>
+      <h1>可轉債市場總覽</h1>
+      <p>集中查看已驗證的盤後成交、近期事件與公開發行進度。</p>
     </header>
     <nav class="bond-context-nav" aria-label="可轉債功能">
-      <a href="./bonds.html" aria-current="page">市場總表</a>
-      <a href="./bonds-filter.html">條件篩選</a>
-      <a href="./bonds-issuance.html">發行案件</a>
-      <a href="./bonds-events.html">公開事件</a>
+      <a href="./bonds.html" aria-current="page">市場總覽</a>
+      <a href="./bonds-filter.html">全部 CB</a>
+      <a href="./bonds-issuance.html">發行進度</a>
+      <a href="./bonds-events.html">事件行事曆</a>
+      <a href="./bonds-stats.html">市場統計</a>
     </nav>
     <section id="bond-market-root" class="ledger-section" data-page-root="bonds" aria-labelledby="bond-market-heading">
       <header class="section-heading">
-        <div><p class="section-number">MARKET WORKSPACE</p><h2 id="bond-market-heading">可轉債市場資料</h2></div>
+        <div><p class="section-number">MARKET WORKSPACE</p><h2 id="bond-market-heading">市場總覽</h2></div>
         <p id="bond-update-status" class="update-status" aria-live="polite">盤後資料讀取中</p>
       </header>
 
-      <div id="bond-list-view">
+      <section id="cb-market-overview" data-cb-market-overview aria-live="polite"><p class="empty-state">可轉債市場總覽讀取中</p></section>
+
+      <div id="bond-list-view" hidden>
         <form class="filters bond-filters" id="bond-filters" aria-label="可轉債篩選">
           <label class="search-field">
             <span>搜尋</span>
