@@ -39,16 +39,17 @@ test("emits IPO milestones and emerging turnover changes only from verified cons
   const before = {
     ...previous,
     ipoPipeline: { status: "verified", records: [{ stockCode: "3313", stage: "B", events: [] }] },
-    emerging: { status: "verified", records: [{ stockCode: "7777", transactionAmount: 100 }] },
+    emerging: { status: "verified", records: [{ stockCode: "7777", transactionAmount: 100 }, { stockCode: "7788", transactionAmount: 200 }] },
   };
   const after = {
     ...current,
     ipoPipeline: { status: "verified", records: [{ stockCode: "3313", stage: "C", events: [{ date: "2026-08-28", kind: "contract_approved", label: "契約核准", verified: true }] }] },
-    emerging: { status: "verified", records: [{ stockCode: "7777", transactionAmount: 250 }] },
+    emerging: { status: "verified", records: [{ stockCode: "7777", transactionAmount: 250 }, { stockCode: "7788", transactionAmount: 200 }] },
   };
   const changes = buildDailyChanges({ previous: before, current: after });
   assert.deepEqual(changes.filter((change) => change.entityType !== "cb").map((change) => [change.entityType, change.changeType, change.oldValue, change.newValue]), [
-    ["emerging", "emerging_turnover_changed", 100, 250],
+    ["emerging", "emerging_turnover_rank_changed", 2, 1],
+    ["emerging", "emerging_turnover_rank_changed", 1, 2],
     ["ipo", "ipo_stage_changed", "B", "C"],
     ["ipo", "new_ipo_event", null, "契約核准"],
   ]);
@@ -78,4 +79,29 @@ test("emits only newly entered verified CB event windows", () => {
     "put_window_added",
     "maturity_window_entered",
   ]);
+});
+
+test("does not surface old IPO history, future CB terms, or unchanged emerging ranks as daily changes", () => {
+  const after = {
+    ...current,
+    cbEvents: {
+      status: "verified",
+      records: [{ eventId: "event:23032:put", eventType: "put", cbCode: "23032", announcementDate: "2029-09-03" }],
+    },
+    ipoPipeline: {
+      status: "verified",
+      records: [{ stockCode: "3313", stage: "C", events: [{ date: "2019-01-01", kind: "listing", label: "掛牌日期", verified: true }] }],
+    },
+    emerging: {
+      status: "verified",
+      records: [{ stockCode: "7777", transactionAmount: 300 }],
+    },
+  };
+  const before = {
+    ...previous,
+    ipoPipeline: { status: "verified", records: [{ stockCode: "3313", stage: "B", events: [] }] },
+    emerging: { status: "verified", records: [{ stockCode: "7777", transactionAmount: 100 }] },
+  };
+  assert.deepEqual(buildDailyChanges({ previous: before, current: after }).filter((change) => change.entityType !== "cb"), []);
+  assert.equal(buildDailyChanges({ previous: before, current: after }).some((change) => change.changeType === "put_window_added"), false);
 });

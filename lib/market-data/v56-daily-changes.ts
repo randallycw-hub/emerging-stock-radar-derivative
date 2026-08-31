@@ -48,7 +48,7 @@ export type V56DailyChange = Readonly<{
     | "maturity_window_entered"
     | "ipo_stage_changed"
     | "new_ipo_event"
-    | "emerging_turnover_changed";
+    | "emerging_turnover_rank_changed";
   oldValue: number | string | null;
   newValue: number | string | null;
   effectiveDate: string;
@@ -114,7 +114,7 @@ const CHANGE_ORDER: Readonly<Record<V56DailyChange["changeType"], number>> = Obj
   maturity_window_entered: 6,
   ipo_stage_changed: 7,
   new_ipo_event: 8,
-  emerging_turnover_changed: 9,
+  emerging_turnover_rank_changed: 9,
 });
 
 /**
@@ -162,7 +162,8 @@ export function buildDailyChanges(input: Readonly<{ previous: unknown; current: 
   }
 
   for (const event of input.current.cbEvents.records.filter(isCbEventRecord)) {
-    if (previousEvents.has(event.eventId)) continue;
+    const isNewEvent = !previousEvents.has(event.eventId);
+    if (!isNewEvent && event.eventType !== "maturity") continue;
     const eventChange = cbEventChange(event, input.previous.dataDate, input.current.dataDate);
     if (eventChange === null) continue;
     changes.push(makeChange({
@@ -192,8 +193,9 @@ function cbEventChange(
   previousDataDate: string,
   currentDataDate: string,
 ): Readonly<{ changeType: Extract<V56DailyChange["changeType"], "new_early_redemption" | "new_listing" | "conversion_suspension_added" | "put_window_added" | "maturity_window_entered">; label: string }> | null {
+  if (!isNewlyAnnounced(event.announcementDate, previousDataDate, currentDataDate) && event.eventType !== "maturity") return null;
   if (event.eventType === "early_redemption") return { changeType: "new_early_redemption", label: "提前贖回" };
-  if (event.eventType === "listing" && (event.announcementDate ?? currentDataDate) >= previousDataDate) {
+  if (event.eventType === "listing") {
     return { changeType: "new_listing", label: "新掛牌" };
   }
   if (event.eventType === "conversion_suspension" || event.eventType === "suspension") {
@@ -204,6 +206,16 @@ function cbEventChange(
     return { changeType: "maturity_window_entered", label: "進入到期窗口" };
   }
   return null;
+}
+
+function isNewlyAnnounced(
+  announcementDate: string | undefined,
+  previousDataDate: string,
+  currentDataDate: string,
+): boolean {
+  return isIsoDate(announcementDate)
+    && announcementDate > previousDataDate
+    && announcementDate <= currentDataDate;
 }
 
 function entersMaturityWindow(eventDate: string | undefined, previousDataDate: string, currentDataDate: string): boolean {
@@ -227,8 +239,12 @@ function appendIpoChanges(changes: V56DailyChange[], previous: V56Snapshot, curr
   );
   for (const record of current.ipoPipeline.records.filter(isIpoRecord)) {
     const prior = previousRecords.get(record.stockCode);
-    if (prior === undefined) continue;
-    if (prior.stage !== record.stage) {
+    const priorEvents = new Set(prior?.events.map(ipoEventKey) ?? []);
+    const newlyPublishedEvents = record.events.filter((event) => (
+      !priorEvents.has(ipoEventKey(event))
+      && isNewlyAnnounced(event.date, previous.dataDate, current.dataDate)
+    ));
+    if (prior !== undefined && prior.stage !== record.stage && newlyPublishedEvents.length > 0) {
       changes.push(makeChange({
         entityType: "ipo",
         entityId: record.stockCode,
@@ -239,9 +255,7 @@ function appendIpoChanges(changes: V56DailyChange[], previous: V56Snapshot, curr
         effectiveDate: current.dataDate,
       }));
     }
-    const priorEvents = new Set(prior.events.map(ipoEventKey));
-    for (const event of record.events) {
-      if (!event.verified || priorEvents.has(ipoEventKey(event))) continue;
+    for (const event of newlyPublishedEvents) {
       changes.push(makeChange({
         entityType: "ipo",
         entityId: record.stockCode,
@@ -256,24 +270,29 @@ function appendIpoChanges(changes: V56DailyChange[], previous: V56Snapshot, curr
 }
 
 function appendEmergingChanges(changes: V56DailyChange[], previous: V56Snapshot, current: V56Snapshot): void {
-  const previousRecords = new Map(
-    previous.emerging.records
-      .filter(isEmergingRecord)
-      .map((record) => [record.stockCode, record] as const),
-  );
+  const previousRanks = turnoverRanks(previous.emerging.records.filter(isEmergingRecord));
+  const currentRanks = turnoverRanks(current.emerging.records.filter(isEmergingRecord));
   for (const record of current.emerging.records.filter(isEmergingRecord)) {
-    const prior = previousRecords.get(record.stockCode);
-    if (prior === undefined || sameNullableNumber(prior.transactionAmount, record.transactionAmount)) continue;
+    const previousRank = previousRanks.get(record.stockCode) ?? null;
+    const currentRank = currentRanks.get(record.stockCode) ?? null;
+    if (previousRank === currentRank || (previousRank !== null && previousRank > 10 && (currentRank === null || currentRank > 10))) continue;
     changes.push(makeChange({
       entityType: "emerging",
       entityId: record.stockCode,
-      fieldName: "transactionAmount",
-      changeType: "emerging_turnover_changed",
-      oldValue: prior.transactionAmount ?? null,
-      newValue: record.transactionAmount ?? null,
+      fieldName: "turnoverRank",
+      changeType: "emerging_turnover_rank_changed",
+      oldValue: previousRank,
+      newValue: currentRank,
       effectiveDate: current.dataDate,
     }));
   }
+}
+
+function turnoverRanks(records: readonly EmergingRecord[]): ReadonlyMap<string, number> {
+  const ranked = records
+    .filter((record): record is EmergingRecord & { transactionAmount: number } => typeof record.transactionAmount === "number")
+    .sort((left, right) => right.transactionAmount - left.transactionAmount || left.stockCode.localeCompare(right.stockCode));
+  return new Map(ranked.map((record, index) => [record.stockCode, index + 1]));
 }
 
 type IpoEvent = Readonly<{

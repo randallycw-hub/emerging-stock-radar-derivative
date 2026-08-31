@@ -299,7 +299,7 @@ function v56ChangeLabel(value) {
     maturity_window_entered: "進入到期窗口",
     ipo_stage_changed: "IPO 階段異動",
     new_ipo_event: "IPO 新事件",
-    emerging_turnover_changed: "成交金額異動",
+    emerging_turnover_rank_changed: "成交金額名次異動",
   })[value] ?? "可轉債異動";
 }
 

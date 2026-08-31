@@ -11,7 +11,7 @@ const model = Object.freeze({
       { entityType: "cb", entityId: "23032", changeType: "conversion_price_changed", oldValue: 135.2, newValue: 130.7, effectiveDate: "2026-08-28" },
       { entityType: "cb", entityId: "23032", changeType: "put_window_added", oldValue: null, newValue: "賣回窗口", effectiveDate: "2026-08-28" },
       { entityType: "ipo", entityId: "3313", changeType: "new_ipo_event", oldValue: null, newValue: "審議完成", effectiveDate: "2026-09-02" },
-      { entityType: "emerging", entityId: "7777", changeType: "emerging_turnover_changed", oldValue: 100, newValue: 200, effectiveDate: "2026-08-28" },
+      { entityType: "emerging", entityId: "7777", changeType: "emerging_turnover_rank_changed", oldValue: 2, newValue: 1, effectiveDate: "2026-08-28" },
     ],
   },
   performance: {
