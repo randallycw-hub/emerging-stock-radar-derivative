@@ -39,7 +39,8 @@ test("public offering projection combines approved auction and subscription fact
     bidStartDate: "2026-08-26",
     bidEndDate: "2026-08-28",
     auctionOpenDate: "2026-08-29",
-    underwritingPrice: "50",
+    underwritingPrice: 50,
+    minimumBidPrice: null,
     subscriptionStartDate: "2026-08-31",
     subscriptionEndDate: "2026-09-02",
     drawDate: "2026-09-03",
@@ -52,7 +53,7 @@ test("public offering projection combines approved auction and subscription fact
 
 test("IPO offering route exposes all required public columns", async () => {
   const source = await readFile(new URL("../static-showcase/ipo-offering.html", import.meta.url), "utf8");
-  for (const label of ["競拍開始", "競拍截止", "開標", "承銷價／暫定價格", "申購期間", "抽籤日期", "掛牌日期", "主辦券商", "資料日期"]) {
+  for (const label of ["競拍開始", "競拍截止", "開標", "競拍最低價", "承銷價／暫定價格", "申購期間", "抽籤日期", "掛牌日期", "主辦券商", "資料日期"]) {
     assert.match(source, new RegExp(label));
   }
 });
@@ -85,5 +86,26 @@ test("public offering projection accepts numeric V5.6 prices without treating th
   });
 
   assert.equal(rows.length, 1);
-  assert.equal(rows[0].underwritingPrice, "56");
+  assert.equal(rows[0].underwritingPrice, 56);
+});
+
+test("V5.7 never turns unpublished IPO prices into a public zero price", () => {
+  const rows = projectPublicOfferings({
+    dataDate: "2026-08-28",
+    records: [{
+      companyCode: "7825", companyName: "和亞智慧", market: "興櫃",
+      auction: { bidStartDate: "2026-08-26", finalUnderwritingPrice: 0, verified: true },
+    }, {
+      companyCode: "2938", companyName: "床的世界", market: "上市",
+      publicOffering: { subscriptionStartDate: "2026-08-26", provisionalUnderwritingPrice: "0", verified: true },
+    }, {
+      companyCode: "1234", companyName: "測試公司", market: "上市",
+      auction: { bidStartDate: "2026-08-26", minimumBidPrice: 25, verified: true },
+    }],
+  });
+
+  assert.equal(rows.find((row) => row.companyCode === "7825")?.underwritingPrice, null);
+  assert.equal(rows.find((row) => row.companyCode === "2938")?.underwritingPrice, null);
+  assert.equal(rows.find((row) => row.companyCode === "1234")?.underwritingPrice, null);
+  assert.equal(rows.find((row) => row.companyCode === "1234")?.minimumBidPrice, 25);
 });

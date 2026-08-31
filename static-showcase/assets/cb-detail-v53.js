@@ -115,7 +115,11 @@ function overviewPanel(record, history, siblings) {
   const chart = chartDataState(history) === "ready"
     ? `<section class="cb-lightweight-chart"><header><h3>價格與成交量</h3><p>僅使用已驗證的官方 OHLCV；紅漲綠跌。</p></header><div data-cb-lightweight-chart aria-label="${escapeHtml(text(record.cbCode))} K 線與成交量圖"></div></section>`
     : '<p class="empty-state">目前沒有足夠的已驗證 OHLCV 資料可繪製 K 線。</p>';
-  return `<h3>概況</h3><dl class="detail-facts cb-detail-facts">${fact("CB 收盤", price(quote.cbClose))}${fact("標的股收盤", price(quote.stockClose))}${fact("資料日", date(quote.dataDate))}${fact("交易狀態", quote.tradeState === "no_trade" ? "今日無成交" : quote.tradeState === "traded" ? "今日有成交" : "—")}</dl>${chart}${companyContext(record, siblings)}`;
+  const noTrade = isNoTrade(quote);
+  const tradeFacts = noTrade
+    ? `${fact("最後成交日", date(quote.lastTradeDate ?? quote.dataDate))}${fact("最後成交價", price(quote.lastPrice ?? quote.cbClose))}${fact("最後成交量", quantity(quote.lastVolume, "張"))}`
+    : fact("CB 收盤", price(quote.cbClose));
+  return `<h3>概況</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("市場快照日", date(quote.snapshotDataDate ?? quote.dataDate))}${tradeFacts}${fact("標的股收盤", price(quote.stockClose))}</dl>${chart}${companyContext(record, siblings)}`;
 }
 
 function valuationPanel(quote) {
@@ -123,8 +127,20 @@ function valuationPanel(quote) {
 }
 
 function liquidityPanel(quote, liquidity) {
-  const trade = quote.tradeState === "no_trade" ? "今日無成交" : quote.tradeState === "unavailable" ? "—" : "今日有成交";
-  return `<h3>流動性</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", trade)}${fact("成交量", quantity(quote.volume, "張"))}${fact("成交額", amount(quote.turnoverAmount))}${fact("5 日平均成交量", quantity(liquidity.average5, "張"))}${fact("20 日平均成交量", quantity(liquidity.average20, "張"))}${fact("本週成交量", quantity(liquidity.weekVolume, "張"))}${fact("近 20 日成交天數", quantity(liquidity.tradedDays20, "日"))}</dl>`;
+  const lastTradeFacts = isNoTrade(quote)
+    ? `${fact("最後成交日", date(quote.lastTradeDate ?? quote.dataDate))}${fact("最後成交價", price(quote.lastPrice ?? quote.cbClose))}${fact("最後成交量", quantity(quote.lastVolume, "張"))}`
+    : "";
+  return `<h3>流動性</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("今日成交量", quantity(quote.volume, "張"))}${fact("今日成交額", amount(quote.turnoverAmount))}${lastTradeFacts}${fact("5 日平均成交量", quantity(liquidity.average5, "張"))}${fact("20 日平均成交量", quantity(liquidity.average20, "張"))}${fact("本週成交量", quantity(liquidity.weekVolume, "張"))}${fact("近 20 交易日有成交", quantity(liquidity.tradedDays20, "日"))}</dl>`;
+}
+
+function isNoTrade(quote) {
+  return quote?.tradeState === "NO_TRADE_TODAY" || quote?.tradeState === "no_trade";
+}
+
+function tradeLabel(quote) {
+  if (quote?.tradeState === "TRADED_TODAY" || quote?.tradeState === "traded") return "今日有成交";
+  if (isNoTrade(quote)) return "今日無成交";
+  return quote?.tradeState === "DATA_ERROR" ? "資料暫時無法取得" : "—";
 }
 
 function termsPanel(terms) {

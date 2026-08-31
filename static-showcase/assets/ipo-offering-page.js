@@ -26,10 +26,12 @@ function textOrNull(value) {
   return text || null;
 }
 
-function decimalOrNull(value) {
-  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+function decimalOrNull(value, { allowZero = false } = {}) {
+  if (typeof value === "number" && Number.isFinite(value)) return value > 0 || (allowZero && value === 0) ? value : null;
   const text = textOrNull(value);
-  return text && /^\d+(?:\.\d+)?$/u.test(text) ? text : null;
+  if (!text || !/^\d+(?:\.\d+)?$/u.test(text)) return null;
+  const number = Number(text);
+  return number > 0 || (allowZero && number === 0) ? number : null;
 }
 
 function dateOrNull(value) {
@@ -42,8 +44,11 @@ function offeringPrice(record, hasOfficialFacts) {
     ?? decimalOrNull(record?.auction?.finalUnderwritingPrice)
     ?? decimalOrNull(record?.publicOffering?.finalUnderwritingPrice)
     ?? decimalOrNull(record?.provisionalUnderwritingPrice)
-    ?? decimalOrNull(record?.publicOffering?.provisionalUnderwritingPrice)
-    ?? decimalOrNull(record?.auction?.minimumBidPrice);
+    ?? decimalOrNull(record?.publicOffering?.provisionalUnderwritingPrice);
+}
+
+function minimumBidPrice(record, auctionVerified) {
+  return auctionVerified ? decimalOrNull(record?.auction?.minimumBidPrice) : null;
 }
 
 export function projectPublicOfferings(snapshot = {}) {
@@ -65,6 +70,7 @@ export function projectPublicOfferings(snapshot = {}) {
       bidEndDate: auctionVerified ? dateOrNull(record?.auction?.bidEndDate) : null,
       auctionOpenDate: auctionVerified ? dateOrNull(record?.auction?.auctionOpenDate) : null,
       underwritingPrice: offeringPrice(record, hasOfficialFacts),
+      minimumBidPrice: minimumBidPrice(record, auctionVerified),
       subscriptionStartDate: subscriptionVerified ? dateOrNull(record?.publicOffering?.subscriptionStartDate) : null,
       subscriptionEndDate: subscriptionVerified ? dateOrNull(record?.publicOffering?.subscriptionEndDate) : null,
       drawDate: subscriptionVerified ? dateOrNull(record?.publicOffering?.drawDate) : null,
@@ -83,9 +89,10 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function priceValue(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? `${formatNumber(parsed, { maximumFractionDigits: 2 })} 元` : "—";
+function priceValue(value, emptyLabel = "待公告") {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? `${formatNumber(value, { maximumFractionDigits: 2 })} 元`
+    : emptyLabel;
 }
 
 function dateRange(start, end) {
@@ -102,7 +109,7 @@ function companyCell(row) {
 }
 
 function rowHtml(row) {
-  return `<tr><th scope="row">${companyCell(row)}</th><td>${formatDate(row.bidStartDate)}</td><td>${formatDate(row.bidEndDate)}</td><td>${formatDate(row.auctionOpenDate)}</td><td>${priceValue(row.underwritingPrice)}</td><td>${dateRange(row.subscriptionStartDate, row.subscriptionEndDate)}</td><td>${formatDate(row.drawDate)}</td><td>${formatDate(row.listingDate)}</td><td>${escapeHtml(row.underwriter ?? "—")}</td><td>${formatDate(row.asOfDate)}</td></tr>`;
+  return `<tr><th scope="row">${companyCell(row)}</th><td>${formatDate(row.bidStartDate)}</td><td>${formatDate(row.bidEndDate)}</td><td>${formatDate(row.auctionOpenDate)}</td><td>${priceValue(row.minimumBidPrice, "—")}</td><td>${priceValue(row.underwritingPrice)}</td><td>${dateRange(row.subscriptionStartDate, row.subscriptionEndDate)}</td><td>${formatDate(row.drawDate)}</td><td>${formatDate(row.listingDate)}</td><td>${escapeHtml(row.underwriter ?? "—")}</td><td>${formatDate(row.asOfDate)}</td></tr>`;
 }
 
 async function initialize() {
@@ -116,7 +123,7 @@ async function initialize() {
   const dataDate = rows[0]?.asOfDate ?? null;
   status.textContent = dataDate ? `資料日期 ${formatDate(dataDate)}` : "IPO 公開資料尚未發布";
   count.textContent = `${formatNumber(rows.length)} 家公司`;
-  body.innerHTML = rows.length ? rows.map(rowHtml).join("") : '<tr><td colspan="10" class="empty-cell">目前沒有可顯示的競拍／申購公開資料。</td></tr>';
+  body.innerHTML = rows.length ? rows.map(rowHtml).join("") : '<tr><td colspan="11" class="empty-cell">目前沒有可顯示的競拍／申購公開資料。</td></tr>';
   if (!snapshot && error) {
     error.textContent = "資料暫時無法取得";
     error.hidden = false;

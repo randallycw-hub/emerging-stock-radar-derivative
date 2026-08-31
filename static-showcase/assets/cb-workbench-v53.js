@@ -228,13 +228,17 @@ function projectQuote(view, history, dataDate) {
   const premiumRate = conversionValue !== null && conversionValue > 0 && cbClose !== null
     ? round((cbClose / conversionValue - 1) * 100)
     : null;
-  const volume = finiteNumber(view.cbTradeUnits);
-  const turnoverAmount = cbPriceDate
-    ? history.find((point) => point.date === cbPriceDate)?.turnover ?? null
-    : null;
-  const tradeState = volume === null ? "unavailable" : volume === 0 ? "no_trade" : "traded";
+  const lastPrice = cbClose;
+  const lastActivity = cbPriceDate ? history.find((point) => point.date === cbPriceDate) ?? null : null;
+  const snapshotActivity = history.find((point) => point.date === dataDate) ?? null;
+  const lastVolume = lastActivity?.tradingUnits ?? finiteNumber(view.cbTradeUnits);
+  const lastTurnoverAmount = lastActivity?.turnover ?? null;
+  const volume = snapshotActivity?.tradingUnits ?? (cbPriceDate === dataDate ? lastVolume : null);
+  const turnoverAmount = snapshotActivity?.turnover ?? (cbPriceDate === dataDate ? lastTurnoverAmount : null);
+  const tradeState = publicTradeState({ latestTradeDate: cbPriceDate, dataDate, lastVolume });
   return {
     dataDate: cbPriceDate,
+    snapshotDataDate: dataDate,
     cbClose,
     stockClose,
     conversionPrice,
@@ -244,9 +248,18 @@ function projectQuote(view, history, dataDate) {
     premiumRate,
     volume,
     turnoverAmount,
+    lastTradeDate: cbPriceDate,
+    lastPrice,
+    lastVolume,
+    lastTurnoverAmount,
     tradeState,
     isLatestSnapshot: cbPriceDate === dataDate,
   };
+}
+
+function publicTradeState({ latestTradeDate, dataDate, lastVolume }) {
+  if (!latestTradeDate || !dataDate || latestTradeDate > dataDate || lastVolume === null || lastVolume < 0) return "DATA_ERROR";
+  return latestTradeDate === dataDate ? "TRADED_TODAY" : "NO_TRADE_TODAY";
 }
 
 function projectTerms(term, view) {
