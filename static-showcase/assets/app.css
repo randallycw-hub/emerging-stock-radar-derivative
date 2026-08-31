@@ -2049,6 +2049,42 @@ button.market-event-calendar__day:focus-visible { position: relative; z-index: 1
 
 /* Home follows the same briefing order: snapshot, attention items, then research modules. */
 .home-event-section { margin: 0 0 24px; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.home-v56-today { padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.home-v56-today > header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .8fr); gap: 8px 24px; align-items: end; margin-bottom: 15px; }
+.home-v56-today > header .kicker, .home-v56-destinations .kicker { grid-column: 1 / -1; margin: 0; }
+.home-v56-today > header h2, .home-v56-destinations h2 { margin: 0; color: var(--ink); font-size: 22px; }
+.home-v56-today > header > p:last-child, .home-v56-destinations__heading > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.home-v56-today__grid, .home-v56-destinations__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.home-v56-today__grid > article, .home-v56-destinations__grid > article { min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--color-surface); }
+.home-v56-today__grid h3, .home-v56-destinations__grid h3 { margin: 0 0 8px; color: var(--ink); font-size: 15px; }
+.home-v56-list, .home-v56-event-list { margin: 0; padding: 0; list-style: none; }
+.home-v56-list li + li { border-top: 1px solid var(--border); }
+.home-v56-list a { min-height: 47px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: center; padding: 8px 0; color: var(--ink); text-decoration: none; }
+.home-v56-list a > span { overflow: hidden; font-weight: 750; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.home-v56-list a > strong { color: var(--brand); font-size: 12px; white-space: nowrap; }
+.home-v56-list a > strong.is-up { color: var(--positive); }
+.home-v56-list a > strong.is-down { color: var(--negative); }
+.home-v56-list a > small { grid-column: 1 / -1; color: var(--muted); font-size: 11px; }
+.home-v56-list a:hover, .home-v56-list a:focus-visible, .home-v56-destination__row:hover, .home-v56-destination__row:focus-visible { color: var(--brand); text-decoration: underline; }
+.home-v56-empty { margin: 0; padding: 10px 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.home-v56-event-list li + li { border-top: 1px solid var(--border); }
+.home-v56-event-list a { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 8px; min-height: 54px; align-items: center; color: var(--ink); text-decoration: none; }
+.home-v56-event-list time, .home-v56-destination__row time { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.home-v56-event-list span { min-width: 0; display: grid; gap: 3px; }
+.home-v56-event-list strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.home-v56-event-list small { color: var(--muted); font-size: 11px; }
+.home-v56-destinations { padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.home-v56-destinations__heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .8fr); gap: 8px 24px; align-items: end; margin-bottom: 15px; }
+.home-v56-destinations__grid > article { display: flex; flex-direction: column; align-items: stretch; }
+.home-v56-destinations__grid > article > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.home-v56-destination__row { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: 40px; border-top: 1px solid var(--border); color: var(--ink); font-size: 12px; text-decoration: none; }
+.home-v56-destination__row span { overflow: hidden; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.home-v56-destination__row strong { color: var(--brand); font-size: 11px; white-space: nowrap; }
+.home-v56-destination__more { display: block; margin-top: auto; padding-top: 14px; color: var(--brand); font-size: 13px; font-weight: 800; text-decoration: none; }
+@media (max-width: 900px) {
+  .home-v56-today > header, .home-v56-destinations__heading { grid-template-columns: 1fr; }
+  .home-v56-today__grid, .home-v56-destinations__grid { grid-template-columns: 1fr; }
+}
 .home-event-section .section-heading { align-items: start; margin-bottom: 10px; }
 .home-event-section .section-heading h2 { margin: 3px 0 0; color: var(--ink); font-size: 20px; }
 .home-event-section__meta { display: grid; justify-items: end; gap: 5px; }
