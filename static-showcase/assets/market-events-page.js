@@ -10,11 +10,13 @@ import {
   projectMarketEvents,
 } from "./market-event-model.js";
 
+const PAGE_SIZE = 25;
+
 const state = {
   allEvents: [],
   asOfDate: null,
   market: "all",
-  period: "30",
+  period: "7",
   eventType: "all",
   status: "all",
   query: "",
@@ -22,6 +24,7 @@ const state = {
   customEnd: null,
   view: "list",
   calendarMonth: null,
+  page: 1,
 };
 
 const errorTarget = globalThis.document?.querySelector("[data-page-error]") ?? null;
@@ -70,7 +73,7 @@ function bindControls() {
   document.querySelector("#market-event-filters")?.addEventListener("submit", (event) => event.preventDefault());
   document.querySelector("#market-event-filters")?.addEventListener("reset", () => {
     window.setTimeout(() => {
-      Object.assign(state, { market: "all", period: "30", eventType: "all", status: "all", query: "", customStart: null, customEnd: null });
+      Object.assign(state, { market: "all", period: "7", eventType: "all", status: "all", query: "", customStart: null, customEnd: null, page: 1 });
       syncUrl();
       applyStateToControls();
       render();
@@ -79,6 +82,7 @@ function bindControls() {
   for (const [selector, key] of [["#market-event-period", "period"], ["#market-event-type", "eventType"], ["#market-event-status", "status"], ["#market-event-search", "query"], ["#market-event-start", "customStart"], ["#market-event-end", "customEnd"]]) {
     document.querySelector(selector)?.addEventListener("input", (event) => {
       state[key] = event.target.value || null;
+      state.page = 1;
       syncUrl();
       applyStateToControls();
       render();
@@ -87,6 +91,7 @@ function bindControls() {
   for (const button of document.querySelectorAll("[data-event-market]")) {
     button.addEventListener("click", () => {
       state.market = button.dataset.eventMarket ?? "all";
+      state.page = 1;
       syncUrl();
       applyStateToControls();
       render();
@@ -114,6 +119,12 @@ function bindControls() {
   document.querySelector("#market-event-clusters")?.addEventListener("click", onEventRowClick);
   document.querySelector("#market-event-clusters")?.addEventListener("keydown", onEventRowKeydown);
   document.querySelector("#market-event-calendar-content")?.addEventListener("click", onCalendarDayClick);
+  document.querySelector("#market-event-pagination")?.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-event-load-more]")) return;
+    state.page += 1;
+    syncUrl();
+    render();
+  });
   document.querySelector("[data-event-drawer-close]")?.addEventListener("click", closeDrawer);
   document.querySelector("#market-event-drawer")?.addEventListener("click", (event) => {
     if (event.target === event.currentTarget) closeDrawer();
@@ -128,7 +139,7 @@ function bindControls() {
 function initializeFromUrl() {
   const params = new URLSearchParams(location.search);
   state.market = ["all", "ipo", "bonds"].includes(params.get("market")) ? params.get("market") : "all";
-  state.period = ["all", "history", "today", "tomorrow", "7", "30", "custom"].includes(params.get("range")) ? params.get("range") : "30";
+  state.period = ["all", "history", "today", "tomorrow", "7", "30", "custom"].includes(params.get("range")) ? params.get("range") : "7";
   state.eventType = params.get("type") ?? "all";
   state.status = ["all", "active", "deadline_soon", "upcoming", "completed"].includes(params.get("status")) ? params.get("status") : "all";
   state.query = params.get("q") ?? "";
@@ -136,18 +147,20 @@ function initializeFromUrl() {
   state.customEnd = validDate(params.get("end")) ? params.get("end") : null;
   state.view = ["list", "calendar", "cluster"].includes(params.get("view")) ? params.get("view") : "list";
   state.calendarMonth = validMonth(params.get("month")) ? params.get("month") : null;
+  state.page = /^\d+$/u.test(params.get("page") ?? "") ? Math.max(1, Number(params.get("page"))) : 1;
 }
 
 function syncUrl() {
   const params = new URLSearchParams();
   if (state.market !== "all") params.set("market", state.market);
-  if (state.period !== "30") params.set("range", state.period);
+  if (state.period !== "7") params.set("range", state.period);
   if (state.eventType !== "all") params.set("type", state.eventType);
   if (state.status !== "all") params.set("status", state.status);
   if (state.query) params.set("q", state.query);
   if (state.customStart) params.set("start", state.customStart);
   if (state.customEnd) params.set("end", state.customEnd);
   if (state.view !== "list") params.set("view", state.view);
+  if (state.page > 1) params.set("page", String(state.page));
   history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
 }
 
@@ -157,6 +170,7 @@ function applyMetric(metric) {
   if (metric === "next7") Object.assign(state, { period: "7", market: "all", status: "all" });
   if (metric === "ipo") Object.assign(state, { period: "30", market: "ipo", status: "all" });
   if (metric === "bonds") Object.assign(state, { period: "30", market: "bonds", status: "all" });
+  state.page = 1;
   syncUrl();
   applyStateToControls();
   render();
@@ -205,6 +219,7 @@ function render() {
   }
   document.querySelector("#market-event-result-count").textContent = `${formatNumber(events.length)} 筆公開事件`;
   renderList(events);
+  renderPagination(events);
   renderCalendar(events);
   renderClusters(events);
   toggleView();
@@ -213,8 +228,17 @@ function render() {
 function renderList(events) {
   const target = document.querySelector("#market-event-list");
   if (!target) return;
-  const groups = groupMarketEventsByDate(events);
+  const groups = groupMarketEventsByDate(events.slice(0, state.page * PAGE_SIZE));
   target.innerHTML = groups.length ? groups.map((group) => `<section class="market-event-date-group"><header><h3>${dateHeading(group.date, state.asOfDate)}</h3><time datetime="${group.date}">${formatDate(group.date)}</time></header><div>${group.events.map(eventRowHtml).join("")}</div></section>`).join("") : '<p class="empty-state">目前沒有符合條件的已發布公開事件。</p>';
+}
+
+function renderPagination(events) {
+  const target = document.querySelector("#market-event-pagination");
+  if (!target) return;
+  const shown = Math.min(events.length, state.page * PAGE_SIZE);
+  target.innerHTML = events.length > shown
+    ? `<button class="secondary-button" type="button" data-event-load-more>載入更多（已顯示 ${formatNumber(shown)}／${formatNumber(events.length)} 筆）</button>`
+    : events.length > PAGE_SIZE ? `<p>已顯示全部 ${formatNumber(events.length)} 筆公開事件。</p>` : "";
 }
 
 function eventRowHtml(event) {

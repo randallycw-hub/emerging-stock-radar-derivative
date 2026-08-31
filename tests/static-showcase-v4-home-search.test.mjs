@@ -17,7 +17,7 @@ test("V5.2 首頁保留研究工作台且移除重複 Hero 搜尋入口", async 
   ]);
 
   assert.doesNotMatch(home, /id="home-primary-search"/);
-  assert.match(home, /id="home-today-grid"/);
+  assert.match(home, /id="home-today-changes"/);
   assert.match(home, /class="home-v51-workbench-section"/);
   assert.match(home, /HOME_V51_WORKBENCH/);
   assert.doesNotMatch(home, /class="market-module/);

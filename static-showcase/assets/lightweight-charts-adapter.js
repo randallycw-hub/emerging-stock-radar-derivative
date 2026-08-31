@@ -47,8 +47,10 @@ export function buildLightweightEventMarkers(events) {
       const time = firstDate(event?.deadlineDate, event?.effectiveDate, event?.startDate, event?.announcementDate, event?.date);
       const type = typeof event?.eventType === "string" ? event.eventType : typeof event?.type === "string" ? event.type : "";
       const text = cleanText(event?.title) || EVENT_LABELS[type] || "公開事件";
-      if (time === null || seen.has(`${time}:${type}:${text}`)) return [];
-      seen.add(`${time}:${type}:${text}`);
+      const canonicalId = cleanText(event?.eventId);
+      const identity = canonicalId || `${time}:${type}:${text}`;
+      if (time === null || seen.has(identity)) return [];
+      seen.add(identity);
       return [{
         time,
         position: type === "early_redemption" || type === "maturity" ? "aboveBar" : "belowBar",

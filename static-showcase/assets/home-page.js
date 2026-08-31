@@ -9,12 +9,14 @@ import { countPublishedPositive, publicNumber, sumPublishedValues } from "./publ
 
 const updateTarget = globalThis.document?.querySelector("#last-successful-update") ?? null;
 const coverageTarget = globalThis.document?.querySelector("#home-data-coverage") ?? null;
-const eventStrip = globalThis.document?.querySelector("#home-event-strip") ?? null;
+const todayChangesTarget = globalThis.document?.querySelector("#home-today-changes") ?? null;
+const nextEventsTarget = globalThis.document?.querySelector("#home-next-events") ?? null;
+const eventStrip = nextEventsTarget;
 const summaryTarget = globalThis.document?.querySelector("#home-market-summary") ?? null;
 const rankingTarget = globalThis.document?.querySelector("#home-emerging-rankings") ?? null;
 const ipoEventsTarget = globalThis.document?.querySelector("#home-ipo-events") ?? null;
 const cbQuickTarget = globalThis.document?.querySelector("#home-cb-quick") ?? null;
-const cbRightsTarget = globalThis.document?.querySelector("#home-cb-rights-events") ?? null;
+const cbRightsTarget = null;
 const workbenchTarget = globalThis.document?.querySelector(".home-v51-workbench-section") ?? null;
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
@@ -271,6 +273,40 @@ export function buildV56HomeBrief(model = {}) {
   return { dataDate, cbChanges, ipoChanges, emergingChanges, cbPerformance, ipoMilestones, emergingTurnover, importantEvents };
 }
 
+/**
+ * V5.7 keeps the public homepage to two non-overlapping questions: what the
+ * latest snapshot changed, and which already-published events occur next.
+ */
+export function buildV57HomeSections(model = {}) {
+  const brief = buildV56HomeBrief(model);
+  if (brief.dataDate === null) return { dataDate: null, todayChanges: [], nextEvents: [] };
+  const todayChanges = [
+    ...brief.cbChanges.map((entry) => ({ market: "CB", code: entry.cbCode, name: entry.cbName, label: entry.label, date: entry.date, href: `./bonds.html?bond=${encodeURIComponent(entry.cbCode)}` })),
+    ...brief.ipoChanges.map((entry) => ({ market: "IPO", code: entry.stockCode, name: entry.companyName, label: entry.label, date: entry.date, href: `./ipo-radar.html?q=${encodeURIComponent(entry.stockCode)}` })),
+    ...brief.emergingChanges.map((entry) => ({ market: "興櫃", code: entry.stockCode, name: entry.companyName, label: entry.label, date: entry.date, href: `./emerging.html?q=${encodeURIComponent(entry.stockCode)}` })),
+  ].sort((left, right) => left.market.localeCompare(right.market, "zh-Hant") || left.code.localeCompare(right.code));
+  const candidates = [
+    ...brief.importantEvents.map((event) => ({ market: "CB", code: event.cbCode, name: event.cbName, label: event.label, date: event.date, href: `./bonds.html?bond=${encodeURIComponent(event.cbCode)}` })),
+    ...brief.ipoMilestones.map((event) => ({ market: "IPO", code: event.stockCode, name: event.companyName, label: event.label, date: event.date, href: `./ipo.html?q=${encodeURIComponent(event.stockCode)}` })),
+  ].filter((event) => calendarDaysFrom(brief.dataDate, event.date) >= 0 && calendarDaysFrom(brief.dataDate, event.date) <= 7);
+  const seen = new Set();
+  const nextEvents = candidates
+    .sort((left, right) => left.date.localeCompare(right.date) || left.market.localeCompare(right.market, "zh-Hant") || left.code.localeCompare(right.code))
+    .filter((event) => {
+      const identity = `${event.market}:${event.code}:${event.date}:${event.label}`;
+      if (seen.has(identity)) return false;
+      seen.add(identity);
+      return true;
+    })
+    .slice(0, 8);
+  return { dataDate: brief.dataDate, todayChanges, nextEvents };
+}
+
+function calendarDaysFrom(start, end) {
+  if (!isPublishedIsoDate(start) || !isPublishedIsoDate(end)) return Number.NaN;
+  return Math.round((Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / DAY_MS);
+}
+
 function firstPublishedDate(...values) {
   return values.find((value) => isPublishedIsoDate(value)) ?? null;
 }
@@ -424,41 +460,34 @@ async function loadHomeData() {
 }
 
 function renderV56Home(model) {
-  const brief = buildV56HomeBrief(model);
-  if (brief.dataDate === null) return;
-  if (updateTarget) updateTarget.textContent = `資料日期 ${formatDate(brief.dataDate)} · 已驗證盤後快照`;
-  if (coverageTarget) coverageTarget.textContent = `資料日期 ${formatDate(brief.dataDate)}`;
-  renderV56TodayBrief(brief);
-  renderV56ImportantEvents(brief);
-  renderV56Destinations(brief);
+  const sections = buildV57HomeSections(model);
+  if (sections.dataDate === null) return;
+  if (updateTarget) updateTarget.textContent = `資料日期 ${formatDate(sections.dataDate)} · 已驗證盤後快照`;
+  if (coverageTarget) coverageTarget.textContent = `資料日期 ${formatDate(sections.dataDate)}`;
+  renderV57TodayChanges(sections);
+  renderV57NextEvents(sections);
+  renderV56Destinations(buildV56HomeBrief(model));
 }
 
-function renderV56TodayBrief(brief) {
-  if (!summaryTarget) return;
+function renderV57TodayChanges(sections) {
+  if (!todayChangesTarget) return;
   const items = (entries, render, empty) => entries.length
     ? `<ol class="home-v56-list">${entries.map(render).join("")}</ol>`
     : `<p class="home-v56-empty">${escapeHtml(empty)}</p>`;
-  summaryTarget.innerHTML = `<section class="home-v56-today" aria-labelledby="home-v56-title">
-    <header><p class="kicker">TODAY / DATA-DRIVEN MARKET</p><h2 id="home-v56-title">今天發生什麼</h2><p>僅列出有資料依據的異動、盤後表現與下一個明確日期。</p></header>
+  const byMarket = (market) => sections.todayChanges.filter((entry) => entry.market === market);
+  todayChangesTarget.innerHTML = `<section class="home-v56-today" aria-labelledby="home-v56-title">
+    <header><p class="kicker">SNAPSHOT DIFF / VERIFIED</p><h2 id="home-v56-title">本次快照異動</h2><p>只列示本次已驗證快照相對前一個有效快照的欄位變化。</p></header>
     <div class="home-v56-today__grid">
-      <article><h3>可轉債異動</h3>${items(brief.cbChanges, (entry) => `<li><a href="./bonds.html?bond=${encodeURIComponent(entry.cbCode)}"><span>${escapeHtml(entry.cbCode)} ${escapeHtml(entry.cbName ?? "")}</span><strong>${escapeHtml(entry.label)}</strong><small>${formatV56OldToNew(entry.oldValue, entry.newValue)}</small></a></li>`, "本次快照沒有可轉債欄位異動。")}</article>
-      <article><h3>盤後表現</h3>${items(brief.cbPerformance, (entry) => `<li><a href="./bonds.html?bond=${encodeURIComponent(entry.cbCode)}"><span>${escapeHtml(entry.cbCode)} ${escapeHtml(entry.cbName ?? "")}</span><strong class="${entry.rate >= 0 ? "is-up" : "is-down"}">${formatV56Percent(entry.rate)}</strong><small>近 1 個有效交易日</small></a></li>`, "尚無足夠的有效交易日歷史可比較。")}</article>
-      <article><h3>IPO 異動</h3>${items(brief.ipoChanges, (entry) => `<li><a href="./ipo-radar.html?q=${encodeURIComponent(entry.stockCode)}"><span>${escapeHtml(entry.stockCode)} ${escapeHtml(entry.companyName ?? "")}</span><strong>${escapeHtml(entry.label)}</strong><small>${formatDate(entry.date)}</small></a></li>`, "本次快照沒有可公開的 IPO 里程碑異動。")}</article>
-      <article><h3>興櫃焦點</h3>${items(brief.emergingChanges.length ? brief.emergingChanges : brief.emergingTurnover, (entry) => `<li><a href="./emerging.html?q=${encodeURIComponent(entry.stockCode)}"><span>${escapeHtml(entry.stockCode)} ${escapeHtml(entry.companyName ?? "")}</span><strong>${escapeHtml(entry.label ?? formatNumber(entry.amount))}</strong><small>${entry.label ? formatV56OldToNew(entry.oldValue, entry.newValue) : "成交金額"}</small></a></li>`, "本次快照沒有可排序的興櫃成交資料。")}</article>
+      ${["CB", "IPO", "興櫃"].map((market) => `<article><h3>${escapeHtml(market)} 異動</h3>${items(byMarket(market), (entry) => `<li><a href="${escapeAttribute(entry.href)}"><span>${escapeHtml(entry.code)} ${escapeHtml(entry.name ?? "")}</span><strong>${escapeHtml(entry.label)}</strong><small>${formatDate(entry.date)}</small></a></li>`, "本次快照沒有已驗證異動。")}</article>`).join("")}
     </div>
   </section>`;
 }
 
-function renderV56ImportantEvents(brief) {
-  if (!eventStrip) return;
-  eventStrip.innerHTML = brief.importantEvents.length
-    ? brief.importantEvents.map((event) => `<a class="home-event-card" href="./bonds.html?bond=${encodeURIComponent(event.cbCode)}"><time datetime="${escapeAttribute(event.date)}">${formatDate(event.date)}</time><p>CB · ${escapeHtml(event.label)}</p><strong>${escapeHtml(event.cbCode)} ${escapeHtml(event.cbName ?? "")}</strong><span aria-hidden="true">→</span></a>`).join("")
-    : '<p class="empty-state">目前沒有日期已確定的近期可轉債重要事件。</p>';
-  if (cbRightsTarget) {
-    cbRightsTarget.innerHTML = brief.importantEvents.length
-      ? `<ol class="home-v56-event-list">${brief.importantEvents.slice(0, 5).map((event) => `<li><a href="./bonds.html?bond=${encodeURIComponent(event.cbCode)}"><time datetime="${escapeAttribute(event.date)}">${formatDate(event.date)}</time><span><strong>${escapeHtml(event.cbCode)} ${escapeHtml(event.cbName ?? "")}</strong><small>${escapeHtml(event.label)}</small></span></a></li>`).join("")}</ol>`
-      : '<p class="empty-state">目前沒有進行中的可轉債權利事件。</p>';
-  }
+function renderV57NextEvents(sections) {
+  if (!nextEventsTarget) return;
+  nextEventsTarget.innerHTML = sections.nextEvents.length
+    ? sections.nextEvents.map((event) => `<a class="home-event-card" href="${escapeAttribute(event.href)}"><time datetime="${escapeAttribute(event.date)}">${formatDate(event.date)}</time><p>${escapeHtml(event.market)} · ${escapeHtml(event.label)}</p><strong>${escapeHtml(event.code)} ${escapeHtml(event.name ?? "")}</strong><span aria-hidden="true">→</span></a>`).join("")
+    : '<p class="empty-state">接下來 7 天沒有日期已確定的公開市場事件。</p>';
 }
 
 function renderV56Destinations(brief) {
@@ -467,18 +496,6 @@ function renderV56Destinations(brief) {
     ? brief.ipoMilestones.map((entry) => `<a class="home-v56-destination__row" href="./ipo-radar.html?code=${encodeURIComponent(entry.stockCode)}"><time datetime="${escapeAttribute(entry.date)}">${formatDate(entry.date)}</time><span>${escapeHtml(entry.stockCode)} ${escapeHtml(entry.companyName)}</span><strong>${escapeHtml(entry.label)}</strong></a>`).join("")
     : '<p class="home-v56-empty">目前沒有日期明確的近期 IPO 里程碑。</p>';
   workbenchTarget.innerHTML = `<section class="home-v56-destinations" aria-labelledby="home-v56-destinations-title"><div class="home-v56-destinations__heading"><div><p class="kicker">RESEARCH DESTINATIONS</p><h2 id="home-v56-destinations-title">進一步研究</h2></div><p>從同一份已驗證資料快照開啟完整清單、事件與時程。</p></div><div class="home-v56-destinations__grid"><article><h3>IPO 近期里程碑</h3>${ipo}<a class="home-v56-destination__more" href="./ipo-radar.html">查看 IPO 雷達 →</a></article><article><h3>可轉債市場</h3><p>比較完整條款、事件與市場表現；沒有有效價格歷史的欄位會明確顯示「—」。</p><a class="home-v56-destination__more" href="./bonds.html">查看全部可轉債 →</a></article><article><h3>興櫃市場</h3><p>查看每日成交、排名與公司關聯資料。</p><a class="home-v56-destination__more" href="./emerging.html">查看興櫃市場 →</a></article></div></section>`;
-}
-
-function formatV56OldToNew(oldValue, newValue) {
-  const left = oldValue === null || oldValue === undefined ? "—" : formatNumber(oldValue);
-  const right = newValue === null || newValue === undefined ? "—" : formatNumber(newValue);
-  return `${left} → ${right}`;
-}
-
-function formatV56Percent(value) {
-  return typeof value === "number" && Number.isFinite(value)
-    ? `${value > 0 ? "+" : ""}${(value * 100).toFixed(2)}%`
-    : "—";
 }
 
 function renderHomeCbRightsEvents({ canonicalEvents, asOfDate }) {

@@ -115,11 +115,11 @@ test("V5.1 首頁以 canonical 公開資料提供跨市場事件與客觀排行"
   const [home, script, css] = await Promise.all([
     readShowcaseFile("index.html"), readShowcaseFile("assets/home-page.js"), readShowcaseFile("assets/app.css"),
   ]);
-  assert.match(home, /id="home-event-strip"/);
+  assert.match(home, /id="home-today-changes"/);
+  assert.match(home, /id="home-next-events"/);
   assert.match(home, /id="home-data-coverage"/);
   assert.match(script, /renderMarketStatusLine/);
   assert.match(script, /safeJsonFetch/);
-  assert.match(home, /HOME_V51_WORKBENCH/);
   assert.match(home, /HOME_V51_WORKBENCH/);
   assert.match(script, /buildCrossMarketEventEntries/);
   assert.match(script, /buildObjectiveRankings/);

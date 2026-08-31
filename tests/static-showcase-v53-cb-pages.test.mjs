@@ -59,6 +59,21 @@ test("V5.3 heatmap is an objective projection and keeps real zero-volume bubbles
   ]);
 });
 
+test("V5.7 heatmap only labels the top eight volumes while keeping every point explorable", () => {
+  const heatmapRecords = Array.from({ length: 10 }, (_, index) => ({
+    ...records[0],
+    cbCode: `91${String(index).padStart(3, "0")}`,
+    cbName: `測試債 ${index + 1}`,
+    status: "active",
+    quote: { ...records[0].quote, volume: 10 - index, conversionValue: 100 + index, premiumRate: index },
+  }));
+  const html = renderMarketOverview({ dataDate: "2026-08-28", records: heatmapRecords, summary: {}, events: [], issuance: [] });
+
+  assert.equal((html.match(/data-heatmap-label=/g) ?? []).length, 8);
+  assert.equal((html.match(/data-heatmap-name=/g) ?? []).length, 10);
+  assert.match(html, /僅標示成交量前 8 名/);
+});
+
 test("V5.3 market overview renders public aggregate labels without diagnostics or recommendations", () => {
   const html = renderMarketOverview({
     dataDate: "2026-08-28",

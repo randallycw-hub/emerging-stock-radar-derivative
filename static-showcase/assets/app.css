@@ -700,7 +700,9 @@ a { color: inherit; }
 .cb-mini-list time, .cb-mini-list span { color: var(--muted); font-variant-numeric: tabular-nums; }
 .cb-heatmap-plot { position: relative; min-height: 320px; overflow: hidden; border: 1px solid var(--line); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 25% 25%; }
 .cb-heatmap-point { position: absolute; left: var(--x); bottom: var(--y); width: var(--size); height: var(--size); min-width: 20px; min-height: 20px; transform: translate(-50%, 50%); display: grid; place-items: center; border: 1px solid var(--clay-ink); border-radius: 999px; background: color-mix(in srgb, var(--clay-soft) 80%, transparent); color: var(--clay-ink); font-size: 9px; font-weight: 900; text-decoration: none; }
+.cb-heatmap-point::after { content: attr(data-heatmap-name); position: absolute; top: calc(100% + 5px); left: 50%; transform: translateX(-50%); z-index: 3; padding: 2px 5px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-size: 10px; white-space: nowrap; opacity: 0; pointer-events: none; }
 .cb-heatmap-point:hover, .cb-heatmap-point:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; z-index: 2; }
+.cb-heatmap-point:hover::after, .cb-heatmap-point:focus-visible::after { opacity: 1; }
 .cb-heatmap-legend { margin: 12px 0 0; font-size: 12px; }
 .cb-issuance-filters, .cb-event-filters { grid-template-columns: minmax(220px, 1.8fr) repeat(2, minmax(150px, 1fr)); }
 .cb-pipeline-legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
@@ -2046,6 +2048,8 @@ button.market-event-calendar__day:focus-visible { position: relative; z-index: 1
 .market-event-drawer__timeline li div { display: grid; gap: 2px; }
 .market-event-drawer__timeline li span { color: var(--muted); font-size: 11px; }
 .market-event-drawer__actions { padding: 16px 20px 20px; display: flex; flex-wrap: wrap; gap: 9px; }
+.market-event-pagination { display: flex; justify-content: center; padding: 18px 0 4px; color: var(--muted); font-size: 13px; }
+.market-event-pagination p { margin: 0; }
 
 /* Home follows the same briefing order: snapshot, attention items, then research modules. */
 .home-event-section { margin: 0 0 24px; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }

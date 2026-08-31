@@ -29,14 +29,15 @@ const PIPELINE_STAGE_KEYS = Object.freeze([
 
 export { EVENT_TYPE_LABELS, OFFICIAL_SOURCE_HOSTS, PIPELINE_STAGE_KEYS };
 
-export function buildCbWorkbenchV53({ workbench, history = [], cbMaster = [], companyMaster = [], supplemental = null } = {}) {
+export function buildCbWorkbenchV53({ workbench, history = [], cbMaster = [], companyMaster = [], supplemental = null, conversionPrices = [] } = {}) {
   const snapshot = requiredRecord(workbench, "workbench");
   const dataDate = isoDate(snapshot.dataDate);
   if (!dataDate || !Array.isArray(snapshot.records)) throw new TypeError("workbench must contain dataDate and records");
   const masters = indexMasters(cbMaster, companyMaster);
   const historyByBond = indexHistory(history);
   const redemptionsByBond = indexRedemptions(supplemental, dataDate);
-  const records = snapshot.records.map((input) => projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond));
+  const conversionHistoryByBond = indexConversionPriceHistory(conversionPrices, dataDate);
+  const records = snapshot.records.map((input) => projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond, conversionHistoryByBond));
   assertUniqueActiveCodes(records);
   const events = records.flatMap((record) => record.events)
     .sort((left, right) => left.date.localeCompare(right.date) || left.cbCode.localeCompare(right.cbCode));
@@ -83,6 +84,11 @@ export function validateCbWorkbenchV53(value) {
         throw new TypeError("CB event must retain a verified official source URL");
       }
     }
+    for (const version of arrayValue(item.conversionPriceHistory)) {
+      if (!isoDate(version?.effectiveDate) || finiteNumber(version?.previousConversionPrice) === null || finiteNumber(version?.currentConversionPrice) === null || !isOfficialSourceUrl(version?.sourceUrl)) {
+        throw new TypeError("CB conversion-price history must retain a verified official source URL");
+      }
+    }
   }
   return true;
 }
@@ -97,7 +103,7 @@ export function isOfficialSourceUrl(value) {
   }
 }
 
-function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond) {
+function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond, conversionHistoryByBond) {
   const raw = requiredRecord(input, "workbench record");
   const term = requiredRecord(raw.term, "workbench term");
   const view = requiredRecord(raw.view, "workbench view");
@@ -107,6 +113,7 @@ function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBon
   const stockCode = master.stockCode;
   const company = masters.companyByCode.get(stockCode);
   const history = historyByBond.get(cbCode) ?? [];
+  const conversionPriceHistory = conversionHistoryByBond.get(cbCode) ?? [];
   const quote = projectQuote(view, history, dataDate);
   const redemption = redemptionsByBond.get(cbCode) ?? null;
   const events = projectEvents([
@@ -126,10 +133,50 @@ function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBon
     terms,
     quote,
     liquidity: projectLiquidity(history, dataDate),
+    conversionPriceHistory,
     rights: { redemption },
     events,
     issuance,
   };
+}
+
+function indexConversionPriceHistory(conversionPrices, dataDate) {
+  const versionsByBond = new Map();
+  for (const raw of arrayValue(conversionPrices)) {
+    const cbCode = text(raw?.bondCode);
+    const effectiveDate = isoDate(raw?.effectiveDate);
+    const initialConversionPrice = finiteNumber(raw?.initialConversionPrice);
+    const currentConversionPrice = finiteNumber(raw?.currentConversionPrice);
+    const sourceUrl = typeof raw?.officialDetailUrl === "string" && isOfficialSourceUrl(raw.officialDetailUrl)
+      ? raw.officialDetailUrl
+      : null;
+    if (!cbCode || !effectiveDate || effectiveDate > dataDate || initialConversionPrice === null || initialConversionPrice <= 0 || currentConversionPrice === null || currentConversionPrice <= 0 || !sourceUrl) continue;
+    const entries = versionsByBond.get(cbCode) ?? [];
+    if (!entries.some((entry) => entry.effectiveDate === effectiveDate)) {
+      entries.push({ effectiveDate, initialConversionPrice, currentConversionPrice, sourceUrl });
+      versionsByBond.set(cbCode, entries);
+    }
+  }
+  for (const [cbCode, versions] of versionsByBond) {
+    versions.sort((left, right) => left.effectiveDate.localeCompare(right.effectiveDate));
+    let priorPrice = null;
+    const history = [];
+    for (const version of versions) {
+      const previousConversionPrice = priorPrice ?? version.initialConversionPrice;
+      if (previousConversionPrice !== version.currentConversionPrice) {
+        history.push(Object.freeze({
+          effectiveDate: version.effectiveDate,
+          previousConversionPrice,
+          currentConversionPrice: version.currentConversionPrice,
+          changeType: "轉換價調整",
+          sourceUrl: version.sourceUrl,
+        }));
+      }
+      priorPrice = version.currentConversionPrice;
+    }
+    versionsByBond.set(cbCode, Object.freeze(history));
+  }
+  return versionsByBond;
 }
 
 function indexRedemptions(supplemental, dataDate) {
@@ -258,7 +305,7 @@ function projectQuote(view, history, dataDate) {
 
 function publicTradeState({ latestTradeDate, dataDate, lastVolume }) {
   if (!latestTradeDate || !dataDate || latestTradeDate > dataDate || lastVolume === null || lastVolume < 0) return "DATA_ERROR";
-  return latestTradeDate === dataDate ? "TRADED_TODAY" : "NO_TRADE_TODAY";
+  return latestTradeDate === dataDate && lastVolume > 0 ? "TRADED_TODAY" : "NO_TRADE_TODAY";
 }
 
 function projectTerms(term, view) {

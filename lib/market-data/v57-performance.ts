@@ -37,12 +37,12 @@ export function calculateV57PeriodMetric(
   const valid = validSessions(sessions);
   const latest = valid.at(-1);
   const baseline = selectValidPeriodBaseline(valid, period);
-  if (!latest || !baseline || baseline.close <= 0) return null;
+  if (!latest || !baseline || typeof baseline.close !== "number" || baseline.close <= 0) return null;
   return Object.freeze({
     value: Number((latest.close / baseline.close - 1).toFixed(8)),
     numerator: latest.close,
     denominator: baseline.close,
-    sourceDates: Object.freeze([baseline.tradeDate, latest.tradeDate]),
+    sourceDates: Object.freeze([baseline.tradeDate, latest.tradeDate] as const),
   });
 }
 
@@ -188,9 +188,9 @@ function calculateLiquidity(sessions: readonly Session[]) {
   return Object.freeze({
     average5Volume: average("volume", 5),
     average20Volume,
-    volumeRatio: latest?.volume === null || average20Volume === null || average20Volume <= 0 ? null : Number((latest.volume / average20Volume).toFixed(4)),
+    volumeRatio: latest === null || latest.volume === null || average20Volume === null || average20Volume <= 0 ? null : Number((latest.volume / average20Volume).toFixed(4)),
     average20Amount,
-    amountChange: latest?.value === null || average20Amount === null || average20Amount <= 0 ? null : Number((latest.value / average20Amount - 1).toFixed(8)),
+    amountChange: latest === null || latest.value === null || average20Amount === null || average20Amount <= 0 ? null : Number((latest.value / average20Amount - 1).toFixed(8)),
   });
 }
 
@@ -200,7 +200,7 @@ function metricFromBaseline(latest: Session, baseline: Readonly<{ tradeDate: str
     value: Number((latest.close / baseline.close - 1).toFixed(8)),
     numerator: latest.close,
     denominator: baseline.close,
-    sourceDates: Object.freeze([baseline.tradeDate, latest.tradeDate]),
+    sourceDates: Object.freeze([baseline.tradeDate, latest.tradeDate] as const),
   });
 }
 

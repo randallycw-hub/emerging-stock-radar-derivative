@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { projectIpoPostListingPerformance } from "../static-showcase/assets/ipo-page.js";
+import { normalizeIpoViewState, projectIpoPostListingPerformance } from "../static-showcase/assets/ipo-page.js";
 
 test("V5.7 IPO post-listing performance uses only the actual released offer price", () => {
   const verified = projectIpoPostListingPerformance({
@@ -18,6 +18,12 @@ test("V5.7 IPO post-listing performance uses only the actual released offer pric
   assert.equal(verified.periods.sinceListing, 0.5);
   assert.equal(minimumOnly.offerPrice, null);
   assert.equal(minimumOnly.periods.sinceListing, null);
+});
+
+test("V5.7 direct links to IPO performance default to a performance sort, not an event-date sort", () => {
+  assert.deepEqual(normalizeIpoViewState({ view: "performance", sortKey: "eventDate", direction: "asc" }), {
+    view: "performance", sortKey: "sinceListing", direction: "desc",
+  });
 });
 
 test("V5.7 IPO page has a sortable post-listing research view", async () => {

@@ -124,7 +124,6 @@ test("V5.3 read model retains official event URLs and leaves unknown issuance st
     auctionOrBookbuildingDate: null,
     pricingDate: null,
     listingDate: "2025-08-28",
-    asoDate: null,
   });
   assert.deepEqual(model.issuance[0].terms, {
     issueDate: "2025-08-28",
@@ -146,8 +145,8 @@ test("V5.3 market summary retains published zero-trade samples without turning u
   assert.equal(model.summary.tradedSampleCount, 1);
   assert.equal(model.summary.turnoverAmount, null);
   assert.equal(model.summary.turnoverSampleCount, 0);
-  assert.equal(model.records[0].quote.tradeState, "no_trade");
-  assert.equal(model.records[1].quote.tradeState, "unavailable");
+  assert.equal(model.records[0].quote.tradeState, "NO_TRADE_TODAY");
+  assert.equal(model.records[1].quote.tradeState, "DATA_ERROR");
 });
 
 test("V5.3 market summary totals only the officially published trade samples", () => {

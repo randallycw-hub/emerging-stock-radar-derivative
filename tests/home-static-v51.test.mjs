@@ -27,7 +27,7 @@ const research = {
 
 test("V5.1 homepage has a static research workbench and never exposes internal governance fields", () => {
   const page = buildV51HomeStaticFallback(research);
-  assert.match(page.startHtml, /今天從這裡開始/);
+  assert.match(page.startHtml, /本次公開資料摘要/);
   assert.match(page.startHtml, /可轉債標的股漲幅/);
   assert.match(page.startHtml, /興櫃排行/);
   assert.match(page.startHtml, /近期 IPO 時程/);

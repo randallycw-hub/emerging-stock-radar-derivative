@@ -25,11 +25,21 @@ export const EVENT_TYPE_LABELS = Object.freeze({
 export function projectMarketEvents({ asOfDate, ipoSnapshot, bonds, canonicalEvents = null } = {}) {
   if (!isIsoDate(asOfDate)) return [];
   const canonical = projectCanonicalEvents(canonicalEvents, asOfDate);
-  if (canonical.length) return canonical.sort(compareEvents);
-  return [
+  if (canonical.length) return dedupePublicEvents(canonical).sort(compareEvents);
+  return dedupePublicEvents([
     ...projectIpoEvents(ipoSnapshot, asOfDate),
     ...projectBondEvents(bonds, asOfDate),
-  ].sort(compareEvents);
+  ]).sort(compareEvents);
+}
+
+function dedupePublicEvents(events) {
+  const seen = new Set();
+  return events.filter((event) => {
+    const identity = text(event?.id) || `${event?.market}:${event?.entityKey}:${event?.date}:${event?.eventType}`;
+    if (!identity || seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
+  });
 }
 
 function projectCanonicalEvents(snapshot, asOfDate) {

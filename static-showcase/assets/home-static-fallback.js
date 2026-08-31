@@ -151,7 +151,7 @@ export function buildV51HomeStaticFallback(research = {}) {
   return {
     statusText: dataDate ? renderMarketStatusLine({ dataDate, updatedAt: research?.meta?.updatedAt }) : "資料日 —",
     coverageText: `資料日期 ${formatDate(dataDate)}`,
-    startHtml: `<div class="home-v51-section-heading"><p class="kicker">TODAY'S RESEARCH START</p><h2>今天從這裡開始</h2><p>所有排行與時程均以同一份已驗證公開資料快照呈現。</p></div><div class="home-v51-start-grid">${renderCbStockLeaders(home.cbStockLeaders)}${renderEmergingRankings(home.emergingRankings)}${renderIpoCalendar(home.ipoCalendar)}</div>`,
+    startHtml: `<div class="home-v51-section-heading"><p class="kicker">SNAPSHOT / VERIFIED PUBLIC DATA</p><h2>本次公開資料摘要</h2><p>互動載入後會以同一份已驗證快照，比對前一個有效快照並列出實際異動。</p></div><div class="home-v51-start-grid">${renderCbStockLeaders(home.cbStockLeaders)}${renderEmergingRankings(home.emergingRankings)}${renderIpoCalendar(home.ipoCalendar)}</div>`,
     workbenchHtml: `<div class="home-v51-workbench">${renderCbTurnover(home.cbTurnover)}${renderCbIssuance(home.cbIssuance)}${renderCbOfficialEvents(home.cbOfficialEvents)}${renderIpoThirtyDays(home.ipoCalendar)}</div>`,
     eventHtml: renderV51Events(home.latestEvents),
   };

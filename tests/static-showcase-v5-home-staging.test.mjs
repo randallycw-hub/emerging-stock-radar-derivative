@@ -28,7 +28,7 @@ test("V5.1 staging writes the verified research workbench into the static first 
       home,
       new RegExp(`資料日 ${manifest.market.dataDate.replaceAll("-", "\\/")}`),
     );
-    assert.match(home, /今天從這裡開始/);
+    assert.match(home, /本次公開資料摘要/);
     assert.match(home, /可轉債標的股漲幅/);
     assert.doesNotMatch(home, /讀取中|載入後顯示|資料日將依|HOME_STATIC_|HOME_V51_|資料狀態/);
     assert.doesNotMatch(home, /sourceId|missingReasons|Snapshot ID|Dataset Health/);

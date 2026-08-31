@@ -22,7 +22,7 @@ test("V5.6 IPO loader converts the shared verified pipeline into the public IPO 
     records: [{
       companyCode: "3313", companyName: "斐成", market: "上市", stage: "C", exceptionStatus: null,
       applicationDate: "2026-07-01", reviewDate: "2026-09-02", boardDate: null, contractDate: null, listingDate: null,
-      provisionalUnderwritingPrice: null, finalUnderwritingPrice: null, underwriter: null, auction: null, publicOffering: null,
+      provisionalUnderwritingPrice: null, finalUnderwritingPrice: null, performance: null, underwriter: null, auction: null, publicOffering: null,
       events: [{ date: "2026-09-02", kind: "review_completed", label: "審議完成", verified: true }],
     }],
   });

@@ -23,7 +23,7 @@ export function renderCbDetailV53(record = {}, { companyBonds = [], rightsEvents
     ${redemptionNotice(record.rights?.redemption, rightsEvents, code)}
     <nav class="detail-tabs cb-detail-tabs" aria-label="可轉債詳細資料分頁" role="tablist">${CB_DETAIL_TABS.map(([key, label], index) => tabButton(key, label, index === 0)).join("")}</nav>
     ${tabPanel("overview", overviewPanel(record, history, siblings))}
-    ${tabPanel("valuation", valuationPanel(quote))}
+    ${tabPanel("valuation", valuationPanel(record))}
     ${tabPanel("liquidity", liquidityPanel(quote, liquidity))}
     ${tabPanel("terms", termsPanel(terms))}
     ${tabPanel("period", periodPanel(terms, quote))}
@@ -122,8 +122,15 @@ function overviewPanel(record, history, siblings) {
   return `<h3>概況</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("市場快照日", date(quote.snapshotDataDate ?? quote.dataDate))}${tradeFacts}${fact("標的股收盤", price(quote.stockClose))}</dl>${chart}${companyContext(record, siblings)}`;
 }
 
-function valuationPanel(quote) {
-  return `<h3>估值</h3><dl class="detail-facts cb-detail-facts">${fact("目前轉換價", price(quote.conversionPrice))}${fact("轉換價值", price(quote.conversionValue))}${fact("轉換溢價", percent(quote.premiumRate))}${fact("資料日", date(quote.dataDate))}</dl>`;
+function valuationPanel(record) {
+  const quote = record?.quote ?? {};
+  const history = arrayValue(record?.conversionPriceHistory)
+    .filter((entry) => isoDate(entry?.effectiveDate) && isOfficialSourceUrl(entry?.sourceUrl))
+    .sort((left, right) => right.effectiveDate.localeCompare(left.effectiveDate));
+  const historyHtml = history.length === 0
+    ? ""
+    : `<section class="cb-conversion-history"><h4>轉換價歷程</h4><div class="table-scroll"><table><thead><tr><th>生效日</th><th>原轉換價</th><th>新轉換價</th><th>變動類型</th><th>來源</th></tr></thead><tbody>${history.map((entry) => `<tr><td>${escapeHtml(date(entry.effectiveDate))}</td><td>${escapeHtml(price(entry.previousConversionPrice))}</td><td>${escapeHtml(price(entry.currentConversionPrice))}</td><td>${escapeHtml(text(entry.changeType) || "轉換價調整")}</td><td><a href="${escapeHtml(entry.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a></td></tr>`).join("")}</tbody></table></div></section>`;
+  return `<h3>估值</h3><dl class="detail-facts cb-detail-facts">${fact("目前轉換價", price(quote.conversionPrice))}${fact("轉換價值", price(quote.conversionValue))}${fact("轉換溢價", percent(quote.premiumRate))}${fact("資料日", date(quote.dataDate))}</dl>${historyHtml}`;
 }
 
 function liquidityPanel(quote, liquidity) {

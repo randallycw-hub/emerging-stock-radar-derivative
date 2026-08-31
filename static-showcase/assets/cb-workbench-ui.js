@@ -112,7 +112,11 @@ function renderHeatmap(points) {
   const xRange = rangeFor(points.map((point) => point.x));
   const yRange = rangeFor(points.map((point) => point.y));
   const maxSize = Math.max(...points.map((point) => point.size), 1);
-  return `<section class="cb-overview-panel cb-heatmap" data-cb-heatmap aria-labelledby="cb-heatmap-heading"><header class="cb-overview-heading"><div><p class="section-number">OBJECTIVE EXPLORER</p><h2 id="cb-heatmap-heading">熱力圖</h2></div><p>X 軸：轉換溢價率 · Y 軸：轉換價值</p></header><div class="cb-heatmap-plot" role="list">${points.map((point) => `<a role="listitem" href="${point.detailHref}" class="cb-heatmap-point" style="--x:${scaled(point.x, xRange)}%;--y:${scaled(point.y, yRange)}%;--size:${10 + Math.round(point.size / maxSize * 18)}px" aria-label="${escapeHtml(`${point.cbCode} ${point.cbName}，轉換溢價率 ${publicNumber(point.x)}%，轉換價值 ${publicNumber(point.y)}，成交量 ${publicNumber(point.size)}`)}"><span>${escapeHtml(point.cbCode)}</span></a>`).join("")}</div><p class="cb-heatmap-legend">泡泡大小代表成交量；資料不足的債券不列入。</p></section>`;
+  const labelledCodes = new Set([...points]
+    .sort((left, right) => right.size - left.size || left.cbCode.localeCompare(right.cbCode))
+    .slice(0, 8)
+    .map((point) => point.cbCode));
+  return `<section class="cb-overview-panel cb-heatmap" data-cb-heatmap aria-labelledby="cb-heatmap-heading"><header class="cb-overview-heading"><div><p class="section-number">OBJECTIVE EXPLORER</p><h2 id="cb-heatmap-heading">熱力圖</h2></div><p>X 軸：轉換溢價率 · Y 軸：轉換價值</p></header><div class="cb-heatmap-plot" role="list">${points.map((point) => { const labelled = labelledCodes.has(point.cbCode); return `<a role="listitem" href="${point.detailHref}" class="cb-heatmap-point"${labelled ? ` data-heatmap-label="${escapeHtml(point.cbCode)}"` : ""} data-heatmap-name="${escapeHtml(point.cbCode)}" style="--x:${scaled(point.x, xRange)}%;--y:${scaled(point.y, yRange)}%;--size:${10 + Math.round(point.size / maxSize * 18)}px" aria-label="${escapeHtml(`${point.cbCode} ${point.cbName}，轉換溢價率 ${publicNumber(point.x)}%，轉換價值 ${publicNumber(point.y)}，成交量 ${publicNumber(point.size)}`)}">${labelled ? `<span>${escapeHtml(point.cbCode)}</span>` : ""}</a>`; }).join("")}</div><p class="cb-heatmap-legend">泡泡大小代表成交量；僅標示成交量前 8 名，其餘可滑過或點選查看。</p></section>`;
 }
 
 function summaryCard(label, value, note) {

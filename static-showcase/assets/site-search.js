@@ -107,8 +107,8 @@ function canonicalSearchPriority(entry = {}, needle) {
   };
   if (entry.type === "cb" && /^\d{5,6}$/.test(needle) && isExact(entry.cbCode)) return 0;
   if (entry.type !== "cb" && isExact(entry.stockCode)) return 1;
-  if (isExact(entry.companyName) || (Array.isArray(entry.aliases) && entry.aliases.some(isExact))) return 2;
-  if (entry.type === "cb" && isExact(entry.cbName)) return 3;
+  if ((isExact(entry.companyName) || (Array.isArray(entry.aliases) && entry.aliases.some(isExact))) && entry.type !== "cb") return 2;
+  if (entry.type === "cb" && (isExact(entry.cbName) || isExact(entry.companyName))) return 3;
   if (isExact(entry.stockCode)) return 4;
   if (canonicalSearchValues(entry).some(isPrefix)) return 4;
   return 5;

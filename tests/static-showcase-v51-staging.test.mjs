@@ -30,7 +30,7 @@ test("V5.2 staging extends the public research model with canonical search point
     assert.equal(research.meta.sourceUrls.every((url) => /^https:\/\//.test(url)), true);
     assert.equal(JSON.stringify(research).includes("sourceId"), false);
     assert.equal(JSON.stringify(research).includes("missingReasons"), false);
-    assert.match(home, /今天從這裡開始/);
+    assert.match(home, /本次公開資料摘要/);
     assert.match(home, /可轉債標的股漲幅/);
     assert.match(home, /CB 成交排行/);
     assert.doesNotMatch(home, /HOME_V51_|資料完整|風險與缺漏提醒/);

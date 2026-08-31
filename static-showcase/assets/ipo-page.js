@@ -9,6 +9,7 @@ const stageOrder = { A: 1, B: 2, C: 4, D: 5, listed: 6, withdrawn: 7, delayed: 7
 const errorTarget = globalThis.document?.querySelector("[data-page-error]") ?? null;
 const state = { rows: [], dataDate: null, query: "", market: "all", stage: "market", event: "all", year: "all", dateRange: "all", view: "list", sortKey: "eventDate", direction: "asc", page: 1 };
 const sortTypes = { companyCode: "text", stage: "number", eventDate: "text", distanceDays: "number", auctionOpenDate: "text", listingDate: "text", offerPrice: "number", latestPrice: "number", return5D: "number", return20D: "number", return1M: "number", sinceListing: "number" };
+const performanceSortKeys = new Set(["offerPrice", "latestPrice", "return5D", "return20D", "return1M", "sinceListing"]);
 const lifecycleDefinitions = [
   ["announcement", "公告", /(?:announcement|公告)/iu],
   ["submission", "送件", /(?:application_submitted|submission|送件|申請)/iu],
@@ -77,6 +78,19 @@ function initializeFromUrl() {
   state.sortKey = Object.hasOwn(sortTypes, params.get("sort")) ? params.get("sort") : "eventDate";
   state.direction = params.get("direction") === "desc" ? "desc" : "asc";
   state.page = positiveInteger(params.get("page"));
+  Object.assign(state, normalizeIpoViewState(state));
+}
+
+export function normalizeIpoViewState({ view = "list", sortKey = "eventDate", direction = "asc" } = {}) {
+  const normalizedView = ["list", "month", "performance"].includes(view) ? view : "list";
+  const normalizedDirection = direction === "desc" ? "desc" : "asc";
+  if (normalizedView === "performance" && !performanceSortKeys.has(sortKey)) {
+    return { view: normalizedView, sortKey: "sinceListing", direction: "desc" };
+  }
+  if (normalizedView !== "performance" && performanceSortKeys.has(sortKey)) {
+    return { view: normalizedView, sortKey: "eventDate", direction: "asc" };
+  }
+  return { view: normalizedView, sortKey: Object.hasOwn(sortTypes, sortKey) ? sortKey : "eventDate", direction: normalizedDirection };
 }
 
 function bindControls() {
@@ -324,7 +338,7 @@ function populateFilters() { replaceOptions("#ipo-market", "全部市場", uniqu
 function replaceOptions(selector, allLabel, values, labels = {}) { document.querySelector(selector).innerHTML = `<option value="all">${allLabel}</option>${values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(labels[value] ?? value)}</option>`).join("")}`; }
 function renderPagination(total) { const target = document.querySelector("#ipo-pagination"); target.innerHTML = `<button type="button" ${state.page === 1 ? "disabled" : ""} data-page="${state.page - 1}">上一頁</button><span>第 ${state.page}／${total} 頁</span><button type="button" ${state.page === total ? "disabled" : ""} data-page="${state.page + 1}">下一頁</button>`; for (const button of target.querySelectorAll("[data-page]")) button.addEventListener("click", () => { state.page = Number(button.dataset.page); syncUrl(); render(); }); }
 function applyStateToControls() { document.querySelector("#ipo-search").value = state.query; selectExistingValue("#ipo-market", state.market); selectExistingValue("#ipo-stage", state.stage); selectExistingValue("#ipo-event", state.event); selectExistingValue("#ipo-year", state.year); for (const button of document.querySelectorAll("[data-ipo-date-filter]")) button.setAttribute("aria-pressed", String(button.dataset.ipoDateFilter === state.dateRange)); updateSortControls(); }
-function updateSortControls() { document.querySelector("#ipo-sort-field").value = Object.hasOwn(sortTypes, state.sortKey) ? state.sortKey : "eventDate"; const button = document.querySelector("#ipo-sort-direction"); button.dataset.direction = state.direction; button.textContent = state.direction === "asc" ? "近到遠 ↑" : "遠到近 ↓"; for (const sortButton of [...document.querySelectorAll("[data-ipo-sort]"), ...document.querySelectorAll("[data-ipo-performance-sort]")]) { const key = sortButton.dataset.ipoSort ?? sortButton.dataset.ipoPerformanceSort; const active = key === state.sortKey; sortButton.closest("th").setAttribute("aria-sort", active ? (state.direction === "asc" ? "ascending" : "descending") : "none"); sortButton.querySelector("span").textContent = active ? (state.direction === "asc" ? "↑" : "↓") : ""; } for (const viewButton of document.querySelectorAll("[data-ipo-view]")) viewButton.setAttribute("aria-selected", String(viewButton.dataset.ipoView === state.view)); document.querySelector("#ipo-list-view").hidden = state.view !== "list"; document.querySelector("#ipo-month-view").hidden = state.view !== "month"; document.querySelector("#ipo-performance-view").hidden = state.view !== "performance"; }
+function updateSortControls() { document.querySelector("#ipo-sort-field").value = Object.hasOwn(sortTypes, state.sortKey) ? state.sortKey : "eventDate"; const button = document.querySelector("#ipo-sort-direction"); button.dataset.direction = state.direction; const numericSort = state.view === "performance"; button.textContent = numericSort ? (state.direction === "asc" ? "低到高 ↑" : "高到低 ↓") : (state.direction === "asc" ? "近到遠 ↑" : "遠到近 ↓"); for (const sortButton of [...document.querySelectorAll("[data-ipo-sort]"), ...document.querySelectorAll("[data-ipo-performance-sort]")]) { const key = sortButton.dataset.ipoSort ?? sortButton.dataset.ipoPerformanceSort; const active = key === state.sortKey; sortButton.closest("th").setAttribute("aria-sort", active ? (state.direction === "asc" ? "ascending" : "descending") : "none"); sortButton.querySelector("span").textContent = active ? (state.direction === "asc" ? "↑" : "↓") : ""; } for (const viewButton of document.querySelectorAll("[data-ipo-view]")) viewButton.setAttribute("aria-selected", String(viewButton.dataset.ipoView === state.view)); document.querySelector("#ipo-list-view").hidden = state.view !== "list"; document.querySelector("#ipo-month-view").hidden = state.view !== "month"; document.querySelector("#ipo-performance-view").hidden = state.view !== "performance"; }
 function syncUrl() { const params = new URLSearchParams(); if (state.query) params.set("q", state.query); if (state.market !== "all") params.set("market", state.market); if (shouldWriteIpoStage(state.stage)) params.set("stage", state.stage); if (state.event !== "all") params.set("event", state.event); if (state.year !== "all") params.set("year", state.year); if (state.dateRange !== "all") params.set("range", state.dateRange); if (state.view !== "list") params.set("view", state.view); if (state.sortKey !== "eventDate") params.set("sort", state.sortKey); if (state.direction !== "asc") params.set("direction", state.direction); if (state.page > 1) params.set("page", String(state.page)); history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`); }
 function showUnavailable() { document.querySelector("#ipo-update-status").textContent = "資料暫時無法取得"; document.querySelector("#ipo-table-body").innerHTML = emptyRow("目前沒有可顯示的 IPO 時程資料"); document.querySelector("#ipo-card-list").innerHTML = emptyCard("目前沒有可顯示的 IPO 時程資料"); document.querySelector("#ipo-upcoming-grid").innerHTML = "<p class=\"empty-cell\">目前沒有未來 7 日公開事件</p>"; showError("資料暫時無法取得"); }
 function showError(message) { if (errorTarget) { errorTarget.textContent = message; errorTarget.hidden = false; } }

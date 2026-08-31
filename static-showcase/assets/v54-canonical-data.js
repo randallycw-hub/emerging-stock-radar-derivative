@@ -38,7 +38,7 @@ export function buildV54CanonicalData({
   emerging = null,
   revenue = [],
 } = {}) {
-  const cb = buildCbWorkbenchV53({ workbench, history, cbMaster, companyMaster, supplemental });
+  const cb = buildCbWorkbenchV53({ workbench, history, cbMaster, companyMaster, supplemental, conversionPrices });
   const dataDate = cb.dataDate;
   const conversionByBond = indexConversionSnapshots(conversionPrices, dataDate);
   const records = cb.records.map((record) => projectCbRecord(record, conversionByBond.get(record.cbCode) ?? null));
@@ -157,7 +157,9 @@ function projectCbRecord(record, conversionSnapshot) {
       puts: putRights,
       maturity,
     },
-    conversionPriceHistory: conversionSnapshot === null ? [] : [conversionSnapshot],
+    conversionPriceHistory: recordsOf(record.conversionPriceHistory).length
+      ? recordsOf(record.conversionPriceHistory)
+      : conversionSnapshot === null ? [] : [conversionSnapshot],
   };
 }
 
@@ -196,13 +198,15 @@ function projectCbEvents(record, dataDate) {
     }));
   }
   for (const version of recordsOf(record.conversionPriceHistory)) {
-    if (version.initialConversionPrice === null || version.initialConversionPrice === version.currentConversionPrice) continue;
+    const previousConversionPrice = number(version.previousConversionPrice ?? version.initialConversionPrice);
+    const currentConversionPrice = number(version.currentConversionPrice);
+    if (previousConversionPrice === null || currentConversionPrice === null || previousConversionPrice === currentConversionPrice) continue;
     events.push(canonicalEvent({
       eventId: `mops-conversion:${record.cbCode}:${version.effectiveDate}`,
       eventType: "cb_conversion_price_change", marketScope: "cb", stockCode: record.stockCode, cbCode: record.cbCode,
       companyName: record.companyName, instrumentName: record.cbName, announcementDate: null, effectiveDate: version.effectiveDate,
       title: `${record.cbName}轉換價目前有效值`, summary: null, sourceUrl: version.sourceUrl, dataDate,
-      extra: { initialConversionPrice: version.initialConversionPrice, currentConversionPrice: version.currentConversionPrice },
+      extra: { initialConversionPrice: previousConversionPrice, currentConversionPrice },
     }));
   }
   return events;

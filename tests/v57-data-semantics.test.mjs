@@ -33,6 +33,12 @@ test("V5.7 compares latest CB trade date against the public snapshot date", () =
     lastPrice: 100,
     lastVolume: 8,
   }).state, "TRADED_TODAY");
+  assert.equal(resolveTradeState({
+    latestTradeDate: "2026-08-28",
+    dataDate: "2026-08-28",
+    lastPrice: 100,
+    lastVolume: 0,
+  }).state, "NO_TRADE_TODAY");
 });
 
 test("V5.7 rolling metrics preserve insufficient samples as null", () => {

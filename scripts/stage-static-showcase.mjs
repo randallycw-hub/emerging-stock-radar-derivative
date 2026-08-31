@@ -320,6 +320,7 @@ async function writePublicMarketResearch({ source, destination, generation }) {
     cbMaster: masters.cbMaster,
     companyMaster: masters.companyMaster,
     supplemental,
+    conversionPrices,
   });
   validateCbWorkbenchV53(cbWorkbenchV53);
   const cbWorkbenchV54 = buildV54CanonicalData({
@@ -540,11 +541,10 @@ async function injectHomeStaticFallback({ destination, marketResearch }) {
   }
   const markers = [
     "<!-- HOME_STATIC_STATUS -->",
-    "<!-- HOME_STATIC_SUMMARY -->",
+    "<!-- HOME_STATIC_CHANGES -->",
     "<!-- HOME_STATIC_EVENTS -->",
     "<!-- HOME_STATIC_COVERAGE -->",
     "<!-- HOME_V51_WORKBENCH -->",
-    "<!-- HOME_CB_RIGHTS -->",
   ];
   if (!markers.every((marker) => html.includes(marker))) return;
   await writeFile(path, html
@@ -552,8 +552,7 @@ async function injectHomeStaticFallback({ destination, marketResearch }) {
     .replace(markers[1], fallback.startHtml)
     .replace(markers[2], fallback.eventHtml)
     .replace(markers[3], fallback.coverageText)
-    .replace(markers[4], fallback.workbenchHtml)
-    .replace(markers[5], '<p class="empty-state">尚未列出近期可轉債關鍵事件。</p>'), "utf8");
+    .replace(markers[4], fallback.workbenchHtml), "utf8");
 }
 
 async function buildStagedDataCenterStatus({ source, destination, generation, manifest, runtime }) {
