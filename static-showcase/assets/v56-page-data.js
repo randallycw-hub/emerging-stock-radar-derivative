@@ -24,6 +24,26 @@ export function mapV56EmergingRows(model = {}) {
   });
 }
 
+/**
+ * Summarise only values that an official daily snapshot has actually published.
+ * A single unavailable company must not blank the whole market, nor become a
+ * fabricated zero in the public totals.
+ */
+export function buildPublishedEmergingBreadth(rows = []) {
+  const records = Array.isArray(rows) ? rows : [];
+  const prices = records.map((row) => finiteOrNull(row?.dailyAveragePrice)).filter((value) => value !== null);
+  const volumes = records.map((row) => finiteOrNull(row?.transactionVolume)).filter((value) => value !== null);
+  const amounts = records.map((row) => finiteOrNull(row?.estimatedTransactionAmount)).filter((value) => value !== null);
+
+  return {
+    effective: prices.length,
+    traded: volumes.filter((value) => value > 0).length,
+    lowLiquidity: volumes.filter((value) => value <= 0).length,
+    totalVolume: volumes.length ? volumes.reduce((sum, value) => sum + value, 0) : null,
+    totalAmount: amounts.length ? amounts.reduce((sum, value) => sum + value, 0) : null,
+  };
+}
+
 function finiteOrNull(value) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }

@@ -1,9 +1,9 @@
 import { formatDate, formatNumber, marketDetailHref, safeJsonFetch } from "./site-shell.js";
 import { applyCanonicalCompanyIdentity, indexCanonicalCompanies } from "./canonical-identity.js";
-import { countPublishedPositive, publicNumber, sumPublishedValues } from "./public-data-state.js";
+import { publicNumber } from "./public-data-state.js";
 import { emergingDailyAverageLabel } from "./emerging-market-display.js";
 import { sortRows } from "./table-sort.js";
-import { mapV56EmergingRows } from "./v56-page-data.js";
+import { buildPublishedEmergingBreadth, mapV56EmergingRows } from "./v56-page-data.js";
 
 const pointerUrl = new URL("../data/current.json", import.meta.url);
 const errorTarget = document.querySelector("[data-page-error]");
@@ -206,20 +206,14 @@ function applyViewPreset() {
 function renderBreadthAndRankings() {
   const rows = currentDateRows();
   const count = (direction) => rows.filter((row) => row.direction === direction).length;
-  const effective = rows.every((row) => publicNumber(row.dailyAveragePrice) !== null)
-    ? rows.length
-    : null;
-  const traded = countPublishedPositive(rows, (row) => row.transactionVolume);
-  const lowLiquidity = traded === null ? null : rows.length - traded;
-  const totalVolume = sumDecimal(rows, "transactionVolume");
-  const totalAmount = sumDecimal(rows, "estimatedTransactionAmount");
+  const breadth = buildPublishedEmergingBreadth(rows);
   setBreadth("companies", formatNumber(rows.length));
-  setBreadth("effective", formatNumber(effective));
-  setBreadth("traded", formatNumber(traded));
-  setBreadth("low-liquidity", formatNumber(lowLiquidity));
+  setBreadth("effective", formatNumber(breadth.effective));
+  setBreadth("traded", formatNumber(breadth.traded));
+  setBreadth("low-liquidity", formatNumber(breadth.lowLiquidity));
   setBreadth("directions", `${count("up")}／${count("down")}／${count("flat")}`);
-  setBreadth("volume", formatNumber(totalVolume));
-  setBreadth("amount", formatNumber(totalAmount, { maximumFractionDigits: 0 }));
+  setBreadth("volume", formatNumber(breadth.totalVolume));
+  setBreadth("amount", formatNumber(breadth.totalAmount, { maximumFractionDigits: 0 }));
 
   const rankings = [
     ["漲幅排行", ranked(rows.filter((row) => positiveNumber(row.averageChangePercent)), "averageChangePercent", "desc"), "percent"],
@@ -441,12 +435,6 @@ function latestTradingDate(rows) {
   return rows.map((row) => row.tradingDate).filter(Boolean).sort().at(-1) ?? null;
 }
 
-function sumDecimal(rows, key) {
-  return sumPublishedValues(rows, (row) => {
-    const value = row?.[key];
-    return typeof value === "string" ? value.replaceAll(",", "") : value;
-  });
-}
 
 function positiveNumber(value) {
   const normalized = typeof value === "string" ? value.replaceAll(",", "") : value;

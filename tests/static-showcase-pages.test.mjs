@@ -71,7 +71,7 @@ for (const [currentFile, pageName] of primaryPageFiles) {
       html,
       new RegExp(`href="\\./${currentFile}"[^>]+aria-current="page"`),
     );
-    assert.doesNotMatch(html, /href="#(?!main-content)/);
+    assert.doesNotMatch(navigation, /href="#/);
   });
 }
 

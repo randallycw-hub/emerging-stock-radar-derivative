@@ -135,17 +135,37 @@ test("V5.3 read model retains official event URLs and leaves unknown issuance st
   });
 });
 
-test("V5.3 market summary preserves official zero-trade state instead of collapsing unavailable data to zero", () => {
+test("V5.3 market summary retains published zero-trade samples without turning unavailable records into zero", () => {
   const model = buildModel([
     record({ bondCode: "90001", cbTradeUnits: "0", cbClose: null, stockClose: null, conversionPrice: null }),
     record({ bondCode: "90002", issuerCode: "9001", cbTradeUnits: null, cbClose: null, stockClose: null, conversionPrice: null }),
   ]);
 
   assert.equal(model.summary.activeCount, 2);
-  assert.equal(model.summary.tradedCount, null);
+  assert.equal(model.summary.tradedCount, 0);
+  assert.equal(model.summary.tradedSampleCount, 1);
   assert.equal(model.summary.turnoverAmount, null);
+  assert.equal(model.summary.turnoverSampleCount, 0);
   assert.equal(model.records[0].quote.tradeState, "no_trade");
   assert.equal(model.records[1].quote.tradeState, "unavailable");
+});
+
+test("V5.3 market summary totals only the officially published trade samples", () => {
+  const model = buildModel([
+    record({ bondCode: "90001", cbTradeUnits: "20" }),
+    record({ bondCode: "90002", issuerCode: "9001", cbTradeUnits: "0" }),
+    record({ bondCode: "90003", issuerCode: "9002", cbTradeUnits: null }),
+  ], [
+    { bondCode: "90001", date: "2026-08-28", cbTradingUnits: "20", cbTurnover: "22000" },
+    { bondCode: "90002", date: "2026-08-28", cbTradingUnits: "0", cbTurnover: "0" },
+  ]);
+
+  assert.equal(model.summary.tradedCount, 1);
+  assert.equal(model.summary.tradedSampleCount, 2);
+  assert.equal(model.summary.turnoverAmount, 22000);
+  assert.equal(model.summary.turnoverSampleCount, 2);
+  assert.equal(model.summary.weekTurnoverAmount, 22000);
+  assert.equal(model.summary.weekTurnoverSampleCount, 2);
 });
 
 test("V5.3 market summary never labels trading units as turnover amount", () => {

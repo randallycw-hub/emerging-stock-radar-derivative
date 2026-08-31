@@ -75,6 +75,26 @@ test("V5.3 market overview renders public aggregate labels without diagnostics o
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|資料健康度|買點|推薦|風險/);
 });
 
+test("V5.6 CB market overview reads canonical event dates instead of dropping them", () => {
+  const html = renderMarketOverview({
+    dataDate: "2026-08-28",
+    summary: {},
+    records: [],
+    issuance: [],
+    events: [{
+      cbCode: "90001",
+      cbName: "甲一",
+      effectiveDate: "2026-08-30",
+      title: "甲一到期日",
+    }],
+  });
+
+  assert.match(html, /近期事件/);
+  assert.match(html, /2026\/08\/30/);
+  assert.match(html, /甲一到期日/);
+  assert.doesNotMatch(html, /近期沒有已公布的事件/);
+});
+
 test("V5.3 CB navigation exposes all five product functions", async () => {
   const [bonds, filter, issuance, events, css] = await Promise.all([
     readFile(new URL("bonds.html", root), "utf8"),

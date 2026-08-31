@@ -53,7 +53,7 @@ test("IPO loader reads the API snapshot when it is available", async () => {
   assert.equal(await loadIpoSnapshot({ fetchImpl: async () => ({ ok: true, json: async () => ({ schemaVersion: 2, records: [] }) }) }), null);
 });
 
-test("IPO loader falls back to the published static snapshot when the API is unavailable", async () => {
+test("IPO loader prefers the published common snapshot before an optional API fallback", async () => {
   globalThis.location = new URL("https://market.example/market-site/ipo-radar.html");
   const { loadIpoSnapshot } = await import(`${dataPath.href}?fallback-test=1`);
   const snapshot = { schemaVersion: 1, dataDate: "2026-07-31", records: [{ companyCode: "1234", companyName: "測試公司" }] };
@@ -71,7 +71,6 @@ test("IPO loader falls back to the published static snapshot when the API is una
   });
   assert.deepEqual(result, snapshot);
   assert.deepEqual(requested, [
-    "/api/ipo-events",
     "/market-site/data/current.json",
     "/market-site/data/generations/test/runtime.json",
     "/market-site/data/generations/test/ipo-events.json",

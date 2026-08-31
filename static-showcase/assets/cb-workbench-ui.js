@@ -43,16 +43,20 @@ export function renderMarketOverview(model, { metric = "volume" } = {}) {
   const definition = RANKING_METRICS[metric] ?? RANKING_METRICS.volume;
   const records = arrayValue(model?.records).filter((record) => record?.status === "active");
   const summary = model?.summary ?? {};
-  const events = arrayValue(model?.events).filter((event) => event?.date >= model?.dataDate).slice(0, 6);
+  const events = arrayValue(model?.events)
+    .map(normalizeOverviewEvent)
+    .filter((event) => event !== null && event.date >= model?.dataDate)
+    .sort((left, right) => left.date.localeCompare(right.date) || text(left.cbCode).localeCompare(text(right.cbCode)))
+    .slice(0, 6);
   const issuance = arrayValue(model?.issuance).filter((item) => item?.stages?.listingDate >= model?.dataDate).slice(0, 6);
   const ranking = rankCbRecords(records, metric).slice(0, 10);
   const heatmap = buildCbHeatmapPoints(records);
   return `<section class="cb-market-overview" data-cb-market-overview aria-label="可轉債市場總覽">
     <section class="cb-market-summary" aria-label="市場摘要">
       ${summaryCard("有效 CB", publicNumber(summary.activeCount), "目前有效掛牌且未到期")}
-      ${summaryCard("今日有成交", publicNumber(summary.tradedCount), "以最新公開交易日為準")}
-      ${summaryCard("今日成交額", publicAmount(summary.turnoverAmount), dateLabel(model?.dataDate))}
-      ${summaryCard("本週成交額", publicAmount(summary.weekTurnoverAmount), text(summary.weekPeriod) || "—")}
+      ${summaryCard("今日有成交（已公布）", publicNumber(summary.tradedCount), "以最新公開交易日為準")}
+      ${summaryCard("今日成交額（已公布）", publicAmount(summary.turnoverAmount), dateLabel(model?.dataDate))}
+      ${summaryCard("本週成交額（已公布）", publicAmount(summary.weekTurnoverAmount), text(summary.weekPeriod) || "—")}
     </section>
     <section class="cb-overview-panel" aria-labelledby="cb-ranking-heading">
       <header class="cb-overview-heading"><div><p class="section-number">TURNOVER RANKING</p><h2 id="cb-ranking-heading">成交排行</h2></div><div class="cb-rank-controls" aria-label="成交排行指標">${Object.entries(RANKING_METRICS).map(([key, item]) => `<button type="button" data-cb-overview-metric="${key}" aria-pressed="${key === metric}">${escapeHtml(item.label)}</button>`).join("")}</div></header>
@@ -90,6 +94,13 @@ function renderRanking(records, definition) {
 
 function renderEventPanel(events) {
   return `<section class="cb-overview-panel" aria-labelledby="cb-events-heading"><header class="cb-overview-heading"><div><p class="section-number">UPCOMING EVENTS</p><h2 id="cb-events-heading">近期事件</h2></div><a href="./bonds-events.html">查看行事曆</a></header>${events.length ? `<ol class="cb-mini-list">${events.map((event) => `<li><time datetime="${escapeHtml(event.date)}">${escapeHtml(dateLabel(event.date))}</time><a href="./bonds.html?bond=${encodeURIComponent(text(event.cbCode))}">${escapeHtml(text(event.cbCode))} ${escapeHtml(text(event.cbName))}</a><span>${escapeHtml(text(event.label))}</span></li>`).join("")}</ol>` : '<p class="empty-state">近期沒有已公布的事件。</p>'}</section>`;
+}
+
+function normalizeOverviewEvent(event) {
+  const date = [event?.date, event?.effectiveDate, event?.startDate, event?.deadlineDate, event?.endDate, event?.announcementDate]
+    .find((value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")));
+  const label = text(event?.label) || text(event?.title);
+  return date && label ? { ...event, date, label } : null;
 }
 
 function renderIssuancePanel(issuance) {

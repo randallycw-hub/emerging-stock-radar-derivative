@@ -343,14 +343,21 @@ function projectLiquidity(history, dataDate) {
 
 function buildSummary(records, dataDate) {
   const active = records.filter((record) => record.status === "active");
-  const hasCompleteTradeCoverage = active.every((record) => record.quote.volume !== null && record.quote.isLatestSnapshot);
-  const hasCompleteTurnoverCoverage = active.every((record) => record.quote.turnoverAmount !== null && record.quote.isLatestSnapshot);
-  const hasCompleteWeeklyCoverage = active.every((record) => record.liquidity.weekTurnover !== null);
+  const latestTradeSamples = active.filter((record) => record.quote.isLatestSnapshot && finiteNumber(record.quote.volume) !== null);
+  const latestTurnoverSamples = active.filter((record) => record.quote.isLatestSnapshot && finiteNumber(record.quote.turnoverAmount) !== null);
+  const weeklyTurnoverSamples = active.filter((record) => finiteNumber(record.liquidity.weekTurnover) !== null);
   return {
     activeCount: active.length,
-    tradedCount: hasCompleteTradeCoverage ? active.filter((record) => record.quote.volume > 0).length : null,
-    turnoverAmount: hasCompleteTurnoverCoverage ? round(active.reduce((sum, record) => sum + record.quote.turnoverAmount, 0)) : null,
-    weekTurnoverAmount: hasCompleteWeeklyCoverage ? round(active.reduce((sum, record) => sum + record.liquidity.weekTurnover, 0)) : null,
+    tradedCount: latestTradeSamples.length ? latestTradeSamples.filter((record) => record.quote.volume > 0).length : null,
+    tradedSampleCount: latestTradeSamples.length,
+    turnoverAmount: latestTurnoverSamples.length
+      ? round(latestTurnoverSamples.reduce((sum, record) => sum + record.quote.turnoverAmount, 0))
+      : null,
+    turnoverSampleCount: latestTurnoverSamples.length,
+    weekTurnoverAmount: weeklyTurnoverSamples.length
+      ? round(weeklyTurnoverSamples.reduce((sum, record) => sum + record.liquidity.weekTurnover, 0))
+      : null,
+    weekTurnoverSampleCount: weeklyTurnoverSamples.length,
     weekPeriod: `${isoWeekMonday(dataDate)} 至 ${dataDate}`,
   };
 }

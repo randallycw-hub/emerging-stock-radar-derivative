@@ -27,7 +27,7 @@ test("首頁使用 V2 標題且不再顯示資料筆數摘要列", () => {
   assert.doesNotMatch(html, />384<|>343<|>354<|資料日期/);
 });
 
-test("六個公開頁面已完全移除舊單頁程式與雜湊路由", async () => {
+test("六個公開頁面已移除舊單頁程式，且僅保留已核對的頁內導覽", async () => {
   const legacyExists = await access(new URL("../static-showcase/assets/app.js", import.meta.url))
     .then(() => true)
     .catch(() => false);
@@ -35,6 +35,11 @@ test("六個公開頁面已完全移除舊單頁程式與雜湊路由", async ()
 
   for (const page of ["index.html", "bonds.html", "emerging.html", "ipo-radar.html", "ipo.html", "methodology.html"]) {
     const pageHtml = await readFile(new URL(`../static-showcase/${page}`, import.meta.url), "utf8");
-    assert.doesNotMatch(pageHtml, /assets\/app\.js|href="#(?!main-content)[^"]+"/);
+    assert.doesNotMatch(pageHtml, /assets\/app\.js/);
+    const fragments = [...pageHtml.matchAll(/href="#([^"]+)"/g)].map((match) => match[1]);
+    const expectedFragments = page === "bonds.html"
+      ? ["main-content", "cb-today-changes", "cb-market-performance", "cb-market-institutions"]
+      : ["main-content"];
+    assert.deepEqual(fragments, expectedFragments);
   }
 });
