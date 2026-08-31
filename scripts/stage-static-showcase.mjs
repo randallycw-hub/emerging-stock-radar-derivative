@@ -27,6 +27,7 @@ import {
   buildV55CanonicalData,
   validateV55CanonicalData,
 } from "../static-showcase/assets/v55-canonical-data.js";
+import { buildV56MarketData } from "../static-showcase/assets/v56-market-data.js";
 import {
   buildCanonicalPublicMasters,
   buildPublicMarketResearch,
@@ -35,6 +36,8 @@ import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-rese
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
 import { parseBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
+import { buildDailyChanges } from "../lib/market-data/v56-daily-changes.ts";
+import { calculatePeriodReturn } from "../lib/market-data/v56-performance.ts";
 import {
   getApprovedIpoResource,
   getApprovedResource,
@@ -76,6 +79,7 @@ const ASSET_FILES = new Set([
   "cb-workbench-v53.js",
   "v54-canonical-data.js",
   "v55-canonical-data.js",
+  "v56-market-data.js",
   "cb-workbench-ui.js",
   "cb-stats-page.js",
   "bond-events-page.js",
@@ -256,13 +260,17 @@ export async function stageStaticShowcase({
     runtime,
   });
   await writePublicStaticArtifacts({ destination, generation: pointer.generation });
-  const marketResearch = await writePublicMarketResearch({ destination, generation: pointer.generation });
+  const marketResearch = await writePublicMarketResearch({
+    source,
+    destination,
+    generation: pointer.generation,
+  });
   await injectHomeStaticFallback({ destination, marketResearch });
   await injectDataCenterBootstrap({ destination, status: dataCenterStatus });
   await writePublicRootArtifacts({ destination });
 }
 
-async function writePublicMarketResearch({ destination, generation }) {
+async function writePublicMarketResearch({ source, destination, generation }) {
   const base = join(destination, "data", ...generation.split("/"));
   const [manifest, emerging, ipo, workbench, stockCloses, history, revenue, supplemental, conversionPrices, rightsEvents] = await Promise.all([
     readJson(join(base, "manifest.json"), "active generation public manifest is invalid"),
@@ -344,6 +352,37 @@ async function writePublicMarketResearch({ destination, generation }) {
     records: cbWorkbenchV55.events,
   };
   const enrichedSearchIndex = enrichSearchIndexWithCbEvents(searchIndex, cbWorkbenchV55.events);
+  const previousV56 = await findPreviousV56Snapshot({
+    source,
+    currentGeneration: generation,
+    currentDataDate: manifest.market.dataDate,
+  });
+  const v56Base = buildV56MarketData({
+    manifest,
+    masters,
+    history,
+    workbench,
+    emerging,
+    ipo,
+    rightsEvents,
+    previous: previousV56,
+  });
+  const v56DailyChanges = previousV56 === null
+    ? []
+    : buildDailyChanges({ previous: previousV56, current: v56Base });
+  const v56Performance = buildV56Performance(v56Base);
+  const v56MarketData = buildV56MarketData({
+    manifest,
+    masters,
+    history,
+    workbench,
+    emerging,
+    ipo,
+    rightsEvents,
+    previous: previousV56,
+    dailyChanges: v56DailyChanges,
+    performance: v56Performance,
+  });
   await Promise.all([
     writeFile(join(base, "market-research.json"), `${JSON.stringify(research, null, 2)}\n`, "utf8"),
     writeFile(join(base, "company-master.json"), `${JSON.stringify(companyMaster, null, 2)}\n`, "utf8"),
@@ -354,6 +393,7 @@ async function writePublicMarketResearch({ destination, generation }) {
     writeFile(join(base, "canonical-events-v54.json"), `${JSON.stringify(canonicalEventsV54, null, 2)}\n`, "utf8"),
     writeFile(join(base, "cb-workbench-v55.json"), `${JSON.stringify(cbWorkbenchV55, null, 2)}\n`, "utf8"),
     writeFile(join(base, "canonical-events-v55.json"), `${JSON.stringify(canonicalEventsV55, null, 2)}\n`, "utf8"),
+    writeFile(join(base, "v56-market-data.json"), `${JSON.stringify(v56MarketData, null, 2)}\n`, "utf8"),
   ]);
   const runtimePath = join(base, "runtime.json");
   const runtime = await readJson(runtimePath, "active generation public runtime is invalid");
@@ -367,8 +407,98 @@ async function writePublicMarketResearch({ destination, generation }) {
     canonicalEventsV54Url: `./data/${generation}/canonical-events-v54.json`,
     cbWorkbenchV55Url: `./data/${generation}/cb-workbench-v55.json`,
     canonicalEventsV55Url: `./data/${generation}/canonical-events-v55.json`,
+    v56MarketDataUrl: `./data/${generation}/v56-market-data.json`,
   }, null, 2)}\n`, "utf8");
   return research;
+}
+
+const V56_PERFORMANCE_PERIODS = Object.freeze(["1D", "1W", "1M", "3M", "6M", "YTD"]);
+
+function buildV56Performance(model) {
+  const priceHistoryByCbCode = new Map();
+  for (const point of model.priceHistory.records) {
+    if (!point.cbCode || typeof point.close !== "number") continue;
+    const points = priceHistoryByCbCode.get(point.cbCode) ?? [];
+    points.push({ tradeDate: point.tradeDate, close: point.close });
+    priceHistoryByCbCode.set(point.cbCode, points);
+  }
+  return model.cbMaster.records.map((record) => ({
+    entityType: "cb",
+    entityId: record.cbCode,
+    cbCode: record.cbCode,
+    dataDate: model.dataDate,
+    periods: Object.fromEntries(V56_PERFORMANCE_PERIODS.map((period) => [
+      period,
+      calculatePeriodReturn(priceHistoryByCbCode.get(record.cbCode) ?? [], period),
+    ])),
+  }));
+}
+
+async function findPreviousV56Snapshot({ source, currentGeneration, currentDataDate }) {
+  const generationsPath = join(source, "data", "generations");
+  let entries;
+  try {
+    entries = await readdir(generationsPath, { withFileTypes: true });
+  } catch {
+    return null;
+  }
+  const candidates = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory() || `generations/${entry.name}` === currentGeneration) continue;
+    try {
+      const manifest = await readJson(
+        join(generationsPath, entry.name, "manifest.json"),
+        "prior V5.6 manifest is invalid",
+      );
+      const dataDate = manifest?.market?.dataDate;
+      if (typeof dataDate === "string" && dataDate < currentDataDate) {
+        candidates.push({ generation: `generations/${entry.name}`, dataDate });
+      }
+    } catch {
+      // An older incomplete snapshot is not a valid comparison baseline.
+    }
+  }
+  candidates.sort((left, right) => right.dataDate.localeCompare(left.dataDate));
+  for (const candidate of candidates) {
+    try {
+      return await buildV56SnapshotFromGeneration({ source, generation: candidate.generation });
+    } catch {
+      // The next older fully verified snapshot remains eligible.
+    }
+  }
+  return null;
+}
+
+async function buildV56SnapshotFromGeneration({ source, generation }) {
+  const base = join(source, "data", ...generation.split("/"));
+  const [manifest, emerging, ipo, workbench, stockCloses, history, revenue, rightsEvents] = await Promise.all([
+    readJson(join(base, "manifest.json"), "prior V5.6 manifest is invalid"),
+    readJson(join(base, "emerging-market.json"), "prior V5.6 emerging market is invalid"),
+    readJson(join(base, "ipo-events.json"), "prior V5.6 IPO snapshot is invalid"),
+    readJson(join(base, "bond-workbench.json"), "prior V5.6 CB workbench is invalid"),
+    readPublicOptionalJson(join(base, "stock-closes.json"), "prior V5.6 stock closes are invalid", []),
+    readPublicOptionalJson(join(base, "bond-market-history.json"), "prior V5.6 CB history is invalid", []),
+    readPublicOptionalJson(join(base, "94025.json"), "prior V5.6 revenue snapshot is invalid", []),
+    readPublicOptionalJson(join(base, "cb-rights-events.json"), "prior V5.6 CB rights events are invalid", { events: [] }),
+  ]);
+  if (manifest?.market?.status !== "verified") throw new Error("prior V5.6 market snapshot is not verified");
+  const masters = buildCanonicalPublicMasters({
+    manifest,
+    emerging,
+    ipo,
+    workbench,
+    stockCloses,
+    revenue,
+  });
+  return buildV56MarketData({
+    manifest,
+    masters,
+    history,
+    workbench,
+    emerging,
+    ipo,
+    rightsEvents,
+  });
 }
 
 function enrichSearchIndexWithCbEvents(searchIndex, events) {

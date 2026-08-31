@@ -156,6 +156,7 @@ test("offline builder and outer refresh stage the same CB generation through the
       canonicalEventsV54Url: `./data/${expectedRuntime.generation}/canonical-events-v54.json`,
       cbWorkbenchV55Url: `./data/${expectedRuntime.generation}/cb-workbench-v55.json`,
       canonicalEventsV55Url: `./data/${expectedRuntime.generation}/canonical-events-v55.json`,
+      v56MarketDataUrl: `./data/${expectedRuntime.generation}/v56-market-data.json`,
     });
     assert.deepEqual(stagedRuntime, expectedRuntime);
     assert.equal(

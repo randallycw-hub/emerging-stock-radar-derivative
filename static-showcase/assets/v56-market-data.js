@@ -17,6 +17,8 @@ export function buildV56MarketData({
   ipo = null,
   rightsEvents = null,
   previous = null,
+  dailyChanges = [],
+  performance = [],
 } = {}) {
   const dataDate = isoDate(manifest?.market?.dataDate);
   if (!dataDate) throw new TypeError("V5.6 data date is invalid");
@@ -35,8 +37,8 @@ export function buildV56MarketData({
     cbEvents: dataset("cb_events", projectCbEvents(rightsEvents, dataDate), dataDate),
     ipoPipeline: dataset("ipo_pipeline", projectIpoPipeline(ipo, dataDate), dataDate),
     emerging: dataset("emerging_market", projectEmerging(emerging, dataDate), dataDate),
-    dailyChanges: dataset("daily_changes", [], dataDate),
-    performance: dataset("performance", [], dataDate),
+    dailyChanges: dataset("daily_changes", recordsOf(dailyChanges), dataDate),
+    performance: dataset("performance", recordsOf(performance), dataDate),
     searchIndex: dataset("search_index", projectSearchIndex(masters?.searchIndex, dataDate), dataDate),
     previousDataDate: isoDate(previous?.dataDate),
   };
