@@ -35,10 +35,20 @@ type CbEventRecord = Readonly<{
 
 export type V56DailyChange = Readonly<{
   changeId: string;
-  entityType: "cb";
+  entityType: "cb" | "ipo" | "emerging";
   entityId: string;
   fieldName: string;
-  changeType: "conversion_price_changed" | "outstanding_changed" | "new_early_redemption";
+  changeType:
+    | "conversion_price_changed"
+    | "outstanding_changed"
+    | "new_early_redemption"
+    | "new_listing"
+    | "conversion_suspension_added"
+    | "put_window_added"
+    | "maturity_window_entered"
+    | "ipo_stage_changed"
+    | "new_ipo_event"
+    | "emerging_turnover_changed";
   oldValue: number | string | null;
   newValue: number | string | null;
   effectiveDate: string;
@@ -98,6 +108,13 @@ const CHANGE_ORDER: Readonly<Record<V56DailyChange["changeType"], number>> = Obj
   conversion_price_changed: 0,
   outstanding_changed: 1,
   new_early_redemption: 2,
+  new_listing: 3,
+  conversion_suspension_added: 4,
+  put_window_added: 5,
+  maturity_window_entered: 6,
+  ipo_stage_changed: 7,
+  new_ipo_event: 8,
+  emerging_turnover_changed: 9,
 });
 
 /**
@@ -145,21 +162,162 @@ export function buildDailyChanges(input: Readonly<{ previous: unknown; current: 
   }
 
   for (const event of input.current.cbEvents.records.filter(isCbEventRecord)) {
-    if (previousEvents.has(event.eventId) || event.eventType !== "early_redemption") continue;
+    if (previousEvents.has(event.eventId)) continue;
+    const eventChange = cbEventChange(event, input.previous.dataDate, input.current.dataDate);
+    if (eventChange === null) continue;
     changes.push(makeChange({
       entityType: "cb",
       entityId: event.cbCode,
       fieldName: "eventType",
-      changeType: "new_early_redemption",
+      changeType: eventChange.changeType,
       oldValue: null,
-      newValue: "提前贖回",
+      newValue: eventChange.label,
       effectiveDate: event.announcementDate ?? input.current.dataDate,
     }));
   }
 
+  appendIpoChanges(changes, input.previous, input.current);
+  appendEmergingChanges(changes, input.previous, input.current);
+
   return Object.freeze(changes.sort((left, right) => (
-    left.entityId.localeCompare(right.entityId)
+    left.entityType.localeCompare(right.entityType)
+    || left.entityId.localeCompare(right.entityId)
     || CHANGE_ORDER[left.changeType] - CHANGE_ORDER[right.changeType]
     || left.changeId.localeCompare(right.changeId)
   )));
+}
+
+function cbEventChange(
+  event: CbEventRecord,
+  previousDataDate: string,
+  currentDataDate: string,
+): Readonly<{ changeType: Extract<V56DailyChange["changeType"], "new_early_redemption" | "new_listing" | "conversion_suspension_added" | "put_window_added" | "maturity_window_entered">; label: string }> | null {
+  if (event.eventType === "early_redemption") return { changeType: "new_early_redemption", label: "提前贖回" };
+  if (event.eventType === "listing" && (event.announcementDate ?? currentDataDate) >= previousDataDate) {
+    return { changeType: "new_listing", label: "新掛牌" };
+  }
+  if (event.eventType === "conversion_suspension" || event.eventType === "suspension") {
+    return { changeType: "conversion_suspension_added", label: "停止轉換" };
+  }
+  if (event.eventType === "put") return { changeType: "put_window_added", label: "賣回窗口" };
+  if (event.eventType === "maturity" && entersMaturityWindow(event.announcementDate, previousDataDate, currentDataDate)) {
+    return { changeType: "maturity_window_entered", label: "進入到期窗口" };
+  }
+  return null;
+}
+
+function entersMaturityWindow(eventDate: string | undefined, previousDataDate: string, currentDataDate: string): boolean {
+  if (!isIsoDate(eventDate)) return false;
+  const previousLimit = addCalendarDays(previousDataDate, 90);
+  const currentLimit = addCalendarDays(currentDataDate, 90);
+  return eventDate > previousLimit && eventDate <= currentLimit;
+}
+
+function addCalendarDays(value: string, days: number): string {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function appendIpoChanges(changes: V56DailyChange[], previous: V56Snapshot, current: V56Snapshot): void {
+  const previousRecords = new Map(
+    previous.ipoPipeline.records
+      .filter(isIpoRecord)
+      .map((record) => [record.stockCode, record] as const),
+  );
+  for (const record of current.ipoPipeline.records.filter(isIpoRecord)) {
+    const prior = previousRecords.get(record.stockCode);
+    if (prior === undefined) continue;
+    if (prior.stage !== record.stage) {
+      changes.push(makeChange({
+        entityType: "ipo",
+        entityId: record.stockCode,
+        fieldName: "stage",
+        changeType: "ipo_stage_changed",
+        oldValue: prior.stage,
+        newValue: record.stage,
+        effectiveDate: current.dataDate,
+      }));
+    }
+    const priorEvents = new Set(prior.events.map(ipoEventKey));
+    for (const event of record.events) {
+      if (!event.verified || priorEvents.has(ipoEventKey(event))) continue;
+      changes.push(makeChange({
+        entityType: "ipo",
+        entityId: record.stockCode,
+        fieldName: "event",
+        changeType: "new_ipo_event",
+        oldValue: null,
+        newValue: event.label,
+        effectiveDate: event.date,
+      }));
+    }
+  }
+}
+
+function appendEmergingChanges(changes: V56DailyChange[], previous: V56Snapshot, current: V56Snapshot): void {
+  const previousRecords = new Map(
+    previous.emerging.records
+      .filter(isEmergingRecord)
+      .map((record) => [record.stockCode, record] as const),
+  );
+  for (const record of current.emerging.records.filter(isEmergingRecord)) {
+    const prior = previousRecords.get(record.stockCode);
+    if (prior === undefined || sameNullableNumber(prior.transactionAmount, record.transactionAmount)) continue;
+    changes.push(makeChange({
+      entityType: "emerging",
+      entityId: record.stockCode,
+      fieldName: "transactionAmount",
+      changeType: "emerging_turnover_changed",
+      oldValue: prior.transactionAmount ?? null,
+      newValue: record.transactionAmount ?? null,
+      effectiveDate: current.dataDate,
+    }));
+  }
+}
+
+type IpoEvent = Readonly<{
+  date: string;
+  kind: string;
+  label: string;
+  verified: boolean;
+}>;
+
+type IpoRecord = Readonly<{
+  stockCode: string;
+  stage: string | null;
+  events: readonly IpoEvent[];
+}>;
+
+type EmergingRecord = Readonly<{
+  stockCode: string;
+  transactionAmount: number | null;
+}>;
+
+function isIpoRecord(value: unknown): value is IpoRecord {
+  if (value === null || typeof value !== "object") return false;
+  const candidate = value as Record<string, unknown>;
+  if (typeof candidate.stockCode !== "string" || !/^\d{4}$/.test(candidate.stockCode)) return false;
+  if (candidate.stage !== null && candidate.stage !== undefined && typeof candidate.stage !== "string") return false;
+  if (!Array.isArray(candidate.events)) return false;
+  return candidate.events.every((event) => {
+    if (event === null || typeof event !== "object") return false;
+    const eventCandidate = event as Record<string, unknown>;
+    return isIsoDate(eventCandidate.date)
+      && typeof eventCandidate.kind === "string"
+      && typeof eventCandidate.label === "string"
+      && eventCandidate.verified === true;
+  });
+}
+
+function isEmergingRecord(value: unknown): value is EmergingRecord {
+  if (value === null || typeof value !== "object") return false;
+  const candidate = value as Record<string, unknown>;
+  return typeof candidate.stockCode === "string"
+    && /^\d{4}$/.test(candidate.stockCode)
+    && (candidate.transactionAmount === undefined || isComparableNumberOrNull(candidate.transactionAmount));
+}
+
+function ipoEventKey(event: IpoEvent): string {
+  return `${event.date}:${event.kind}:${event.label}`;
 }

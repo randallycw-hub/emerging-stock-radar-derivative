@@ -62,9 +62,92 @@ test("V5.6 model preserves missing values and emits a canonical stock-to-CB rela
   assert.equal(model.cbMaster.records[0].currentConversionPrice, null);
   assert.deepEqual(model.securityMaster.records[0].relatedCbCodes, ["23032"]);
   assert.equal(model.searchIndex.records[0].cbCode, "23032");
+  assert.equal(model.searchIndex.records[0].url, "./bonds.html?bond=23032");
   assert.equal(displayFinancialValue(null, "undetermined"), "待定");
   assert.equal(displayFinancialValue(null, "no_trade"), "今日無成交");
   assert.equal(displayFinancialValue(0, "numeric"), "0");
+});
+
+test("V5.6 model retains published emerging ranking fields without raw source metadata", () => {
+  const model = buildV56MarketData({
+    manifest,
+    masters,
+    history: [],
+    workbench,
+    emerging: { records: [{
+      companyCode: "7777", companyName: "測試興櫃", industryName: "半導體業", tradingDate: "2026-08-28",
+      dailyAveragePrice: "102", previousAveragePrice: "100", dailyHighPrice: "103", dailyLowPrice: "99",
+      averageChange: "2", averageChangePercent: "2", direction: "up", transactionVolume: "150", estimatedTransactionAmount: "15300",
+      applyingDate: null, applyingStatus: null, rawSourceId: "do-not-publish",
+    }] },
+    ipo: { records: [] },
+    rightsEvents: { events: [] },
+  });
+  assert.deepEqual(model.emerging.records[0], {
+    stockCode: "7777", companyName: "測試興櫃", industryName: "半導體業", tradingDate: "2026-08-28",
+    dailyAveragePrice: 102, previousAveragePrice: 100, dailyHighPrice: 103, dailyLowPrice: 99,
+    averageChange: 2, averageChangePercent: 2, direction: "up", dailyVolume: 150, transactionAmount: 15300,
+    applyingDate: null, applyingStatus: null, dataDate: "2026-08-28",
+  });
+});
+
+test("V5.6 IPO pipeline retains only verified public milestone facts and no source identifiers", () => {
+  const model = buildV56MarketData({
+    manifest,
+    masters,
+    history: [],
+    workbench,
+    emerging: { records: [] },
+    ipo: { records: [{
+      companyCode: "3313", companyName: "斐成", market: "上市", stage: "C", exceptionStatus: null,
+      applicationDate: "2026-07-01", reviewDate: "2026-07-20", boardDate: null, contractDate: null, listingDate: null,
+      finalUnderwritingPrice: null,
+      events: [{ date: "2026-09-02", kind: "review_completed", label: "審議完成", sourceRecordIds: ["private"] }],
+    }] },
+    rightsEvents: { events: [] },
+  });
+  assert.deepEqual(model.ipoPipeline.records[0].events, [{ date: "2026-09-02", kind: "review_completed", label: "審議完成", verified: true }]);
+  assert.equal(model.ipoPipeline.records[0].exceptionStatus, null);
+  assert.doesNotMatch(JSON.stringify(model.ipoPipeline), /sourceRecordId|sourceId|rawTextHash/);
+});
+
+test("V5.6 CB event feed projects official lifecycle events without internal source fields", () => {
+  const model = buildV56MarketData({
+    manifest,
+    masters,
+    history: [],
+    workbench: {
+      records: [{
+        ...workbench.records[0],
+        events: [{
+          eventId: "11406:put:2027-12-10",
+          type: "put",
+          date: "2027-12-10",
+          title: "聯電二賣回權日期",
+          sourceId: "11406",
+          sourceUrl: "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+        }],
+      }],
+    },
+    emerging: { records: [] },
+    ipo: { records: [] },
+    rightsEvents: { events: [] },
+  });
+  assert.deepEqual(model.cbEvents.records, [{
+    eventId: "cb:23032:put:2027-12-10",
+    eventType: "put",
+    cbCode: "23032",
+    stockCode: "2303",
+    announcementDate: "2027-12-10",
+    startDate: null,
+    endDate: null,
+    deadlineDate: "2027-12-10",
+    effectiveDate: "2027-12-10",
+    title: "聯電二賣回權日期",
+    status: "upcoming",
+    dataDate: "2026-08-28",
+  }]);
+  assert.doesNotMatch(JSON.stringify(model.cbEvents), /sourceId|sourceUrl|rawTextHash/);
 });
 
 test("V5.6 model rejects mismatched company and CB identities instead of joining by name", () => {

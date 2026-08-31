@@ -24,7 +24,7 @@ export function buildV56MarketData({
   if (!dataDate) throw new TypeError("V5.6 data date is invalid");
   const companyMaster = recordsOf(masters?.companyMaster);
   const cbMaster = recordsOf(masters?.cbMaster);
-  const workbenchRecords = recordsOf(workbench);
+  const workbenchRecords = recordsOf(workbench?.records ?? workbench);
   const securityRecords = projectSecurityMaster(companyMaster, dataDate);
   const cbRecords = projectCbMaster(cbMaster, workbenchRecords, securityRecords, dataDate);
   const model = {
@@ -34,7 +34,7 @@ export function buildV56MarketData({
     securityMaster: dataset("security_master", securityRecords, dataDate),
     priceHistory: dataset("price_history", projectPriceHistory(history, dataDate), dataDate),
     cbMaster: dataset("cb_master", cbRecords, dataDate),
-    cbEvents: dataset("cb_events", projectCbEvents(rightsEvents, dataDate), dataDate),
+    cbEvents: dataset("cb_events", projectCbEvents(rightsEvents, workbenchRecords, dataDate), dataDate),
     ipoPipeline: dataset("ipo_pipeline", projectIpoPipeline(ipo, dataDate), dataDate),
     emerging: dataset("emerging_market", projectEmerging(emerging, dataDate), dataDate),
     dailyChanges: dataset("daily_changes", recordsOf(dailyChanges), dataDate),
@@ -149,15 +149,16 @@ function projectPriceHistory(history, dataDate) {
   });
 }
 
-function projectCbEvents(rightsEvents, dataDate) {
-  return recordsOf(rightsEvents?.events).flatMap((event) => {
-    const eventId = text(event?.eventId);
+function projectCbEvents(rightsEvents, workbenchRecords, dataDate) {
+  const events = new Map();
+  for (const event of recordsOf(rightsEvents?.events)) {
     const cbCode = bondCodeOf(event?.bondCode);
     const announcementDate = isoDate(event?.announcementDate);
-    if (!eventId || !cbCode || !announcementDate) return [];
-    return [{
-      eventId,
-      eventType: text(event?.eventType) || "early_redemption",
+    const eventType = text(event?.eventType) || "early_redemption";
+    if (!cbCode || !announcementDate) continue;
+    const projected = {
+      eventId: publicCbEventId(cbCode, eventType, announcementDate),
+      eventType,
       cbCode,
       stockCode: stockCodeOf(event?.issuerCode),
       announcementDate,
@@ -166,11 +167,42 @@ function projectCbEvents(rightsEvents, dataDate) {
       deadlineDate: isoDate(event?.lastConversionDate ?? event?.acceptEndDate),
       effectiveDate: isoDate(event?.recordDate),
       title: textOrNull(event?.reason),
-      sourceUrl: safeOfficialUrl(event?.sourceUrl),
       status: text(event?.status) || "upcoming",
       dataDate,
-    }];
-  });
+    };
+    events.set(projected.eventId, projected);
+  }
+  for (const record of workbenchRecords) {
+    const cbCode = bondCodeOf(record?.bondCode ?? record?.term?.bondCode);
+    const stockCode = stockCodeOf(record?.term?.issuerCode ?? record?.view?.issuerCode);
+    if (!cbCode) continue;
+    for (const event of recordsOf(record?.events)) {
+      const eventType = publicCbEventType(event?.type);
+      const date = isoDate(event?.date);
+      if (!eventType || !date) continue;
+      const eventId = publicCbEventId(cbCode, eventType, date);
+      if (events.has(eventId)) continue;
+      events.set(eventId, {
+        eventId,
+        eventType,
+        cbCode,
+        stockCode,
+        announcementDate: date,
+        startDate: null,
+        endDate: null,
+        deadlineDate: date,
+        effectiveDate: date,
+        title: textOrNull(event?.title),
+        status: date < dataDate ? "completed" : "upcoming",
+        dataDate,
+      });
+    }
+  }
+  return [...events.values()].sort((left, right) => (
+    left.announcementDate.localeCompare(right.announcementDate)
+    || left.cbCode.localeCompare(right.cbCode)
+    || left.eventType.localeCompare(right.eventType)
+  ));
 }
 
 function projectIpoPipeline(ipo, dataDate) {
@@ -178,7 +210,26 @@ function projectIpoPipeline(ipo, dataDate) {
     const stockCode = stockCodeOf(record?.companyCode);
     const companyName = text(record?.companyName);
     if (!stockCode || !companyName) return [];
-    return [{ stockCode, companyName, market: textOrNull(record?.market), applicationDate: isoDate(record?.applicationDate), reviewDate: isoDate(record?.reviewDate), boardDate: isoDate(record?.boardDate), contractDate: isoDate(record?.contractDate), listingDate: isoDate(record?.listingDate), offerPrice: finiteNumber(record?.finalUnderwritingPrice), stage: textOrNull(record?.stage), dataDate }];
+    return [{
+      stockCode,
+      companyName,
+      market: textOrNull(record?.market),
+      applicationDate: isoDate(record?.applicationDate),
+      reviewDate: isoDate(record?.reviewDate),
+      boardDate: isoDate(record?.boardDate),
+      contractDate: isoDate(record?.contractDate),
+      listingDate: isoDate(record?.listingDate),
+      offerPrice: finiteNumber(record?.finalUnderwritingPrice),
+      stage: textOrNull(record?.stage),
+      exceptionStatus: textOrNull(record?.exceptionStatus),
+      events: recordsOf(record?.events).flatMap((event) => {
+        const date = isoDate(event?.date);
+        const label = text(event?.label);
+        if (!date || !label) return [];
+        return [{ date, label, kind: text(event?.kind ?? event?.type) || label, verified: true }];
+      }),
+      dataDate,
+    }];
   });
 }
 
@@ -186,7 +237,24 @@ function projectEmerging(emerging, dataDate) {
   return recordsOf(emerging?.records ?? emerging).flatMap((record) => {
     const stockCode = stockCodeOf(record?.companyCode);
     if (!stockCode) return [];
-    return [{ stockCode, companyName: textOrNull(record?.companyName), tradingDate: isoDate(record?.tradingDate), dailyAveragePrice: finiteNumber(record?.dailyAveragePrice), dailyVolume: finiteNumber(record?.transactionVolume), transactionAmount: finiteNumber(record?.estimatedTransactionAmount), dataDate }];
+    return [{
+      stockCode,
+      companyName: textOrNull(record?.companyName),
+      industryName: textOrNull(record?.industryName),
+      tradingDate: isoDate(record?.tradingDate),
+      dailyAveragePrice: finiteNumber(record?.dailyAveragePrice),
+      previousAveragePrice: finiteNumber(record?.previousAveragePrice),
+      dailyHighPrice: finiteNumber(record?.dailyHighPrice),
+      dailyLowPrice: finiteNumber(record?.dailyLowPrice),
+      averageChange: finiteNumber(record?.averageChange),
+      averageChangePercent: finiteNumber(record?.averageChangePercent),
+      direction: textOrNull(record?.direction),
+      dailyVolume: finiteNumber(record?.transactionVolume),
+      transactionAmount: finiteNumber(record?.estimatedTransactionAmount),
+      applyingDate: textOrNull(record?.applyingDate),
+      applyingStatus: textOrNull(record?.applyingStatus),
+      dataDate,
+    }];
   });
 }
 
@@ -194,8 +262,28 @@ function projectSearchIndex(records, dataDate) {
   return recordsOf(records).flatMap((record) => {
     const type = text(record?.type);
     if (!type || findInternalField(record)) return [];
-    return [{ id: text(record?.id), type, stockCode: stockCodeOf(record?.stockCode), companyName: textOrNull(record?.companyName), cbCode: bondCodeOf(record?.cbCode), cbName: textOrNull(record?.cbName), market: textOrNull(record?.market), aliases: recordsOf(record?.aliases).map(text).filter(Boolean), dataDate }];
+    const stockCode = stockCodeOf(record?.stockCode);
+    const cbCode = bondCodeOf(record?.cbCode);
+    return [{
+      id: text(record?.id),
+      type,
+      stockCode,
+      companyName: textOrNull(record?.companyName),
+      cbCode,
+      cbName: textOrNull(record?.cbName),
+      market: textOrNull(record?.market),
+      aliases: recordsOf(record?.aliases).map(text).filter(Boolean),
+      url: publicSearchRoute(type, stockCode, cbCode),
+      dataDate,
+    }];
   });
+}
+
+function publicSearchRoute(type, stockCode, cbCode) {
+  if (type === "cb" && cbCode) return `./bonds.html?bond=${encodeURIComponent(cbCode)}`;
+  if (type === "ipo" && stockCode) return `./ipo-radar.html?q=${encodeURIComponent(stockCode)}`;
+  if (type === "emerging" && stockCode) return `./emerging.html?q=${encodeURIComponent(stockCode)}`;
+  return stockCode ? `./company.html?code=${encodeURIComponent(stockCode)}` : null;
 }
 
 function dataset(name, records, dataDate) {
@@ -213,13 +301,11 @@ function findInternalField(value) {
   return null;
 }
 
-function safeOfficialUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" && ["www.tpex.org.tw", "mopsov.twse.com.tw", "mops.twse.com.tw", "www.twse.com.tw"].includes(url.hostname) ? url.toString() : null;
-  } catch {
-    return null;
-  }
+function publicCbEventId(cbCode, eventType, date) { return `cb:${cbCode}:${eventType}:${date}`; }
+function publicCbEventType(value) {
+  const type = text(value);
+  if (type === "redemption") return "early_redemption";
+  return ["early_redemption", "conversion_suspension", "put", "maturity", "listing"].includes(type) ? type : null;
 }
 
 function recordsOf(value) { return Array.isArray(value) ? value : []; }

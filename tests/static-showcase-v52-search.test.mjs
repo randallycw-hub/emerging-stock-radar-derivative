@@ -61,4 +61,11 @@ test("V5.2 search loader preserves five distinct fetch and schema outcomes", asy
     return response(index);
   });
   assert.deepEqual(ready, { state: "ready", entries: index.records });
+
+  const v56Ready = await load(async (url) => {
+    if (String(url) === pointer) return response({ runtimeUrl: "./data/runtime.json" });
+    if (String(url).endsWith("/data/runtime.json")) return response({ v56MarketDataUrl: "./data/v56-market-data.json" });
+    return response({ schemaVersion: 3, searchIndex: index });
+  });
+  assert.deepEqual(v56Ready, { state: "ready", entries: index.records });
 });

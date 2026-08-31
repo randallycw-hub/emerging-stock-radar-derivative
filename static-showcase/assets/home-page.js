@@ -184,6 +184,8 @@ export function buildV56HomeBrief(model = {}) {
     return {
       dataDate: null,
       cbChanges: [],
+      ipoChanges: [],
+      emergingChanges: [],
       cbPerformance: [],
       ipoMilestones: [],
       emergingTurnover: [],
@@ -191,6 +193,8 @@ export function buildV56HomeBrief(model = {}) {
     };
   }
   const cbByCode = new Map(recordsOf(model?.cbMaster)?.map((record) => [record?.cbCode, record]) ?? []);
+  const ipoByCode = new Map(recordsOf(model?.ipoPipeline)?.map((record) => [record?.stockCode, record]) ?? []);
+  const emergingByCode = new Map(recordsOf(model?.emerging)?.map((record) => [record?.stockCode, record]) ?? []);
   const changes = recordsOf(model?.dailyChanges) ?? [];
   const cbChanges = changes
     .filter((change) => change?.entityType === "cb" && typeof change?.entityId === "string")
@@ -203,6 +207,28 @@ export function buildV56HomeBrief(model = {}) {
       date: isPublishedIsoDate(change.effectiveDate) ? change.effectiveDate : dataDate,
     }))
     .sort((left, right) => left.date.localeCompare(right.date) || left.cbCode.localeCompare(right.cbCode))
+    .slice(0, 6);
+  const ipoChanges = changes
+    .filter((change) => change?.entityType === "ipo" && typeof change?.entityId === "string")
+    .map((change) => ({
+      stockCode: change.entityId,
+      companyName: ipoByCode.get(change.entityId)?.companyName ?? null,
+      label: typeof change.newValue === "string" && change.newValue ? change.newValue : v56ChangeLabel(change.changeType),
+      date: isPublishedIsoDate(change.effectiveDate) ? change.effectiveDate : dataDate,
+    }))
+    .sort((left, right) => left.date.localeCompare(right.date) || left.stockCode.localeCompare(right.stockCode))
+    .slice(0, 6);
+  const emergingChanges = changes
+    .filter((change) => change?.entityType === "emerging" && typeof change?.entityId === "string")
+    .map((change) => ({
+      stockCode: change.entityId,
+      companyName: emergingByCode.get(change.entityId)?.companyName ?? null,
+      label: v56ChangeLabel(change.changeType),
+      oldValue: change.oldValue ?? null,
+      newValue: change.newValue ?? null,
+      date: isPublishedIsoDate(change.effectiveDate) ? change.effectiveDate : dataDate,
+    }))
+    .sort((left, right) => left.date.localeCompare(right.date) || left.stockCode.localeCompare(right.stockCode))
     .slice(0, 6);
   const cbPerformance = (recordsOf(model?.performance) ?? [])
     .filter((record) => record?.entityType === "cb" && typeof record?.cbCode === "string" && typeof record?.periods?.["1D"] === "number")
@@ -242,7 +268,7 @@ export function buildV56HomeBrief(model = {}) {
     .filter((event) => event.date >= dataDate && event.status !== "completed")
     .sort((left, right) => left.date.localeCompare(right.date) || left.cbCode.localeCompare(right.cbCode))
     .slice(0, 8);
-  return { dataDate, cbChanges, cbPerformance, ipoMilestones, emergingTurnover, importantEvents };
+  return { dataDate, cbChanges, ipoChanges, emergingChanges, cbPerformance, ipoMilestones, emergingTurnover, importantEvents };
 }
 
 function firstPublishedDate(...values) {
@@ -267,6 +293,13 @@ function v56ChangeLabel(value) {
     conversion_price_changed: "轉換價調整",
     outstanding_changed: "流通餘額異動",
     new_early_redemption: "提前贖回公告",
+    new_listing: "新掛牌",
+    conversion_suspension_added: "停止轉換",
+    put_window_added: "賣回窗口",
+    maturity_window_entered: "進入到期窗口",
+    ipo_stage_changed: "IPO 階段異動",
+    new_ipo_event: "IPO 新事件",
+    emerging_turnover_changed: "成交金額異動",
   })[value] ?? "可轉債異動";
 }
 
@@ -410,7 +443,8 @@ function renderV56TodayBrief(brief) {
     <div class="home-v56-today__grid">
       <article><h3>可轉債異動</h3>${items(brief.cbChanges, (entry) => `<li><a href="./bonds.html?bond=${encodeURIComponent(entry.cbCode)}"><span>${escapeHtml(entry.cbCode)} ${escapeHtml(entry.cbName ?? "")}</span><strong>${escapeHtml(entry.label)}</strong><small>${formatV56OldToNew(entry.oldValue, entry.newValue)}</small></a></li>`, "本次快照沒有可轉債欄位異動。")}</article>
       <article><h3>盤後表現</h3>${items(brief.cbPerformance, (entry) => `<li><a href="./bonds.html?bond=${encodeURIComponent(entry.cbCode)}"><span>${escapeHtml(entry.cbCode)} ${escapeHtml(entry.cbName ?? "")}</span><strong class="${entry.rate >= 0 ? "is-up" : "is-down"}">${formatV56Percent(entry.rate)}</strong><small>近 1 個有效交易日</small></a></li>`, "尚無足夠的有效交易日歷史可比較。")}</article>
-      <article><h3>興櫃成交焦點</h3>${items(brief.emergingTurnover, (entry) => `<li><a href="./emerging.html?stock=${encodeURIComponent(entry.stockCode)}"><span>${escapeHtml(entry.stockCode)} ${escapeHtml(entry.companyName ?? "")}</span><strong>${formatNumber(entry.amount)}</strong><small>成交金額</small></a></li>`, "本次快照沒有可排序的興櫃成交資料。")}</article>
+      <article><h3>IPO 異動</h3>${items(brief.ipoChanges, (entry) => `<li><a href="./ipo-radar.html?q=${encodeURIComponent(entry.stockCode)}"><span>${escapeHtml(entry.stockCode)} ${escapeHtml(entry.companyName ?? "")}</span><strong>${escapeHtml(entry.label)}</strong><small>${formatDate(entry.date)}</small></a></li>`, "本次快照沒有可公開的 IPO 里程碑異動。")}</article>
+      <article><h3>興櫃焦點</h3>${items(brief.emergingChanges.length ? brief.emergingChanges : brief.emergingTurnover, (entry) => `<li><a href="./emerging.html?q=${encodeURIComponent(entry.stockCode)}"><span>${escapeHtml(entry.stockCode)} ${escapeHtml(entry.companyName ?? "")}</span><strong>${escapeHtml(entry.label ?? formatNumber(entry.amount))}</strong><small>${entry.label ? formatV56OldToNew(entry.oldValue, entry.newValue) : "成交金額"}</small></a></li>`, "本次快照沒有可排序的興櫃成交資料。")}</article>
     </div>
   </section>`;
 }

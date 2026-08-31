@@ -80,6 +80,7 @@ const ASSET_FILES = new Set([
   "v54-canonical-data.js",
   "v55-canonical-data.js",
   "v56-market-data.js",
+  "v56-page-data.js",
   "cb-workbench-ui.js",
   "cb-stats-page.js",
   "bond-events-page.js",

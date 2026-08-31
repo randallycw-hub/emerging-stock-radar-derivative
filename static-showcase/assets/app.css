@@ -2055,6 +2055,7 @@ button.market-event-calendar__day:focus-visible { position: relative; z-index: 1
 .home-v56-today > header h2, .home-v56-destinations h2 { margin: 0; color: var(--ink); font-size: 22px; }
 .home-v56-today > header > p:last-child, .home-v56-destinations__heading > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
 .home-v56-today__grid, .home-v56-destinations__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.home-v56-today__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .home-v56-today__grid > article, .home-v56-destinations__grid > article { min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--color-surface); }
 .home-v56-today__grid h3, .home-v56-destinations__grid h3 { margin: 0 0 8px; color: var(--ink); font-size: 15px; }
 .home-v56-list, .home-v56-event-list { margin: 0; padding: 0; list-style: none; }

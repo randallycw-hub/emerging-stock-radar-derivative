@@ -34,3 +34,48 @@ test("does not manufacture a change after an invalid replacement snapshot", () =
   const invalid = { ...current, cbMaster: { status: "failed", records: [] } };
   assert.deepEqual(buildDailyChanges({ previous, current: invalid }), []);
 });
+
+test("emits IPO milestones and emerging turnover changes only from verified consecutive snapshots", () => {
+  const before = {
+    ...previous,
+    ipoPipeline: { status: "verified", records: [{ stockCode: "3313", stage: "B", events: [] }] },
+    emerging: { status: "verified", records: [{ stockCode: "7777", transactionAmount: 100 }] },
+  };
+  const after = {
+    ...current,
+    ipoPipeline: { status: "verified", records: [{ stockCode: "3313", stage: "C", events: [{ date: "2026-08-28", kind: "contract_approved", label: "契約核准", verified: true }] }] },
+    emerging: { status: "verified", records: [{ stockCode: "7777", transactionAmount: 250 }] },
+  };
+  const changes = buildDailyChanges({ previous: before, current: after });
+  assert.deepEqual(changes.filter((change) => change.entityType !== "cb").map((change) => [change.entityType, change.changeType, change.oldValue, change.newValue]), [
+    ["emerging", "emerging_turnover_changed", 100, 250],
+    ["ipo", "ipo_stage_changed", "B", "C"],
+    ["ipo", "new_ipo_event", null, "契約核准"],
+  ]);
+});
+
+test("emits only newly entered verified CB event windows", () => {
+  const after = {
+    ...current,
+    cbEvents: {
+      status: "verified",
+      records: [
+        { eventId: "event:23032:redemption", eventType: "early_redemption", cbCode: "23032", announcementDate: "2026-08-28" },
+        { eventId: "event:23032:listing", eventType: "listing", cbCode: "23032", announcementDate: "2026-08-28" },
+        { eventId: "event:23032:suspension", eventType: "conversion_suspension", cbCode: "23032", announcementDate: "2026-08-28" },
+        { eventId: "event:23032:put", eventType: "put", cbCode: "23032", announcementDate: "2026-08-28" },
+        { eventId: "event:23032:maturity", eventType: "maturity", cbCode: "23032", announcementDate: "2026-11-26" },
+      ],
+    },
+  };
+  const changes = buildDailyChanges({ previous, current: after });
+  assert.deepEqual(changes.filter((change) => change.entityType === "cb").map((change) => change.changeType), [
+    "conversion_price_changed",
+    "outstanding_changed",
+    "new_early_redemption",
+    "new_listing",
+    "conversion_suspension_added",
+    "put_window_added",
+    "maturity_window_entered",
+  ]);
+});

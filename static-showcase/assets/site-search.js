@@ -189,7 +189,16 @@ export async function loadCanonicalSearchIndex({
   if (!pointer?.runtimeUrl) return { state: "not_ready", entries: [] };
   const runtimeResponse = await fetchJson(new URL(pointer.runtimeUrl, baseUrl), fetchImpl);
   if (runtimeResponse.state !== "ready") return { state: runtimeResponse.state, entries: [] };
-  const searchUrl = runtimeResponse.data?.searchIndexUrl;
+  const runtime = runtimeResponse.data;
+  if (typeof runtime?.v56MarketDataUrl === "string") {
+    const v56Response = await fetchJson(new URL(runtime.v56MarketDataUrl, baseUrl), fetchImpl);
+    const v56Entries = entriesOf(v56Response.data?.searchIndex);
+    if (v56Response.state === "ready" && v56Response.data?.schemaVersion === 3 && Array.isArray(v56Response.data?.searchIndex?.records)) {
+      return { state: "ready", entries: v56Entries };
+    }
+    if (typeof runtime?.searchIndexUrl !== "string") return { state: v56Response.state, entries: [] };
+  }
+  const searchUrl = runtime?.searchIndexUrl;
   if (!searchUrl) return { state: "not_ready", entries: [] };
   const searchResponse = await fetchJson(new URL(searchUrl, baseUrl), fetchImpl);
   if (searchResponse.state !== "ready") return { state: searchResponse.state, entries: [] };

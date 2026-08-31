@@ -9,6 +9,9 @@ const model = Object.freeze({
   dailyChanges: {
     records: [
       { entityType: "cb", entityId: "23032", changeType: "conversion_price_changed", oldValue: 135.2, newValue: 130.7, effectiveDate: "2026-08-28" },
+      { entityType: "cb", entityId: "23032", changeType: "put_window_added", oldValue: null, newValue: "賣回窗口", effectiveDate: "2026-08-28" },
+      { entityType: "ipo", entityId: "3313", changeType: "new_ipo_event", oldValue: null, newValue: "審議完成", effectiveDate: "2026-09-02" },
+      { entityType: "emerging", entityId: "7777", changeType: "emerging_turnover_changed", oldValue: 100, newValue: 200, effectiveDate: "2026-08-28" },
     ],
   },
   performance: {
@@ -33,7 +36,9 @@ const model = Object.freeze({
 test("V5.6 homepage brief prioritizes validated changes, performance, and dated official events", () => {
   const brief = buildV56HomeBrief(model);
   assert.equal(brief.dataDate, "2026-08-28");
-  assert.deepEqual(brief.cbChanges.map((entry) => entry.label), ["轉換價調整"]);
+  assert.deepEqual(brief.cbChanges.map((entry) => entry.label), ["轉換價調整", "賣回窗口"]);
+  assert.equal(brief.ipoChanges[0].label, "審議完成");
+  assert.equal(brief.emergingChanges[0].stockCode, "7777");
   assert.equal(brief.cbPerformance[0].cbCode, "23032");
   assert.equal(brief.ipoMilestones[0].date, "2026-09-02");
   assert.equal(brief.importantEvents[0].date, "2026-09-10");
@@ -43,6 +48,8 @@ test("V5.6 homepage brief prioritizes validated changes, performance, and dated 
 test("V5.6 homepage brief preserves unavailable values instead of inventing zeros", () => {
   const brief = buildV56HomeBrief({ schemaVersion: 3, dataDate: "2026-08-28" });
   assert.deepEqual(brief.cbChanges, []);
+  assert.deepEqual(brief.ipoChanges, []);
+  assert.deepEqual(brief.emergingChanges, []);
   assert.deepEqual(brief.cbPerformance, []);
   assert.deepEqual(brief.importantEvents, []);
 });

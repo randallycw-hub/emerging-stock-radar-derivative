@@ -3,6 +3,7 @@ import { applyCanonicalCompanyIdentity, indexCanonicalCompanies } from "./canoni
 import { countPublishedPositive, publicNumber, sumPublishedValues } from "./public-data-state.js";
 import { emergingDailyAverageLabel } from "./emerging-market-display.js";
 import { sortRows } from "./table-sort.js";
+import { mapV56EmergingRows } from "./v56-page-data.js";
 
 const pointerUrl = new URL("../data/current.json", import.meta.url);
 const errorTarget = document.querySelector("[data-page-error]");
@@ -48,11 +49,14 @@ async function loadData() {
     return;
   }
 
-  const [marketArtifact, monthlyRevenue, companyMaster] = await Promise.all([
+  const [marketArtifact, monthlyRevenue, companyMaster, v56Model] = await Promise.all([
     safeJsonFetch(new URL(runtime.emergingMarketUrl, document.baseURI), { errorTarget }),
     safeJsonFetch(new URL(runtime.datasets?.["94025"], document.baseURI), { errorTarget }),
     typeof runtime.companyMasterUrl === "string"
       ? safeJsonFetch(new URL(runtime.companyMasterUrl, document.baseURI), { errorTarget })
+      : Promise.resolve(null),
+    typeof runtime.v56MarketDataUrl === "string"
+      ? safeJsonFetch(new URL(runtime.v56MarketDataUrl, document.baseURI), { errorTarget })
       : Promise.resolve(null),
   ]);
   const companies = indexCanonicalCompanies(companyMaster);
@@ -60,7 +64,9 @@ async function loadData() {
     showUnavailable();
     return;
   }
-  state.market = arrayValue(marketArtifact?.records ?? marketArtifact)
+  const sharedV56Market = mapV56EmergingRows(v56Model);
+  const useV56Market = v56Model?.schemaVersion === 3 && Array.isArray(v56Model?.emerging?.records);
+  state.market = (useV56Market ? sharedV56Market : arrayValue(marketArtifact?.records ?? marketArtifact))
     .map((row) => {
       const identity = applyCanonicalCompanyIdentity(row, companies);
       return identity ? { ...row, ...identity } : null;
@@ -77,9 +83,9 @@ async function loadData() {
   applyStateToControls();
   render();
 
-  const tradingDate = marketArtifact?.tradingDate ?? latestTradingDate(state.market);
+  const tradingDate = useV56Market ? v56Model.dataDate : marketArtifact?.tradingDate ?? latestTradingDate(state.market);
   document.querySelector("#emerging-update-status").textContent = tradingDate
-    ? `盤後資料日 ${formatDate(tradingDate)}`
+    ? `盤後資料日 ${formatDate(tradingDate)}${useV56Market ? " · 已驗證共同快照" : ""}`
     : "盤後市場資料尚未發布";
 }
 
