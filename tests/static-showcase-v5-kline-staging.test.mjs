@@ -16,6 +16,8 @@ test("V5 staging publishes the locally installed KLineChart ESM build", async ()
     });
     const vendor = await readFile(join(destination, "assets", "vendor", "klinecharts.esm.js"), "utf8");
     assert.match(vendor, /KLineChart|klinecharts/i);
+    const lightweight = await readFile(join(destination, "assets", "vendor", "lightweight-charts.standalone.production.mjs"), "utf8");
+    assert.match(lightweight, /LightweightCharts|createChart/i);
   } finally {
     await rm(destination, { recursive: true, force: true });
   }

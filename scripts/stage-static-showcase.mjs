@@ -105,6 +105,7 @@ const ASSET_FILES = new Set([
   "ipo-radar-page.js",
   "ipo-stage-filter.js",
   "klinechart-adapter.js",
+  "lightweight-charts-adapter.js",
   "public-event-digest.js",
   "public-data-state.js",
   "site-shell.js",
@@ -113,6 +114,9 @@ const ASSET_FILES = new Set([
 ]);
 const KLINECHART_VENDOR_SOURCE = fileURLToPath(
   new URL("../node_modules/klinecharts/dist/index.esm.js", import.meta.url),
+);
+const LIGHTWEIGHT_CHARTS_VENDOR_SOURCE = fileURLToPath(
+  new URL("../node_modules/lightweight-charts/dist/lightweight-charts.standalone.production.mjs", import.meta.url),
 );
 const DATA_ROOT_FILES = new Set([
   "11406.json",
@@ -252,6 +256,10 @@ export async function stageStaticShowcase({
   const vendorTarget = join(destination, "assets", "vendor", "klinecharts.esm.js");
   await mkdir(dirname(vendorTarget), { recursive: true });
   await copyFile(KLINECHART_VENDOR_SOURCE, vendorTarget);
+  await copyFile(
+    LIGHTWEIGHT_CHARTS_VENDOR_SOURCE,
+    join(destination, "assets", "vendor", "lightweight-charts.standalone.production.mjs"),
+  );
   const dataCenterStatus = await buildStagedDataCenterStatus({
     source,
     destination,

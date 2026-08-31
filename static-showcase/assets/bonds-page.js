@@ -37,6 +37,7 @@ const state = {
   workbenchUnavailable: false,
   workbenchAsOfDate: null,
   v53Model: null,
+  v56Model: null,
   overviewMetric: "volume",
   detailOrigin: null,
   suggestions: [],
@@ -75,7 +76,7 @@ async function loadAndRender() {
     config.datasets ?? {},
     "bondWorkbench",
   );
-  const [manifest, bondTerms, history, conversionPrices, workbenchResult, cbMaster, v53Model] =
+  const [manifest, bondTerms, history, conversionPrices, workbenchResult, cbMaster, v53Model, v56Model] =
     await Promise.all([
       loadJson(config.manifestUrl, null),
       loadJson(config.datasets["11406"], []),
@@ -89,6 +90,9 @@ async function loadAndRender() {
         : Promise.resolve([]),
       typeof (config.cbWorkbenchV55Url ?? config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url) === "string"
         ? loadJson(config.cbWorkbenchV55Url ?? config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url, null)
+        : Promise.resolve(null),
+      typeof config.v56MarketDataUrl === "string"
+        ? loadJson(config.v56MarketDataUrl, null)
         : Promise.resolve(null),
     ]);
   state.manifest = manifest;
@@ -114,6 +118,9 @@ async function loadAndRender() {
     });
   state.v53Model = (v53Model?.schemaVersion === 1 || v53Model?.schemaVersion === 2) && Array.isArray(v53Model?.records)
     ? v53Model
+    : null;
+  state.v56Model = v56Model?.schemaVersion === 3 && validPublishedDate(v56Model?.dataDate)
+    ? v56Model
     : null;
   updateSearchSuggestions();
   renderRoute();
@@ -312,6 +319,41 @@ export function buildBondListRecords({ views = [], workbench = [], bondTerms = [
       cbTurnoverAmount: turnoverByBondDate.get(`${view.bondCode}:${view.cbPriceDate}`) ?? null,
     });
   }).filter(Boolean);
+}
+
+export function buildV56CbMarketSections(model = {}) {
+  if (model?.schemaVersion !== 3 || !validPublishedDate(model?.dataDate)) {
+    return { dataDate: null, changes: [], performance: [] };
+  }
+  const names = new Map(arrayValue(model?.cbMaster).map((record) => [record?.cbCode, record?.cbName]));
+  const changes = arrayValue(model?.dailyChanges)
+    .filter((record) => record?.entityType === "cb" && typeof record?.entityId === "string")
+    .map((record) => ({
+      cbCode: record.entityId,
+      cbName: names.get(record.entityId) ?? null,
+      label: v56ChangeLabel(record.changeType),
+      oldValue: record.oldValue ?? null,
+      newValue: record.newValue ?? null,
+      date: validPublishedDate(record.effectiveDate) ? record.effectiveDate : model.dataDate,
+    }))
+    .sort((left, right) => left.date.localeCompare(right.date) || left.cbCode.localeCompare(right.cbCode));
+  const performance = arrayValue(model?.performance)
+    .filter((record) => record?.entityType === "cb" && typeof record?.cbCode === "string" && record?.periods && typeof record.periods === "object")
+    .map((record) => ({
+      cbCode: record.cbCode,
+      cbName: names.get(record.cbCode) ?? null,
+      periods: {
+        "1D": finitePublicNumber(record.periods["1D"]),
+        "1W": finitePublicNumber(record.periods["1W"]),
+        "1M": finitePublicNumber(record.periods["1M"]),
+        "3M": finitePublicNumber(record.periods["3M"]),
+        "6M": finitePublicNumber(record.periods["6M"]),
+        YTD: finitePublicNumber(record.periods.YTD),
+      },
+    }))
+    .filter((record) => Object.values(record.periods).some((value) => value !== null))
+    .sort((left, right) => v56PerformanceSortValue(right.periods["1D"]) - v56PerformanceSortValue(left.periods["1D"]) || left.cbCode.localeCompare(right.cbCode));
+  return { dataDate: model.dataDate, changes, performance };
 }
 
 function canonicalListFieldsForLegacyView(view) {
@@ -687,6 +729,7 @@ function renderRoute() {
     if (overview) {
       overview.hidden = false;
       renderOverview();
+      renderV56MarketSections();
     } else {
       list.hidden = false;
       renderBonds();
@@ -694,6 +737,7 @@ function renderRoute() {
     return;
   }
   if (overview) overview.hidden = true;
+  setV56MarketSectionsHidden(true);
   if (state.workbenchUnavailable) {
     target.hidden = false;
     list.hidden = true;
@@ -727,8 +771,14 @@ function renderRoute() {
   const v53Record = state.v53Model?.records?.find((candidate) => candidate.cbCode === code) ?? null;
   if (v53Record) {
     const companyBonds = state.v53Model.records.filter((candidate) => candidate.stockCode === v53Record.stockCode && candidate.status === "active");
-    target.innerHTML = renderCbDetailV53(v53Record, { companyBonds, rightsEvents: state.v53Model.events });
-    disposeDetail = bindCbDetailV53(target, closeDetail);
+    const cbHistory = state.history.filter((point) => point?.bondCode === code);
+    const cbEvents = state.v53Model.events.filter((event) => event?.cbCode === code);
+    target.innerHTML = renderCbDetailV53(v53Record, {
+      companyBonds,
+      rightsEvents: state.v53Model.events,
+      history: cbHistory,
+    });
+    disposeDetail = bindCbDetailV53(target, closeDetail, { history: cbHistory, events: cbEvents });
   } else {
     target.innerHTML = renderBondDetail(detail, { asOfDate: state.workbenchAsOfDate });
     disposeDetail = bindBondDetail(target, closeDetail);
@@ -754,6 +804,73 @@ function renderOverview() {
       renderOverview();
     });
   }
+}
+
+function renderV56MarketSections() {
+  const changesTarget = document.querySelector("#cb-today-changes");
+  const performanceTarget = document.querySelector("#cb-market-performance");
+  if (!changesTarget || !performanceTarget) return;
+  const sections = buildV56CbMarketSections(state.v56Model ?? {});
+  if (sections.dataDate === null) {
+    setV56MarketSectionsHidden(true);
+    return;
+  }
+  changesTarget.hidden = false;
+  performanceTarget.hidden = false;
+  changesTarget.innerHTML = `<header class="section-heading"><div><p class="section-number">DAILY CHANGES</p><h2>今日異動</h2></div><p class="update-status">資料日期 ${escapeHtml(sections.dataDate)}</p></header>${sections.changes.length ? `<ol class="cb-v56-change-list">${sections.changes.slice(0, 16).map((change) => `<li><a href="./bonds.html?bond=${encodeURIComponent(change.cbCode)}"><time datetime="${escapeHtml(change.date)}">${escapeHtml(change.date)}</time><strong>${escapeHtml(change.cbCode)} ${escapeHtml(change.cbName ?? "")}</strong><span>${escapeHtml(change.label)}</span><b>${escapeHtml(v56OldToNew(change.oldValue, change.newValue))}</b></a></li>`).join("")}</ol>` : '<p class="empty-state">本次已驗證快照與前一份快照相比，沒有可公開的可轉債欄位異動。</p>'}`;
+  performanceTarget.innerHTML = `<header class="section-heading"><div><p class="section-number">MARKET PERFORMANCE</p><h2>市場表現</h2></div><p class="update-status">以有效交易日計算</p></header>${sections.performance.length ? `<div class="cb-v56-performance-table"><table><thead><tr><th>CB</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>YTD</th></tr></thead><tbody>${sections.performance.slice(0, 30).map((entry) => `<tr><th><a href="./bonds.html?bond=${encodeURIComponent(entry.cbCode)}">${escapeHtml(entry.cbCode)} ${escapeHtml(entry.cbName ?? "")}</a></th>${["1D", "1W", "1M", "3M", "6M", "YTD"].map((period) => `<td class="${entry.periods[period] === null ? "" : entry.periods[period] >= 0 ? "market-up" : "market-down"}">${escapeHtml(v56Percent(entry.periods[period]))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>` : '<p class="empty-state">尚無足夠的已驗證有效交易日歷史可產生市場表現。</p>'}`;
+  renderInstitutionSection();
+}
+
+function renderInstitutionSection() {
+  const target = document.querySelector("#cb-market-institutions");
+  const navLink = document.querySelector("[data-cb-institution-link]");
+  const records = state.v53Model?.records ?? [];
+  const available = records.some((record) => finitePublicNumber(record?.institution?.netBuySell) !== null);
+  if (!target || !navLink) return;
+  target.hidden = !available;
+  navLink.hidden = !available;
+  if (!available) return;
+  const rows = records
+    .map((record) => ({ cbCode: record.cbCode, cbName: record.cbName, value: finitePublicNumber(record?.institution?.netBuySell) }))
+    .filter((record) => record.value !== null)
+    .sort((left, right) => Math.abs(right.value) - Math.abs(left.value));
+  target.innerHTML = `<header class="section-heading"><div><p class="section-number">INSTITUTIONAL FLOW</p><h2>法人動向</h2></div></header><ol class="cb-v56-change-list">${rows.map((row) => `<li><a href="./bonds.html?bond=${encodeURIComponent(row.cbCode)}"><strong>${escapeHtml(row.cbCode)} ${escapeHtml(row.cbName ?? "")}</strong><b>${escapeHtml(numberText(row.value))}</b></a></li>`).join("")}</ol>`;
+}
+
+function setV56MarketSectionsHidden(hidden) {
+  for (const selector of ["#cb-today-changes", "#cb-market-performance", "#cb-market-institutions"]) {
+    const target = document.querySelector(selector);
+    if (target) target.hidden = hidden;
+  }
+  const link = document.querySelector("[data-cb-institution-link]");
+  if (link) link.hidden = hidden || !link.innerHTML;
+}
+
+function v56ChangeLabel(type) {
+  return ({
+    conversion_price_changed: "轉換價調整",
+    outstanding_changed: "流通餘額異動",
+    new_early_redemption: "提前贖回公告",
+  })[type] ?? "可轉債異動";
+}
+
+function v56OldToNew(oldValue, newValue) {
+  return `${oldValue === null ? "—" : numberText(oldValue)} → ${newValue === null ? "—" : numberText(newValue)}`;
+}
+
+function v56Percent(value) {
+  return value === null ? "—" : `${value > 0 ? "+" : ""}${(value * 100).toFixed(2)}%`;
+}
+
+function finitePublicNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function v56PerformanceSortValue(value) {
+  return value === null ? -1 : Math.abs(value);
 }
 
 function closeDetail() {

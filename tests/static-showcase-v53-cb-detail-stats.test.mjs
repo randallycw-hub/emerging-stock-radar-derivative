@@ -37,11 +37,11 @@ test("V5.3 CB market statistics separate verified zeroes from unavailable values
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|買點|推薦|風險/);
 });
 
-test("V5.3 CB detail has exactly five public tabs and keeps company CB crosslinks", () => {
+test("V5.6 CB detail has six factual tabs and keeps company CB crosslinks", () => {
   const html = renderCbDetailV53(records[0], { companyBonds: records });
 
-  for (const label of ["行情", "流動性", "條款", "事件", "公司", "90002 甲二", "公司研究頁", "官方公告"]) assert.match(html, new RegExp(label));
-  assert.equal((html.match(/data-cb-detail-tab=/g) ?? []).length, 5);
+  for (const label of ["概況", "估值", "流動性", "條款", "期間", "事件", "90002 甲二", "公司研究頁", "官方公告"]) assert.match(html, new RegExp(label));
+  assert.equal((html.match(/data-cb-detail-tab=/g) ?? []).length, 6);
   assert.match(html, /今日無成交/);
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|買點|推薦|風險/);
 });

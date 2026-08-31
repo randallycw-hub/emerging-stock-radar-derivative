@@ -41,10 +41,12 @@
     </header>
     <nav class="bond-context-nav" aria-label="可轉債功能">
       <a href="./bonds.html" aria-current="page">市場總覽</a>
+      <a href="#cb-today-changes">今日異動</a>
+      <a href="#cb-market-performance">市場表現</a>
       <a href="./bonds-filter.html">全部 CB</a>
-      <a href="./bonds-issuance.html">發行進度</a>
+      <a href="./bonds-issuance.html">預計發行</a>
       <a href="./bonds-events.html">事件行事曆</a>
-      <a href="./bonds-stats.html">市場統計</a>
+      <a href="#cb-market-institutions" data-cb-institution-link hidden>法人動向</a>
     </nav>
     <section id="bond-market-root" class="ledger-section" data-page-root="bonds" aria-labelledby="bond-market-heading">
       <header class="section-heading">
@@ -53,6 +55,9 @@
       </header>
 
       <section id="cb-market-overview" data-cb-market-overview aria-live="polite"><p class="empty-state">可轉債市場總覽讀取中</p></section>
+      <section id="cb-today-changes" class="cb-v56-market-section" aria-live="polite" hidden></section>
+      <section id="cb-market-performance" class="cb-v56-market-section" aria-live="polite" hidden></section>
+      <section id="cb-market-institutions" class="cb-v56-market-section" aria-live="polite" hidden></section>
 
       <div id="bond-list-view" hidden>
         <form class="filters bond-filters" id="bond-filters" aria-label="可轉債篩選">
