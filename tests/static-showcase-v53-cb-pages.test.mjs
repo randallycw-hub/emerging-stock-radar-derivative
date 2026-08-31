@@ -131,17 +131,11 @@ test("V5.3 all-CB page groups display fields by quote, terms, events and liquidi
   }
 });
 
-test("V5.3 issuance pipeline lights only source-confirmed stages and marks the rest pending announcement", () => {
+test("V5.7 issuance pipeline keeps only source-confirmed official stages", () => {
   assert.deepEqual(buildV53IssuancePipeline({
-    stages: { announcementDate: null, filingDate: null, effectiveDate: null, auctionOrBookbuildingDate: null, pricingDate: null, listingDate: "2026-09-03", asoDate: null },
+    stages: { announcementDate: null, filingDate: null, effectiveDate: null, auctionOrBookbuildingDate: null, pricingDate: null, listingDate: "2026-09-03" },
   }).map((node) => ({ stage: node.stage, state: node.state, label: node.label })), [
-    { stage: "announcementDate", state: "pending", label: "待公告" },
-    { stage: "filingDate", state: "pending", label: "待公告" },
-    { stage: "effectiveDate", state: "pending", label: "待公告" },
-    { stage: "auctionOrBookbuildingDate", state: "pending", label: "待公告" },
-    { stage: "pricingDate", state: "pending", label: "待公告" },
     { stage: "listingDate", state: "confirmed", label: "2026/09/03" },
-    { stage: "asoDate", state: "pending", label: "待公告" },
   ]);
 });
 
@@ -153,7 +147,8 @@ test("V5.3 issuance and event pages expose usable public controls instead of leg
   ]);
 
   assert.match(issuance, /id="bond-issuance-form"/);
-  for (const label of ["公告", "送件", "生效", "詢圈／競拍", "定價", "掛牌", "CBAS 拆解"]) assert.match(issuance, new RegExp(label));
+  for (const label of ["進行中", "即將發行", "最近掛牌", "公告", "送件", "生效", "詢圈／競拍", "定價", "掛牌"]) assert.match(issuance, new RegExp(label));
+  assert.doesNotMatch(issuance, /CBAS 拆解/);
   assert.match(events, /id="bond-events-form"/);
   for (const label of ["今日", "未來 7 日", "未來 30 日", "本月", "清單", "月曆", "停止轉換", "提前贖回", "賣回", "到期", "轉換價調整", "Reset", "新掛牌"]) assert.match(events, new RegExp(label));
   for (const selector of ["cb-pipeline", "cb-event-list", "cb-event-calendar", "cb-calendar-days"]) assert.match(css, new RegExp(selector));

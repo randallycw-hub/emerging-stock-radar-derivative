@@ -25,7 +25,6 @@ const PIPELINE_STAGE_KEYS = Object.freeze([
   "auctionOrBookbuildingDate",
   "pricingDate",
   "listingDate",
-  "asoDate",
 ]);
 
 export { EVENT_TYPE_LABELS, OFFICIAL_SOURCE_HOSTS, PIPELINE_STAGE_KEYS };
@@ -312,7 +311,6 @@ function projectIssuance({ cbCode, bondName, stockCode, companyName, terms, even
     auctionOrBookbuildingDate: null,
     pricingDate: null,
     listingDate: listing?.date ?? null,
-    asoDate: null,
   };
   return {
     cbCode,

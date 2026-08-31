@@ -3,11 +3,12 @@ import { applyCanonicalCompanyIdentity, indexCanonicalCompanies } from "./canoni
 import { publicNumber } from "./public-data-state.js";
 import { emergingDailyAverageLabel } from "./emerging-market-display.js";
 import { sortRows } from "./table-sort.js";
-import { buildPublishedEmergingBreadth, mapV56EmergingRows } from "./v56-page-data.js";
+import { buildPublishedEmergingBreadth, mapV57EmergingResearchRows } from "./v56-page-data.js";
+import { parseV57EmergingState, V57_EMERGING_SORT_KEYS } from "./emerging-research-state.js";
 
 const pointerUrl = new URL("../data/current.json", import.meta.url);
 const errorTarget = document.querySelector("[data-page-error]");
-const marketSortKeys = new Set([...document.querySelectorAll("[data-market-sort]")].map((button) => button.dataset.marketSort));
+const marketSortKeys = V57_EMERGING_SORT_KEYS;
 export const viewAliases = Object.freeze({
   rankings: "summary",
   market: "all",
@@ -32,6 +33,24 @@ const state = {
   page: 1,
   revenuePage: 1,
 };
+
+function marketSchemaFor(view = state.view) {
+  if (view === "price") return [
+    ["companyCode", "公司代碼／名稱", "text"], ["industryName", "產業", "text"], ["todayPrice", "今日", "number"],
+    ["period1W", "1W", "number"], ["period1M", "1M", "number"], ["period3M", "3M", "number"], ["period6M", "6M", "number"], ["periodYTD", "YTD", "number"],
+    ["transactionAmount", "成交額", "number"],
+  ];
+  if (view === "volume") return [
+    ["companyCode", "公司代碼／名稱", "text"], ["industryName", "產業", "text"], ["transactionVolume", "今日成交量", "number"],
+    ["average5Volume", "5D 均量", "number"], ["average20Volume", "20D 均量", "number"], ["volumeRatio", "量比", "number"],
+    ["average20Amount", "20D 平均成交額", "number"], ["amountChange", "成交額異動", "number"],
+  ];
+  return [
+    ["companyCode", "公司代碼／名稱", "text"], ["industryName", "產業", "text"], ["dailyAveragePrice", "本日成交均價（盤後）", "number"],
+    ["previousAveragePrice", "前日成交均價（盤後）", "number"], ["averageChangePercent", "均價漲跌", "number"], ["dailyHighPrice", "最高", "number"],
+    ["dailyLowPrice", "最低", "number"], ["transactionVolume", "成交股數", "number"], ["estimatedTransactionAmount", "估算成交金額（盤後）", "number"], ["applyingStatus", "申請狀態", "text"],
+  ];
+}
 
 initializeFromUrl();
 bindControls();
@@ -64,7 +83,7 @@ async function loadData() {
     showUnavailable();
     return;
   }
-  const sharedV56Market = mapV56EmergingRows(v56Model);
+  const sharedV56Market = mapV57EmergingResearchRows(v56Model);
   const useV56Market = v56Model?.schemaVersion === 3 && Array.isArray(v56Model?.emerging?.records);
   state.market = (useV56Market ? sharedV56Market : arrayValue(marketArtifact?.records ?? marketArtifact))
     .map((row) => {
@@ -91,19 +110,18 @@ async function loadData() {
 
 function initializeFromUrl() {
   const params = new URLSearchParams(location.search);
-  state.view = viewAliases[params.get("view")] ?? "summary";
+  const parsedResearchState = parseV57EmergingState(location.search);
+  state.view = viewAliases[parsedResearchState.view] ?? "summary";
   state.query = params.get("q") ?? "";
   state.industry = params.get("industry") ?? "all";
   state.application = params.get("application") ?? "all";
   state.marketDirection = params.get("direction") ?? "all";
-  const sortKey = params.get("sort");
-  state.sortKey = marketSortKeys.has(sortKey) ? sortKey : "companyCode";
-  state.sortDirection = params.get("directionSort") === "desc" ? "desc" : "asc";
+  state.sortKey = parsedResearchState.sortKey;
+  state.sortDirection = parsedResearchState.sortDirection;
   state.revenueSortKey = params.get("revenueSort") ?? "companyCode";
   state.revenueSortDirection = params.get("revenueDirectionSort") === "desc" ? "desc" : "asc";
   state.page = positiveInteger(params.get("page"));
   state.revenuePage = positiveInteger(params.get("revenuePage"));
-  if (!sortKey) applyViewPreset();
 }
 
 function bindControls() {
@@ -144,8 +162,9 @@ function bindControls() {
     syncUrl();
     renderMarketTable();
   });
-  for (const button of document.querySelectorAll("[data-market-sort]")) {
-    button.addEventListener("click", () => {
+  document.querySelector("#emerging-table-head").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-market-sort]");
+    if (button) {
       const key = button.dataset.marketSort;
       state.sortDirection = state.sortKey === key && state.sortDirection === "desc" ? "asc" : "desc";
       state.sortKey = key;
@@ -154,8 +173,8 @@ function bindControls() {
       updateSortControls();
       syncUrl();
       renderMarketTable();
-    });
-  }
+    }
+  });
   for (const button of document.querySelectorAll("[data-revenue-sort]")) {
     button.addEventListener("click", () => {
       const key = button.dataset.revenueSort;
@@ -193,14 +212,9 @@ function render() {
 }
 
 function applyViewPreset() {
-  if (state.view === "price") {
-    state.sortKey = "averageChangePercent";
-    state.sortDirection = "desc";
-  }
-  if (state.view === "volume") {
-    state.sortKey = "transactionVolume";
-    state.sortDirection = "desc";
-  }
+  const preset = parseV57EmergingState(`?view=${encodeURIComponent(state.view)}`);
+  state.sortKey = preset.sortKey;
+  state.sortDirection = preset.sortDirection;
 }
 
 function renderBreadthAndRankings() {
@@ -243,17 +257,23 @@ function renderBreadthAndRankings() {
 
 function renderMarketTable() {
   const filtered = filteredMarketRows();
-  const type = document.querySelector(`[data-market-sort="${CSS.escape(state.sortKey)}"]`)?.dataset.sortType ?? "number";
+  const schema = marketSchemaFor();
+  if (!schema.some(([key]) => key === state.sortKey)) {
+    state.sortKey = schema[0][0];
+    state.sortDirection = "asc";
+  }
+  const type = schema.find(([key]) => key === state.sortKey)?.[2] ?? "number";
   const sorted = sortRows(
-    filtered.map((row) => ({ ...row, bondCode: row.companyCode })),
+    filtered.map((row) => ({ ...row, ...researchSortFields(row), bondCode: row.companyCode })),
     { key: state.sortKey, direction: state.sortDirection, type },
   );
   const size = pageSize();
   const pages = Math.max(1, Math.ceil(sorted.length / size));
   state.page = Math.min(state.page, pages);
   const visible = sorted.slice((state.page - 1) * size, state.page * size);
+  document.querySelector("#emerging-table-head").innerHTML = `<tr>${schema.map(([key, label, sortType]) => `<th aria-sort="none"><button type="button" data-market-sort="${escapeHtml(key)}" data-sort-type="${escapeHtml(sortType)}">${escapeHtml(label)} <span aria-hidden="true"></span></button></th>`).join("")}</tr>`;
   document.querySelector("#emerging-result-count").textContent = `${formatNumber(sorted.length)} 筆`;
-  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(10);
+  document.querySelector("#emerging-table-body").innerHTML = visible.length ? visible.map(marketRowHtml).join("") : emptyRow(schema.length);
   document.querySelector("#emerging-card-list").innerHTML = visible.map(marketCardHtml).join("");
   renderPagination("#emerging-pagination", state.page, pages, (page) => {
     state.page = page;
@@ -301,6 +321,8 @@ function filteredMarketRows() {
 }
 
 function marketRowHtml(row) {
+  if (state.view === "price") return performanceRowHtml(row);
+  if (state.view === "volume") return liquidityRowHtml(row);
   return `<tr id="company-${escapeHtml(row.companyCode)}">
     <th scope="row"><a href="${marketDetailHref(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a></th>
     <td>${escapeHtml(row.industryName ?? "未分類")}</td>
@@ -315,7 +337,17 @@ function marketRowHtml(row) {
   </tr>`;
 }
 
+function performanceRowHtml(row) {
+  return `<tr id="company-${escapeHtml(row.companyCode)}"><th scope="row"><a href="${marketDetailHref(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a></th><td>${escapeHtml(row.industryName ?? "未分類")}</td><td>${formatEmergingToday(row)}</td><td>${formatPeriod(row.periods["1W"])}</td><td>${formatPeriod(row.periods["1M"])}</td><td>${formatPeriod(row.periods["3M"])}</td><td>${formatPeriod(row.periods["6M"])}</td><td>${formatPeriod(row.periods.YTD)}</td><td>${formatNumber(row.estimatedTransactionAmount, { maximumFractionDigits: 0 })}</td></tr>`;
+}
+
+function liquidityRowHtml(row) {
+  return `<tr id="company-${escapeHtml(row.companyCode)}"><th scope="row"><a href="${marketDetailHref(row.companyCode)}"><span class="metric-main">${escapeHtml(row.companyCode)}</span>${escapeHtml(row.companyName)}</a></th><td>${escapeHtml(row.industryName ?? "未分類")}</td><td>${formatEmergingVolume(row)}</td><td>${formatNumber(row.liquidity.average5Volume, { maximumFractionDigits: 0 })}</td><td>${formatNumber(row.liquidity.average20Volume, { maximumFractionDigits: 0 })}</td><td>${formatNumber(row.liquidity.volumeRatio, { maximumFractionDigits: 2 })}</td><td>${formatNumber(row.liquidity.average20Amount, { maximumFractionDigits: 0 })}</td><td>${formatPeriod(row.liquidity.amountChange)}</td></tr>`;
+}
+
 function marketCardHtml(row) {
+  if (state.view === "price") return `<article class="market-card" id="card-${escapeHtml(row.companyCode)}"><header><strong>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</strong><span>${escapeHtml(row.industryName ?? "未分類")}</span></header><dl><div><dt>今日</dt><dd>${formatEmergingToday(row)}</dd></div><div><dt>1W／1M</dt><dd>${formatPeriod(row.periods["1W"])}／${formatPeriod(row.periods["1M"])}</dd></div><div><dt>3M／6M／YTD</dt><dd>${formatPeriod(row.periods["3M"])}／${formatPeriod(row.periods["6M"])}／${formatPeriod(row.periods.YTD)}</dd></div><div><dt>成交額</dt><dd>${formatNumber(row.estimatedTransactionAmount, { maximumFractionDigits: 0 })}</dd></div></dl></article>`;
+  if (state.view === "volume") return `<article class="market-card" id="card-${escapeHtml(row.companyCode)}"><header><strong>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</strong><span>${escapeHtml(row.industryName ?? "未分類")}</span></header><dl><div><dt>今日成交量</dt><dd>${formatEmergingVolume(row)}</dd></div><div><dt>5D／20D 均量</dt><dd>${formatNumber(row.liquidity.average5Volume)}／${formatNumber(row.liquidity.average20Volume)}</dd></div><div><dt>量比</dt><dd>${formatNumber(row.liquidity.volumeRatio, { maximumFractionDigits: 2 })}</dd></div><div><dt>20D 平均成交額／異動</dt><dd>${formatNumber(row.liquidity.average20Amount, { maximumFractionDigits: 0 })}／${formatPeriod(row.liquidity.amountChange)}</dd></div></dl></article>`;
   return `<article class="market-card" id="card-${escapeHtml(row.companyCode)}"><header><strong>${escapeHtml(row.companyCode)} ${escapeHtml(row.companyName)}</strong><span>${escapeHtml(row.industryName ?? "未分類")}</span></header><dl>
     <div><dt>本日成交均價（盤後）</dt><dd>${formatEmergingDailyAverage(row)}</dd></div>
     <div><dt>前日成交均價（盤後）</dt><dd>${formatNumber(row.previousAveragePrice, { maximumFractionDigits: 2 })}</dd></div>
@@ -365,6 +397,11 @@ function updateSortControls() {
   const directionButton = document.querySelector("#emerging-sort-direction");
   directionButton.dataset.direction = state.sortDirection;
   directionButton.textContent = state.sortDirection === "desc" ? "高到低 ↓" : "低到高 ↑";
+  const schemaKeys = new Set(marketSchemaFor().map(([key]) => key));
+  if (!schemaKeys.has(state.sortKey)) {
+    state.sortKey = marketSchemaFor()[0][0];
+    state.sortDirection = "asc";
+  }
   for (const button of document.querySelectorAll("[data-market-sort]")) {
     const active = button.dataset.marketSort === state.sortKey;
     const th = button.closest("th");
@@ -459,6 +496,38 @@ function formatPercent(value) {
 function formatEmergingDailyAverage(row) {
   const label = emergingDailyAverageLabel(row);
   return label ?? formatNumber(row.dailyAveragePrice, { maximumFractionDigits: 2 });
+}
+
+function formatEmergingToday(row) {
+  if (row.tradeState === "NO_TRADE_TODAY") return "今日無成交";
+  if (row.tradeState === "DATA_ERROR") return "—";
+  return formatNumber(row.todayPrice, { maximumFractionDigits: 2 });
+}
+
+function formatEmergingVolume(row) {
+  return row.tradeState === "NO_TRADE_TODAY" ? "今日無成交" : formatNumber(row.transactionVolume, { maximumFractionDigits: 0 });
+}
+
+function formatPeriod(value) {
+  const number = publicNumber(value);
+  return number === null ? "—" : `${number > 0 ? "+" : ""}${formatNumber(number * 100, { maximumFractionDigits: 2 })}%`;
+}
+
+function researchSortFields(row) {
+  return {
+    todayPrice: row.todayPrice,
+    period1W: publicNumber(row.periods["1W"]),
+    period1M: publicNumber(row.periods["1M"]),
+    period3M: publicNumber(row.periods["3M"]),
+    period6M: publicNumber(row.periods["6M"]),
+    periodYTD: publicNumber(row.periods.YTD),
+    transactionAmount: row.estimatedTransactionAmount,
+    average5Volume: publicNumber(row.liquidity.average5Volume),
+    average20Volume: publicNumber(row.liquidity.average20Volume),
+    volumeRatio: publicNumber(row.liquidity.volumeRatio),
+    average20Amount: publicNumber(row.liquidity.average20Amount),
+    amountChange: publicNumber(row.liquidity.amountChange),
+  };
 }
 
 function formatRocMonth(value) {

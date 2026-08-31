@@ -12,6 +12,7 @@ export function buildV56MarketData({
   manifest = null,
   masters = null,
   history = [],
+  stockCloses = [],
   workbench = null,
   emerging = null,
   ipo = null,
@@ -33,6 +34,7 @@ export function buildV56MarketData({
     generatedAt: textOrNull(manifest?.market?.generatedAt),
     securityMaster: dataset("security_master", securityRecords, dataDate),
     priceHistory: dataset("price_history", projectPriceHistory(history, dataDate), dataDate),
+    stockPriceHistory: dataset("stock_price_history", projectStockPriceHistory(stockCloses, dataDate), dataDate),
     cbMaster: dataset("cb_master", cbRecords, dataDate),
     cbEvents: dataset("cb_events", projectCbEvents(rightsEvents, workbenchRecords, dataDate), dataDate),
     ipoPipeline: dataset("ipo_pipeline", projectIpoPipeline(ipo, dataDate), dataDate),
@@ -63,7 +65,7 @@ export function validateV56MarketData(value) {
   if (!isRecord(value) || value.schemaVersion !== 3 || !isoDate(value.dataDate)) {
     throw new TypeError("V5.6 market model is invalid");
   }
-  for (const key of ["securityMaster", "priceHistory", "cbMaster", "cbEvents", "ipoPipeline", "emerging", "dailyChanges", "performance", "searchIndex"]) {
+  for (const key of ["securityMaster", "priceHistory", "stockPriceHistory", "cbMaster", "cbEvents", "ipoPipeline", "emerging", "dailyChanges", "performance", "searchIndex"]) {
     const section = value[key];
     if (!isRecord(section) || !Array.isArray(section.records) || section.dataDate !== value.dataDate) {
       throw new TypeError(`V5.6 dataset is invalid: ${key}`);
@@ -149,6 +151,24 @@ function projectPriceHistory(history, dataDate) {
   });
 }
 
+function projectStockPriceHistory(stockCloses, dataDate) {
+  return recordsOf(stockCloses).flatMap((record) => {
+    const stockCode = stockCodeOf(record?.companyCode);
+    const tradeDate = isoDate(record?.tradingDate);
+    if (!stockCode || !tradeDate) return [];
+    return [{
+      securityId: `stock:${stockCode}`,
+      stockCode,
+      tradeDate,
+      close: finiteNumber(record?.close),
+      volume: finiteNumber(record?.volume),
+      value: finiteNumber(record?.turnover),
+      source: "official",
+      dataDate,
+    }];
+  });
+}
+
 function projectCbEvents(rightsEvents, workbenchRecords, dataDate) {
   const events = new Map();
   for (const event of recordsOf(rightsEvents?.events)) {
@@ -219,8 +239,8 @@ function projectIpoPipeline(ipo, dataDate) {
       boardDate: isoDate(record?.boardDate),
       contractDate: isoDate(record?.contractDate),
       listingDate: isoDate(record?.listingDate),
-      provisionalUnderwritingPrice: finiteNumber(record?.provisionalUnderwritingPrice),
-      offerPrice: finiteNumber(record?.finalUnderwritingPrice),
+      provisionalUnderwritingPrice: positiveFiniteNumber(record?.provisionalUnderwritingPrice),
+      offerPrice: positiveFiniteNumber(record?.finalUnderwritingPrice),
       underwriter: textOrNull(record?.underwriter),
       auction: projectVerifiedAuction(record?.auction),
       publicOffering: projectVerifiedPublicOffering(record?.publicOffering),
@@ -244,8 +264,8 @@ function projectVerifiedAuction(record) {
     bidEndDate: isoDate(record?.bidEndDate),
     auctionOpenDate: isoDate(record?.auctionOpenDate),
     listingDate: isoDate(record?.listingDate),
-    minimumBidPrice: finiteNumber(record?.minimumBidPrice),
-    finalUnderwritingPrice: finiteNumber(record?.finalUnderwritingPrice),
+    minimumBidPrice: positiveFiniteNumber(record?.minimumBidPrice),
+    finalUnderwritingPrice: positiveFiniteNumber(record?.finalUnderwritingPrice),
     verified: true,
   };
 }
@@ -257,8 +277,8 @@ function projectVerifiedPublicOffering(record) {
     subscriptionEndDate: isoDate(record?.subscriptionEndDate),
     drawDate: isoDate(record?.drawDate),
     listingDate: isoDate(record?.listingDate),
-    provisionalUnderwritingPrice: finiteNumber(record?.provisionalUnderwritingPrice),
-    finalUnderwritingPrice: finiteNumber(record?.finalUnderwritingPrice),
+    provisionalUnderwritingPrice: positiveFiniteNumber(record?.provisionalUnderwritingPrice),
+    finalUnderwritingPrice: positiveFiniteNumber(record?.finalUnderwritingPrice),
     verified: true,
   };
 }
@@ -272,6 +292,7 @@ function projectEmerging(emerging, dataDate) {
       companyName: textOrNull(record?.companyName),
       industryName: textOrNull(record?.industryName),
       tradingDate: isoDate(record?.tradingDate),
+      lastTradedPrice: finiteNumber(record?.lastTradedPrice),
       dailyAveragePrice: finiteNumber(record?.dailyAveragePrice),
       previousAveragePrice: finiteNumber(record?.previousAveragePrice),
       dailyHighPrice: finiteNumber(record?.dailyHighPrice),
@@ -346,5 +367,6 @@ function stockCodeOf(value) { const code = text(value); return /^\d{4}$/.test(co
 function bondCodeOf(value) { const code = text(value); return /^\d{5,6}$/.test(code) ? code : null; }
 function isFiniteNumber(value) { return typeof value === "number" && Number.isFinite(value); }
 function finiteNumber(value) { if (value === null || value === undefined || value === "") return null; const number = Number(value); return Number.isFinite(number) ? number : null; }
+function positiveFiniteNumber(value) { const number = finiteNumber(value); return number !== null && number > 0 ? number : null; }
 function isoDate(value) { if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ""))) return null; const date = new Date(`${value}T00:00:00.000Z`); return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value ? value : null; }
 function deepFreeze(value) { if (value !== null && typeof value === "object" && !Object.isFrozen(value)) { for (const child of Object.values(value)) deepFreeze(child); Object.freeze(value); } return value; }

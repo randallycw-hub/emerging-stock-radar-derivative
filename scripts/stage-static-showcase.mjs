@@ -37,7 +37,7 @@ import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplementa
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
 import { parseBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
 import { buildDailyChanges } from "../lib/market-data/v56-daily-changes.ts";
-import { calculatePeriodReturn } from "../lib/market-data/v56-performance.ts";
+import { buildV57Performance } from "../lib/market-data/v57-performance.ts";
 import {
   getApprovedIpoResource,
   getApprovedResource,
@@ -93,6 +93,7 @@ const ASSET_FILES = new Set([
   "data-center-page.js",
   "data-center-status.js",
   "emerging-market-display.js",
+  "emerging-research-state.js",
   "emerging-detail-page.js",
   "emerging-page.js",
   "market-event-model.js",
@@ -361,15 +362,17 @@ async function writePublicMarketResearch({ source, destination, generation }) {
     records: cbWorkbenchV55.events,
   };
   const enrichedSearchIndex = enrichSearchIndexWithCbEvents(searchIndex, cbWorkbenchV55.events);
-  const previousV56 = await findPreviousV56Snapshot({
+  const historicalV56 = await findHistoricalV56Snapshots({
     source,
     currentGeneration: generation,
     currentDataDate: manifest.market.dataDate,
   });
+  const previousV56 = historicalV56.at(-1) ?? null;
   const v56Base = buildV56MarketData({
     manifest,
     masters,
     history,
+    stockCloses,
     workbench,
     emerging,
     ipo,
@@ -379,18 +382,19 @@ async function writePublicMarketResearch({ source, destination, generation }) {
   const v56DailyChanges = previousV56 === null
     ? []
     : buildDailyChanges({ previous: previousV56, current: v56Base });
-  const v56Performance = buildV56Performance(v56Base);
+  const v57Performance = buildV57Performance([...historicalV56, v56Base]);
   const v56MarketData = buildV56MarketData({
     manifest,
     masters,
     history,
+    stockCloses,
     workbench,
     emerging,
     ipo,
     rightsEvents,
     previous: previousV56,
     dailyChanges: v56DailyChanges,
-    performance: v56Performance,
+    performance: v57Performance,
   });
   await Promise.all([
     writeFile(join(base, "market-research.json"), `${JSON.stringify(research, null, 2)}\n`, "utf8"),
@@ -421,35 +425,13 @@ async function writePublicMarketResearch({ source, destination, generation }) {
   return research;
 }
 
-const V56_PERFORMANCE_PERIODS = Object.freeze(["1D", "1W", "1M", "3M", "6M", "YTD"]);
-
-function buildV56Performance(model) {
-  const priceHistoryByCbCode = new Map();
-  for (const point of model.priceHistory.records) {
-    if (!point.cbCode || typeof point.close !== "number") continue;
-    const points = priceHistoryByCbCode.get(point.cbCode) ?? [];
-    points.push({ tradeDate: point.tradeDate, close: point.close });
-    priceHistoryByCbCode.set(point.cbCode, points);
-  }
-  return model.cbMaster.records.map((record) => ({
-    entityType: "cb",
-    entityId: record.cbCode,
-    cbCode: record.cbCode,
-    dataDate: model.dataDate,
-    periods: Object.fromEntries(V56_PERFORMANCE_PERIODS.map((period) => [
-      period,
-      calculatePeriodReturn(priceHistoryByCbCode.get(record.cbCode) ?? [], period),
-    ])),
-  }));
-}
-
-async function findPreviousV56Snapshot({ source, currentGeneration, currentDataDate }) {
+async function findHistoricalV56Snapshots({ source, currentGeneration, currentDataDate }) {
   const generationsPath = join(source, "data", "generations");
   let entries;
   try {
     entries = await readdir(generationsPath, { withFileTypes: true });
   } catch {
-    return null;
+    return [];
   }
   const candidates = [];
   for (const entry of entries) {
@@ -467,15 +449,16 @@ async function findPreviousV56Snapshot({ source, currentGeneration, currentDataD
       // An older incomplete snapshot is not a valid comparison baseline.
     }
   }
-  candidates.sort((left, right) => right.dataDate.localeCompare(left.dataDate));
+  candidates.sort((left, right) => left.dataDate.localeCompare(right.dataDate));
+  const snapshots = [];
   for (const candidate of candidates) {
     try {
-      return await buildV56SnapshotFromGeneration({ source, generation: candidate.generation });
+      snapshots.push(await buildV56SnapshotFromGeneration({ source, generation: candidate.generation }));
     } catch {
-      // The next older fully verified snapshot remains eligible.
+      // An incomplete older snapshot is not eligible for a public time series.
     }
   }
-  return null;
+  return snapshots;
 }
 
 async function buildV56SnapshotFromGeneration({ source, generation }) {
@@ -503,6 +486,7 @@ async function buildV56SnapshotFromGeneration({ source, generation }) {
     manifest,
     masters,
     history,
+    stockCloses,
     workbench,
     emerging,
     ipo,

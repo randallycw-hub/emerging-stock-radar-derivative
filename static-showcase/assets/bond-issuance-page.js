@@ -9,14 +9,33 @@ const PIPELINE_STAGES = Object.freeze([
   ["auctionOrBookbuildingDate", "詢圈／競拍"],
   ["pricingDate", "定價"],
   ["listingDate", "掛牌"],
-  ["asoDate", "CBAS 拆解"],
 ]);
 
+const ISSUANCE_CATEGORIES = Object.freeze({
+  in_progress: "進行中",
+  upcoming: "即將發行",
+  recent_listing: "最近掛牌",
+});
+
+const ISSUANCE_WINDOW_DAYS = 90;
+
 export function buildV53IssuancePipeline(issuance = {}) {
-  return PIPELINE_STAGES.map(([stage, name]) => {
+  return PIPELINE_STAGES.flatMap(([stage, name]) => {
     const date = isoDate(issuance?.stages?.[stage]);
-    return { stage, name, date, state: date ? "confirmed" : "pending", label: date ? date.replaceAll("-", "/") : "待公告" };
+    return date ? [{ stage, name, date, state: "confirmed", label: date.replaceAll("-", "/") }] : [];
   });
+}
+
+export function selectV57IssuanceRecords(records, { query = "", status = "all" } = {}, dataDate) {
+  const needle = normalizeQuery(query);
+  const allowedStatus = Object.hasOwn(ISSUANCE_CATEGORIES, status) ? status : "all";
+  return arrayValue(records)
+    .map((record) => ({ ...record, category: issuanceCategory(record, dataDate) }))
+    .filter((record) => record.category !== null)
+    .filter((record) => allowedStatus === "all" || record.category === allowedStatus)
+    .filter((record) => !needle || [record.cbCode, record.cbName, record.stockCode, record.companyName].some((value) => normalizeQuery(value).includes(needle)))
+    .sort(compareIssuanceRows)
+    .slice(0, 30);
 }
 
 export function buildBondIssuanceRows(workbench) {
@@ -38,17 +57,6 @@ export function buildBondIssuanceRows(workbench) {
     }));
 }
 
-function filterIssuance(records, { query = "", stage = "", days = "" } = {}, dataDate) {
-  const needle = normalizeQuery(query);
-  const maxDays = days === "7" || days === "30" ? Number(days) : null;
-  return arrayValue(records).filter((record) => {
-    if (needle && ![record.cbCode, record.cbName, record.stockCode, record.companyName].some((value) => normalizeQuery(value).includes(needle))) return false;
-    if (stage && record.currentStage !== stage) return false;
-    const listingDate = record.stages?.listingDate;
-    return maxDays === null || isWithinDays(listingDate, dataDate, maxDays);
-  });
-}
-
 function renderRows(target, records) {
   if (!records.length) {
     target.innerHTML = '<tr><td colspan="10" class="empty-cell">目前沒有符合條件的已公布發行案件。</td></tr>';
@@ -56,6 +64,7 @@ function renderRows(target, records) {
   }
   target.innerHTML = records.map((record) => {
     const pipeline = buildV53IssuancePipeline(record);
+    const category = ISSUANCE_CATEGORIES[record.category] ?? "已公布案件";
     const source = isOfficialSourceUrl(record.sourceUrl)
       ? `<a href="${escapeHtml(record.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a>`
       : "—";
@@ -69,7 +78,7 @@ function renderRows(target, records) {
       <td>${dateLabel(record.terms?.issueDate)}</td>
       <td>${dateLabel(record.stages?.listingDate)}</td>
       <td>${dateLabel(record.terms?.maturityDate)}</td>
-      <td><ol class="cb-pipeline" aria-label="${escapeHtml(`${record.cbCode} 發行進度`)}">${pipeline.map((node) => `<li class="${node.state}"><span>${escapeHtml(node.name)}</span><time>${escapeHtml(node.label)}</time></li>`).join("")}</ol>${source}</td>
+      <td><p class="issuance-category">${escapeHtml(category)}</p><ol class="cb-pipeline" aria-label="${escapeHtml(`${record.cbCode} 發行進度`)}">${pipeline.map((node) => `<li class="${node.state}"><span>${escapeHtml(node.name)}</span><time>${escapeHtml(node.label)}</time></li>`).join("")}</ol>${source}</td>
     </tr>`;
   }).join("");
 }
@@ -88,24 +97,61 @@ async function initialize() {
   }
   const render = () => {
     const values = new FormData(form);
-    const records = filterIssuance(model.issuance, {
+    const records = selectV57IssuanceRecords(model.issuance, {
       query: values.get("q") ?? "",
-      stage: String(values.get("stage") ?? ""),
-      days: String(values.get("days") ?? ""),
+      status: String(values.get("status") ?? "all"),
     }, model.dataDate);
-    count.textContent = `${records.length} 件 · 資料日 ${dateLabel(model.dataDate)}`;
+    syncUrl({ query: values.get("q") ?? "", status: values.get("status") ?? "all" });
+    count.textContent = `${records.length} 件（最多顯示 30 件）· 資料日 ${dateLabel(model.dataDate)}`;
     renderRows(target, records);
   };
+  const initial = new URL(globalThis.location.href).searchParams;
+  form.elements.q.value = initial.get("q") ?? "";
+  form.elements.status.value = initial.get("status") && Object.hasOwn(ISSUANCE_CATEGORIES, initial.get("status")) ? initial.get("status") : "all";
   form.addEventListener("input", render);
   form.addEventListener("change", render);
   render();
 }
 
-function isWithinDays(value, asOfDate, days) {
-  const date = isoDate(value);
-  if (!date || !isoDate(asOfDate)) return false;
-  const difference = (Date.parse(`${date}T00:00:00Z`) - Date.parse(`${asOfDate}T00:00:00Z`)) / 86400000;
-  return difference >= 0 && difference <= days;
+function issuanceCategory(record, dataDate) {
+  const snapshotDate = isoDate(dataDate);
+  if (!snapshotDate) return null;
+  const listingDate = isoDate(record?.stages?.listingDate);
+  if (listingDate) {
+    const difference = daysBetween(snapshotDate, listingDate);
+    if (difference >= 0 && difference <= ISSUANCE_WINDOW_DAYS) return "upcoming";
+    if (difference < 0 && difference >= -ISSUANCE_WINDOW_DAYS) return "recent_listing";
+    return null;
+  }
+  return buildV53IssuancePipeline(record).length ? "in_progress" : null;
+}
+
+function compareIssuanceRows(left, right) {
+  const order = { in_progress: 0, upcoming: 1, recent_listing: 2 };
+  const categoryDifference = order[left.category] - order[right.category];
+  if (categoryDifference !== 0) return categoryDifference;
+  const leftDate = issuanceSortDate(left);
+  const rightDate = issuanceSortDate(right);
+  if (left.category === "recent_listing") return String(rightDate ?? "").localeCompare(String(leftDate ?? "")) || left.cbCode.localeCompare(right.cbCode, "zh-Hant");
+  return String(leftDate ?? "").localeCompare(String(rightDate ?? "")) || left.cbCode.localeCompare(right.cbCode, "zh-Hant");
+}
+
+function issuanceSortDate(record) {
+  return isoDate(record?.stages?.listingDate) ?? buildV53IssuancePipeline(record).at(-1)?.date ?? null;
+}
+
+function daysBetween(from, to) {
+  return (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000;
+}
+
+function syncUrl({ query, status }) {
+  if (!globalThis.history || !globalThis.location) return;
+  const url = new URL(globalThis.location.href);
+  url.searchParams.delete("q");
+  url.searchParams.delete("status");
+  if (normalizeQuery(query)) url.searchParams.set("q", String(query).trim());
+  if (Object.hasOwn(ISSUANCE_CATEGORIES, status)) url.searchParams.set("status", status);
+  globalThis.history.replaceState(null, "", url);
 }
 
 function dateLabel(value) {

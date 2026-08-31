@@ -84,7 +84,7 @@ test("V5.6 model retains published emerging ranking fields without raw source me
     rightsEvents: { events: [] },
   });
   assert.deepEqual(model.emerging.records[0], {
-    stockCode: "7777", companyName: "測試興櫃", industryName: "半導體業", tradingDate: "2026-08-28",
+    stockCode: "7777", companyName: "測試興櫃", industryName: "半導體業", tradingDate: "2026-08-28", lastTradedPrice: null,
     dailyAveragePrice: 102, previousAveragePrice: 100, dailyHighPrice: 103, dailyLowPrice: 99,
     averageChange: 2, averageChangePercent: 2, direction: "up", dailyVolume: 150, transactionAmount: 15300,
     applyingDate: null, applyingStatus: null, dataDate: "2026-08-28",

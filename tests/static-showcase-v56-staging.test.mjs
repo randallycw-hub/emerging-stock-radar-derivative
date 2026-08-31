@@ -29,6 +29,10 @@ test("V5.6 staging emits one public model for shared data, daily changes, and pe
     assert.equal(model.securityMaster.status, "verified");
     assert.equal(model.performance.status, "verified");
     assert.equal(model.dailyChanges.status, "verified");
+    assert.ok(model.performance.records.some((record) => record.entityType === "cb"));
+    assert.ok(model.performance.records.some((record) => record.entityType === "emerging"));
+    assert.ok(model.performance.records.some((record) => record.entityType === "ipo"));
+    assert.ok(model.stockPriceHistory.records.every((record) => record.source === "official"));
     assert.doesNotMatch(JSON.stringify(model), /rawSourceId|rawTextHash|missingReason|diagnostics/);
   } finally {
     await rm(destination, { recursive: true, force: true });

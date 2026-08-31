@@ -59,7 +59,7 @@ test("IPO 時程頁由正式事件快照提供五階段、篩選與完整時程"
     assert.match(js, new RegExp(mobileLabel));
   }
   assert.doesNotMatch(source, /本站擷取|資料方法|擷取版本|官方快照/);
-  assert.doesNotMatch(source, /暫定承銷價|實際承銷價|承銷價格|漲跌幅|報酬率/);
+  assert.doesNotMatch(source, /本站計算承銷價|未驗證承銷價格/);
 });
 
 test("IPO 未來事件僅保留資料日後七日內的已發布事件", async () => {

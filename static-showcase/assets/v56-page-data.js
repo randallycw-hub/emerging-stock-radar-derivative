@@ -24,6 +24,33 @@ export function mapV56EmergingRows(model = {}) {
   });
 }
 
+export function mapV57EmergingResearchRows(model = {}) {
+  const base = mapV56EmergingRows(model);
+  const performanceByCode = new Map(
+    Array.isArray(model?.performance?.records)
+      ? model.performance.records
+        .filter((record) => record?.entityType === "emerging" && /^\d{4}$/.test(String(record?.stockCode ?? "")))
+        .map((record) => [record.stockCode, record])
+      : [],
+  );
+  return base.map((row) => {
+    const performance = performanceByCode.get(row.companyCode) ?? null;
+    const tradeState = textOrNull(performance?.tradeState)
+      ?? (row.tradingDate === model?.dataDate
+        ? row.transactionVolume !== null && row.transactionVolume > 0 ? "TRADED_TODAY" : "NO_TRADE_TODAY"
+        : "DATA_ERROR");
+    return {
+      ...row,
+      tradeState,
+      latestTradeDate: textOrNull(performance?.latestTradeDate),
+      latestPrice: finiteOrNull(performance?.latestPrice),
+      todayPrice: tradeState === "TRADED_TODAY" ? finiteOrNull(performance?.latestPrice ?? row.dailyAveragePrice) : null,
+      periods: isRecord(performance?.periods) ? performance.periods : {},
+      liquidity: isRecord(performance?.liquidity) ? performance.liquidity : {},
+    };
+  });
+}
+
 /**
  * Summarise only values that an official daily snapshot has actually published.
  * A single unavailable company must not blank the whole market, nor become a
@@ -55,6 +82,10 @@ function text(value) {
 function textOrNull(value) {
   const result = text(value);
   return result || null;
+}
+
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function isIsoDate(value) {

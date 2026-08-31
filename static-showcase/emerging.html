@@ -72,7 +72,7 @@
           <label><span>申請狀態</span><select id="emerging-application" name="application"><option value="all">全部狀態</option></select></label>
           <label><span>漲跌方向</span><select id="emerging-direction" name="direction"><option value="all">全部</option><option value="up">上漲</option><option value="down">下跌</option><option value="flat">持平</option><option value="unavailable">無法計算</option></select></label>
           <label class="mobile-sort-control"><span>排序欄位</span><select id="emerging-sort-field" name="sort">
-            <option value="companyCode">公司代碼／名稱</option><option value="dailyAveragePrice">本日成交均價（盤後）</option><option value="averageChangePercent">均價漲跌</option><option value="dailyHighPrice">最高</option><option value="dailyLowPrice">最低</option><option value="transactionVolume">成交股數</option><option value="estimatedTransactionAmount">估算成交金額（盤後）</option><option value="applyingStatus">申請狀態</option><option value="tradingDate">資料日期</option>
+            <option value="companyCode">公司代碼／名稱</option><option value="todayPrice">今日</option><option value="period1W">1W</option><option value="period1M">1M</option><option value="period3M">3M</option><option value="period6M">6M</option><option value="periodYTD">YTD</option><option value="transactionAmount">成交額</option><option value="average5Volume">5D 均量</option><option value="average20Volume">20D 均量</option><option value="volumeRatio">量比</option><option value="average20Amount">20D 平均成交額</option><option value="amountChange">成交額異動</option><option value="dailyAveragePrice">本日成交均價（盤後）</option><option value="averageChangePercent">均價漲跌</option><option value="transactionVolume">成交股數</option><option value="estimatedTransactionAmount">估算成交金額（盤後）</option>
           </select></label>
           <button id="emerging-sort-direction" class="sort-direction" type="button" aria-label="切換排序方向" data-direction="asc">低到高 ↑</button>
           <output id="emerging-result-count" aria-live="polite">—</output>
@@ -80,7 +80,7 @@
 
         <div class="market-table-shell">
           <table class="market-table">
-            <thead><tr>
+            <thead id="emerging-table-head"><tr>
               <th aria-sort="none"><button type="button" data-market-sort="companyCode" data-sort-type="text">公司代碼／名稱 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-market-sort="industryName" data-sort-type="text">產業 <span aria-hidden="true"></span></button></th>
               <th aria-sort="none"><button type="button" data-market-sort="dailyAveragePrice" data-sort-type="number">本日成交均價（盤後） <span aria-hidden="true"></span></button></th>

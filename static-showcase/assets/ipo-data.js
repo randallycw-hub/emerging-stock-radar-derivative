@@ -49,6 +49,13 @@ async function loadPublishedStaticSnapshot(fetchImpl) {
 /** Converts the staging-only V5.6 model into the existing public IPO shape. */
 export function snapshotFromV56Model(model) {
   if (model?.schemaVersion !== 3 || !isIsoDate(model?.dataDate) || !Array.isArray(model?.ipoPipeline?.records)) return null;
+  const performanceByCode = new Map(
+    Array.isArray(model?.performance?.records)
+      ? model.performance.records
+        .filter((record) => record?.entityType === "ipo" && /^\d{4}$/.test(String(record?.stockCode ?? "")))
+        .map((record) => [record.stockCode, record])
+      : [],
+  );
   const records = model.ipoPipeline.records.flatMap((record) => {
     const companyCode = text(record?.stockCode);
     const companyName = text(record?.companyName);
@@ -66,6 +73,7 @@ export function snapshotFromV56Model(model) {
       listingDate: dateOrNull(record?.listingDate),
       provisionalUnderwritingPrice: finiteOrNull(record?.provisionalUnderwritingPrice),
       finalUnderwritingPrice: finiteOrNull(record?.offerPrice),
+      performance: projectPostListingPerformance(performanceByCode.get(companyCode)),
       underwriter: textOrNull(record?.underwriter),
       auction: projectOfferingFacts(record?.auction, ["bidStartDate", "bidEndDate", "auctionOpenDate"]),
       publicOffering: projectOfferingFacts(record?.publicOffering, ["subscriptionStartDate", "subscriptionEndDate", "drawDate"]),
@@ -86,6 +94,20 @@ export function snapshotFromV56Model(model) {
   };
 }
 
+function projectPostListingPerformance(record) {
+  if (!record || typeof record !== "object") return null;
+  return {
+    latestTradeDate: dateOrNull(record.latestTradeDate),
+    latestPrice: positiveOrNull(record.latestPrice),
+    periods: projectPerformancePeriods(record.periods),
+  };
+}
+
+function projectPerformancePeriods(periods) {
+  const values = periods && typeof periods === "object" ? periods : {};
+  return Object.fromEntries(["5D", "20D", "1M", "sinceListing"].map((key) => [key, finiteOrNull(values[key])]));
+}
+
 function projectOfferingFacts(record, dateKeys) {
   if (record?.verified !== true) return null;
   const result = { verified: true };
@@ -103,6 +125,11 @@ function isSnapshot(value) {
 
 function finiteOrNull(value) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function positiveOrNull(value) {
+  const number = finiteOrNull(value);
+  return number !== null && number > 0 ? number : null;
 }
 
 function dateOrNull(value) {

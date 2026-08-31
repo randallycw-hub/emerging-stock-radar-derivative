@@ -57,8 +57,8 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
 
   assert.match(html, /assets\/emerging-page\.js/);
   assert.match(js, /URLSearchParams/);
-  assert.match(js, /const marketSortKeys = new Set/);
-  assert.match(js, /state\.sortKey = marketSortKeys\.has\(sortKey\) \? sortKey : "companyCode"/);
+  assert.match(js, /const marketSortKeys = V57_EMERGING_SORT_KEYS/);
+  assert.match(js, /parseV57EmergingState/);
   assert.doesNotMatch(js, /state\.sortKey = params\.get\("sort"\) \?\? "companyCode"/);
   assert.match(js, /history\.replaceState/);
   assert.match(js, /pageSize\(\)/);
