@@ -219,7 +219,11 @@ function projectIpoPipeline(ipo, dataDate) {
       boardDate: isoDate(record?.boardDate),
       contractDate: isoDate(record?.contractDate),
       listingDate: isoDate(record?.listingDate),
+      provisionalUnderwritingPrice: finiteNumber(record?.provisionalUnderwritingPrice),
       offerPrice: finiteNumber(record?.finalUnderwritingPrice),
+      underwriter: textOrNull(record?.underwriter),
+      auction: projectVerifiedAuction(record?.auction),
+      publicOffering: projectVerifiedPublicOffering(record?.publicOffering),
       stage: textOrNull(record?.stage),
       exceptionStatus: textOrNull(record?.exceptionStatus),
       events: recordsOf(record?.events).flatMap((event) => {
@@ -231,6 +235,32 @@ function projectIpoPipeline(ipo, dataDate) {
       dataDate,
     }];
   });
+}
+
+function projectVerifiedAuction(record) {
+  if (record?.verified !== true || record?.cancelled === true) return null;
+  return {
+    bidStartDate: isoDate(record?.bidStartDate),
+    bidEndDate: isoDate(record?.bidEndDate),
+    auctionOpenDate: isoDate(record?.auctionOpenDate),
+    listingDate: isoDate(record?.listingDate),
+    minimumBidPrice: finiteNumber(record?.minimumBidPrice),
+    finalUnderwritingPrice: finiteNumber(record?.finalUnderwritingPrice),
+    verified: true,
+  };
+}
+
+function projectVerifiedPublicOffering(record) {
+  if (record?.verified !== true || record?.cancelled === true) return null;
+  return {
+    subscriptionStartDate: isoDate(record?.subscriptionStartDate),
+    subscriptionEndDate: isoDate(record?.subscriptionEndDate),
+    drawDate: isoDate(record?.drawDate),
+    listingDate: isoDate(record?.listingDate),
+    provisionalUnderwritingPrice: finiteNumber(record?.provisionalUnderwritingPrice),
+    finalUnderwritingPrice: finiteNumber(record?.finalUnderwritingPrice),
+    verified: true,
+  };
 }
 
 function projectEmerging(emerging, dataDate) {

@@ -74,3 +74,16 @@ test("public offering projection accepts release-stage verified nested facts wit
   assert.equal(rows[0].bidStartDate, "2026-08-26");
   assert.equal(rows[0].subscriptionStartDate, "2026-08-31");
 });
+
+test("public offering projection accepts numeric V5.6 prices without treating them as unavailable", () => {
+  const rows = projectPublicOfferings({
+    dataDate: "2026-08-28",
+    records: [{
+      companyCode: "7825", companyName: "和亞智慧", market: "興櫃", underwriter: "測試承銷商",
+      auction: { bidStartDate: "2026-08-26", finalUnderwritingPrice: 56, verified: true },
+    }],
+  });
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].underwritingPrice, "56");
+});

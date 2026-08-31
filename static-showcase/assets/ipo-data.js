@@ -64,7 +64,11 @@ export function snapshotFromV56Model(model) {
       boardDate: dateOrNull(record?.boardDate),
       contractDate: dateOrNull(record?.contractDate),
       listingDate: dateOrNull(record?.listingDate),
+      provisionalUnderwritingPrice: finiteOrNull(record?.provisionalUnderwritingPrice),
       finalUnderwritingPrice: finiteOrNull(record?.offerPrice),
+      underwriter: textOrNull(record?.underwriter),
+      auction: projectOfferingFacts(record?.auction, ["bidStartDate", "bidEndDate", "auctionOpenDate"]),
+      publicOffering: projectOfferingFacts(record?.publicOffering, ["subscriptionStartDate", "subscriptionEndDate", "drawDate"]),
       events: (Array.isArray(record?.events) ? record.events : []).flatMap((event) => {
         const date = dateOrNull(event?.date);
         const label = text(event?.label);
@@ -80,6 +84,17 @@ export function snapshotFromV56Model(model) {
     sourceManifest: [],
     records,
   };
+}
+
+function projectOfferingFacts(record, dateKeys) {
+  if (record?.verified !== true) return null;
+  const result = { verified: true };
+  for (const key of dateKeys) result[key] = dateOrNull(record?.[key]);
+  result.listingDate = dateOrNull(record?.listingDate);
+  if (Object.hasOwn(record ?? {}, "minimumBidPrice")) result.minimumBidPrice = finiteOrNull(record.minimumBidPrice);
+  if (Object.hasOwn(record ?? {}, "provisionalUnderwritingPrice")) result.provisionalUnderwritingPrice = finiteOrNull(record.provisionalUnderwritingPrice);
+  if (Object.hasOwn(record ?? {}, "finalUnderwritingPrice")) result.finalUnderwritingPrice = finiteOrNull(record.finalUnderwritingPrice);
+  return result;
 }
 
 function isSnapshot(value) {

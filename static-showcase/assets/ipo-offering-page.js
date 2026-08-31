@@ -27,6 +27,7 @@ function textOrNull(value) {
 }
 
 function decimalOrNull(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
   const text = textOrNull(value);
   return text && /^\d+(?:\.\d+)?$/u.test(text) ? text : null;
 }

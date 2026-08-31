@@ -111,6 +111,42 @@ test("V5.6 IPO pipeline retains only verified public milestone facts and no sour
   assert.doesNotMatch(JSON.stringify(model.ipoPipeline), /sourceRecordId|sourceId|rawTextHash/);
 });
 
+test("V5.6 IPO pipeline preserves verified auction and subscription facts for the offering desk", () => {
+  const model = buildV56MarketData({
+    manifest,
+    masters,
+    history: [],
+    workbench,
+    emerging: { records: [] },
+    ipo: { records: [{
+      companyCode: "7825", companyName: "和亞智慧", market: "興櫃", stage: "D", exceptionStatus: null,
+      applicationDate: "2026-06-01", reviewDate: null, boardDate: null, contractDate: "2026-08-01", listingDate: "2026-09-10",
+      provisionalUnderwritingPrice: "52", finalUnderwritingPrice: "56", underwriter: "測試承銷商",
+      auction: {
+        bidStartDate: "2026-08-26", bidEndDate: "2026-08-28", auctionOpenDate: "2026-09-01", listingDate: "2026-09-10",
+        minimumBidPrice: "50", finalUnderwritingPrice: "56", verified: true, sourceRecordId: "private",
+      },
+      publicOffering: {
+        subscriptionStartDate: "2026-08-31", subscriptionEndDate: "2026-09-02", drawDate: "2026-09-03", listingDate: "2026-09-10",
+        provisionalUnderwritingPrice: "52", finalUnderwritingPrice: "56", verified: true, sourceRecordId: "private",
+      },
+      events: [],
+    }] },
+    rightsEvents: { events: [] },
+  });
+
+  assert.deepEqual(model.ipoPipeline.records[0].auction, {
+    bidStartDate: "2026-08-26", bidEndDate: "2026-08-28", auctionOpenDate: "2026-09-01", listingDate: "2026-09-10",
+    minimumBidPrice: 50, finalUnderwritingPrice: 56, verified: true,
+  });
+  assert.deepEqual(model.ipoPipeline.records[0].publicOffering, {
+    subscriptionStartDate: "2026-08-31", subscriptionEndDate: "2026-09-02", drawDate: "2026-09-03", listingDate: "2026-09-10",
+    provisionalUnderwritingPrice: 52, finalUnderwritingPrice: 56, verified: true,
+  });
+  assert.equal(model.ipoPipeline.records[0].underwriter, "測試承銷商");
+  assert.doesNotMatch(JSON.stringify(model.ipoPipeline.records[0]), /sourceRecordId|sourceId/);
+});
+
 test("V5.6 CB event feed projects official lifecycle events without internal source fields", () => {
   const model = buildV56MarketData({
     manifest,
