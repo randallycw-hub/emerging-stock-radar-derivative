@@ -1,9 +1,14 @@
 import { renderDataCenterBootstrap } from "./data-center-status.js";
 import { isPublishedIsoDate } from "./public-event-digest.js";
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
 
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
 };
+const pointerUrl = configuredPublishedPointerUrl(
+  bootstrapConfig,
+  new URL("../data/current.json", import.meta.url),
+);
 
 const legacyPublicDatasets = Object.freeze([
   Object.freeze({ label: "興櫃盤後", source: "TPEx", isAvailable: (runtime) => Boolean(runtime?.emergingMarketUrl) }),
@@ -47,7 +52,7 @@ export function readEmbeddedStatus(element) {
 
 async function readJson(url) {
   try {
-    const response = await fetch(url, { headers: { Accept: "application/json" } });
+    const response = await fetch(url, { cache: "no-store", headers: { Accept: "application/json" } });
     if (!response.ok) return null;
     return await response.json();
   } catch {
@@ -56,9 +61,9 @@ async function readJson(url) {
 }
 
 async function fetchCurrentStatus() {
-  const pointer = await readJson(bootstrapConfig.generationPointerUrl);
+  const pointer = await readJson(pointerUrl);
   if (!/^generations\/[a-f0-9]+$/i.test(pointer?.generation ?? "")) return null;
-  const url = new URL(`./data/${pointer.generation}/data-status.json`, document.baseURI);
+  const url = resolvePublishedDataUrl(`./data/${pointer.generation}/data-status.json`, pointerUrl);
   const status = await readJson(url);
   return validStatusSnapshot(status) ? status : null;
 }

@@ -1,4 +1,19 @@
+import { PUBLIC_DATA_POINTER_URL } from "./public-data-origin.js";
+
 const themeStorageKey = "market-theme";
+
+function isPublicSite() {
+  return globalThis.location?.protocol === "https:"
+    && globalThis.location?.hostname !== "localhost"
+    && globalThis.location?.hostname !== "127.0.0.1";
+}
+
+if (globalThis.window && isPublicSite()) {
+  globalThis.window.__OFFICIAL_SHOWCASE__ = {
+    ...(globalThis.window.__OFFICIAL_SHOWCASE__ ?? {}),
+    generationPointerUrl: PUBLIC_DATA_POINTER_URL.href,
+  };
+}
 
 export const PUBLIC_PRIMARY_NAVIGATION = Object.freeze([
   Object.freeze({ key: "home", label: "首頁", href: "./index.html" }),

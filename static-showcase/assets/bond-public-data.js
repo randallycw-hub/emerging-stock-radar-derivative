@@ -1,9 +1,25 @@
 import { safeJsonFetch } from "./site-shell.js";
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
 
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
   datasets: {},
 };
+const pointerUrl = configuredPublishedPointerUrl(
+  bootstrapConfig,
+  new URL("../data/current.json", import.meta.url),
+);
+
+async function loadRuntimeConfig(errorTarget) {
+  const pointer = await safeJsonFetch(pointerUrl, { errorTarget });
+  const runtimeUrl = pointer?.runtimeUrl
+    ? resolvePublishedDataUrl(pointer.runtimeUrl, pointerUrl)
+    : null;
+  const config = runtimeUrl
+    ? await safeJsonFetch(runtimeUrl, { errorTarget })
+    : bootstrapConfig;
+  return { config, pointerUrl };
+}
 
 export function textValue(value) {
   return typeof value === "string" && value.trim() ? value.trim() : "—";
@@ -55,13 +71,10 @@ export function publicBondRecords(workbench) {
 }
 
 export async function loadPublicBondWorkbench({ errorTarget = null } = {}) {
-  const pointer = await safeJsonFetch(bootstrapConfig.generationPointerUrl, { errorTarget });
-  const config = pointer?.runtimeUrl
-    ? await safeJsonFetch(new URL(pointer.runtimeUrl, globalThis.document?.baseURI), { errorTarget })
-    : bootstrapConfig;
+  const { config } = await loadRuntimeConfig(errorTarget);
   const url = config?.datasets?.bondWorkbench;
   if (!url) return null;
-  return safeJsonFetch(new URL(url, globalThis.document?.baseURI), { errorTarget });
+  return safeJsonFetch(resolvePublishedDataUrl(url, pointerUrl), { errorTarget });
 }
 
 export async function loadPublicCbWorkbenchV53({ errorTarget = null } = {}) {
@@ -69,21 +82,15 @@ export async function loadPublicCbWorkbenchV53({ errorTarget = null } = {}) {
 }
 
 export async function loadPublicCbWorkbenchV54({ errorTarget = null } = {}) {
-  const pointer = await safeJsonFetch(bootstrapConfig.generationPointerUrl, { errorTarget });
-  const config = pointer?.runtimeUrl
-    ? await safeJsonFetch(new URL(pointer.runtimeUrl, globalThis.document?.baseURI), { errorTarget })
-    : bootstrapConfig;
+  const { config } = await loadRuntimeConfig(errorTarget);
   const url = config?.cbWorkbenchV54Url ?? config?.cbWorkbenchV53Url;
   if (typeof url !== "string" || !url) return null;
-  return safeJsonFetch(new URL(url, globalThis.document?.baseURI), { errorTarget });
+  return safeJsonFetch(resolvePublishedDataUrl(url, pointerUrl), { errorTarget });
 }
 
 export async function loadPublicCbWorkbenchV55({ errorTarget = null } = {}) {
-  const pointer = await safeJsonFetch(bootstrapConfig.generationPointerUrl, { errorTarget });
-  const config = pointer?.runtimeUrl
-    ? await safeJsonFetch(new URL(pointer.runtimeUrl, globalThis.document?.baseURI), { errorTarget })
-    : bootstrapConfig;
+  const { config } = await loadRuntimeConfig(errorTarget);
   const url = config?.cbWorkbenchV55Url ?? config?.cbWorkbenchV54Url ?? config?.cbWorkbenchV53Url;
   if (typeof url !== "string" || !url) return null;
-  return safeJsonFetch(new URL(url, globalThis.document?.baseURI), { errorTarget });
+  return safeJsonFetch(resolvePublishedDataUrl(url, pointerUrl), { errorTarget });
 }

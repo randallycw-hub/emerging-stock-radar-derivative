@@ -14,6 +14,7 @@ import { pathToFileURL } from "node:url";
 import { types } from "node:util";
 
 import { isIsoDate } from "../lib/domain/dates.ts";
+import { PUBLIC_DATA_POINTER_URL } from "../static-showcase/assets/public-data-origin.js";
 import { EmergingMarketViewSchema } from "../lib/domain/schema.ts";
 import { buildBondMarketViews } from "../lib/market-data/bond-market-view.ts";
 import { buildEmergingMarketViews } from "../lib/market-data/emerging-market-view.ts";
@@ -69,7 +70,7 @@ export function buildRuntimeBootstrap() {
   return [
     "window.__OFFICIAL_SHOWCASE__ = ",
     JSON.stringify({
-      generationPointerUrl: "./data/current.json",
+      generationPointerUrl: PUBLIC_DATA_POINTER_URL.href,
     }),
     ";\n",
   ].join("");
@@ -262,6 +263,9 @@ async function refreshStaticShowcaseCandidate({
   paths,
 }) {
   const activeGeneration = await readActiveGeneration(paths.dataDirectory);
+  const previousBondTerms = await readPublishedBondTermsFromActive(
+    activeGeneration,
+  );
   const previousWorkbench = await readPublishedBondWorkbenchFromActive(
     activeGeneration,
   );
@@ -309,6 +313,10 @@ async function refreshStaticShowcaseCandidate({
 
   let marketFetchImpl = fetchImpl;
   if (expectedDataDate !== undefined) {
+    verifyRosterDoesNotLeadMarketDate(
+      datasets["11406"],
+      expectedDataDate,
+    );
     const censusResponse = await fetchOfficialCsvWithRetry(
       OFFICIAL_ROSTER_CENSUS_SOURCE,
       fetchImpl,
@@ -335,7 +343,10 @@ async function refreshStaticShowcaseCandidate({
       censusResponse.bytes,
     );
     const census = parseConversionIndex(JSON.parse(censusText));
-    verifyRosterCompleteness(datasets["11406"], census);
+    verifyRosterCompleteness(datasets["11406"], census, {
+      expectedDataDate,
+      priorBonds: previousBondTerms,
+    });
     manifestDatasets.push({
       datasetId: "11406Census",
       sourceUrl: OFFICIAL_ROSTER_CENSUS_SOURCE,
@@ -715,19 +726,53 @@ function isolatedNightlyMarketBuilder(scenario) {
   });
 }
 
-function verifyRosterCompleteness(rosterRows, censusEntries) {
+export function verifyRosterCompleteness(
+  rosterRows,
+  censusEntries,
+  { expectedDataDate, priorBonds = [] } = {},
+) {
   const rosterCodes = new Set(
     bondInputsFrom11406Rows(rosterRows).map((bond) => bond.bondCode),
   );
   if (!Array.isArray(censusEntries) || censusEntries.length === 0) {
     throw new Error("VALIDATION_FAILED:ROSTER_COMPLETENESS:EMPTY_CENSUS");
   }
+  const priorMaturityByBondCode = new Map(
+    priorBonds.map((bond) => [bond.bondCode, bond.maturityDate]),
+  );
   const missing = censusEntries
     .map((entry) => entry.bondCode)
     .filter((bondCode) => !rosterCodes.has(bondCode));
-  if (missing.length > 0) {
+  const unresolved = missing.filter((bondCode) => {
+    const maturityDate = priorMaturityByBondCode.get(bondCode);
+    return !(
+      isIsoDate(expectedDataDate)
+      && isIsoDate(maturityDate)
+      && maturityDate <= expectedDataDate
+    );
+  });
+  if (unresolved.length > 0) {
     throw new Error(
-      `VALIDATION_FAILED:ROSTER_COMPLETENESS:MISSING_CENSUS_CODES:${missing.join(",")}`,
+      `VALIDATION_FAILED:ROSTER_COMPLETENESS:MISSING_CENSUS_CODES:${unresolved.join(",")}`,
+    );
+  }
+}
+
+export function verifyRosterDoesNotLeadMarketDate(
+  rosterRows,
+  expectedDataDate,
+) {
+  if (!isIsoDate(expectedDataDate)) {
+    throw new TypeError("expected market date must be ISO");
+  }
+  const futureDate = bondInputsFrom11406Rows(rosterRows)
+    .map((bond) => bond.outstandingDataDate)
+    .filter(isIsoDate)
+    .sort()
+    .find((dataDate) => dataDate > expectedDataDate);
+  if (futureDate !== undefined) {
+    throw new Error(
+      `VALIDATION_FAILED:ROSTER_FUTURE_DATA_DATE:${futureDate}:${expectedDataDate}`,
     );
   }
 }
@@ -918,7 +963,7 @@ async function loadIsolatedHarnessFixtures() {
 
 function nightlyRosterCsv(current) {
   return `${current.trimEnd()}\n${[
-    "20260730",
+    "20260729",
     "1101",
     "台泥",
     "11011",
@@ -1735,6 +1780,42 @@ export async function readPublishedBondWorkbench(
   return readPublishedBondWorkbenchFromActive(
     await readActiveGeneration(dataDirectory),
   );
+}
+
+async function readPublishedBondTermsFromActive(active) {
+  if (active === undefined) {
+    return [];
+  }
+  try {
+    const text = await readFile(join(active.root, "11406.json"), "utf8");
+    const rows = JSON.parse(text);
+    return prior11406TermsFromVerifiedSnapshot(rows, active.manifest);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return [];
+    }
+    throw new TypeError(`prior 11406 snapshot is invalid: ${error.message}`);
+  }
+}
+
+export function prior11406TermsFromVerifiedSnapshot(rows, manifest) {
+  const entries = Array.isArray(manifest?.datasets)
+    ? manifest.datasets.filter((entry) => entry?.datasetId === "11406")
+    : [];
+  const entry = entries[0];
+  if (
+    !Array.isArray(rows)
+    || entries.length !== 1
+    || entry?.sourceUrl !== OFFICIAL_SHOWCASE_SOURCES["11406"]
+    || !isIsoDate(entry?.downloadedAt)
+    || !/^sha256:[a-f0-9]{64}$/i.test(entry?.sha256 ?? "")
+    || !Number.isSafeInteger(entry?.rawBytes)
+    || entry.rawBytes <= 0
+    || entry.rowCount !== rows.length
+  ) {
+    throw new Error("prior 11406 manifest integrity is invalid");
+  }
+  return bondInputsFrom11406Rows(rows);
 }
 
 async function readPublishedBondWorkbenchFromActive(active) {

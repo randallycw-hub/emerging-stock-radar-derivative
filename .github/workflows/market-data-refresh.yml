@@ -1,4 +1,4 @@
-name: Market data validation
+name: Market data refresh
 
 on:
   schedule:
@@ -16,14 +16,21 @@ on:
         options: [FAST, OFFICIAL, EVENT, RECONCILE, WEEKLY]
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: market-data-refresh-main
+  cancel-in-progress: false
 
 jobs:
-  validate:
+  refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -61,3 +68,21 @@ jobs:
               ;;
             *) exit 1 ;;
           esac
+      - name: Build verified static snapshot
+        if: ${{ steps.context.outputs.mode == 'FAST' || steps.context.outputs.mode == 'OFFICIAL' || steps.context.outputs.mode == 'EVENT' }}
+        run: npm run build
+      - name: Commit verified public snapshot
+        if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && (steps.context.outputs.mode == 'FAST' || steps.context.outputs.mode == 'OFFICIAL' || steps.context.outputs.mode == 'EVENT') }}
+        env:
+          DATA_DATE: ${{ steps.context.outputs.data_date }}
+        shell: bash
+        run: |
+          git add -- static-showcase/data
+          if git diff --cached --quiet -- static-showcase/data; then
+            echo "No verified public snapshot changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: refresh verified market snapshot ${DATA_DATE}"
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"

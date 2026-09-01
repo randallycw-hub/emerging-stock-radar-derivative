@@ -12,7 +12,7 @@ test("obsolete Cloudflare refresh workflow stays removed", async () => {
   await assert.rejects(access(".github/workflows/refresh-public-site.yml"), { code: "ENOENT" });
 });
 
-test("Taipei refresh workflow schedules validation modes without deployment credentials", async () => {
+test("Taipei refresh workflow safely commits only validated snapshots without deployment credentials", async () => {
   const workflow = await readFile(".github/workflows/market-data-refresh.yml", "utf8");
 
   for (const cron of [
@@ -26,6 +26,12 @@ test("Taipei refresh workflow schedules validation modes without deployment cred
   }
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /mode:/);
+  assert.match(workflow, /contents:\s*write/);
+  assert.match(workflow, /npm run build/);
+  assert.match(workflow, /git add -- static-showcase\/data/);
+  assert.match(workflow, /git diff --cached --quiet/);
+  assert.match(workflow, /git push origin "HEAD:\$\{\{ github\.event\.repository\.default_branch \}\}"/);
+  assert.match(workflow, /github\.ref == format\('refs\/heads\/\{0\}', github\.event\.repository\.default_branch\)/);
   assert.doesNotMatch(workflow, /deploy|hosting|token|secret|curl/i);
 });
 

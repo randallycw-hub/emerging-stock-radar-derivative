@@ -1,3 +1,5 @@
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
+
 export async function loadIpoSnapshot({ fetchImpl = fetch } = {}) {
   const published = await loadPublishedStaticSnapshot(fetchImpl);
   if (published) return published;
@@ -16,28 +18,35 @@ export async function loadIpoSnapshot({ fetchImpl = fetch } = {}) {
 
 async function loadPublishedStaticSnapshot(fetchImpl) {
   try {
-    const pointerUrl = new URL("./data/current.json", location.href);
-    const pointerResponse = await fetchImpl(pointerUrl, { headers: { Accept: "application/json" } });
+    const pointerUrl = configuredPublishedPointerUrl(
+      globalThis.window?.__OFFICIAL_SHOWCASE__,
+      new URL("./data/current.json", globalThis.location?.href ?? import.meta.url),
+    );
+    const pointerResponse = await fetchImpl(pointerUrl, { cache: "no-store", headers: { Accept: "application/json" } });
     if (!pointerResponse.ok) return null;
     const pointer = await pointerResponse.json();
     if (typeof pointer?.runtimeUrl !== "string") return null;
 
-    const runtimeResponse = await fetchImpl(new URL(pointer.runtimeUrl, location.href), { headers: { Accept: "application/json" } });
+    const runtimeUrl = resolvePublishedDataUrl(pointer.runtimeUrl, pointerUrl);
+    if (!runtimeUrl) return null;
+    const runtimeResponse = await fetchImpl(runtimeUrl, { cache: "no-store", headers: { Accept: "application/json" } });
     if (!runtimeResponse.ok) return null;
     const runtime = await runtimeResponse.json();
     if (typeof runtime?.v56MarketDataUrl === "string") {
-      const v56Response = await fetchImpl(new URL(runtime.v56MarketDataUrl, location.href), { headers: { Accept: "application/json" } });
+      const v56Url = resolvePublishedDataUrl(runtime.v56MarketDataUrl, pointerUrl);
+      if (!v56Url) return null;
+      const v56Response = await fetchImpl(v56Url, { cache: "no-store", headers: { Accept: "application/json" } });
       if (v56Response.ok) {
         const v56Snapshot = snapshotFromV56Model(await v56Response.json());
         if (v56Snapshot) return v56Snapshot;
       }
     }
     const snapshotUrl = typeof runtime?.ipoEventsUrl === "string"
-      ? new URL(runtime.ipoEventsUrl, location.href)
+      ? resolvePublishedDataUrl(runtime.ipoEventsUrl, pointerUrl)
       : null;
     if (!snapshotUrl) return null;
 
-    const snapshotResponse = await fetchImpl(snapshotUrl, { headers: { Accept: "application/json" } });
+    const snapshotResponse = await fetchImpl(snapshotUrl, { cache: "no-store", headers: { Accept: "application/json" } });
     if (!snapshotResponse.ok) return null;
     const snapshot = await snapshotResponse.json();
     return isSnapshot(snapshot) ? snapshot : null;

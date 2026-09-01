@@ -6,6 +6,7 @@ import {
 } from "./site-shell.js";
 import { buildCrossMarketEventEntries, buildPublicEventDigest, isPublishedIsoDate } from "./public-event-digest.js";
 import { countPublishedPositive, publicNumber, sumPublishedValues } from "./public-data-state.js";
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
 
 const updateTarget = globalThis.document?.querySelector("#last-successful-update") ?? null;
 const coverageTarget = globalThis.document?.querySelector("#home-data-coverage") ?? null;
@@ -21,7 +22,10 @@ const workbenchTarget = globalThis.document?.querySelector(".home-v51-workbench-
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
 };
-const pointerUrl = bootstrapConfig.generationPointerUrl;
+const pointerUrl = configuredPublishedPointerUrl(
+  bootstrapConfig,
+  new URL("../data/current.json", import.meta.url),
+);
 
 if (globalThis.window && globalThis.document) loadHomeData();
 
@@ -375,14 +379,14 @@ async function loadHomeData() {
   if (!pointer?.runtimeUrl) return renderHomeEvents({});
 
   const runtime = await safeJsonFetch(
-    new URL(pointer.runtimeUrl, document.baseURI),
+    resolvePublishedDataUrl(pointer.runtimeUrl, pointerUrl),
     { errorTarget: updateTarget },
   );
   if (!runtime?.manifestUrl) return renderHomeEvents({});
 
   if (typeof runtime.v56MarketDataUrl === "string") {
     const v56 = await safeJsonFetch(
-      new URL(runtime.v56MarketDataUrl, document.baseURI),
+      resolvePublishedDataUrl(runtime.v56MarketDataUrl, pointerUrl),
       { errorTarget: updateTarget },
     );
     if (v56?.schemaVersion === 3 && isPublishedIsoDate(v56?.dataDate)) {
@@ -393,14 +397,14 @@ async function loadHomeData() {
 
   const canonicalUrl = runtime.canonicalEventsV55Url ?? runtime.canonicalEventsV54Url ?? null;
   const canonicalEvents = typeof canonicalUrl === "string"
-    ? await safeJsonFetch(new URL(canonicalUrl, document.baseURI), { errorTarget: coverageTarget })
+    ? await safeJsonFetch(resolvePublishedDataUrl(canonicalUrl, pointerUrl), { errorTarget: coverageTarget })
     : null;
 
   const marketResearchUrl = runtime.marketResearchUrl
     ?? (typeof pointer.generation === "string" ? `./data/${pointer.generation}/market-research.json` : null);
   if (typeof marketResearchUrl === "string") {
     const research = await safeJsonFetch(
-      new URL(marketResearchUrl, document.baseURI),
+      resolvePublishedDataUrl(marketResearchUrl, pointerUrl),
       { errorTarget: updateTarget },
     );
     if (research?.home && research?.meta) {
@@ -416,7 +420,7 @@ async function loadHomeData() {
   }
 
   const manifest = await safeJsonFetch(
-    new URL(runtime.manifestUrl, document.baseURI),
+    resolvePublishedDataUrl(runtime.manifestUrl, pointerUrl),
     { errorTarget: updateTarget },
   );
   const workbenchUrl = runtime.datasets?.bondWorkbench;
@@ -424,13 +428,13 @@ async function loadHomeData() {
   const emergingUrl = runtime.emergingMarketUrl;
   const [workbench, ipo, emerging] = await Promise.all([
     typeof workbenchUrl === "string"
-      ? safeJsonFetch(new URL(workbenchUrl, document.baseURI), { errorTarget: coverageTarget })
+      ? safeJsonFetch(resolvePublishedDataUrl(workbenchUrl, pointerUrl), { errorTarget: coverageTarget })
       : Promise.resolve(null),
     typeof ipoEventsUrl === "string"
-      ? safeJsonFetch(new URL(ipoEventsUrl, document.baseURI), { errorTarget: coverageTarget })
+      ? safeJsonFetch(resolvePublishedDataUrl(ipoEventsUrl, pointerUrl), { errorTarget: coverageTarget })
       : Promise.resolve(null),
     typeof emergingUrl === "string"
-      ? safeJsonFetch(new URL(emergingUrl, document.baseURI), { errorTarget: coverageTarget })
+      ? safeJsonFetch(resolvePublishedDataUrl(emergingUrl, pointerUrl), { errorTarget: coverageTarget })
       : Promise.resolve(null),
   ]);
 

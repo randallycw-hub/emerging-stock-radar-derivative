@@ -1,3 +1,5 @@
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
+
 function text(value) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -282,20 +284,24 @@ async function loadCompanyOverview() {
     renderOverview(target, null);
     return;
   }
-  const pointer = await fetchJson(new URL("../data/current.json", import.meta.url));
-  const runtime = pointer?.runtimeUrl ? await fetchJson(new URL(pointer.runtimeUrl, document.baseURI)) : null;
+  const pointerUrl = configuredPublishedPointerUrl(
+    globalThis.window?.__OFFICIAL_SHOWCASE__,
+    new URL("../data/current.json", import.meta.url),
+  );
+  const pointer = await fetchJson(pointerUrl);
+  const runtime = pointer?.runtimeUrl ? await fetchJson(resolvePublishedDataUrl(pointer.runtimeUrl, pointerUrl)) : null;
   if (!runtime?.companyMasterUrl) {
     target.innerHTML = '<p class="empty-state">公司公開資料暫時無法載入，請稍後再試。</p>';
     return;
   }
   const [companyMaster, market, ipo, revenue, workbench, v53Model] = await Promise.all([
-    fetchJson(new URL(runtime.companyMasterUrl, document.baseURI)),
-    runtime.emergingMarketUrl ? fetchJson(new URL(runtime.emergingMarketUrl, document.baseURI)) : null,
-    runtime.ipoEventsUrl ? fetchJson(new URL(runtime.ipoEventsUrl, document.baseURI)) : null,
-    runtime.datasets?.["94025"] ? fetchJson(new URL(runtime.datasets["94025"], document.baseURI)) : null,
-    runtime.datasets?.bondWorkbench ? fetchJson(new URL(runtime.datasets.bondWorkbench, document.baseURI)) : null,
+    fetchJson(resolvePublishedDataUrl(runtime.companyMasterUrl, pointerUrl)),
+    runtime.emergingMarketUrl ? fetchJson(resolvePublishedDataUrl(runtime.emergingMarketUrl, pointerUrl)) : null,
+    runtime.ipoEventsUrl ? fetchJson(resolvePublishedDataUrl(runtime.ipoEventsUrl, pointerUrl)) : null,
+    runtime.datasets?.["94025"] ? fetchJson(resolvePublishedDataUrl(runtime.datasets["94025"], pointerUrl)) : null,
+    runtime.datasets?.bondWorkbench ? fetchJson(resolvePublishedDataUrl(runtime.datasets.bondWorkbench, pointerUrl)) : null,
     runtime.cbWorkbenchV54Url || runtime.cbWorkbenchV53Url
-      ? fetchJson(new URL(runtime.cbWorkbenchV54Url ?? runtime.cbWorkbenchV53Url, document.baseURI))
+      ? fetchJson(resolvePublishedDataUrl(runtime.cbWorkbenchV54Url ?? runtime.cbWorkbenchV53Url, pointerUrl))
       : null,
   ]);
   if (!Array.isArray(companyMaster?.records)) {

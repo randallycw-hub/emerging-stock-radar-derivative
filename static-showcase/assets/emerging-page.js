@@ -5,8 +5,12 @@ import { emergingDailyAverageLabel } from "./emerging-market-display.js";
 import { sortRows } from "./table-sort.js";
 import { buildPublishedEmergingBreadth, mapV57EmergingResearchRows } from "./v56-page-data.js";
 import { parseV57EmergingState, V57_EMERGING_SORT_KEYS } from "./emerging-research-state.js";
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
 
-const pointerUrl = new URL("../data/current.json", import.meta.url);
+const pointerUrl = configuredPublishedPointerUrl(
+  globalThis.window?.__OFFICIAL_SHOWCASE__,
+  new URL("../data/current.json", import.meta.url),
+);
 const errorTarget = document.querySelector("[data-page-error]");
 const marketSortKeys = V57_EMERGING_SORT_KEYS;
 export const viewAliases = Object.freeze({
@@ -62,20 +66,20 @@ async function loadData() {
     showUnavailable();
     return;
   }
-  const runtime = await safeJsonFetch(new URL(pointer.runtimeUrl, document.baseURI), { errorTarget });
+  const runtime = await safeJsonFetch(resolvePublishedDataUrl(pointer.runtimeUrl, pointerUrl), { errorTarget });
   if (!runtime) {
     showUnavailable();
     return;
   }
 
   const [marketArtifact, monthlyRevenue, companyMaster, v56Model] = await Promise.all([
-    safeJsonFetch(new URL(runtime.emergingMarketUrl, document.baseURI), { errorTarget }),
-    safeJsonFetch(new URL(runtime.datasets?.["94025"], document.baseURI), { errorTarget }),
+    safeJsonFetch(resolvePublishedDataUrl(runtime.emergingMarketUrl, pointerUrl), { errorTarget }),
+    safeJsonFetch(resolvePublishedDataUrl(runtime.datasets?.["94025"], pointerUrl), { errorTarget }),
     typeof runtime.companyMasterUrl === "string"
-      ? safeJsonFetch(new URL(runtime.companyMasterUrl, document.baseURI), { errorTarget })
+      ? safeJsonFetch(resolvePublishedDataUrl(runtime.companyMasterUrl, pointerUrl), { errorTarget })
       : Promise.resolve(null),
     typeof runtime.v56MarketDataUrl === "string"
-      ? safeJsonFetch(new URL(runtime.v56MarketDataUrl, document.baseURI), { errorTarget })
+      ? safeJsonFetch(resolvePublishedDataUrl(runtime.v56MarketDataUrl, pointerUrl), { errorTarget })
       : Promise.resolve(null),
   ]);
   const companies = indexCanonicalCompanies(companyMaster);

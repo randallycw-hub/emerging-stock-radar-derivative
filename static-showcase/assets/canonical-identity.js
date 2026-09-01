@@ -76,7 +76,7 @@ export function applyCanonicalBondIdentity(record, bonds) {
 }
 
 async function readJson(url, fetchImpl) {
-  const response = await fetchImpl(url, { headers: { Accept: "application/json" } });
+  const response = await fetchImpl(url, { cache: "no-store", headers: { Accept: "application/json" } });
   if (!response.ok) return null;
   return response.json();
 }
@@ -89,14 +89,18 @@ export async function loadCanonicalPublicMasters({
 } = {}) {
   if (typeof fetchImpl !== "function" || typeof baseUrl !== "string") return null;
   try {
-    const pointer = await readJson(new URL("./data/current.json", baseUrl), fetchImpl);
+    const pointerUrl = configuredPublishedPointerUrl(
+      globalThis.window?.__OFFICIAL_SHOWCASE__,
+      new URL("./data/current.json", baseUrl),
+    );
+    const pointer = await readJson(pointerUrl, fetchImpl);
     if (typeof pointer?.runtimeUrl !== "string") return null;
-    const runtime = await readJson(new URL(pointer.runtimeUrl, baseUrl), fetchImpl);
+    const runtime = await readJson(resolvePublishedDataUrl(pointer.runtimeUrl, pointerUrl), fetchImpl);
     if (typeof runtime?.companyMasterUrl !== "string") return null;
     if (includeBonds && typeof runtime?.cbMasterUrl !== "string") return null;
-    const companyMaster = await readJson(new URL(runtime.companyMasterUrl, baseUrl), fetchImpl);
+    const companyMaster = await readJson(resolvePublishedDataUrl(runtime.companyMasterUrl, pointerUrl), fetchImpl);
     const cbMaster = includeBonds
-      ? await readJson(new URL(runtime.cbMasterUrl, baseUrl), fetchImpl)
+      ? await readJson(resolvePublishedDataUrl(runtime.cbMasterUrl, pointerUrl), fetchImpl)
       : [];
     return {
       companies: indexCanonicalCompanies(companyMaster),
@@ -106,3 +110,4 @@ export async function loadCanonicalPublicMasters({
     return null;
   }
 }
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";

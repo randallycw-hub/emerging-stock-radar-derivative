@@ -1045,7 +1045,7 @@ test("重新產生 runtime 時只寫入正式資料網址，不嵌入呈現程�
   const result = buildRuntimeBootstrap(manifest);
 
   assert.match(result, /window\.__OFFICIAL_SHOWCASE__/);
-  assert.match(result, /"generationPointerUrl":"\.\/data\/current\.json"/);
+  assert.match(result, /"generationPointerUrl":"https:\/\/raw\.githubusercontent\.com\/randallycw-hub\/emerging-stock-radar-derivative\/main\/static-showcase\/data\/current\.json"/);
   assert.doesNotMatch(result, /公司代號|document\.querySelector/);
 });
 

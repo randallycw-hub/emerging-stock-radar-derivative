@@ -275,7 +275,7 @@ export async function fetchCurrentOfficialMarketData({
     if (
       Array.isArray(cached)
       && cached.some((quote) => quote?.tradingDate === date)
-    ) return cached;
+    ) return cached.filter((quote) => quote?.tradingDate === date);
     await sleepImpl(perRequestDelayMs);
     const body = new URLSearchParams({
       date: requestDate,
@@ -288,7 +288,9 @@ export async function fetchCurrentOfficialMarketData({
       fetchImpl,
     );
     const table = verifiedCbQuoteTable(payload);
-    const values = table.data.map((row) => normalizeCbQuoteRow(bondCode, row));
+    const values = table.data
+      .map((row) => normalizeCbQuoteRow(bondCode, row))
+      .filter((quote) => quote.tradingDate === date);
     await onCheckpoint({
       kind: "cbQuotesByBondCode",
       key: bondCode,

@@ -184,7 +184,7 @@ test("collects only requested official CB, stock and conversion records", async 
   const result = await fetchCurrentOfficialMarketData({
     bondCodes: ["35221"],
     issuerCodes: ["2330", "3522"],
-    date: "2026-07-30",
+    date: "2026-07-29",
     fetchImpl: fakeFetch,
     sleepImpl: async (milliseconds) => {
       delays.push(milliseconds);
@@ -203,7 +203,7 @@ test("collects only requested official CB, stock and conversion records", async 
   assert.equal(result.conversionPrices[0].currentConversionPrice, "18.2");
   assert.equal(requests.length, 5);
   assert.ok(requests.some((request) =>
-    request.body === "date=2026%2F07%2F30&code=35221&response=json"
+    request.body === "date=2026%2F07%2F29&code=35221&response=json"
   ));
   assert.ok(requests.some((request) =>
     request.body === "name=bondIssuer&searchNo=&response=json"
@@ -224,7 +224,7 @@ test("collects only requested official CB, stock and conversion records", async 
   await fetchCurrentOfficialMarketData({
     bondCodes: ["35221"],
     issuerCodes: ["2330", "3522"],
-    date: "2026-07-30",
+    date: "2026-07-29",
     fetchImpl: fakeFetch,
     sleepImpl: async (milliseconds) => {
       delays.push(milliseconds);
@@ -245,13 +245,13 @@ test("collects only requested official CB, stock and conversion records", async 
 
   checkpoint.cbQuotesByBondCode["35221"] = result.cbQuotes.map((quote) => ({
     ...quote,
-    tradingDate: "2026-07-29",
+    tradingDate: "2026-07-28",
   }));
   requests.length = 0;
   await fetchCurrentOfficialMarketData({
     bondCodes: ["35221"],
     issuerCodes: ["2330", "3522"],
-    date: "2026-07-30",
+    date: "2026-07-29",
     fetchImpl: fakeFetch,
     sleepImpl: async () => {},
     perRequestDelayMs: 0,
@@ -262,6 +262,100 @@ test("collects only requested official CB, stock and conversion records", async 
     requests.filter((request) => request.url.endsWith("/bond/cbDayQry")).length,
     1,
   );
+});
+
+test("collects CB quotes only for the requested trading date when TPEx returns a monthly table", async () => {
+  const quote = JSON.parse(await fixture("tpex-cb-quote.json"));
+  quote.tables[0].data.push([
+    "1150728", "等價", "100.0000", "0.0000", "100.0000", "100.0000",
+    "100.0000", "1", "1", "100,000", "100.00",
+  ]);
+  const values = {
+    quote: JSON.stringify(quote),
+    twse: await fixture("twse-stock-close.json"),
+    tpex: await fixture("tpex-stock-close.json"),
+    conversion: await fixture("tpex-conversion-index.json"),
+    detail: await fixture("mops-bond-detail.html"),
+  };
+  const fakeFetch = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/bond/cbDayQry")) return jsonResponse(values.quote);
+    if (target.endsWith("/exchangeReport/STOCK_DAY_ALL")) return jsonResponse(values.twse);
+    if (target.endsWith("/tpex_mainboard_daily_close_quotes")) return jsonResponse(values.tpex);
+    if (target.endsWith("/bond/convSearch")) return jsonResponse(values.conversion);
+    if (target.startsWith("https://mopsov.twse.com.tw/mops/web/t120sg01?")) {
+      return new Response(values.detail, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+
+  const result = await fetchCurrentOfficialMarketData({
+    bondCodes: ["35221"],
+    issuerCodes: ["2330", "3522"],
+    date: "2026-07-29",
+    fetchImpl: fakeFetch,
+    sleepImpl: async () => {},
+    perRequestDelayMs: 0,
+  });
+
+  assert.deepEqual(
+    [...new Set(result.cbQuotes.map((quoteRow) => quoteRow.tradingDate))],
+    ["2026-07-29"],
+  );
+});
+
+test("filters prior-date CB quotes before returning a checkpoint cache hit", async () => {
+  const values = {
+    twse: await fixture("twse-stock-close.json"),
+    tpex: await fixture("tpex-stock-close.json"),
+    conversion: await fixture("tpex-conversion-index.json"),
+    detail: await fixture("mops-bond-detail.html"),
+  };
+  let cbQuoteRequests = 0;
+  const fakeFetch = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/bond/cbDayQry")) {
+      cbQuoteRequests += 1;
+      throw new Error("checkpoint should avoid a quote request");
+    }
+    if (target.endsWith("/exchangeReport/STOCK_DAY_ALL")) return jsonResponse(values.twse);
+    if (target.endsWith("/tpex_mainboard_daily_close_quotes")) return jsonResponse(values.tpex);
+    if (target.endsWith("/bond/convSearch")) return jsonResponse(values.conversion);
+    if (target.startsWith("https://mopsov.twse.com.tw/mops/web/t120sg01?")) {
+      return new Response(values.detail, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+
+  const result = await fetchCurrentOfficialMarketData({
+    bondCodes: ["35221"],
+    issuerCodes: ["2330", "3522"],
+    date: "2026-07-29",
+    fetchImpl: fakeFetch,
+    sleepImpl: async () => {},
+    perRequestDelayMs: 0,
+    checkpoint: {
+      cbQuotesByBondCode: {
+        "35221": [
+          { bondCode: "35221", tradingDate: "2026-07-29" },
+          { bondCode: "35221", tradingDate: "2026-07-28" },
+        ],
+      },
+      conversionPricesByBondCode: {},
+    },
+  });
+
+  assert.equal(cbQuoteRequests, 0);
+  assert.deepEqual(result.cbQuotes, [{
+    bondCode: "35221",
+    tradingDate: "2026-07-29",
+  }]);
 });
 
 test("omits requested TWSE and TPEx issuers when official rows have no closing value", async () => {
@@ -324,7 +418,7 @@ test("omits requested TWSE and TPEx issuers when official rows have no closing v
   const result = await fetchCurrentOfficialMarketData({
     bondCodes: ["35221"],
     issuerCodes: ["2330", "3522", "3587", "4190"],
-    date: "2026-07-31",
+    date: "2026-07-29",
     fetchImpl: fakeFetch,
     sleepImpl: async () => {},
     perRequestDelayMs: 0,

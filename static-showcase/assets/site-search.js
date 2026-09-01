@@ -1,5 +1,7 @@
 const MAX_RESULTS = 8;
 
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
+
 export function normalizePublicSearch(value = "") {
   return String(value).normalize("NFKC").trim().toUpperCase();
 }
@@ -183,15 +185,19 @@ export async function loadCanonicalSearchIndex({
   if (typeof pointerUrl !== "string" || typeof baseUrl !== "string" || typeof fetchImpl !== "function") {
     return { state: "not_ready", entries: [] };
   }
-  const pointerResponse = await fetchJson(pointerUrl, fetchImpl);
+  const resolvedPointerUrl = configuredPublishedPointerUrl(
+    { generationPointerUrl: pointerUrl },
+    new URL("./data/current.json", baseUrl),
+  );
+  const pointerResponse = await fetchJson(resolvedPointerUrl, fetchImpl);
   if (pointerResponse.state !== "ready") return { state: pointerResponse.state, entries: [] };
   const pointer = pointerResponse.data;
   if (!pointer?.runtimeUrl) return { state: "not_ready", entries: [] };
-  const runtimeResponse = await fetchJson(new URL(pointer.runtimeUrl, baseUrl), fetchImpl);
+  const runtimeResponse = await fetchJson(resolvePublishedDataUrl(pointer.runtimeUrl, resolvedPointerUrl), fetchImpl);
   if (runtimeResponse.state !== "ready") return { state: runtimeResponse.state, entries: [] };
   const runtime = runtimeResponse.data;
   if (typeof runtime?.v56MarketDataUrl === "string") {
-    const v56Response = await fetchJson(new URL(runtime.v56MarketDataUrl, baseUrl), fetchImpl);
+    const v56Response = await fetchJson(resolvePublishedDataUrl(runtime.v56MarketDataUrl, resolvedPointerUrl), fetchImpl);
     const v56Entries = entriesOf(v56Response.data?.searchIndex);
     if (v56Response.state === "ready" && v56Response.data?.schemaVersion === 3 && Array.isArray(v56Response.data?.searchIndex?.records)) {
       return { state: "ready", entries: v56Entries };
@@ -200,7 +206,7 @@ export async function loadCanonicalSearchIndex({
   }
   const searchUrl = runtime?.searchIndexUrl;
   if (!searchUrl) return { state: "not_ready", entries: [] };
-  const searchResponse = await fetchJson(new URL(searchUrl, baseUrl), fetchImpl);
+  const searchResponse = await fetchJson(resolvePublishedDataUrl(searchUrl, resolvedPointerUrl), fetchImpl);
   if (searchResponse.state !== "ready") return { state: searchResponse.state, entries: [] };
   const entries = entriesOf(searchResponse.data);
   return entries.length || Array.isArray(searchResponse.data?.records)

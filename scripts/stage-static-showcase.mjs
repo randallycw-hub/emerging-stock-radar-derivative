@@ -110,6 +110,7 @@ const ASSET_FILES = new Set([
   "lightweight-charts-adapter.js",
   "public-event-digest.js",
   "public-data-state.js",
+  "public-data-origin.js",
   "site-shell.js",
   "site-search.js",
   "table-sort.js",

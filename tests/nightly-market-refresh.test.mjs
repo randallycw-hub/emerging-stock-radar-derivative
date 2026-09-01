@@ -164,13 +164,16 @@ test("every required source failure preserves pointer, workbench, and history by
 });
 
 test("a mismatched or missing required core market date cannot switch the pointer", async () => {
-  for (const scenario of ["core-date-mismatch", "core-stock-date-mismatch"]) {
+  for (const [scenario, expectedError] of [
+    ["core-date-mismatch", /EMPTY_CB_QUOTES/],
+    ["core-stock-date-mismatch", /CORE_MARKET_DATE_MISMATCH/],
+  ]) {
     const wrongDate = await runIsolatedNightlyMarketRefreshTestHarness({
       date: "2026-07-29",
       scenario,
     });
     assertAtomicRollback(wrongDate);
-    assert.match(wrongDate.error.message, /CORE_MARKET_DATE_MISMATCH/, scenario);
+    assert.match(wrongDate.error.message, expectedError, scenario);
   }
 });
 

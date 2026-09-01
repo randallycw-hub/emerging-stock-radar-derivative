@@ -9,6 +9,7 @@ import {
   groupMarketEventsByEntity,
   projectMarketEvents,
 } from "./market-event-model.js";
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
 
 const PAGE_SIZE = 25;
 
@@ -37,9 +38,13 @@ if (root) {
 }
 
 async function loadEvents() {
-  const pointer = await safeJsonFetch(new URL("./data/current.json", location.href), { errorTarget });
+  const pointerUrl = configuredPublishedPointerUrl(
+    globalThis.window?.__OFFICIAL_SHOWCASE__,
+    new URL("./data/current.json", location.href),
+  );
+  const pointer = await safeJsonFetch(pointerUrl, { errorTarget });
   const runtime = pointer?.runtimeUrl
-    ? await safeJsonFetch(new URL(pointer.runtimeUrl, location.href), { errorTarget })
+    ? await safeJsonFetch(resolvePublishedDataUrl(pointer.runtimeUrl, pointerUrl), { errorTarget })
     : null;
   if (!runtime?.canonicalEventsV55Url && !runtime?.canonicalEventsV54Url && (!runtime?.ipoEventsUrl || !runtime?.datasets?.bondWorkbench)) {
     showUnavailable();
@@ -47,10 +52,10 @@ async function loadEvents() {
   }
   const [canonicalEvents, ipoSnapshot, bondWorkbench] = await Promise.all([
     (runtime.canonicalEventsV55Url ?? runtime.canonicalEventsV54Url)
-      ? safeJsonFetch(new URL(runtime.canonicalEventsV55Url ?? runtime.canonicalEventsV54Url, location.href), { errorTarget })
+      ? safeJsonFetch(resolvePublishedDataUrl(runtime.canonicalEventsV55Url ?? runtime.canonicalEventsV54Url, pointerUrl), { errorTarget })
       : null,
-    runtime.ipoEventsUrl ? safeJsonFetch(new URL(runtime.ipoEventsUrl, location.href), { errorTarget }) : null,
-    runtime.datasets?.bondWorkbench ? safeJsonFetch(new URL(runtime.datasets.bondWorkbench, location.href), { errorTarget }) : null,
+    runtime.ipoEventsUrl ? safeJsonFetch(resolvePublishedDataUrl(runtime.ipoEventsUrl, pointerUrl), { errorTarget }) : null,
+    runtime.datasets?.bondWorkbench ? safeJsonFetch(resolvePublishedDataUrl(runtime.datasets.bondWorkbench, pointerUrl), { errorTarget }) : null,
   ]);
   const asOfDate = validDate(canonicalEvents?.dataDate) ? canonicalEvents.dataDate
     : validDate(ipoSnapshot?.dataDate) ? ipoSnapshot.dataDate

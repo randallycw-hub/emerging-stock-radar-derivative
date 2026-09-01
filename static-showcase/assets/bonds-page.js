@@ -11,11 +11,16 @@ import { bindBondDetail, detailRecordFromLegacy, renderBondDetail } from "./bond
 import { applyCanonicalBondIdentity, indexCanonicalBonds } from "./canonical-identity.js";
 import { RANKING_METRICS, renderMarketOverview } from "./cb-workbench-ui.js";
 import { bindCbDetailV53, renderCbDetailV53 } from "./cb-detail-v53.js";
+import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
 
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
   generationPointerUrl: new URL("../data/current.json", import.meta.url).href,
   datasets: {},
 };
+const pointerUrl = configuredPublishedPointerUrl(
+  bootstrapConfig,
+  new URL("../data/current.json", import.meta.url),
+);
 const state = {
   manifest: null,
   bondTerms: [],
@@ -68,9 +73,9 @@ if (globalThis.window && globalThis.document) {
 }
 
 async function loadAndRender() {
-  const pointer = await loadJson(bootstrapConfig.generationPointerUrl, null);
+  const pointer = await loadJson(pointerUrl, null);
   const config = pointer?.runtimeUrl
-    ? await loadJson(new URL(pointer.runtimeUrl, document.baseURI), { manifestUrl: null, datasets: {} })
+    ? await loadJson(resolvePublishedDataUrl(pointer.runtimeUrl, pointerUrl), { manifestUrl: null, datasets: {} })
     : bootstrapConfig;
   const workbenchDeclared = Object.prototype.hasOwnProperty.call(
     config.datasets ?? {},
@@ -78,21 +83,21 @@ async function loadAndRender() {
   );
   const [manifest, bondTerms, history, conversionPrices, workbenchResult, cbMaster, v53Model, v56Model] =
     await Promise.all([
-      loadJson(config.manifestUrl, null),
-      loadJson(config.datasets["11406"], []),
-      loadJson(config.datasets.bondHistory, []),
-      loadJson(config.datasets.conversionPrices, []),
+      loadJson(resolvePublishedDataUrl(config.manifestUrl, pointerUrl), null),
+      loadJson(resolvePublishedDataUrl(config.datasets["11406"], pointerUrl), []),
+      loadJson(resolvePublishedDataUrl(config.datasets.bondHistory, pointerUrl), []),
+      loadJson(resolvePublishedDataUrl(config.datasets.conversionPrices, pointerUrl), []),
       workbenchDeclared
-        ? loadDeclaredWorkbench(config.datasets.bondWorkbench)
+        ? loadDeclaredWorkbench(resolvePublishedDataUrl(config.datasets.bondWorkbench, pointerUrl)?.href ?? "")
         : Promise.resolve({ ok: true, value: null }),
       typeof config.cbMasterUrl === "string"
-        ? loadJson(config.cbMasterUrl, [])
+        ? loadJson(resolvePublishedDataUrl(config.cbMasterUrl, pointerUrl), [])
         : Promise.resolve([]),
       typeof (config.cbWorkbenchV55Url ?? config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url) === "string"
-        ? loadJson(config.cbWorkbenchV55Url ?? config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url, null)
+        ? loadJson(resolvePublishedDataUrl(config.cbWorkbenchV55Url ?? config.cbWorkbenchV54Url ?? config.cbWorkbenchV53Url, pointerUrl), null)
         : Promise.resolve(null),
       typeof config.v56MarketDataUrl === "string"
-        ? loadJson(config.v56MarketDataUrl, null)
+        ? loadJson(resolvePublishedDataUrl(config.v56MarketDataUrl, pointerUrl), null)
         : Promise.resolve(null),
     ]);
   state.manifest = manifest;
