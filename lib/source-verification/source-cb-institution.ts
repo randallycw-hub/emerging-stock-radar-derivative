@@ -147,24 +147,31 @@ function parseTradeRow(
     dealerSellUnits,
     dealerNetUnits,
     totalNetUnits,
-  ];
-  for (const cell of unitCells) {
-    if (!/^[+-]?\d+$/.test(cell)) {
-      throw new TypeError("CB institutional unit cells must be signed integers");
-    }
-  }
-  if (BigInt(foreignNetUnits) !== BigInt(foreignBuyUnits) - BigInt(foreignSellUnits)) {
+  ].map(normalizeSignedInteger);
+  const [
+    normalizedForeignBuyUnits,
+    normalizedForeignSellUnits,
+    normalizedForeignNetUnits,
+    normalizedTrustBuyUnits,
+    normalizedTrustSellUnits,
+    normalizedTrustNetUnits,
+    normalizedDealerBuyUnits,
+    normalizedDealerSellUnits,
+    normalizedDealerNetUnits,
+    normalizedTotalNetUnits,
+  ] = unitCells;
+  if (BigInt(normalizedForeignNetUnits) !== BigInt(normalizedForeignBuyUnits) - BigInt(normalizedForeignSellUnits)) {
     throw new TypeError("CB institutional foreign net units do not match buy minus sell");
   }
-  if (BigInt(trustNetUnits) !== BigInt(trustBuyUnits) - BigInt(trustSellUnits)) {
+  if (BigInt(normalizedTrustNetUnits) !== BigInt(normalizedTrustBuyUnits) - BigInt(normalizedTrustSellUnits)) {
     throw new TypeError("CB institutional trust net units do not match buy minus sell");
   }
-  if (BigInt(dealerNetUnits) !== BigInt(dealerBuyUnits) - BigInt(dealerSellUnits)) {
+  if (BigInt(normalizedDealerNetUnits) !== BigInt(normalizedDealerBuyUnits) - BigInt(normalizedDealerSellUnits)) {
     throw new TypeError("CB institutional dealer net units do not match buy minus sell");
   }
   if (
-    BigInt(totalNetUnits)
-    !== BigInt(foreignNetUnits) + BigInt(trustNetUnits) + BigInt(dealerNetUnits)
+    BigInt(normalizedTotalNetUnits)
+    !== BigInt(normalizedForeignNetUnits) + BigInt(normalizedTrustNetUnits) + BigInt(normalizedDealerNetUnits)
   ) {
     throw new TypeError("CB institutional total net units do not match institutional net units");
   }
@@ -173,17 +180,24 @@ function parseTradeRow(
     bondCode,
     bondName,
     tradingDate,
-    foreignBuyUnits,
-    foreignSellUnits,
-    foreignNetUnits,
-    trustBuyUnits,
-    trustSellUnits,
-    trustNetUnits,
-    dealerBuyUnits,
-    dealerSellUnits,
-    dealerNetUnits,
-    totalNetUnits,
+    foreignBuyUnits: normalizedForeignBuyUnits,
+    foreignSellUnits: normalizedForeignSellUnits,
+    foreignNetUnits: normalizedForeignNetUnits,
+    trustBuyUnits: normalizedTrustBuyUnits,
+    trustSellUnits: normalizedTrustSellUnits,
+    trustNetUnits: normalizedTrustNetUnits,
+    dealerBuyUnits: normalizedDealerBuyUnits,
+    dealerSellUnits: normalizedDealerSellUnits,
+    dealerNetUnits: normalizedDealerNetUnits,
+    totalNetUnits: normalizedTotalNetUnits,
   };
+}
+
+function normalizeSignedInteger(value: string): string {
+  if (!/^[+-]?(?:\d+|\d{1,3}(?:,\d{3})+)$/.test(value)) {
+    throw new TypeError("CB institutional unit cells must be signed integers");
+  }
+  return value.replaceAll(",", "");
 }
 
 function assertExactFields(value: unknown): void {

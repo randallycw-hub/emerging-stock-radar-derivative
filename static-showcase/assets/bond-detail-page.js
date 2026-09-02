@@ -66,6 +66,8 @@ function publicFiniteNumber(value) {
 export function renderBondDetail(record, { asOfDate = null } = {}) {
   const view = record?.view ?? {};
   const term = record?.term ?? {};
+  const showInstitutions = hasVerifiedInstitutionData(view);
+  const showCompany = hasVerifiedCompanyData(view);
   const marketStatus = publicDetailMarketStatus(view);
   const priorTradeDate = view.staleCbPrice === true && validIsoDate(view.cbPriceDate)
     ? `<span>前次成交日：${text(view.cbPriceDate)}</span>`
@@ -75,12 +77,12 @@ export function renderBondDetail(record, { asOfDate = null } = {}) {
     <p class="bond-detail-disclaimer">本頁為公開資料的教育性條件檢核，不構成投資建議或交易指令。</p>
     ${factDashboardSection(record, { asOfDate })}
     ${detailDatesSection(record)}
-    <nav class="detail-tabs" aria-label="詳細資料分頁" role="tablist">${tabButton("overview", "行情資料", true)}${tabButton("terms", "條款與事件")}${tabButton("institutions", "法人")}${tabButton("company", "公司營運")}</nav>
+    <nav class="detail-tabs" aria-label="詳細資料分頁" role="tablist">${tabButton("overview", "行情資料", true)}${tabButton("terms", "條款與事件")}${showInstitutions ? tabButton("institutions", "法人") : ""}${showCompany ? tabButton("company", "公司營運") : ""}</nav>
     ${mobileArea("行情摘要", "overview", marketSummarySection(record))}
     ${mobileArea("債券條款", "terms", termsSection(term, view))}
     ${mobileArea("資料來源與授權範圍", "terms", dataSourceSection())}
-    ${mobileArea("法人 1／5／20 日", "institutions", institutionsSection(view, record?.fieldStates))}
-    ${mobileArea("公司營運與公開財務", "company", companySection(view))}
+    ${showInstitutions ? mobileArea("法人 1／5／20 日", "institutions", institutionsSection(view)) : ""}
+    ${showCompany ? mobileArea("公司營運與公開財務", "company", companySection(view)) : ""}
     ${mobileArea("事件時間軸", "terms", eventsSection(record?.events))}`;
   const violations = noAdviceViolations(html);
   if (violations.length) throw new Error(`detail UI contains prohibited content: ${violations.join(", ")}`);
@@ -143,12 +145,12 @@ export function projectBondDetailDateFacts(record = {}) {
     ["轉換價生效日", view.conversionPriceEffectiveDate, validIsoDate],
     ["估值日期", view.valuationDate, validIsoDate],
     ["流通餘額資料日", view.outstandingDataDate, validIsoDate],
-    ["法人資料日", view.institutionDataDate, validIsoDate],
-    ["財務月份", company?.revenueMonth, validYearMonth],
+    ...(hasVerifiedInstitutionData(view) ? [["法人資料日", view.institutionDataDate, validIsoDate]] : []),
+    ...(hasVerifiedCompanyData(view) ? [["財務月份", company?.revenueMonth, validYearMonth]] : []),
   ];
-  return facts.map(([label, value, validator]) => ({
+  return facts.filter(([, value, validator]) => validator(value)).map(([label, value]) => ({
     label,
-    value: validator(value) ? value : MISSING_WORDING,
+    value,
   }));
 }
 
@@ -249,7 +251,7 @@ function approved11406BalanceEvidence(view) {
 }
 function marketSummarySection(record) {
   const view = record?.view ?? {};
-  return `<h3>行情摘要</h3><dl class="detail-facts">${fact("CB 收盤", view.cbClose)}${fact("CB 資料日", view.cbPriceDate)}${fact("標的股收盤", view.stockClose)}${fact("標的股資料日", view.stockPriceDate)}${fact("轉換價值", view.conversionValue)}${fact("轉換溢價", view.premiumRate)}</dl>`;
+  return `<h3>行情摘要</h3><dl class="detail-facts">${factList([["CB 收盤", view.cbClose], ["CB 資料日", view.cbPriceDate], ["標的股收盤", view.stockClose], ["標的股資料日", view.stockPriceDate], ["轉換價值", view.conversionValue], ["轉換溢價", view.premiumRate]])}</dl>`;
 }
 function detailDatesSection(record) {
   const values = projectBondDetailDateFacts(record);
@@ -257,7 +259,7 @@ function detailDatesSection(record) {
 }
 function termsSection(term, view) {
   const relationship = projectCbMarketRelationship(view);
-  return `<h3>債券條款</h3><dl class="detail-facts">${fact("發行日", term.issueDate)}${fact("掛牌日", term.listingDate)}${fact("到期日", term.maturityDate)}${fact("發行總額", term.issueAmount)}${fact("流通餘額", term.outstandingAmount ?? view.outstandingAmount)}${fact("最近餘額異動日", term.outstandingChangeDate)}${fact("最近餘額異動原因", term.outstandingChangeReason)}${fact("轉換開始", term.conversionStartDate)}${fact("轉換截止", term.conversionEndDate)}${fact("發行轉換價", term.initialConversionPrice)}${fact("目前轉換價", view.currentConversionPrice)}${fact("標的股相對轉換價", relationship ? `${relationship.label}（${relationship.distancePercent}）` : null)}${fact("賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null)}${fact("賣回價格", term.putPrice)}${fact("擔保", term.securedStatus)}${fact("承銷機構", term.underwriter)}${fact("受託人", term.trustee)}${fact("每張面額", term.unitFaceValueTwd)}</dl>${conversionPriceHistorySection(view.conversionPriceHistory)}${formulaDetails(view)}`;
+  return `<h3>債券條款</h3><dl class="detail-facts">${factList([["發行日", term.issueDate], ["掛牌日", term.listingDate], ["到期日", term.maturityDate], ["發行總額", term.issueAmount], ["流通餘額", term.outstandingAmount ?? view.outstandingAmount], ["最近餘額異動日", term.outstandingChangeDate], ["最近餘額異動原因", term.outstandingChangeReason], ["轉換開始", term.conversionStartDate], ["轉換截止", term.conversionEndDate], ["發行轉換價", term.initialConversionPrice], ["目前轉換價", view.currentConversionPrice], ["標的股相對轉換價", relationship ? `${relationship.label}（${relationship.distancePercent}）` : null], ["賣回日期", Array.isArray(term.putDates) ? term.putDates.join("、") : null], ["賣回價格", term.putPrice], ["擔保", term.securedStatus], ["承銷機構", term.underwriter], ["受託人", term.trustee], ["每張面額", term.unitFaceValueTwd]])}</dl>${conversionPriceHistorySection(view.conversionPriceHistory)}${formulaDetails(view)}`;
 }
 function conversionPriceHistorySection(history) {
   const rows = Array.isArray(history)
@@ -274,10 +276,12 @@ function sourceFact(label, sourceId, sourceLabel) {
   const link = sourceLink(url, sourceId);
   return `<div><dt>${text(label)}</dt><dd>${link ? `${link}（${text(sourceLabel)}）` : MISSING_WORDING}</dd></div>`;
 }
-function formulaDetails(view) { return `<details class="formula-details"><summary>展開公式與已驗證輸入值</summary><dl class="detail-facts">${fact("轉換價值", view.conversionValue)}${fact("轉換溢價", view.premiumRate)}${fact("剩餘單位", view.remainingUnits)}${fact("剩餘比例", view.remainingRatio)}${fact("週轉率", view.dailyTurnoverRate)}${fact("天數", view.daysToMaturity)}</dl></details>`; }
+function formulaDetails(view) {
+  const values = factList([["轉換價值", view.conversionValue], ["轉換溢價", view.premiumRate], ["剩餘單位", view.remainingUnits], ["剩餘比例", view.remainingRatio], ["週轉率", view.dailyTurnoverRate], ["天數", view.daysToMaturity]]);
+  return values ? `<details class="formula-details"><summary>展開公式與已驗證輸入值</summary><dl class="detail-facts">${values}</dl></details>` : "";
+}
 function institutionsSection(view) {
-  const unavailable = view.institutionNetUnits === null || view.institutionNetUnits === undefined;
-  return `<h3>法人 1／5／20 日</h3><dl class="detail-facts">${fact("資料日", view.institutionDataDate)}${fact("法人 1 日淨額", unavailable ? MISSING_WORDING : view.institutionNetUnits)}${fact("法人 5 日淨額", unavailable ? MISSING_WORDING : view.institutionNet5dUnits)}${fact("法人 20 日淨額", unavailable ? MISSING_WORDING : view.institutionNet20dUnits)}</dl>`;
+  return `<h3>法人 1／5／20 日</h3><dl class="detail-facts">${factList([["資料日", view.institutionDataDate], ["法人 1 日淨額", view.institutionNetUnits], ["法人 5 日淨額", view.institutionNet5dUnits], ["法人 20 日淨額", view.institutionNet20dUnits]])}</dl>`;
 }
 function companySection(view) {
   const company = view.issuerResearch;
@@ -285,7 +289,7 @@ function companySection(view) {
   const context = links.length
     ? `<section class="company-context"><h4>關聯市場</h4><p>${links.map((link) => `<a href="${escapeHtml(link.href)}">${text(link.label)} →</a>`).join(" ")}</p></section>`
     : "";
-  return `<h3>公司營運與公開財務</h3><dl class="detail-facts">${fact("營收月份", company?.revenueMonth)}${fact("發布日", company?.sourcePublishedOn)}${fact("營收單位", company?.revenueUnit)}${fact("當月營收", company?.currentMonthRevenue)}${fact("月增率", company?.monthOverMonthPercent)}${fact("年增率", company?.yearOverYearPercent)}${fact("累計營收", company?.cumulativeRevenue)}${fact("累計年增率", company?.cumulativeYearOverYearPercent)}</dl>${context}`;
+  return `<h3>公司營運與公開財務</h3><dl class="detail-facts">${factList([["營收月份", company?.revenueMonth], ["發布日", company?.sourcePublishedOn], ["營收單位", company?.revenueUnit], ["當月營收", company?.currentMonthRevenue], ["月增率", company?.monthOverMonthPercent], ["年增率", company?.yearOverYearPercent], ["累計營收", company?.cumulativeRevenue], ["累計年增率", company?.cumulativeYearOverYearPercent]])}</dl>${context}`;
 }
 function eventsSection(events) {
   const values = Array.isArray(events) ? events : [];
@@ -313,3 +317,14 @@ function legacyFieldStates(view) {
 }
 function fact(label, value) { return `<div><dt>${text(label)}</dt><dd>${text(value ?? MISSING_WORDING)}</dd></div>`; }
 function text(value) { return escapeHtml(value ?? MISSING_WORDING); }
+function hasVerifiedInstitutionData(view = {}) {
+  return validIsoDate(view.institutionDataDate)
+    && [view.institutionNetUnits, view.institutionNet5dUnits, view.institutionNet20dUnits].some(hasPublicValue);
+}
+function hasVerifiedCompanyData(view = {}) {
+  const company = view?.issuerResearch;
+  return validYearMonth(company?.revenueMonth)
+    && [company?.currentMonthRevenue, company?.cumulativeRevenue, company?.monthOverMonthPercent, company?.yearOverYearPercent].some(hasPublicValue);
+}
+function hasPublicValue(value) { return value !== null && value !== undefined && String(value).trim() !== ""; }
+function factList(entries) { return entries.filter(([, value]) => hasPublicValue(value)).map(([label, value]) => fact(label, value)).join(""); }

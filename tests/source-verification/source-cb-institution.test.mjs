@@ -54,6 +54,23 @@ test("parses the positional institutional columns and face-value unit", async ()
   });
 });
 
+test("normalizes TPEx grouped institutional units before validating arithmetic", async () => {
+  const fixture = await jsonFixture("daily-minimal.json");
+  fixture.tables[0].data[0] = [
+    "61876", "萬潤六", "0", "0", "0", "0", "0", "0", "1,707", "8", "1,699", "1,699",
+  ];
+
+  const result = parseCbInstitutionDaily(fixture);
+
+  assert.deepEqual(result.records[0], {
+    bondCode: "61876", bondName: "萬潤六", tradingDate: "2026-08-07",
+    foreignBuyUnits: "0", foreignSellUnits: "0", foreignNetUnits: "0",
+    trustBuyUnits: "0", trustSellUnits: "0", trustNetUnits: "0",
+    dealerBuyUnits: "1707", dealerSellUnits: "8", dealerNetUnits: "1699",
+    totalNetUnits: "1699",
+  });
+});
+
 test("rejects schema drift, date mismatch, duplicate codes and arithmetic mismatch", async () => {
   const fixture = await jsonFixture("daily-minimal.json");
 

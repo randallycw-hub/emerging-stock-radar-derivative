@@ -40,6 +40,21 @@ test("filters only domestic convertible-bond underwriting cases", () => {
   ]);
 });
 
+test("accepts the current official layout wrapper around the verified result table", () => {
+  const currentOfficialShape = fixtureHtml
+    .replace(
+      '<table id="ctl00_cphMain_gvResult">',
+      '<table class="style1"><tr><td><table id="ctl00_cphMain_gvResult">',
+    )
+    .replace('</tbody>\n    </table>', '</tbody>\n    </table></td></tr></table>');
+
+  const result = parseCbUnderwritingHtml(currentOfficialShape);
+
+  assert.equal(result.rocYear, 115);
+  assert.equal(result.records.length, 2);
+  assert.equal(result.records[0].issuerName, "志聖工業股份有限公司");
+});
+
 test("validates Gregorian filed dates within the verified carry-over window", async (t) => {
   await t.test("accepts the previous Gregorian year", () => {
     assert.equal(parseCbUnderwritingHtml(fixtureHtml).records[0].filedDate, "2025/12/26");
@@ -98,11 +113,11 @@ test("fails closed on page-title and notice-structure drift", () => {
   );
 });
 
-test("fails closed when a decoy table intervenes between the notice and result table", () => {
-  const withDecoyTable = fixtureHtml.replace(
-    "</p>\n    <table id=\"ctl00_cphMain_gvResult\"",
-    "</p>\n    <table id=\"decoy\"></table>\n    <table id=\"ctl00_cphMain_gvResult\"",
-  );
+test("fails closed when more than one verified result table appears", () => {
+  const resultTable = fixtureHtml.match(/<table id="ctl00_cphMain_gvResult">[\s\S]*?<\/table>/)?.[0];
+  assert.ok(resultTable);
 
-  assert.throws(() => parseCbUnderwritingHtml(withDecoyTable), /notice/);
+  const withDuplicateResultTable = fixtureHtml.replace("\n  </body>", `\n    ${resultTable}\n  </body>`);
+
+  assert.throws(() => parseCbUnderwritingHtml(withDuplicateResultTable), /result table/);
 });

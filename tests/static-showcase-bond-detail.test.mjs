@@ -228,6 +228,61 @@ test("partial fixture keeps public sections but hides unavailable rule checks", 
   assert.match(html, /行情摘要/);
 });
 
+test("detail omits empty institution and company panels instead of rendering dash-only data", () => {
+  const html = renderBondDetail(fixture({
+    view: {
+      ...fixture().view,
+      institutionDataDate: null,
+      institutionNetUnits: null,
+      institutionNet5dUnits: null,
+      institutionNet20dUnits: null,
+      issuerResearch: null,
+    },
+    fieldStates: { ...fixture().fieldStates, institutions: "missing", company: "missing" },
+  }));
+
+  assert.doesNotMatch(html, /法人 1／5／20 日/);
+  assert.doesNotMatch(html, /法人資料日/);
+  assert.doesNotMatch(html, /公司營運與公開財務/);
+  assert.match(html, /行情摘要/);
+  assert.match(html, /債券條款/);
+  assert.equal((html.match(/<details class="detail-mobile-area"/g) ?? []).length, 4);
+});
+
+test("detail omits individual optional facts that have no verified public value", () => {
+  const html = renderBondDetail(fixture({
+    term: {
+      ...fixture().term,
+      outstandingChangeDate: null,
+      outstandingChangeReason: null,
+      putPrice: null,
+      unitFaceValueTwd: null,
+    },
+    view: {
+      ...fixture().view,
+      institutionNet5dUnits: null,
+      institutionNet20dUnits: null,
+      issuerResearch: {
+        revenueMonth: "2026-07",
+        currentMonthRevenue: "100",
+        sourcePublishedOn: null,
+        revenueUnit: null,
+        monthOverMonthPercent: null,
+        yearOverYearPercent: null,
+        cumulativeRevenue: null,
+        cumulativeYearOverYearPercent: null,
+      },
+    },
+  }));
+
+  for (const label of ["最近餘額異動日", "最近餘額異動原因", "賣回價格", "每張面額", "法人 5 日淨額", "法人 20 日淨額", "發布日", "營收單位", "月增率", "年增率", "累計營收", "累計年增率"]) {
+    assert.doesNotMatch(html, new RegExp(label));
+  }
+  assert.match(html, /法人 1 日淨額[\s\S]*2/);
+  assert.match(html, /當月營收[\s\S]*100/);
+  assert.doesNotMatch(html, />—</);
+});
+
 test("date-mismatch fixture does not expose technical states", () => {
   const record = fixture({
     assessment: {

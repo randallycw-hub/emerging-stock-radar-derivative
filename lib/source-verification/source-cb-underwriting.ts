@@ -80,23 +80,24 @@ function parseRocYear(html: string): number {
 }
 
 function assertVerifiedNotice(html: string): void {
-  const notice = /<body\b[^>]*>\s*<p\b[^>]*>([\s\S]*?)<\/p\s*>\s*<table\b([^>]*)>/i.exec(html);
-  if (
-    !notice
-    || toText(notice[1]) !== NOTICE
-    || !hasExactId(notice[2], RESULT_TABLE_ID)
-  ) {
+  const notices = Array.from(html.matchAll(/<(?:p|span)\b[^>]*>([\s\S]*?)<\/(?:p|span)\s*>/gi));
+  if (!notices.some((notice) => toText(notice[1]) === NOTICE)) {
     throw new TypeError("CB underwriting notice does not match the verified contract");
   }
 }
 
 function findResultTable(html: string): string {
-  const tables = Array.from(html.matchAll(/<table\b([^>]*)>([\s\S]*?)<\/table\s*>/gi));
-  const resultTables = tables.filter((table) => hasExactId(table[1], RESULT_TABLE_ID));
-  if (resultTables.length !== 1) {
+  const openings = Array.from(html.matchAll(/<table\b([^>]*)>/gi)).filter((table) => hasExactId(table[1], RESULT_TABLE_ID));
+  if (openings.length !== 1 || openings[0].index === undefined) {
     throw new TypeError("CB underwriting result table does not match the verified contract");
   }
-  return resultTables[0][2];
+
+  const contentStart = openings[0].index + openings[0][0].length;
+  const closingTag = /<\/table\s*>/i.exec(html.slice(contentStart));
+  if (closingTag === null || closingTag.index === undefined) {
+    throw new TypeError("CB underwriting result table does not match the verified contract");
+  }
+  return html.slice(contentStart, contentStart + closingTag.index);
 }
 
 function hasExactId(attributes: string, id: string): boolean {
