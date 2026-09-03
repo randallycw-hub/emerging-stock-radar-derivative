@@ -6,8 +6,10 @@ import test from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { buildBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
+import { buildCbRightsEventSnapshot } from "../lib/market-data/cb-rights-events.ts";
 import { runIsolatedNightlyMarketRefreshTestHarness } from "../scripts/run-nightly-market-refresh.mjs";
 import {
+  publishPublicResearchSnapshot,
   projectPublicBondArtifacts,
   stageStaticShowcase,
   stripPublicInternalMetadata,
@@ -135,6 +137,16 @@ test("offline builder and outer refresh stage the same CB generation through the
       assert.equal(typeof text, "string", `isolated candidate omitted ${name}`);
       await writeFile(join(generationRoot, name), text, "utf8");
     }
+    await writeFile(
+      join(generationRoot, "cb-rights-events.json"),
+      `${JSON.stringify(buildCbRightsEventSnapshot({
+        dataDate: "2026-07-29",
+        generatedAt: "2026-07-29T14:30:00.000Z",
+        current: [],
+      }))}\n`,
+      "utf8",
+    );
+    await publishPublicResearchSnapshot({ source, generation: runtime.generation });
 
     await stageStaticShowcase({ source, destination });
     const stagedPointerText = await readFile(join(destination, "data", "current.json"), "utf8");

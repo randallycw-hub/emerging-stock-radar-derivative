@@ -99,6 +99,26 @@ test("preserves a TPEx ex-dividend marker without inventing a numeric change", a
   });
 });
 
+test("preserves a TPEx ex-rights-and-dividend marker without inventing a numeric change", async () => {
+  const [tpex] = await jsonFixture("tpex-stock-close.json");
+
+  assert.deepEqual(normalizeTpexStockClose({
+    ...tpex,
+    SecuritiesCompanyCode: "6874",
+    Close: "70.10",
+    Change: "除權息 ",
+  }), {
+    companyCode: "6874",
+    market: "otc",
+    tradingDate: "2026-07-29",
+    close: "70.1",
+    change: null,
+    changeEvent: "ex-rights-and-dividend",
+    volume: "346776",
+    turnover: "4119795",
+  });
+});
+
 test("extracts exact bond and issuer codes from the approved MOPS URL", async () => {
   const payload = await jsonFixture("tpex-conversion-index.json");
   const [entry] = parseConversionIndex(payload);

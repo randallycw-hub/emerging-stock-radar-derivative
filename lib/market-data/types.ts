@@ -34,7 +34,7 @@ export type StockClose = {
   tradingDate: string;
   close: string;
   change: string | null;
-  changeEvent?: "ex-dividend";
+  changeEvent?: "ex-dividend" | "ex-rights-and-dividend";
   volume: string;
   turnover: string;
 };

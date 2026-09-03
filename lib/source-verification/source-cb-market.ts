@@ -109,10 +109,14 @@ export function normalizeTpexStockClose(
 function normalizeTpexChange(
   value: string,
 ): Pick<StockClose, "change" | "changeEvent"> {
-  if (value.trim() === "除息") {
+  const text = value.trim();
+  if (text === "除息") {
     return { change: null, changeEvent: "ex-dividend" };
   }
-  return { change: requiredSignedDecimal(value, "Change") };
+  if (text === "除權息") {
+    return { change: null, changeEvent: "ex-rights-and-dividend" };
+  }
+  return { change: requiredSignedDecimal(text, "Change") };
 }
 
 export function parseConversionIndex(payload: unknown): readonly {
