@@ -34,6 +34,45 @@ test("active static generation is fully tracked so a fresh checkout can rebuild 
   assert.deepEqual(tracked, expected);
 });
 
+test("active raw snapshot is self-contained for every public research page", async () => {
+  const pointer = JSON.parse(await readFile("static-showcase/data/current.json", "utf8"));
+  const generation = pointer.generation;
+  const runtimePath = join("static-showcase", pointer.runtimeUrl.replace(/^\.\//, ""));
+  const runtime = JSON.parse(await readFile(runtimePath, "utf8"));
+  const requiredArtifacts = {
+    companyMasterUrl: "company-master.json",
+    cbMasterUrl: "cb-master.json",
+    searchIndexUrl: "search-index.json",
+    cbWorkbenchV53Url: "cb-workbench-v53.json",
+    cbWorkbenchV54Url: "cb-workbench-v54.json",
+    cbWorkbenchV55Url: "cb-workbench-v55.json",
+    canonicalEventsV54Url: "canonical-events-v54.json",
+    canonicalEventsV55Url: "canonical-events-v55.json",
+    v56MarketDataUrl: "v56-market-data.json",
+  };
+
+  for (const [field, file] of Object.entries(requiredArtifacts)) {
+    const expectedUrl = `./data/${generation}/${file}`;
+    assert.equal(runtime[field], expectedUrl, `${field} must target the active generation`);
+    await access(join("static-showcase", expectedUrl.replace(/^\.\//, "")));
+  }
+});
+
+test("active raw snapshot includes same-date verified CB rights events", async () => {
+  const pointer = JSON.parse(await readFile("static-showcase/data/current.json", "utf8"));
+  const generation = pointer.generation;
+  const base = join("static-showcase/data", generation);
+  const [manifest, rights] = await Promise.all([
+    readFile(join(base, "manifest.json"), "utf8").then(JSON.parse),
+    readFile(join(base, "cb-rights-events.json"), "utf8").then(JSON.parse),
+  ]);
+  assert.equal(rights.dataDate, manifest.market.dataDate);
+  assert.equal(rights.source?.dataDate, manifest.market.dataDate);
+  assert.equal(rights.source?.state, "fresh");
+  assert.ok(rights.events.length > 0);
+  assert.ok(manifest.market.files.some((entry) => entry?.name === "cb-rights-events.json"));
+});
+
 test("Taipei refresh workflow safely commits only validated snapshots without deployment credentials", async () => {
   const workflow = await readFile(".github/workflows/market-data-refresh.yml", "utf8");
 
@@ -49,6 +88,7 @@ test("Taipei refresh workflow safely commits only validated snapshots without de
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /mode:/);
   assert.match(workflow, /contents:\s*write/);
+  assert.match(workflow, /node scripts\/publish-static-showcase-research\.mjs/);
   assert.match(workflow, /npm run build/);
   assert.match(workflow, /git add -f -- static-showcase\/data/);
   assert.match(workflow, /git diff --cached --quiet/);

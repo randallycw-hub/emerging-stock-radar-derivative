@@ -238,7 +238,18 @@
         "sha256": "sha256:a0a343255cee228d9e34ce44b4f7c2102861250575fe7582bd2919df6d160f7a",
         "rawBytes": 2587462,
         "recordCount": 1439
+      },
+      {
+        "name": "cb-rights-events.json",
+        "sha256": "sha256:62a6f8e8b2fc77375008c02f09ff697b72d4229b933b43b76f6aa019dee8403f",
+        "rawBytes": 37714,
+        "recordCount": 37
       }
-    ]
+    ],
+    "cbRightsEventSource": {
+      "state": "fresh",
+      "dataDate": "2026-08-28",
+      "recordCount": 37
+    }
   }
 }

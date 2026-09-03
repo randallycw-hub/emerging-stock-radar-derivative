@@ -68,6 +68,9 @@ jobs:
               ;;
             *) exit 1 ;;
           esac
+      - name: Materialize complete public research snapshot
+        if: ${{ steps.context.outputs.mode == 'FAST' || steps.context.outputs.mode == 'OFFICIAL' || steps.context.outputs.mode == 'EVENT' }}
+        run: node scripts/publish-static-showcase-research.mjs
       - name: Build verified static snapshot
         if: ${{ steps.context.outputs.mode == 'FAST' || steps.context.outputs.mode == 'OFFICIAL' || steps.context.outputs.mode == 'EVENT' }}
         run: npm run build

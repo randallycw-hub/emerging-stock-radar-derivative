@@ -33,6 +33,7 @@ import {
   buildPublicMarketResearch,
 } from "../static-showcase/assets/public-market-research.js";
 import { parseCbIssuerResearchSnapshot } from "../lib/market-data/cb-issuer-research.ts";
+import { parseCbRightsEventSnapshot } from "../lib/market-data/cb-rights-events.ts";
 import { parseCbSupplementalSnapshot } from "../lib/market-data/bond-supplemental.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
 import { parseBondWorkbenchSnapshot } from "../lib/market-data/bond-workbench.ts";
@@ -151,7 +152,28 @@ const GENERATION_FILES = new Set([
   "manifest.json",
   "runtime.json",
   "stock-closes.json",
+  "market-research.json",
+  "company-master.json",
+  "cb-master.json",
+  "search-index.json",
+  "cb-workbench-v53.json",
+  "cb-workbench-v54.json",
+  "canonical-events-v54.json",
+  "cb-workbench-v55.json",
+  "canonical-events-v55.json",
+  "v56-market-data.json",
 ]);
+const PUBLIC_RESEARCH_RUNTIME_ARTIFACTS = Object.freeze({
+  companyMasterUrl: "company-master.json",
+  cbMasterUrl: "cb-master.json",
+  searchIndexUrl: "search-index.json",
+  cbWorkbenchV53Url: "cb-workbench-v53.json",
+  cbWorkbenchV54Url: "cb-workbench-v54.json",
+  canonicalEventsV54Url: "canonical-events-v54.json",
+  cbWorkbenchV55Url: "cb-workbench-v55.json",
+  canonicalEventsV55Url: "canonical-events-v55.json",
+  v56MarketDataUrl: "v56-market-data.json",
+});
 const BASE_DATASET_FILES = {
   "94025": "94025.json",
   "11406": "11406.json",
@@ -235,6 +257,7 @@ export async function stageStaticShowcase({
   }
   const requiredUrls = [runtime.emergingMarketUrl, ...Object.values(expectedDatasets)];
   requiredUrls.push(runtime.ipoEventsUrl);
+  requiredUrls.push(...publicResearchRuntimeUrls(runtime, pointer.generation));
   for (const expectedUrl of requiredUrls) {
     await readJson(
       join(source, expectedUrl.replace(/^\.\//, "")),
@@ -279,6 +302,108 @@ export async function stageStaticShowcase({
   await injectHomeStaticFallback({ destination, marketResearch });
   await injectDataCenterBootstrap({ destination, status: dataCenterStatus });
   await writePublicRootArtifacts({ destination });
+}
+
+/**
+ * Materializes the research artifacts that public pages read directly from the
+ * active Git snapshot.  The hosted site deliberately reads that immutable
+ * snapshot (rather than the transient build directory), so these files must
+ * exist before the snapshot is committed.
+ */
+export async function publishPublicResearchSnapshot({ source = "static-showcase", generation: requestedGeneration } = {}) {
+  const pointer = await readJson(
+    join(source, "data", "current.json"),
+    "active generation pointer is missing or invalid",
+  );
+  if (!/^generations\/[a-f0-9]+$/i.test(pointer?.generation ?? "")) {
+    throw new Error("active generation pointer is missing or invalid");
+  }
+  const generation = requestedGeneration ?? pointer.generation;
+  if (!/^generations\/[a-f0-9]+$/i.test(generation)) {
+    throw new Error("public research generation is missing or invalid");
+  }
+  await ensureActiveCbRightsEvents({ source, generation });
+  const research = await writePublicMarketResearch({
+    source,
+    destination: source,
+    generation,
+  });
+  return {
+    generation,
+    dataDate: research?.meta?.dataDate ?? null,
+  };
+}
+
+async function ensureActiveCbRightsEvents({ source, generation }) {
+  const base = join(source, "data", ...generation.split("/"));
+  const manifestPath = join(base, "manifest.json");
+  const manifest = await readJson(manifestPath, "active generation public manifest is invalid");
+  const dataDate = manifest?.market?.dataDate;
+  if (!isStrictIsoDate(dataDate) || !Array.isArray(manifest?.market?.files)) {
+    throw new Error("active generation public manifest is invalid");
+  }
+  const targetPath = join(base, "cb-rights-events.json");
+  let snapshot = await readValidatedRightsSnapshot(targetPath, "active generation public CB rights events are invalid");
+  if (snapshot === undefined) {
+    snapshot = await findSameDateVerifiedRightsSnapshot({ source, generation, dataDate });
+    if (snapshot === undefined) {
+      throw new Error("active generation has no same-date verified CB rights event snapshot");
+    }
+  }
+  if (snapshot.dataDate !== dataDate) {
+    throw new Error("active generation CB rights event snapshot does not match the published data date");
+  }
+  const text = `${JSON.stringify(snapshot, null, 2)}\n`;
+  await writeFile(targetPath, text, "utf8");
+  const details = {
+    name: "cb-rights-events.json",
+    sha256: sha256Text(text),
+    rawBytes: Buffer.byteLength(text, "utf8"),
+    recordCount: snapshot.events.length,
+  };
+  manifest.market.files = [
+    ...manifest.market.files.filter((entry) => entry?.name !== details.name),
+    details,
+  ];
+  manifest.market.cbRightsEventSource = snapshot.source;
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+}
+
+async function findSameDateVerifiedRightsSnapshot({ source, generation, dataDate }) {
+  const generations = join(source, "data", "generations");
+  let entries;
+  try {
+    entries = await readdir(generations, { withFileTypes: true });
+  } catch {
+    return undefined;
+  }
+  const candidates = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory() || `generations/${entry.name}` === generation) continue;
+    const snapshot = await readValidatedRightsSnapshot(
+      join(generations, entry.name, "cb-rights-events.json"),
+      "prior CB rights event snapshot is invalid",
+    );
+    if (
+      snapshot !== undefined
+      && snapshot.dataDate === dataDate
+      && snapshot.source?.dataDate === dataDate
+      && snapshot.source?.state === "fresh"
+    ) {
+      candidates.push(snapshot);
+    }
+  }
+  candidates.sort((left, right) => right.generatedAt.localeCompare(left.generatedAt));
+  return candidates[0];
+}
+
+async function readValidatedRightsSnapshot(path, message) {
+  try {
+    return parseCbRightsEventSnapshot(JSON.parse(await readFile(path, "utf8")));
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw new Error(message);
+  }
 }
 
 async function writePublicMarketResearch({ source, destination, generation }) {
@@ -414,15 +539,7 @@ async function writePublicMarketResearch({ source, destination, generation }) {
   const runtime = await readJson(runtimePath, "active generation public runtime is invalid");
   await writeFile(runtimePath, `${JSON.stringify({
     ...runtime,
-    companyMasterUrl: `./data/${generation}/company-master.json`,
-    cbMasterUrl: `./data/${generation}/cb-master.json`,
-    searchIndexUrl: `./data/${generation}/search-index.json`,
-    cbWorkbenchV53Url: `./data/${generation}/cb-workbench-v53.json`,
-    cbWorkbenchV54Url: `./data/${generation}/cb-workbench-v54.json`,
-    canonicalEventsV54Url: `./data/${generation}/canonical-events-v54.json`,
-    cbWorkbenchV55Url: `./data/${generation}/cb-workbench-v55.json`,
-    canonicalEventsV55Url: `./data/${generation}/canonical-events-v55.json`,
-    v56MarketDataUrl: `./data/${generation}/v56-market-data.json`,
+    ...publicResearchRuntimeArtifactUrls(generation),
   }, null, 2)}\n`, "utf8");
   return research;
 }
@@ -992,8 +1109,20 @@ function validateRuntime(runtime, generation, expectedDatasets) {
     "manifestUrl",
     "ipoEventsUrl",
   ].sort();
-  if (!equalStringArrays(runtimeKeys, expectedRuntimeKeys)) {
+  const expectedResearchRuntimeKeys = [
+    ...expectedRuntimeKeys,
+    ...Object.keys(PUBLIC_RESEARCH_RUNTIME_ARTIFACTS),
+  ].sort();
+  if (
+    !equalStringArrays(runtimeKeys, expectedRuntimeKeys)
+    && !equalStringArrays(runtimeKeys, expectedResearchRuntimeKeys)
+  ) {
     throw new Error("active generation runtime is missing or invalid");
+  }
+  for (const [field, url] of Object.entries(publicResearchRuntimeArtifactUrls(generation))) {
+    if (runtimeKeys.includes(field) && runtime[field] !== url) {
+      throw new Error("active generation runtime is missing or invalid");
+    }
   }
   if (
     runtime.datasets === null
@@ -1011,6 +1140,17 @@ function validateRuntime(runtime, generation, expectedDatasets) {
       "active generation required dataset artifacts or runtime datasets are missing or invalid",
     );
   }
+}
+
+function publicResearchRuntimeArtifactUrls(generation) {
+  const base = `./data/${generation}`;
+  return Object.fromEntries(Object.entries(PUBLIC_RESEARCH_RUNTIME_ARTIFACTS)
+    .map(([field, file]) => [field, `${base}/${file}`]));
+}
+
+function publicResearchRuntimeUrls(runtime, generation) {
+  if (!Object.hasOwn(runtime, "v56MarketDataUrl")) return [];
+  return Object.values(publicResearchRuntimeArtifactUrls(generation));
 }
 
 function equalStringArrays(left, right) {

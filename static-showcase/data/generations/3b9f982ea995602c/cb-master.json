@@ -1,0 +1,3218 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "dataDate": "2026-08-28",
+    "recordCount": 2196,
+    "status": "ok"
+  },
+  "records": [
+    {
+      "bondCode": "11011",
+      "bondName": "台泥一永",
+      "stockCode": "1101",
+      "companyName": "台泥",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "12561",
+      "bondName": "鮮活果汁一KY",
+      "stockCode": "1256",
+      "companyName": "鮮活果汁-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "13166",
+      "bondName": "上曜六",
+      "stockCode": "1316",
+      "companyName": "上曜",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "13382",
+      "bondName": "廣華二KY",
+      "stockCode": "1338",
+      "companyName": "廣華-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "140201",
+      "bondName": "遠東新E1永",
+      "stockCode": "1402",
+      "companyName": "遠東新",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "140202",
+      "bondName": "遠東新E2永",
+      "stockCode": "1402",
+      "companyName": "遠東新",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "14363",
+      "bondName": "華友聯三",
+      "stockCode": "1436",
+      "companyName": "華友聯",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "14364",
+      "bondName": "華友聯四",
+      "stockCode": "1436",
+      "companyName": "華友聯",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "14381",
+      "bondName": "三地開發一",
+      "stockCode": "1438",
+      "companyName": "三地開發",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "14664",
+      "bondName": "聚隆四",
+      "stockCode": "1466",
+      "companyName": "聚隆",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "14722",
+      "bondName": "三洋實業二",
+      "stockCode": "1472",
+      "companyName": "三洋實業",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "14723",
+      "bondName": "三洋實業三",
+      "stockCode": "1472",
+      "companyName": "三洋實業",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "14743",
+      "bondName": "弘裕三",
+      "stockCode": "1474",
+      "companyName": "弘裕",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15142",
+      "bondName": "亞力二",
+      "stockCode": "1514",
+      "companyName": "亞力",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15261",
+      "bondName": "日馳一",
+      "stockCode": "1526",
+      "companyName": "日馳",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15364",
+      "bondName": "和大四",
+      "stockCode": "1536",
+      "companyName": "和大",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15601",
+      "bondName": "中砂一",
+      "stockCode": "1560",
+      "companyName": "中砂",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15602",
+      "bondName": "中砂二",
+      "stockCode": "1560",
+      "companyName": "中砂",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15864",
+      "bondName": "和勤四",
+      "stockCode": "1586",
+      "companyName": "和勤",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15865",
+      "bondName": "和勤五",
+      "stockCode": "1586",
+      "companyName": "和勤",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15952",
+      "bondName": "川寶二",
+      "stockCode": "1595",
+      "companyName": "川寶",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "15984",
+      "bondName": "岱宇四",
+      "stockCode": "1598",
+      "companyName": "岱宇",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "16095",
+      "bondName": "大亞五",
+      "stockCode": "1609",
+      "companyName": "大亞",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "16231",
+      "bondName": "大東電一",
+      "stockCode": "1623",
+      "companyName": "大東電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "17172",
+      "bondName": "長興二",
+      "stockCode": "1717",
+      "companyName": "長興",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "17813",
+      "bondName": "合世三",
+      "stockCode": "1781",
+      "companyName": "合世",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "17863",
+      "bondName": "科妍三",
+      "stockCode": "1786",
+      "companyName": "科妍",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "19094",
+      "bondName": "榮成四",
+      "stockCode": "1909",
+      "companyName": "榮成",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "20344",
+      "bondName": "允強四",
+      "stockCode": "2034",
+      "companyName": "允強",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "21043",
+      "bondName": "國際中橡三",
+      "stockCode": "2104",
+      "companyName": "國際中橡",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "22013",
+      "bondName": "裕隆三",
+      "stockCode": "2201",
+      "companyName": "裕隆",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "22283",
+      "bondName": "劍麟三",
+      "stockCode": "2228",
+      "companyName": "劍麟",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "22331",
+      "bondName": "宇隆一",
+      "stockCode": "2233",
+      "companyName": "宇隆",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "22363",
+      "bondName": "百達三KY",
+      "stockCode": "2236",
+      "companyName": "百達-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "22471",
+      "bondName": "汎德永業一",
+      "stockCode": "2247",
+      "companyName": "汎德永業",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "22472",
+      "bondName": "汎德永業二",
+      "stockCode": "2247",
+      "companyName": "汎德永業",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "23031",
+      "bondName": "聯電一",
+      "stockCode": "2303",
+      "companyName": "聯電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "23032",
+      "bondName": "聯電二",
+      "stockCode": "2303",
+      "companyName": "聯電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "23291",
+      "bondName": "華泰一",
+      "stockCode": "2329",
+      "companyName": "華泰",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "23372",
+      "bondName": "旺宏二",
+      "stockCode": "2337",
+      "companyName": "旺宏",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "23383",
+      "bondName": "光罩三",
+      "stockCode": "2338",
+      "companyName": "光罩",
+      "market": "—",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "23511",
+      "bondName": "順德一",
+      "stockCode": "2351",
+      "companyName": "順德",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "23683",
+      "bondName": "金像電三",
+      "stockCode": "2368",
+      "companyName": "金像電",
+      "market": "—",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "23742",
+      "bondName": "佳能二",
+      "stockCode": "2374",
+      "companyName": "佳能",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24023",
+      "bondName": "毅嘉三",
+      "stockCode": "2402",
+      "companyName": "毅嘉",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24271",
+      "bondName": "三商電一",
+      "stockCode": "2427",
+      "companyName": "三商電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24361",
+      "bondName": "偉詮電一",
+      "stockCode": "2436",
+      "companyName": "偉詮電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24394",
+      "bondName": "美律四",
+      "stockCode": "2439",
+      "companyName": "美律",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24395",
+      "bondName": "美律五",
+      "stockCode": "2439",
+      "companyName": "美律",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24423",
+      "bondName": "新美齊三",
+      "stockCode": "2442",
+      "companyName": "新美齊",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24424",
+      "bondName": "新美齊四",
+      "stockCode": "2442",
+      "companyName": "新美齊",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24552",
+      "bondName": "全新二",
+      "stockCode": "2455",
+      "companyName": "全新",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24553",
+      "bondName": "全新三",
+      "stockCode": "2455",
+      "companyName": "全新",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24624",
+      "bondName": "良得電四",
+      "stockCode": "2462",
+      "companyName": "良得電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24642",
+      "bondName": "盟立二",
+      "stockCode": "2464",
+      "companyName": "盟立",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24672",
+      "bondName": "志聖二",
+      "stockCode": "2467",
+      "companyName": "志聖",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24673",
+      "bondName": "志聖三",
+      "stockCode": "2467",
+      "companyName": "志聖",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24762",
+      "bondName": "鉅祥二",
+      "stockCode": "2476",
+      "companyName": "鉅祥",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "24867",
+      "bondName": "一詮七",
+      "stockCode": "2486",
+      "companyName": "一詮",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "25283",
+      "bondName": "皇普三",
+      "stockCode": "2528",
+      "companyName": "皇普",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "25284",
+      "bondName": "皇普四",
+      "stockCode": "2528",
+      "companyName": "皇普",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "25303",
+      "bondName": "華建三",
+      "stockCode": "2530",
+      "companyName": "華建",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "25304",
+      "bondName": "華建四",
+      "stockCode": "2530",
+      "companyName": "華建",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "25483",
+      "bondName": "華固三",
+      "stockCode": "2548",
+      "companyName": "華固",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "25484",
+      "bondName": "華固四",
+      "stockCode": "2548",
+      "companyName": "華固",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "26417",
+      "bondName": "正德七",
+      "stockCode": "2641",
+      "companyName": "正德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "26418",
+      "bondName": "正德八",
+      "stockCode": "2641",
+      "companyName": "正德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27271",
+      "bondName": "王品一",
+      "stockCode": "2727",
+      "companyName": "王品",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27323",
+      "bondName": "六角三",
+      "stockCode": "2732",
+      "companyName": "六角",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27324",
+      "bondName": "六角四",
+      "stockCode": "2732",
+      "companyName": "六角",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27431",
+      "bondName": "山富一",
+      "stockCode": "2743",
+      "companyName": "山富",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27451",
+      "bondName": "五福一",
+      "stockCode": "2745",
+      "companyName": "五福",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27531",
+      "bondName": "八方雲集一",
+      "stockCode": "2753",
+      "companyName": "八方雲集",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27532",
+      "bondName": "八方雲集二",
+      "stockCode": "2753",
+      "companyName": "八方雲集",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27551",
+      "bondName": "揚秦一",
+      "stockCode": "2755",
+      "companyName": "揚秦",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "27561",
+      "bondName": "聯發國際一",
+      "stockCode": "2756",
+      "companyName": "聯發國際",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "29061",
+      "bondName": "高林一",
+      "stockCode": "2906",
+      "companyName": "高林",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30112",
+      "bondName": "今皓二",
+      "stockCode": "3011",
+      "companyName": "今皓",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30134",
+      "bondName": "晟銘電四",
+      "stockCode": "3013",
+      "companyName": "晟銘電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30165",
+      "bondName": "嘉晶五",
+      "stockCode": "3016",
+      "companyName": "嘉晶",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30166",
+      "bondName": "嘉晶六",
+      "stockCode": "3016",
+      "companyName": "嘉晶",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30285",
+      "bondName": "增你強五",
+      "stockCode": "3028",
+      "companyName": "增你強",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30321",
+      "bondName": "偉訓一",
+      "stockCode": "3032",
+      "companyName": "偉訓",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30322",
+      "bondName": "偉訓二",
+      "stockCode": "3032",
+      "companyName": "偉訓",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30336",
+      "bondName": "威健六",
+      "stockCode": "3033",
+      "companyName": "威健",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30337",
+      "bondName": "威健七",
+      "stockCode": "3033",
+      "companyName": "威健",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30371",
+      "bondName": "欣興一",
+      "stockCode": "3037",
+      "companyName": "欣興",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30401",
+      "bondName": "遠見一",
+      "stockCode": "3040",
+      "companyName": "遠見",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30454",
+      "bondName": "台灣大四",
+      "stockCode": "3045",
+      "companyName": "台灣大",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30455",
+      "bondName": "台灣大五",
+      "stockCode": "3045",
+      "companyName": "台灣大",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30811",
+      "bondName": "聯亞一",
+      "stockCode": "3081",
+      "companyName": "聯亞",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30812",
+      "bondName": "聯亞二",
+      "stockCode": "3081",
+      "companyName": "聯亞",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30882",
+      "bondName": "艾訊二",
+      "stockCode": "3088",
+      "companyName": "艾訊",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "30954",
+      "bondName": "及成四",
+      "stockCode": "3095",
+      "companyName": "及成",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31222",
+      "bondName": "笙泉二",
+      "stockCode": "3122",
+      "companyName": "笙泉",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31311",
+      "bondName": "弘塑一",
+      "stockCode": "3131",
+      "companyName": "弘塑",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31312",
+      "bondName": "弘塑二",
+      "stockCode": "3131",
+      "companyName": "弘塑",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31352",
+      "bondName": "凌航二",
+      "stockCode": "3135",
+      "companyName": "凌航",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31413",
+      "bondName": "晶宏三",
+      "stockCode": "3141",
+      "companyName": "晶宏",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31414",
+      "bondName": "晶宏四",
+      "stockCode": "3141",
+      "companyName": "晶宏",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31494",
+      "bondName": "正達四",
+      "stockCode": "3149",
+      "companyName": "正達",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31672",
+      "bondName": "大量二",
+      "stockCode": "3167",
+      "companyName": "大量",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "31882",
+      "bondName": "鑫龍騰二",
+      "stockCode": "3188",
+      "companyName": "鑫龍騰",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "32071",
+      "bondName": "耀勝一",
+      "stockCode": "3207",
+      "companyName": "耀勝",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "32191",
+      "bondName": "倚強科一",
+      "stockCode": "3219",
+      "companyName": "倚強科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "32571",
+      "bondName": "虹冠電一",
+      "stockCode": "3257",
+      "companyName": "虹冠電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "32723",
+      "bondName": "東碩三",
+      "stockCode": "3272",
+      "companyName": "東碩",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "32843",
+      "bondName": "太普高三",
+      "stockCode": "3284",
+      "companyName": "太普高",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "32943",
+      "bondName": "英濟三",
+      "stockCode": "3294",
+      "companyName": "英濟",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33035",
+      "bondName": "岱稜五",
+      "stockCode": "3303",
+      "companyName": "岱稜",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33055",
+      "bondName": "昇貿五",
+      "stockCode": "3305",
+      "companyName": "昇貿",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33121",
+      "bondName": "弘憶股一",
+      "stockCode": "3312",
+      "companyName": "弘憶股",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33133",
+      "bondName": "斐成三",
+      "stockCode": "3313",
+      "companyName": "斐成",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33225",
+      "bondName": "建舜電五",
+      "stockCode": "3322",
+      "companyName": "建舜電",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33245",
+      "bondName": "雙鴻五",
+      "stockCode": "3324",
+      "companyName": "雙鴻",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33246",
+      "bondName": "雙鴻六",
+      "stockCode": "3324",
+      "companyName": "雙鴻",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33247",
+      "bondName": "雙鴻七",
+      "stockCode": "3324",
+      "companyName": "雙鴻",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33466",
+      "bondName": "麗清六",
+      "stockCode": "3346",
+      "companyName": "麗清",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33571",
+      "bondName": "臺慶科一",
+      "stockCode": "3357",
+      "companyName": "臺慶科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33621",
+      "bondName": "先進光一",
+      "stockCode": "3362",
+      "companyName": "先進光",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33763",
+      "bondName": "新日興三",
+      "stockCode": "3376",
+      "companyName": "新日興",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33881",
+      "bondName": "崇越電一",
+      "stockCode": "3388",
+      "companyName": "崇越電",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "33902",
+      "bondName": "旭軟二",
+      "stockCode": "3390",
+      "companyName": "旭軟",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "34163",
+      "bondName": "融程電三",
+      "stockCode": "3416",
+      "companyName": "融程電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "34793",
+      "bondName": "安勤三",
+      "stockCode": "3479",
+      "companyName": "安勤",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "34834",
+      "bondName": "力致四",
+      "stockCode": "3483",
+      "companyName": "力致",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "34843",
+      "bondName": "崧騰三",
+      "stockCode": "3484",
+      "companyName": "崧騰",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "34913",
+      "bondName": "昇達科三",
+      "stockCode": "3491",
+      "companyName": "昇達科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35122",
+      "bondName": "皇龍二",
+      "stockCode": "3512",
+      "companyName": "皇龍",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35161",
+      "bondName": "亞帝歐一",
+      "stockCode": "3516",
+      "companyName": "亞帝歐",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35181",
+      "bondName": "柏騰一",
+      "stockCode": "3518",
+      "companyName": "柏騰",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35221",
+      "bondName": "御嵿一",
+      "stockCode": "3522",
+      "companyName": "御頂",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35265",
+      "bondName": "凡甲五",
+      "stockCode": "3526",
+      "companyName": "凡甲",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35266",
+      "bondName": "凡甲六",
+      "stockCode": "3526",
+      "companyName": "凡甲",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35267",
+      "bondName": "凡甲七",
+      "stockCode": "3526",
+      "companyName": "凡甲",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35431",
+      "bondName": "州巧一",
+      "stockCode": "3543",
+      "companyName": "州巧",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35482",
+      "bondName": "兆利二",
+      "stockCode": "3548",
+      "companyName": "兆利",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35483",
+      "bondName": "兆利三",
+      "stockCode": "3548",
+      "companyName": "兆利",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35513",
+      "bondName": "世禾三",
+      "stockCode": "3551",
+      "companyName": "世禾",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35642",
+      "bondName": "其陽二",
+      "stockCode": "3564",
+      "companyName": "其陽",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35833",
+      "bondName": "辛耘三",
+      "stockCode": "3583",
+      "companyName": "辛耘",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35872",
+      "bondName": "閎康二",
+      "stockCode": "3587",
+      "companyName": "閎康",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "35914",
+      "bondName": "艾笛森四",
+      "stockCode": "3591",
+      "companyName": "艾笛森",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36053",
+      "bondName": "宏致三",
+      "stockCode": "3605",
+      "companyName": "宏致",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36054",
+      "bondName": "宏致四",
+      "stockCode": "3605",
+      "companyName": "宏致",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36173",
+      "bondName": "碩天三",
+      "stockCode": "3617",
+      "companyName": "碩天",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36804",
+      "bondName": "家登四",
+      "stockCode": "3680",
+      "companyName": "家登",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36805",
+      "bondName": "家登五",
+      "stockCode": "3680",
+      "companyName": "家登",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36806",
+      "bondName": "家登六",
+      "stockCode": "3680",
+      "companyName": "家登",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36841",
+      "bondName": "榮昌一",
+      "stockCode": "3684",
+      "companyName": "榮昌",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36872",
+      "bondName": "歐買尬二",
+      "stockCode": "3687",
+      "companyName": "歐買尬",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36873",
+      "bondName": "歐買尬三",
+      "stockCode": "3687",
+      "companyName": "歐買尬",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36894",
+      "bondName": "湧德四",
+      "stockCode": "3689",
+      "companyName": "湧德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "36913",
+      "bondName": "碩禾三",
+      "stockCode": "3691",
+      "companyName": "碩禾",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "370201",
+      "bondName": "大聯大E1",
+      "stockCode": "3702",
+      "companyName": "大聯大",
+      "market": "—",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "37075",
+      "bondName": "漢磊五",
+      "stockCode": "3707",
+      "companyName": "漢磊",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "37083",
+      "bondName": "上緯投控三",
+      "stockCode": "3708",
+      "companyName": "上緯投控",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "37084",
+      "bondName": "上緯投控四",
+      "stockCode": "3708",
+      "companyName": "上緯投控",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "37151",
+      "bondName": "定穎投控一",
+      "stockCode": "3715",
+      "companyName": "定穎投控",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "37152",
+      "bondName": "定穎投控二",
+      "stockCode": "3715",
+      "companyName": "定穎投控",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "37171",
+      "bondName": "聯嘉投控一",
+      "stockCode": "3717",
+      "companyName": "聯嘉投控",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41135",
+      "bondName": "聯上五",
+      "stockCode": "4113",
+      "companyName": "聯上",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41136",
+      "bondName": "聯上六",
+      "stockCode": "4113",
+      "companyName": "聯上",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41236",
+      "bondName": "晟德六",
+      "stockCode": "4123",
+      "companyName": "晟德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41237",
+      "bondName": "晟德七",
+      "stockCode": "4123",
+      "companyName": "晟德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41238",
+      "bondName": "晟德八",
+      "stockCode": "4123",
+      "companyName": "晟德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41239",
+      "bondName": "晟德九",
+      "stockCode": "4123",
+      "companyName": "晟德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41295",
+      "bondName": "聯合五",
+      "stockCode": "4129",
+      "companyName": "聯合",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41372",
+      "bondName": "麗豐二KY",
+      "stockCode": "4137",
+      "companyName": "麗豐-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41645",
+      "bondName": "承業醫五",
+      "stockCode": "4164",
+      "companyName": "承業醫",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41684",
+      "bondName": "醣聯四",
+      "stockCode": "4168",
+      "companyName": "醣聯",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41903",
+      "bondName": "佐登三KY",
+      "stockCode": "4190",
+      "companyName": "佐登-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "41904",
+      "bondName": "佐登四KY",
+      "stockCode": "4190",
+      "companyName": "佐登-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "44163",
+      "bondName": "三圓三",
+      "stockCode": "4416",
+      "companyName": "三圓",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "44383",
+      "bondName": "廣越三",
+      "stockCode": "4438",
+      "companyName": "廣越",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "44391",
+      "bondName": "冠星一KY",
+      "stockCode": "4439",
+      "companyName": "冠星-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "44421",
+      "bondName": "竣邦一KY",
+      "stockCode": "4442",
+      "companyName": "竣邦-KY",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45031",
+      "bondName": "金雨一",
+      "stockCode": "4503",
+      "companyName": "金雨",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45102",
+      "bondName": "高鋒二",
+      "stockCode": "4510",
+      "companyName": "高鋒",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45421",
+      "bondName": "科嶠一",
+      "stockCode": "4542",
+      "companyName": "科嶠",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45491",
+      "bondName": "桓達一",
+      "stockCode": "4549",
+      "companyName": "桓達",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45554",
+      "bondName": "氣立四",
+      "stockCode": "4555",
+      "companyName": "氣立",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45581",
+      "bondName": "寶緯一",
+      "stockCode": "4558",
+      "companyName": "寶緯",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45641",
+      "bondName": "元翎一",
+      "stockCode": "4564",
+      "companyName": "元翎",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45663",
+      "bondName": "時碩工業三",
+      "stockCode": "4566",
+      "companyName": "時碩工業",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45691",
+      "bondName": "六方科一KY",
+      "stockCode": "4569",
+      "companyName": "六方科-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45721",
+      "bondName": "駐龍一",
+      "stockCode": "4572",
+      "companyName": "駐龍",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "45811",
+      "bondName": "光隆精密一KY",
+      "stockCode": "4581",
+      "companyName": "光隆精密-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47148",
+      "bondName": "永捷八",
+      "stockCode": "4714",
+      "companyName": "永捷",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47223",
+      "bondName": "國精化三",
+      "stockCode": "4722",
+      "companyName": "國精化",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47224",
+      "bondName": "國精化四",
+      "stockCode": "4722",
+      "companyName": "國精化",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47393",
+      "bondName": "康普三",
+      "stockCode": "4739",
+      "companyName": "康普",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47394",
+      "bondName": "康普四",
+      "stockCode": "4739",
+      "companyName": "康普",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47491",
+      "bondName": "新應材一",
+      "stockCode": "4749",
+      "companyName": "新應材",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47602",
+      "bondName": "勤凱二",
+      "stockCode": "4760",
+      "companyName": "勤凱科技",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47642",
+      "bondName": "雙鍵二",
+      "stockCode": "4764",
+      "companyName": "雙鍵",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "47721",
+      "bondName": "台特化一",
+      "stockCode": "4772",
+      "companyName": "台特化",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "49231",
+      "bondName": "力士一",
+      "stockCode": "4923",
+      "companyName": "力士",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "49311",
+      "bondName": "新盛力一",
+      "stockCode": "4931",
+      "companyName": "新盛力",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "49675",
+      "bondName": "十銓五",
+      "stockCode": "4967",
+      "companyName": "十銓",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "49731",
+      "bondName": "廣穎電通一",
+      "stockCode": "4973",
+      "companyName": "廣穎電通",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "49793",
+      "bondName": "華星光三",
+      "stockCode": "4979",
+      "companyName": "華星光",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "49794",
+      "bondName": "華星光四",
+      "stockCode": "4979",
+      "companyName": "華星光",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52011",
+      "bondName": "凱衛一",
+      "stockCode": "5201",
+      "companyName": "凱衛",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52091",
+      "bondName": "新鼎一",
+      "stockCode": "5209",
+      "companyName": "新鼎",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52121",
+      "bondName": "凌網一",
+      "stockCode": "5212",
+      "companyName": "凌網",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52441",
+      "bondName": "弘凱一",
+      "stockCode": "5244",
+      "companyName": "弘凱",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52452",
+      "bondName": "智晶二",
+      "stockCode": "5245",
+      "companyName": "智晶",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52635",
+      "bondName": "智崴五",
+      "stockCode": "5263",
+      "companyName": "智崴",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52844",
+      "bondName": "jpp四KY",
+      "stockCode": "5284",
+      "companyName": "jpp-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52845",
+      "bondName": "jpp五KY",
+      "stockCode": "5284",
+      "companyName": "jpp-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52892",
+      "bondName": "宜鼎二",
+      "stockCode": "5289",
+      "companyName": "宜鼎",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "52912",
+      "bondName": "邑昇二",
+      "stockCode": "5291",
+      "companyName": "邑昇",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "53064",
+      "bondName": "桂盟四",
+      "stockCode": "5306",
+      "companyName": "桂盟",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "53095",
+      "bondName": "系統電五",
+      "stockCode": "5309",
+      "companyName": "系統電",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "53096",
+      "bondName": "系統電六",
+      "stockCode": "5309",
+      "companyName": "系統電",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "53097",
+      "bondName": "系統電七",
+      "stockCode": "5309",
+      "companyName": "系統電",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "53211",
+      "bondName": "美而快一",
+      "stockCode": "5321",
+      "companyName": "美而快",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "53887",
+      "bondName": "中磊七",
+      "stockCode": "5388",
+      "companyName": "中磊",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "54391",
+      "bondName": "高技一",
+      "stockCode": "5439",
+      "companyName": "高技",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "54501",
+      "bondName": "南良一",
+      "stockCode": "5450",
+      "companyName": "南良",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "54573",
+      "bondName": "宣德三",
+      "stockCode": "5457",
+      "companyName": "宣德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "54642",
+      "bondName": "霖宏二",
+      "stockCode": "5464",
+      "companyName": "霖宏",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "55344",
+      "bondName": "長虹四",
+      "stockCode": "5534",
+      "companyName": "長虹",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "55362",
+      "bondName": "聖暉二",
+      "stockCode": "5536",
+      "companyName": "聖暉*",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "55363",
+      "bondName": "聖暉三",
+      "stockCode": "5536",
+      "companyName": "聖暉*",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "56087",
+      "bondName": "四維航七",
+      "stockCode": "5608",
+      "companyName": "四維航",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "60152",
+      "bondName": "宏遠證二",
+      "stockCode": "6015",
+      "companyName": "宏遠證",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61011",
+      "bondName": "寬魚國際一",
+      "stockCode": "6101",
+      "companyName": "寬魚國際",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61012",
+      "bondName": "寬魚國際二",
+      "stockCode": "6101",
+      "companyName": "寬魚國際",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61041",
+      "bondName": "創惟一",
+      "stockCode": "6104",
+      "companyName": "創惟",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61112",
+      "bondName": "光聚晶電二",
+      "stockCode": "6111",
+      "companyName": "大宇資",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61171",
+      "bondName": "迎廣一",
+      "stockCode": "6117",
+      "companyName": "迎廣",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61172",
+      "bondName": "迎廣二",
+      "stockCode": "6117",
+      "companyName": "迎廣",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61255",
+      "bondName": "廣運五",
+      "stockCode": "6125",
+      "companyName": "廣運",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61263",
+      "bondName": "信音三",
+      "stockCode": "6126",
+      "companyName": "信音",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61343",
+      "bondName": "萬旭三",
+      "stockCode": "6134",
+      "companyName": "萬旭",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61506",
+      "bondName": "撼訊六",
+      "stockCode": "6150",
+      "companyName": "撼訊",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61565",
+      "bondName": "松上五",
+      "stockCode": "6156",
+      "companyName": "松上",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61635",
+      "bondName": "華電網五",
+      "stockCode": "6163",
+      "companyName": "華電網",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61777",
+      "bondName": "達麗七",
+      "stockCode": "6177",
+      "companyName": "達麗",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61794",
+      "bondName": "亞通四",
+      "stockCode": "6179",
+      "companyName": "亞通",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61828",
+      "bondName": "合晶八",
+      "stockCode": "6182",
+      "companyName": "合晶",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61843",
+      "bondName": "大豐電三",
+      "stockCode": "6184",
+      "companyName": "大豐電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61876",
+      "bondName": "萬潤六",
+      "stockCode": "6187",
+      "companyName": "萬潤",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61894",
+      "bondName": "豐藝四",
+      "stockCode": "6189",
+      "companyName": "豐藝",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61907",
+      "bondName": "萬泰科七",
+      "stockCode": "6190",
+      "companyName": "萬泰科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61973",
+      "bondName": "佳必琪三",
+      "stockCode": "6197",
+      "companyName": "佳必琪",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61993",
+      "bondName": "天品三",
+      "stockCode": "6199",
+      "companyName": "天品",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "61994",
+      "bondName": "天品四",
+      "stockCode": "6199",
+      "companyName": "天品",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62075",
+      "bondName": "雷科五",
+      "stockCode": "6207",
+      "companyName": "雷科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62076",
+      "bondName": "雷科六",
+      "stockCode": "6207",
+      "companyName": "雷科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62093",
+      "bondName": "今國光三",
+      "stockCode": "6209",
+      "companyName": "今國光",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62194",
+      "bondName": "富旺四",
+      "stockCode": "6219",
+      "companyName": "富旺",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "622010",
+      "bondName": "岳豐十",
+      "stockCode": "6220",
+      "companyName": "岳豐",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62236",
+      "bondName": "旺矽六",
+      "stockCode": "6223",
+      "companyName": "旺矽",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62433",
+      "bondName": "迅杰三",
+      "stockCode": "6243",
+      "companyName": "迅杰",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62695",
+      "bondName": "台郡五",
+      "stockCode": "6269",
+      "companyName": "台郡",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62696",
+      "bondName": "台郡六",
+      "stockCode": "6269",
+      "companyName": "台郡",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62822",
+      "bondName": "康舒二",
+      "stockCode": "6282",
+      "companyName": "康舒",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "62843",
+      "bondName": "佳邦三",
+      "stockCode": "6284",
+      "companyName": "佳邦",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "629010",
+      "bondName": "良維十",
+      "stockCode": "6290",
+      "companyName": "良維",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64145",
+      "bondName": "樺漢五",
+      "stockCode": "6414",
+      "companyName": "樺漢",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64251",
+      "bondName": "易發一",
+      "stockCode": "6425",
+      "companyName": "易發",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64324",
+      "bondName": "今展科四",
+      "stockCode": "6432",
+      "companyName": "今展科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64512",
+      "bondName": "訊芯二KY",
+      "stockCode": "6451",
+      "companyName": "訊芯-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64693",
+      "bondName": "大樹三",
+      "stockCode": "6469",
+      "companyName": "大樹",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64724",
+      "bondName": "保瑞四",
+      "stockCode": "6472",
+      "companyName": "保瑞",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64725",
+      "bondName": "保瑞五",
+      "stockCode": "6472",
+      "companyName": "保瑞",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64773",
+      "bondName": "安集三",
+      "stockCode": "6477",
+      "companyName": "安集",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64774",
+      "bondName": "安集四",
+      "stockCode": "6477",
+      "companyName": "安集",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "64775",
+      "bondName": "安集五",
+      "stockCode": "6477",
+      "companyName": "安集",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65096",
+      "bondName": "聚和六",
+      "stockCode": "6509",
+      "companyName": "聚和",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65101",
+      "bondName": "精測一",
+      "stockCode": "6510",
+      "companyName": "精測",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65152",
+      "bondName": "穎崴二",
+      "stockCode": "6515",
+      "companyName": "穎崴",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65331",
+      "bondName": "晶心科一",
+      "stockCode": "6533",
+      "companyName": "晶心科",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65381",
+      "bondName": "倉和一",
+      "stockCode": "6538",
+      "companyName": "倉和",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65461",
+      "bondName": "正基一",
+      "stockCode": "6546",
+      "companyName": "正基",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65462",
+      "bondName": "正基二",
+      "stockCode": "6546",
+      "companyName": "正基",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65463",
+      "bondName": "正基三",
+      "stockCode": "6546",
+      "companyName": "正基",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65472",
+      "bondName": "高端疫苗二",
+      "stockCode": "6547",
+      "companyName": "高端疫苗",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65521",
+      "bondName": "易華電一",
+      "stockCode": "6552",
+      "companyName": "易華電",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65702",
+      "bondName": "維田二",
+      "stockCode": "6570",
+      "companyName": "維田",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65761",
+      "bondName": "逸達一",
+      "stockCode": "6576",
+      "companyName": "逸達",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65841",
+      "bondName": "南俊國際一",
+      "stockCode": "6584",
+      "companyName": "南俊國際",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65842",
+      "bondName": "南俊國際二",
+      "stockCode": "6584",
+      "companyName": "南俊國際",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65843",
+      "bondName": "南俊國際三",
+      "stockCode": "6584",
+      "companyName": "南俊國際",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65851",
+      "bondName": "鼎基一",
+      "stockCode": "6585",
+      "companyName": "鼎基",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65852",
+      "bondName": "鼎基二",
+      "stockCode": "6585",
+      "companyName": "鼎基",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "65914",
+      "bondName": "動力四KY",
+      "stockCode": "6591",
+      "companyName": "動力-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66034",
+      "bondName": "富強鑫四",
+      "stockCode": "6603",
+      "companyName": "富強鑫",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66163",
+      "bondName": "特昇三KY",
+      "stockCode": "6616",
+      "companyName": "特昇-KY",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66241",
+      "bondName": "萬年清一",
+      "stockCode": "6624",
+      "companyName": "萬年清",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66292",
+      "bondName": "泰金二KY",
+      "stockCode": "6629",
+      "companyName": "泰金-KY",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66451",
+      "bondName": "金萬林一創",
+      "stockCode": "6645",
+      "companyName": "金萬林-創",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66642",
+      "bondName": "群翊二",
+      "stockCode": "6664",
+      "companyName": "群翊",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66702",
+      "bondName": "復盛應用二",
+      "stockCode": "6670",
+      "companyName": "復盛應用",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66721",
+      "bondName": "騰輝電子一KY",
+      "stockCode": "6672",
+      "companyName": "騰輝電子-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66722",
+      "bondName": "騰輝電子二KY",
+      "stockCode": "6672",
+      "companyName": "騰輝電子-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66801",
+      "bondName": "鑫創電子一",
+      "stockCode": "6680",
+      "companyName": "鑫創電子",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66831",
+      "bondName": "雍智一",
+      "stockCode": "6683",
+      "companyName": "雍智科技",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "66931",
+      "bondName": "廣閎科一",
+      "stockCode": "6693",
+      "companyName": "廣閎科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "67062",
+      "bondName": "惠特二",
+      "stockCode": "6706",
+      "companyName": "惠特",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "67531",
+      "bondName": "龍德造船一",
+      "stockCode": "6753",
+      "companyName": "龍德造船",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "67681",
+      "bondName": "志強一KY",
+      "stockCode": "6768",
+      "companyName": "志強-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "67711",
+      "bondName": "平和環保一創",
+      "stockCode": "6771",
+      "companyName": "平和環保-創",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "67961",
+      "bondName": "晉弘一",
+      "stockCode": "6796",
+      "companyName": "晉弘",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "67962",
+      "bondName": "晉弘二",
+      "stockCode": "6796",
+      "companyName": "晉弘",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68032",
+      "bondName": "崑鼎二",
+      "stockCode": "6803",
+      "companyName": "崑鼎",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68061",
+      "bondName": "森崴能源一",
+      "stockCode": "6806",
+      "companyName": "森崴能源",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68211",
+      "bondName": "聯寶一",
+      "stockCode": "6821",
+      "companyName": "聯寶",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68301",
+      "bondName": "汎銓一",
+      "stockCode": "6830",
+      "companyName": "汎銓",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68351",
+      "bondName": "圓裕一",
+      "stockCode": "6835",
+      "companyName": "圓裕",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68401",
+      "bondName": "東研信超一",
+      "stockCode": "6840",
+      "companyName": "東研信超",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68431",
+      "bondName": "進典一",
+      "stockCode": "6843",
+      "companyName": "進典",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68461",
+      "bondName": "綠茵一",
+      "stockCode": "6846",
+      "companyName": "綠茵",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68462",
+      "bondName": "綠茵二",
+      "stockCode": "6846",
+      "companyName": "綠茵",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68541",
+      "bondName": "錼創科技一KY創",
+      "stockCode": "6854",
+      "companyName": "錼創科技-KY創",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68621",
+      "bondName": "三集瑞一KY",
+      "stockCode": "6862",
+      "companyName": "三集瑞-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68631",
+      "bondName": "永道一KY",
+      "stockCode": "6863",
+      "companyName": "永道-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68692",
+      "bondName": "雲豹能源二",
+      "stockCode": "6869",
+      "companyName": "雲豹能源",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68701",
+      "bondName": "騰雲一",
+      "stockCode": "6870",
+      "companyName": "騰雲",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68702",
+      "bondName": "騰雲二",
+      "stockCode": "6870",
+      "companyName": "騰雲",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68731",
+      "bondName": "泓德能源一",
+      "stockCode": "6873",
+      "companyName": "泓德能源-創",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68732",
+      "bondName": "泓德能源二",
+      "stockCode": "6873",
+      "companyName": "泓德能源-創",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68741",
+      "bondName": "倍力一",
+      "stockCode": "6874",
+      "companyName": "倍力",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68901",
+      "bondName": "來億一KY",
+      "stockCode": "6890",
+      "companyName": "來億-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68902",
+      "bondName": "來億二KY",
+      "stockCode": "6890",
+      "companyName": "來億-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "68941",
+      "bondName": "衛司特一",
+      "stockCode": "6894",
+      "companyName": "衛司特",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "69031",
+      "bondName": "巨漢一",
+      "stockCode": "6903",
+      "companyName": "巨漢",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "69032",
+      "bondName": "巨漢二",
+      "stockCode": "6903",
+      "companyName": "巨漢",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "69041",
+      "bondName": "伯鑫一",
+      "stockCode": "6904",
+      "companyName": "伯鑫",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "69131",
+      "bondName": "鴻呈一",
+      "stockCode": "6913",
+      "companyName": "鴻呈",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "69571",
+      "bondName": "裕慶一KY",
+      "stockCode": "6957",
+      "companyName": "裕慶-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "69821",
+      "bondName": "大井泵浦一",
+      "stockCode": "6982",
+      "companyName": "大井泵浦",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "69822",
+      "bondName": "大井泵浦二",
+      "stockCode": "6982",
+      "companyName": "大井泵浦",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "74022",
+      "bondName": "邑錡二",
+      "stockCode": "7402",
+      "companyName": "邑錡",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "75561",
+      "bondName": "意德士一永",
+      "stockCode": "7556",
+      "companyName": "意德士科技",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "75562",
+      "bondName": "意德士二",
+      "stockCode": "7556",
+      "companyName": "意德士科技",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "76101",
+      "bondName": "聯友金屬一創",
+      "stockCode": "7610",
+      "companyName": "聯友金屬-創",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "76311",
+      "bondName": "聚賢研發一創",
+      "stockCode": "7631",
+      "companyName": "聚賢研發-創",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "77131",
+      "bondName": "威力德生醫一",
+      "stockCode": "7713",
+      "companyName": "威力德生醫",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80212",
+      "bondName": "尖點二",
+      "stockCode": "8021",
+      "companyName": "尖點",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80273",
+      "bondName": "鈦昇三",
+      "stockCode": "8027",
+      "companyName": "鈦昇",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80282",
+      "bondName": "昇陽半導體二",
+      "stockCode": "8028",
+      "companyName": "昇陽半導體",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80426",
+      "bondName": "金山電六",
+      "stockCode": "8042",
+      "companyName": "金山電",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80506",
+      "bondName": "廣積六",
+      "stockCode": "8050",
+      "companyName": "廣積",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80541",
+      "bondName": "安國一",
+      "stockCode": "8054",
+      "companyName": "安國",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80746",
+      "bondName": "鉅橡六",
+      "stockCode": "8074",
+      "companyName": "鉅橡",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80872",
+      "bondName": "麗升能源二",
+      "stockCode": "8087",
+      "companyName": "麗升能源",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80914",
+      "bondName": "翔名四",
+      "stockCode": "8091",
+      "companyName": "翔名",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80924",
+      "bondName": "建暐四",
+      "stockCode": "8092",
+      "companyName": "建暐",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80962",
+      "bondName": "擎亞二",
+      "stockCode": "8096",
+      "companyName": "擎亞",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "80963",
+      "bondName": "擎亞三",
+      "stockCode": "8096",
+      "companyName": "擎亞",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "81042",
+      "bondName": "錸寶二",
+      "stockCode": "8104",
+      "companyName": "錸寶",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "81114",
+      "bondName": "立碁四",
+      "stockCode": "8111",
+      "companyName": "立碁",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "811210",
+      "bondName": "至上十",
+      "stockCode": "8112",
+      "companyName": "至上",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "811211",
+      "bondName": "至上11",
+      "stockCode": "8112",
+      "companyName": "至上",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "81473",
+      "bondName": "正淩三",
+      "stockCode": "8147",
+      "companyName": "正淩",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "81551",
+      "bondName": "博智一",
+      "stockCode": "8155",
+      "companyName": "博智",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "81552",
+      "bondName": "博智二",
+      "stockCode": "8155",
+      "companyName": "博智",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "81553",
+      "bondName": "博智三",
+      "stockCode": "8155",
+      "companyName": "博智",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "81714",
+      "bondName": "天宇四",
+      "stockCode": "8171",
+      "companyName": "天宇",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "81715",
+      "bondName": "天宇五",
+      "stockCode": "8171",
+      "companyName": "天宇",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "82102",
+      "bondName": "勤誠二",
+      "stockCode": "8210",
+      "companyName": "勤誠",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "82103",
+      "bondName": "勤誠三",
+      "stockCode": "8210",
+      "companyName": "勤誠",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "82551",
+      "bondName": "朋程一",
+      "stockCode": "8255",
+      "companyName": "朋程",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "82711",
+      "bondName": "宇瞻一",
+      "stockCode": "8271",
+      "companyName": "宇瞻",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "82993",
+      "bondName": "群聯三",
+      "stockCode": "8299",
+      "companyName": "群聯",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "83742",
+      "bondName": "羅昇二",
+      "stockCode": "8374",
+      "companyName": "羅昇",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84041",
+      "bondName": "百和興業一KY",
+      "stockCode": "8404",
+      "companyName": "百和興業-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84113",
+      "bondName": "福貞三KY",
+      "stockCode": "8411",
+      "companyName": "福貞-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84221",
+      "bondName": "可寧衛一",
+      "stockCode": "8422",
+      "companyName": "可寧衛",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84222",
+      "bondName": "可寧衛二",
+      "stockCode": "8422",
+      "companyName": "可寧衛",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84312",
+      "bondName": "匯鑽科二",
+      "stockCode": "8431",
+      "companyName": "匯鑽科",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84332",
+      "bondName": "弘帆二",
+      "stockCode": "8433",
+      "companyName": "弘帆",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84333",
+      "bondName": "弘帆三",
+      "stockCode": "8433",
+      "companyName": "弘帆",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84381",
+      "bondName": "昶昕一",
+      "stockCode": "8438",
+      "companyName": "昶昕",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84422",
+      "bondName": "威宏二KY",
+      "stockCode": "8442",
+      "companyName": "威宏-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84423",
+      "bondName": "威宏三KY",
+      "stockCode": "8442",
+      "companyName": "威宏-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84624",
+      "bondName": "柏文四",
+      "stockCode": "8462",
+      "companyName": "柏文",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84672",
+      "bondName": "波力二KY",
+      "stockCode": "8467",
+      "companyName": "波力-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84673",
+      "bondName": "波力三KY",
+      "stockCode": "8467",
+      "companyName": "波力-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84732",
+      "bondName": "山林水二",
+      "stockCode": "8473",
+      "companyName": "山林水",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84762",
+      "bondName": "台境二",
+      "stockCode": "8476",
+      "companyName": "台境*",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84781",
+      "bondName": "東哥遊艇一",
+      "stockCode": "8478",
+      "companyName": "東哥遊艇",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84881",
+      "bondName": "吉源一KY",
+      "stockCode": "8488",
+      "companyName": "吉源-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "84891",
+      "bondName": "三貝德一",
+      "stockCode": "8489",
+      "companyName": "三貝德",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "89277",
+      "bondName": "北基七",
+      "stockCode": "8927",
+      "companyName": "北基",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "89278",
+      "bondName": "北基八",
+      "stockCode": "8927",
+      "companyName": "北基",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "89365",
+      "bondName": "國統五",
+      "stockCode": "8936",
+      "companyName": "國統",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "89366",
+      "bondName": "國統六",
+      "stockCode": "8936",
+      "companyName": "國統",
+      "market": "上櫃",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "89964",
+      "bondName": "高力四",
+      "stockCode": "8996",
+      "companyName": "高力",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "98026",
+      "bondName": "鈺齊六KY",
+      "stockCode": "9802",
+      "companyName": "鈺齊-KY",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "99063",
+      "bondName": "欣巴巴三",
+      "stockCode": "9906",
+      "companyName": "欣巴巴",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "99332",
+      "bondName": "中鼎二",
+      "stockCode": "9933",
+      "companyName": "中鼎",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "99353",
+      "bondName": "慶豐富三",
+      "stockCode": "9935",
+      "companyName": "慶豐富",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "99392",
+      "bondName": "宏全二",
+      "stockCode": "9939",
+      "companyName": "宏全",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "99412",
+      "bondName": "裕融二",
+      "stockCode": "9941",
+      "companyName": "裕融",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "99587",
+      "bondName": "世紀鋼七",
+      "stockCode": "9958",
+      "companyName": "世紀鋼",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    },
+    {
+      "bondCode": "99588",
+      "bondName": "世紀鋼八永",
+      "stockCode": "9958",
+      "companyName": "世紀鋼",
+      "market": "上市",
+      "dataDate": "2026-08-28"
+    }
+  ]
+}

@@ -22,6 +22,7 @@ import {
   buildCbSupplementalSnapshot,
   parseCbSupplementalSnapshot,
 } from "../lib/market-data/bond-supplemental.ts";
+import { buildCbRightsEventSnapshot } from "../lib/market-data/cb-rights-events.ts";
 import { parseBondMarketHistory } from "../lib/market-data/bond-market-history.ts";
 import { mergeConversionPriceVersions } from "../lib/market-data/conversion-price-history.ts";
 import {
@@ -52,6 +53,7 @@ import {
   fetchCbSupplementalSources,
   fetchCurrentOfficialMarketData,
 } from "./lib/official-market-fetch.mjs";
+import { publishPublicResearchSnapshot } from "./stage-static-showcase.mjs";
 
 export const OFFICIAL_SHOWCASE_SOURCES = {
   "94025": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
@@ -538,6 +540,10 @@ async function refreshStaticShowcaseCandidate({
     await verifyStagedGeneration(stagingDataDirectory, previousWorkbench);
     await mkdir(join(paths.dataDirectory, "generations"), { recursive: true });
     await rename(stagingDataDirectory, join(paths.dataDirectory, generation));
+    await publishPublicResearchSnapshot({
+      source: dirname(paths.dataDirectory),
+      generation,
+    });
     const pointerStage = join(stagingRoot, "current.json");
     await writeFile(pointerStage, `${JSON.stringify({ schemaVersion: 1, generation, runtimeUrl: `./data/${generation}/runtime.json` })}\n`, "utf8");
     await rename(pointerStage, join(paths.dataDirectory, "current.json"));
@@ -1184,6 +1190,11 @@ async function buildIsolatedMarketCandidate({
     nightlyScenario ? (staleOptional ? "stale" : "fresh") : "unavailable",
   );
   const supplementalText = `${JSON.stringify(supplemental, null, 2)}\n`;
+  const rightsEvents = buildCbRightsEventSnapshot({
+    generatedAt,
+    dataDate: "2026-07-30",
+  });
+  const rightsEventsText = `${JSON.stringify(rightsEvents, null, 2)}\n`;
   const rawRows = JSON.parse(await readFile(
     join(outputDir, "11406.json"),
     "utf8",
@@ -1220,6 +1231,7 @@ async function buildIsolatedMarketCandidate({
   const workbenchSourceStateSummary = summarizeWorkbenchSourceStates(workbench);
   await writeFile(join(outputDir, "cb-issuer-research.json"), researchText, "utf8");
   await writeFile(join(outputDir, "bond-supplemental.json"), supplementalText, "utf8");
+  await writeFile(join(outputDir, "cb-rights-events.json"), rightsEventsText, "utf8");
   await writeFile(join(outputDir, "bond-market-view.json"), viewsText, "utf8");
   await writeFile(join(outputDir, "bond-workbench.json"), workbenchText, "utf8");
   const files = [
@@ -1232,6 +1244,12 @@ async function buildIsolatedMarketCandidate({
       name: "bond-supplemental.json",
       sha256: sha256Text(supplementalText),
       recordCount: 0,
+    },
+    {
+      name: "cb-rights-events.json",
+      sha256: sha256Text(rightsEventsText),
+      rawBytes: Buffer.byteLength(rightsEventsText),
+      recordCount: rightsEvents.events.length,
     },
     {
       name: "bond-market-view.json",
@@ -1291,6 +1309,7 @@ async function buildIsolatedMarketCandidate({
         dataDate: "2026-07-30",
         requestedDate: "2026-07-30",
         supplementalSources: supplemental.sources,
+        cbRightsEventSource: rightsEvents.source,
         workbenchSourceStateSummary,
         files,
       },
