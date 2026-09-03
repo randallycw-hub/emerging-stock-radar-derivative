@@ -1,0 +1,396 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-28T18:38:56.458Z",
+  "unitFaceValueTwd": null,
+  "institutionHistory": {},
+  "redemptions": [
+    {
+      "issuerCode": "3167",
+      "issuerName": "大量",
+      "bondCode": "31672",
+      "bondName": "大量二",
+      "announcementDate": "2026-08-13",
+      "delistingDate": "2026-10-01",
+      "subject": "公告大量股份有限公司國內第二次無擔保轉換公司債轉換公司債(簡稱：大量二，代碼：31672)發行公司行使債券贖回權暨訂於115年10月01日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3167&date1=20260813&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6290",
+      "issuerName": "良維",
+      "bondCode": "629010",
+      "bondName": "良維十",
+      "announcementDate": "2026-08-10",
+      "delistingDate": "2026-10-01",
+      "subject": "公告良維股份有限公司第十次無擔保轉換公司債(簡稱：良維十，代碼：629010)發行公司行使債券贖回權暨訂於115年10月01日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6290&date1=20260810&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3689",
+      "issuerName": "湧德",
+      "bondCode": "36894",
+      "bondName": "湧德四",
+      "announcementDate": "2026-08-10",
+      "delistingDate": "2026-10-01",
+      "subject": "公告湧德股份有限公司國內第四次無擔保公司債轉換公司債(簡稱：湧德四，代碼：36894)發行公司行使債券贖回權暨訂於115年10月01日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3689&date1=20260810&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3131",
+      "issuerName": "弘塑",
+      "bondCode": "31312",
+      "bondName": "弘塑二",
+      "announcementDate": "2026-08-04",
+      "delistingDate": "2026-09-21",
+      "subject": "公告弘塑股份有限公司國內第二次無擔保轉換公司債(簡稱：弘塑二，代碼：31312)發行公司行使債券贖回權暨訂於115年09月21日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3131&date1=20260804&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3131",
+      "issuerName": "弘塑",
+      "bondCode": "31311",
+      "bondName": "弘塑一",
+      "announcementDate": "2026-08-04",
+      "delistingDate": "2026-09-21",
+      "subject": "公告弘塑股份有限公司國內第一次無擔保轉換公司債(簡稱：弘塑一，代碼：31311)發行公司行使債券贖回權暨訂於115年09月21日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3131&date1=20260804&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3305",
+      "issuerName": "昇貿",
+      "bondCode": "33055",
+      "bondName": "昇貿五",
+      "announcementDate": "2026-07-29",
+      "delistingDate": "2026-09-17",
+      "subject": "公告昇貿股份有限公司國內第五次無擔保轉換公司債(簡稱：昇貿五，代碼：33055)發行公司行使債券贖回權暨訂於115年09月17日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3305&date1=20260729&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2337",
+      "issuerName": "旺宏",
+      "bondCode": "23372",
+      "bondName": "旺宏二",
+      "announcementDate": "2026-07-28",
+      "delistingDate": "2026-09-16",
+      "subject": "公告旺宏股份有限公司國內第二次無擔保轉換公司債(簡稱：旺宏二，代碼：23372)發行公司行使債券贖回權暨訂於115年09月16日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2337&date1=20260728&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "4542",
+      "issuerName": "科嶠",
+      "bondCode": "45421",
+      "bondName": "科嶠一",
+      "announcementDate": "2026-07-23",
+      "delistingDate": "2026-09-18",
+      "subject": "公告科嶠股份有限公司國內第一次無擔保轉換公司債(簡稱：科嶠一，代碼：45421)發行公司行使債券贖回權暨訂於115年09月18日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=4542&date1=20260723&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3388",
+      "issuerName": "崇越電",
+      "bondCode": "33881",
+      "bondName": "崇越電一",
+      "announcementDate": "2026-07-16",
+      "delistingDate": "2026-09-10",
+      "subject": "公告崇越電股份有限公司第一次無擔保轉換公司債(簡稱：崇越電一，代碼：33881)發行公司行使債券贖回權暨訂於115年09月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3388&date1=20260716&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6672",
+      "issuerName": "騰輝電子-KY",
+      "bondCode": "66722",
+      "bondName": "騰輝電子二KY",
+      "announcementDate": "2026-07-15",
+      "delistingDate": "2026-09-02",
+      "subject": "公告騰輝電子-KY股份有限公司中華民國境內第二次無擔保轉換公司債(簡稱：騰輝電子二KY，代碼：66722)發行公司行使債券贖回權暨訂於115年09月02日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6672&date1=20260715&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6451",
+      "issuerName": "訊芯-KY",
+      "bondCode": "64512",
+      "bondName": "訊芯二KY",
+      "announcementDate": "2026-07-15",
+      "delistingDate": "2026-09-14",
+      "subject": "公告訊芯-KY股份有限公司中華民國境內第二次無擔保轉換公司債(簡稱：訊芯二KY，代碼：64512)發行公司行使債券贖回權暨訂於115年09月14日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6451&date1=20260715&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "1560",
+      "issuerName": "中砂",
+      "bondCode": "15601",
+      "bondName": "中砂一",
+      "announcementDate": "2026-07-15",
+      "delistingDate": "2026-09-03",
+      "subject": "公告中砂股份有限公司國內第一次無擔保轉換公司債(簡稱：中砂一，代碼：15601)發行公司行使債券贖回權暨訂於115年09月03日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=1560&date1=20260715&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6672",
+      "issuerName": "騰輝電子-KY",
+      "bondCode": "66721",
+      "bondName": "騰輝電子一KY",
+      "announcementDate": "2026-07-14",
+      "delistingDate": "2026-09-02",
+      "subject": "公告騰輝電子-KY股份有限公司中華民國境內第一次無擔保轉換公司債(簡稱：騰輝電子一KY，代碼：66721)發行公司行使債券贖回權暨訂於115年09月02日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6672&date1=20260714&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2368",
+      "issuerName": "金像電",
+      "bondCode": "23683",
+      "bondName": "金像電三",
+      "announcementDate": "2026-07-06",
+      "delistingDate": "2026-08-21",
+      "subject": "公告金像電股份有限公司國內第三次無擔保轉換公司債(簡稱：金像電三，代碼：23683)發行公司行使債券贖回權暨訂於115年08月21日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2368&date1=20260706&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "8996",
+      "issuerName": "高力",
+      "bondCode": "89964",
+      "bondName": "高力四",
+      "announcementDate": "2026-07-02",
+      "delistingDate": "2026-08-28",
+      "subject": "公告高力股份有限公司國內第四次無擔保轉換公司債(簡稱：高力四，代碼：89964)發行公司行使債券贖回權暨訂於115年08月28日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=8996&date1=20260702&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2464",
+      "issuerName": "盟立",
+      "bondCode": "24642",
+      "bondName": "盟立二",
+      "announcementDate": "2026-06-16",
+      "delistingDate": "2026-08-10",
+      "subject": "公告盟立股份有限公司國內第二次無擔保轉換公司債(簡稱：盟立二，代碼：24642)發行公司行使債券贖回權暨訂於115年08月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2464&date1=20260616&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6584",
+      "issuerName": "南俊國際",
+      "bondCode": "65842",
+      "bondName": "南俊國際二",
+      "announcementDate": "2026-06-15",
+      "delistingDate": "2026-08-10",
+      "subject": "公告南俊國際股份有限公司國內第二次無擔保轉換公司債(簡稱：南俊國際二，代碼：65842)發行公司行使債券贖回權暨訂於115年08月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6584&date1=20260615&seq_no=4&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6584",
+      "issuerName": "南俊國際",
+      "bondCode": "65841",
+      "bondName": "南俊國際一",
+      "announcementDate": "2026-06-15",
+      "delistingDate": "2026-08-10",
+      "subject": "公告南俊國際股份有限公司國內第一次有擔保轉換公司債(簡稱：南俊國際一，代碼：65841)發行公司行使債券贖回權暨訂於115年08月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6584&date1=20260615&seq_no=3&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3702",
+      "issuerName": "大聯大",
+      "bondCode": "37022",
+      "bondName": "大聯大二",
+      "announcementDate": "2026-06-10",
+      "delistingDate": "2026-07-27",
+      "subject": "公告大聯大股份有限公司國內第二次無擔保轉換公司債(簡稱：大聯大二，代碼：37022)發行公司行使債券贖回權暨訂於115年07月27日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3702&date1=20260610&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3702",
+      "issuerName": "大聯大",
+      "bondCode": "37023",
+      "bondName": "大聯大三",
+      "announcementDate": "2026-06-10",
+      "delistingDate": "2026-07-27",
+      "subject": "公告大聯大股份有限公司國內第三次無擔保轉換公司債(簡稱：大聯大三，代碼：37023)發行公司行使債券贖回權暨訂於115年07月27日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3702&date1=20260610&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2486",
+      "issuerName": "一詮",
+      "bondCode": "24866",
+      "bondName": "一詮六",
+      "announcementDate": "2026-06-02",
+      "delistingDate": "2026-07-20",
+      "subject": "公告一詮股份有限公司國內第六次無擔保轉換公司債(簡稱：一詮六，代碼：24866)發行公司行使債券贖回權暨訂於115年07月20日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2486&date1=20260602&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "4967",
+      "issuerName": "十銓",
+      "bondCode": "49674",
+      "bondName": "十銓四",
+      "announcementDate": "2026-05-29",
+      "delistingDate": "2026-07-20",
+      "subject": "公告十銓股份有限公司第四次有擔保轉換公司債(簡稱：十銓四，代碼：49674)發行公司行使債券贖回權暨訂於115年07月20日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=4967&date1=20260529&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6275",
+      "issuerName": "元山",
+      "bondCode": "62756",
+      "bondName": "元山六",
+      "announcementDate": "2026-05-28",
+      "delistingDate": "2026-07-15",
+      "subject": "公告元山股份有限公司國內第六次有擔保轉換公司債(簡稱：元山六，代碼：62756)發行公司行使債券贖回權暨訂於115年07月15日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6275&date1=20260528&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3260",
+      "issuerName": "威剛",
+      "bondCode": "32608",
+      "bondName": "威剛八",
+      "announcementDate": "2026-05-22",
+      "delistingDate": "2026-07-10",
+      "subject": "公告威剛股份有限公司第八次無擔保轉換公司債轉換公司債(簡稱：威剛八，代碼：32608)發行公司行使債券贖回權暨訂於115年07月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3260&date1=20260522&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3583",
+      "issuerName": "辛耘",
+      "bondCode": "35832",
+      "bondName": "辛耘二",
+      "announcementDate": "2026-05-12",
+      "delistingDate": "2026-07-08",
+      "subject": "公告辛耘股份有限公司國內第二次無擔保轉換公司債(簡稱：辛耘二，代碼：35832)發行公司行使債券贖回權暨訂於115年07月08日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3583&date1=20260512&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3583",
+      "issuerName": "辛耘",
+      "bondCode": "35831",
+      "bondName": "辛耘一",
+      "announcementDate": "2026-05-12",
+      "delistingDate": "2026-07-08",
+      "subject": "公告辛耘股份有限公司國內第一次無擔保轉換公司債(簡稱：辛耘一，代碼：35831)發行公司行使債券贖回權暨訂於115年07月08日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3583&date1=20260512&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3135",
+      "issuerName": "凌航",
+      "bondCode": "31351",
+      "bondName": "凌航一",
+      "announcementDate": "2026-05-08",
+      "delistingDate": "2026-06-25",
+      "subject": "公告凌航股份有限公司國內第一次無擔保轉換公司債(簡稱：凌航一，代碼：31351)發行公司行使債券贖回權暨訂於115年06月25日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3135&date1=20260508&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6274",
+      "issuerName": "台燿",
+      "bondCode": "62745",
+      "bondName": "台燿五",
+      "announcementDate": "2026-04-29",
+      "delistingDate": "2026-06-29",
+      "subject": "公告台燿股份有限公司第五次無擔保轉換公司債(簡稱：台燿五，代碼：62745)發行公司行使債券贖回權暨訂於115年06月29日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6274&date1=20260429&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6442",
+      "issuerName": "光聖",
+      "bondCode": "64423",
+      "bondName": "光聖三",
+      "announcementDate": "2026-04-24",
+      "delistingDate": "2026-06-24",
+      "subject": "公告光聖股份有限公司國內第三次無擔保轉換公司債(簡稱：光聖三，代碼：64423)發行公司行使債券贖回權暨訂於115年06月24日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6442&date1=20260424&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6715",
+      "issuerName": "嘉基",
+      "bondCode": "67152",
+      "bondName": "嘉基二",
+      "announcementDate": "2026-04-22",
+      "delistingDate": "2026-06-11",
+      "subject": "公告嘉基股份有限公司國內第二次無擔保轉換公司債(簡稱：嘉基二，代碼：67152)發行公司行使債券贖回權暨訂於115年06月11日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6715&date1=20260422&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6442",
+      "issuerName": "光聖",
+      "bondCode": "64422",
+      "bondName": "光聖二",
+      "announcementDate": "2026-04-15",
+      "delistingDate": "2026-06-12",
+      "subject": "公告光聖股份有限公司國內第二次無擔保轉換公司債(簡稱：光聖二，代碼：64422)發行公司行使債券贖回權暨訂於115年06月12日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6442&date1=20260415&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "4916",
+      "issuerName": "事欣科",
+      "bondCode": "49165",
+      "bondName": "事欣科五",
+      "announcementDate": "2026-04-07",
+      "delistingDate": "2026-06-01",
+      "subject": "公告事欣科股份有限公司國內第五次無擔保轉換公司債(簡稱：事欣科五，代碼：49165)發行公司行使債券贖回權暨訂於115年06月01日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=4916&date1=20260407&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6187",
+      "issuerName": "萬潤",
+      "bondCode": "61875",
+      "bondName": "萬潤五",
+      "announcementDate": "2026-04-01",
+      "delistingDate": "2026-05-21",
+      "subject": "公告萬潤股份有限公司第五次無擔保轉換公司債(簡稱：萬潤五，代碼：61875)發行公司行使債券贖回權暨訂於115年05月21日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6187&date1=20260401&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2236",
+      "issuerName": "百達-KY",
+      "bondCode": "22362",
+      "bondName": "百達二KY",
+      "announcementDate": "2026-03-13",
+      "delistingDate": "2026-04-28",
+      "subject": "公告百達-KY股份有限公司中華民國境內第二次無擔保轉換公司債(簡稱：百達二KY，代碼：22362)發行公司行使債券贖回權暨訂於115年04月28日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2236&date1=20260313&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3138",
+      "issuerName": "耀登",
+      "bondCode": "31382",
+      "bondName": "耀登二",
+      "announcementDate": "2026-03-11",
+      "delistingDate": "2026-04-22",
+      "subject": "公告耀登股份有限公司第二次無擔保轉換公司債(簡稱：耀登二，代碼：31382)發行公司行使債券贖回權暨訂於115年04月22日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3138&date1=20260311&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3006",
+      "issuerName": "晶豪科",
+      "bondCode": "30061",
+      "bondName": "晶豪科一",
+      "announcementDate": "2026-02-12",
+      "delistingDate": "2026-04-09",
+      "subject": "公告晶豪科股份有限公司國內第一次無擔保轉換公司債(簡稱：晶豪科一，代碼：30061)發行公司行使債券贖回權暨訂於115年04月09日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3006&date1=20260212&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6196",
+      "issuerName": "帆宣",
+      "bondCode": "61965",
+      "bondName": "帆宣五",
+      "announcementDate": "2026-02-10",
+      "delistingDate": "2026-03-26",
+      "subject": "公告帆宣股份有限公司第五次無擔保轉換公司債(簡稱：帆宣五，代碼：61965)發行公司行使債券贖回權暨訂於115年03月26日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6196&date1=20260210&seq_no=2&pub_class=0&firstin=1"
+    }
+  ],
+  "underwritingCases": [],
+  "sources": {
+    "institution": {
+      "state": "unavailable",
+      "dataDate": null,
+      "periodYear": null
+    },
+    "redemption": {
+      "state": "fresh",
+      "dataDate": "2026-08-13",
+      "periodYear": 2026
+    },
+    "underwriting": {
+      "state": "unavailable",
+      "dataDate": null,
+      "periodYear": null
+    }
+  }
+}

@@ -77,7 +77,9 @@ jobs:
           DATA_DATE: ${{ steps.context.outputs.data_date }}
         shell: bash
         run: |
-          git add -- static-showcase/data
+          # Generation artifacts are normally ignored locally. Force-add the
+          # verified pointer and every file it references as one atomic commit.
+          git add -f -- static-showcase/data
           if git diff --cached --quiet -- static-showcase/data; then
             echo "No verified public snapshot changes."
             exit 0

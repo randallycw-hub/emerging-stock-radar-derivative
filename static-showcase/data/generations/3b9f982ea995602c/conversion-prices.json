@@ -1,0 +1,3130 @@
+[
+  {
+    "bondCode": "11011",
+    "issuerCode": "1101",
+    "initialConversionPrice": "36.5",
+    "currentConversionPrice": "34",
+    "effectiveDate": "2026-07-07",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=11011&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1101&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "12561",
+    "issuerCode": "1256",
+    "initialConversionPrice": "190",
+    "currentConversionPrice": "182.5",
+    "effectiveDate": "2026-07-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=12561&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1256&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "13166",
+    "issuerCode": "1316",
+    "initialConversionPrice": "17.8",
+    "currentConversionPrice": "17.8",
+    "effectiveDate": "2024-12-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=13166&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1316&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "13382",
+    "issuerCode": "1338",
+    "initialConversionPrice": "39.4",
+    "currentConversionPrice": "37.6",
+    "effectiveDate": "2025-07-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=13382&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1338&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "140201",
+    "issuerCode": "1402",
+    "initialConversionPrice": "45.4",
+    "currentConversionPrice": "45.4",
+    "effectiveDate": "2024-08-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=140201&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1402&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "140202",
+    "issuerCode": "1402",
+    "initialConversionPrice": "33.7",
+    "currentConversionPrice": "33.7",
+    "effectiveDate": "2024-08-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=140202&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1402&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "14363",
+    "issuerCode": "1436",
+    "initialConversionPrice": "182.5",
+    "currentConversionPrice": "114.3",
+    "effectiveDate": "2026-07-31",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=14363&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1436&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "14364",
+    "issuerCode": "1436",
+    "initialConversionPrice": "140.3",
+    "currentConversionPrice": "87.9",
+    "effectiveDate": "2026-07-31",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=14364&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1436&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "14381",
+    "issuerCode": "1438",
+    "initialConversionPrice": "57.5",
+    "currentConversionPrice": "55.88",
+    "effectiveDate": "2024-12-26",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=14381&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1438&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "14664",
+    "issuerCode": "1466",
+    "initialConversionPrice": "18.8",
+    "currentConversionPrice": "18.8",
+    "effectiveDate": "2025-06-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=14664&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1466&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "14722",
+    "issuerCode": "1472",
+    "initialConversionPrice": "102",
+    "currentConversionPrice": "91.9",
+    "effectiveDate": "2026-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=14722&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1472&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "14723",
+    "issuerCode": "1472",
+    "initialConversionPrice": "105",
+    "currentConversionPrice": "94.6",
+    "effectiveDate": "2026-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=14723&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1472&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "14743",
+    "issuerCode": "1474",
+    "initialConversionPrice": "14.5",
+    "currentConversionPrice": "13.7",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=14743&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1474&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15142",
+    "issuerCode": "1514",
+    "initialConversionPrice": "113.2",
+    "currentConversionPrice": "109.2",
+    "effectiveDate": "2025-09-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15142&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1514&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15261",
+    "issuerCode": "1526",
+    "initialConversionPrice": "38",
+    "currentConversionPrice": "37.29",
+    "effectiveDate": "2023-12-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15261&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1526&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15364",
+    "issuerCode": "1536",
+    "initialConversionPrice": "72.26",
+    "currentConversionPrice": "71.47",
+    "effectiveDate": "2025-04-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15364&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1536&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15601",
+    "issuerCode": "1560",
+    "initialConversionPrice": "292.1",
+    "currentConversionPrice": "282.7",
+    "effectiveDate": "2026-07-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15601&bond_kind=5&bond_subn=%24M00000002&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1560&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15602",
+    "issuerCode": "1560",
+    "initialConversionPrice": "708.3",
+    "currentConversionPrice": "708.3",
+    "effectiveDate": "2026-09-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15602&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1560&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15864",
+    "issuerCode": "1586",
+    "initialConversionPrice": "33.39",
+    "currentConversionPrice": "30.74",
+    "effectiveDate": "2025-10-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15864&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1586&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15865",
+    "issuerCode": "1586",
+    "initialConversionPrice": "32.74",
+    "currentConversionPrice": "30.14",
+    "effectiveDate": "2025-10-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15865&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1586&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15952",
+    "issuerCode": "1595",
+    "initialConversionPrice": "38.3",
+    "currentConversionPrice": "37.7",
+    "effectiveDate": "2025-07-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15952&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1595&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "15984",
+    "issuerCode": "1598",
+    "initialConversionPrice": "33.6",
+    "currentConversionPrice": "31.9",
+    "effectiveDate": "2026-07-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=15984&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1598&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "16095",
+    "issuerCode": "1609",
+    "initialConversionPrice": "53.1",
+    "currentConversionPrice": "50.4",
+    "effectiveDate": "2026-06-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=16095&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1609&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "16231",
+    "issuerCode": "1623",
+    "initialConversionPrice": "232",
+    "currentConversionPrice": "232",
+    "effectiveDate": "2026-07-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=16231&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1623&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "17172",
+    "issuerCode": "1717",
+    "initialConversionPrice": "76",
+    "currentConversionPrice": "75.7",
+    "effectiveDate": "2026-07-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=17172&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1717&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "17813",
+    "issuerCode": "1781",
+    "initialConversionPrice": "18",
+    "currentConversionPrice": "18",
+    "effectiveDate": "2024-09-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=17813&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1781&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "17863",
+    "issuerCode": "1786",
+    "initialConversionPrice": "116.5",
+    "currentConversionPrice": "116.5",
+    "effectiveDate": "2025-08-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=17863&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1786&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "19094",
+    "issuerCode": "1909",
+    "initialConversionPrice": "26.2",
+    "currentConversionPrice": "23.9",
+    "effectiveDate": "2023-07-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=19094&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=1909&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "20344",
+    "issuerCode": "2034",
+    "initialConversionPrice": "25.6",
+    "currentConversionPrice": "25.2",
+    "effectiveDate": "2024-11-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=20344&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2034&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "21043",
+    "issuerCode": "2104",
+    "initialConversionPrice": "21.2",
+    "currentConversionPrice": "21.2",
+    "effectiveDate": "2023-10-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=21043&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2104&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "22013",
+    "issuerCode": "2201",
+    "initialConversionPrice": "82",
+    "currentConversionPrice": "75",
+    "effectiveDate": "2024-08-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=22013&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2201&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "22283",
+    "issuerCode": "2228",
+    "initialConversionPrice": "95.51",
+    "currentConversionPrice": "80.91",
+    "effectiveDate": "2026-07-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=22283&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2228&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "22331",
+    "issuerCode": "2233",
+    "initialConversionPrice": "250",
+    "currentConversionPrice": "250",
+    "effectiveDate": "2026-01-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=22331&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2233&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "22363",
+    "issuerCode": "2236",
+    "initialConversionPrice": "118.1",
+    "currentConversionPrice": "118.1",
+    "effectiveDate": "2026-02-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=22363&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2236&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "22471",
+    "issuerCode": "2247",
+    "initialConversionPrice": "307.6",
+    "currentConversionPrice": "273.1",
+    "effectiveDate": "2026-07-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=22471&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2247&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "22472",
+    "issuerCode": "2247",
+    "initialConversionPrice": "297.8",
+    "currentConversionPrice": "264.4",
+    "effectiveDate": "2026-07-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=22472&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2247&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "23031",
+    "issuerCode": "2303",
+    "initialConversionPrice": "146",
+    "currentConversionPrice": "146",
+    "effectiveDate": "2026-08-07",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=23031&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2303&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "23032",
+    "issuerCode": "2303",
+    "initialConversionPrice": "130.7",
+    "currentConversionPrice": "130.7",
+    "effectiveDate": "2026-09-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=23032&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2303&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "23291",
+    "issuerCode": "2329",
+    "initialConversionPrice": "51.3",
+    "currentConversionPrice": "50.3",
+    "effectiveDate": "2026-06-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=23291&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2329&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "23372",
+    "issuerCode": "2337",
+    "initialConversionPrice": "23",
+    "currentConversionPrice": "23",
+    "effectiveDate": "2025-03-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=23372&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2337&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "23511",
+    "issuerCode": "2351",
+    "initialConversionPrice": "75",
+    "currentConversionPrice": "72.4",
+    "effectiveDate": "2025-08-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=23511&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2351&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "23742",
+    "issuerCode": "2374",
+    "initialConversionPrice": "86.8",
+    "currentConversionPrice": "83.6",
+    "effectiveDate": "2026-08-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=23742&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2374&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24023",
+    "issuerCode": "2402",
+    "initialConversionPrice": "55",
+    "currentConversionPrice": "53.3",
+    "effectiveDate": "2026-08-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24023&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2402&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24271",
+    "issuerCode": "2427",
+    "initialConversionPrice": "28",
+    "currentConversionPrice": "26.3",
+    "effectiveDate": "2025-08-11",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24271&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2427&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24361",
+    "issuerCode": "2436",
+    "initialConversionPrice": "61.2",
+    "currentConversionPrice": "51.7",
+    "effectiveDate": "2026-07-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24361&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2436&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24394",
+    "issuerCode": "2439",
+    "initialConversionPrice": "143.1",
+    "currentConversionPrice": "128.9",
+    "effectiveDate": "2025-09-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24394&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2439&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24395",
+    "issuerCode": "2439",
+    "initialConversionPrice": "139",
+    "currentConversionPrice": "125.2",
+    "effectiveDate": "2025-09-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24395&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2439&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24423",
+    "issuerCode": "2442",
+    "initialConversionPrice": "26.1",
+    "currentConversionPrice": "25.1",
+    "effectiveDate": "2025-09-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24423&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2442&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24424",
+    "issuerCode": "2442",
+    "initialConversionPrice": "26.4",
+    "currentConversionPrice": "25.3",
+    "effectiveDate": "2025-09-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24424&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2442&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24552",
+    "issuerCode": "2455",
+    "initialConversionPrice": "162.9",
+    "currentConversionPrice": "161.8",
+    "effectiveDate": "2026-07-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24552&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2455&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24553",
+    "issuerCode": "2455",
+    "initialConversionPrice": "153.5",
+    "currentConversionPrice": "152.5",
+    "effectiveDate": "2026-07-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24553&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2455&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24672",
+    "issuerCode": "2467",
+    "initialConversionPrice": "250.6",
+    "currentConversionPrice": "248.5",
+    "effectiveDate": "2026-06-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24672&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2467&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24673",
+    "issuerCode": "2467",
+    "initialConversionPrice": "246.6",
+    "currentConversionPrice": "244.5",
+    "effectiveDate": "2026-06-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24673&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2467&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24762",
+    "issuerCode": "2476",
+    "initialConversionPrice": "72.2",
+    "currentConversionPrice": "64.8",
+    "effectiveDate": "2026-08-19",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24762&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2476&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "24867",
+    "issuerCode": "2486",
+    "initialConversionPrice": "256",
+    "currentConversionPrice": "256",
+    "effectiveDate": "2026-07-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=24867&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2486&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "25283",
+    "issuerCode": "2528",
+    "initialConversionPrice": "46.4",
+    "currentConversionPrice": "34.9",
+    "effectiveDate": "2026-08-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=25283&bond_kind=5&bond_subn=%24M00000002&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2528&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "25284",
+    "issuerCode": "2528",
+    "initialConversionPrice": "45",
+    "currentConversionPrice": "33.7",
+    "effectiveDate": "2026-08-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=25284&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2528&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "25303",
+    "issuerCode": "2530",
+    "initialConversionPrice": "34.7",
+    "currentConversionPrice": "32.2",
+    "effectiveDate": "2025-12-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=25303&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2530&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "25304",
+    "issuerCode": "2530",
+    "initialConversionPrice": "32.5",
+    "currentConversionPrice": "30.2",
+    "effectiveDate": "2025-12-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=25304&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2530&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "25483",
+    "issuerCode": "2548",
+    "initialConversionPrice": "138",
+    "currentConversionPrice": "138",
+    "effectiveDate": "2024-10-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=25483&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2548&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "25484",
+    "issuerCode": "2548",
+    "initialConversionPrice": "136.3",
+    "currentConversionPrice": "136.3",
+    "effectiveDate": "2024-10-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=25484&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2548&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "26417",
+    "issuerCode": "2641",
+    "initialConversionPrice": "22.7",
+    "currentConversionPrice": "21.59",
+    "effectiveDate": "2026-06-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=26417&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2641&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "26418",
+    "issuerCode": "2641",
+    "initialConversionPrice": "19.3",
+    "currentConversionPrice": "18.82",
+    "effectiveDate": "2026-06-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=26418&bond_kind=5&bond_subn=%24M00000001&bond_yrn=8&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2641&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27271",
+    "issuerCode": "2727",
+    "initialConversionPrice": "295",
+    "currentConversionPrice": "218.2",
+    "effectiveDate": "2025-07-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27271&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2727&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27323",
+    "issuerCode": "2732",
+    "initialConversionPrice": "137.7",
+    "currentConversionPrice": "121",
+    "effectiveDate": "2026-04-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27323&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2732&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27324",
+    "issuerCode": "2732",
+    "initialConversionPrice": "74.3",
+    "currentConversionPrice": "72",
+    "effectiveDate": "2026-04-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27324&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2732&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27431",
+    "issuerCode": "2743",
+    "initialConversionPrice": "135",
+    "currentConversionPrice": "135",
+    "effectiveDate": "2025-08-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27431&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2743&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27451",
+    "issuerCode": "2745",
+    "initialConversionPrice": "111.3",
+    "currentConversionPrice": "111.3",
+    "effectiveDate": "2026-01-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27451&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2745&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27531",
+    "issuerCode": "2753",
+    "initialConversionPrice": "212",
+    "currentConversionPrice": "199.3",
+    "effectiveDate": "2026-07-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27531&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2753&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27532",
+    "issuerCode": "2753",
+    "initialConversionPrice": "210",
+    "currentConversionPrice": "197.3",
+    "effectiveDate": "2026-07-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27532&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2753&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27551",
+    "issuerCode": "2755",
+    "initialConversionPrice": "106",
+    "currentConversionPrice": "67.9",
+    "effectiveDate": "2026-07-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27551&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2755&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "27561",
+    "issuerCode": "2756",
+    "initialConversionPrice": "94.3",
+    "currentConversionPrice": "87.7",
+    "effectiveDate": "2026-04-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=27561&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2756&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "29061",
+    "issuerCode": "2906",
+    "initialConversionPrice": "18",
+    "currentConversionPrice": "16.8",
+    "effectiveDate": "2025-07-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=29061&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=2906&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30112",
+    "issuerCode": "3011",
+    "initialConversionPrice": "12.5",
+    "currentConversionPrice": "12.5",
+    "effectiveDate": "2026-03-26",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30112&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3011&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30134",
+    "issuerCode": "3013",
+    "initialConversionPrice": "144.5",
+    "currentConversionPrice": "143.2",
+    "effectiveDate": "2026-07-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30134&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3013&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30165",
+    "issuerCode": "3016",
+    "initialConversionPrice": "72.6",
+    "currentConversionPrice": "71.1",
+    "effectiveDate": "2026-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30165&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3016&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30166",
+    "issuerCode": "3016",
+    "initialConversionPrice": "105",
+    "currentConversionPrice": "105",
+    "effectiveDate": "2026-08-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30166&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3016&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30285",
+    "issuerCode": "3028",
+    "initialConversionPrice": "78",
+    "currentConversionPrice": "78",
+    "effectiveDate": "2026-07-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30285&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3028&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30321",
+    "issuerCode": "3032",
+    "initialConversionPrice": "105.9",
+    "currentConversionPrice": "105.9",
+    "effectiveDate": "2025-11-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30321&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3032&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30322",
+    "issuerCode": "3032",
+    "initialConversionPrice": "101.9",
+    "currentConversionPrice": "101.9",
+    "effectiveDate": "2025-11-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30322&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3032&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30336",
+    "issuerCode": "3033",
+    "initialConversionPrice": "34.27",
+    "currentConversionPrice": "24.84",
+    "effectiveDate": "2025-08-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30336&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3033&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30337",
+    "issuerCode": "3033",
+    "initialConversionPrice": "36.67",
+    "currentConversionPrice": "34.44",
+    "effectiveDate": "2025-08-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30337&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3033&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30371",
+    "issuerCode": "3037",
+    "initialConversionPrice": "165.4",
+    "currentConversionPrice": "163.8",
+    "effectiveDate": "2026-07-12",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30371&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3037&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30401",
+    "issuerCode": "3040",
+    "initialConversionPrice": "48.3",
+    "currentConversionPrice": "47.2",
+    "effectiveDate": "2025-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30401&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3040&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30454",
+    "issuerCode": "3045",
+    "initialConversionPrice": "123",
+    "currentConversionPrice": "113.5",
+    "effectiveDate": "2026-07-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30454&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3045&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30455",
+    "issuerCode": "3045",
+    "initialConversionPrice": "115.8",
+    "currentConversionPrice": "106.9",
+    "effectiveDate": "2026-07-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30455&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3045&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30811",
+    "issuerCode": "3081",
+    "initialConversionPrice": "1757.9",
+    "currentConversionPrice": "1757.9",
+    "effectiveDate": "2026-08-12",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30811&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3081&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30812",
+    "issuerCode": "3081",
+    "initialConversionPrice": "2168.8",
+    "currentConversionPrice": "2168.8",
+    "effectiveDate": "2026-08-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30812&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3081&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30882",
+    "issuerCode": "3088",
+    "initialConversionPrice": "109.5",
+    "currentConversionPrice": "86.7",
+    "effectiveDate": "2026-07-31",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30882&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3088&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "30954",
+    "issuerCode": "3095",
+    "initialConversionPrice": "41.1",
+    "currentConversionPrice": "41.1",
+    "effectiveDate": "2025-02-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=30954&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3095&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31222",
+    "issuerCode": "3122",
+    "initialConversionPrice": "42.3",
+    "currentConversionPrice": "42.3",
+    "effectiveDate": "2024-05-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31222&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3122&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31311",
+    "issuerCode": "3131",
+    "initialConversionPrice": "1762.2",
+    "currentConversionPrice": "1711.8",
+    "effectiveDate": "2026-08-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31311&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3131&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31312",
+    "issuerCode": "3131",
+    "initialConversionPrice": "1626.6",
+    "currentConversionPrice": "1603.5",
+    "effectiveDate": "2026-08-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31312&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3131&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31352",
+    "issuerCode": "3135",
+    "initialConversionPrice": "129.9",
+    "currentConversionPrice": "129.9",
+    "effectiveDate": "2026-05-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31352&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3135&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31413",
+    "issuerCode": "3141",
+    "initialConversionPrice": "95",
+    "currentConversionPrice": "93.6",
+    "effectiveDate": "2025-08-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31413&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3141&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31414",
+    "issuerCode": "3141",
+    "initialConversionPrice": "63.01",
+    "currentConversionPrice": "63.01",
+    "effectiveDate": "2026-08-07",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31414&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3141&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31494",
+    "issuerCode": "3149",
+    "initialConversionPrice": "68.1",
+    "currentConversionPrice": "68.1",
+    "effectiveDate": "2026-08-31",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31494&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3149&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31672",
+    "issuerCode": "3167",
+    "initialConversionPrice": "170",
+    "currentConversionPrice": "168.3",
+    "effectiveDate": "2025-09-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31672&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3167&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "31882",
+    "issuerCode": "3188",
+    "initialConversionPrice": "31.4",
+    "currentConversionPrice": "28.4",
+    "effectiveDate": "2026-04-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=31882&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3188&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "32071",
+    "issuerCode": "3207",
+    "initialConversionPrice": "105.47",
+    "currentConversionPrice": "100.99",
+    "effectiveDate": "2024-12-19",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=32071&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3207&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "32191",
+    "issuerCode": "3219",
+    "initialConversionPrice": "66.4",
+    "currentConversionPrice": "66.4",
+    "effectiveDate": "2026-08-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=32191&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3219&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "32571",
+    "issuerCode": "3257",
+    "initialConversionPrice": "75",
+    "currentConversionPrice": "68.5",
+    "effectiveDate": "2026-05-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=32571&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3257&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "32723",
+    "issuerCode": "3272",
+    "initialConversionPrice": "34.2",
+    "currentConversionPrice": "34.2",
+    "effectiveDate": "2024-03-07",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=32723&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3272&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "32843",
+    "issuerCode": "3284",
+    "initialConversionPrice": "23.91",
+    "currentConversionPrice": "23.41",
+    "effectiveDate": "2026-07-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=32843&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3284&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "32943",
+    "issuerCode": "3294",
+    "initialConversionPrice": "41.8",
+    "currentConversionPrice": "41.8",
+    "effectiveDate": "2026-06-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=32943&bond_kind=5&bond_subn=%24M00000002&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3294&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33035",
+    "issuerCode": "3303",
+    "initialConversionPrice": "62",
+    "currentConversionPrice": "55.7",
+    "effectiveDate": "2026-07-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33035&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3303&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33055",
+    "issuerCode": "3305",
+    "initialConversionPrice": "78.3",
+    "currentConversionPrice": "72",
+    "effectiveDate": "2026-07-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33055&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3305&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33121",
+    "issuerCode": "3312",
+    "initialConversionPrice": "76.8",
+    "currentConversionPrice": "73.2",
+    "effectiveDate": "2025-10-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33121&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3312&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33121",
+    "issuerCode": "3312",
+    "initialConversionPrice": "76.8",
+    "currentConversionPrice": "71.4",
+    "effectiveDate": "2026-09-14",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33121&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3312&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33133",
+    "issuerCode": "3313",
+    "initialConversionPrice": "16.5",
+    "currentConversionPrice": "15.7",
+    "effectiveDate": "2025-03-26",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33133&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3313&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33225",
+    "issuerCode": "3322",
+    "initialConversionPrice": "23.78",
+    "currentConversionPrice": "22.97",
+    "effectiveDate": "2025-04-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33225&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3322&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33245",
+    "issuerCode": "3324",
+    "initialConversionPrice": "754",
+    "currentConversionPrice": "726.1",
+    "effectiveDate": "2026-06-26",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33245&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3324&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33246",
+    "issuerCode": "3324",
+    "initialConversionPrice": "1124",
+    "currentConversionPrice": "1111.3",
+    "effectiveDate": "2026-06-26",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33246&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3324&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33247",
+    "issuerCode": "3324",
+    "initialConversionPrice": "1105",
+    "currentConversionPrice": "1092.5",
+    "effectiveDate": "2026-06-26",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33247&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3324&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33466",
+    "issuerCode": "3346",
+    "initialConversionPrice": "38.8",
+    "currentConversionPrice": "36.5",
+    "effectiveDate": "2025-09-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33466&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3346&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33571",
+    "issuerCode": "3357",
+    "initialConversionPrice": "118",
+    "currentConversionPrice": "105.6",
+    "effectiveDate": "2026-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33571&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3357&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33621",
+    "issuerCode": "3362",
+    "initialConversionPrice": "254",
+    "currentConversionPrice": "251",
+    "effectiveDate": "2025-08-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33621&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3362&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33763",
+    "issuerCode": "3376",
+    "initialConversionPrice": "202",
+    "currentConversionPrice": "195.2",
+    "effectiveDate": "2025-08-12",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33763&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3376&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33881",
+    "issuerCode": "3388",
+    "initialConversionPrice": "73.6",
+    "currentConversionPrice": "60.8",
+    "effectiveDate": "2026-06-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33881&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3388&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "33902",
+    "issuerCode": "3390",
+    "initialConversionPrice": "26.2",
+    "currentConversionPrice": "24.2",
+    "effectiveDate": "2025-08-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=33902&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3390&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "34163",
+    "issuerCode": "3416",
+    "initialConversionPrice": "136.8",
+    "currentConversionPrice": "123.3",
+    "effectiveDate": "2026-07-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=34163&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3416&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "34793",
+    "issuerCode": "3479",
+    "initialConversionPrice": "121.5",
+    "currentConversionPrice": "121.5",
+    "effectiveDate": "2024-01-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=34793&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3479&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "34834",
+    "issuerCode": "3483",
+    "initialConversionPrice": "168",
+    "currentConversionPrice": "131.1",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=34834&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3483&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "34843",
+    "issuerCode": "3484",
+    "initialConversionPrice": "48.1",
+    "currentConversionPrice": "42.2",
+    "effectiveDate": "2025-09-14",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=34843&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3484&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "34913",
+    "issuerCode": "3491",
+    "initialConversionPrice": "1788",
+    "currentConversionPrice": "1788",
+    "effectiveDate": "2026-06-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=34913&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3491&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35122",
+    "issuerCode": "3512",
+    "initialConversionPrice": "20.5",
+    "currentConversionPrice": "20.5",
+    "effectiveDate": "2026-08-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35122&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3512&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35161",
+    "issuerCode": "3516",
+    "initialConversionPrice": "26.7",
+    "currentConversionPrice": "25.81",
+    "effectiveDate": "2025-08-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35161&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3516&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35181",
+    "issuerCode": "3518",
+    "initialConversionPrice": "35",
+    "currentConversionPrice": "35",
+    "effectiveDate": "2024-08-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35181&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3518&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35221",
+    "issuerCode": "3522",
+    "initialConversionPrice": "19.5",
+    "currentConversionPrice": "18.2",
+    "effectiveDate": "2026-01-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35221&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3522&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35265",
+    "issuerCode": "3526",
+    "initialConversionPrice": "207.3",
+    "currentConversionPrice": "151.9",
+    "effectiveDate": "2026-04-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35265&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3526&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35266",
+    "issuerCode": "3526",
+    "initialConversionPrice": "223.2",
+    "currentConversionPrice": "188.7",
+    "effectiveDate": "2026-04-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35266&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3526&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35267",
+    "issuerCode": "3526",
+    "initialConversionPrice": "269.6",
+    "currentConversionPrice": "254",
+    "effectiveDate": "2026-04-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35267&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3526&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35431",
+    "issuerCode": "3543",
+    "initialConversionPrice": "46.3",
+    "currentConversionPrice": "44.2",
+    "effectiveDate": "2026-06-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35431&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3543&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35482",
+    "issuerCode": "3548",
+    "initialConversionPrice": "199",
+    "currentConversionPrice": "186",
+    "effectiveDate": "2025-09-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35482&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3548&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35483",
+    "issuerCode": "3548",
+    "initialConversionPrice": "170",
+    "currentConversionPrice": "162.8",
+    "effectiveDate": "2025-09-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35483&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3548&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35513",
+    "issuerCode": "3551",
+    "initialConversionPrice": "173",
+    "currentConversionPrice": "173",
+    "effectiveDate": "2025-10-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35513&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3551&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35642",
+    "issuerCode": "3564",
+    "initialConversionPrice": "85",
+    "currentConversionPrice": "83.4",
+    "effectiveDate": "2026-07-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35642&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3564&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35833",
+    "issuerCode": "3583",
+    "initialConversionPrice": "850",
+    "currentConversionPrice": "850",
+    "effectiveDate": "2026-07-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35833&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3583&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35872",
+    "issuerCode": "3587",
+    "initialConversionPrice": "198",
+    "currentConversionPrice": "196.7",
+    "effectiveDate": "2026-04-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35872&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3587&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "35914",
+    "issuerCode": "3591",
+    "initialConversionPrice": "25.5",
+    "currentConversionPrice": "24.5",
+    "effectiveDate": "2025-07-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35914&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3591&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36053",
+    "issuerCode": "3605",
+    "initialConversionPrice": "51",
+    "currentConversionPrice": "48.9",
+    "effectiveDate": "2026-08-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36053&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3605&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36054",
+    "issuerCode": "3605",
+    "initialConversionPrice": "88",
+    "currentConversionPrice": "86.5",
+    "effectiveDate": "2026-08-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36054&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3605&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36173",
+    "issuerCode": "3617",
+    "initialConversionPrice": "305",
+    "currentConversionPrice": "274.3",
+    "effectiveDate": "2026-07-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36173&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3617&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36804",
+    "issuerCode": "3680",
+    "initialConversionPrice": "374.9",
+    "currentConversionPrice": "351",
+    "effectiveDate": "2026-06-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36804&bond_kind=5&bond_subn=%24M00000002&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3680&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36805",
+    "issuerCode": "3680",
+    "initialConversionPrice": "488.9",
+    "currentConversionPrice": "484.7",
+    "effectiveDate": "2026-06-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36805&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3680&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36806",
+    "issuerCode": "3680",
+    "initialConversionPrice": "483",
+    "currentConversionPrice": "478.9",
+    "effectiveDate": "2026-06-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36806&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3680&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36841",
+    "issuerCode": "3684",
+    "initialConversionPrice": "50.7",
+    "currentConversionPrice": "48.4",
+    "effectiveDate": "2026-06-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36841&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3684&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36872",
+    "issuerCode": "3687",
+    "initialConversionPrice": "75.9",
+    "currentConversionPrice": "73.9",
+    "effectiveDate": "2026-07-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36872&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3687&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36873",
+    "issuerCode": "3687",
+    "initialConversionPrice": "80.1",
+    "currentConversionPrice": "77.9",
+    "effectiveDate": "2026-07-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36873&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3687&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36894",
+    "issuerCode": "3689",
+    "initialConversionPrice": "65.7",
+    "currentConversionPrice": "59.7",
+    "effectiveDate": "2026-08-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36894&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3689&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "36913",
+    "issuerCode": "3691",
+    "initialConversionPrice": "118",
+    "currentConversionPrice": "118",
+    "effectiveDate": "2024-08-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=36913&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3691&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "37075",
+    "issuerCode": "3707",
+    "initialConversionPrice": "40.1",
+    "currentConversionPrice": "40.1",
+    "effectiveDate": "2025-08-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=37075&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3707&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "37083",
+    "issuerCode": "3708",
+    "initialConversionPrice": "99",
+    "currentConversionPrice": "81.7",
+    "effectiveDate": "2026-07-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=37083&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3708&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "37084",
+    "issuerCode": "3708",
+    "initialConversionPrice": "95",
+    "currentConversionPrice": "78.5",
+    "effectiveDate": "2026-07-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=37084&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3708&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "37151",
+    "issuerCode": "3715",
+    "initialConversionPrice": "140",
+    "currentConversionPrice": "140",
+    "effectiveDate": "2026-01-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=37151&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3715&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "37152",
+    "issuerCode": "3715",
+    "initialConversionPrice": "159",
+    "currentConversionPrice": "159",
+    "effectiveDate": "2026-03-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=37152&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3715&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "37171",
+    "issuerCode": "3717",
+    "initialConversionPrice": "17.5",
+    "currentConversionPrice": "17.5",
+    "effectiveDate": "2026-01-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=37171&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3717&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41135",
+    "issuerCode": "4113",
+    "initialConversionPrice": "26.3",
+    "currentConversionPrice": "26.3",
+    "effectiveDate": "2025-10-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41135&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4113&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41136",
+    "issuerCode": "4113",
+    "initialConversionPrice": "20.45",
+    "currentConversionPrice": "20.45",
+    "effectiveDate": "2026-03-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41136&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4113&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41236",
+    "issuerCode": "4123",
+    "initialConversionPrice": "48",
+    "currentConversionPrice": "35.1",
+    "effectiveDate": "2026-08-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41236&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4123&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41237",
+    "issuerCode": "4123",
+    "initialConversionPrice": "49",
+    "currentConversionPrice": "35.7",
+    "effectiveDate": "2026-08-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41237&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4123&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41238",
+    "issuerCode": "4123",
+    "initialConversionPrice": "43",
+    "currentConversionPrice": "39.1",
+    "effectiveDate": "2026-08-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41238&bond_kind=5&bond_subn=%24M00000001&bond_yrn=8&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4123&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41239",
+    "issuerCode": "4123",
+    "initialConversionPrice": "42",
+    "currentConversionPrice": "38.2",
+    "effectiveDate": "2026-08-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41239&bond_kind=5&bond_subn=%24M00000001&bond_yrn=9&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4123&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41295",
+    "issuerCode": "4129",
+    "initialConversionPrice": "109.8",
+    "currentConversionPrice": "100.5",
+    "effectiveDate": "2026-07-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41295&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4129&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41372",
+    "issuerCode": "4137",
+    "initialConversionPrice": "166",
+    "currentConversionPrice": "128.3",
+    "effectiveDate": "2026-07-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41372&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4137&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41645",
+    "issuerCode": "4164",
+    "initialConversionPrice": "48.4",
+    "currentConversionPrice": "45.3",
+    "effectiveDate": "2026-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41645&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4164&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41684",
+    "issuerCode": "4168",
+    "initialConversionPrice": "24",
+    "currentConversionPrice": "23.91",
+    "effectiveDate": "2025-09-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41684&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4168&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41903",
+    "issuerCode": "4190",
+    "initialConversionPrice": "56.1",
+    "currentConversionPrice": "53.1",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41903&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4190&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "41904",
+    "issuerCode": "4190",
+    "initialConversionPrice": "26.6",
+    "currentConversionPrice": "26.1",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=41904&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4190&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "44163",
+    "issuerCode": "4416",
+    "initialConversionPrice": "81",
+    "currentConversionPrice": "65.7",
+    "effectiveDate": "2025-09-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=44163&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4416&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "44383",
+    "issuerCode": "4438",
+    "initialConversionPrice": "76",
+    "currentConversionPrice": "75",
+    "effectiveDate": "2025-10-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=44383&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4438&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "44391",
+    "issuerCode": "4439",
+    "initialConversionPrice": "103",
+    "currentConversionPrice": "96.3",
+    "effectiveDate": "2026-07-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=44391&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4439&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "44421",
+    "issuerCode": "4442",
+    "initialConversionPrice": "49",
+    "currentConversionPrice": "45.3",
+    "effectiveDate": "2026-06-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=44421&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4442&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45031",
+    "issuerCode": "4503",
+    "initialConversionPrice": "46",
+    "currentConversionPrice": "46",
+    "effectiveDate": "2026-05-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45031&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4503&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45102",
+    "issuerCode": "4510",
+    "initialConversionPrice": "49.2",
+    "currentConversionPrice": "48.41",
+    "effectiveDate": "2025-07-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45102&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4510&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45421",
+    "issuerCode": "4542",
+    "initialConversionPrice": "86.8",
+    "currentConversionPrice": "85.5",
+    "effectiveDate": "2026-04-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45421&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4542&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45491",
+    "issuerCode": "4549",
+    "initialConversionPrice": "166",
+    "currentConversionPrice": "154.4",
+    "effectiveDate": "2025-09-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45491&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4549&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45554",
+    "issuerCode": "4555",
+    "initialConversionPrice": "44",
+    "currentConversionPrice": "43.4",
+    "effectiveDate": "2025-09-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45554&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4555&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45581",
+    "issuerCode": "4558",
+    "initialConversionPrice": "29.8",
+    "currentConversionPrice": "29.8",
+    "effectiveDate": "2025-08-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45581&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4558&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45641",
+    "issuerCode": "4564",
+    "initialConversionPrice": "27",
+    "currentConversionPrice": "26.4",
+    "effectiveDate": "2025-03-12",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45641&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4564&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45663",
+    "issuerCode": "4566",
+    "initialConversionPrice": "52",
+    "currentConversionPrice": "49",
+    "effectiveDate": "2026-04-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45663&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4566&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45691",
+    "issuerCode": "4569",
+    "initialConversionPrice": "212",
+    "currentConversionPrice": "212",
+    "effectiveDate": "2025-01-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45691&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4569&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45721",
+    "issuerCode": "4572",
+    "initialConversionPrice": "175",
+    "currentConversionPrice": "155",
+    "effectiveDate": "2026-07-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45721&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4572&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "45811",
+    "issuerCode": "4581",
+    "initialConversionPrice": "53.4",
+    "currentConversionPrice": "53.4",
+    "effectiveDate": "2025-08-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=45811&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4581&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47148",
+    "issuerCode": "4714",
+    "initialConversionPrice": "16.1",
+    "currentConversionPrice": "16.1",
+    "effectiveDate": "2026-05-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47148&bond_kind=5&bond_subn=%24M00000001&bond_yrn=8&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4714&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47223",
+    "issuerCode": "4722",
+    "initialConversionPrice": "141.3",
+    "currentConversionPrice": "140.5",
+    "effectiveDate": "2026-07-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47223&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4722&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47224",
+    "issuerCode": "4722",
+    "initialConversionPrice": "265.7",
+    "currentConversionPrice": "264.2",
+    "effectiveDate": "2026-07-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47224&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4722&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47393",
+    "issuerCode": "4739",
+    "initialConversionPrice": "110",
+    "currentConversionPrice": "96.9",
+    "effectiveDate": "2026-06-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47393&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4739&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47394",
+    "issuerCode": "4739",
+    "initialConversionPrice": "71",
+    "currentConversionPrice": "69.9",
+    "effectiveDate": "2026-06-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47394&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4739&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47491",
+    "issuerCode": "4749",
+    "initialConversionPrice": "1072",
+    "currentConversionPrice": "1072",
+    "effectiveDate": "2026-05-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47491&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4749&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47602",
+    "issuerCode": "4760",
+    "initialConversionPrice": "303.5",
+    "currentConversionPrice": "303.5",
+    "effectiveDate": "2026-05-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47602&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4760&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47642",
+    "issuerCode": "4764",
+    "initialConversionPrice": "336.8",
+    "currentConversionPrice": "336.8",
+    "effectiveDate": "2026-08-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47642&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4764&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "47721",
+    "issuerCode": "4772",
+    "initialConversionPrice": "323.8",
+    "currentConversionPrice": "320.3",
+    "effectiveDate": "2026-07-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=47721&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4772&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "49231",
+    "issuerCode": "4923",
+    "initialConversionPrice": "34.66",
+    "currentConversionPrice": "34.66",
+    "effectiveDate": "2026-01-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=49231&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4923&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "49311",
+    "issuerCode": "4931",
+    "initialConversionPrice": "175",
+    "currentConversionPrice": "173.3",
+    "effectiveDate": "2026-07-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=49311&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4931&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "49675",
+    "issuerCode": "4967",
+    "initialConversionPrice": "213.5",
+    "currentConversionPrice": "205",
+    "effectiveDate": "2026-08-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=49675&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4967&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "49731",
+    "issuerCode": "4973",
+    "initialConversionPrice": "169.6",
+    "currentConversionPrice": "169.6",
+    "effectiveDate": "2026-08-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=49731&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4973&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "49793",
+    "issuerCode": "4979",
+    "initialConversionPrice": "178",
+    "currentConversionPrice": "175.7",
+    "effectiveDate": "2026-07-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=49793&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4979&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "49794",
+    "issuerCode": "4979",
+    "initialConversionPrice": "206",
+    "currentConversionPrice": "203.3",
+    "effectiveDate": "2026-07-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=49794&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=4979&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52011",
+    "issuerCode": "5201",
+    "initialConversionPrice": "41.2",
+    "currentConversionPrice": "37.8",
+    "effectiveDate": "2026-06-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52011&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5201&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52091",
+    "issuerCode": "5209",
+    "initialConversionPrice": "177",
+    "currentConversionPrice": "139.8",
+    "effectiveDate": "2026-07-11",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52091&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5209&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52121",
+    "issuerCode": "5212",
+    "initialConversionPrice": "66.5",
+    "currentConversionPrice": "57.73",
+    "effectiveDate": "2026-04-14",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52121&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5212&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52441",
+    "issuerCode": "5244",
+    "initialConversionPrice": "46",
+    "currentConversionPrice": "44",
+    "effectiveDate": "2026-07-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52441&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5244&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52452",
+    "issuerCode": "5245",
+    "initialConversionPrice": "35",
+    "currentConversionPrice": "35",
+    "effectiveDate": "2024-12-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52452&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5245&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52635",
+    "issuerCode": "5263",
+    "initialConversionPrice": "112",
+    "currentConversionPrice": "110.4",
+    "effectiveDate": "2025-12-12",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52635&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5263&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52844",
+    "issuerCode": "5284",
+    "initialConversionPrice": "353",
+    "currentConversionPrice": "348.5",
+    "effectiveDate": "2026-07-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52844&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5284&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52845",
+    "issuerCode": "5284",
+    "initialConversionPrice": "322.6",
+    "currentConversionPrice": "318.5",
+    "effectiveDate": "2026-07-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52845&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5284&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52892",
+    "issuerCode": "5289",
+    "initialConversionPrice": "2180",
+    "currentConversionPrice": "2180",
+    "effectiveDate": "2026-07-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52892&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5289&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "52912",
+    "issuerCode": "5291",
+    "initialConversionPrice": "53",
+    "currentConversionPrice": "53",
+    "effectiveDate": "2026-07-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=52912&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5291&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "53064",
+    "issuerCode": "5306",
+    "initialConversionPrice": "130.5",
+    "currentConversionPrice": "118.8",
+    "effectiveDate": "2026-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=53064&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5306&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "53096",
+    "issuerCode": "5309",
+    "initialConversionPrice": "63.5",
+    "currentConversionPrice": "63",
+    "effectiveDate": "2026-06-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=53096&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5309&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "53097",
+    "issuerCode": "5309",
+    "initialConversionPrice": "55",
+    "currentConversionPrice": "54.6",
+    "effectiveDate": "2026-06-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=53097&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5309&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "53211",
+    "issuerCode": "5321",
+    "initialConversionPrice": "92",
+    "currentConversionPrice": "92",
+    "effectiveDate": "2024-03-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=53211&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5321&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "53887",
+    "issuerCode": "5388",
+    "initialConversionPrice": "145",
+    "currentConversionPrice": "139.6",
+    "effectiveDate": "2024-04-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=53887&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5388&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "54391",
+    "issuerCode": "5439",
+    "initialConversionPrice": "300",
+    "currentConversionPrice": "293.6",
+    "effectiveDate": "2026-07-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=54391&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5439&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "54501",
+    "issuerCode": "5450",
+    "initialConversionPrice": "18.8",
+    "currentConversionPrice": "17.1",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=54501&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5450&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "54573",
+    "issuerCode": "5457",
+    "initialConversionPrice": "69.5",
+    "currentConversionPrice": "69.5",
+    "effectiveDate": "2024-03-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=54573&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5457&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "54642",
+    "issuerCode": "5464",
+    "initialConversionPrice": "33.4",
+    "currentConversionPrice": "33.4",
+    "effectiveDate": "2026-05-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=54642&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5464&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "55344",
+    "issuerCode": "5534",
+    "initialConversionPrice": "80",
+    "currentConversionPrice": "80",
+    "effectiveDate": "2026-03-11",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=55344&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5534&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "55362",
+    "issuerCode": "5536",
+    "initialConversionPrice": "1178",
+    "currentConversionPrice": "1178",
+    "effectiveDate": "2026-08-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=55362&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5536&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "55363",
+    "issuerCode": "5536",
+    "initialConversionPrice": "1158",
+    "currentConversionPrice": "1158",
+    "effectiveDate": "2026-08-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=55363&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5536&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "56087",
+    "issuerCode": "5608",
+    "initialConversionPrice": "19.3",
+    "currentConversionPrice": "19.3",
+    "effectiveDate": "2024-12-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=56087&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=5608&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "60152",
+    "issuerCode": "6015",
+    "initialConversionPrice": "10.92",
+    "currentConversionPrice": "9.81",
+    "effectiveDate": "2026-04-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=60152&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6015&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61011",
+    "issuerCode": "6101",
+    "initialConversionPrice": "36.9",
+    "currentConversionPrice": "36.9",
+    "effectiveDate": "2026-01-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61011&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6101&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61012",
+    "issuerCode": "6101",
+    "initialConversionPrice": "38.9",
+    "currentConversionPrice": "38.9",
+    "effectiveDate": "2026-01-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61012&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6101&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61041",
+    "issuerCode": "6104",
+    "initialConversionPrice": "132",
+    "currentConversionPrice": "119",
+    "effectiveDate": "2026-04-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61041&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6104&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61112",
+    "issuerCode": "6111",
+    "initialConversionPrice": "67",
+    "currentConversionPrice": "67",
+    "effectiveDate": "2024-09-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61112&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6111&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61171",
+    "issuerCode": "6117",
+    "initialConversionPrice": "84",
+    "currentConversionPrice": "82",
+    "effectiveDate": "2025-08-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61171&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6117&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61172",
+    "issuerCode": "6117",
+    "initialConversionPrice": "79.3",
+    "currentConversionPrice": "77.4",
+    "effectiveDate": "2025-08-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61172&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6117&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61255",
+    "issuerCode": "6125",
+    "initialConversionPrice": "114",
+    "currentConversionPrice": "112",
+    "effectiveDate": "2025-07-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61255&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6125&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61263",
+    "issuerCode": "6126",
+    "initialConversionPrice": "28.5",
+    "currentConversionPrice": "26.8",
+    "effectiveDate": "2025-09-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61263&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6126&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61343",
+    "issuerCode": "6134",
+    "initialConversionPrice": "34",
+    "currentConversionPrice": "33.8",
+    "effectiveDate": "2026-07-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61343&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6134&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61506",
+    "issuerCode": "6150",
+    "initialConversionPrice": "90.2",
+    "currentConversionPrice": "89.3",
+    "effectiveDate": "2026-07-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61506&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6150&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61565",
+    "issuerCode": "6156",
+    "initialConversionPrice": "30.1",
+    "currentConversionPrice": "28.8",
+    "effectiveDate": "2026-07-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61565&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6156&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61635",
+    "issuerCode": "6163",
+    "initialConversionPrice": "25.02",
+    "currentConversionPrice": "25.02",
+    "effectiveDate": "2025-10-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61635&bond_kind=5&bond_subn=%24M00000003&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6163&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61777",
+    "issuerCode": "6177",
+    "initialConversionPrice": "52.3",
+    "currentConversionPrice": "43.2",
+    "effectiveDate": "2026-08-26",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61777&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6177&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61794",
+    "issuerCode": "6179",
+    "initialConversionPrice": "30.2",
+    "currentConversionPrice": "28.2",
+    "effectiveDate": "2026-03-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61794&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6179&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61828",
+    "issuerCode": "6182",
+    "initialConversionPrice": "33.8",
+    "currentConversionPrice": "33.1",
+    "effectiveDate": "2026-06-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61828&bond_kind=5&bond_subn=%24M00000001&bond_yrn=8&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6182&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61843",
+    "issuerCode": "6184",
+    "initialConversionPrice": "55.5",
+    "currentConversionPrice": "46.2",
+    "effectiveDate": "2026-06-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61843&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6184&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61876",
+    "issuerCode": "6187",
+    "initialConversionPrice": "1150",
+    "currentConversionPrice": "1136.8",
+    "effectiveDate": "2026-08-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61876&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6187&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61894",
+    "issuerCode": "6189",
+    "initialConversionPrice": "56.65",
+    "currentConversionPrice": "40.97",
+    "effectiveDate": "2026-07-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61894&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6189&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61907",
+    "issuerCode": "6190",
+    "initialConversionPrice": "41.7",
+    "currentConversionPrice": "40.7",
+    "effectiveDate": "2026-07-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61907&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6190&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61973",
+    "issuerCode": "6197",
+    "initialConversionPrice": "160",
+    "currentConversionPrice": "148.8",
+    "effectiveDate": "2026-07-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61973&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6197&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61993",
+    "issuerCode": "6199",
+    "initialConversionPrice": "104.6",
+    "currentConversionPrice": "104.6",
+    "effectiveDate": "2026-01-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61993&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6199&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "61994",
+    "issuerCode": "6199",
+    "initialConversionPrice": "114.8",
+    "currentConversionPrice": "114.8",
+    "effectiveDate": "2026-01-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=61994&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6199&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62075",
+    "issuerCode": "6207",
+    "initialConversionPrice": "52.1",
+    "currentConversionPrice": "50.5",
+    "effectiveDate": "2026-07-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62075&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6207&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62076",
+    "issuerCode": "6207",
+    "initialConversionPrice": "50.6",
+    "currentConversionPrice": "49",
+    "effectiveDate": "2026-07-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62076&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6207&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62093",
+    "issuerCode": "6209",
+    "initialConversionPrice": "38.6",
+    "currentConversionPrice": "38.3",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62093&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6209&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62194",
+    "issuerCode": "6219",
+    "initialConversionPrice": "21.17",
+    "currentConversionPrice": "21.17",
+    "effectiveDate": "2025-10-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62194&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6219&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "622010",
+    "issuerCode": "6220",
+    "initialConversionPrice": "33",
+    "currentConversionPrice": "32.4",
+    "effectiveDate": "2026-07-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=622010&bond_kind=5&bond_subn=%24M00000002&bond_yrn=10&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6220&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62236",
+    "issuerCode": "6223",
+    "initialConversionPrice": "6223",
+    "currentConversionPrice": "6201.8",
+    "effectiveDate": "2026-07-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62236&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6223&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62433",
+    "issuerCode": "6243",
+    "initialConversionPrice": "65.8",
+    "currentConversionPrice": "65.8",
+    "effectiveDate": "2024-06-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62433&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6243&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62695",
+    "issuerCode": "6269",
+    "initialConversionPrice": "93",
+    "currentConversionPrice": "93",
+    "effectiveDate": "2024-08-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62695&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6269&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62696",
+    "issuerCode": "6269",
+    "initialConversionPrice": "101",
+    "currentConversionPrice": "101",
+    "effectiveDate": "2024-08-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62696&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6269&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62822",
+    "issuerCode": "6282",
+    "initialConversionPrice": "50",
+    "currentConversionPrice": "46.1",
+    "effectiveDate": "2025-08-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62822&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6282&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "62843",
+    "issuerCode": "6284",
+    "initialConversionPrice": "92",
+    "currentConversionPrice": "86.6",
+    "effectiveDate": "2025-07-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=62843&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6284&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "629010",
+    "issuerCode": "6290",
+    "initialConversionPrice": "80.1",
+    "currentConversionPrice": "75.9",
+    "effectiveDate": "2025-07-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=629010&bond_kind=5&bond_subn=%24M00000001&bond_yrn=10&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6290&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "64251",
+    "issuerCode": "6425",
+    "initialConversionPrice": "61",
+    "currentConversionPrice": "57.9",
+    "effectiveDate": "2026-07-07",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=64251&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6425&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "64324",
+    "issuerCode": "6432",
+    "initialConversionPrice": "33.84",
+    "currentConversionPrice": "30.88",
+    "effectiveDate": "2025-08-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=64324&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6432&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "64512",
+    "issuerCode": "6451",
+    "initialConversionPrice": "241.2",
+    "currentConversionPrice": "240.5",
+    "effectiveDate": "2026-08-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=64512&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6451&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "64693",
+    "issuerCode": "6469",
+    "initialConversionPrice": "149.74",
+    "currentConversionPrice": "119.96",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=64693&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6469&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "64724",
+    "issuerCode": "6472",
+    "initialConversionPrice": "500",
+    "currentConversionPrice": "500",
+    "effectiveDate": "2026-04-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=64724&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6472&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "64725",
+    "issuerCode": "6472",
+    "initialConversionPrice": "485",
+    "currentConversionPrice": "485",
+    "effectiveDate": "2026-04-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=64725&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6472&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "64774",
+    "issuerCode": "6477",
+    "initialConversionPrice": "53.9",
+    "currentConversionPrice": "49.8",
+    "effectiveDate": "2026-07-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=64774&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6477&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "64775",
+    "issuerCode": "6477",
+    "initialConversionPrice": "44.3",
+    "currentConversionPrice": "43.8",
+    "effectiveDate": "2026-07-18",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=64775&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6477&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65096",
+    "issuerCode": "6509",
+    "initialConversionPrice": "41.5",
+    "currentConversionPrice": "37.6",
+    "effectiveDate": "2025-08-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65096&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6509&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65101",
+    "issuerCode": "6510",
+    "initialConversionPrice": "2016.8",
+    "currentConversionPrice": "2008.1",
+    "effectiveDate": "2026-07-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65101&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6510&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65152",
+    "issuerCode": "6515",
+    "initialConversionPrice": "3540.4",
+    "currentConversionPrice": "3520.6",
+    "effectiveDate": "2026-07-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65152&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6515&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65331",
+    "issuerCode": "6533",
+    "initialConversionPrice": "308",
+    "currentConversionPrice": "308",
+    "effectiveDate": "2025-09-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65331&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6533&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65381",
+    "issuerCode": "6538",
+    "initialConversionPrice": "104.4",
+    "currentConversionPrice": "103.2",
+    "effectiveDate": "2026-06-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65381&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6538&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65461",
+    "issuerCode": "6546",
+    "initialConversionPrice": "158.8",
+    "currentConversionPrice": "144",
+    "effectiveDate": "2026-07-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65461&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6546&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65462",
+    "issuerCode": "6546",
+    "initialConversionPrice": "88.5",
+    "currentConversionPrice": "85.5",
+    "effectiveDate": "2026-07-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65462&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6546&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65463",
+    "issuerCode": "6546",
+    "initialConversionPrice": "81.5",
+    "currentConversionPrice": "78.8",
+    "effectiveDate": "2026-07-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65463&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6546&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65472",
+    "issuerCode": "6547",
+    "initialConversionPrice": "37",
+    "currentConversionPrice": "37",
+    "effectiveDate": "2026-03-19",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65472&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6547&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65521",
+    "issuerCode": "6552",
+    "initialConversionPrice": "63.5",
+    "currentConversionPrice": "63.5",
+    "effectiveDate": "2021-10-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65521&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6552&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65702",
+    "issuerCode": "6570",
+    "initialConversionPrice": "55.73",
+    "currentConversionPrice": "55.73",
+    "effectiveDate": "2026-08-14",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65702&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6570&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65761",
+    "issuerCode": "6576",
+    "initialConversionPrice": "84.3",
+    "currentConversionPrice": "84.3",
+    "effectiveDate": "2026-03-25",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65761&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6576&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65843",
+    "issuerCode": "6584",
+    "initialConversionPrice": "685",
+    "currentConversionPrice": "685",
+    "effectiveDate": "2026-07-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65843&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6584&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65851",
+    "issuerCode": "6585",
+    "initialConversionPrice": "120.9",
+    "currentConversionPrice": "106.3",
+    "effectiveDate": "2026-07-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65851&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6585&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65852",
+    "issuerCode": "6585",
+    "initialConversionPrice": "120.6",
+    "currentConversionPrice": "106.1",
+    "effectiveDate": "2026-07-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65852&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6585&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "65914",
+    "issuerCode": "6591",
+    "initialConversionPrice": "72.88",
+    "currentConversionPrice": "78.61",
+    "effectiveDate": "2026-07-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=65914&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6591&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66034",
+    "issuerCode": "6603",
+    "initialConversionPrice": "26.63",
+    "currentConversionPrice": "26.63",
+    "effectiveDate": "2026-05-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66034&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6603&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66163",
+    "issuerCode": "6616",
+    "initialConversionPrice": "14.8",
+    "currentConversionPrice": "14.5",
+    "effectiveDate": "2023-11-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66163&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6616&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66241",
+    "issuerCode": "6624",
+    "initialConversionPrice": "42.2",
+    "currentConversionPrice": "40.6",
+    "effectiveDate": "2025-07-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66241&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6624&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66292",
+    "issuerCode": "6629",
+    "initialConversionPrice": "135",
+    "currentConversionPrice": "115.5",
+    "effectiveDate": "2026-06-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66292&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6629&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66451",
+    "issuerCode": "6645",
+    "initialConversionPrice": "28.31",
+    "currentConversionPrice": "28.31",
+    "effectiveDate": "2024-12-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66451&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6645&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66642",
+    "issuerCode": "6664",
+    "initialConversionPrice": "306",
+    "currentConversionPrice": "284.2",
+    "effectiveDate": "2026-08-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66642&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6664&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66702",
+    "issuerCode": "6670",
+    "initialConversionPrice": "270",
+    "currentConversionPrice": "254.5",
+    "effectiveDate": "2026-06-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66702&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6670&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66721",
+    "issuerCode": "6672",
+    "initialConversionPrice": "96",
+    "currentConversionPrice": "93.4",
+    "effectiveDate": "2026-04-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66721&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6672&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66722",
+    "issuerCode": "6672",
+    "initialConversionPrice": "93",
+    "currentConversionPrice": "90.5",
+    "effectiveDate": "2026-04-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66722&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6672&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66801",
+    "issuerCode": "6680",
+    "initialConversionPrice": "76.2",
+    "currentConversionPrice": "76.2",
+    "effectiveDate": "2024-09-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66801&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6680&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66831",
+    "issuerCode": "6683",
+    "initialConversionPrice": "1127.1",
+    "currentConversionPrice": "1127.1",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66831&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6683&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "66931",
+    "issuerCode": "6693",
+    "initialConversionPrice": "228.1",
+    "currentConversionPrice": "228.1",
+    "effectiveDate": "2026-07-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=66931&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6693&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "67062",
+    "issuerCode": "6706",
+    "initialConversionPrice": "178.8",
+    "currentConversionPrice": "176",
+    "effectiveDate": "2024-11-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=67062&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6706&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "67531",
+    "issuerCode": "6753",
+    "initialConversionPrice": "125",
+    "currentConversionPrice": "116.6",
+    "effectiveDate": "2025-09-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=67531&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6753&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "67681",
+    "issuerCode": "6768",
+    "initialConversionPrice": "101",
+    "currentConversionPrice": "90.1",
+    "effectiveDate": "2026-07-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=67681&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6768&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "67711",
+    "issuerCode": "6771",
+    "initialConversionPrice": "55",
+    "currentConversionPrice": "47.72",
+    "effectiveDate": "2026-07-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=67711&bond_kind=5&bond_subn=%24M00000002&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6771&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "67961",
+    "issuerCode": "6796",
+    "initialConversionPrice": "123",
+    "currentConversionPrice": "105.8",
+    "effectiveDate": "2026-08-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=67961&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6796&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "67962",
+    "issuerCode": "6796",
+    "initialConversionPrice": "101.6",
+    "currentConversionPrice": "99.6",
+    "effectiveDate": "2026-08-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=67962&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6796&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68032",
+    "issuerCode": "6803",
+    "initialConversionPrice": "324",
+    "currentConversionPrice": "306.2",
+    "effectiveDate": "2026-07-11",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68032&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6803&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68211",
+    "issuerCode": "6821",
+    "initialConversionPrice": "43.06",
+    "currentConversionPrice": "42.19",
+    "effectiveDate": "2026-05-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68211&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6821&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68301",
+    "issuerCode": "6830",
+    "initialConversionPrice": "150",
+    "currentConversionPrice": "149",
+    "effectiveDate": "2024-08-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68301&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6830&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68351",
+    "issuerCode": "6835",
+    "initialConversionPrice": "50.8",
+    "currentConversionPrice": "47.4",
+    "effectiveDate": "2026-07-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68351&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6835&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68401",
+    "issuerCode": "6840",
+    "initialConversionPrice": "73.4",
+    "currentConversionPrice": "64.7",
+    "effectiveDate": "2026-07-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68401&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6840&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68431",
+    "issuerCode": "6843",
+    "initialConversionPrice": "61.4",
+    "currentConversionPrice": "61.4",
+    "effectiveDate": "2025-08-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68431&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6843&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68461",
+    "issuerCode": "6846",
+    "initialConversionPrice": "83.8",
+    "currentConversionPrice": "75.8",
+    "effectiveDate": "2026-07-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68461&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6846&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68462",
+    "issuerCode": "6846",
+    "initialConversionPrice": "81.3",
+    "currentConversionPrice": "73.6",
+    "effectiveDate": "2026-07-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68462&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6846&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68541",
+    "issuerCode": "6854",
+    "initialConversionPrice": "250.9",
+    "currentConversionPrice": "248.3",
+    "effectiveDate": "2025-03-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68541&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6854&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68621",
+    "issuerCode": "6862",
+    "initialConversionPrice": "197",
+    "currentConversionPrice": "191.9",
+    "effectiveDate": "2026-07-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68621&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6862&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68631",
+    "issuerCode": "6863",
+    "initialConversionPrice": "305.5",
+    "currentConversionPrice": "290.1",
+    "effectiveDate": "2026-08-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68631&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6863&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68692",
+    "issuerCode": "6869",
+    "initialConversionPrice": "72.3",
+    "currentConversionPrice": "72.3",
+    "effectiveDate": "2026-07-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68692&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6869&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68701",
+    "issuerCode": "6870",
+    "initialConversionPrice": "248.5",
+    "currentConversionPrice": "196.6",
+    "effectiveDate": "2026-07-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68701&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6870&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68702",
+    "issuerCode": "6870",
+    "initialConversionPrice": "236.6",
+    "currentConversionPrice": "187.3",
+    "effectiveDate": "2026-07-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68702&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6870&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68731",
+    "issuerCode": "6873",
+    "initialConversionPrice": "120",
+    "currentConversionPrice": "95.4",
+    "effectiveDate": "2025-08-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68731&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6873&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68732",
+    "issuerCode": "6873",
+    "initialConversionPrice": "246",
+    "currentConversionPrice": "215.4",
+    "effectiveDate": "2025-08-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68732&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6873&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68741",
+    "issuerCode": "6874",
+    "initialConversionPrice": "108",
+    "currentConversionPrice": "90",
+    "effectiveDate": "2026-09-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68741&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6874&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68901",
+    "issuerCode": "6890",
+    "initialConversionPrice": "246.4",
+    "currentConversionPrice": "237.5",
+    "effectiveDate": "2026-07-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68901&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6890&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68902",
+    "issuerCode": "6890",
+    "initialConversionPrice": "245.2",
+    "currentConversionPrice": "245.2",
+    "effectiveDate": "2025-12-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68902&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6890&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "68941",
+    "issuerCode": "6894",
+    "initialConversionPrice": "262.4",
+    "currentConversionPrice": "254.9",
+    "effectiveDate": "2026-03-31",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=68941&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6894&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "69031",
+    "issuerCode": "6903",
+    "initialConversionPrice": "406.6",
+    "currentConversionPrice": "406.6",
+    "effectiveDate": "2026-07-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=69031&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6903&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "69032",
+    "issuerCode": "6903",
+    "initialConversionPrice": "369.8",
+    "currentConversionPrice": "369.8",
+    "effectiveDate": "2026-08-07",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=69032&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6903&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "69041",
+    "issuerCode": "6904",
+    "initialConversionPrice": "130",
+    "currentConversionPrice": "124.7",
+    "effectiveDate": "2026-07-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=69041&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6904&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "69131",
+    "issuerCode": "6913",
+    "initialConversionPrice": "126",
+    "currentConversionPrice": "126",
+    "effectiveDate": "2026-03-19",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=69131&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6913&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "69571",
+    "issuerCode": "6957",
+    "initialConversionPrice": "190",
+    "currentConversionPrice": "190",
+    "effectiveDate": "2025-10-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=69571&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6957&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "69821",
+    "issuerCode": "6982",
+    "initialConversionPrice": "63.6",
+    "currentConversionPrice": "63.6",
+    "effectiveDate": "2025-07-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=69821&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6982&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "69822",
+    "issuerCode": "6982",
+    "initialConversionPrice": "61.8",
+    "currentConversionPrice": "61.8",
+    "effectiveDate": "2025-08-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=69822&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=6982&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "74022",
+    "issuerCode": "7402",
+    "initialConversionPrice": "97.6",
+    "currentConversionPrice": "97.6",
+    "effectiveDate": "2025-09-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=74022&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=7402&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "75561",
+    "issuerCode": "7556",
+    "initialConversionPrice": "182",
+    "currentConversionPrice": "169.9",
+    "effectiveDate": "2026-07-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=75561&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=7556&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "75562",
+    "issuerCode": "7556",
+    "initialConversionPrice": "178.5",
+    "currentConversionPrice": "166.7",
+    "effectiveDate": "2026-07-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=75562&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=7556&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "76101",
+    "issuerCode": "7610",
+    "initialConversionPrice": "795",
+    "currentConversionPrice": "662.3",
+    "effectiveDate": "2026-07-19",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=76101&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=7610&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "76311",
+    "issuerCode": "7631",
+    "initialConversionPrice": "150.8",
+    "currentConversionPrice": "150.8",
+    "effectiveDate": "2026-08-26",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=76311&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=7631&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "77131",
+    "issuerCode": "7713",
+    "initialConversionPrice": "73.9",
+    "currentConversionPrice": "69.6",
+    "effectiveDate": "2026-04-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=77131&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=7713&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80212",
+    "issuerCode": "8021",
+    "initialConversionPrice": "203.5",
+    "currentConversionPrice": "200.4",
+    "effectiveDate": "2026-07-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80212&bond_kind=5&bond_subn=%24M00000002&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8021&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80273",
+    "issuerCode": "8027",
+    "initialConversionPrice": "67.6",
+    "currentConversionPrice": "64.74",
+    "effectiveDate": "2023-04-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80273&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8027&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80282",
+    "issuerCode": "8028",
+    "initialConversionPrice": "140.3",
+    "currentConversionPrice": "136.8",
+    "effectiveDate": "2026-06-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80282&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8028&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80426",
+    "issuerCode": "8042",
+    "initialConversionPrice": "60",
+    "currentConversionPrice": "59.4",
+    "effectiveDate": "2026-06-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80426&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8042&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80506",
+    "issuerCode": "8050",
+    "initialConversionPrice": "75",
+    "currentConversionPrice": "60.9",
+    "effectiveDate": "2026-08-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80506&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8050&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80541",
+    "issuerCode": "8054",
+    "initialConversionPrice": "122.6",
+    "currentConversionPrice": "122.6",
+    "effectiveDate": "2026-07-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80541&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8054&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80746",
+    "issuerCode": "8074",
+    "initialConversionPrice": "79.2",
+    "currentConversionPrice": "77",
+    "effectiveDate": "2026-06-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80746&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8074&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80872",
+    "issuerCode": "8087",
+    "initialConversionPrice": "40.4",
+    "currentConversionPrice": "39.4",
+    "effectiveDate": "2025-09-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80872&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8087&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80914",
+    "issuerCode": "8091",
+    "initialConversionPrice": "136",
+    "currentConversionPrice": "124.9",
+    "effectiveDate": "2026-06-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80914&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8091&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80924",
+    "issuerCode": "8092",
+    "initialConversionPrice": "14.5",
+    "currentConversionPrice": "14.5",
+    "effectiveDate": "2024-03-11",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80924&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8092&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80962",
+    "issuerCode": "8096",
+    "initialConversionPrice": "158",
+    "currentConversionPrice": "158",
+    "effectiveDate": "2026-07-02",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80962&bond_kind=5&bond_subn=%24M00000002&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8096&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "80963",
+    "issuerCode": "8096",
+    "initialConversionPrice": "155",
+    "currentConversionPrice": "155",
+    "effectiveDate": "2026-07-14",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=80963&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8096&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "81042",
+    "issuerCode": "8104",
+    "initialConversionPrice": "80.5",
+    "currentConversionPrice": "69.98",
+    "effectiveDate": "2025-10-09",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=81042&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8104&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "81114",
+    "issuerCode": "8111",
+    "initialConversionPrice": "75.1",
+    "currentConversionPrice": "74.4",
+    "effectiveDate": "2026-06-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=81114&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8111&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "811210",
+    "issuerCode": "8112",
+    "initialConversionPrice": "82.7",
+    "currentConversionPrice": "69.5",
+    "effectiveDate": "2026-07-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=811210&bond_kind=5&bond_subn=%24M00000001&bond_yrn=10&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8112&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "811211",
+    "issuerCode": "8112",
+    "initialConversionPrice": "95.3",
+    "currentConversionPrice": "90.1",
+    "effectiveDate": "2026-07-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=811211&bond_kind=5&bond_subn=%24M00000001&bond_yrn=11&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8112&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "81473",
+    "issuerCode": "8147",
+    "initialConversionPrice": "134.6",
+    "currentConversionPrice": "132.1",
+    "effectiveDate": "2025-07-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=81473&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8147&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "81551",
+    "issuerCode": "8155",
+    "initialConversionPrice": "126.8",
+    "currentConversionPrice": "120",
+    "effectiveDate": "2026-07-14",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=81551&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8155&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "81552",
+    "issuerCode": "8155",
+    "initialConversionPrice": "338",
+    "currentConversionPrice": "338",
+    "effectiveDate": "2026-08-03",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=81552&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8155&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "81553",
+    "issuerCode": "8155",
+    "initialConversionPrice": "318",
+    "currentConversionPrice": "318",
+    "effectiveDate": "2026-08-13",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=81553&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8155&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "81714",
+    "issuerCode": "8171",
+    "initialConversionPrice": "33.8",
+    "currentConversionPrice": "30.5",
+    "effectiveDate": "2025-05-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=81714&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8171&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "81715",
+    "issuerCode": "8171",
+    "initialConversionPrice": "35.9",
+    "currentConversionPrice": "32.4",
+    "effectiveDate": "2025-05-23",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=81715&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8171&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "82102",
+    "issuerCode": "8210",
+    "initialConversionPrice": "1007.2",
+    "currentConversionPrice": "997.3",
+    "effectiveDate": "2026-07-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=82102&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8210&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "82103",
+    "issuerCode": "8210",
+    "initialConversionPrice": "985.3",
+    "currentConversionPrice": "975.6",
+    "effectiveDate": "2026-07-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=82103&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8210&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "82711",
+    "issuerCode": "8271",
+    "initialConversionPrice": "165",
+    "currentConversionPrice": "161.4",
+    "effectiveDate": "2026-07-07",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=82711&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8271&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "82993",
+    "issuerCode": "8299",
+    "initialConversionPrice": "2488",
+    "currentConversionPrice": "2468.8",
+    "effectiveDate": "2026-07-06",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=82993&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8299&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "83742",
+    "issuerCode": "8374",
+    "initialConversionPrice": "133.1",
+    "currentConversionPrice": "132.2",
+    "effectiveDate": "2026-07-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=83742&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8374&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84041",
+    "issuerCode": "8404",
+    "initialConversionPrice": "26.8",
+    "currentConversionPrice": "26",
+    "effectiveDate": "2026-08-10",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84041&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8404&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84113",
+    "issuerCode": "8411",
+    "initialConversionPrice": "13.3",
+    "currentConversionPrice": "13.3",
+    "effectiveDate": "2025-08-01",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84113&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8411&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84221",
+    "issuerCode": "8422",
+    "initialConversionPrice": "170",
+    "currentConversionPrice": "14",
+    "effectiveDate": "2026-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84221&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8422&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84222",
+    "issuerCode": "8422",
+    "initialConversionPrice": "200",
+    "currentConversionPrice": "18.2",
+    "effectiveDate": "2026-07-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84222&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8422&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84312",
+    "issuerCode": "8431",
+    "initialConversionPrice": "68",
+    "currentConversionPrice": "68",
+    "effectiveDate": "2026-01-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84312&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8431&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84332",
+    "issuerCode": "8433",
+    "initialConversionPrice": "102",
+    "currentConversionPrice": "94",
+    "effectiveDate": "2024-05-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84332&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8433&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84333",
+    "issuerCode": "8433",
+    "initialConversionPrice": "106.1",
+    "currentConversionPrice": "97.8",
+    "effectiveDate": "2024-05-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84333&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8433&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84381",
+    "issuerCode": "8438",
+    "initialConversionPrice": "90.8",
+    "currentConversionPrice": "90.8",
+    "effectiveDate": "2026-08-05",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84381&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8438&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84422",
+    "issuerCode": "8442",
+    "initialConversionPrice": "84.3",
+    "currentConversionPrice": "73.9",
+    "effectiveDate": "2025-07-20",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84422&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8442&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84423",
+    "issuerCode": "8442",
+    "initialConversionPrice": "42.5",
+    "currentConversionPrice": "42.5",
+    "effectiveDate": "2026-07-24",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84423&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8442&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84624",
+    "issuerCode": "8462",
+    "initialConversionPrice": "152.2",
+    "currentConversionPrice": "144.3",
+    "effectiveDate": "2026-06-27",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84624&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8462&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84672",
+    "issuerCode": "8467",
+    "initialConversionPrice": "193.6",
+    "currentConversionPrice": "191.4",
+    "effectiveDate": "2025-06-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84672&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8467&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84673",
+    "issuerCode": "8467",
+    "initialConversionPrice": "236.1",
+    "currentConversionPrice": "233.4",
+    "effectiveDate": "2025-06-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84673&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8467&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84732",
+    "issuerCode": "8473",
+    "initialConversionPrice": "40",
+    "currentConversionPrice": "34.1",
+    "effectiveDate": "2025-07-29",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84732&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8473&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84762",
+    "issuerCode": "8476",
+    "initialConversionPrice": "19.7",
+    "currentConversionPrice": "19.5",
+    "effectiveDate": "2026-07-12",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84762&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8476&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84781",
+    "issuerCode": "8478",
+    "initialConversionPrice": "392.2",
+    "currentConversionPrice": "377.7",
+    "effectiveDate": "2024-07-30",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84781&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8478&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84881",
+    "issuerCode": "8488",
+    "initialConversionPrice": "18.5",
+    "currentConversionPrice": "18.4",
+    "effectiveDate": "2024-01-15",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84881&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8488&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "84891",
+    "issuerCode": "8489",
+    "initialConversionPrice": "28.8",
+    "currentConversionPrice": "27.9",
+    "effectiveDate": "2025-12-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=84891&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8489&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "89277",
+    "issuerCode": "8927",
+    "initialConversionPrice": "68.27",
+    "currentConversionPrice": "50.01",
+    "effectiveDate": "2026-08-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=89277&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8927&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "89278",
+    "issuerCode": "8927",
+    "initialConversionPrice": "63.73",
+    "currentConversionPrice": "63.73",
+    "effectiveDate": "2024-08-21",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=89278&bond_kind=5&bond_subn=%24M00000001&bond_yrn=8&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8927&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "89365",
+    "issuerCode": "8936",
+    "initialConversionPrice": "55",
+    "currentConversionPrice": "55",
+    "effectiveDate": "2026-08-17",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=89365&bond_kind=5&bond_subn=%24M00000001&bond_yrn=5&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8936&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "89366",
+    "issuerCode": "8936",
+    "initialConversionPrice": "53.8",
+    "currentConversionPrice": "53.8",
+    "effectiveDate": "2026-08-28",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=89366&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8936&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "89964",
+    "issuerCode": "8996",
+    "initialConversionPrice": "240",
+    "currentConversionPrice": "232.2",
+    "effectiveDate": "2026-04-04",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=89964&bond_kind=5&bond_subn=%24M00000001&bond_yrn=4&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=8996&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "98026",
+    "issuerCode": "9802",
+    "initialConversionPrice": "112.9",
+    "currentConversionPrice": "104.1",
+    "effectiveDate": "2026-03-22",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=98026&bond_kind=5&bond_subn=%24M00000001&bond_yrn=6&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9802&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "99063",
+    "issuerCode": "9906",
+    "initialConversionPrice": "111.8",
+    "currentConversionPrice": "101.5",
+    "effectiveDate": "2025-09-11",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=99063&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9906&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "99063",
+    "issuerCode": "9906",
+    "initialConversionPrice": "111.8",
+    "currentConversionPrice": "100.7",
+    "effectiveDate": "2026-09-16",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=99063&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9906&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "99332",
+    "issuerCode": "9933",
+    "initialConversionPrice": "51.8",
+    "currentConversionPrice": "45.2",
+    "effectiveDate": "2026-07-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=99332&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9933&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "99353",
+    "issuerCode": "9935",
+    "initialConversionPrice": "34.9",
+    "currentConversionPrice": "30.2",
+    "effectiveDate": "2026-07-12",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=99353&bond_kind=5&bond_subn=%24M00000001&bond_yrn=3&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9935&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "99392",
+    "issuerCode": "9939",
+    "initialConversionPrice": "168.4",
+    "currentConversionPrice": "153.7",
+    "effectiveDate": "2026-07-08",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=99392&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9939&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "99412",
+    "issuerCode": "9941",
+    "initialConversionPrice": "204.6",
+    "currentConversionPrice": "166.8",
+    "effectiveDate": "2026-09-07",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=99412&bond_kind=5&bond_subn=%24M00000001&bond_yrn=2&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9941&monyr_reg=202608&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "99587",
+    "issuerCode": "9958",
+    "initialConversionPrice": "247",
+    "currentConversionPrice": "232.5",
+    "effectiveDate": "2026-07-31",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=99587&bond_kind=5&bond_subn=%24M00000001&bond_yrn=7&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9958&monyr_reg=202607&pg=&step=0&tg="
+  },
+  {
+    "bondCode": "99588",
+    "issuerCode": "9958",
+    "initialConversionPrice": "238",
+    "currentConversionPrice": "223.8",
+    "effectiveDate": "2026-07-31",
+    "officialDetailUrl": "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=99588&bond_kind=5&bond_subn=%24M00000001&bond_yrn=8&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=9958&monyr_reg=202607&pg=&step=0&tg="
+  }
+]

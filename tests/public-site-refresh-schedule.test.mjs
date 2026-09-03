@@ -1,15 +1,37 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { execFile as execFileCallback } from "node:child_process";
+import { access, readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import { triggerIpoRefresh } from "../scripts/trigger-ipo-refresh.mjs";
 import { runNightlyMarketRefresh } from "../scripts/run-nightly-market-refresh.mjs";
 import { createValidIpoSnapshot } from "./helpers/ipo-snapshot.mjs";
 
 const now = new Date("2026-08-01T14:30:00.000Z");
+const execFile = promisify(execFileCallback);
 
 test("obsolete Cloudflare refresh workflow stays removed", async () => {
   await assert.rejects(access(".github/workflows/refresh-public-site.yml"), { code: "ENOENT" });
+});
+
+test("active static generation is fully tracked so a fresh checkout can rebuild it", async () => {
+  const pointerPath = "static-showcase/data/current.json";
+  const pointer = JSON.parse(await readFile(pointerPath, "utf8"));
+  assert.match(pointer?.generation ?? "", /^generations\/[a-f0-9]+$/i);
+
+  const generationPath = join("static-showcase/data", pointer.generation);
+  const generationFiles = (await readdir(generationPath, { withFileTypes: true }))
+    .filter((entry) => entry.isFile())
+    .map((entry) => `${generationPath.replaceAll("\\", "/")}/${entry.name}`)
+    .sort();
+  assert.ok(generationFiles.includes(`${generationPath.replaceAll("\\", "/")}/manifest.json`));
+
+  const expected = [pointerPath, ...generationFiles].sort();
+  const { stdout } = await execFile("git", ["ls-files", "--", ...expected]);
+  const tracked = stdout.split(/\r?\n/).filter(Boolean).sort();
+  assert.deepEqual(tracked, expected);
 });
 
 test("Taipei refresh workflow safely commits only validated snapshots without deployment credentials", async () => {
@@ -28,7 +50,7 @@ test("Taipei refresh workflow safely commits only validated snapshots without de
   assert.match(workflow, /mode:/);
   assert.match(workflow, /contents:\s*write/);
   assert.match(workflow, /npm run build/);
-  assert.match(workflow, /git add -- static-showcase\/data/);
+  assert.match(workflow, /git add -f -- static-showcase\/data/);
   assert.match(workflow, /git diff --cached --quiet/);
   assert.match(workflow, /git push origin "HEAD:\$\{\{ github\.event\.repository\.default_branch \}\}"/);
   assert.match(workflow, /github\.ref == format\('refs\/heads\/\{0\}', github\.event\.repository\.default_branch\)/);
