@@ -88,6 +88,7 @@ test("Taipei refresh workflow safely commits only validated snapshots without de
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /mode:/);
   assert.match(workflow, /contents:\s*write/);
+  assert.match(workflow, /timeout-minutes:\s*60/);
   assert.match(workflow, /node scripts\/publish-static-showcase-research\.mjs/);
   assert.match(workflow, /npm run build/);
   assert.match(workflow, /git add -f -- static-showcase\/data/);
