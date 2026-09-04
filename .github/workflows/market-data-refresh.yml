@@ -45,7 +45,7 @@ jobs:
             case "$schedule" in
               "15 8 * * 1-5") mode=FAST ;;
               "45 9 * * 1-5") mode=OFFICIAL ;;
-              "30 14 * * *") mode=EVENT ;;
+              "30 14 * * *") mode=OFFICIAL ;;
               "30 23 * * 0-4") mode=RECONCILE ;;
               "0 2 * * 6") mode=WEEKLY ;;
               *) exit 1 ;;
