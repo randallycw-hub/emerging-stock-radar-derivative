@@ -264,6 +264,49 @@ test("collects only requested official CB, stock and conversion records", async 
   );
 });
 
+test("retains an exact prior conversion price when one MOPS detail request times out", async () => {
+  const values = {
+    quote: await fixture("tpex-cb-quote.json"),
+    twse: await fixture("twse-stock-close.json"),
+    tpex: await fixture("tpex-stock-close.json"),
+    conversion: await fixture("tpex-conversion-index.json"),
+  };
+  const prior = {
+    bondCode: "35221",
+    issuerCode: "3522",
+    initialConversionPrice: "19.5",
+    currentConversionPrice: "18.2",
+    effectiveDate: "2026-01-30",
+    officialDetailUrl: "https://mopsov.twse.com.tw/mops/web/t120sg01?TYPEK=&bond_id=35221&bond_kind=5&bond_subn=%24M00000001&bond_yrn=1&come=2&encodeURIComponent=1&firstin=ture&issuer_stock_code=3522&monyr_reg=202606&pg=&step=0&tg=",
+  };
+  let detailRequests = 0;
+  const fakeFetch = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/bond/cbDayQry")) return jsonResponse(values.quote);
+    if (target.endsWith("/exchangeReport/STOCK_DAY_ALL")) return jsonResponse(values.twse);
+    if (target.endsWith("/tpex_mainboard_daily_close_quotes")) return jsonResponse(values.tpex);
+    if (target.endsWith("/bond/convSearch")) return jsonResponse(values.conversion);
+    if (target.startsWith("https://mopsov.twse.com.tw/mops/web/t120sg01?")) {
+      detailRequests += 1;
+      throw new TypeError("fetch failed", { cause: { code: "UND_ERR_CONNECT_TIMEOUT" } });
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+
+  const result = await fetchCurrentOfficialMarketData({
+    bondCodes: ["35221"],
+    issuerCodes: ["2330", "3522"],
+    date: "2026-07-29",
+    fetchImpl: fakeFetch,
+    sleepImpl: async () => {},
+    perRequestDelayMs: 0,
+    previousConversionPrices: [prior],
+  });
+
+  assert.deepEqual(result.conversionPrices, [prior]);
+  assert.equal(detailRequests, 3);
+});
+
 test("collects CB quotes only for the requested trading date when TPEx returns a monthly table", async () => {
   const quote = JSON.parse(await fixture("tpex-cb-quote.json"));
   quote.tables[0].data.push([

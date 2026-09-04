@@ -166,6 +166,7 @@ export async function buildBondMarketSnapshot(options = {}) {
     bondCodes,
     issuerCodes,
     date: asOfDate,
+    previousConversionPrices,
     optionalSourceAuthorization,
   });
   const issuerResearchSourceResults = collected.issuerResearchSourceResults === undefined

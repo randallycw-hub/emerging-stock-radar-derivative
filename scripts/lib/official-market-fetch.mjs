@@ -223,6 +223,7 @@ export async function fetchCurrentOfficialMarketData({
   perRequestDelayMs = 350,
   checkpoint = {},
   onCheckpoint = async () => {},
+  previousConversionPrices = [],
 }) {
   if (!isIsoDate(date)) throw new TypeError("date must be a valid ISO date");
   if (!Number.isInteger(perRequestDelayMs) || perRequestDelayMs < 0) {
@@ -312,11 +313,19 @@ export async function fetchCurrentOfficialMarketData({
         return cached;
       }
       await sleepImpl(perRequestDelayMs);
-      const value = await fetchMopsConversionPrice(
-        entry,
-        fetchImpl,
-        sleepImpl,
-      );
+      let value;
+      try {
+        value = await fetchMopsConversionPrice(entry, fetchImpl, sleepImpl);
+      } catch (error) {
+        const fallback = selectPriorConversionPrice({
+          entry,
+          previousConversionPrices,
+          date,
+          error,
+        });
+        if (fallback === undefined) throw error;
+        return fallback;
+      }
       await onCheckpoint({
         kind: "conversionPricesByBondCode",
         key: entry.bondCode,
@@ -343,6 +352,47 @@ export async function fetchCurrentOfficialMarketData({
 
 function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+function selectPriorConversionPrice({ entry, previousConversionPrices, date, error }) {
+  if (!isRetryableMopsConnectionFailure(error) || !Array.isArray(previousConversionPrices)) {
+    return undefined;
+  }
+  const candidates = previousConversionPrices
+    .filter((value) => isCompatiblePriorConversionPrice(value, entry, date))
+    .sort((left, right) => left.effectiveDate.localeCompare(right.effectiveDate));
+  return candidates.at(-1);
+}
+
+function isRetryableMopsConnectionFailure(error) {
+  if (!(error instanceof Error) || !error.message.startsWith("MOPS_CONVERSION_PARSE_FAILED:")) {
+    return false;
+  }
+  return error.cause instanceof TypeError && error.cause.message === "fetch failed";
+}
+
+function isCompatiblePriorConversionPrice(value, entry, date) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+  const version = value;
+  if (
+    version.bondCode !== entry.bondCode
+    || version.issuerCode !== entry.issuerCode
+    || !isIsoDate(version.effectiveDate)
+    || version.effectiveDate > date
+    || !isCanonicalConversionPrice(version.initialConversionPrice)
+    || !isCanonicalConversionPrice(version.currentConversionPrice)
+    || typeof version.officialDetailUrl !== "string"
+  ) return false;
+  try {
+    assertApprovedMopsUrl(version.officialDetailUrl);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isCanonicalConversionPrice(value) {
+  return typeof value === "string" && /^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value);
 }
 
 export async function fetchCbMonthlyHistory({
