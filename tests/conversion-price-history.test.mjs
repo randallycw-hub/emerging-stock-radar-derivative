@@ -49,3 +49,41 @@ test("merges immutable versions by bond identity and rejects an effective-date c
     /conflicting conversion price version/i,
   );
 });
+
+test("accepts an official MOPS correction only from a later report month with the same issuer and initial price", () => {
+  const previous = [version("2026-07-31", "232.5", {
+    bondCode: "99587",
+    issuerCode: "9958",
+    initialConversionPrice: "247",
+    officialDetailUrl: "https://mopsov.twse.com.tw/mops/web/t120sg01?bond_id=99587&issuer_stock_code=9958&monyr_reg=202607",
+  })];
+  const corrected = version("2026-07-31", "230.5", {
+    bondCode: "99587",
+    issuerCode: "9958",
+    initialConversionPrice: "247",
+    officialDetailUrl: "https://mopsov.twse.com.tw/mops/web/t120sg01?bond_id=99587&issuer_stock_code=9958&monyr_reg=202608",
+  });
+
+  assert.deepEqual(
+    mergeConversionPriceVersions(previous, [corrected], { allowOfficialRevisions: true }),
+    [corrected],
+  );
+  assert.throws(
+    () => mergeConversionPriceVersions(previous, [
+      { ...corrected, officialDetailUrl: previous[0].officialDetailUrl },
+    ], { allowOfficialRevisions: true }),
+    /conflicting conversion price version/i,
+  );
+  assert.throws(
+    () => mergeConversionPriceVersions(previous, [
+      { ...corrected, issuerCode: "9999" },
+    ], { allowOfficialRevisions: true }),
+    /conflicting conversion price version/i,
+  );
+  assert.throws(
+    () => mergeConversionPriceVersions(previous, [
+      { ...corrected, initialConversionPrice: "246" },
+    ], { allowOfficialRevisions: true }),
+    /conflicting conversion price version/i,
+  );
+});

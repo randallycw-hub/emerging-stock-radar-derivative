@@ -216,6 +216,7 @@ export async function buildBondMarketSnapshot(options = {}) {
   const conversionPrices = mergeConversionPriceVersions(
     previousConversionPrices,
     collected.conversionPrices,
+    { allowOfficialRevisions: true },
   );
   const views = buildBondMarketViews({
     asOfDate,

@@ -50,12 +50,17 @@ function normalizeEffectiveVersions(
 export function mergeConversionPriceVersions(
   previous: readonly ConversionPriceVersion[],
   current: readonly ConversionPriceVersion[],
+  { allowOfficialRevisions = false }: { allowOfficialRevisions?: boolean } = {},
 ): readonly ConversionPriceVersion[] {
   const merged = new Map<string, ConversionPriceVersion>();
   for (const version of [...normalizeVersions(previous), ...normalizeVersions(current)]) {
     const key = `${version.bondCode}:${version.effectiveDate}`;
     const existing = merged.get(key);
     if (existing !== undefined && !sameVersion(existing, version)) {
+      if (allowOfficialRevisions && isLaterOfficialRevision(existing, version)) {
+        merged.set(key, version);
+        continue;
+      }
       throw new TypeError(`conflicting conversion price version: ${key}`);
     }
     merged.set(key, version);
@@ -125,6 +130,41 @@ function sameVersion(left: ConversionPriceVersion, right: ConversionPriceVersion
     // MOPS updates the report-month query parameter in its detail URL on every
     // refresh.  It is a locator, not a conversion-price fact.
     && left.effectiveDate === right.effectiveDate;
+}
+
+function isLaterOfficialRevision(
+  previous: ConversionPriceVersion,
+  current: ConversionPriceVersion,
+): boolean {
+  if (
+    previous.bondCode !== current.bondCode
+    || previous.issuerCode !== current.issuerCode
+    || previous.effectiveDate !== current.effectiveDate
+    || previous.initialConversionPrice !== current.initialConversionPrice
+  ) return false;
+  const previousReportMonth = mopsReportMonth(previous.officialDetailUrl);
+  const currentReportMonth = mopsReportMonth(current.officialDetailUrl);
+  return previousReportMonth !== null
+    && currentReportMonth !== null
+    && currentReportMonth > previousReportMonth;
+}
+
+function mopsReportMonth(officialDetailUrl: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(officialDetailUrl);
+  } catch {
+    return null;
+  }
+  if (
+    url.protocol !== "https:"
+    || url.hostname !== "mopsov.twse.com.tw"
+    || url.pathname !== "/mops/web/t120sg01"
+    || url.username !== ""
+    || url.password !== ""
+  ) return null;
+  const reportMonth = url.searchParams.get("monyr_reg") ?? "";
+  return /^\d{6}$/.test(reportMonth) ? reportMonth : null;
 }
 
 function compareVersions(
