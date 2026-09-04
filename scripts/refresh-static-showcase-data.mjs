@@ -853,7 +853,20 @@ async function verifyRequiredCoreMarketDate({
     || market?.latestStockPriceDate !== expectedDataDate
     || market?.dataDate !== expectedDataDate
   ) {
-    throw new Error("VALIDATION_FAILED:CORE_MARKET_DATE_MISMATCH");
+    const quoteDates = [...new Set(cbQuotes.map((quote) => quote?.tradingDate))].sort();
+    const stockDates = [...new Set(stockCloses.map((stock) => stock?.tradingDate))].sort();
+    const missingBondCodes = [...bondCodes].filter((bondCode) => !exactQuoteCodes.has(bondCode));
+    const missingIssuerCodes = [...issuerCodes].filter((issuerCode) => !exactStockCodes.has(issuerCode));
+    throw new Error(
+      `VALIDATION_FAILED:CORE_MARKET_DATE_MISMATCH:${JSON.stringify({
+        expectedDataDate,
+        quoteDates,
+        stockDates,
+        missingBondCodes,
+        missingIssuerCodes,
+        manifestDate: market?.dataDate ?? null,
+      })}`,
+    );
   }
 }
 
