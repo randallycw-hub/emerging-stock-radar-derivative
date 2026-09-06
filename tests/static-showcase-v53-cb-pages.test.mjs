@@ -83,7 +83,7 @@ test("V5.3 market overview renders public aggregate labels without diagnostics o
     issuance: [],
   }, { metric: "volume" });
 
-  for (const label of ["有效 CB", "今日有成交", "今日成交額", "本週成交額", "日成交量", "近期事件", "近期發行", "熱力圖"]) {
+  for (const label of ["已掛牌 CB", "該資料日有成交", "單日成交額", "當週已收錄成交額", "日成交量", "近期事件", "近期發行", "熱力圖"]) {
     assert.match(html, new RegExp(label));
   }
   assert.match(html, /—/);

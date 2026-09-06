@@ -12,6 +12,9 @@ export function buildCbMarketStats(model = {}) {
     dataDate: isoDate(model.dataDate),
     current: {
       activeCount: finite(summary.activeCount) ?? records.length,
+      listedCount: finite(summary.listedCount),
+      upcomingCount: finite(summary.upcomingCount),
+      weekObservedDayCount: finite(summary.weekObservedDayCount),
       tradedCount: finite(summary.tradedCount),
       turnoverAmount: finite(summary.turnoverAmount),
       weekTurnoverAmount: finite(summary.weekTurnoverAmount),
@@ -25,7 +28,7 @@ export function buildCbMarketStats(model = {}) {
 export function renderCbMarketStats(stats = {}) {
   const current = stats?.current ?? {};
   return `<div class="cb-stats-grid">
-    <section class="cb-stats-panel"><header><p class="section-number">CURRENT MARKET</p><h2>今日市場</h2></header><dl class="cb-stats-current">${statFact("有效 CB", count(current.activeCount))}${statFact("今日有成交", count(current.tradedCount))}${statFact("今日成交額", amount(current.turnoverAmount))}${statFact("本週成交額", amount(current.weekTurnoverAmount))}</dl></section>
+    <section class="cb-stats-panel"><header><p class="section-number">CURRENT MARKET</p><h2>今日市場</h2></header><dl class="cb-stats-current">${statFact("已掛牌 CB", count(current.listedCount))}${statFact("待掛牌", count(current.upcomingCount))}${statFact("今日有成交", count(current.tradedCount))}${statFact("今日成交額", amount(current.turnoverAmount))}${statFact("當週已收錄成交額", amount(current.weekTurnoverAmount))}${statFact("當週涵蓋", current.weekObservedDayCount === null ? "—" : `已收錄 ${count(current.weekObservedDayCount)} 日`)}</dl></section>
     ${distributionPanel("市場分布", stats.marketBreakdown)}
     ${distributionPanel("轉換溢價分布", stats.premiumDistribution)}
     ${distributionPanel("到期年限分布", stats.maturityDistribution)}

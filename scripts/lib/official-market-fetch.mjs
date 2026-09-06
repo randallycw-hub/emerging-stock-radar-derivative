@@ -14,6 +14,7 @@ import {
   parseMopsConversionPrice,
 } from "../../lib/source-verification/source-cb-market.ts";
 import { mapLimit } from "./map-limit.mjs";
+import { collectUnpricedStockObservations } from './official-stock-availability.mjs';
 
 const TPEX_CB_QUOTE =
   "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry";
@@ -339,6 +340,10 @@ export async function fetchCurrentOfficialMarketData({
     requestedDate: date,
     cbQuotes: quoteGroups.flat(),
     stockCloses,
+    unpricedStockObservations: [
+      ...collectUnpricedStockObservations(twsePayload, TWSE_CLOSE, issuerSet),
+      ...collectUnpricedStockObservations(tpexPayload, TPEX_CLOSE, issuerSet),
+    ],
     conversionPrices,
     sourceUrls: [
       TPEX_CB_QUOTE,

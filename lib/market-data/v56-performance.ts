@@ -43,11 +43,20 @@ export function selectValidPeriodBaseline(
 
   if (period === "YTD") {
     const year = latest.tradeDate.slice(0, 4);
-    return sessions.find((session) => session.tradeDate.startsWith(`${year}-`)) ?? null;
+    // YTD uses the previous year-end close, never the first partial-history row.
+    const priorYear = String(Number(year) - 1);
+    return sessions.findLast((session) => session.tradeDate >= `${priorYear}-12-24` && session.tradeDate < `${year}-01-01`) ?? null;
   }
 
   const offset = PERIOD_SESSION_OFFSET[period];
-  return sessions.at(-1 - offset) ?? null;
+  const baseline = sessions.at(-1 - offset) ?? null;
+  if (!baseline) return null;
+  // Fail closed when sparse or missing history stretches an N-session period.
+  // These conservative upper bounds are eligibility checks, not an inferred
+  // trading calendar. Long holiday gaps remain unavailable until verified.
+  const maxSpan = {"1D":4,"1W":10,"1M":35,"3M":105,"6M":200}[period];
+  const span = (Date.parse(latest.tradeDate) - Date.parse(baseline.tradeDate)) / 86400000;
+  return span > 0 && span <= maxSpan ? baseline : null;
 }
 
 export function calculatePeriodReturn(

@@ -42,7 +42,7 @@ test("V5.6 CB detail has six factual tabs and keeps company CB crosslinks", () =
 
   for (const label of ["概況", "估值", "流動性", "條款", "期間", "事件", "90002 甲二", "公司研究頁", "官方公告"]) assert.match(html, new RegExp(label));
   assert.equal((html.match(/data-cb-detail-tab=/g) ?? []).length, 6);
-  assert.match(html, /今日無成交/);
+  assert.match(html, /當日無成交/);
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|買點|推薦|風險/);
 });
 

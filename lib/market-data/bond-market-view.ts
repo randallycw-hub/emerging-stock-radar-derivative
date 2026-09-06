@@ -119,7 +119,10 @@ function buildView(
     && quote.tradingUnits === "0"
   ));
   const latestStock = stockCloses[0];
-  const latestConversion = conversionPrices[0];
+  // Keep the as-of-date effective version when a newer notice is not yet in
+  // force. If only a future version exists, retain its explicitly dated terms;
+  // it remains ineligible for valuation until its effective date.
+  const latestConversion = selectEffectiveConversionPrice(conversionPrices, input.asOfDate) ?? conversionPrices[0];
   const stockByDate = new Map(
     stockCloses.map((stock) => [stock.tradingDate, stock] as const),
   );

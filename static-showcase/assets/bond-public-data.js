@@ -26,6 +26,7 @@ export function textValue(value) {
 }
 
 export function numberValue(value, digits = 2) {
+  if (!['number','string'].includes(typeof value) || String(value).trim() === '') return '—';
   const parsed = Number(value);
   return Number.isFinite(parsed)
     ? new Intl.NumberFormat("zh-TW", { maximumFractionDigits: digits }).format(parsed)

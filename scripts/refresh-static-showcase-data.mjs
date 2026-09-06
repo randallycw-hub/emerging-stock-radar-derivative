@@ -54,6 +54,8 @@ import {
   fetchCurrentOfficialMarketData,
 } from "./lib/official-market-fetch.mjs";
 import { publishPublicResearchSnapshot } from "./stage-static-showcase.mjs";
+import { requiredQuotedBonds } from './lib/bond-inputs-from-11406.mjs';
+import { confirmedUnpricedStockCodes } from './lib/official-stock-availability.mjs';
 
 export const OFFICIAL_SHOWCASE_SOURCES = {
   "94025": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
@@ -317,7 +319,9 @@ async function refreshStaticShowcaseCandidate({
   if (expectedDataDate !== undefined) {
     verifyRosterDoesNotLeadMarketDate(
       datasets["11406"],
-      expectedDataDate,
+      // Terms retain their own outstandingDataDate. A weekend roster is not
+      // a weekend price: reject future publication, not valid newer terms.
+      taipeiDate(now),
     );
     const censusResponse = await fetchOfficialCsvWithRetry(
       OFFICIAL_ROSTER_CENSUS_SOURCE,
@@ -820,7 +824,7 @@ async function verifyRequiredCoreMarketDate({
     readFile(join(dataDirectory, "cb-quotes.json"), "utf8").then(JSON.parse),
     readFile(join(dataDirectory, "stock-closes.json"), "utf8").then(JSON.parse),
   ]);
-  const bonds = bondInputsFrom11406Rows(rosterRows);
+  const bonds = requiredQuotedBonds(bondTermSummariesFrom11406Rows(rosterRows), expectedDataDate);
   const bondCodes = new Set(bonds.map((bond) => bond.bondCode));
   const issuerCodes = new Set(bonds.map((bond) => bond.issuerCode));
   const exactQuoteCodes = new Set(
@@ -841,6 +845,9 @@ async function verifyRequiredCoreMarketDate({
       : [],
   );
   const market = manifest?.market;
+  // A missing source row still blocks publication. Only an explicit same-day
+  // official no-close marker is accepted, without fabricating a stock price.
+  for (const code of confirmedUnpricedStockCodes(market?.unpricedStockObservations, expectedDataDate)) exactStockCodes.add(code);
   if (
     !Array.isArray(cbQuotes)
     || !Array.isArray(stockCloses)

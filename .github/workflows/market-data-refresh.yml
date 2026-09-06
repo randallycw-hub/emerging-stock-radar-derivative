@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "15 8 * * 1-5" # FAST, 16:15 Asia/Taipei
     - cron: "45 9 * * 1-5" # OFFICIAL, 17:45 Asia/Taipei
-    - cron: "30 14 * * *" # EVENT, 22:30 Asia/Taipei
+    - cron: "30 14 * * *" # OFFICIAL retry, 22:30 Asia/Taipei
     - cron: "30 23 * * 0-4" # RECONCILE, 07:30 Asia/Taipei
     - cron: "0 2 * * 6" # WEEKLY, Saturday 10:00 Asia/Taipei
   workflow_dispatch:
@@ -26,6 +26,9 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      UV_THREADPOOL_SIZE: 2
+      OMP_NUM_THREADS: 2
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,7 +61,7 @@ jobs:
         run: |
           case "${{ steps.context.outputs.mode }}" in
             FAST|OFFICIAL)
-              node scripts/run-nightly-market-refresh.mjs --date "${{ steps.context.outputs.data_date }}"
+              node scripts/run-latest-market-refresh.mjs
               ;;
             EVENT)
               node scripts/refresh-static-ipo-snapshot.mjs

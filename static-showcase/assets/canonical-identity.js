@@ -47,6 +47,12 @@ export function applyCanonicalCompanyIdentity(record, companies) {
   return companies.get(companyCode(record?.companyCode)) ?? null;
 }
 
+/** IPO application destination is not the issuer's current trading market. */
+export function applyCanonicalIpoIdentity(record, companies) {
+  const identity = applyCanonicalCompanyIdentity(record, companies);
+  return identity ? {...identity, market: text(record?.market) || "—"} : null;
+}
+
 /** Creates an exact-code lookup for public CB and underlying-company identity. */
 export function indexCanonicalBonds(value) {
   const indexed = new Map();

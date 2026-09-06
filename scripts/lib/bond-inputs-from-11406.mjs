@@ -1,6 +1,15 @@
 import { isIsoDate } from "../../lib/domain/dates.ts";
 import { multiplyDecimal } from "../../lib/market-data/decimal.ts";
 
+export function requiredQuotedBonds(bonds, dataDate) {
+  if (!isIsoDate(dataDate)) throw new TypeError('invalid quote-gate date');
+  return bonds.filter(bond => {
+    const begins = bond.listingDate ?? bond.issueDate;
+    // Unknown dates remain required; only a dated official future issue is exempt.
+    return !isIsoDate(begins) || begins <= dataDate;
+  });
+}
+
 export function bondTermSummariesFrom11406Rows(rows) {
   if (!Array.isArray(rows)) throw new TypeError("11406 rows must be an array");
   return rows.flatMap((row, index) => {

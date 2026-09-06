@@ -72,6 +72,7 @@ const ROOT_FILES = new Set([
   "methodology.html",
 ]);
 const ASSET_FILES = new Set([
+  "workspace.css",
   "app.css",
   "canonical-identity.js",
   "company-overview.js",
@@ -293,12 +294,14 @@ export async function stageStaticShowcase({
     manifest,
     runtime,
   });
-  await writePublicStaticArtifacts({ destination, generation: pointer.generation });
   const marketResearch = await writePublicMarketResearch({
     source,
     destination,
     generation: pointer.generation,
   });
+  // Derive verified events before removing the internal evidence used to
+  // authenticate them. Sanitize every public artifact only after projection.
+  await writePublicStaticArtifacts({ destination, generation: pointer.generation });
   await injectHomeStaticFallback({ destination, marketResearch });
   await injectDataCenterBootstrap({ destination, status: dataCenterStatus });
   await writePublicRootArtifacts({ destination });

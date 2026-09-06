@@ -5,10 +5,10 @@ export const CB_VIEW_COLUMNS = Object.freeze({
   quote: [
     ["CB 代碼／名稱", (record) => `${record.cbCode} ${record.cbName}`],
     ["標的公司", (record) => `${record.stockCode} ${record.companyName}`],
-    ["CB 收盤", (record) => publicNumber(record.quote?.cbClose)],
-    ["成交量", (record) => record.quote?.tradeState === "no_trade" ? "今日無成交" : publicNumber(record.quote?.volume)],
+    ["CB 收盤／最近成交", (record) => `${publicNumber(record.quote?.cbClose)}${record.quote?.isLatestSnapshot === false && record.quote?.cbClose != null ? `（${dateLabel(record.quote.dataDate)}）` : ''}`],
+    ["成交量", (record) => ["no_trade","NO_TRADE_TODAY"].includes(record.quote?.tradeState) ? "當日無成交" : publicNumber(record.quote?.volume)],
     ["成交額", (record) => publicAmount(record.quote?.turnoverAmount)],
-    ["轉換價值", (record) => publicNumber(record.quote?.conversionValue)],
+    ["轉換價值", (record) => publicNumber(record.quote?.stockConversionValue ?? record.quote?.conversionValue)],
     ["轉換溢價率", (record) => rate(record.quote?.premiumRate)],
   ],
   terms: [
@@ -24,8 +24,8 @@ export const CB_VIEW_COLUMNS = Object.freeze({
   ],
   events: [
     ["CB 代碼／名稱", (record) => `${record.cbCode} ${record.cbName}`],
-    ["最近權利事件", (record) => nextEvent(record)?.label ?? "—"],
-    ["下一事件", (record) => dateLabel(nextEvent(record)?.date)],
+    ["最近權利事件", (record, asOfDate) => nextPublishedCbEvent(record, asOfDate)?.label ?? "—"],
+    ["下一事件", (record, asOfDate) => dateLabel(nextPublishedCbEvent(record, asOfDate)?.date)],
     ["停止轉換", (record) => hasEvent(record, "conversion_suspension") ? "已公告" : "—"],
     ["賣回", (record) => eventDate(record, "put")],
     ["提前贖回", (record) => eventDate(record, "redemption")],
@@ -33,11 +33,12 @@ export const CB_VIEW_COLUMNS = Object.freeze({
   ],
   liquidity: [
     ["CB 代碼／名稱", (record) => `${record.cbCode} ${record.cbName}`],
-    ["今日量", (record) => record.quote?.tradeState === "no_trade" ? "0" : publicNumber(record.quote?.volume)],
-    ["5 日均量", (record) => publicNumber(record.liquidity?.average5)],
-    ["20 日均量", (record) => publicNumber(record.liquidity?.average20)],
-    ["週成交量", (record) => publicNumber(record.liquidity?.weekVolume)],
-    ["近 20 日有成交天數", (record) => publicNumber(record.liquidity?.tradedDays20, 0)],
+    ["當日量", (record) => publicNumber(record.quote?.volume)],
+    ["近 5 筆日均量", (record) => publicNumber(record.liquidity?.average5)],
+    ["近 20 筆日均量", (record) => publicNumber(record.liquidity?.average20)],
+    ["當週已收錄量", (record) => publicNumber(record.liquidity?.weekVolume)],
+    ["近 20 筆有成交天數", (record) => publicNumber(record.liquidity?.tradedDays20, 0)],
+    ["樣本期間", (record) => `${dateLabel(record.liquidity?.sampleStartDate)}～${dateLabel(record.liquidity?.sampleEndDate)}`],
   ],
 });
 
@@ -53,6 +54,49 @@ const QUICK_FILTERS = new Set([
   "conversionSuspended",
 ]);
 
+const SORT_VALUES = Object.freeze({
+  code: record => record.cbCode,
+  close: record => finiteNumber(record.quote?.cbClose),
+  volume: record => finiteNumber(record.quote?.volume),
+  premium: record => finiteNumber(record.quote?.premiumRate),
+  maturity: record => isoDate(record.terms?.maturityDate),
+});
+
+export function readCbFilterState(search = '') {
+  const params = new URLSearchParams(search);
+  const quickFilter = params.get('quickFilter') ?? '';
+  const view = params.get('view');
+  const sort = params.get('sort') ?? '';
+  return {q:normalizeQuery(params.get('q') ?? ''),quickFilter:QUICK_FILTERS.has(quickFilter) ? quickFilter : '',
+    view:Object.hasOwn(CB_VIEW_COLUMNS,view) ? view : 'quote',sort:Object.hasOwn(SORT_VALUES,sort) ? sort : '',
+    direction:params.get('direction') === 'desc' ? 'desc' : 'asc'};
+}
+
+export function sortCbDatabase(records, key, direction = 'asc') {
+  if (!Object.hasOwn(SORT_VALUES,key)) return records;
+  const value = SORT_VALUES[key];
+  return records.slice().sort((a,b)=>{
+    const left=value(a), right=value(b);
+    if (left == null || right == null) return left == null ? right == null ? 0 : 1 : -1;
+    const order = typeof left === 'number' ? left-right : String(left).localeCompare(String(right),'zh-Hant',{numeric:true});
+    return (direction === 'desc' ? -1 : 1)*order;
+  });
+}
+
+export function cbFilterRecords(model) {
+  const types = {early_redemption:'redemption',suspension:'conversion_suspension',put:'put',maturity:'maturity',listing:'listing',conversion_price_adjustment:'conversion_price_change'};
+  const grouped = new Map();
+  for (const event of arrayValue(model.events)) {
+    if (event.marketScope !== 'cb' || !Object.hasOwn(types,event.eventType)) continue;
+    const date = event.deadlineDate ?? event.effectiveDate ?? event.startDate ?? event.announcementDate;
+    if (!isoDate(date)) continue;
+    const items = grouped.get(event.cbCode) ?? [];
+    items.push({...event,type:types[event.eventType],date,label:event.title});
+    grouped.set(event.cbCode,items);
+  }
+  return arrayValue(model.records).map(record => ({...record,events:grouped.get(record.cbCode) ?? record.events}));
+}
+
 export function filterV53CbRecords(records, { query = "", quickFilter = "", dataDate = null } = {}) {
   const needle = normalizeQuery(query);
   const selected = QUICK_FILTERS.has(quickFilter) ? quickFilter : "";
@@ -65,7 +109,7 @@ export function filterV53CbRecords(records, { query = "", quickFilter = "", data
   });
   if (selected === "lowPremium") return sortBy(result, (record) => finiteNumber(record.quote?.premiumRate));
   if (selected === "nearConversion") return sortBy(result, (record) => {
-    const value = finiteNumber(record.quote?.conversionValue);
+    const value = finiteNumber(record.quote?.stockConversionValue ?? record.quote?.conversionValue);
     return value === null ? null : Math.abs(value - 100);
   });
   return result;
@@ -77,14 +121,14 @@ function meetsQuickFilter(record, quickFilter, asOfDate) {
   if (quickFilter === "newIssue") return isWithinPriorDays(record.terms?.issueDate, asOfDate, 90);
   if (quickFilter === "lowPremium") return finiteNumber(record.quote?.premiumRate) !== null;
   if (quickFilter === "nearConversion") {
-    const value = finiteNumber(record.quote?.conversionValue);
+    const value = finiteNumber(record.quote?.stockConversionValue ?? record.quote?.conversionValue);
     return value !== null && Math.abs(value - 100) <= 5;
   }
   if (quickFilter === "maturity365") return isWithinDays(record.terms?.maturityDate, asOfDate, 365);
   if (quickFilter === "rights90") return arrayValue(record.events).some((event) => event?.type !== "listing" && isWithinDays(event?.date, asOfDate, 90));
   if (quickFilter === "recentPut") return arrayValue(record.events).some((event) => event?.type === "put" && isWithinDays(event?.date, asOfDate, 90));
   if (quickFilter === "recentRedemption") return arrayValue(record.events).some((event) => event?.type === "redemption" && isWithinDays(event?.date, asOfDate, 90));
-  if (quickFilter === "conversionSuspended") return arrayValue(record.events).some((event) => event?.type === "conversion_suspension" && String(event.date ?? "") <= asOfDate);
+  if (quickFilter === "conversionSuspended") return arrayValue(record.events).some((event) => event?.type === "conversion_suspension" && isoDate(event.startDate ?? event.date) && isoDate(event.endDate) && (event.startDate ?? event.date) <= asOfDate && event.endDate >= asOfDate);
   return true;
 }
 
@@ -95,7 +139,7 @@ function sortBy(records, valueFor) {
   }).map((item) => item.record);
 }
 
-function renderRows(head, body, records, view) {
+function renderRows(head, body, records, view, asOfDate) {
   const columns = CB_VIEW_COLUMNS[view] ?? CB_VIEW_COLUMNS.quote;
   head.innerHTML = `<tr>${columns.map(([label]) => `<th>${escapeHtml(label)}</th>`).join("")}</tr>`;
   if (!records.length) {
@@ -103,7 +147,7 @@ function renderRows(head, body, records, view) {
     return;
   }
   body.innerHTML = records.map((record) => `<tr>${columns.map(([label, value], index) => {
-    const rendered = value(record);
+    const rendered = value(record, asOfDate);
     return index === 0 ? `<td><a href="./bonds.html?bond=${encodeURIComponent(record.cbCode)}">${escapeHtml(rendered)}</a></td>` : `<td data-label="${escapeHtml(label)}">${escapeHtml(rendered)}</td>`;
   }).join("")}</tr>`).join("");
 }
@@ -123,16 +167,26 @@ async function initialize() {
     body.innerHTML = '<tr><td class="empty-cell">資料暫時無法取得</td></tr>';
     return;
   }
-  let activeView = viewFromUrl();
+  let activeView;
+  const restore = () => {
+    const state = readCbFilterState(globalThis.location?.search);
+    activeView = state.view;
+    for (const key of ['q','quickFilter','sort','direction']) {
+      const control = form.elements.namedItem(key);
+      if (control) control.value = state[key];
+    }
+  };
+  restore();
+  const filterRecords = cbFilterRecords(model);
   const render = () => {
     const values = new FormData(form);
-    const rows = filterV53CbRecords(model.records, {
+    const rows = sortCbDatabase(filterV53CbRecords(filterRecords, {
       query: values.get("q") ?? "",
       quickFilter: String(values.get("quickFilter") ?? ""),
       dataDate: model.dataDate,
-    });
+    }), String(values.get('sort') ?? ''), String(values.get('direction') ?? 'asc'));
     count.textContent = `${rows.length} 檔 · 資料日 ${dateLabel(model.dataDate)}`;
-    renderRows(head, body, rows, activeView);
+    renderRows(head, body, rows, activeView, model.dataDate);
     tabs.querySelectorAll("[data-cb-view]").forEach((button) => button.setAttribute("aria-selected", String(button.dataset.cbView === activeView)));
     clear.hidden = !String(values.get("q") ?? "") && !String(values.get("quickFilter") ?? "");
     syncUrl(activeView, values);
@@ -149,12 +203,8 @@ async function initialize() {
     activeView = button.dataset.cbView;
     render();
   });
+  globalThis.addEventListener?.('popstate', () => { restore(); render(); });
   render();
-}
-
-function viewFromUrl() {
-  const view = new URLSearchParams(globalThis.location?.search ?? "").get("view");
-  return Object.hasOwn(CB_VIEW_COLUMNS, view) ? view : "quote";
 }
 
 function syncUrl(view, values) {
@@ -165,12 +215,16 @@ function syncUrl(view, values) {
   if (query) params.set("q", query);
   if (QUICK_FILTERS.has(quickFilter) && quickFilter) params.set("quickFilter", quickFilter);
   if (view !== "quote") params.set("view", view);
+  if (Object.hasOwn(SORT_VALUES, values.get('sort'))) {
+    params.set('sort',values.get('sort'));
+    if (values.get('direction') === 'desc') params.set('direction','desc');
+  }
   const search = params.size ? `?${params}` : "";
   globalThis.history.replaceState(null, "", `${globalThis.location.pathname}${search}`);
 }
 
-function nextEvent(record) {
-  return arrayValue(record?.events).slice().sort((left, right) => String(left?.date ?? "").localeCompare(String(right?.date ?? "")))[0] ?? null;
+export function nextPublishedCbEvent(record, asOfDate) {
+  return arrayValue(record?.events).filter(event => isoDate(event.date) && (!isoDate(asOfDate) || event.date >= asOfDate)).sort((left, right) => left.date.localeCompare(right.date))[0] ?? null;
 }
 
 function eventDate(record, type) {

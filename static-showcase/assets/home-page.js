@@ -219,7 +219,7 @@ export function buildV56HomeBrief(model = {}) {
     .map((change) => ({
       stockCode: change.entityId,
       companyName: ipoByCode.get(change.entityId)?.companyName ?? null,
-      label: typeof change.newValue === "string" && change.newValue ? change.newValue : v56ChangeLabel(change.changeType),
+      label: ({A:'送件觀察',B:'審議進程',C:'契約／時程',D:'定價／掛牌'})[change.newValue] ?? (typeof change.newValue === "string" && change.newValue ? change.newValue : v56ChangeLabel(change.changeType)),
       date: isPublishedIsoDate(change.effectiveDate) ? change.effectiveDate : dataDate,
     }))
     .sort((left, right) => left.date.localeCompare(right.date) || left.stockCode.localeCompare(right.stockCode))
@@ -303,7 +303,7 @@ export function buildV57HomeSections(model = {}) {
       return true;
     })
     .slice(0, 8);
-  return { dataDate: brief.dataDate, todayChanges, nextEvents };
+  return { dataDate: brief.dataDate, previousDataDate: model?.previousDataDate ?? null, todayChanges, nextEvents };
 }
 
 function calendarDaysFrom(start, end) {
@@ -480,7 +480,7 @@ function renderV57TodayChanges(sections) {
     : `<p class="home-v56-empty">${escapeHtml(empty)}</p>`;
   const byMarket = (market) => sections.todayChanges.filter((entry) => entry.market === market);
   todayChangesTarget.innerHTML = `<section class="home-v56-today" aria-labelledby="home-v56-title">
-    <header><p class="kicker">SNAPSHOT DIFF / VERIFIED</p><h2 id="home-v56-title">本次快照異動</h2><p>只列示本次已驗證快照相對前一個有效快照的欄位變化。</p></header>
+    <header><p id="home-v56-title">比較 ${formatDate(sections.previousDataDate)} → ${formatDate(sections.dataDate)}</p></header>
     <div class="home-v56-today__grid">
       ${["CB", "IPO", "興櫃"].map((market) => `<article><h3>${escapeHtml(market)} 異動</h3>${items(byMarket(market), (entry) => `<li><a href="${escapeAttribute(entry.href)}"><span>${escapeHtml(entry.code)} ${escapeHtml(entry.name ?? "")}</span><strong>${escapeHtml(entry.label)}</strong><small>${formatDate(entry.date)}</small></a></li>`, "本次快照沒有已驗證異動。")}</article>`).join("")}
     </div>

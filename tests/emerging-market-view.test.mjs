@@ -110,6 +110,13 @@ test("accepts a complete grouped-source view at the public schema boundary", () 
   assert.deepEqual(EmergingMarketViewSchema.parse(view), view);
 });
 
+test('zero-price no-trade row is not a minus-100-percent stock move',()=>{
+  const [value]=buildEmergingMarketViews({marketRows:[row({dailyAveragePrice:'0',transactionVolume:'0'})],companyRows:[]});
+  assert.equal(value.dailyAveragePrice,null);
+  assert.equal(value.averageChangePercent,null);
+  assert.equal(value.estimatedTransactionAmount,'0');
+});
+
 test("returns unavailable derived change values when a source price is missing or prior price is zero", () => {
   const views = buildEmergingMarketViews({
     marketRows: [

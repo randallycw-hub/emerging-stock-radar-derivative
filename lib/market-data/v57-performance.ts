@@ -73,8 +73,8 @@ function buildCbRecord(record: Record<string, unknown>, byCode: ReadonlyMap<stri
     entityId: cbCode,
     cbCode,
     dataDate,
-    periods: periodValues(sessions),
-    metrics: periodMetrics(sessions),
+    periods: periodValues(sessions.at(-1)?.tradeDate === dataDate ? sessions : []),
+    metrics: periodMetrics(sessions.at(-1)?.tradeDate === dataDate ? sessions : []),
   })];
 }
 
@@ -93,8 +93,8 @@ function buildEmergingRecord(record: Record<string, unknown>, byCode: ReadonlyMa
     latestTradeDate: latest?.tradeDate ?? null,
     latestPrice: latest?.close ?? null,
     latestVolume: latest?.volume ?? null,
-    periods: periodValues(sessions),
-    metrics: periodMetrics(sessions),
+    periods: periodValues(latest?.tradeDate === dataDate ? sessions : []),
+    metrics: periodMetrics(latest?.tradeDate === dataDate ? sessions : []),
     liquidity: calculateLiquidity(sessions),
   })];
 }
@@ -212,6 +212,6 @@ function text(value: unknown): string { return typeof value === "string" ? value
 function textOrNull(value: unknown): string | null { const result = text(value); return result || null; }
 function code(value: unknown): string | null { const result = text(value); return /^\d{4,6}$/.test(result) ? result : null; }
 function positiveNumber(value: unknown): number | null { const parsed = Number(value); return Number.isFinite(parsed) && parsed > 0 ? parsed : null; }
-function nonNegativeNumber(value: unknown): number | null { const parsed = Number(value); return Number.isFinite(parsed) && parsed >= 0 ? parsed : null; }
+function nonNegativeNumber(value: unknown): number | null { if (value == null || value === '' || typeof value === 'boolean') return null; const parsed = Number(value); return Number.isFinite(parsed) && parsed >= 0 ? parsed : null; }
 function isoDate(value: unknown): string | null { const date = String(value ?? ""); return isIsoDate(date) ? date : null; }
 function isIsoDate(value: string): boolean { return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(`${value}T00:00:00Z`)); }

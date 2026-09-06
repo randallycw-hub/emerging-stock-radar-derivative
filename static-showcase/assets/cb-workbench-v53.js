@@ -249,6 +249,7 @@ function indexHistory(history) {
     const values = result.get(cbCode) ?? [];
     values.push({
       date,
+      close: finiteNumber(point?.cbClose),
       tradingUnits: finiteNumber(point?.cbTradingUnits),
       turnover: finiteNumber(point?.cbTurnover),
     });
@@ -259,12 +260,20 @@ function indexHistory(history) {
 }
 
 function projectQuote(view, history, dataDate) {
-  const cbPriceDate = isoDate(view.cbPriceDate);
+  const historicalPrice = history.findLast((point) => point.date <= dataDate && point.close > 0 && point.tradingUnits > 0);
+  const viewPriceDate = isoDate(view.cbPriceDate);
+  const viewPrice = finiteNumber(view.cbClose);
+  const useHistory = historicalPrice && (!viewPriceDate || viewPrice === null || historicalPrice.date > viewPriceDate);
+  const cbPriceDate = useHistory ? historicalPrice.date : viewPriceDate;
   const stockPriceDate = isoDate(view.stockPriceDate);
   const conversionPriceEffectiveDate = isoDate(view.conversionPriceEffectiveDate);
-  const cbClose = finiteNumber(view.cbClose);
+  const cbClose = useHistory ? historicalPrice.close : viewPrice;
   const stockClose = finiteNumber(view.stockClose);
   const conversionPrice = finiteNumber(view.currentConversionPrice);
+  // Stock conversion value needs a dated stock close, not a CB transaction.
+  // The premium below still requires a same-date CB/stock price pair.
+  const stockConversionValueDate = stockPriceDate && stockPriceDate <= dataDate && conversionPriceEffectiveDate && conversionPriceEffectiveDate <= stockPriceDate && stockClose > 0 && conversionPrice > 0 ? stockPriceDate : null;
+  const stockConversionValue = stockConversionValueDate ? round(stockClose / conversionPrice * 100) : null;
   const valuationDate = cbPriceDate && cbPriceDate === stockPriceDate && conversionPriceEffectiveDate && conversionPriceEffectiveDate <= cbPriceDate
     ? cbPriceDate
     : null;
@@ -281,12 +290,15 @@ function projectQuote(view, history, dataDate) {
   const lastTurnoverAmount = lastActivity?.turnover ?? null;
   const volume = snapshotActivity?.tradingUnits ?? (cbPriceDate === dataDate ? lastVolume : null);
   const turnoverAmount = snapshotActivity?.turnover ?? (cbPriceDate === dataDate ? lastTurnoverAmount : null);
-  const tradeState = publicTradeState({ latestTradeDate: cbPriceDate, dataDate, lastVolume });
+  const tradeState = publicTradeState({ latestTradeDate: cbPriceDate, dataDate, lastVolume, volume });
   return {
     dataDate: cbPriceDate,
     snapshotDataDate: dataDate,
     cbClose,
     stockClose,
+    stockPriceDate,
+    stockConversionValue,
+    stockConversionValueDate,
     conversionPrice,
     conversionPriceEffectiveDate,
     valuationDate,
@@ -303,7 +315,8 @@ function projectQuote(view, history, dataDate) {
   };
 }
 
-function publicTradeState({ latestTradeDate, dataDate, lastVolume }) {
+function publicTradeState({ latestTradeDate, dataDate, lastVolume, volume }) {
+  if (dataDate && volume === 0) return "NO_TRADE_TODAY";
   if (!latestTradeDate || !dataDate || latestTradeDate > dataDate || lastVolume === null || lastVolume < 0) return "DATA_ERROR";
   return latestTradeDate === dataDate && lastVolume > 0 ? "TRADED_TODAY" : "NO_TRADE_TODAY";
 }
@@ -371,6 +384,7 @@ function projectIssuance({ cbCode, bondName, stockCode, companyName, terms, even
       issueAmount: terms.issueAmount,
       securedStatus: terms.securedStatus,
       underwriter: terms.underwriter,
+      trustee: terms.trustee,
     },
     currentStage: [...PIPELINE_STAGE_KEYS].reverse().find((stage) => stages[stage]) ?? "unannounced",
     sourceUrl: listing?.sourceUrl ?? null,
@@ -395,17 +409,26 @@ function projectLiquidity(history, dataDate) {
     sample20: Math.min(valid.length, 20),
     weekVolume: hasWeeklyVolume ? round(weekly.reduce((sum, point) => sum + point.tradingUnits, 0)) : null,
     weekTurnover: hasWeeklyTurnover ? round(weekly.reduce((sum, point) => sum + point.turnover, 0)) : null,
+    weekObservationDates: weekly.map((point) => point.date),
+    sampleStartDate: valid.at(-20)?.date ?? valid[0]?.date ?? null,
+    sampleEndDate: valid.at(-1)?.date ?? null,
     tradedDays20: valid.slice(-20).filter((point) => point.tradingUnits > 0).length,
   };
 }
 
 function buildSummary(records, dataDate) {
   const active = records.filter((record) => record.status === "active");
+  const upcoming = active.filter((record) => (record.terms.listingDate ?? record.terms.issueDate) > dataDate);
+  const weekObservationDates = [...new Set(active.flatMap((record) => record.liquidity.weekObservationDates))].sort();
   const latestTradeSamples = active.filter((record) => record.quote.isLatestSnapshot && finiteNumber(record.quote.volume) !== null);
   const latestTurnoverSamples = active.filter((record) => record.quote.isLatestSnapshot && finiteNumber(record.quote.turnoverAmount) !== null);
   const weeklyTurnoverSamples = active.filter((record) => finiteNumber(record.liquidity.weekTurnover) !== null);
   return {
     activeCount: active.length,
+    listedCount: active.length - upcoming.length,
+    upcomingCount: upcoming.length,
+    weekObservedDayCount: weekObservationDates.length,
+    weekObservationDates,
     tradedCount: latestTradeSamples.length ? latestTradeSamples.filter((record) => record.quote.volume > 0).length : null,
     tradedSampleCount: latestTradeSamples.length,
     turnoverAmount: latestTurnoverSamples.length

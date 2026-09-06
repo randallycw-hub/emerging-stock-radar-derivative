@@ -25,7 +25,7 @@ test("V5.6 staging emits one public model for shared data, daily changes, and pe
       "utf8",
     ));
     assert.equal(model.schemaVersion, 3);
-    assert.equal(model.dataDate, "2026-08-28");
+    assert.equal(model.dataDate, JSON.parse(await readFile(join(showcaseSource, "data", pointer.generation, "bond-workbench.json"), "utf8")).dataDate);
     assert.equal(model.securityMaster.status, "verified");
     assert.equal(model.performance.status, "verified");
     assert.equal(model.dailyChanges.status, "verified");
@@ -34,6 +34,15 @@ test("V5.6 staging emits one public model for shared data, daily changes, and pe
     assert.ok(model.performance.records.some((record) => record.entityType === "ipo"));
     assert.ok(model.stockPriceHistory.records.every((record) => record.source === "official"));
     assert.doesNotMatch(JSON.stringify(model), /rawSourceId|rawTextHash|missingReason|diagnostics/);
+    const sourceEvents = JSON.parse(await readFile(join(showcaseSource, "data", pointer.generation, "canonical-events-v55.json"), "utf8"));
+    const stagedEvents = JSON.parse(await readFile(join(destination, runtime.canonicalEventsV55Url.replace(/^\.\//, "")), "utf8"));
+    for (const scope of ["ipo", "cb"]) {
+      assert.ok(sourceEvents.records.some(row => row.marketScope === scope));
+      assert.equal(stagedEvents.records.filter(row => row.marketScope === scope).length,
+        sourceEvents.records.filter(row => row.marketScope === scope).length,
+        `staging must retain verified ${scope} events before removing internal evidence`);
+    }
+    assert.doesNotMatch(JSON.stringify(stagedEvents), /"sourceId"|"sourceRecordIds"|"missingReason"/);
   } finally {
     await rm(destination, { recursive: true, force: true });
   }

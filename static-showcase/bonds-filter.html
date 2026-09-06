@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="全部可轉債公開資料庫">
   <title>全部可轉債｜市場資訊台</title>
-  <link rel="stylesheet" href="./assets/app.css">
+  <link rel="stylesheet" href="./assets/app.css"><link rel="stylesheet" href="./assets/workspace.css">
 </head>
 <body data-page="bonds">
   <a class="skip-link" href="#main-content">跳到主要內容</a>
@@ -24,6 +24,8 @@
       <form id="bond-filter-form" class="filters" aria-label="可轉債公開條件篩選">
         <label><span>搜尋</span><input name="q" type="search" autocomplete="off" placeholder="股票／CB 代碼、名稱"></label>
         <label><span>快速條件</span><select name="quickFilter"><option value="">全部</option><option value="newIssue">新發行</option><option value="lowPremium">低溢價</option><option value="nearConversion">接近轉換價值</option><option value="rights90">90 日內權利事件</option><option value="maturity365">365 日內到期</option><option value="recentPut">近期賣回</option><option value="recentRedemption">近期強贖</option><option value="conversionSuspended">停止轉換中</option></select></label>
+        <label><span>排序</span><select name="sort"><option value="">依快速條件</option><option value="code">CB 代碼</option><option value="close">CB 收盤</option><option value="volume">成交量</option><option value="premium">轉換溢價率</option><option value="maturity">到期日</option></select></label>
+        <label><span>順序</span><select name="direction"><option value="asc">由小到大／由近到遠</option><option value="desc">由大到小／由遠到近</option></select></label>
         <button id="bond-filter-clear" type="button" hidden>清除條件</button>
       </form>
       <div class="bond-table-shell"><table class="bond-table public-data-table"><thead id="bond-filter-head"></thead><tbody id="bond-filter-body"><tr><td class="empty-cell">盤後資料讀取中</td></tr></tbody></table></div>

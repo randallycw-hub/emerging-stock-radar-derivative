@@ -3,6 +3,13 @@ import test from "node:test";
 
 import { buildV57Performance } from "../lib/market-data/v57-performance.ts";
 
+test('missing-week prices cannot masquerade as daily performance or year-to-date history',()=>{
+  const rows=buildV57Performance([snapshot('2026-08-24',100),snapshot('2026-09-04',110)]);
+  const cb=rows.find(row=>row.entityType==='cb');
+  assert.equal(cb.periods['1D'],null);
+  assert.equal(cb.periods.YTD,null);
+});
+
 function snapshot(date, price, volume = 100, offerPrice = 20) {
   return {
     dataDate: date,

@@ -95,6 +95,12 @@ function completeMarket(tradingUnits = "10") {
   };
 }
 
+test('a future announced conversion adjustment does not replace the currently effective version',()=>{
+  const [view]=buildBondMarketViews(fixture({...completeMarket(),conversionPrices:[conversion('2025-11-09','35.1'),conversion('2026-09-14','30.3')]}));
+  assert.equal(view.currentConversionPrice,'35.1');
+  assert.equal(view.conversionPriceEffectiveDate,'2025-11-09');
+});
+
 function supplementalSnapshot({
   institutionTotals = ["23", ...Array(14).fill("18"), "19", "19", "19", "19", "69"],
   redemptions = [redemptionEvent("2026-07-29", "2026-09-21")],

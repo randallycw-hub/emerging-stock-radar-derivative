@@ -1,7 +1,7 @@
 const RANKING_METRICS = Object.freeze({
   volume: { label: "日成交量", value: (record) => record?.quote?.volume ?? null },
-  average5: { label: "5 日均量", value: (record) => record?.liquidity?.average5 ?? null },
-  average20: { label: "20 日均量", value: (record) => record?.liquidity?.average20 ?? null },
+  average5: { label: "近 5 筆日均量", value: (record) => record?.liquidity?.average5 ?? null },
+  average20: { label: "近 20 筆日均量", value: (record) => record?.liquidity?.average20 ?? null },
   turnoverAmount: { label: "成交額", value: (record) => record?.quote?.turnoverAmount ?? null },
 });
 
@@ -52,15 +52,22 @@ export function renderMarketOverview(model, { metric = "volume" } = {}) {
   const ranking = rankCbRecords(records, metric).slice(0, 10);
   const heatmap = buildCbHeatmapPoints(records);
   return `<section class="cb-market-overview" data-cb-market-overview aria-label="可轉債市場總覽">
-    <section class="cb-market-summary" aria-label="市場摘要">
-      ${summaryCard("有效 CB", publicNumber(summary.activeCount), "目前有效掛牌且未到期")}
-      ${summaryCard("今日有成交（已公布）", publicNumber(summary.tradedCount), "以最新公開交易日為準")}
-      ${summaryCard("今日成交額（已公布）", publicAmount(summary.turnoverAmount), dateLabel(model?.dataDate))}
-      ${summaryCard("本週成交額（已公布）", publicAmount(summary.weekTurnoverAmount), text(summary.weekPeriod) || "—")}
+    <section class="cb-market-summary cb-market-summary--workspace" aria-label="市場快覽">
+      ${summaryCard("已掛牌 CB", publicNumber(summary.listedCount ?? summary.activeCount), summary.upcomingCount ? `另有 ${summary.upcomingCount} 檔即將掛牌，可於發行頁查看` : "有效掛牌清單", "active")}
+      ${summaryCard("該資料日有成交", publicNumber(summary.tradedCount), dateLabel(model?.dataDate), "traded")}
+      ${summaryCard("單日成交額", publicAmount(summary.turnoverAmount), dateLabel(model?.dataDate), "turnover")}
+      ${summaryCard("當週已收錄成交額", publicAmount(summary.weekTurnoverAmount), `${text(summary.weekPeriod) || "—"}${summary.weekObservedDayCount != null ? ` · 已收錄 ${summary.weekObservedDayCount} 日` : ''}`, "week")}
     </section>
+    <nav class="cb-workspace-tabs" aria-label="可轉債快速篩選">
+      <a href="./bonds-filter.html?quickFilter=lowPremium">轉換溢價率由低到高 →</a>
+      <a href="./bonds-filter.html?quickFilter=newIssue">近 90 日發行 →</a>
+      <a href="./bonds-filter.html?quickFilter=maturity365&sort=maturity">一年內到期 →</a>
+      <a href="./bonds-filter.html?quickFilter=rights90&view=events">近期權利事件 →</a>
+    </nav>
     <section class="cb-overview-panel" aria-labelledby="cb-ranking-heading">
       <header class="cb-overview-heading"><div><p class="section-number">TURNOVER RANKING</p><h2 id="cb-ranking-heading">成交排行</h2></div><div class="cb-rank-controls" aria-label="成交排行指標">${Object.entries(RANKING_METRICS).map(([key, item]) => `<button type="button" data-cb-overview-metric="${key}" aria-pressed="${key === metric}">${escapeHtml(item.label)}</button>`).join("")}</div></header>
       <div class="cb-ranking-table">${renderRanking(ranking, definition)}</div>
+      <a class="workspace-more" href="./bonds-filter.html?sort=volume&direction=desc">查看完整可轉債清單 →</a>
     </section>
     <section class="cb-overview-grid">
       ${renderEventPanel(events)}
@@ -85,10 +92,12 @@ export function publicAmount(value) {
 
 function renderRanking(records, definition) {
   if (records.length === 0) return '<p class="empty-state">目前沒有可顯示的公開行情。</p>';
-  return `<ol>${records.map((record, index) => `<li>
-    <span class="cb-rank">${index + 1}</span>
+  return `<ol class="cb-research-cards">${records.map((record, index) => `<li>
+    <header><span class="cb-rank">${index + 1}</span>
     <a href="./bonds.html?bond=${encodeURIComponent(text(record.cbCode))}"><strong>${escapeHtml(text(record.cbCode))} ${escapeHtml(text(record.cbName))}</strong><small>${escapeHtml(text(record.stockCode))} ${escapeHtml(text(record.companyName))}</small></a>
-    <span class="cb-rank-value">${escapeHtml(publicNumber(definition.value(record)))}<small>${escapeHtml(definition.label)}</small></span>
+    <span class="cb-rank-value">${escapeHtml(publicNumber(definition.value(record)))}<small>${escapeHtml(definition.label)}${definition.label.includes('量') ? '（張）' : '（元）'}</small></span></header>
+    <dl><div><dt>CB 收盤${record.quote?.isLatestSnapshot === false && record.quote?.cbClose != null ? `（${dateLabel(record.quote.dataDate)}）` : ''}</dt><dd>${publicNumber(record.quote?.cbClose)}</dd></div><div><dt>轉換價值</dt><dd>${publicNumber(record.quote?.stockConversionValue ?? record.quote?.conversionValue)}</dd></div><div><dt>轉換溢價率</dt><dd>${publicNumber(record.quote?.premiumRate)}${finiteNumber(record.quote?.premiumRate) === null ? '' : '%'}</dd></div></dl>
+    <footer><span>到期 ${dateLabel(record.terms?.maturityDate)}</span><a href="./bonds.html?bond=${encodeURIComponent(text(record.cbCode))}">條款與完整明細 →</a></footer>
   </li>`).join("")}</ol>`;
 }
 
@@ -119,8 +128,8 @@ function renderHeatmap(points) {
   return `<section class="cb-overview-panel cb-heatmap" data-cb-heatmap aria-labelledby="cb-heatmap-heading"><header class="cb-overview-heading"><div><p class="section-number">OBJECTIVE EXPLORER</p><h2 id="cb-heatmap-heading">熱力圖</h2></div><p>X 軸：轉換溢價率 · Y 軸：轉換價值</p></header><div class="cb-heatmap-plot" role="list">${points.map((point) => { const labelled = labelledCodes.has(point.cbCode); return `<a role="listitem" href="${point.detailHref}" class="cb-heatmap-point"${labelled ? ` data-heatmap-label="${escapeHtml(point.cbCode)}"` : ""} data-heatmap-name="${escapeHtml(point.cbCode)}" style="--x:${scaled(point.x, xRange)}%;--y:${scaled(point.y, yRange)}%;--size:${10 + Math.round(point.size / maxSize * 18)}px" aria-label="${escapeHtml(`${point.cbCode} ${point.cbName}，轉換溢價率 ${publicNumber(point.x)}%，轉換價值 ${publicNumber(point.y)}，成交量 ${publicNumber(point.size)}`)}">${labelled ? `<span>${escapeHtml(point.cbCode)}</span>` : ""}</a>`; }).join("")}</div><p class="cb-heatmap-legend">泡泡大小代表成交量；僅標示成交量前 8 名，其餘可滑過或點選查看。</p></section>`;
 }
 
-function summaryCard(label, value, note) {
-  return `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`;
+function summaryCard(label, value, note, tone) {
+  return `<article class="cb-summary-card cb-summary-card--${escapeHtml(tone)}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`;
 }
 
 function rangeFor(values) {

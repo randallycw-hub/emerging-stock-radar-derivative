@@ -184,7 +184,7 @@ test("IPO calendar retains release-stage verified evidence without source identi
   assert.deepEqual(projectIpoEvidence(row), {
     underwriter: "正式承銷商",
     issuance: "公開申購",
-    auction: "已開標 2026/09/10",
+    auction: "開標日 2026/09/10",
   });
   assert.equal(projectIpoLifecycle(row, "2026-08-24").find((step) => step.key === "submission").state, "complete");
 });

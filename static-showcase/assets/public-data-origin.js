@@ -35,6 +35,12 @@ export function resolvePublishedDataUrl(reference, baseUrl) {
 }
 
 export function configuredPublishedPointerUrl(config, fallback) {
+  // Preview must not silently mix production data with the locally rebuilt
+  // generation. Production continues to use the approved publication mirror.
+  try {
+    const local = new URL(fallback);
+    if (['localhost','127.0.0.1','[::1]'].includes(local.hostname)) return local;
+  } catch {}
   const configured = config?.generationPointerUrl;
   if (typeof configured === "string" && configured) {
     try {

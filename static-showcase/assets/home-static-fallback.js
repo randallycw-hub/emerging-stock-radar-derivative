@@ -138,8 +138,9 @@ function renderIpoThirtyDays(section = {}) {
   return `<article class="home-v51-card"><div class="home-v51-card__heading"><p class="kicker">IPO 30 DAYS</p><h3>30 日內 IPO 排程</h3><a href="./ipo-radar.html">IPO 雷達</a></div><div class="home-v51-list">${list}</div></article>`;
 }
 
-function renderV51Events(section = {}) {
-  const entries = Array.isArray(section.entries) ? section.entries : [];
+function renderV51Events(section = {}, dataDate) {
+  const end = isPublishedIsoDate(dataDate) ? new Date(Date.parse(dataDate) + 7 * 86400000).toISOString().slice(0,10) : null;
+  const entries = (Array.isArray(section.entries) ? section.entries : []).filter(entry=>end && entry.date >= dataDate && entry.date <= end).sort((a,b)=>a.date.localeCompare(b.date));
   if (section.state !== "ready") return stateHtml(section.state);
   const labels = { cb: "CB", ipo: "IPO", emerging: "興櫃" };
   return entries.slice(0, 8).map((entry) => `<a class="home-event-card" href="${escapeHtml(entry.route)}"><time datetime="${escapeHtml(entry.date)}">${escapeHtml(formatDate(entry.date))}</time><p>${escapeHtml(labels[entry.category] ?? "市場")} · ${escapeHtml(entry.title)}</p><strong>${escapeHtml(entry.code)}</strong><span aria-hidden="true">→</span></a>`).join("");
@@ -153,7 +154,7 @@ export function buildV51HomeStaticFallback(research = {}) {
     coverageText: `資料日期 ${formatDate(dataDate)}`,
     startHtml: `<div class="home-v51-section-heading"><p class="kicker">SNAPSHOT / VERIFIED PUBLIC DATA</p><h2>本次公開資料摘要</h2><p>互動載入後會以同一份已驗證快照，比對前一個有效快照並列出實際異動。</p></div><div class="home-v51-start-grid">${renderCbStockLeaders(home.cbStockLeaders)}${renderEmergingRankings(home.emergingRankings)}${renderIpoCalendar(home.ipoCalendar)}</div>`,
     workbenchHtml: `<div class="home-v51-workbench">${renderCbTurnover(home.cbTurnover)}${renderCbIssuance(home.cbIssuance)}${renderCbOfficialEvents(home.cbOfficialEvents)}${renderIpoThirtyDays(home.ipoCalendar)}</div>`,
-    eventHtml: renderV51Events(home.latestEvents),
+    eventHtml: renderV51Events(home.latestEvents, dataDate),
   };
 }
 

@@ -48,9 +48,9 @@ test("V5.7 CB detail keeps last trade facts when today has no trade", () => {
   const record = audited80426Model().records[0];
   const html = renderCbDetailV53(record);
 
-  assert.match(html, /今日無成交/);
+  assert.match(html, /當日無成交/);
   assert.match(html, /最後成交日[\s\S]*2026\/08\/11/);
   assert.match(html, /最後成交價[\s\S]*196/);
   assert.match(html, /最後成交量[\s\S]*1 張/);
-  assert.match(html, /近 20 交易日有成交<\/dt><dd>1 日/);
+  assert.match(html, /近 20 筆有成交<\/dt><dd>1 日/);
 });

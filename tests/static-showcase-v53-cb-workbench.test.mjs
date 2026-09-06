@@ -131,6 +131,7 @@ test("V5.3 read model retains official event URLs and leaves unknown issuance st
     issueAmount: 500000000,
     securedStatus: "無擔保",
     underwriter: "測試承銷商",
+    trustee: null,
   });
 });
 

@@ -2103,6 +2103,106 @@ button.market-event-calendar__day:focus-visible { position: relative; z-index: 1
 .cb-v56-performance-table th, .cb-v56-performance-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
 .cb-v56-performance-table th:first-child { text-align: left; }
 .cb-v56-performance-table th a { color: var(--ink); text-decoration: none; }
+
+/* CB workspace: a compact, event-first surface for post-close research. */
+.bonds-workspace-page {
+  --cb-navy: #102a43;
+  --cb-teal: #0f887d;
+  --cb-amber: #c77b13;
+  --cb-sky: #2e71b8;
+  --cb-cloud: #f2f6fa;
+}
+.bonds-workspace-page .page-heading {
+  max-width: none;
+  margin-bottom: 24px;
+  padding: clamp(22px, 3vw, 36px);
+  border: 1px solid color-mix(in srgb, var(--cb-navy) 20%, var(--line));
+  border-radius: 20px;
+  background: linear-gradient(125deg, var(--cb-navy), #173f62 68%, #176c72);
+  color: #fff;
+  box-shadow: 0 18px 42px rgb(16 42 67 / 14%);
+}
+.bonds-workspace-page .page-heading .kicker { color: #f5c66c; }
+.bonds-workspace-page .page-heading > p:last-child { color: rgb(255 255 255 / 84%); }
+.bonds-workspace-page .ledger-section { margin-top: 0; }
+.bonds-workspace-page .section-heading { margin-bottom: 18px; }
+.bonds-workspace-page .section-heading h2 { font-size: clamp(22px, 2vw, 28px); }
+.bonds-workspace-page .cb-market-overview { gap: 16px; }
+.bonds-workspace-page .cb-market-summary--workspace {
+  gap: 10px;
+  padding: 10px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--cb-cloud);
+}
+.bonds-workspace-page .cb-market-summary--workspace article {
+  min-height: 142px;
+  padding: 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 3px 12px rgb(16 42 67 / 7%);
+}
+.bonds-workspace-page .cb-summary-card--active { border-top: 4px solid var(--cb-navy); }
+.bonds-workspace-page .cb-summary-card--traded { border-top: 4px solid var(--cb-teal); }
+.bonds-workspace-page .cb-summary-card--turnover { border-top: 4px solid var(--cb-sky); }
+.bonds-workspace-page .cb-summary-card--week { border-top: 4px solid var(--cb-amber); }
+.bonds-workspace-page .cb-market-summary--workspace strong { color: var(--cb-navy); }
+.bonds-workspace-page .cb-workspace-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: thin;
+}
+.bonds-workspace-page .cb-workspace-tabs a {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+}
+.bonds-workspace-page .cb-workspace-tabs a:hover,
+.bonds-workspace-page .cb-workspace-tabs a:focus-visible,
+.bonds-workspace-page .cb-workspace-tabs a[aria-current="page"] {
+  background: color-mix(in srgb, var(--cb-teal) 12%, var(--surface));
+  color: var(--cb-teal);
+}
+.bonds-workspace-page .cb-overview-panel,
+.bonds-workspace-page .cb-v56-market-section {
+  border-color: var(--line);
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgb(16 42 67 / 5%);
+}
+.bonds-workspace-page .cb-overview-heading h2 { color: var(--cb-navy); }
+.bonds-workspace-page .cb-overview-heading a { color: var(--cb-teal); }
+.bonds-workspace-page .cb-rank-controls button[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--cb-teal) 45%, var(--line));
+  background: color-mix(in srgb, var(--cb-teal) 12%, var(--surface));
+  color: var(--cb-teal);
+}
+.bonds-workspace-page .cb-ranking-table li:hover { background: var(--cb-cloud); }
+.bonds-workspace-page .cb-rank-value { color: var(--cb-teal); }
+.bonds-workspace-page .cb-v56-change-list a:hover,
+.bonds-workspace-page .cb-v56-change-list a:focus-visible { background: var(--cb-cloud); }
+[data-theme="dark"] .bonds-workspace-page {
+  --cb-navy: #a9d7ff;
+  --cb-teal: #62d4c4;
+  --cb-amber: #f2bd64;
+  --cb-sky: #91bbff;
+  --cb-cloud: #111d2c;
+}
+[data-theme="dark"] .bonds-workspace-page .page-heading {
+  border-color: #315477;
+  background: linear-gradient(125deg, #0b2238, #123953 68%, #155d61);
+}
+[data-theme="dark"] .bonds-workspace-page .cb-market-summary--workspace strong,
+[data-theme="dark"] .bonds-workspace-page .cb-overview-heading h2 { color: var(--ink); }
+
 @media (max-width: 900px) {
   .home-v56-today > header, .home-v56-destinations__heading { grid-template-columns: 1fr; }
   .home-v56-today__grid, .home-v56-destinations__grid { grid-template-columns: 1fr; }

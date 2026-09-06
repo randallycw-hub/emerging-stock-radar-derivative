@@ -55,7 +55,7 @@ test("V5.7 public pages expose a compact seven-day event desk and no duplicate C
     readFile(new URL("assets/market-events-page.js", root), "utf8"),
   ]);
 
-  for (const label of ["今天有哪些變化", "接下來 7 天"]) assert.match(home, new RegExp(label));
+  for (const label of ["盤後異動", "資料日起 7 日事件"]) assert.match(home, new RegExp(label));
   assert.doesNotMatch(home, /可轉債關鍵事件/);
   assert.match(events, /value="7" selected/);
   assert.match(events, /id="market-event-pagination"/);

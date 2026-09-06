@@ -334,6 +334,7 @@ export async function buildBondMarketSnapshot(options = {}) {
         latestCbPriceDate,
         latestStockPriceDate,
         dataDate,
+        unpricedStockObservations: collected.unpricedStockObservations ?? [],
         supplementalSources: supplemental.sources,
         cbRightsEventSource: rightsEvents.source,
         workbenchSourceStateSummary,

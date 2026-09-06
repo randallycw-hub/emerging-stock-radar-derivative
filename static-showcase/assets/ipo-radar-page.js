@@ -1,5 +1,5 @@
 import { formatDate, formatNumber } from "./site-shell.js";
-import { applyCanonicalCompanyIdentity, loadCanonicalPublicMasters } from "./canonical-identity.js";
+import { applyCanonicalIpoIdentity, loadCanonicalPublicMasters } from "./canonical-identity.js";
 import { loadIpoSnapshot } from "./ipo-data.js";
 import { defaultIpoStage, displayIpoStage, isActiveIpoRecord, matchesIpoRecordStage, normalizeApprovedIpoEvents, projectActiveIpoEventEntries, publicCompanyHref, selectPublishedUpcomingEvents, shouldWriteIpoStage } from "./ipo-stage-filter.js";
 
@@ -51,7 +51,7 @@ function applySnapshot(snapshot, companies) {
   state.dataDate = validDate(snapshot.dataDate) ? snapshot.dataDate : null;
   state.rows = snapshot.records
     .map((record) => {
-      const identity = applyCanonicalCompanyIdentity(record, companies);
+      const identity = applyCanonicalIpoIdentity(record, companies);
       return identity ? { ...projectIpoRadarRecord(record, snapshot), ...identity } : null;
     })
     .filter((row) => row?.companyCode && row.companyName && !isIpoRadarExcluded(row));

@@ -287,19 +287,20 @@ function projectEmerging(emerging, dataDate) {
   return recordsOf(emerging?.records ?? emerging).flatMap((record) => {
     const stockCode = stockCodeOf(record?.companyCode);
     if (!stockCode) return [];
+    const hasPrice = finiteNumber(record?.dailyAveragePrice) > 0;
     return [{
       stockCode,
       companyName: textOrNull(record?.companyName),
       industryName: textOrNull(record?.industryName),
       tradingDate: isoDate(record?.tradingDate),
       lastTradedPrice: finiteNumber(record?.lastTradedPrice),
-      dailyAveragePrice: finiteNumber(record?.dailyAveragePrice),
+      dailyAveragePrice: hasPrice ? finiteNumber(record?.dailyAveragePrice) : null,
       previousAveragePrice: finiteNumber(record?.previousAveragePrice),
       dailyHighPrice: finiteNumber(record?.dailyHighPrice),
       dailyLowPrice: finiteNumber(record?.dailyLowPrice),
-      averageChange: finiteNumber(record?.averageChange),
-      averageChangePercent: finiteNumber(record?.averageChangePercent),
-      direction: textOrNull(record?.direction),
+      averageChange: hasPrice ? finiteNumber(record?.averageChange) : null,
+      averageChangePercent: hasPrice ? finiteNumber(record?.averageChangePercent) : null,
+      direction: hasPrice ? textOrNull(record?.direction) : "unavailable",
       dailyVolume: finiteNumber(record?.transactionVolume),
       transactionAmount: finiteNumber(record?.estimatedTransactionAmount),
       applyingDate: textOrNull(record?.applyingDate),

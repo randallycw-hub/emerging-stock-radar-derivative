@@ -25,7 +25,7 @@ function buildView(
   row: EmergingMarketSourceRow,
   industries: ReadonlyMap<string, string>,
 ): EmergingMarketView {
-  const dailyAveragePrice = row.dailyAveragePrice === null
+  const dailyAveragePrice = row.dailyAveragePrice === null || isZeroDecimal(decimalInput(row.dailyAveragePrice))
     ? null
     : decimalInput(row.dailyAveragePrice);
   const previousAveragePrice = row.previousAveragePrice === null
@@ -50,7 +50,7 @@ function buildView(
       2,
     )
     : null;
-  const estimatedTransactionAmount = dailyAveragePrice !== null
+  const estimatedTransactionAmount = transactionVolume !== null && isZeroDecimal(transactionVolume) ? "0" : dailyAveragePrice !== null
     && transactionVolume !== null
     ? multiplyDecimal(
       dailyAveragePrice,
@@ -65,7 +65,7 @@ function buildView(
     companyName: row.companyName,
     industryName: industries.get(row.companyCode) ?? null,
     lastTradedPrice: row.lastTradedPrice,
-    dailyAveragePrice: row.dailyAveragePrice,
+    dailyAveragePrice: dailyAveragePrice === null ? null : row.dailyAveragePrice,
     previousAveragePrice: row.previousAveragePrice,
     dailyHighPrice: row.dailyHighPrice,
     dailyLowPrice: row.dailyLowPrice,

@@ -4,7 +4,12 @@ import test from "node:test";
 import {
   PUBLIC_DATA_POINTER_URL,
   resolvePublishedDataUrl,
+  configuredPublishedPointerUrl,
 } from "../static-showcase/assets/public-data-origin.js";
+
+test('all localhost pages use the same local generation even when legacy runtime points to production',()=>{
+  assert.equal(String(configuredPublishedPointerUrl({generationPointerUrl:PUBLIC_DATA_POINTER_URL.href},'http://127.0.0.1:4176/market-site/data/current.json')),'http://127.0.0.1:4176/market-site/data/current.json');
+});
 
 test("published snapshots resolve generation artifacts from the approved GitHub data mirror", () => {
   const runtimeUrl = resolvePublishedDataUrl(

@@ -119,7 +119,7 @@ function overviewPanel(record, history, siblings) {
   const tradeFacts = noTrade
     ? `${fact("最後成交日", date(quote.lastTradeDate ?? quote.dataDate))}${fact("最後成交價", price(quote.lastPrice ?? quote.cbClose))}${fact("最後成交量", quantity(quote.lastVolume, "張"))}`
     : fact("CB 收盤", price(quote.cbClose));
-  return `<h3>概況</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("市場快照日", date(quote.snapshotDataDate ?? quote.dataDate))}${tradeFacts}${fact("標的股收盤", price(quote.stockClose))}</dl>${chart}${companyContext(record, siblings)}`;
+  return `<h3>概況</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("行情資料日", date(quote.snapshotDataDate ?? quote.dataDate))}${tradeFacts}${fact("標的股收盤", price(quote.stockClose))}${fact("股價日期", date(quote.stockPriceDate))}</dl>${chart}${companyContext(record, siblings)}`;
 }
 
 function valuationPanel(record) {
@@ -130,14 +130,14 @@ function valuationPanel(record) {
   const historyHtml = history.length === 0
     ? ""
     : `<section class="cb-conversion-history"><h4>轉換價歷程</h4><div class="table-scroll"><table><thead><tr><th>生效日</th><th>原轉換價</th><th>新轉換價</th><th>變動類型</th><th>來源</th></tr></thead><tbody>${history.map((entry) => `<tr><td>${escapeHtml(date(entry.effectiveDate))}</td><td>${escapeHtml(price(entry.previousConversionPrice))}</td><td>${escapeHtml(price(entry.currentConversionPrice))}</td><td>${escapeHtml(text(entry.changeType) || "轉換價調整")}</td><td><a href="${escapeHtml(entry.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a></td></tr>`).join("")}</tbody></table></div></section>`;
-  return `<h3>估值</h3><dl class="detail-facts cb-detail-facts">${fact("目前轉換價", price(quote.conversionPrice))}${fact("轉換價值", price(quote.conversionValue))}${fact("轉換溢價", percent(quote.premiumRate))}${fact("資料日", date(quote.dataDate))}</dl>${historyHtml}`;
+  return `<h3>估值</h3><dl class="detail-facts cb-detail-facts">${fact("目前轉換價", price(quote.conversionPrice))}${fact("轉換價生效日", date(quote.conversionPriceEffectiveDate))}${fact("轉換價值", price(quote.stockConversionValue ?? quote.conversionValue))}${fact("轉換價值計算日", date(quote.stockConversionValueDate ?? quote.valuationDate))}${fact("轉換溢價", percent(quote.premiumRate))}${fact("溢價計算日", date(quote.valuationDate))}</dl><p class="field-note">轉換價值＝標的股收盤價 ÷ 有效轉換價 × 100；溢價率僅使用同日股價與 CB 成交價計算。</p>${historyHtml}`;
 }
 
 function liquidityPanel(quote, liquidity) {
   const lastTradeFacts = isNoTrade(quote)
     ? `${fact("最後成交日", date(quote.lastTradeDate ?? quote.dataDate))}${fact("最後成交價", price(quote.lastPrice ?? quote.cbClose))}${fact("最後成交量", quantity(quote.lastVolume, "張"))}`
     : "";
-  return `<h3>流動性</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("今日成交量", quantity(quote.volume, "張"))}${fact("今日成交額", amount(quote.turnoverAmount))}${lastTradeFacts}${fact("5 日平均成交量", quantity(liquidity.average5, "張"))}${fact("20 日平均成交量", quantity(liquidity.average20, "張"))}${fact("本週成交量", quantity(liquidity.weekVolume, "張"))}${fact("近 20 交易日有成交", quantity(liquidity.tradedDays20, "日"))}</dl>`;
+  return `<h3>流動性</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("當日成交量", quantity(quote.volume, "張"))}${fact("當日成交額", amount(quote.turnoverAmount))}${lastTradeFacts}${fact("近 5 筆日平均成交量", quantity(liquidity.average5, "張"))}${fact("近 20 筆日平均成交量", quantity(liquidity.average20, "張"))}${fact("當週已收錄成交量", quantity(liquidity.weekVolume, "張"))}${fact("近 20 筆有成交", quantity(liquidity.tradedDays20, "日"))}${fact("樣本期間", dateRange(liquidity.sampleStartDate, liquidity.sampleEndDate))}</dl><p class="field-note">均量採已收錄的每日資料；樣本未滿 5／20 筆不計算，未補齊的交易日不視為零成交。</p>`;
 }
 
 function isNoTrade(quote) {
@@ -145,8 +145,8 @@ function isNoTrade(quote) {
 }
 
 function tradeLabel(quote) {
-  if (quote?.tradeState === "TRADED_TODAY" || quote?.tradeState === "traded") return "今日有成交";
-  if (isNoTrade(quote)) return "今日無成交";
+  if (quote?.tradeState === "TRADED_TODAY" || quote?.tradeState === "traded") return "當日有成交";
+  if (isNoTrade(quote)) return "當日無成交";
   return quote?.tradeState === "DATA_ERROR" ? "資料暫時無法取得" : "—";
 }
 
@@ -156,7 +156,7 @@ function termsPanel(terms) {
 }
 
 function periodPanel(terms, quote) {
-  return `<h3>期間</h3><dl class="detail-facts cb-detail-facts">${fact("發行日", date(terms.issueDate))}${fact("掛牌日", date(terms.listingDate))}${fact("到期日", date(terms.maturityDate))}${fact("轉換期間", dateRange(terms.conversionStartDate, terms.conversionEndDate))}${fact("資料日", date(quote.dataDate))}</dl>`;
+  return `<h3>期間</h3><dl class="detail-facts cb-detail-facts">${fact("發行日", date(terms.issueDate))}${fact("掛牌日", date(terms.listingDate))}${fact("到期日", date(terms.maturityDate))}${fact("轉換期間", dateRange(terms.conversionStartDate, terms.conversionEndDate))}${fact("資料日", date(quote.snapshotDataDate ?? quote.dataDate))}</dl>`;
 }
 
 function eventsPanel(events, rightsEvents, cbCode) {

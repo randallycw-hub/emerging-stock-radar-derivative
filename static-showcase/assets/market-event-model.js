@@ -87,6 +87,9 @@ function canonicalEventDate(event) {
 function canonicalEventType(value) {
   const type = text(value);
   const mapping = {
+    put: "put",
+    maturity: "maturity",
+    listing: "listing",
     cb_listing: "listing",
     cb_early_redemption: "redemption",
     cb_put: "put",
@@ -98,6 +101,7 @@ function canonicalEventType(value) {
     conversion_price_adjustment: "conversion_price_adjustment",
     ipo_filing: "application_submitted",
     ipo_review: "review",
+    ipo_board: "board",
     ipo_contract: "contract",
     ipo_auction: "auction",
     ipo_subscription: "subscription",

@@ -160,12 +160,20 @@ export function buildCompanyOverview({
   const ipoRecord = activeIpoRecord(ipo, companyCode, company.dataDate);
   const monthlyRevenue = revenueRecord(revenue, companyCode);
   const bonds = exactBondRecords(workbench, companyCode);
+  const stockQuotes = recordsOf(workbench)
+    .filter(row => text(row.stockCode ?? row.term?.issuerCode) === companyCode)
+    .map(row => row.quote ?? row.view ?? {})
+    .filter(quote => Number(quote.stockClose) > 0 && validDate(quote.stockPriceDate)
+      && validDate(company.dataDate) && quote.stockPriceDate <= company.dataDate)
+    .sort((left, right) => right.stockPriceDate.localeCompare(left.stockPriceDate));
+  const stockQuote = stockQuotes[0];
   return {
     code: companyCode,
     name: display(company.companyName),
     market: display(company.market),
     industry: display(company.industry),
     dataDate: publicText(company.dataDate),
+    stock: stockQuote ? { close: publicScalar(stockQuote.stockClose), tradingDate: stockQuote.stockPriceDate } : null,
     emerging: market ? {
       tradingDate: publicText(market.tradingDate),
       dailyAveragePrice: publicText(market.dailyAveragePrice),
@@ -205,7 +213,7 @@ export function renderCompanyOverviewHtml(overview, activeTab = "overview") {
   const ipoEvents = overview.ipo?.events ?? [];
   const events = overview.events ?? [];
   const bonds = overview.bonds ?? [];
-  const overviewHtml = `<h3>概覽</h3><dl>${fact("市場", overview.market)}${fact("產業", overview.industry)}${fact("資料日", formatDate(overview.dataDate))}${fact("盤後均價", formatCompanyNumber(overview.emerging?.dailyAveragePrice))}${fact("成交量", formatCompanyNumber(overview.emerging?.transactionVolume))}</dl>`;
+  const overviewHtml = `<h3>概覽</h3><dl>${fact("市場", overview.market)}${fact("產業", overview.industry)}${fact("資料日", formatDate(overview.dataDate))}${overview.emerging ? `${fact("盤後均價", formatCompanyNumber(overview.emerging.dailyAveragePrice))}${fact("成交量", formatCompanyNumber(overview.emerging.transactionVolume))}` : `${fact("股票收盤", formatCompanyNumber(overview.stock?.close))}${fact("股價日期", formatDate(overview.stock?.tradingDate))}`}</dl>`;
   const revenueHtml = overview.revenue
     ? `<h3>營收</h3><dl>${fact("資料年月", display(overview.revenue.yearMonth))}${fact("當月營收", formatCompanyNumber(overview.revenue.currentMonthRevenue))}${fact("月增率", formatCompanyPercent(overview.revenue.monthOverMonthPercent))}${fact("年增率", formatCompanyPercent(overview.revenue.yearOverYearPercent))}</dl><a href="./emerging.html?view=revenue&q=${encodeURIComponent(overview.code)}">查看月營收明細</a>`
     : '<h3>營收</h3><p class="company-empty">目前無可用資料。</p>';

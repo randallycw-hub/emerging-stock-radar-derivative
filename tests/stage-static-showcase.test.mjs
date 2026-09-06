@@ -30,7 +30,7 @@ test("V5.3 staging publishes one validated CB workbench projection through runti
   ));
 
   assert.equal(model.schemaVersion, 1);
-  assert.equal(model.dataDate, "2026-08-28");
+  assert.equal(model.dataDate, JSON.parse(await readFile(join(showcaseSource, "data", current.generation, "bond-workbench.json"), "utf8")).dataDate);
   assert.ok(model.records.length > 300);
   assert.equal(model.records.filter((row) => row.status === "active").length, new Set(model.records.filter((row) => row.status === "active").map((row) => row.cbCode)).size);
   assert.ok(model.events.every((event) => isOfficialSourceUrl(event.sourceUrl)));

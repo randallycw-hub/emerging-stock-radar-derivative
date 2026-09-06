@@ -41,6 +41,7 @@ test("company overview combines public modules by exact code without exposing di
     industry: "食品",
     dataDate: "2026-08-28",
     emerging: { tradingDate: null, dailyAveragePrice: "30.57", transactionVolume: "37137" },
+    stock: null,
     ipo: { market: "上櫃", stage: "A", events: [{ label: "申請送件", date: "2026-08-01" }] },
     revenue: { yearMonth: "11507", currentMonthRevenue: "448516", monthOverMonthPercent: "-2.6", yearOverYearPercent: "12.1" },
     bonds: [{ bondCode: "12601", bondName: "富味鄉一", cbClose: "101.5", cbPriceDate: "2026-08-24", premiumRate: null }],
