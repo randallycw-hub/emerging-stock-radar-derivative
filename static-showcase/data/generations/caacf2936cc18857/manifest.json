@@ -1,0 +1,272 @@
+{
+  "kind": "official-source-snapshot",
+  "status": "official-static-snapshot",
+  "generatedAt": "2026-09-07",
+  "datasets": [
+    {
+      "datasetId": "11406",
+      "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
+      "downloadedAt": "2026-09-07",
+      "sha256": "sha256:b72969e8af4e423b991fcddd523e9c42c0a0309a973fdad60f03288e429defdc",
+      "rawBytes": 137469,
+      "rowCount": 416
+    },
+    {
+      "datasetId": "11586",
+      "sourceUrl": "https://www.twse.com.tw/company/applylistingCsvAndHtml?selectType=Local&type=open_data",
+      "downloadedAt": "2026-09-07",
+      "sha256": "sha256:9db1de64a8b279d45b3929a4cfcb5d071c7bbb4a7d879a05625992407f34d97b",
+      "rawBytes": 80340,
+      "rowCount": 700
+    },
+    {
+      "datasetId": "94025",
+      "sourceUrl": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
+      "downloadedAt": "2026-09-07",
+      "sha256": "sha256:48befb71e176cca82ddd2e969274e3b2bb55833f95a29fe43937cb79919d90ba",
+      "rawBytes": 68085,
+      "rowCount": 359
+    },
+    {
+      "datasetId": "11406Census",
+      "sourceUrl": "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
+      "downloadedAt": "2026-09-07",
+      "sha256": "sha256:3945d7af16c2c0a3f7256139da8642e1485263a164c2917dc7048e9089e7eb41",
+      "rawBytes": 132110,
+      "rowCount": 385
+    },
+    {
+      "datasetId": "emergingMarket",
+      "sourceUrl": "https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics",
+      "downloadedAt": "2026-09-07",
+      "sha256": "sha256:e6d3e06adbbb4f84618477cca6d597feeb3d53abae606f57716d77fc460d744d",
+      "rawBytes": 142314,
+      "rowCount": 363
+    }
+  ],
+  "emergingMarketUrl": "./data/generations/caacf2936cc18857/emerging-market.json",
+  "market": {
+    "status": "verified",
+    "generatedAt": "2026-09-06T17:17:22.473Z",
+    "requestedDate": "2026-09-04",
+    "latestCbPriceDate": "2026-09-04",
+    "latestStockPriceDate": "2026-09-04",
+    "dataDate": "2026-09-04",
+    "unpricedStockObservations": [
+      {
+        "companyCode": "6904",
+        "tradingDate": "2026-09-04",
+        "sourceUrl": "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes",
+        "reportedClose": "---",
+        "state": "official_close_unavailable"
+      }
+    ],
+    "supplementalSources": {
+      "institution": {
+        "state": "fresh",
+        "dataDate": "2026-09-04",
+        "periodYear": 2026
+      },
+      "redemption": {
+        "state": "fresh",
+        "dataDate": "2026-09-03",
+        "periodYear": 2026
+      },
+      "underwriting": {
+        "state": "fresh",
+        "dataDate": "2026/08/31",
+        "periodYear": 2026
+      }
+    },
+    "cbRightsEventSource": {
+      "state": "fresh",
+      "dataDate": "2026-09-04",
+      "recordCount": 38
+    },
+    "workbenchSourceStateSummary": {
+      "lifecycle": {
+        "active": 385,
+        "archived": 20
+      },
+      "fields": {
+        "price": {
+          "complete": 186,
+          "stale": 8,
+          "date_mismatch": 0,
+          "missing": 211,
+          "accumulating": 0
+        },
+        "valuation": {
+          "complete": 1,
+          "stale": 1,
+          "date_mismatch": 402,
+          "missing": 1,
+          "accumulating": 0
+        },
+        "outstanding": {
+          "complete": 3,
+          "stale": 0,
+          "date_mismatch": 402,
+          "missing": 0,
+          "accumulating": 0
+        },
+        "institutions": {
+          "complete": 150,
+          "stale": 0,
+          "date_mismatch": 0,
+          "missing": 255,
+          "accumulating": 0
+        },
+        "company": {
+          "complete": 389,
+          "stale": 0,
+          "date_mismatch": 0,
+          "missing": 16,
+          "accumulating": 0
+        },
+        "events": {
+          "complete": 394,
+          "stale": 0,
+          "date_mismatch": 0,
+          "missing": 11,
+          "accumulating": 0
+        },
+        "history": {
+          "complete": 0,
+          "stale": 0,
+          "date_mismatch": 0,
+          "missing": 0,
+          "accumulating": 405
+        }
+      }
+    },
+    "normalizedInputs": [
+      {
+        "name": "11406.json",
+        "sha256": "sha256:68b23320c546a57c1c319dcd744e8354413d259713f0dfa69abcf5c9d189f92f",
+        "rawBytes": 435939,
+        "recordCount": 416
+      }
+    ],
+    "files": [
+      {
+        "name": "cb-quotes.json",
+        "sha256": "sha256:5e2900584610cf034c0481d4da508389dfa7b41b67dbab8b7f2102a995268ed0",
+        "rawBytes": 217753,
+        "recordCount": 762
+      },
+      {
+        "name": "stock-closes.json",
+        "sha256": "sha256:69bb87d513c5013ef86a0639a87ec7a1b81b7b5b9280041e2ac2052bcb0ccaa3",
+        "rawBytes": 57173,
+        "recordCount": 310
+      },
+      {
+        "name": "conversion-prices.json",
+        "sha256": "sha256:33e754edfe5d4cf14fc967c78c955feffec158757a43a90e9d0cb9474e701d65",
+        "rawBytes": 173392,
+        "recordCount": 427
+      },
+      {
+        "name": "bond-supplemental.json",
+        "sha256": "sha256:d60023fb19cfb402484e741027be91fab27bed6665a51093a19c0d7be1bc3315",
+        "rawBytes": 128176,
+        "recordCount": 301
+      },
+      {
+        "name": "cb-issuer-research.json",
+        "sha256": "sha256:a79c36a26463b9a0ff48a6ca5939045c088a701b817b36a2cb84092e8a09397f",
+        "rawBytes": 148820,
+        "recordCount": 308
+      },
+      {
+        "name": "bond-market-view.json",
+        "sha256": "sha256:875ded763ff81a4eff71c6de5f1db8235dba2c213e6166d9a82c3c61484c332a",
+        "rawBytes": 654033,
+        "recordCount": 385
+      },
+      {
+        "name": "bond-market-history.json",
+        "sha256": "sha256:feadcb37bdeb1a50f975fd124deaf066b90f3dc8f1ae373bfca57573af1fae39",
+        "rawBytes": 5816464,
+        "recordCount": 16033
+      },
+      {
+        "name": "bond-workbench.json",
+        "sha256": "sha256:dbf92a9164ee14a49b520877d3c01c32a4f4a43daf374d09be53d1d18c505856",
+        "rawBytes": 6832199,
+        "recordCount": 405,
+        "schemaVersion": 1,
+        "sourceStateSummary": {
+          "lifecycle": {
+            "active": 385,
+            "archived": 20
+          },
+          "fields": {
+            "price": {
+              "complete": 186,
+              "stale": 8,
+              "date_mismatch": 0,
+              "missing": 211,
+              "accumulating": 0
+            },
+            "valuation": {
+              "complete": 1,
+              "stale": 1,
+              "date_mismatch": 402,
+              "missing": 1,
+              "accumulating": 0
+            },
+            "outstanding": {
+              "complete": 3,
+              "stale": 0,
+              "date_mismatch": 402,
+              "missing": 0,
+              "accumulating": 0
+            },
+            "institutions": {
+              "complete": 150,
+              "stale": 0,
+              "date_mismatch": 0,
+              "missing": 255,
+              "accumulating": 0
+            },
+            "company": {
+              "complete": 389,
+              "stale": 0,
+              "date_mismatch": 0,
+              "missing": 16,
+              "accumulating": 0
+            },
+            "events": {
+              "complete": 394,
+              "stale": 0,
+              "date_mismatch": 0,
+              "missing": 11,
+              "accumulating": 0
+            },
+            "history": {
+              "complete": 0,
+              "stale": 0,
+              "date_mismatch": 0,
+              "missing": 0,
+              "accumulating": 405
+            }
+          }
+        }
+      },
+      {
+        "name": "ipo-events.json",
+        "sha256": "sha256:19785f4f0bb55fdf2ddcfe878a8551e58f3527accbc39db2b27d00ec53cd4a48",
+        "rawBytes": 2593268,
+        "recordCount": 1442
+      },
+      {
+        "name": "cb-rights-events.json",
+        "sha256": "sha256:05997c1b75a756e265246322e2df0bb212fe3cdb765f793f46576f404f953a78",
+        "rawBytes": 38719,
+        "recordCount": 38
+      }
+    ]
+  }
+}
