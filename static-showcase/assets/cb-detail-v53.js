@@ -2,15 +2,24 @@ import { EVENT_TYPE_LABELS, isOfficialSourceUrl } from "./cb-workbench-v53.js";
 import { chartDataState, mountLightweightCbChart } from "./lightweight-charts-adapter.js";
 
 export const CB_DETAIL_TABS = Object.freeze([
-  ["overview", "概況"],
-  ["valuation", "估值"],
-  ["liquidity", "流動性"],
-  ["terms", "條款"],
-  ["period", "期間"],
-  ["events", "事件"],
+  ["overview", "歷史行情"],
+  ["terms", "條款與估值"],
+  ["events", "權利事件"],
+  ["company", "標的公司"],
 ]);
 
-export function renderCbDetailV53(record = {}, { companyBonds = [], rightsEvents = [], history = [] } = {}) {
+export function cbDatabaseReturnUrl(search = '') {
+  const params = new URLSearchParams(search);
+  if (params.get('from') !== 'database') return null;
+  const list = new URLSearchParams(params.get('list') ?? '');
+  const safe = new URLSearchParams();
+  for (const key of ['q','quickFilter','view','sort','direction','priceMin','priceMax','premiumMax','remainingMin']) {
+    if (list.has(key)) safe.set(key, list.get(key).slice(0, 200));
+  }
+  return `./bonds-filter.html${safe.size ? `?${safe}` : ''}`;
+}
+
+export function renderCbDetailV53(record = {}, { companyBonds = [], rightsEvents = [], history = [], returnSearch = '' } = {}) {
   const code = text(record.cbCode);
   const name = text(record.cbName) || "—";
   const quote = record.quote ?? {};
@@ -19,16 +28,42 @@ export function renderCbDetailV53(record = {}, { companyBonds = [], rightsEvents
   const siblings = arrayValue(companyBonds)
     .filter((item) => item?.status === "active" && text(item?.stockCode) === text(record.stockCode) && text(item?.cbCode) !== code)
     .sort((left, right) => text(left.cbCode).localeCompare(text(right.cbCode)));
-  return `<header class="cb-detail-head"><div><p class="section-number">${escapeHtml(code)} / CB WORKBENCH</p><h2>${escapeHtml(name)}</h2><p>${escapeHtml(text(record.stockCode))} ${escapeHtml(text(record.companyName))}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="返回可轉債市場總覽">← 返回市場總覽</button></header>
+  const returnLabel = cbDatabaseReturnUrl(returnSearch) ? '返回全部 CB' : '返回市場總覽';
+  return `<header class="cb-detail-head"><div><p class="section-number">${escapeHtml(code)} / CB WORKBENCH</p><h2>${escapeHtml(name)}</h2><p>${escapeHtml(text(record.stockCode))} ${escapeHtml(text(record.companyName))}</p></div><button class="close-workbench" type="button" data-detail-close aria-label="${returnLabel}">← ${returnLabel}</button></header>
+    ${summaryFacts(quote)}
     ${redemptionNotice(record.rights?.redemption, rightsEvents, code)}
     <nav class="detail-tabs cb-detail-tabs" aria-label="可轉債詳細資料分頁" role="tablist">${CB_DETAIL_TABS.map(([key, label], index) => tabButton(key, label, index === 0)).join("")}</nav>
-    ${tabPanel("overview", overviewPanel(record, history, siblings))}
-    ${tabPanel("valuation", valuationPanel(record))}
-    ${tabPanel("liquidity", liquidityPanel(quote, liquidity))}
-    ${tabPanel("terms", termsPanel(terms))}
-    ${tabPanel("period", periodPanel(terms, quote))}
+    ${tabPanel("overview", overviewPanel(record, history) + liquidityPanel(quote, liquidity) + historyTable(history, code))}
+    ${tabPanel("terms", termsPanel(terms) + valuationPanel(record))}
     ${tabPanel("events", eventsPanel(record.events, rightsEvents, code))}
+    ${tabPanel("company", companyContext(record, siblings))}
+    ${sourceLinks(record)}
   `;
+}
+
+function summaryFacts(quote) {
+  const cell = (label, value, stamp, prefix = '資料日') => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd><small>${escapeHtml(prefix)} ${escapeHtml(date(stamp))}</small></div>`;
+  const historical = isNoTrade(quote) || quote.isLatestSnapshot === false;
+  return `<dl class="cb-detail-summary" aria-label="可轉債核心數據">${
+    cell(historical ? '最近成交價' : 'CB 收盤', price(quote.cbClose), quote.dataDate)
+  }${cell('標的股收盤', price(quote.stockClose), quote.stockPriceDate)}${
+    cell('轉換價', price(quote.conversionPrice), quote.conversionPriceEffectiveDate, '生效日')
+  }${cell('轉換價值', price(quote.stockConversionValue ?? quote.conversionValue), quote.stockConversionValueDate ?? quote.valuationDate, '計算日')}${
+    cell('轉換溢價率', percent(quote.premiumRate), quote.valuationDate, '計算日')
+  }${cell('當日成交量', quantity(quote.volume, '張'), quote.snapshotDataDate ?? quote.dataDate)}</dl>`;
+}
+
+function sourceLinks(record) {
+  const termsUrl = arrayValue(record.events).find(event => ['listing','maturity'].includes(event.type) && isOfficialSourceUrl(event.sourceUrl))?.sourceUrl;
+  const conversionUrl = arrayValue(record.conversionPriceHistory).find(entry => isOfficialSourceUrl(entry.sourceUrl))?.sourceUrl;
+  const links = [[termsUrl, '發行條款'], [conversionUrl, '轉換價明細']].filter(([url]) => url);
+  return links.length ? `<p class="cb-detail-sources">官方來源：${links.map(([url, label]) => `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`).join(' · ')}</p>` : '';
+}
+
+function historyTable(history, code) {
+  const rows = arrayValue(history).filter(point => point?.bondCode === code && isoDate(point.date)).sort((a,b) => b.date.localeCompare(a.date));
+  if (!rows.length) return '';
+  return `<details class="cb-history-records"><summary>歷史成交明細（${rows.length} 筆）</summary><div class="table-scroll" tabindex="0" role="region" aria-label="歷史成交明細"><table class="public-data-table"><thead><tr>${['日期','開盤','最高','最低','收盤','成交量（張）','成交額（元）'].map(label => `<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${rows.map(point => `<tr><th scope="row">${date(point.date)}</th>${[point.cbOpen,point.cbHigh,point.cbLow,point.cbClose,point.cbTradingUnits,point.cbTurnover].map(value => `<td>${finite(value) === null ? '—' : numberFormat(finite(value))}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
 }
 
 function redemptionNotice(right, rightsEvents, cbCode) {
@@ -71,6 +106,15 @@ export function bindCbDetailV53(target, onClose, { history = [], events = [] } =
   });
   for (const button of target.querySelectorAll("[data-cb-detail-tab]")) {
     button.addEventListener("click", () => activateTab(target, button.dataset.cbDetailTab));
+    button.addEventListener('keydown', event => {
+      if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+      event.preventDefault();
+      const buttons = [...target.querySelectorAll('[data-cb-detail-tab]')];
+      const index = buttons.indexOf(button);
+      const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length;
+      activateTab(target, buttons[next].dataset.cbDetailTab);
+      buttons[next].focus();
+    });
   }
   let disposed = false;
   let chart = null;
@@ -103,23 +147,23 @@ function activateTab(target, tab) {
 }
 
 function tabButton(key, label, selected) {
-  return `<button type="button" role="tab" data-cb-detail-tab="${key}" aria-controls="cb-detail-${key}" aria-selected="${selected}"${selected ? "" : ' tabindex="-1"'}>${label}</button>`;
+  return `<button id="cb-detail-tab-${key}" type="button" role="tab" data-cb-detail-tab="${key}" aria-controls="cb-detail-${key}" aria-selected="${selected}"${selected ? "" : ' tabindex="-1"'}>${label}</button>`;
 }
 
 function tabPanel(key, content) {
-  return `<section id="cb-detail-${key}" class="cb-detail-panel" data-cb-detail-panel="${key}" role="tabpanel"${key === "overview" ? "" : " hidden"}>${content}</section>`;
+  return `<section id="cb-detail-${key}" class="cb-detail-panel" data-cb-detail-panel="${key}" role="tabpanel" aria-labelledby="cb-detail-tab-${key}" tabindex="0"${key === "overview" ? "" : " hidden"}>${content}</section>`;
 }
 
-function overviewPanel(record, history, siblings) {
+function overviewPanel(record, history) {
   const quote = record.quote ?? {};
   const chart = chartDataState(history) === "ready"
-    ? `<section class="cb-lightweight-chart"><header><h3>價格與成交量</h3><p>僅使用已驗證的官方 OHLCV；紅漲綠跌。</p></header><div data-cb-lightweight-chart aria-label="${escapeHtml(text(record.cbCode))} K 線與成交量圖"></div></section>`
-    : '<p class="empty-state">目前沒有足夠的已驗證 OHLCV 資料可繪製 K 線。</p>';
+    ? `<section class="cb-lightweight-chart"><header><h3>CB 價格與成交量</h3><p>櫃買中心盤後資料；紅漲綠跌。</p></header><div data-cb-lightweight-chart aria-label="${escapeHtml(text(record.cbCode))} K 線與成交量圖"></div></section>`
+    : '';
   const noTrade = isNoTrade(quote);
   const tradeFacts = noTrade
     ? `${fact("最後成交日", date(quote.lastTradeDate ?? quote.dataDate))}${fact("最後成交價", price(quote.lastPrice ?? quote.cbClose))}${fact("最後成交量", quantity(quote.lastVolume, "張"))}`
     : fact("CB 收盤", price(quote.cbClose));
-  return `<h3>概況</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("行情資料日", date(quote.snapshotDataDate ?? quote.dataDate))}${tradeFacts}${fact("標的股收盤", price(quote.stockClose))}${fact("股價日期", date(quote.stockPriceDate))}</dl>${chart}${companyContext(record, siblings)}`;
+  return `<h3>交易概況</h3><dl class="detail-facts cb-detail-facts">${fact("交易狀態", tradeLabel(quote))}${fact("行情資料日", date(quote.snapshotDataDate ?? quote.dataDate))}${tradeFacts}${fact("標的股收盤", price(quote.stockClose))}${fact("股價日期", date(quote.stockPriceDate))}</dl>${chart}`;
 }
 
 function valuationPanel(record) {
@@ -153,10 +197,6 @@ function tradeLabel(quote) {
 function termsPanel(terms) {
   const putDates = arrayValue(terms.putDates).map(date).filter((value) => value !== "—").join("、") || "—";
   return `<h3>條款</h3><dl class="detail-facts cb-detail-facts">${fact("發行日", date(terms.issueDate))}${fact("掛牌日", date(terms.listingDate))}${fact("到期日", date(terms.maturityDate))}${fact("發行總額", amount(terms.issueAmount))}${fact("流通餘額", amount(terms.outstandingAmount))}${fact("餘額資料日", date(terms.outstandingDataDate))}${fact("流通餘額比例", percent(terms.remainingRatio))}${fact("擔保", text(terms.securedStatus) || "—")}${fact("承銷機構", text(terms.underwriter) || "—")}${fact("受託人", text(terms.trustee) || "—")}${fact("轉換期間", dateRange(terms.conversionStartDate, terms.conversionEndDate))}${fact("賣回日", putDates)}${fact("賣回價格", price(terms.putPrice))}</dl>`;
-}
-
-function periodPanel(terms, quote) {
-  return `<h3>期間</h3><dl class="detail-facts cb-detail-facts">${fact("發行日", date(terms.issueDate))}${fact("掛牌日", date(terms.listingDate))}${fact("到期日", date(terms.maturityDate))}${fact("轉換期間", dateRange(terms.conversionStartDate, terms.conversionEndDate))}${fact("資料日", date(quote.snapshotDataDate ?? quote.dataDate))}</dl>`;
 }
 
 function eventsPanel(events, rightsEvents, cbCode) {
@@ -205,7 +245,7 @@ function companyContext(record, siblings) {
   const related = siblings.length
     ? `<section class="cb-company-bonds"><h4>同公司其他 CB</h4><ol>${siblings.map((bond) => `<li><a href="./bonds.html?bond=${encodeURIComponent(bond.cbCode)}">${escapeHtml(bond.cbCode)} ${escapeHtml(bond.cbName)}</a></li>`).join("")}</ol></section>`
     : "";
-  return `<section class="cb-company-context"><h3>公司關聯</h3><dl class="detail-facts cb-detail-facts">${fact("公司", text(record.companyName) || "—")}${fact("股票代碼", text(record.stockCode) || "—")}${fact("市場", text(record.market) || "—")}${fact("產業", text(record.industry) || "—")}</dl>${companyUrl ? `<p><a class="cb-company-link" href="${companyUrl}">前往公司研究頁 →</a></p>` : ""}${related}</section>`;
+  return `<section class="cb-company-context"><h3>標的公司資料</h3><dl class="detail-facts cb-detail-facts">${fact("公司", text(record.companyName) || "—")}${fact("股票代碼", text(record.stockCode) || "—")}${fact("市場", text(record.market) || "—")}${fact("產業", text(record.industry) || "—")}</dl><p class="field-note">此處為標的股票與發行公司資料；不與 CB 成交量或 CB 法人交易混用。</p>${companyUrl ? `<p><a class="cb-company-link" href="${companyUrl}">前往公司研究頁 →</a></p>` : ""}${related}</section>`;
 }
 
 function fact(label, value) {

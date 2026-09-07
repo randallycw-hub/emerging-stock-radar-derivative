@@ -19,7 +19,7 @@ test("V5.6 CB detail uses the required factual tabs and an official OHLCV chart 
   const html = renderCbDetailV53(record, {
     history: [{ bondCode: "23032", date: "2026-08-28", cbOpen: "100", cbHigh: "104", cbLow: "99", cbClose: "102", cbTradingUnits: "123" }],
   });
-  assert.deepEqual(CB_DETAIL_TABS.map(([key]) => key), ["overview", "valuation", "liquidity", "terms", "period", "events"]);
+  assert.deepEqual(CB_DETAIL_TABS.map(([key]) => key), ["overview", "terms", "events", "company"]);
   assert.match(html, /data-cb-lightweight-chart/);
   assert.match(html, /概況/);
   assert.match(html, /估值/);

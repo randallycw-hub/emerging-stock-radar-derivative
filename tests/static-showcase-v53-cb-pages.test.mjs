@@ -140,7 +140,7 @@ test("V5.3 all-CB search returns every active CB of a canonical stock code and c
 test("V5.3 all-CB page groups display fields by quote, terms, events and liquidity", async () => {
   const filter = await readFile(new URL("bonds-filter.html", root), "utf8");
 
-  assert.deepEqual(Object.keys(CB_VIEW_COLUMNS), ["quote", "terms", "events", "liquidity"]);
+  assert.deepEqual(Object.keys(CB_VIEW_COLUMNS), ["quote", "terms", "period", "events", "liquidity"]);
   for (const label of ["行情", "條款", "事件", "流動性", "新發行", "低溢價", "接近轉換價值", "近期賣回", "近期強贖", "停止轉換中", "清除條件"]) {
     assert.match(filter, new RegExp(label));
   }

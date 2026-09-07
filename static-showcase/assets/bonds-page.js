@@ -10,7 +10,7 @@ import {
 import { bindBondDetail, detailRecordFromLegacy, renderBondDetail } from "./bond-detail-page.js";
 import { applyCanonicalBondIdentity, indexCanonicalBonds } from "./canonical-identity.js";
 import { RANKING_METRICS, renderMarketOverview } from "./cb-workbench-ui.js";
-import { bindCbDetailV53, renderCbDetailV53 } from "./cb-detail-v53.js";
+import { bindCbDetailV53, renderCbDetailV53, cbDatabaseReturnUrl } from "./cb-detail-v53.js";
 import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
 
 const bootstrapConfig = globalThis.window?.__OFFICIAL_SHOWCASE__ ?? {
@@ -782,6 +782,7 @@ function renderRoute() {
       companyBonds,
       rightsEvents: state.v53Model.events,
       history: cbHistory,
+      returnSearch: location.search,
     });
     disposeDetail = bindCbDetailV53(target, closeDetail, { history: cbHistory, events: cbEvents });
   } else {
@@ -879,6 +880,11 @@ function v56PerformanceSortValue(value) {
 }
 
 function closeDetail() {
+  const databaseUrl = cbDatabaseReturnUrl(location.search);
+  if (databaseUrl) {
+    location.assign(databaseUrl);
+    return;
+  }
   const origin = state.detailOrigin;
   state.detailOrigin = null;
   const params = new URLSearchParams(location.search);

@@ -7,7 +7,7 @@
   <title>全部可轉債｜市場資訊台</title>
   <link rel="stylesheet" href="./assets/app.css"><link rel="stylesheet" href="./assets/workspace.css">
 </head>
-<body data-page="bonds">
+<body data-page="bonds" class="cb-database-page">
   <a class="skip-link" href="#main-content">跳到主要內容</a>
   <header class="site-header"><div class="site-header__inner">
     <a class="site-mark" href="./index.html" aria-label="市場資訊台首頁"><span>POST-CLOSE</span><strong>市場資訊台</strong></a>
@@ -16,19 +16,26 @@
     <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切換深淺色模式" aria-pressed="false"><span aria-hidden="true">◐</span><span data-theme-label>深色模式</span></button>
   </div></header>
   <main id="main-content" class="page-content" tabindex="-1">
-    <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / DATABASE</p><h1>全部 CB</h1><p>依行情、條款、事件與流動性分組瀏覽已驗證的可轉債公開資料。</p></header>
+    <header class="page-heading"><p class="kicker">CONVERTIBLE BONDS / DATABASE</p><h1>全部 CB</h1><p>查詢盤後行情、發行條款與權利日期。</p></header>
     <nav class="bond-context-nav" aria-label="可轉債功能"><a href="./bonds.html">市場總覽</a><a href="./bonds-filter.html" aria-current="page">全部 CB</a><a href="./bonds-issuance.html">發行進度</a><a href="./bonds-events.html">事件行事曆</a><a href="./bonds-stats.html">市場統計</a></nav>
     <section class="ledger-section" aria-labelledby="bond-filter-heading">
       <header class="section-heading"><div><p class="section-number">PUBLIC DATABASE</p><h2 id="bond-filter-heading">可轉債資料庫</h2></div><p id="bond-filter-count" class="update-status" aria-live="polite">讀取中</p></header>
-      <nav id="bond-view-tabs" class="view-tabs cb-view-tabs" aria-label="全部 CB 檢視"><button type="button" data-cb-view="quote" aria-selected="true">行情</button><button type="button" data-cb-view="terms" aria-selected="false">條款</button><button type="button" data-cb-view="events" aria-selected="false">事件</button><button type="button" data-cb-view="liquidity" aria-selected="false">流動性</button></nav>
+      <nav id="bond-view-tabs" class="view-tabs cb-view-tabs" role="tablist" aria-label="全部 CB 檢視"><button id="cb-view-quote" type="button" role="tab" aria-controls="cb-database-panel" data-cb-view="quote" aria-selected="true">價格與溢價</button><button id="cb-view-terms" type="button" role="tab" aria-controls="cb-database-panel" data-cb-view="terms" aria-selected="false" tabindex="-1">發行條款</button><button id="cb-view-period" type="button" role="tab" aria-controls="cb-database-panel" data-cb-view="period" aria-selected="false" tabindex="-1">期間與餘額</button><button id="cb-view-events" type="button" role="tab" aria-controls="cb-database-panel" data-cb-view="events" aria-selected="false" tabindex="-1">權利事件</button><button id="cb-view-liquidity" type="button" role="tab" aria-controls="cb-database-panel" data-cb-view="liquidity" aria-selected="false" tabindex="-1">流動性</button></nav>
       <form id="bond-filter-form" class="filters" aria-label="可轉債公開條件篩選">
         <label><span>搜尋</span><input name="q" type="search" autocomplete="off" placeholder="股票／CB 代碼、名稱"></label>
         <label><span>快速條件</span><select name="quickFilter"><option value="">全部</option><option value="newIssue">新發行</option><option value="lowPremium">低溢價</option><option value="nearConversion">接近轉換價值</option><option value="rights90">90 日內權利事件</option><option value="maturity365">365 日內到期</option><option value="recentPut">近期賣回</option><option value="recentRedemption">近期強贖</option><option value="conversionSuspended">停止轉換中</option></select></label>
-        <label><span>排序</span><select name="sort"><option value="">依快速條件</option><option value="code">CB 代碼</option><option value="close">CB 收盤</option><option value="volume">成交量</option><option value="premium">轉換溢價率</option><option value="maturity">到期日</option></select></label>
+        <label><span>排序</span><select name="sort"><option value="">依快速條件</option><option value="code">CB 代碼</option><option value="close">CB 收盤／最近成交</option><option value="stockClose">標的股收盤</option><option value="conversionPrice">轉換價</option><option value="conversionValue">轉換價值</option><option value="volume">成交量</option><option value="premium">轉換溢價率</option><option value="maturity">到期日</option><option value="outstanding">流通餘額</option><option value="remaining">餘額比例</option></select></label>
         <label><span>順序</span><select name="direction"><option value="asc">由小到大／由近到遠</option><option value="desc">由大到小／由遠到近</option></select></label>
         <button id="bond-filter-clear" type="button" hidden>清除條件</button>
+        <details class="cb-range-filters"><summary>數值篩選</summary><div>
+          <label><span>CB 價格下限（元）</span><input name="priceMin" type="number" step="any" min="0" inputmode="decimal" placeholder="不限"></label>
+          <label><span>CB 價格上限（元）</span><input name="priceMax" type="number" step="any" min="0" inputmode="decimal" placeholder="不限"></label>
+          <label><span>溢價率上限（%）</span><input name="premiumMax" type="number" step="any" inputmode="decimal" placeholder="不限"></label>
+          <label><span>餘額比例下限（%）</span><input name="remainingMin" type="number" step="any" min="0" max="100" inputmode="decimal" placeholder="不限"></label>
+        </div></details>
       </form>
-      <div class="bond-table-shell"><table class="bond-table public-data-table"><thead id="bond-filter-head"></thead><tbody id="bond-filter-body"><tr><td class="empty-cell">盤後資料讀取中</td></tr></tbody></table></div>
+      <p class="table-hint">行情數值下方為各自資料日期，轉換價下方為生效日；溢價率只採同日價格。點選代碼看完整明細。</p>
+      <div id="cb-database-panel" role="tabpanel" aria-labelledby="cb-view-quote" tabindex="0" class="bond-table-shell"><table class="bond-table public-data-table"><thead id="bond-filter-head"></thead><tbody id="bond-filter-body"><tr><td class="empty-cell">盤後資料讀取中</td></tr></tbody></table></div>
       <p class="data-error" data-page-error hidden role="status"></p>
     </section>
   </main>
