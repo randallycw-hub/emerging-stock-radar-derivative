@@ -11,7 +11,7 @@ import {
   CB_VIEW_COLUMNS,
   filterV53CbRecords,
 } from "../static-showcase/assets/bond-filter-page.js";
-import { buildV53IssuancePipeline } from "../static-showcase/assets/bond-issuance-page.js";
+import { buildV53IssuancePipeline, renderIssuanceTable } from "../static-showcase/assets/bond-issuance-page.js";
 import {
   filterV53CbEvents,
   groupV53CbEventsByDate,
@@ -140,7 +140,9 @@ test("V5.3 all-CB search returns every active CB of a canonical stock code and c
 test("V5.3 all-CB page groups display fields by quote, terms, events and liquidity", async () => {
   const filter = await readFile(new URL("bonds-filter.html", root), "utf8");
 
-  assert.deepEqual(Object.keys(CB_VIEW_COLUMNS), ["quote", "terms", "period", "events", "liquidity"]);
+  assert.deepEqual(Object.keys(CB_VIEW_COLUMNS), ["quote", "overview", "terms", "period", "events", "liquidity"]);
+  for (const view of Object.keys(CB_VIEW_COLUMNS)) assert.match(filter, new RegExp(`data-cb-view="${view}"`));
+  assert.match(filter, /data-cb-view="quote" aria-selected="true"/);
   for (const label of ["行情", "條款", "事件", "流動性", "新發行", "低溢價", "接近轉換價值", "近期賣回", "近期強贖", "停止轉換中", "清除條件"]) {
     assert.match(filter, new RegExp(label));
   }
@@ -162,7 +164,9 @@ test("V5.3 issuance and event pages expose usable public controls instead of leg
   ]);
 
   assert.match(issuance, /id="bond-issuance-form"/);
-  for (const label of ["進行中", "即將發行", "最近掛牌", "公告", "送件", "生效", "詢圈／競拍", "定價", "掛牌"]) assert.match(issuance, new RegExp(label));
+  for (const label of ["進行中", "即將發行", "最近掛牌"]) assert.match(issuance, new RegExp(label));
+  const issuanceHeader = renderIssuanceTable([]).head;
+  for (const label of ["公告日", "送件日", "生效日", "詢圈／競拍日", "定價日", "掛牌日"]) assert.match(issuanceHeader, new RegExp(label));
   assert.doesNotMatch(issuance, /CBAS 拆解/);
   assert.match(events, /id="bond-events-form"/);
   for (const label of ["今日", "未來 7 日", "未來 30 日", "本月", "清單", "月曆", "停止轉換", "提前贖回", "賣回", "到期", "轉換價調整", "Reset", "新掛牌"]) assert.match(events, new RegExp(label));

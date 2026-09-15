@@ -5,7 +5,7 @@ import { numberValue } from '../static-showcase/assets/bond-public-data.js';
 
 test('shared CB filter links restore search, quick filter and view',()=>{
   assert.deepEqual(readCbFilterState('?q=１２３４&quickFilter=lowPremium&view=terms&sort=premium&direction=desc'),
-    {q:'1234',quickFilter:'lowPremium',view:'terms',sort:'premium',direction:'desc'});
+    {q:'1234',quickFilter:'lowPremium',secured:'all',view:'terms',sort:'premium',direction:'desc'});
   assert.equal(readCbFilterState('?view=bad&sort=bad').view,'quote');
 });
 test('numeric sorting preserves zero and keeps unavailable values last in both directions',()=>{

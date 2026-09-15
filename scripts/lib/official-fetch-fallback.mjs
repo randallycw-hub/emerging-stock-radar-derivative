@@ -19,10 +19,12 @@ const APPROVED_TPEX_PATHS = new Set([
  * TPEx intermittently returns Cloudflare 520 responses to Node's built-in
  * transport while the same public endpoint remains available.  Keep this
  * fallback narrow: it applies only to explicitly approved TPEx endpoints and
- * only to a 520 response.  All existing response, date, and content validators
- * continue to run after transport succeeds.
+ * a 520 response or Node's observed UNABLE_TO_VERIFY_LEAF_SIGNATURE error.
+ * curl still verifies HTTPS with its normal system trust store; it never uses
+ * insecure TLS flags, custom trust roots or redirect following. If that check
+ * fails too, the error propagates. All source/date/content gates remain active.
  */
-export function withTpex520Fallback({
+export function withTpexTransportFallback({
   fetchImpl = fetch,
   fallbackFetchImpl = curlTpexFetch,
   maxFallbackAttempts = 3,
@@ -36,8 +38,15 @@ export function withTpex520Fallback({
   }
   if (typeof sleepImpl !== "function") throw new TypeError("TPEx transport fallback requires a sleep function");
   return async (url, init) => {
-    const response = await fetchImpl(url, init);
-    if (response?.status !== 520 || !isApprovedTpexEndpoint(url)) return response;
+    let response;
+    let verifiedChainFailure = false;
+    try {
+      response = await fetchImpl(url, init);
+    } catch (error) {
+      if (error?.cause?.code !== "UNABLE_TO_VERIFY_LEAF_SIGNATURE" || !isApprovedTpexEndpoint(url)) throw error;
+      verifiedChainFailure = true;
+    }
+    if (!verifiedChainFailure && (response?.status !== 520 || !isApprovedTpexEndpoint(url))) return response;
     let fallbackResponse;
     for (let attempt = 1; attempt <= maxFallbackAttempts; attempt += 1) {
       fallbackResponse = await fallbackFetchImpl(url, init);
@@ -49,6 +58,9 @@ export function withTpex520Fallback({
     return fallbackResponse;
   };
 }
+
+// Preserve existing collector imports while exposing the broader transport name.
+export { withTpexTransportFallback as withTpex520Fallback };
 
 export async function curlTpexFetch(url, init = {}) {
   const target = approvedTpexUrl(url);
@@ -109,6 +121,10 @@ function approvedTpexUrl(value) {
   if (
     url.protocol !== "https:"
     || url.hostname !== "www.tpex.org.tw"
+    || url.port !== ""
+    || url.username !== ""
+    || url.password !== ""
+    || url.hash !== ""
     || url.search !== ""
     || !APPROVED_TPEX_PATHS.has(url.pathname)
   ) {

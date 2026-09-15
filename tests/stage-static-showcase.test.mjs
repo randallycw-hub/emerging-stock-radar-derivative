@@ -22,6 +22,12 @@ test("V5.3 staging publishes one validated CB workbench projection through runti
 
   await stageStaticShowcase({ source: showcaseSource, destination });
 
+  assert.equal(
+    await readFile(join(destination, 'assets', 'cb-filter-state.js'), 'utf8'),
+    await readFile(join(showcaseSource, 'assets', 'cb-filter-state.js'), 'utf8'),
+    'staging must copy the shared numeric and date validator required by both CB pages',
+  );
+
   const current = JSON.parse(await readFile(join(destination, "data", "current.json"), "utf8"));
   const runtime = JSON.parse(await readFile(join(destination, current.runtimeUrl.replace(/^\.\//, "")), "utf8"));
   const model = JSON.parse(await readFile(
@@ -72,6 +78,7 @@ test("Sites staging copies the complete static showcase including the active gen
   );
   for (const file of [
     "bond-list-page.js",
+    "cb-issue-scope.js",
     "bond-detail-page.js",
     "klinechart-adapter.js",
     "company-overview.js",
@@ -114,6 +121,7 @@ test("Sites staging copies the complete static showcase including the active gen
   );
   for (const file of [
     "bond-list-page.js",
+    "cb-issue-scope.js",
     "bond-detail-page.js",
     "klinechart-adapter.js",
     "company-overview.js",

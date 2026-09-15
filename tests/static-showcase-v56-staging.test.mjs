@@ -13,6 +13,9 @@ test("V5.6 staging emits one public model for shared data, daily changes, and pe
   const destination = await mkdtemp(join(tmpdir(), "market-v56-stage-"));
   try {
     await stageStaticShowcase({ source: showcaseSource, destination });
+    assert.equal(await readFile(join(destination, "assets", "cb-issue-scope.js"), "utf8"),
+      await readFile(join(showcaseSource, "assets", "cb-issue-scope.js"), "utf8"),
+      "the staged CB workbench must include its shared issue-scope dependency");
     const pointer = JSON.parse(await readFile(join(destination, "data", "current.json"), "utf8"));
     const runtime = JSON.parse(await readFile(
       join(destination, pointer.runtimeUrl.replace(/^\.\//, "")),
@@ -36,11 +39,20 @@ test("V5.6 staging emits one public model for shared data, daily changes, and pe
     assert.doesNotMatch(JSON.stringify(model), /rawSourceId|rawTextHash|missingReason|diagnostics/);
     const sourceEvents = JSON.parse(await readFile(join(showcaseSource, "data", pointer.generation, "canonical-events-v55.json"), "utf8"));
     const stagedEvents = JSON.parse(await readFile(join(destination, runtime.canonicalEventsV55Url.replace(/^\.\//, "")), "utf8"));
+    // Legacy snapshots inferred "currently effective" events from conversion
+    // values whose effective date was still in the future. Reprojection must
+    // drop those, but retain genuine scheduled listings and announced rights.
+    const expectedEvents = sourceEvents.records.filter(row => !(
+      row.eventType === "conversion_price_adjustment"
+      && row.eventId.startsWith("mops-conversion:")
+      && !row.announcementDate
+      && row.effectiveDate > model.dataDate
+    ));
     for (const scope of ["ipo", "cb"]) {
       assert.ok(sourceEvents.records.some(row => row.marketScope === scope));
-      assert.equal(stagedEvents.records.filter(row => row.marketScope === scope).length,
-        sourceEvents.records.filter(row => row.marketScope === scope).length,
-        `staging must retain verified ${scope} events before removing internal evidence`);
+      assert.deepEqual(stagedEvents.records.filter(row => row.marketScope === scope).map(row => row.eventId).sort(),
+        expectedEvents.filter(row => row.marketScope === scope).map(row => row.eventId).sort(),
+        `staging must retain every snapshot-valid ${scope} event before removing internal evidence`);
     }
     assert.doesNotMatch(JSON.stringify(stagedEvents), /"sourceId"|"sourceRecordIds"|"missingReason"/);
   } finally {

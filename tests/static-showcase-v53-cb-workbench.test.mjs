@@ -78,10 +78,11 @@ function record({
   };
 }
 
-function buildModel(records, history = []) {
+function buildModel(records, history = [], issuanceRows = []) {
   return buildCbWorkbenchV53({
     workbench: { schemaVersion: 1, dataDate: "2026-08-28", records },
     history,
+    issuanceRows,
     cbMaster: records.map((item) => ({
       bondCode: item.bondCode,
       bondName: item.term.bondName,
@@ -99,6 +100,36 @@ function buildModel(records, history = []) {
     })),
   });
 }
+
+test('official issue details reach the CB model without replacing the current conversion price', () => {
+  const input = record();
+  input.term.initialConversionPrice = '95';
+  const model = buildModel([input], [], [{
+    債券代碼: '90001 ', 機構代碼: '9000', 資料日期: '20260828',
+    票面利率: '0.000000', 債券擔保情形: '測試擔保條款', 募集方式: '1',
+  }]);
+  assert.equal(model.records[0].terms.initialConversionPrice, 95);
+  assert.equal(model.records[0].terms.couponRate, '0.000000');
+  assert.equal(model.records[0].terms.securityDescription, '測試擔保條款');
+  assert.equal(model.records[0].terms.officialDataDate, '2026-08-28');
+  assert.equal(model.records[0].quote.conversionPrice, 100);
+  assert.equal(model.records[0].terms.offeringMethod, null, 'unverified offering code is not relabeled as a fact');
+});
+
+test('issue detail enrichment rejects duplicate codes and issuer or source-date mismatches', () => {
+  const detail = {債券代碼:'90001', 機構代碼:'9000', 資料日期:'20260828', 票面利率:'0'};
+  assert.throws(() => buildModel([record()], [], [detail,detail]), /duplicate/i);
+  assert.throws(() => buildModel([record()], [], [{...detail, 機構代碼:'9001'}]), /issuer/i);
+  assert.throws(() => buildModel([record()], [], [{...detail, 資料日期:'20260829'}]), /date/i);
+});
+
+test('issue details exclude explicitly private unlisted rows, not unidentified public issues', () => {
+  const privateRows = ['', '無', '無', 'N/A', 'YI31AA'].map(code => ({
+    債券代碼: code, 募集方式: '8', 上市櫃否: '5',
+  }));
+  assert.equal(buildModel([record()], [], privateRows).records.length, 1);
+  assert.throws(() => buildModel([record()], [], [{債券代碼: '無'}]), /invalid bond code/i);
+});
 
 test("V5.3 read model computes conversion facts only from a same-date public quote", () => {
   const sameDay = buildModel([record()]);

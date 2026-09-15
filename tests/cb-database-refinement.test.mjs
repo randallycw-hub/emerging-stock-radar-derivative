@@ -57,17 +57,46 @@ test('detail shows core dated facts before tabs without manufacturing a cross-da
   assert.doesNotMatch(summary, /0\.00%/);
 });
 
-test('regrouped detail preserves terms, trade history and company links without empty chart cards', () => {
+test('compact detail omits chart and history presentation while retaining terms and company links', () => {
   const html = renderCbDetailV53(record, { history: [
     { bondCode: '90001', date: '2026-09-02', cbOpen: '110', cbHigh: '113', cbLow: '109', cbClose: '112', cbTradingUnits: '6', cbTurnover: '672000' },
   ] });
   assert.match(html, /data-cb-detail-panel="company"/);
-  assert.match(html, /歷史成交明細/);
-  assert.match(html, /672,000/);
+  assert.doesNotMatch(html, /歷史成交明細|cb-lightweight-chart|樣本期間|均量採/);
   assert.match(html, /測試受託人/);
   assert.match(html, /company\.html\?code=9000/);
   assert.doesNotMatch(renderCbDetailV53(record), /class="cb-lightweight-chart"/);
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|待確認/);
+});
+
+test('removed sample metadata never renders even when complete history and liquidity are supplied', () => {
+  const html = renderCbDetailV53({...record, liquidity: {
+    average5: 12, average20: 10, weekVolume: 60, tradedDays20: 18,
+    sampleStartDate: '2026-08-01', sampleEndDate: '2026-09-04',
+  }}, {history: [{bondCode: '90001', date:'2026-09-04', cbOpen:110, cbHigh:113, cbLow:109, cbClose:112, cbTradingUnits:6}]});
+  assert.doesNotMatch(html, /CB 價格與成交量|data-cb-lightweight-chart|歷史成交明細|樣本期間|均量採|未補齊/);
+  assert.match(html, /交易概況/);
+  assert.match(html, /12 張/);
+  assert.match(html, /最後成交日/);
+});
+
+test('liquidity comparison preserves dated trading values without sample diagnostics', () => {
+  const {head,body} = renderCbDatabaseTable([record], {view:'liquidity'});
+  assert.doesNotMatch(head+body, /樣本期間/);
+  assert.match(head, /成交量/);
+  assert.match(body, /90001/);
+});
+
+test('terms render zero coupon and initial conversion price as separate official facts', () => {
+  const html = renderCbDetailV53({...record, terms:{...record.terms,
+    initialConversionPrice:55, couponRate:'0.000000', securityDescription:'擔保條款 <來源>',
+    officialDataDate:'2026-09-04', offeringMethod:null,
+  }});
+  assert.match(html, /票面利率<\/dt><dd>0%/);
+  assert.match(html, /發行時轉換價<\/dt><dd>55 元/);
+  assert.match(html, /擔保條款 &lt;來源&gt;/);
+  assert.match(html, /條款資料日<\/dt><dd>2026\/09\/04/);
+  assert.doesNotMatch(html, /募集方式<\/dt><dd>1/);
 });
 
 test('database detail navigation retains comparison filters and permits only the local database return path', () => {

@@ -78,6 +78,8 @@ const ASSET_FILES = new Set([
   "company-overview.js",
   "bond-detail-page.js",
   "cb-detail-v53.js",
+  "cb-filter-state.js",
+  "cb-issue-scope.js",
   "cb-workbench-v53.js",
   "v54-canonical-data.js",
   "v55-canonical-data.js",
@@ -411,7 +413,7 @@ async function readValidatedRightsSnapshot(path, message) {
 
 async function writePublicMarketResearch({ source, destination, generation }) {
   const base = join(destination, "data", ...generation.split("/"));
-  const [manifest, emerging, ipo, workbench, stockCloses, history, revenue, supplemental, conversionPrices, rightsEvents] = await Promise.all([
+  const [manifest, emerging, ipo, workbench, stockCloses, history, revenue, supplemental, conversionPrices, rightsEvents, issuanceRows] = await Promise.all([
     readJson(join(base, "manifest.json"), "active generation public manifest is invalid"),
     readJson(join(base, "emerging-market.json"), "active generation public emerging market is invalid"),
     readJson(join(base, "ipo-events.json"), "active generation public IPO snapshot is invalid"),
@@ -422,6 +424,7 @@ async function writePublicMarketResearch({ source, destination, generation }) {
     readPublicOptionalJson(join(base, "bond-supplemental.json"), "active generation public CB supplemental snapshot is invalid", { redemptions: [] }),
     readPublicOptionalJson(join(base, "conversion-prices.json"), "active generation public conversion prices are invalid", []),
     readPublicOptionalJson(join(base, "cb-rights-events.json"), "active generation public CB rights events are invalid", { events: [] }),
+    readJson(join(base, "11406.json"), "active generation official CB issue details are invalid"),
   ]);
   const masters = buildCanonicalPublicMasters({
     manifest,
@@ -444,6 +447,7 @@ async function writePublicMarketResearch({ source, destination, generation }) {
   const cbMaster = { schemaVersion: 1, meta: masters.meta, records: masters.cbMaster };
   const searchIndex = { schemaVersion: 1, meta: masters.meta, records: masters.searchIndex };
   const cbWorkbenchV53 = buildCbWorkbenchV53({
+    issuanceRows,
     workbench,
     history,
     cbMaster: masters.cbMaster,
@@ -453,6 +457,7 @@ async function writePublicMarketResearch({ source, destination, generation }) {
   });
   validateCbWorkbenchV53(cbWorkbenchV53);
   const cbWorkbenchV54 = buildV54CanonicalData({
+    issuanceRows,
     manifest,
     workbench,
     history,
@@ -466,6 +471,7 @@ async function writePublicMarketResearch({ source, destination, generation }) {
   });
   validateV54CanonicalData(cbWorkbenchV54);
   const cbWorkbenchV55 = buildV55CanonicalData({
+    issuanceRows,
     manifest,
     workbench,
     history,

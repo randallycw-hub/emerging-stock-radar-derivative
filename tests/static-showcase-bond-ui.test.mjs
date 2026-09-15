@@ -336,6 +336,7 @@ test("bond detail projects the neutral stock-to-conversion relationship only fro
 });
 
 test("static CB detail and issuance pages surface public term facts without diagnostic metadata", async () => {
+  const { renderIssuanceTable } = await import("../static-showcase/assets/bond-issuance-page.js");
   const [detail, issuance] = await Promise.all([
     readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
     readFile(new URL("bonds-issuance.html", root), "utf8"),
@@ -343,10 +344,12 @@ test("static CB detail and issuance pages surface public term facts without diag
   for (const label of ["承銷機構", "受託人", "最近餘額異動日", "最近餘額異動原因", "標的股相對轉換價"]) {
     assert.match(detail, new RegExp(label));
   }
-  for (const label of ["目前進度", "擔保", "承銷機構", "受託人"]) {
-    assert.match(issuance, new RegExp(label));
+  assert.match(issuance, /id="bond-issuance-head"/);
+  const issuanceHeader = renderIssuanceTable([]).head;
+  for (const label of ["案件狀態", "擔保狀態", "承銷商", "受託機構"]) {
+    assert.match(issuanceHeader, new RegExp(label));
   }
-  assert.doesNotMatch(detail + issuance, /來源 ID|缺漏原因|目前無核准公開資料／待確認/);
+  assert.doesNotMatch(detail + issuance + issuanceHeader, /來源 ID|缺漏原因|目前無核准公開資料／待確認/);
 });
 
 test("detail evidence selects the conversion-price version effective on its valuation date", async () => {

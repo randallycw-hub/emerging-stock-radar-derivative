@@ -119,6 +119,43 @@ test("preserves a TPEx ex-rights-and-dividend marker without inventing a numeric
   });
 });
 
+test("preserves a TPEx ex-rights close without inventing a numeric change", async () => {
+  const [tpex] = await jsonFixture("tpex-stock-close.json");
+
+  // Relevant fields reproduce the 2026-09-08 official 4549 observation.
+  for (const change of ["除權", "除權 ", " 除權\t"]) {
+    assert.deepEqual(normalizeTpexStockClose({
+      ...tpex,
+      Date: "1150908",
+      SecuritiesCompanyCode: "4549",
+      CompanyName: "桓達",
+      Close: "100.50",
+      Change: change,
+      TradingShares: "60919",
+      TransactionAmount: "6094861",
+    }), {
+      companyCode: "4549",
+      market: "otc",
+      tradingDate: "2026-09-08",
+      close: "100.5",
+      change: null,
+      changeEvent: "ex-rights",
+      volume: "60919",
+      turnover: "6094861",
+    });
+  }
+});
+
+test("rejects unknown TPEx change markers instead of treating them as corporate actions", async () => {
+  const [tpex] = await jsonFixture("tpex-stock-close.json");
+  for (const change of ["除權待確認", "除 權", "---", "NaN", "未知", "除權+1"]) {
+    assert.throws(
+      () => normalizeTpexStockClose({ ...tpex, Change: change }),
+      /Change must be a valid decimal/,
+    );
+  }
+});
+
 test("extracts exact bond and issuer codes from the approved MOPS URL", async () => {
   const payload = await jsonFixture("tpex-conversion-index.json");
   const [entry] = parseConversionIndex(payload);

@@ -1,14 +1,15 @@
 import { loadPublicCbWorkbenchV53 } from "./bond-public-data.js";
 import { publicAmount, publicNumber } from "./cb-workbench-ui.js";
+import { CB_SECURED_VALUES, readValidatedCbConditions, strictIsoDate, validCbRangeNumber } from './cb-filter-state.js';
 
-export const CB_VIEW_COLUMNS = Object.freeze({
+const BASE_CB_VIEWS = {
   quote: [
     ["CB 代碼／名稱", (record) => `${record.cbCode} ${record.cbName}`],
     ["標的公司", (record) => `${record.stockCode} ${record.companyName}`],
-    ["CB 收盤／最近成交", (record) => publicNumber(record.quote?.cbClose), "close", record => record.quote?.dataDate],
+    ["CB 收盤／最近成交", (record) => record.quote?.tradeState === "NOT_YET_LISTED" ? "尚未掛牌" : publicNumber(record.quote?.cbClose), "close", record => record.quote?.dataDate],
     ["標的股收盤", record => publicNumber(record.quote?.stockClose), "stockClose", record => record.quote?.stockPriceDate],
     ["轉換價", record => publicNumber(record.quote?.conversionPrice), "conversionPrice", record => record.quote?.conversionPriceEffectiveDate],
-    ["成交量", (record) => ["no_trade","NO_TRADE_TODAY"].includes(record.quote?.tradeState) ? "當日無成交" : publicNumber(record.quote?.volume)],
+    ["成交量", (record) => record.quote?.tradeState === "NOT_YET_LISTED" ? "尚未掛牌" : ["no_trade","NO_TRADE_TODAY"].includes(record.quote?.tradeState) ? "當日無成交" : publicNumber(record.quote?.volume), "volume"],
     ["成交額", (record) => publicAmount(record.quote?.turnoverAmount)],
     ["轉換價值", (record) => publicNumber(record.quote?.stockConversionValue ?? record.quote?.conversionValue), "conversionValue", record => record.quote?.stockConversionValueDate ?? record.quote?.valuationDate],
     ["轉換溢價率", (record) => rate(record.quote?.premiumRate), "premium", record => record.quote?.valuationDate],
@@ -16,15 +17,15 @@ export const CB_VIEW_COLUMNS = Object.freeze({
   terms: [
     ["CB 代碼／名稱", (record) => `${record.cbCode} ${record.cbName}`],
     ["標的公司", (record) => `${record.stockCode} ${record.companyName}`],
-    ["發行額", (record) => publicAmount(record.terms?.issueAmount)],
+    ["發行總額", (record) => publicAmount(record.terms?.issueAmount)],
     ["流通餘額", (record) => publicAmount(record.terms?.outstandingAmount)],
-    ["餘額比例", (record) => rate(record.terms?.remainingRatio)],
+    ["剩餘比率", (record) => rate(record.terms?.remainingRatio)],
     ["轉換價", (record) => publicNumber(record.quote?.conversionPrice)],
     ["發行日", (record) => dateLabel(record.terms?.issueDate)],
     ["到期日", (record) => dateLabel(record.terms?.maturityDate)],
-    ["擔保", (record) => record.terms?.securedStatus ?? "—"],
-    ["主辦券商", (record) => record.terms?.underwriter ?? "—"],
-    ["受託人", (record) => record.terms?.trustee ?? "—"],
+    ["擔保狀態", (record) => record.terms?.securedStatus ?? "—"],
+    ["承銷商", (record) => record.terms?.underwriter ?? "—"],
+    ["受託機構", (record) => record.terms?.trustee ?? "—"],
   ],
   period: [
     ["CB 代碼／名稱", record => `${record.cbCode} ${record.cbName}`],
@@ -34,7 +35,7 @@ export const CB_VIEW_COLUMNS = Object.freeze({
     ["轉換開始日", record => dateLabel(record.terms?.conversionStartDate)],
     ["轉換截止日", record => dateLabel(record.terms?.conversionEndDate)],
     ["流通餘額", record => publicAmount(record.terms?.outstandingAmount), "outstanding"],
-    ["餘額比例", record => rate(record.terms?.remainingRatio), "remaining"],
+    ["剩餘比率", record => rate(record.terms?.remainingRatio), "remaining"],
     ["餘額資料日", record => dateLabel(record.terms?.outstandingDataDate)],
     ["賣回日", record => arrayValue(record.terms?.putDates).map(dateLabel).join("、") || "—"],
     ["賣回價格", record => publicNumber(record.terms?.putPrice)],
@@ -52,13 +53,30 @@ export const CB_VIEW_COLUMNS = Object.freeze({
   liquidity: [
     ["CB 代碼／名稱", (record) => `${record.cbCode} ${record.cbName}`],
     ["標的公司", (record) => `${record.stockCode} ${record.companyName}`],
-    ["當日量", (record) => publicNumber(record.quote?.volume)],
+    ["當日成交量", (record) => publicNumber(record.quote?.volume)],
     ["近 5 筆日均量", (record) => publicNumber(record.liquidity?.average5)],
     ["近 20 筆日均量", (record) => publicNumber(record.liquidity?.average20)],
     ["當週已收錄量", (record) => publicNumber(record.liquidity?.weekVolume)],
     ["近 20 筆有成交天數", (record) => publicNumber(record.liquidity?.tradedDays20, 0)],
-    ["樣本期間", (record) => `${dateLabel(record.liquidity?.sampleStartDate)}～${dateLabel(record.liquidity?.sampleEndDate)}`],
   ],
+};
+
+// Reuse the same values, dates and sort keys across the compact and full views.
+export const CB_VIEW_COLUMNS = Object.freeze({
+  quote: BASE_CB_VIEWS.quote,
+  overview: [
+    ...BASE_CB_VIEWS.quote.slice(0, 5),
+    ...BASE_CB_VIEWS.quote.slice(7, 9),
+    ...BASE_CB_VIEWS.period.slice(6, 8),
+    BASE_CB_VIEWS.terms[8],
+    BASE_CB_VIEWS.terms[6],
+    BASE_CB_VIEWS.period[3],
+    BASE_CB_VIEWS.terms[9],
+  ],
+  terms: BASE_CB_VIEWS.terms,
+  period: BASE_CB_VIEWS.period,
+  events: BASE_CB_VIEWS.events,
+  liquidity: BASE_CB_VIEWS.liquidity,
 });
 
 const QUICK_FILTERS = new Set([
@@ -89,15 +107,26 @@ const SORT_VALUES = Object.freeze({
 const RANGE_FIELDS = Object.freeze({
   priceMin: [record => finiteNumber(record.quote?.cbClose), 'min'],
   priceMax: [record => finiteNumber(record.quote?.cbClose), 'max'],
+  premiumMin: [record => finiteNumber(record.quote?.premiumRate), 'min'],
   premiumMax: [record => finiteNumber(record.quote?.premiumRate), 'max'],
   remainingMin: [record => finiteNumber(record.terms?.remainingRatio), 'min'],
+  remainingMax: [record => finiteNumber(record.terms?.remainingRatio), 'max'],
+  conversionPriceMin: [record => finiteNumber(record.quote?.conversionPrice), 'min'],
+  conversionPriceMax: [record => finiteNumber(record.quote?.conversionPrice), 'max'],
+  conversionValueMin: [record => finiteNumber(record.quote?.stockConversionValue ?? record.quote?.conversionValue), 'min'],
+  conversionValueMax: [record => finiteNumber(record.quote?.stockConversionValue ?? record.quote?.conversionValue), 'max'],
+  stockPriceMin: [record => finiteNumber(record.quote?.stockClose), 'min'],
+  stockPriceMax: [record => finiteNumber(record.quote?.stockClose), 'max'],
+  maturityDaysMin: [(record, asOfDate) => maturityDays(record, asOfDate), 'min'],
+  maturityDaysMax: [(record, asOfDate) => maturityDays(record, asOfDate), 'max'],
+  issueFrom: [record => isoDate(record.terms?.issueDate), 'min', 'date'],
+  issueTo: [record => isoDate(record.terms?.issueDate), 'max', 'date'],
+  maturityFrom: [record => isoDate(record.terms?.maturityDate), 'min', 'date'],
+  maturityTo: [record => isoDate(record.terms?.maturityDate), 'max', 'date'],
 });
 
 function readRanges(params) {
-  return Object.fromEntries(Object.keys(RANGE_FIELDS).flatMap(key => {
-    const value = params.get(key);
-    return finiteNumber(value) === null ? [] : [[key, String(value).trim()]];
-  }));
+  return readValidatedCbConditions(params);
 }
 
 export function readCbFilterState(search = '') {
@@ -105,7 +134,8 @@ export function readCbFilterState(search = '') {
   const quickFilter = params.get('quickFilter') ?? '';
   const view = params.get('view');
   const sort = params.get('sort') ?? '';
-  return {q:normalizeQuery(params.get('q') ?? ''),quickFilter:QUICK_FILTERS.has(quickFilter) ? quickFilter : '',
+  const secured = params.get('secured') ?? 'all';
+  return {q:normalizeQuery(params.get('q') ?? ''),quickFilter:QUICK_FILTERS.has(quickFilter) ? quickFilter : '', secured:CB_SECURED_VALUES.has(secured) ? secured : 'all',
     view:Object.hasOwn(CB_VIEW_COLUMNS,view) ? view : 'quote',sort:Object.hasOwn(SORT_VALUES,sort) ? sort : '',
     direction:params.get('direction') === 'desc' ? 'desc' : 'asc', ...readRanges(params)};
 }
@@ -135,7 +165,7 @@ export function cbFilterRecords(model) {
   return arrayValue(model.records).map(record => ({...record,events:grouped.get(record.cbCode) ?? record.events}));
 }
 
-export function filterV53CbRecords(records, { query = "", quickFilter = "", dataDate = null, ranges = {} } = {}) {
+export function filterV53CbRecords(records, { query = "", quickFilter = "", dataDate = null, ranges = {}, secured = 'all' } = {}) {
   const needle = normalizeQuery(query);
   const selected = QUICK_FILTERS.has(quickFilter) ? quickFilter : "";
   const asOfDate = isoDate(dataDate);
@@ -143,10 +173,12 @@ export function filterV53CbRecords(records, { query = "", quickFilter = "", data
     if (record?.status !== "active") return false;
     if (needle && ![record.cbCode, record.cbName, record.stockCode, record.companyName]
       .some((value) => normalizeQuery(value).includes(needle))) return false;
-    return meetsQuickFilter(record, selected, asOfDate) && Object.entries(RANGE_FIELDS).every(([key, [read, bound]]) => {
-      const limit = finiteNumber(ranges[key]);
+    if (secured === 'secured' && !['有擔保'].includes(record.terms?.securedStatus)) return false;
+    if (secured === 'unsecured' && !['無擔保'].includes(record.terms?.securedStatus)) return false;
+    return meetsQuickFilter(record, selected, asOfDate) && Object.entries(RANGE_FIELDS).every(([key, [read, bound, type]]) => {
+      const limit = type === 'date' ? strictIsoDate(ranges[key]) : validCbRangeNumber(key, ranges[key]);
       if (limit === null) return true;
-      const value = read(record);
+      const value = read(record, asOfDate);
       return value !== null && (bound === 'min' ? value >= limit : value <= limit);
     });
   });
@@ -221,7 +253,7 @@ async function initialize() {
   const restore = () => {
     const state = readCbFilterState(globalThis.location?.search);
     activeView = state.view;
-    for (const key of ['q','quickFilter','sort','direction', ...Object.keys(RANGE_FIELDS)]) {
+    for (const key of ['q','quickFilter','secured','sort','direction', ...Object.keys(RANGE_FIELDS)]) {
       const control = form.elements.namedItem(key);
       if (control) control.value = state[key] ?? '';
     }
@@ -234,6 +266,7 @@ async function initialize() {
     const rows = sortCbDatabase(filterV53CbRecords(filterRecords, {
       query: values.get("q") ?? "",
       quickFilter: String(values.get("quickFilter") ?? ""),
+      secured: String(values.get('secured') ?? 'all'),
       dataDate: model.dataDate,
       ranges: readRanges(values),
     }), String(values.get('sort') ?? ''), String(values.get('direction') ?? 'asc'));
@@ -248,10 +281,11 @@ async function initialize() {
       button.setAttribute("aria-selected", String(selected));
       button.tabIndex = selected ? 0 : -1;
     });
-    clear.hidden = !['q','quickFilter','sort', ...Object.keys(RANGE_FIELDS)].some(key => String(values.get(key) ?? ''));
+    clear.hidden = !['q','quickFilter','sort', ...Object.keys(RANGE_FIELDS)].some(key => String(values.get(key) ?? '')) && String(values.get('secured') ?? 'all') === 'all';
   };
   form.addEventListener("input", render);
   form.addEventListener("change", render);
+  form.addEventListener('submit', event => { event.preventDefault(); render(); });
   clear.addEventListener("click", () => {
     form.reset();
     render();
@@ -289,6 +323,8 @@ function syncUrl(view, values) {
   const quickFilter = String(values.get("quickFilter") ?? "");
   if (query) params.set("q", query);
   if (QUICK_FILTERS.has(quickFilter) && quickFilter) params.set("quickFilter", quickFilter);
+  const secured = String(values.get('secured') ?? 'all');
+  if (CB_SECURED_VALUES.has(secured) && secured !== 'all') params.set('secured', secured);
   if (view !== "quote") params.set("view", view);
   for (const [key, value] of Object.entries(readRanges(values))) params.set(key, value);
   if (Object.hasOwn(SORT_VALUES, values.get('sort'))) {
@@ -348,6 +384,12 @@ function finiteNumber(value) {
   if ((typeof value !== "string" && typeof value !== "number") || String(value).trim() === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function maturityDays(record, asOfDate) {
+  const maturity = isoDate(record.terms?.maturityDate);
+  if (!maturity || !asOfDate) return null;
+  return (Date.parse(`${maturity}T00:00:00Z`) - Date.parse(`${asOfDate}T00:00:00Z`)) / 86400000;
 }
 
 function arrayValue(value) {

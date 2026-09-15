@@ -470,6 +470,51 @@ test("omits requested TWSE and TPEx issuers when official rows have no closing v
   assert.deepEqual(result.stockCloses.map((row) => row.companyCode).sort(), ["2330", "3522"]);
 });
 
+test("an ex-rights issuer does not abort the official stock close collection", async () => {
+  const [base] = JSON.parse(await fixture("tpex-stock-close.json"));
+  const tpex = JSON.stringify([
+    { ...base, Date: "1150908" },
+    {
+      ...base,
+      Date: "1150908",
+      SecuritiesCompanyCode: "4549",
+      CompanyName: "桓達",
+      Close: "100.50",
+      Change: "除權 ",
+      TradingShares: "60919",
+      TransactionAmount: "6094861",
+    },
+  ]);
+  const conversion = await fixture("tpex-conversion-index.json");
+  const result = await fetchCurrentOfficialMarketData({
+    bondCodes: [],
+    issuerCodes: ["3522", "4549"],
+    date: "2026-09-08",
+    sleepImpl: async () => {},
+    perRequestDelayMs: 0,
+    fetchImpl: async (url) => {
+      const target = String(url);
+      if (target === "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL") return jsonResponse("[]");
+      if (target === "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes") return jsonResponse(tpex);
+      if (target === "https://www.tpex.org.tw/www/zh-tw/bond/convSearch") return jsonResponse(conversion);
+      throw new Error(`unexpected request: ${target}`);
+    },
+  });
+
+  assert.deepEqual(result.stockCloses, [
+    {
+      companyCode: "3522", market: "otc", tradingDate: "2026-09-08",
+      close: "11.65", change: "-0.6", volume: "346776", turnover: "4119795",
+    },
+    {
+      companyCode: "4549", market: "otc", tradingDate: "2026-09-08",
+      close: "100.5", change: null, changeEvent: "ex-rights",
+      volume: "60919", turnover: "6094861",
+    },
+  ]);
+  assert.deepEqual(result.unpricedStockObservations, []);
+});
+
 test("normalizes the three verified monthly history contracts", async () => {
   const quote = await fixture("tpex-cb-quote.json");
   const requests = [];

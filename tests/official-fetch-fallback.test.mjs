@@ -62,3 +62,63 @@ test("retries only a transient 520 returned by the controlled transport", async 
   assert.equal(response.status, 200);
   assert.deepEqual(pauses, [1_000]);
 });
+
+test("retries a Node leaf-chain verification failure through the verified system transport at the same approved URL", async () => {
+  const url = "https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics";
+  const init = { signal: AbortSignal.timeout(30000), redirect: "error" };
+  const fetchImpl = withTpex520Fallback({
+    fetchImpl: async () => { throw new TypeError("fetch failed", { cause: { code: "UNABLE_TO_VERIFY_LEAF_SIGNATURE" } }); },
+    fallbackFetchImpl: async (target, options) => {
+      assert.equal(target, url);
+      assert.equal(options, init);
+      return new Response('[{"Date":"1150914"}]', { status: 200 });
+    },
+  });
+  assert.deepEqual(await (await fetchImpl(url, init)).json(), [{ Date: "1150914" }]);
+});
+
+test("transport errors outside the approved certificate-chain case remain failures", async () => {
+  for (const code of ["CERT_HAS_EXPIRED", "ERR_TLS_CERT_ALTNAME_INVALID", "DEPTH_ZERO_SELF_SIGNED_CERT", "ECONNRESET", "ABORT_ERR"]) {
+    const error = new TypeError("fetch failed", { cause: { code } });
+    const fetchImpl = withTpex520Fallback({
+      fetchImpl: async () => { throw error; },
+      fallbackFetchImpl: async () => assert.fail("unrelated errors must not select another transport"),
+    });
+    await assert.rejects(fetchImpl("https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics"), error);
+  }
+});
+
+test("fallback never accepts alternate ports, embedded credentials, fragments or unapproved endpoints", async () => {
+  for (const url of [
+    "https://www.tpex.org.tw:8443/openapi/v1/tpex_esb_latest_statistics",
+    "https://user:password@www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics",
+    "https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics#fragment",
+    "https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics?redirect=1",
+    "https://example.com/openapi/v1/tpex_esb_latest_statistics",
+    "https://www.tpex.org.tw/unapproved",
+  ]) {
+    const fetchImpl = withTpex520Fallback({
+      fetchImpl: async () => new Response("upstream", { status: 520 }),
+      fallbackFetchImpl: async () => assert.fail("unapproved URL must not reach system transport"),
+    });
+    assert.equal((await fetchImpl(url)).status, 520);
+  }
+});
+
+test("a system certificate validation failure is propagated without retrying or accepting data", async () => {
+  const leafError = new TypeError("fetch failed", { cause: { code: "UNABLE_TO_VERIFY_LEAF_SIGNATURE" } });
+  const systemError = Object.assign(new Error("certificate verification failed"), { code: 60 });
+  const fetchImpl = withTpex520Fallback({
+    fetchImpl: async () => { throw leafError; },
+    fallbackFetchImpl: async () => { throw systemError; },
+  });
+  await assert.rejects(fetchImpl("https://www.tpex.org.tw/openapi/v1/tpex_esb_latest_statistics"), systemError);
+});
+
+test("an absent primary response never authorizes a transport fallback", async () => {
+  const fetchImpl = withTpex520Fallback({
+    fetchImpl: async () => undefined,
+    fallbackFetchImpl: async () => assert.fail("missing response is not a verified fallback trigger"),
+  });
+  assert.equal(await fetchImpl("https://example.com/anything"), undefined);
+});

@@ -113,6 +113,9 @@ function normalizeTpexChange(
   if (text === "除息") {
     return { change: null, changeEvent: "ex-dividend" };
   }
+  if (text === "除權") {
+    return { change: null, changeEvent: "ex-rights" };
+  }
   if (text === "除權息") {
     return { change: null, changeEvent: "ex-rights-and-dividend" };
   }

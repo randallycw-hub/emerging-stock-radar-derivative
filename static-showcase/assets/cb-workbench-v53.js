@@ -1,3 +1,5 @@
+import { unassignedFutureCbIssue } from './cb-issue-scope.js';
+
 const OFFICIAL_SOURCE_HOSTS = new Set([
   "www.tpex.org.tw",
   "www.twse.com.tw",
@@ -29,7 +31,7 @@ const PIPELINE_STAGE_KEYS = Object.freeze([
 
 export { EVENT_TYPE_LABELS, OFFICIAL_SOURCE_HOSTS, PIPELINE_STAGE_KEYS };
 
-export function buildCbWorkbenchV53({ workbench, history = [], cbMaster = [], companyMaster = [], supplemental = null, conversionPrices = [] } = {}) {
+export function buildCbWorkbenchV53({ workbench, history = [], cbMaster = [], companyMaster = [], supplemental = null, conversionPrices = [], issuanceRows = [] } = {}) {
   const snapshot = requiredRecord(workbench, "workbench");
   const dataDate = isoDate(snapshot.dataDate);
   if (!dataDate || !Array.isArray(snapshot.records)) throw new TypeError("workbench must contain dataDate and records");
@@ -37,7 +39,8 @@ export function buildCbWorkbenchV53({ workbench, history = [], cbMaster = [], co
   const historyByBond = indexHistory(history);
   const redemptionsByBond = indexRedemptions(supplemental, dataDate);
   const conversionHistoryByBond = indexConversionPriceHistory(conversionPrices, dataDate);
-  const records = snapshot.records.map((input) => projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond, conversionHistoryByBond));
+  const issueDetails = indexIssueDetails(issuanceRows, dataDate);
+  const records = snapshot.records.map((input) => projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond, conversionHistoryByBond, issueDetails));
   assertUniqueActiveCodes(records);
   const events = records.flatMap((record) => record.events)
     .sort((left, right) => left.date.localeCompare(right.date) || left.cbCode.localeCompare(right.cbCode));
@@ -103,7 +106,7 @@ export function isOfficialSourceUrl(value) {
   }
 }
 
-function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond, conversionHistoryByBond) {
+function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBond, conversionHistoryByBond, issueDetails) {
   const raw = requiredRecord(input, "workbench record");
   const term = requiredRecord(raw.term, "workbench term");
   const view = requiredRecord(raw.view, "workbench view");
@@ -112,16 +115,21 @@ function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBon
   if (!cbCode || !master) throw new TypeError(`CB ${cbCode || "record"} is absent from canonical master`);
   const stockCode = master.stockCode;
   const company = masters.companyByCode.get(stockCode);
-  const history = historyByBond.get(cbCode) ?? [];
+  const listingDate = isoDate(term.listingDate);
+  const history = (historyByBond.get(cbCode) ?? []).filter((point) => !listingDate || point.date >= listingDate);
   const conversionPriceHistory = conversionHistoryByBond.get(cbCode) ?? [];
-  const quote = projectQuote(view, history, dataDate);
+  const quote = projectQuote(view, history, dataDate, listingDate);
   const redemption = redemptionsByBond.get(cbCode) ?? null;
   const events = projectEvents([
     ...arrayValue(raw.events),
     ...(redemption === null ? [] : [redemptionEvent(redemption)]),
   ], { cbCode, bondName: master.bondName, stockCode, companyName: master.companyName });
-  const terms = projectTerms(term, view);
-  const issuance = projectIssuance({ cbCode, bondName: master.bondName, stockCode, companyName: master.companyName, terms, events, sourceDataDate: dataDate });
+  const detail = issueDetails.get(cbCode);
+  if (detail && detail.issuerCode !== stockCode) throw new TypeError(`CB ${cbCode} issue detail issuer mismatch`);
+  if (detail && detail.officialDataDate !== isoDate(term.outstandingDataDate)) throw new TypeError(`CB ${cbCode} issue detail source date mismatch`);
+  const terms = projectTerms(term, view, detail);
+  const status = raw.status === "archived" ? "archived" : "active";
+  const issuance = projectIssuance({ cbCode, bondName: master.bondName, stockCode, companyName: master.companyName, status, terms, events, sourceDataDate: dataDate });
   return {
     cbCode,
     cbName: master.bondName,
@@ -129,7 +137,7 @@ function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBon
     companyName: master.companyName,
     market: master.market,
     industry: company?.industry ?? null,
-    status: raw.status === "archived" ? "archived" : "active",
+    status,
     terms,
     quote,
     liquidity: projectLiquidity(history, dataDate),
@@ -259,17 +267,20 @@ function indexHistory(history) {
   return result;
 }
 
-function projectQuote(view, history, dataDate) {
+function projectQuote(view, history, dataDate, listingDate) {
   const historicalPrice = history.findLast((point) => point.date <= dataDate && point.close > 0 && point.tradingUnits > 0);
-  const viewPriceDate = isoDate(view.cbPriceDate);
-  const viewPrice = finiteNumber(view.cbClose);
+  const rawViewPriceDate = isoDate(view.cbPriceDate);
+  const viewPriceDate = rawViewPriceDate && rawViewPriceDate <= dataDate && (!listingDate || rawViewPriceDate >= listingDate) ? rawViewPriceDate : null;
+  const viewPrice = viewPriceDate ? finiteNumber(view.cbClose) : null;
   const useHistory = historicalPrice && (!viewPriceDate || viewPrice === null || historicalPrice.date > viewPriceDate);
   const cbPriceDate = useHistory ? historicalPrice.date : viewPriceDate;
-  const stockPriceDate = isoDate(view.stockPriceDate);
-  const conversionPriceEffectiveDate = isoDate(view.conversionPriceEffectiveDate);
+  const rawStockPriceDate = isoDate(view.stockPriceDate);
+  const stockPriceDate = rawStockPriceDate && rawStockPriceDate <= dataDate ? rawStockPriceDate : null;
+  const rawConversionPriceEffectiveDate = isoDate(view.conversionPriceEffectiveDate);
+  const conversionPriceEffectiveDate = rawConversionPriceEffectiveDate && rawConversionPriceEffectiveDate <= dataDate ? rawConversionPriceEffectiveDate : null;
   const cbClose = useHistory ? historicalPrice.close : viewPrice;
-  const stockClose = finiteNumber(view.stockClose);
-  const conversionPrice = finiteNumber(view.currentConversionPrice);
+  const stockClose = stockPriceDate ? finiteNumber(view.stockClose) : null;
+  const conversionPrice = conversionPriceEffectiveDate ? finiteNumber(view.currentConversionPrice) : null;
   // Stock conversion value needs a dated stock close, not a CB transaction.
   // The premium below still requires a same-date CB/stock price pair.
   const stockConversionValueDate = stockPriceDate && stockPriceDate <= dataDate && conversionPriceEffectiveDate && conversionPriceEffectiveDate <= stockPriceDate && stockClose > 0 && conversionPrice > 0 ? stockPriceDate : null;
@@ -286,11 +297,11 @@ function projectQuote(view, history, dataDate) {
   const lastPrice = cbClose;
   const lastActivity = cbPriceDate ? history.find((point) => point.date === cbPriceDate) ?? null : null;
   const snapshotActivity = history.find((point) => point.date === dataDate) ?? null;
-  const lastVolume = lastActivity?.tradingUnits ?? finiteNumber(view.cbTradeUnits);
+  const lastVolume = lastActivity?.tradingUnits ?? (viewPriceDate ? finiteNumber(view.cbTradeUnits) : null);
   const lastTurnoverAmount = lastActivity?.turnover ?? null;
   const volume = snapshotActivity?.tradingUnits ?? (cbPriceDate === dataDate ? lastVolume : null);
   const turnoverAmount = snapshotActivity?.turnover ?? (cbPriceDate === dataDate ? lastTurnoverAmount : null);
-  const tradeState = publicTradeState({ latestTradeDate: cbPriceDate, dataDate, lastVolume, volume });
+  const tradeState = publicTradeState({ dataDate, listingDate, volume });
   return {
     dataDate: cbPriceDate,
     snapshotDataDate: dataDate,
@@ -315,13 +326,40 @@ function projectQuote(view, history, dataDate) {
   };
 }
 
-function publicTradeState({ latestTradeDate, dataDate, lastVolume, volume }) {
+function publicTradeState({ dataDate, listingDate, volume }) {
+  if (listingDate && dataDate && listingDate > dataDate) return "NOT_YET_LISTED";
   if (dataDate && volume === 0) return "NO_TRADE_TODAY";
-  if (!latestTradeDate || !dataDate || latestTradeDate > dataDate || lastVolume === null || lastVolume < 0) return "DATA_ERROR";
-  return latestTradeDate === dataDate && lastVolume > 0 ? "TRADED_TODAY" : "NO_TRADE_TODAY";
+  if (dataDate && volume > 0) return "TRADED_TODAY";
+  return "DATA_ERROR";
 }
 
-function projectTerms(term, view) {
+function indexIssueDetails(rows, dataDate) {
+  const result = new Map();
+  for (const row of arrayValue(rows)) {
+    const code = text(row?.['債券代碼']);
+    if (!/^\d{5,6}$/.test(code)) {
+      if (unassignedFutureCbIssue(row, dataDate)) continue;
+      // Match the verified 11406 importer: private, unlisted issues may have no exchange code.
+      if (text(row?.['募集方式']) === '8' && text(row?.['上市櫃否']) === '5') continue;
+      throw new TypeError(`11406 invalid bond code ${code}`);
+    }
+    if (result.has(code)) throw new TypeError(`duplicate 11406 bond code ${code}`);
+    const stamp = text(row?.['資料日期']);
+    const officialDataDate = isoDate(stamp.replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3'));
+    if (!officialDataDate) throw new TypeError(`11406 ${code} invalid source date`);
+    const offering = optionalText(row?.['募集方式']);
+    result.set(code, {
+      issuerCode: text(row?.['機構代碼']), officialDataDate,
+      couponRate: optionalText(row?.['票面利率']),
+      securityDescription: optionalText(row?.['債券擔保情形']),
+      // Numeric offering codes need an independently verified official codebook.
+      offeringMethod: offering && !/^\d+$/.test(offering) ? offering : null,
+    });
+  }
+  return result;
+}
+
+function projectTerms(term, view, detail) {
   return {
     issueDate: isoDate(term.issueDate),
     listingDate: isoDate(term.listingDate),
@@ -338,6 +376,13 @@ function projectTerms(term, view) {
     putPrice: finiteNumber(term.putPrice),
     conversionStartDate: isoDate(term.conversionStartDate),
     conversionEndDate: isoDate(term.conversionEndDate),
+    initialConversionPrice: finiteNumber(term.initialConversionPrice),
+    couponRate: detail?.couponRate ?? null,
+    securityDescription: detail?.securityDescription ?? null,
+    offeringMethod: detail?.offeringMethod ?? null,
+    officialDataDate: detail?.officialDataDate ?? isoDate(term.outstandingDataDate),
+    outstandingChangeDate: isoDate(term.outstandingChangeDate),
+    outstandingChangeReason: optionalText(term.outstandingChangeReason),
   };
 }
 
@@ -362,7 +407,7 @@ function projectEvents(events, identity) {
   }).filter(Boolean).sort((left, right) => left.date.localeCompare(right.date) || left.type.localeCompare(right.type));
 }
 
-function projectIssuance({ cbCode, bondName, stockCode, companyName, terms, events, sourceDataDate }) {
+function projectIssuance({ cbCode, bondName, stockCode, companyName, status, terms, events, sourceDataDate }) {
   const listing = events.find((event) => event.type === "listing" && event.date === terms.listingDate) ?? null;
   const stages = {
     announcementDate: null,
@@ -377,6 +422,7 @@ function projectIssuance({ cbCode, bondName, stockCode, companyName, terms, even
     cbName: bondName,
     stockCode,
     companyName,
+    status,
     stages,
     terms: {
       issueDate: terms.issueDate,
@@ -386,7 +432,8 @@ function projectIssuance({ cbCode, bondName, stockCode, companyName, terms, even
       underwriter: terms.underwriter,
       trustee: terms.trustee,
     },
-    currentStage: [...PIPELINE_STAGE_KEYS].reverse().find((stage) => stages[stage]) ?? "unannounced",
+    currentStage: [...PIPELINE_STAGE_KEYS].reverse().find((stage) => stages[stage] && stages[stage] <= sourceDataDate)
+      ?? (PIPELINE_STAGE_KEYS.some((stage) => stages[stage] > sourceDataDate) ? "scheduled" : "unannounced"),
     sourceUrl: listing?.sourceUrl ?? null,
     dataDate: sourceDataDate,
   };
@@ -412,7 +459,7 @@ function projectLiquidity(history, dataDate) {
     weekObservationDates: weekly.map((point) => point.date),
     sampleStartDate: valid.at(-20)?.date ?? valid[0]?.date ?? null,
     sampleEndDate: valid.at(-1)?.date ?? null,
-    tradedDays20: valid.slice(-20).filter((point) => point.tradingUnits > 0).length,
+    tradedDays20: valid.length ? valid.slice(-20).filter((point) => point.tradingUnits > 0).length : null,
   };
 }
 
@@ -420,8 +467,8 @@ function buildSummary(records, dataDate) {
   const active = records.filter((record) => record.status === "active");
   const upcoming = active.filter((record) => (record.terms.listingDate ?? record.terms.issueDate) > dataDate);
   const weekObservationDates = [...new Set(active.flatMap((record) => record.liquidity.weekObservationDates))].sort();
-  const latestTradeSamples = active.filter((record) => record.quote.isLatestSnapshot && finiteNumber(record.quote.volume) !== null);
-  const latestTurnoverSamples = active.filter((record) => record.quote.isLatestSnapshot && finiteNumber(record.quote.turnoverAmount) !== null);
+  const latestTradeSamples = active.filter((record) => record.quote.snapshotDataDate === dataDate && finiteNumber(record.quote.volume) !== null);
+  const latestTurnoverSamples = active.filter((record) => record.quote.snapshotDataDate === dataDate && finiteNumber(record.quote.turnoverAmount) !== null);
   const weeklyTurnoverSamples = active.filter((record) => finiteNumber(record.liquidity.weekTurnover) !== null);
   return {
     activeCount: active.length,

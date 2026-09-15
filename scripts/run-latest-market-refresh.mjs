@@ -2,6 +2,7 @@ import { pathToFileURL } from 'node:url';
 import { isIsoDate } from '../lib/domain/dates.ts';
 import { parseEmergingMarketSource } from '../lib/source-verification/source-emerging-market.ts';
 import { OFFICIAL_SHOWCASE_SOURCES, refreshStaticShowcase } from './refresh-static-showcase-data.mjs';
+import { withTpexTransportFallback } from './lib/official-fetch-fallback.mjs';
 
 export function selectPublishedTradingDate(rows, today) {
   const dates = [...new Set(rows.map(row => row.tradingDate))];
@@ -11,7 +12,7 @@ export function selectPublishedTradingDate(rows, today) {
   return dates[0];
 }
 
-export async function runLatestMarketRefresh({fetchImpl = fetch, now = new Date()} = {}) {
+export async function runLatestMarketRefresh({fetchImpl = withTpexTransportFallback(), now = new Date()} = {}) {
   const response = await fetchImpl(OFFICIAL_SHOWCASE_SOURCES.emergingMarket, {
     signal: AbortSignal.timeout(30000), redirect:'error',
   });

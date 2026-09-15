@@ -18,6 +18,11 @@ const ISSUANCE_CATEGORIES = Object.freeze({
 });
 
 const ISSUANCE_WINDOW_DAYS = 90;
+const ISSUANCE_COLUMNS = Object.freeze([
+  "CB 代碼／名稱", "發行人", "擔保狀態", "發行總額", "承銷商",
+  "公告日", "送件日", "生效日", "詢圈／競拍日", "定價日",
+  "發行時轉換價", "現行轉換價", "掛牌日", "發行日", "到期日", "受託機構", "案件狀態", "官方來源",
+]);
 
 export function buildV53IssuancePipeline(issuance = {}) {
   return PIPELINE_STAGES.flatMap(([stage, name]) => {
@@ -34,8 +39,16 @@ export function selectV57IssuanceRecords(records, { query = "", status = "all" }
     .filter((record) => record.category !== null)
     .filter((record) => allowedStatus === "all" || record.category === allowedStatus)
     .filter((record) => !needle || [record.cbCode, record.cbName, record.stockCode, record.companyName].some((value) => normalizeQuery(value).includes(needle)))
-    .sort(compareIssuanceRows)
-    .slice(0, 30);
+    .sort(compareIssuanceRows);
+}
+
+export function buildIssuanceSummary(records, dataDate) {
+  const summary = { total: 0, in_progress: 0, upcoming: 0, recent_listing: 0 };
+  for (const record of selectV57IssuanceRecords(records, {}, dataDate)) {
+    summary.total += 1;
+    summary[record.category] += 1;
+  }
+  return summary;
 }
 
 export function buildBondIssuanceRows(workbench) {
@@ -57,13 +70,19 @@ export function buildBondIssuanceRows(workbench) {
     }));
 }
 
-function renderRows(target, records) {
-  if (!records.length) {
-    target.innerHTML = '<tr><td colspan="10" class="empty-cell">目前沒有符合條件的已公布發行案件。</td></tr>';
-    return;
+export function renderIssuanceTable(records, canonicalRecords = []) {
+  const head = `<tr>${ISSUANCE_COLUMNS.map((label) => `<th scope="col">${label}</th>`).join("")}</tr>`;
+  const canonical = new Map();
+  for (const record of arrayValue(canonicalRecords)) {
+    // Ambiguous keys must never borrow terms from one of the duplicate issues.
+    const key = `${record.cbCode}:${record.stockCode}`;
+    canonical.set(key, canonical.has(key) ? null : record);
   }
-  target.innerHTML = records.map((record) => {
-    const pipeline = buildV53IssuancePipeline(record);
+  const body = arrayValue(records).map((record) => {
+    const detail = canonical.get(`${record.cbCode}:${record.stockCode}`);
+    const termsDataDate = isoDate(detail?.terms?.officialDataDate);
+    const conversionEffectiveDate = isoDate(detail?.quote?.conversionPriceEffectiveDate);
+    const currentPrice = positivePrice(detail?.quote?.conversionPrice);
     const category = ISSUANCE_CATEGORIES[record.category] ?? "已公布案件";
     const source = isOfficialSourceUrl(record.sourceUrl)
       ? `<a href="${escapeHtml(record.sourceUrl)}" target="_blank" rel="noopener noreferrer">官方公告</a>`
@@ -71,28 +90,36 @@ function renderRows(target, records) {
     return `<tr>
       <td><a href="./bonds.html?bond=${encodeURIComponent(record.cbCode)}"><strong>${escapeHtml(record.cbCode)}</strong><span>${escapeHtml(record.cbName)}</span></a></td>
       <td>${escapeHtml(record.stockCode)} ${escapeHtml(record.companyName)}</td>
-      <td>${publicAmount(record.terms?.issueAmount)}</td>
       <td>${escapeHtml(record.terms?.securedStatus ?? "—")}</td>
+      <td>${publicAmount(record.terms?.issueAmount)}</td>
       <td>${escapeHtml(record.terms?.underwriter ?? "—")}</td>
-      <td>${escapeHtml(record.terms?.trustee ?? "—")}</td>
-      <td>${dateLabel(record.terms?.issueDate)}</td>
+      ${PIPELINE_STAGES.filter(([stage]) => stage !== "listingDate").map(([stage]) => `<td>${dateLabel(record.stages?.[stage])}</td>`).join("")}
+      <td>${positivePrice(detail?.terms?.initialConversionPrice)}</td>
+      <td>${currentPrice}${currentPrice !== "—" && conversionEffectiveDate ? `<time datetime="${conversionEffectiveDate}">生效 ${dateLabel(conversionEffectiveDate)}</time>` : ""}</td>
       <td>${dateLabel(record.stages?.listingDate)}</td>
+      <td>${dateLabel(record.terms?.issueDate)}</td>
       <td>${dateLabel(record.terms?.maturityDate)}</td>
-      <td><p class="issuance-category">${escapeHtml(category)}</p><ol class="cb-pipeline" aria-label="${escapeHtml(`${record.cbCode} 發行進度`)}">${pipeline.map((node) => `<li class="${node.state}"><span>${escapeHtml(node.name)}</span><time>${escapeHtml(node.label)}</time></li>`).join("")}</ol>${source}</td>
+      <td>${escapeHtml(record.terms?.trustee ?? "—")}</td>
+      <td>${escapeHtml(category)}</td>
+      <td>${source}${termsDataDate ? `<time datetime="${termsDataDate}">條款 ${dateLabel(termsDataDate)}</time>` : ""}</td>
     </tr>`;
-  }).join("");
+  }).join("") || `<tr><td colspan="${ISSUANCE_COLUMNS.length}" class="empty-cell">目前沒有符合條件的已公布發行案件。</td></tr>`;
+  return { head, body };
 }
 
 async function initialize() {
   const form = document.querySelector("#bond-issuance-form");
   const target = document.querySelector("#bond-issuance-body");
+  const head = document.querySelector("#bond-issuance-head");
   const count = document.querySelector("#bond-issuance-count");
+  const summaryTarget = document.querySelector("#bond-issuance-summary");
   const errorTarget = document.querySelector("[data-page-error]");
-  if (!form || !target || !count) return;
+  if (!form || !target || !head || !count) return;
+  head.innerHTML = renderIssuanceTable([]).head;
   const model = await loadPublicCbWorkbenchV53({ errorTarget });
   if (!model?.dataDate || !Array.isArray(model.issuance)) {
     count.textContent = "資料暫時無法取得";
-    target.innerHTML = '<tr><td colspan="10" class="empty-cell">資料暫時無法取得</td></tr>';
+    target.innerHTML = `<tr><td colspan="${ISSUANCE_COLUMNS.length}" class="empty-cell">資料暫時無法取得</td></tr>`;
     return;
   }
   const render = () => {
@@ -102,25 +129,31 @@ async function initialize() {
       status: String(values.get("status") ?? "all"),
     }, model.dataDate);
     syncUrl({ query: values.get("q") ?? "", status: values.get("status") ?? "all" });
-    count.textContent = `${records.length} 件（最多顯示 30 件）· 資料日 ${dateLabel(model.dataDate)}`;
-    renderRows(target, records);
+    count.textContent = `${records.length} 件 · 資料日 ${dateLabel(model.dataDate)}`;
+    target.innerHTML = renderIssuanceTable(records, model.records).body;
   };
+  if (summaryTarget) {
+    const summary = buildIssuanceSummary(model.issuance, model.dataDate);
+    summaryTarget.innerHTML = Object.entries(ISSUANCE_CATEGORIES).map(([key, label]) => `<span>${label}<strong>${summary[key]}</strong></span>`).join("");
+  }
   const initial = new URL(globalThis.location.href).searchParams;
   form.elements.q.value = initial.get("q") ?? "";
   form.elements.status.value = initial.get("status") && Object.hasOwn(ISSUANCE_CATEGORIES, initial.get("status")) ? initial.get("status") : "all";
   form.addEventListener("input", render);
   form.addEventListener("change", render);
+  form.addEventListener("submit", (event) => { event.preventDefault(); render(); });
+  form.querySelector('[data-clear-issuance]')?.addEventListener("click", () => { form.reset(); render(); });
   render();
 }
 
 function issuanceCategory(record, dataDate) {
   const snapshotDate = isoDate(dataDate);
-  if (!snapshotDate) return null;
+  if (!snapshotDate || record?.status === "archived") return null;
   const listingDate = isoDate(record?.stages?.listingDate);
   if (listingDate) {
     const difference = daysBetween(snapshotDate, listingDate);
-    if (difference >= 0 && difference <= ISSUANCE_WINDOW_DAYS) return "upcoming";
-    if (difference < 0 && difference >= -ISSUANCE_WINDOW_DAYS) return "recent_listing";
+    if (difference > 0 && difference <= ISSUANCE_WINDOW_DAYS) return "upcoming";
+    if (difference <= 0 && difference >= -ISSUANCE_WINDOW_DAYS) return "recent_listing";
     return null;
   }
   return buildV53IssuancePipeline(record).length ? "in_progress" : null;
@@ -156,6 +189,12 @@ function syncUrl({ query, status }) {
 
 function dateLabel(value) {
   return isoDate(value)?.replaceAll("-", "/") ?? "—";
+}
+
+function positivePrice(value) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? `${value.toLocaleString("zh-TW", { maximumFractionDigits: 4 })} 元`
+    : "—";
 }
 
 function isoDate(value) {

@@ -146,11 +146,11 @@ export async function buildBondMarketSnapshot(options = {}) {
     throw new TypeError("normalized 11406 artifact must be an array");
   }
   const sourceRows = bonds === undefined ? normalized11406Rows : undefined;
-  const bondInputs = bonds ?? bondInputsFrom11406Rows(sourceRows);
+  const bondInputs = bonds ?? bondInputsFrom11406Rows(sourceRows, asOfDate);
   if (!Array.isArray(bondInputs)) throw new TypeError("bonds must be an array");
   const baseTerms = sourceRows === undefined
     ? termSummariesFromBondInputs(bondInputs)
-    : bondTermSummariesFrom11406Rows(sourceRows);
+    : bondTermSummariesFrom11406Rows(sourceRows, asOfDate);
   const previousWorkbench = await readPreviousWorkbench(outputDir);
   const previousHistory = await readPreviousHistory(outputDir);
   const previousConversionPrices = await readPreviousConversionPrices(outputDir);

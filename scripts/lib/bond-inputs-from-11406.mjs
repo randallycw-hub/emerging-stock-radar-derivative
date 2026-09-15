@@ -1,5 +1,6 @@
 import { isIsoDate } from "../../lib/domain/dates.ts";
 import { multiplyDecimal } from "../../lib/market-data/decimal.ts";
+import { unassignedFutureCbIssue } from "../../static-showcase/assets/cb-issue-scope.js";
 
 export function requiredQuotedBonds(bonds, dataDate) {
   if (!isIsoDate(dataDate)) throw new TypeError('invalid quote-gate date');
@@ -10,7 +11,7 @@ export function requiredQuotedBonds(bonds, dataDate) {
   });
 }
 
-export function bondTermSummariesFrom11406Rows(rows) {
+export function bondTermSummariesFrom11406Rows(rows, asOfDate) {
   if (!Array.isArray(rows)) throw new TypeError("11406 rows must be an array");
   return rows.flatMap((row, index) => {
     if (row === null || typeof row !== "object" || Array.isArray(row)) {
@@ -18,6 +19,7 @@ export function bondTermSummariesFrom11406Rows(rows) {
     }
     const bondCode = sourceText(row, "債券代碼");
     if (bondCode === "") {
+      if (unassignedFutureCbIssue(row, asOfDate)) return [];
       if (isExplicitPrivateUnlistedBond(row)) return [];
       throw new TypeError(`11406 row ${index + 1} has missing bond code`);
     }
@@ -114,8 +116,8 @@ function optionalOfficialDate(row, key, index, aliases = []) {
   return value === "" ? null : officialDate(value, `11406 ${key}`);
 }
 
-export function bondInputsFrom11406Rows(rows) {
-  return bondTermSummariesFrom11406Rows(rows).map((term) => ({
+export function bondInputsFrom11406Rows(rows, asOfDate) {
+  return bondTermSummariesFrom11406Rows(rows, asOfDate).map((term) => ({
     bondCode: term.bondCode,
     issuerCode: term.issuerCode,
     issuerName: term.issuerName,

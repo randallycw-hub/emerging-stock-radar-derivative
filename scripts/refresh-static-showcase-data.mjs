@@ -56,6 +56,7 @@ import {
 import { publishPublicResearchSnapshot } from "./stage-static-showcase.mjs";
 import { requiredQuotedBonds } from './lib/bond-inputs-from-11406.mjs';
 import { confirmedUnpricedStockCodes } from './lib/official-stock-availability.mjs';
+import { unassignedFutureCbIssue } from '../static-showcase/assets/cb-issue-scope.js';
 
 export const OFFICIAL_SHOWCASE_SOURCES = {
   "94025": "https://mopsfin.twse.com.tw/opendata/t187ap05_R.csv",
@@ -775,8 +776,10 @@ export function verifyRosterDoesNotLeadMarketDate(
   if (!isIsoDate(expectedDataDate)) {
     throw new TypeError("expected market date must be ISO");
   }
-  const futureDate = bondInputsFrom11406Rows(rosterRows)
-    .map((bond) => bond.outstandingDataDate)
+  const futureDate = [
+    ...bondInputsFrom11406Rows(rosterRows, expectedDataDate).map((bond) => bond.outstandingDataDate),
+    ...rosterRows.map((row) => unassignedFutureCbIssue(row)?.sourceDate),
+  ]
     .filter(isIsoDate)
     .sort()
     .find((dataDate) => dataDate > expectedDataDate);

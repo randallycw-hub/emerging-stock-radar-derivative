@@ -34,11 +34,12 @@ export function buildV54CanonicalData({
   companyMaster = [],
   supplemental = null,
   conversionPrices = [],
+  issuanceRows = [],
   ipo = null,
   emerging = null,
   revenue = [],
 } = {}) {
-  const cb = buildCbWorkbenchV53({ workbench, history, cbMaster, companyMaster, supplemental, conversionPrices });
+  const cb = buildCbWorkbenchV53({ workbench, history, cbMaster, companyMaster, supplemental, conversionPrices, issuanceRows });
   const dataDate = cb.dataDate;
   const conversionByBond = indexConversionSnapshots(conversionPrices, dataDate);
   const records = cb.records.map((record) => projectCbRecord(record, conversionByBond.get(record.cbCode) ?? null));
@@ -171,7 +172,7 @@ function indexConversionSnapshots(records, dataDate) {
     const sourceUrl = typeof raw?.officialDetailUrl === "string" && isOfficialSourceUrl(raw.officialDetailUrl) ? raw.officialDetailUrl : null;
     const currentConversionPrice = number(raw?.currentConversionPrice);
     const initialConversionPrice = number(raw?.initialConversionPrice);
-    if (!cbCode || !effectiveDate || !sourceUrl || currentConversionPrice === null || indexed.has(cbCode)) continue;
+    if (!cbCode || !effectiveDate || effectiveDate > dataDate || !sourceUrl || currentConversionPrice === null || indexed.has(cbCode)) continue;
     indexed.set(cbCode, {
       effectiveDate,
       initialConversionPrice,
