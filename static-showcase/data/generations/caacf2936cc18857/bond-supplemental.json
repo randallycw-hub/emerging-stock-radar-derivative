@@ -1,0 +1,4201 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-06T17:17:22.473Z",
+  "unitFaceValueTwd": "100000",
+  "institutionHistory": {
+    "11011": [
+      {
+        "bondCode": "11011",
+        "bondName": "台泥一永        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "8",
+        "dealerSellUnits": "10",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "15142": [
+      {
+        "bondCode": "15142",
+        "bondName": "亞力二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "19",
+        "dealerSellUnits": "21",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "15261": [
+      {
+        "bondCode": "15261",
+        "bondName": "日馳一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "80",
+        "dealerNetUnits": "-80",
+        "totalNetUnits": "-80"
+      }
+    ],
+    "15602": [
+      {
+        "bondCode": "15602",
+        "bondName": "中砂二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "130",
+        "dealerSellUnits": "45",
+        "dealerNetUnits": "85",
+        "totalNetUnits": "85"
+      }
+    ],
+    "17172": [
+      {
+        "bondCode": "17172",
+        "bondName": "長興二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "1",
+        "foreignNetUnits": "-1",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "88",
+        "dealerSellUnits": "72",
+        "dealerNetUnits": "16",
+        "totalNetUnits": "15"
+      }
+    ],
+    "20344": [
+      {
+        "bondCode": "20344",
+        "bondName": "允強四          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "6",
+        "dealerNetUnits": "-6",
+        "totalNetUnits": "-6"
+      }
+    ],
+    "22331": [
+      {
+        "bondCode": "22331",
+        "bondName": "宇隆一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "27",
+        "dealerSellUnits": "25",
+        "dealerNetUnits": "2",
+        "totalNetUnits": "2"
+      }
+    ],
+    "22471": [
+      {
+        "bondCode": "22471",
+        "bondName": "汎德永業一      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "4",
+        "dealerSellUnits": "8",
+        "dealerNetUnits": "-4",
+        "totalNetUnits": "-4"
+      }
+    ],
+    "23031": [
+      {
+        "bondCode": "23031",
+        "bondName": "聯電一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "20",
+        "foreignNetUnits": "-20",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2965",
+        "dealerSellUnits": "954",
+        "dealerNetUnits": "2011",
+        "totalNetUnits": "1991"
+      }
+    ],
+    "23032": [
+      {
+        "bondCode": "23032",
+        "bondName": "聯電二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "90",
+        "dealerSellUnits": "189",
+        "dealerNetUnits": "-99",
+        "totalNetUnits": "-99"
+      }
+    ],
+    "23291": [
+      {
+        "bondCode": "23291",
+        "bondName": "華泰一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "89",
+        "dealerSellUnits": "76",
+        "dealerNetUnits": "13",
+        "totalNetUnits": "13"
+      }
+    ],
+    "24023": [
+      {
+        "bondCode": "24023",
+        "bondName": "毅嘉三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "5",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "24395": [
+      {
+        "bondCode": "24395",
+        "bondName": "美律五          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "4",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "24423": [
+      {
+        "bondCode": "24423",
+        "bondName": "新美齊三        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "15",
+        "foreignNetUnits": "-15",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "-15"
+      }
+    ],
+    "24424": [
+      {
+        "bondCode": "24424",
+        "bondName": "新美齊四        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "7",
+        "dealerNetUnits": "-7",
+        "totalNetUnits": "-7"
+      }
+    ],
+    "24552": [
+      {
+        "bondCode": "24552",
+        "bondName": "全新二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "53",
+        "dealerNetUnits": "-51",
+        "totalNetUnits": "-51"
+      }
+    ],
+    "24673": [
+      {
+        "bondCode": "24673",
+        "bondName": "志聖三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "24867": [
+      {
+        "bondCode": "24867",
+        "bondName": "一詮七          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "118",
+        "dealerSellUnits": "104",
+        "dealerNetUnits": "14",
+        "totalNetUnits": "14"
+      }
+    ],
+    "25283": [
+      {
+        "bondCode": "25283",
+        "bondName": "皇普三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "5",
+        "dealerSellUnits": "5",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "25483": [
+      {
+        "bondCode": "25483",
+        "bondName": "華固三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "5",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "27531": [
+      {
+        "bondCode": "27531",
+        "bondName": "八方雲集一      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "5",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "27532": [
+      {
+        "bondCode": "27532",
+        "bondName": "八方雲集二      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "27551": [
+      {
+        "bondCode": "27551",
+        "bondName": "揚秦一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "16",
+        "dealerNetUnits": "-10",
+        "totalNetUnits": "-10"
+      }
+    ],
+    "30285": [
+      {
+        "bondCode": "30285",
+        "bondName": "增你強五        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "8",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "4",
+        "totalNetUnits": "4"
+      }
+    ],
+    "30337": [
+      {
+        "bondCode": "30337",
+        "bondName": "威健七          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "40",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "36",
+        "totalNetUnits": "36"
+      }
+    ],
+    "30371": [
+      {
+        "bondCode": "30371",
+        "bondName": "欣興一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "13",
+        "dealerNetUnits": "-7",
+        "totalNetUnits": "-7"
+      }
+    ],
+    "30454": [
+      {
+        "bondCode": "30454",
+        "bondName": "台灣大四        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "60",
+        "foreignNetUnits": "-60",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "96",
+        "dealerSellUnits": "92",
+        "dealerNetUnits": "4",
+        "totalNetUnits": "-56"
+      }
+    ],
+    "30455": [
+      {
+        "bondCode": "30455",
+        "bondName": "台灣大五        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "53",
+        "dealerSellUnits": "64",
+        "dealerNetUnits": "-11",
+        "totalNetUnits": "-11"
+      }
+    ],
+    "30811": [
+      {
+        "bondCode": "30811",
+        "bondName": "聯亞一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "269",
+        "dealerSellUnits": "229",
+        "dealerNetUnits": "40",
+        "totalNetUnits": "40"
+      }
+    ],
+    "30812": [
+      {
+        "bondCode": "30812",
+        "bondName": "聯亞二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "255",
+        "dealerSellUnits": "46",
+        "dealerNetUnits": "209",
+        "totalNetUnits": "209"
+      }
+    ],
+    "31311": [
+      {
+        "bondCode": "31311",
+        "bondName": "弘塑一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "14",
+        "dealerSellUnits": "45",
+        "dealerNetUnits": "-31",
+        "totalNetUnits": "-31"
+      }
+    ],
+    "31312": [
+      {
+        "bondCode": "31312",
+        "bondName": "弘塑二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "19",
+        "dealerSellUnits": "37",
+        "dealerNetUnits": "-18",
+        "totalNetUnits": "-18"
+      }
+    ],
+    "31352": [
+      {
+        "bondCode": "31352",
+        "bondName": "凌航二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "4",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "4",
+        "totalNetUnits": "4"
+      }
+    ],
+    "31413": [
+      {
+        "bondCode": "31413",
+        "bondName": "晶宏三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "4",
+        "dealerSellUnits": "12",
+        "dealerNetUnits": "-8",
+        "totalNetUnits": "-8"
+      }
+    ],
+    "31414": [
+      {
+        "bondCode": "31414",
+        "bondName": "晶宏四          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "24",
+        "dealerSellUnits": "80",
+        "dealerNetUnits": "-56",
+        "totalNetUnits": "-56"
+      }
+    ],
+    "31672": [
+      {
+        "bondCode": "31672",
+        "bondName": "大量二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "80",
+        "dealerNetUnits": "-74",
+        "totalNetUnits": "-74"
+      }
+    ],
+    "32191": [
+      {
+        "bondCode": "32191",
+        "bondName": "倚強科一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "5",
+        "dealerSellUnits": "9",
+        "dealerNetUnits": "-4",
+        "totalNetUnits": "-4"
+      }
+    ],
+    "32571": [
+      {
+        "bondCode": "32571",
+        "bondName": "虹冠電一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "32723": [
+      {
+        "bondCode": "32723",
+        "bondName": "東碩三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "17",
+        "dealerNetUnits": "-17",
+        "totalNetUnits": "-17"
+      }
+    ],
+    "33055": [
+      {
+        "bondCode": "33055",
+        "bondName": "昇貿五          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "3",
+        "dealerSellUnits": "16",
+        "dealerNetUnits": "-13",
+        "totalNetUnits": "-13"
+      }
+    ],
+    "33245": [
+      {
+        "bondCode": "33245",
+        "bondName": "雙鴻五          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "357",
+        "dealerSellUnits": "1158",
+        "dealerNetUnits": "-801",
+        "totalNetUnits": "-801"
+      }
+    ],
+    "33246": [
+      {
+        "bondCode": "33246",
+        "bondName": "雙鴻六          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "223",
+        "dealerSellUnits": "214",
+        "dealerNetUnits": "9",
+        "totalNetUnits": "9"
+      }
+    ],
+    "33247": [
+      {
+        "bondCode": "33247",
+        "bondName": "雙鴻七          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "30",
+        "trustNetUnits": "-30",
+        "dealerBuyUnits": "326",
+        "dealerSellUnits": "332",
+        "dealerNetUnits": "-6",
+        "totalNetUnits": "-36"
+      }
+    ],
+    "33571": [
+      {
+        "bondCode": "33571",
+        "bondName": "臺慶科一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "-4",
+        "totalNetUnits": "-4"
+      }
+    ],
+    "33621": [
+      {
+        "bondCode": "33621",
+        "bondName": "先進光一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "10",
+        "foreignNetUnits": "-10",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "39",
+        "dealerSellUnits": "28",
+        "dealerNetUnits": "11",
+        "totalNetUnits": "1"
+      }
+    ],
+    "33763": [
+      {
+        "bondCode": "33763",
+        "bondName": "新日興三        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "3",
+        "dealerSellUnits": "3",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "33881": [
+      {
+        "bondCode": "33881",
+        "bondName": "崇越電一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "10",
+        "dealerNetUnits": "-10",
+        "totalNetUnits": "-10"
+      }
+    ],
+    "34163": [
+      {
+        "bondCode": "34163",
+        "bondName": "融程電三        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "34793": [
+      {
+        "bondCode": "34793",
+        "bondName": "安勤三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "18",
+        "dealerNetUnits": "-12",
+        "totalNetUnits": "-12"
+      }
+    ],
+    "34913": [
+      {
+        "bondCode": "34913",
+        "bondName": "昇達科三        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "11",
+        "dealerSellUnits": "8",
+        "dealerNetUnits": "3",
+        "totalNetUnits": "3"
+      }
+    ],
+    "35122": [
+      {
+        "bondCode": "35122",
+        "bondName": "皇龍二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "24",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "24",
+        "totalNetUnits": "24"
+      }
+    ],
+    "35431": [
+      {
+        "bondCode": "35431",
+        "bondName": "州巧一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "35833": [
+      {
+        "bondCode": "35833",
+        "bondName": "辛耘三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "12",
+        "dealerSellUnits": "6",
+        "dealerNetUnits": "6",
+        "totalNetUnits": "6"
+      }
+    ],
+    "35872": [
+      {
+        "bondCode": "35872",
+        "bondName": "閎康二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "8",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "4",
+        "totalNetUnits": "4"
+      }
+    ],
+    "35914": [
+      {
+        "bondCode": "35914",
+        "bondName": "艾笛森四        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "-1",
+        "totalNetUnits": "-1"
+      }
+    ],
+    "36054": [
+      {
+        "bondCode": "36054",
+        "bondName": "宏致四          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "39",
+        "dealerSellUnits": "10",
+        "dealerNetUnits": "29",
+        "totalNetUnits": "29"
+      }
+    ],
+    "36173": [
+      {
+        "bondCode": "36173",
+        "bondName": "碩天三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "39",
+        "dealerSellUnits": "40",
+        "dealerNetUnits": "-1",
+        "totalNetUnits": "-1"
+      }
+    ],
+    "36804": [
+      {
+        "bondCode": "36804",
+        "bondName": "家登四          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "14",
+        "dealerSellUnits": "12",
+        "dealerNetUnits": "2",
+        "totalNetUnits": "2"
+      }
+    ],
+    "36805": [
+      {
+        "bondCode": "36805",
+        "bondName": "家登五          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "5",
+        "totalNetUnits": "5"
+      }
+    ],
+    "36806": [
+      {
+        "bondCode": "36806",
+        "bondName": "家登六          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "4",
+        "totalNetUnits": "4"
+      }
+    ],
+    "36913": [
+      {
+        "bondCode": "36913",
+        "bondName": "碩禾三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "7",
+        "dealerSellUnits": "7",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "37083": [
+      {
+        "bondCode": "37083",
+        "bondName": "上緯投控三      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "8",
+        "dealerNetUnits": "-8",
+        "totalNetUnits": "-8"
+      }
+    ],
+    "37152": [
+      {
+        "bondCode": "37152",
+        "bondName": "定穎投控二      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "17",
+        "dealerSellUnits": "12",
+        "dealerNetUnits": "5",
+        "totalNetUnits": "5"
+      }
+    ],
+    "37171": [
+      {
+        "bondCode": "37171",
+        "bondName": "聯嘉投控一      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "7",
+        "dealerSellUnits": "6",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "41237": [
+      {
+        "bondCode": "41237",
+        "bondName": "晟德七          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "3",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "41238": [
+      {
+        "bondCode": "41238",
+        "bondName": "晟德八          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "41239": [
+      {
+        "bondCode": "41239",
+        "bondName": "晟德九          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "41904": [
+      {
+        "bondCode": "41904",
+        "bondName": "佐登四KY        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "45031": [
+      {
+        "bondCode": "45031",
+        "bondName": "金雨一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "3",
+        "dealerNetUnits": "-3",
+        "totalNetUnits": "-3"
+      }
+    ],
+    "47223": [
+      {
+        "bondCode": "47223",
+        "bondName": "國精化三        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "3",
+        "dealerNetUnits": "-3",
+        "totalNetUnits": "-3"
+      }
+    ],
+    "47224": [
+      {
+        "bondCode": "47224",
+        "bondName": "國精化四        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "47393": [
+      {
+        "bondCode": "47393",
+        "bondName": "康普三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "4",
+        "dealerSellUnits": "9",
+        "dealerNetUnits": "-5",
+        "totalNetUnits": "-5"
+      }
+    ],
+    "47491": [
+      {
+        "bondCode": "47491",
+        "bondName": "新應材一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "47642": [
+      {
+        "bondCode": "47642",
+        "bondName": "雙鍵二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "40",
+        "foreignNetUnits": "-40",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "78",
+        "dealerSellUnits": "29",
+        "dealerNetUnits": "49",
+        "totalNetUnits": "9"
+      }
+    ],
+    "47721": [
+      {
+        "bondCode": "47721",
+        "bondName": "台特化一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "15",
+        "dealerSellUnits": "17",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "49311": [
+      {
+        "bondCode": "49311",
+        "bondName": "新盛力一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "49675": [
+      {
+        "bondCode": "49675",
+        "bondName": "十銓五          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "149",
+        "dealerSellUnits": "74",
+        "dealerNetUnits": "75",
+        "totalNetUnits": "75"
+      }
+    ],
+    "49731": [
+      {
+        "bondCode": "49731",
+        "bondName": "廣穎電通一      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "52091": [
+      {
+        "bondCode": "52091",
+        "bondName": "新鼎一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "32",
+        "dealerSellUnits": "90",
+        "dealerNetUnits": "-58",
+        "totalNetUnits": "-58"
+      }
+    ],
+    "52844": [
+      {
+        "bondCode": "52844",
+        "bondName": "jpp四KY         ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "-1",
+        "totalNetUnits": "-1"
+      }
+    ],
+    "52845": [
+      {
+        "bondCode": "52845",
+        "bondName": "jpp五KY         ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "12",
+        "dealerSellUnits": "5",
+        "dealerNetUnits": "7",
+        "totalNetUnits": "7"
+      }
+    ],
+    "52892": [
+      {
+        "bondCode": "52892",
+        "bondName": "宜鼎二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "5",
+        "trustNetUnits": "-5",
+        "dealerBuyUnits": "82",
+        "dealerSellUnits": "9",
+        "dealerNetUnits": "73",
+        "totalNetUnits": "68"
+      }
+    ],
+    "52912": [
+      {
+        "bondCode": "52912",
+        "bondName": "邑昇二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "5",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "5",
+        "totalNetUnits": "5"
+      }
+    ],
+    "53887": [
+      {
+        "bondCode": "53887",
+        "bondName": "中磊七          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "77",
+        "dealerSellUnits": "85",
+        "dealerNetUnits": "-8",
+        "totalNetUnits": "-8"
+      }
+    ],
+    "54391": [
+      {
+        "bondCode": "54391",
+        "bondName": "高技一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "3",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "2",
+        "totalNetUnits": "2"
+      }
+    ],
+    "54573": [
+      {
+        "bondCode": "54573",
+        "bondName": "宣德三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "-1",
+        "totalNetUnits": "-1"
+      }
+    ],
+    "55362": [
+      {
+        "bondCode": "55362",
+        "bondName": "聖暉二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "11",
+        "dealerSellUnits": "11",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "55363": [
+      {
+        "bondCode": "55363",
+        "bondName": "聖暉三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "60",
+        "dealerSellUnits": "20",
+        "dealerNetUnits": "40",
+        "totalNetUnits": "40"
+      }
+    ],
+    "56087": [
+      {
+        "bondCode": "56087",
+        "bondName": "四維航七        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "11",
+        "dealerSellUnits": "11",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "61263": [
+      {
+        "bondCode": "61263",
+        "bondName": "信音三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "10",
+        "dealerNetUnits": "-10",
+        "totalNetUnits": "-10"
+      }
+    ],
+    "61506": [
+      {
+        "bondCode": "61506",
+        "bondName": "撼訊六          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "-4",
+        "totalNetUnits": "-4"
+      }
+    ],
+    "61828": [
+      {
+        "bondCode": "61828",
+        "bondName": "合晶八          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "3",
+        "dealerSellUnits": "3",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "61876": [
+      {
+        "bondCode": "61876",
+        "bondName": "萬潤六          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "72",
+        "dealerSellUnits": "66",
+        "dealerNetUnits": "6",
+        "totalNetUnits": "6"
+      }
+    ],
+    "61973": [
+      {
+        "bondCode": "61973",
+        "bondName": "佳必琪三        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "10",
+        "dealerSellUnits": "10",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "62075": [
+      {
+        "bondCode": "62075",
+        "bondName": "雷科五          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "12",
+        "dealerSellUnits": "17",
+        "dealerNetUnits": "-5",
+        "totalNetUnits": "-5"
+      }
+    ],
+    "62093": [
+      {
+        "bondCode": "62093",
+        "bondName": "今國光三        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "62236": [
+      {
+        "bondCode": "62236",
+        "bondName": "旺矽六          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "55",
+        "dealerSellUnits": "44",
+        "dealerNetUnits": "11",
+        "totalNetUnits": "11"
+      }
+    ],
+    "62822": [
+      {
+        "bondCode": "62822",
+        "bondName": "康舒二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "24",
+        "dealerSellUnits": "24",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "62843": [
+      {
+        "bondCode": "62843",
+        "bondName": "佳邦三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "10",
+        "dealerSellUnits": "10",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "64512": [
+      {
+        "bondCode": "64512",
+        "bondName": "訊芯二KY        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "11",
+        "dealerNetUnits": "-11",
+        "totalNetUnits": "-11"
+      }
+    ],
+    "64724": [
+      {
+        "bondCode": "64724",
+        "bondName": "保瑞四          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "12",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "12",
+        "totalNetUnits": "12"
+      }
+    ],
+    "64725": [
+      {
+        "bondCode": "64725",
+        "bondName": "保瑞五          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "65096": [
+      {
+        "bondCode": "65096",
+        "bondName": "聚和六          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "3",
+        "dealerNetUnits": "-1",
+        "totalNetUnits": "-1"
+      }
+    ],
+    "65101": [
+      {
+        "bondCode": "65101",
+        "bondName": "精測一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "44",
+        "dealerSellUnits": "20",
+        "dealerNetUnits": "24",
+        "totalNetUnits": "24"
+      }
+    ],
+    "65152": [
+      {
+        "bondCode": "65152",
+        "bondName": "穎崴二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "113",
+        "dealerSellUnits": "98",
+        "dealerNetUnits": "15",
+        "totalNetUnits": "15"
+      }
+    ],
+    "65381": [
+      {
+        "bondCode": "65381",
+        "bondName": "倉和一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "69",
+        "dealerSellUnits": "82",
+        "dealerNetUnits": "-13",
+        "totalNetUnits": "-13"
+      }
+    ],
+    "65472": [
+      {
+        "bondCode": "65472",
+        "bondName": "高端疫苗二      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "7",
+        "dealerSellUnits": "3",
+        "dealerNetUnits": "4",
+        "totalNetUnits": "4"
+      }
+    ],
+    "65851": [
+      {
+        "bondCode": "65851",
+        "bondName": "鼎基一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "4",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "65852": [
+      {
+        "bondCode": "65852",
+        "bondName": "鼎基二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "40",
+        "dealerNetUnits": "-40",
+        "totalNetUnits": "-40"
+      }
+    ],
+    "66642": [
+      {
+        "bondCode": "66642",
+        "bondName": "群翊二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "2",
+        "totalNetUnits": "2"
+      }
+    ],
+    "66702": [
+      {
+        "bondCode": "66702",
+        "bondName": "復盛應用二      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "66831": [
+      {
+        "bondCode": "66831",
+        "bondName": "雍智一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "33",
+        "dealerSellUnits": "18",
+        "dealerNetUnits": "15",
+        "totalNetUnits": "15"
+      }
+    ],
+    "66931": [
+      {
+        "bondCode": "66931",
+        "bondName": "廣閎科一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "53",
+        "dealerSellUnits": "35",
+        "dealerNetUnits": "18",
+        "totalNetUnits": "18"
+      }
+    ],
+    "67962": [
+      {
+        "bondCode": "67962",
+        "bondName": "晉弘二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "12",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "12",
+        "totalNetUnits": "12"
+      }
+    ],
+    "68032": [
+      {
+        "bondCode": "68032",
+        "bondName": "崑鼎二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "68351": [
+      {
+        "bondCode": "68351",
+        "bondName": "圓裕一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "68401": [
+      {
+        "bondCode": "68401",
+        "bondName": "東研信超一      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "4",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "68692": [
+      {
+        "bondCode": "68692",
+        "bondName": "雲豹能源二      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "16",
+        "dealerSellUnits": "16",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "68701": [
+      {
+        "bondCode": "68701",
+        "bondName": "騰雲一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "68702": [
+      {
+        "bondCode": "68702",
+        "bondName": "騰雲二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "68901": [
+      {
+        "bondCode": "68901",
+        "bondName": "來億一KY        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "2",
+        "totalNetUnits": "2"
+      }
+    ],
+    "68902": [
+      {
+        "bondCode": "68902",
+        "bondName": "來億二KY        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "5",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "5",
+        "totalNetUnits": "5"
+      }
+    ],
+    "68941": [
+      {
+        "bondCode": "68941",
+        "bondName": "衛司特一        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "5",
+        "dealerSellUnits": "4",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "69031": [
+      {
+        "bondCode": "69031",
+        "bondName": "巨漢一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "80",
+        "dealerSellUnits": "62",
+        "dealerNetUnits": "18",
+        "totalNetUnits": "18"
+      }
+    ],
+    "69032": [
+      {
+        "bondCode": "69032",
+        "bondName": "巨漢二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "180",
+        "dealerSellUnits": "40",
+        "dealerNetUnits": "140",
+        "totalNetUnits": "140"
+      }
+    ],
+    "69041": [
+      {
+        "bondCode": "69041",
+        "bondName": "伯鑫一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "69131": [
+      {
+        "bondCode": "69131",
+        "bondName": "鴻呈一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "5",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "4",
+        "totalNetUnits": "4"
+      }
+    ],
+    "76101": [
+      {
+        "bondCode": "76101",
+        "bondName": "聯友金屬一創    ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "45",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "45",
+        "totalNetUnits": "45"
+      }
+    ],
+    "76311": [
+      {
+        "bondCode": "76311",
+        "bondName": "聚賢研發一創    ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "94",
+        "dealerSellUnits": "12",
+        "dealerNetUnits": "82",
+        "totalNetUnits": "82"
+      }
+    ],
+    "77131": [
+      {
+        "bondCode": "77131",
+        "bondName": "威力德生醫一    ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "2",
+        "dealerNetUnits": "-2",
+        "totalNetUnits": "-2"
+      }
+    ],
+    "80212": [
+      {
+        "bondCode": "80212",
+        "bondName": "尖點二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "7",
+        "dealerSellUnits": "12",
+        "dealerNetUnits": "-5",
+        "totalNetUnits": "-5"
+      }
+    ],
+    "80962": [
+      {
+        "bondCode": "80962",
+        "bondName": "擎亞二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "7",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "7",
+        "totalNetUnits": "7"
+      }
+    ],
+    "81552": [
+      {
+        "bondCode": "81552",
+        "bondName": "博智二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "321",
+        "dealerSellUnits": "262",
+        "dealerNetUnits": "59",
+        "totalNetUnits": "59"
+      }
+    ],
+    "81553": [
+      {
+        "bondCode": "81553",
+        "bondName": "博智三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "159",
+        "dealerSellUnits": "21",
+        "dealerNetUnits": "138",
+        "totalNetUnits": "138"
+      }
+    ],
+    "82102": [
+      {
+        "bondCode": "82102",
+        "bondName": "勤誠二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "33",
+        "dealerSellUnits": "12",
+        "dealerNetUnits": "21",
+        "totalNetUnits": "21"
+      }
+    ],
+    "82103": [
+      {
+        "bondCode": "82103",
+        "bondName": "勤誠三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "18",
+        "dealerSellUnits": "16",
+        "dealerNetUnits": "2",
+        "totalNetUnits": "2"
+      }
+    ],
+    "82993": [
+      {
+        "bondCode": "82993",
+        "bondName": "群聯三          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "53",
+        "dealerSellUnits": "57",
+        "dealerNetUnits": "-4",
+        "totalNetUnits": "-4"
+      }
+    ],
+    "84113": [
+      {
+        "bondCode": "84113",
+        "bondName": "福貞三KY        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "6",
+        "dealerSellUnits": "6",
+        "dealerNetUnits": "0",
+        "totalNetUnits": "0"
+      }
+    ],
+    "84312": [
+      {
+        "bondCode": "84312",
+        "bondName": "匯鑽科二        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "4",
+        "dealerSellUnits": "7",
+        "dealerNetUnits": "-3",
+        "totalNetUnits": "-3"
+      }
+    ],
+    "84381": [
+      {
+        "bondCode": "84381",
+        "bondName": "昶昕一          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "31",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "31",
+        "totalNetUnits": "31"
+      }
+    ],
+    "84423": [
+      {
+        "bondCode": "84423",
+        "bondName": "威宏三KY        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "16",
+        "dealerSellUnits": "15",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "84732": [
+      {
+        "bondCode": "84732",
+        "bondName": "山林水二        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "11",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "11",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "12",
+        "dealerNetUnits": "-12",
+        "totalNetUnits": "-1"
+      }
+    ],
+    "89365": [
+      {
+        "bondCode": "89365",
+        "bondName": "國統五          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "1",
+        "dealerNetUnits": "-1",
+        "totalNetUnits": "-1"
+      }
+    ],
+    "89366": [
+      {
+        "bondCode": "89366",
+        "bondName": "國統六          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1855",
+        "dealerSellUnits": "830",
+        "dealerNetUnits": "1025",
+        "totalNetUnits": "1025"
+      }
+    ],
+    "99063": [
+      {
+        "bondCode": "99063",
+        "bondName": "欣巴巴三        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "90",
+        "dealerNetUnits": "-90",
+        "totalNetUnits": "-90"
+      }
+    ],
+    "99412": [
+      {
+        "bondCode": "99412",
+        "bondName": "裕融二          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "2",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "2",
+        "totalNetUnits": "2"
+      }
+    ],
+    "99587": [
+      {
+        "bondCode": "99587",
+        "bondName": "世紀鋼七        ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "0",
+        "dealerSellUnits": "9",
+        "dealerNetUnits": "-9",
+        "totalNetUnits": "-9"
+      }
+    ],
+    "99588": [
+      {
+        "bondCode": "99588",
+        "bondName": "世紀鋼八永      ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "1",
+        "dealerSellUnits": "0",
+        "dealerNetUnits": "1",
+        "totalNetUnits": "1"
+      }
+    ],
+    "811210": [
+      {
+        "bondCode": "811210",
+        "bondName": "至上十          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "39",
+        "dealerSellUnits": "10",
+        "dealerNetUnits": "29",
+        "totalNetUnits": "29"
+      }
+    ],
+    "811211": [
+      {
+        "bondCode": "811211",
+        "bondName": "至上11          ",
+        "tradingDate": "2026-09-04",
+        "foreignBuyUnits": "0",
+        "foreignSellUnits": "0",
+        "foreignNetUnits": "0",
+        "trustBuyUnits": "0",
+        "trustSellUnits": "0",
+        "trustNetUnits": "0",
+        "dealerBuyUnits": "61",
+        "dealerSellUnits": "40",
+        "dealerNetUnits": "21",
+        "totalNetUnits": "21"
+      }
+    ]
+  },
+  "redemptions": [
+    {
+      "issuerCode": "2755",
+      "issuerName": "揚秦",
+      "bondCode": "27551",
+      "bondName": "揚秦一",
+      "announcementDate": "2026-09-03",
+      "delistingDate": "2026-11-02",
+      "subject": "公告揚秦股份有限公司第一次無擔保轉換公司債(簡稱：揚秦一，代碼：27551)發行公司行使債券贖回權暨訂於115年11月02日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2755&date1=20260903&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3167",
+      "issuerName": "大量",
+      "bondCode": "31672",
+      "bondName": "大量二",
+      "announcementDate": "2026-08-13",
+      "delistingDate": "2026-10-01",
+      "subject": "公告大量股份有限公司國內第二次無擔保轉換公司債轉換公司債(簡稱：大量二，代碼：31672)發行公司行使債券贖回權暨訂於115年10月01日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3167&date1=20260813&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6290",
+      "issuerName": "良維",
+      "bondCode": "629010",
+      "bondName": "良維十",
+      "announcementDate": "2026-08-10",
+      "delistingDate": "2026-10-01",
+      "subject": "公告良維股份有限公司第十次無擔保轉換公司債(簡稱：良維十，代碼：629010)發行公司行使債券贖回權暨訂於115年10月01日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6290&date1=20260810&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3689",
+      "issuerName": "湧德",
+      "bondCode": "36894",
+      "bondName": "湧德四",
+      "announcementDate": "2026-08-10",
+      "delistingDate": "2026-10-01",
+      "subject": "公告湧德股份有限公司國內第四次無擔保公司債轉換公司債(簡稱：湧德四，代碼：36894)發行公司行使債券贖回權暨訂於115年10月01日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3689&date1=20260810&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3131",
+      "issuerName": "弘塑",
+      "bondCode": "31312",
+      "bondName": "弘塑二",
+      "announcementDate": "2026-08-04",
+      "delistingDate": "2026-09-21",
+      "subject": "公告弘塑股份有限公司國內第二次無擔保轉換公司債(簡稱：弘塑二，代碼：31312)發行公司行使債券贖回權暨訂於115年09月21日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3131&date1=20260804&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3131",
+      "issuerName": "弘塑",
+      "bondCode": "31311",
+      "bondName": "弘塑一",
+      "announcementDate": "2026-08-04",
+      "delistingDate": "2026-09-21",
+      "subject": "公告弘塑股份有限公司國內第一次無擔保轉換公司債(簡稱：弘塑一，代碼：31311)發行公司行使債券贖回權暨訂於115年09月21日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3131&date1=20260804&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3305",
+      "issuerName": "昇貿",
+      "bondCode": "33055",
+      "bondName": "昇貿五",
+      "announcementDate": "2026-07-29",
+      "delistingDate": "2026-09-17",
+      "subject": "公告昇貿股份有限公司國內第五次無擔保轉換公司債(簡稱：昇貿五，代碼：33055)發行公司行使債券贖回權暨訂於115年09月17日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3305&date1=20260729&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2337",
+      "issuerName": "旺宏",
+      "bondCode": "23372",
+      "bondName": "旺宏二",
+      "announcementDate": "2026-07-28",
+      "delistingDate": "2026-09-16",
+      "subject": "公告旺宏股份有限公司國內第二次無擔保轉換公司債(簡稱：旺宏二，代碼：23372)發行公司行使債券贖回權暨訂於115年09月16日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2337&date1=20260728&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "4542",
+      "issuerName": "科嶠",
+      "bondCode": "45421",
+      "bondName": "科嶠一",
+      "announcementDate": "2026-07-23",
+      "delistingDate": "2026-09-18",
+      "subject": "公告科嶠股份有限公司國內第一次無擔保轉換公司債(簡稱：科嶠一，代碼：45421)發行公司行使債券贖回權暨訂於115年09月18日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=4542&date1=20260723&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3388",
+      "issuerName": "崇越電",
+      "bondCode": "33881",
+      "bondName": "崇越電一",
+      "announcementDate": "2026-07-16",
+      "delistingDate": "2026-09-10",
+      "subject": "公告崇越電股份有限公司第一次無擔保轉換公司債(簡稱：崇越電一，代碼：33881)發行公司行使債券贖回權暨訂於115年09月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3388&date1=20260716&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6672",
+      "issuerName": "騰輝電子-KY",
+      "bondCode": "66722",
+      "bondName": "騰輝電子二KY",
+      "announcementDate": "2026-07-15",
+      "delistingDate": "2026-09-02",
+      "subject": "公告騰輝電子-KY股份有限公司中華民國境內第二次無擔保轉換公司債(簡稱：騰輝電子二KY，代碼：66722)發行公司行使債券贖回權暨訂於115年09月02日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6672&date1=20260715&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6451",
+      "issuerName": "訊芯-KY",
+      "bondCode": "64512",
+      "bondName": "訊芯二KY",
+      "announcementDate": "2026-07-15",
+      "delistingDate": "2026-09-14",
+      "subject": "公告訊芯-KY股份有限公司中華民國境內第二次無擔保轉換公司債(簡稱：訊芯二KY，代碼：64512)發行公司行使債券贖回權暨訂於115年09月14日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6451&date1=20260715&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "1560",
+      "issuerName": "中砂",
+      "bondCode": "15601",
+      "bondName": "中砂一",
+      "announcementDate": "2026-07-15",
+      "delistingDate": "2026-09-03",
+      "subject": "公告中砂股份有限公司國內第一次無擔保轉換公司債(簡稱：中砂一，代碼：15601)發行公司行使債券贖回權暨訂於115年09月03日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=1560&date1=20260715&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6672",
+      "issuerName": "騰輝電子-KY",
+      "bondCode": "66721",
+      "bondName": "騰輝電子一KY",
+      "announcementDate": "2026-07-14",
+      "delistingDate": "2026-09-02",
+      "subject": "公告騰輝電子-KY股份有限公司中華民國境內第一次無擔保轉換公司債(簡稱：騰輝電子一KY，代碼：66721)發行公司行使債券贖回權暨訂於115年09月02日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6672&date1=20260714&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2368",
+      "issuerName": "金像電",
+      "bondCode": "23683",
+      "bondName": "金像電三",
+      "announcementDate": "2026-07-06",
+      "delistingDate": "2026-08-21",
+      "subject": "公告金像電股份有限公司國內第三次無擔保轉換公司債(簡稱：金像電三，代碼：23683)發行公司行使債券贖回權暨訂於115年08月21日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2368&date1=20260706&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "8996",
+      "issuerName": "高力",
+      "bondCode": "89964",
+      "bondName": "高力四",
+      "announcementDate": "2026-07-02",
+      "delistingDate": "2026-08-28",
+      "subject": "公告高力股份有限公司國內第四次無擔保轉換公司債(簡稱：高力四，代碼：89964)發行公司行使債券贖回權暨訂於115年08月28日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=8996&date1=20260702&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2464",
+      "issuerName": "盟立",
+      "bondCode": "24642",
+      "bondName": "盟立二",
+      "announcementDate": "2026-06-16",
+      "delistingDate": "2026-08-10",
+      "subject": "公告盟立股份有限公司國內第二次無擔保轉換公司債(簡稱：盟立二，代碼：24642)發行公司行使債券贖回權暨訂於115年08月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2464&date1=20260616&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6584",
+      "issuerName": "南俊國際",
+      "bondCode": "65842",
+      "bondName": "南俊國際二",
+      "announcementDate": "2026-06-15",
+      "delistingDate": "2026-08-10",
+      "subject": "公告南俊國際股份有限公司國內第二次無擔保轉換公司債(簡稱：南俊國際二，代碼：65842)發行公司行使債券贖回權暨訂於115年08月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6584&date1=20260615&seq_no=4&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6584",
+      "issuerName": "南俊國際",
+      "bondCode": "65841",
+      "bondName": "南俊國際一",
+      "announcementDate": "2026-06-15",
+      "delistingDate": "2026-08-10",
+      "subject": "公告南俊國際股份有限公司國內第一次有擔保轉換公司債(簡稱：南俊國際一，代碼：65841)發行公司行使債券贖回權暨訂於115年08月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6584&date1=20260615&seq_no=3&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3702",
+      "issuerName": "大聯大",
+      "bondCode": "37022",
+      "bondName": "大聯大二",
+      "announcementDate": "2026-06-10",
+      "delistingDate": "2026-07-27",
+      "subject": "公告大聯大股份有限公司國內第二次無擔保轉換公司債(簡稱：大聯大二，代碼：37022)發行公司行使債券贖回權暨訂於115年07月27日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3702&date1=20260610&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3702",
+      "issuerName": "大聯大",
+      "bondCode": "37023",
+      "bondName": "大聯大三",
+      "announcementDate": "2026-06-10",
+      "delistingDate": "2026-07-27",
+      "subject": "公告大聯大股份有限公司國內第三次無擔保轉換公司債(簡稱：大聯大三，代碼：37023)發行公司行使債券贖回權暨訂於115年07月27日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3702&date1=20260610&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2486",
+      "issuerName": "一詮",
+      "bondCode": "24866",
+      "bondName": "一詮六",
+      "announcementDate": "2026-06-02",
+      "delistingDate": "2026-07-20",
+      "subject": "公告一詮股份有限公司國內第六次無擔保轉換公司債(簡稱：一詮六，代碼：24866)發行公司行使債券贖回權暨訂於115年07月20日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2486&date1=20260602&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "4967",
+      "issuerName": "十銓",
+      "bondCode": "49674",
+      "bondName": "十銓四",
+      "announcementDate": "2026-05-29",
+      "delistingDate": "2026-07-20",
+      "subject": "公告十銓股份有限公司第四次有擔保轉換公司債(簡稱：十銓四，代碼：49674)發行公司行使債券贖回權暨訂於115年07月20日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=4967&date1=20260529&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6275",
+      "issuerName": "元山",
+      "bondCode": "62756",
+      "bondName": "元山六",
+      "announcementDate": "2026-05-28",
+      "delistingDate": "2026-07-15",
+      "subject": "公告元山股份有限公司國內第六次有擔保轉換公司債(簡稱：元山六，代碼：62756)發行公司行使債券贖回權暨訂於115年07月15日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6275&date1=20260528&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3260",
+      "issuerName": "威剛",
+      "bondCode": "32608",
+      "bondName": "威剛八",
+      "announcementDate": "2026-05-22",
+      "delistingDate": "2026-07-10",
+      "subject": "公告威剛股份有限公司第八次無擔保轉換公司債轉換公司債(簡稱：威剛八，代碼：32608)發行公司行使債券贖回權暨訂於115年07月10日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3260&date1=20260522&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3583",
+      "issuerName": "辛耘",
+      "bondCode": "35832",
+      "bondName": "辛耘二",
+      "announcementDate": "2026-05-12",
+      "delistingDate": "2026-07-08",
+      "subject": "公告辛耘股份有限公司國內第二次無擔保轉換公司債(簡稱：辛耘二，代碼：35832)發行公司行使債券贖回權暨訂於115年07月08日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3583&date1=20260512&seq_no=2&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3583",
+      "issuerName": "辛耘",
+      "bondCode": "35831",
+      "bondName": "辛耘一",
+      "announcementDate": "2026-05-12",
+      "delistingDate": "2026-07-08",
+      "subject": "公告辛耘股份有限公司國內第一次無擔保轉換公司債(簡稱：辛耘一，代碼：35831)發行公司行使債券贖回權暨訂於115年07月08日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3583&date1=20260512&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3135",
+      "issuerName": "凌航",
+      "bondCode": "31351",
+      "bondName": "凌航一",
+      "announcementDate": "2026-05-08",
+      "delistingDate": "2026-06-25",
+      "subject": "公告凌航股份有限公司國內第一次無擔保轉換公司債(簡稱：凌航一，代碼：31351)發行公司行使債券贖回權暨訂於115年06月25日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3135&date1=20260508&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6274",
+      "issuerName": "台燿",
+      "bondCode": "62745",
+      "bondName": "台燿五",
+      "announcementDate": "2026-04-29",
+      "delistingDate": "2026-06-29",
+      "subject": "公告台燿股份有限公司第五次無擔保轉換公司債(簡稱：台燿五，代碼：62745)發行公司行使債券贖回權暨訂於115年06月29日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6274&date1=20260429&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6442",
+      "issuerName": "光聖",
+      "bondCode": "64423",
+      "bondName": "光聖三",
+      "announcementDate": "2026-04-24",
+      "delistingDate": "2026-06-24",
+      "subject": "公告光聖股份有限公司國內第三次無擔保轉換公司債(簡稱：光聖三，代碼：64423)發行公司行使債券贖回權暨訂於115年06月24日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6442&date1=20260424&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6715",
+      "issuerName": "嘉基",
+      "bondCode": "67152",
+      "bondName": "嘉基二",
+      "announcementDate": "2026-04-22",
+      "delistingDate": "2026-06-11",
+      "subject": "公告嘉基股份有限公司國內第二次無擔保轉換公司債(簡稱：嘉基二，代碼：67152)發行公司行使債券贖回權暨訂於115年06月11日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6715&date1=20260422&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6442",
+      "issuerName": "光聖",
+      "bondCode": "64422",
+      "bondName": "光聖二",
+      "announcementDate": "2026-04-15",
+      "delistingDate": "2026-06-12",
+      "subject": "公告光聖股份有限公司國內第二次無擔保轉換公司債(簡稱：光聖二，代碼：64422)發行公司行使債券贖回權暨訂於115年06月12日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6442&date1=20260415&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "4916",
+      "issuerName": "事欣科",
+      "bondCode": "49165",
+      "bondName": "事欣科五",
+      "announcementDate": "2026-04-07",
+      "delistingDate": "2026-06-01",
+      "subject": "公告事欣科股份有限公司國內第五次無擔保轉換公司債(簡稱：事欣科五，代碼：49165)發行公司行使債券贖回權暨訂於115年06月01日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=4916&date1=20260407&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6187",
+      "issuerName": "萬潤",
+      "bondCode": "61875",
+      "bondName": "萬潤五",
+      "announcementDate": "2026-04-01",
+      "delistingDate": "2026-05-21",
+      "subject": "公告萬潤股份有限公司第五次無擔保轉換公司債(簡稱：萬潤五，代碼：61875)發行公司行使債券贖回權暨訂於115年05月21日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6187&date1=20260401&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "2236",
+      "issuerName": "百達-KY",
+      "bondCode": "22362",
+      "bondName": "百達二KY",
+      "announcementDate": "2026-03-13",
+      "delistingDate": "2026-04-28",
+      "subject": "公告百達-KY股份有限公司中華民國境內第二次無擔保轉換公司債(簡稱：百達二KY，代碼：22362)發行公司行使債券贖回權暨訂於115年04月28日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=2236&date1=20260313&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3138",
+      "issuerName": "耀登",
+      "bondCode": "31382",
+      "bondName": "耀登二",
+      "announcementDate": "2026-03-11",
+      "delistingDate": "2026-04-22",
+      "subject": "公告耀登股份有限公司第二次無擔保轉換公司債(簡稱：耀登二，代碼：31382)發行公司行使債券贖回權暨訂於115年04月22日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3138&date1=20260311&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "3006",
+      "issuerName": "晶豪科",
+      "bondCode": "30061",
+      "bondName": "晶豪科一",
+      "announcementDate": "2026-02-12",
+      "delistingDate": "2026-04-09",
+      "subject": "公告晶豪科股份有限公司國內第一次無擔保轉換公司債(簡稱：晶豪科一，代碼：30061)發行公司行使債券贖回權暨訂於115年04月09日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=3006&date1=20260212&seq_no=1&pub_class=0&firstin=1"
+    },
+    {
+      "issuerCode": "6196",
+      "issuerName": "帆宣",
+      "bondCode": "61965",
+      "bondName": "帆宣五",
+      "announcementDate": "2026-02-10",
+      "delistingDate": "2026-03-26",
+      "subject": "公告帆宣股份有限公司第五次無擔保轉換公司債(簡稱：帆宣五，代碼：61965)發行公司行使債券贖回權暨訂於115年03月26日終止櫃檯買賣等相關事宜。",
+      "detailUrl": "https://mopsov.twse.com.tw/mops/web/ajax_t120sb23?TYPEK=otc&co_id=6196&date1=20260210&seq_no=2&pub_class=0&firstin=1"
+    }
+  ],
+  "underwritingCases": [
+    {
+      "referenceNumber": "115003",
+      "filedDate": "2025/12/26",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "志聖工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115012",
+      "filedDate": "2026/01/02",
+      "leadUnderwriter": "永豐金證券股份有限公司",
+      "issuerName": "十銓科技股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115021",
+      "filedDate": "2025/12/30",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "天品聯合企業股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115023",
+      "filedDate": "2026/01/07",
+      "leadUnderwriter": "福邦證券股份有限公司",
+      "issuerName": "尖點科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115026",
+      "filedDate": "2026/01/09",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "志聖工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115027",
+      "filedDate": "2026/01/07",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "天品聯合企業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115028",
+      "filedDate": "2026/01/06",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "定穎投資控股股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115029",
+      "filedDate": "2026/01/08",
+      "leadUnderwriter": "國泰綜合證券股份有限公司",
+      "issuerName": "聯嘉光電投資控股股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115034",
+      "filedDate": "2026/01/08",
+      "leadUnderwriter": "永豐金證券股份有限公司",
+      "issuerName": "騰輝電子國際集團股份有限公司-KY",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115037",
+      "filedDate": "2026/01/12",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "全新光電科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115038",
+      "filedDate": "2026/01/12",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "宇隆科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115040",
+      "filedDate": "2026/01/12",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "勤誠興業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115041",
+      "filedDate": "2026/01/07",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "全新光電科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115049",
+      "filedDate": "2026/01/16",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "寬魚國際股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115051",
+      "filedDate": "2026/01/15",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "力士科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115054",
+      "filedDate": "2026/01/15",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "寬魚國際股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115055",
+      "filedDate": "2026/01/19",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "佳能企業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115058",
+      "filedDate": "2026/01/21",
+      "leadUnderwriter": "永豐金證券股份有限公司",
+      "issuerName": "騰輝電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115060",
+      "filedDate": "2026/01/21",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "勤誠興業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115067",
+      "filedDate": "2026/01/22",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "閎康科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115070",
+      "filedDate": "2026/01/16",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "穎崴科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115071",
+      "filedDate": "2026/01/21",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "群聯電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115074",
+      "filedDate": "2026/01/28",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "百達精密工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115084",
+      "filedDate": "2026/02/04",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "雙鴻科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115088",
+      "filedDate": "2026/02/23",
+      "leadUnderwriter": "兆豐證券股份有限公司",
+      "issuerName": "衛司特科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115091",
+      "filedDate": "2026/02/24",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "長虹建設股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115095",
+      "filedDate": "2026/02/23",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "雙鴻科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115096",
+      "filedDate": "2026/02/25",
+      "leadUnderwriter": "華南永昌綜合證券股份有限公司",
+      "issuerName": "三集瑞科技國際集團股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115102",
+      "filedDate": "2026/03/02",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "華泰電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115104",
+      "filedDate": "2026/03/06",
+      "leadUnderwriter": "永豐金證券股份有限公司",
+      "issuerName": "高端疫苗生物製劑股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115105",
+      "filedDate": "2026/03/06",
+      "leadUnderwriter": "兆豐證券股份有限公司",
+      "issuerName": "鴻呈實業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115106",
+      "filedDate": "2026/03/09",
+      "leadUnderwriter": "合作金庫證券股份有限公司",
+      "issuerName": "聯上實業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115110",
+      "filedDate": "2026/03/04",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "定穎投資控股股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115111",
+      "filedDate": "2026/03/12",
+      "leadUnderwriter": "元富證券股份有限公司",
+      "issuerName": "逸達生物科技股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115114",
+      "filedDate": "2026/03/06",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "今晧實業股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115123",
+      "filedDate": "2026/03/19",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "保瑞藥業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115131",
+      "filedDate": "2026/03/31",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "保瑞藥業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115134",
+      "filedDate": "2026/04/07",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "台境企業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115141",
+      "filedDate": "2026/04/15",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "立碁電子工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115146",
+      "filedDate": "2026/04/20",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "富強鑫精密工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115147",
+      "filedDate": "2026/04/20",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "永捷創新科技股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115151",
+      "filedDate": "2026/04/14",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "宇瞻科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115152",
+      "filedDate": "2026/04/20",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "晟德大藥廠股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115153",
+      "filedDate": "2026/04/20",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "JPP Holding Company Limited(經寶精密控股-KY)",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115154",
+      "filedDate": "2026/04/21",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "凌航科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115161",
+      "filedDate": "2026/04/23",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "家登精密工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115162",
+      "filedDate": "2026/04/24",
+      "leadUnderwriter": "永豐金證券股份有限公司",
+      "issuerName": "柏文健康事業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115164",
+      "filedDate": "2026/04/20",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "JPP Holding Company Limited(經寶精密控股股份有限公司-KY)",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115167",
+      "filedDate": "2026/04/29",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "金雨企業股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115171",
+      "filedDate": "2026/04/30",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "晟德大藥廠股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115172",
+      "filedDate": "2026/04/30",
+      "leadUnderwriter": "福邦證券股份有限公司",
+      "issuerName": "鉅橡企業股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115179",
+      "filedDate": "2026/05/07",
+      "leadUnderwriter": "福邦證券股份有限公司",
+      "issuerName": "聯友金屬科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115180",
+      "filedDate": "2026/04/30",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "家登精密工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115181",
+      "filedDate": "2026/05/08",
+      "leadUnderwriter": "國泰綜合證券股份有限公司",
+      "issuerName": "崑鼎綠能環保股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115183",
+      "filedDate": "2026/05/08",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "勤凱科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115185",
+      "filedDate": "2026/05/05",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "霖宏科技股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115188",
+      "filedDate": "2026/05/14",
+      "leadUnderwriter": "華南永昌綜合證券股份有限公司",
+      "issuerName": "國精化學股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115192",
+      "filedDate": "2026/05/15",
+      "leadUnderwriter": "兆豐證券股份有限公司",
+      "issuerName": "新應材股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115196",
+      "filedDate": "2026/05/18",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "新盛力科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115207",
+      "filedDate": "2026/05/26",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "長興材料工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115208",
+      "filedDate": "2026/05/20",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "昇達科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115209",
+      "filedDate": "2026/05/26",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "正基科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115210",
+      "filedDate": "2026/05/21",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "岳豐科技股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115218",
+      "filedDate": "2026/05/29",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "旺矽科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115224",
+      "filedDate": "2026/06/05",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "英濟股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115227",
+      "filedDate": "2026/06/08",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "至上電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115236",
+      "filedDate": "2026/06/09",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "正基科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115239",
+      "filedDate": "2026/06/10",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "宜鼎國際股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115240",
+      "filedDate": "2026/06/16",
+      "leadUnderwriter": "華南永昌綜合證券股份有限公司",
+      "issuerName": "佐登妮絲集團股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115242",
+      "filedDate": "2026/06/18",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "擎亞電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115244",
+      "filedDate": "2026/06/18",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "萬潤科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115245",
+      "filedDate": "2026/06/17",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "南俊國際股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115248",
+      "filedDate": "2026/06/22",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "宏致電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115258",
+      "filedDate": "2026/07/02",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "擎亞電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115261",
+      "filedDate": "2026/07/01",
+      "leadUnderwriter": "國泰綜合證券股份有限公司",
+      "issuerName": "大東電業廠股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115263",
+      "filedDate": "2026/07/06",
+      "leadUnderwriter": "中國信託綜合證券股份有限公司",
+      "issuerName": "萬旭電業股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115267",
+      "filedDate": "2026/07/08",
+      "leadUnderwriter": "福邦證券股份有限公司",
+      "issuerName": "安國國際科技股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115269",
+      "filedDate": "2026/07/14",
+      "leadUnderwriter": "中國信託綜合證券股份有限公司",
+      "issuerName": "一詮精密工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115270",
+      "filedDate": "2026/07/09",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "威宏控股股份有限公司-KY",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115272",
+      "filedDate": "2026/07/09",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "巨漢系統科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115273",
+      "filedDate": "2026/07/13",
+      "leadUnderwriter": "兆豐證券股份有限公司",
+      "issuerName": "廣閎科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115274",
+      "filedDate": "2026/07/06",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "增你強股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115275",
+      "filedDate": "2026/07/06",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "雲豹能源科技股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115281",
+      "filedDate": "2026/07/16",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "邑昇實業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115284",
+      "filedDate": "2026/07/14",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "辛耘企業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115285",
+      "filedDate": "2026/07/17",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "博智電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115289",
+      "filedDate": "2026/07/20",
+      "leadUnderwriter": "國票綜合證券股份有限公司",
+      "issuerName": "聖暉工程科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115290",
+      "filedDate": "2026/07/23",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "昶昕實業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115291",
+      "filedDate": "2026/07/16",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "雙鍵化工股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115293",
+      "filedDate": "2026/07/27",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "晶宏半導體股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115294",
+      "filedDate": "2026/07/27",
+      "leadUnderwriter": "宏遠證券股份有限公司",
+      "issuerName": "聯華電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115295",
+      "filedDate": "2026/07/27",
+      "leadUnderwriter": "富邦綜合證券股份有限公司",
+      "issuerName": "巨漢系統科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115297",
+      "filedDate": "2026/07/21",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "雍智科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115307",
+      "filedDate": "2026/07/30",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "聯亞光電工業股份有限公司(第一次)",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115308",
+      "filedDate": "2026/07/24",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "博智電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115310",
+      "filedDate": "2026/07/31",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "聯亞光電工業股份有限公司(第二次)",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115313",
+      "filedDate": "2026/08/03",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "維田科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115314",
+      "filedDate": "2026/08/04",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "國統國際股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115315",
+      "filedDate": "2026/07/28",
+      "leadUnderwriter": "國票綜合證券股份有限公司",
+      "issuerName": "聖暉工程科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115316",
+      "filedDate": "2026/08/05",
+      "leadUnderwriter": "永豐金證券股份有限公司",
+      "issuerName": "十銓科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115317",
+      "filedDate": "2026/08/04",
+      "leadUnderwriter": "凱基證券股份有限公司",
+      "issuerName": "嘉晶電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115318",
+      "filedDate": "2026/08/05",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "皇龍開發股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115323",
+      "filedDate": "2026/08/10",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "廣穎電通股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115325",
+      "filedDate": "2026/08/05",
+      "leadUnderwriter": "群益金鼎證券股份有限公司",
+      "issuerName": "倚強科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115328",
+      "filedDate": "2026/08/13",
+      "leadUnderwriter": "宏遠證券股份有限公司",
+      "issuerName": "聚賢研發股份有限公司-創新版",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115330",
+      "filedDate": "2026/08/14",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "國統國際股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115331",
+      "filedDate": "2026/08/18",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "正達國際光電股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115336",
+      "filedDate": "2026/08/21",
+      "leadUnderwriter": "宏遠證券股份有限公司",
+      "issuerName": "聯華電子股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115337",
+      "filedDate": "2026/08/21",
+      "leadUnderwriter": "元大證券股份有限公司",
+      "issuerName": "中國砂輪企業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115340",
+      "filedDate": "2026/08/25",
+      "leadUnderwriter": "中國信託綜合證券股份有限公司",
+      "issuerName": "盟立自動化股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115346",
+      "filedDate": "2026/08/27",
+      "leadUnderwriter": "永豐金證券股份有限公司",
+      "issuerName": "金利食安科技股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115348",
+      "filedDate": "2026/08/28",
+      "leadUnderwriter": "台新綜合證券股份有限公司",
+      "issuerName": "寶一科技股份有限公司",
+      "guaranteeType": "secured",
+      "placementMethods": [
+        "競價拍賣"
+      ],
+      "caseStatus": "正常"
+    },
+    {
+      "referenceNumber": "115354",
+      "filedDate": "2026/08/31",
+      "leadUnderwriter": "統一綜合證券股份有限公司",
+      "issuerName": "大甲永和機械工業股份有限公司",
+      "guaranteeType": "unsecured",
+      "placementMethods": [
+        "詢價圈購"
+      ],
+      "caseStatus": "正常"
+    }
+  ],
+  "sources": {
+    "institution": {
+      "state": "fresh",
+      "dataDate": "2026-09-04",
+      "periodYear": 2026
+    },
+    "redemption": {
+      "state": "fresh",
+      "dataDate": "2026-09-03",
+      "periodYear": 2026
+    },
+    "underwriting": {
+      "state": "fresh",
+      "dataDate": "2026/08/31",
+      "periodYear": 2026
+    }
+  }
+}
