@@ -4,7 +4,7 @@ import { publicNumber } from "./public-data-state.js";
 import { emergingDailyAverageLabel } from "./emerging-market-display.js";
 import { sortRows } from "./table-sort.js";
 import { buildPublishedEmergingBreadth, mapV57EmergingResearchRows } from "./v56-page-data.js";
-import { parseV57EmergingState, V57_EMERGING_SORT_KEYS } from "./emerging-research-state.js";
+import { parseV57EmergingState } from "./emerging-research-state.js";
 import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
 
 const pointerUrl = configuredPublishedPointerUrl(
@@ -12,7 +12,6 @@ const pointerUrl = configuredPublishedPointerUrl(
   new URL("../data/current.json", import.meta.url),
 );
 const errorTarget = document.querySelector("[data-page-error]");
-const marketSortKeys = V57_EMERGING_SORT_KEYS;
 export const viewAliases = Object.freeze({
   rankings: "summary",
   market: "all",

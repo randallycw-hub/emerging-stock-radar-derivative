@@ -352,7 +352,9 @@ async function refreshStaticShowcaseCandidate({
     const census = parseConversionIndex(JSON.parse(censusText));
     verifyRosterCompleteness(datasets["11406"], census, {
       expectedDataDate,
+      observedDate: taipeiDate(now),
       priorBonds: previousBondTerms,
+      priorWorkbench: previousWorkbench,
     });
     manifestDatasets.push({
       datasetId: "11406Census",
@@ -740,16 +742,32 @@ function isolatedNightlyMarketBuilder(scenario) {
 export function verifyRosterCompleteness(
   rosterRows,
   censusEntries,
-  { expectedDataDate, priorBonds = [] } = {},
+  { expectedDataDate, observedDate = expectedDataDate, priorBonds = [], priorWorkbench } = {},
 ) {
-  const rosterCodes = new Set(
-    bondInputsFrom11406Rows(rosterRows).map((bond) => bond.bondCode),
-  );
+  const rosterBonds = bondInputsFrom11406Rows(rosterRows);
+  const rosterCodes = new Set(rosterBonds.map((bond) => bond.bondCode));
+  // The current roster can legitimately drop weekend maturities while the
+  // latest available quote remains Friday's. Only dated official rows can
+  // advance this cutoff; missing dates or a partial roster never justify it.
+  const rosterDates = rosterBonds.map(bond => bond.outstandingDataDate);
+  const datedRoster = rosterDates.length > 0 && rosterDates.every(isIsoDate);
+  const earliestRosterDate = datedRoster ? rosterDates.slice().sort()[0] : null;
+  const latestRosterDate = datedRoster ? rosterDates.slice().sort().at(-1) : null;
+  const maturityCutoff = isIsoDate(observedDate) && isIsoDate(expectedDataDate)
+    && earliestRosterDate >= expectedDataDate && latestRosterDate <= observedDate
+    ? earliestRosterDate : expectedDataDate;
   if (!Array.isArray(censusEntries) || censusEntries.length === 0) {
     throw new Error("VALIDATION_FAILED:ROSTER_COMPLETENESS:EMPTY_CENSUS");
   }
   const priorMaturityByBondCode = new Map(
-    priorBonds.map((bond) => [bond.bondCode, bond.maturityDate]),
+    [
+      // The caller reads the workbench through manifest/hash validation. Its
+      // archived official terms survive after a bond leaves the 11406 roster.
+      ...(priorWorkbench?.records ?? [])
+        .filter(record => record.status === "archived" && record.term?.bondCode === record.bondCode)
+        .map(record => [record.bondCode, record.term.maturityDate]),
+      ...priorBonds.map((bond) => [bond.bondCode, bond.maturityDate]),
+    ],
   );
   const missing = censusEntries
     .map((entry) => entry.bondCode)
@@ -759,7 +777,7 @@ export function verifyRosterCompleteness(
     return !(
       isIsoDate(expectedDataDate)
       && isIsoDate(maturityDate)
-      && maturityDate <= expectedDataDate
+      && maturityDate <= maturityCutoff
     );
   });
   if (unresolved.length > 0) {
@@ -1871,7 +1889,7 @@ async function readPublishedBondWorkbenchFromActive(active) {
       text,
       snapshot.records.length,
     );
-    if (entry !== undefined && (
+    if (entry === undefined || (
       entry.rawBytes !== Buffer.byteLength(text, "utf8")
       || entry.schemaVersion !== snapshot.schemaVersion
       || !equalJson(entry.sourceStateSummary, summarizeWorkbenchSourceStates(snapshot))

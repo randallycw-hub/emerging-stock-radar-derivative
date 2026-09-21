@@ -68,6 +68,13 @@ test("all production source roots contain only Source Registry APPROVED external
   assertOnlyApprovedExternalUrls(sources.flatMap(externalUrlLiterals));
 });
 
+test("production modules cannot import the quarantined CB source review tools", async () => {
+  const productionFiles = (await Promise.all([...productionRoots, "static-showcase/assets"].map(filesUnder))).flat();
+  for (const path of productionFiles) {
+    assert.doesNotMatch(await file(path), /(?:from\s*|import\s*(?:\(\s*)?|require\s*\(\s*)["'][^"']*research\/cb-sources\//, path);
+  }
+});
+
 test("derives every reviewed IPO refresh source from registry policy", () => {
   const urls = listApprovedIpoResources(2026).map(resource => resource.exactUrl);
   assert.equal(urls.length, 5);

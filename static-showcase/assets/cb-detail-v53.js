@@ -18,7 +18,7 @@ export function cbDatabaseReturnUrl(search = '') {
   const quickFilter = list.get('quickFilter');
   if (['newIssue','lowPremium','nearConversion','rights90','maturity365','recentPut','recentRedemption','conversionSuspended'].includes(quickFilter)) safe.set('quickFilter',quickFilter);
   const view = list.get('view');
-  if (['overview','terms','period','events','liquidity'].includes(view)) safe.set('view',view);
+  if (['overview','quote','terms','period','events','liquidity'].includes(view)) safe.set('view',view);
   const sort = list.get('sort');
   if (['code','stockClose','conversionPrice','conversionValue','outstanding','remaining','close','volume','premium','maturity'].includes(sort)) {
     safe.set('sort',sort);

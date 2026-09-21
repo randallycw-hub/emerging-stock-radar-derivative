@@ -19,6 +19,34 @@ const PRIOR_11406_ROW = {
   賣回權日期: "",
 };
 
+test("consecutive refreshes retain verified maturity evidence in the archived workbench", () => {
+  const current = [{ ...PRIOR_11406_ROW, 資料日期: "20260921" }];
+  const options = { expectedDataDate: "2026-09-18", observedDate: "2026-09-21",
+    priorBonds: [], priorWorkbench: { records: [
+      { bondCode: "15261", status: "archived", term: { bondCode: "15261", maturityDate: "2026-09-19" } },
+    ] } };
+  assert.doesNotThrow(() => verifyRosterCompleteness(current, [{ bondCode: "15261" }], options));
+  assert.throws(() => verifyRosterCompleteness(current, [{ bondCode: "99991" }], options), /MISSING_CENSUS_CODES/);
+  assert.throws(() => verifyRosterCompleteness(current, [{ bondCode: "15261" }], {
+    ...options, priorBonds: [{ bondCode: "15261", maturityDate: "2026-09-22" }],
+  }), /MISSING_CENSUS_CODES/);
+  assert.throws(() => verifyRosterCompleteness(current, [{ bondCode: "15261" }], {
+    ...options, priorWorkbench: { records: [{ bondCode: "15261", status: "active", term: { bondCode: "15261", maturityDate: "2026-09-19" } }] },
+  }), /MISSING_CENSUS_CODES/);
+});
+
+test("weekend maturities use the verified roster date while quotes retain Friday's date", () => {
+  const current = [{ ...PRIOR_11406_ROW, 資料日期: "20260921" }];
+  const options = { expectedDataDate: "2026-09-18", observedDate: "2026-09-21",
+    priorBonds: [{ bondCode: "15261", maturityDate: "2026-09-19" }, { bondCode: "29061", maturityDate: "2026-09-20" }] };
+  assert.doesNotThrow(() => verifyRosterCompleteness(current, [{bondCode:"15261"},{bondCode:"29061"}], options));
+  for (const rows of [[PRIOR_11406_ROW], [{...PRIOR_11406_ROW, 資料日期:"20260918"}]]) {
+    assert.throws(() => verifyRosterCompleteness(rows, [{bondCode:"15261"}], options), /MISSING_CENSUS_CODES/);
+  }
+  assert.throws(() => verifyRosterCompleteness(current, [{bondCode:"99991"}], options), /MISSING_CENSUS_CODES/);
+  assert.throws(() => verifyRosterCompleteness(current, [{bondCode:"15261"}], {...options, priorBonds:[{bondCode:"15261",maturityDate:"2026-09-22"}]}), /MISSING_CENSUS_CODES/);
+});
+
 test("uses the prior 11406 terms only when the official dataset manifest verifies them", () => {
   const terms = prior11406TermsFromVerifiedSnapshot(
     [PRIOR_11406_ROW],

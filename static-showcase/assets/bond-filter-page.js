@@ -65,13 +65,19 @@ const BASE_CB_VIEWS = {
 export const CB_VIEW_COLUMNS = Object.freeze({
   quote: BASE_CB_VIEWS.quote,
   overview: [
-    ...BASE_CB_VIEWS.quote.slice(0, 5),
-    ...BASE_CB_VIEWS.quote.slice(7, 9),
-    ...BASE_CB_VIEWS.period.slice(6, 8),
+    ["股票代碼", record => record.stockCode],
+    ["股票名稱", record => record.companyName],
+    ["債券代碼", record => record.cbCode, "code"],
+    ["債券名稱", record => record.cbName],
+    BASE_CB_VIEWS.quote[2],
+    BASE_CB_VIEWS.quote[4],
+    BASE_CB_VIEWS.quote[7],
     BASE_CB_VIEWS.terms[8],
+    BASE_CB_VIEWS.quote[3],
+    [...BASE_CB_VIEWS.period[7], record => record.terms?.outstandingDataDate],
     BASE_CB_VIEWS.terms[6],
     BASE_CB_VIEWS.period[3],
-    BASE_CB_VIEWS.terms[9],
+    ["CB 明細", () => ""],
   ],
   terms: BASE_CB_VIEWS.terms,
   period: BASE_CB_VIEWS.period,
@@ -136,7 +142,7 @@ export function readCbFilterState(search = '') {
   const sort = params.get('sort') ?? '';
   const secured = params.get('secured') ?? 'all';
   return {q:normalizeQuery(params.get('q') ?? ''),quickFilter:QUICK_FILTERS.has(quickFilter) ? quickFilter : '', secured:CB_SECURED_VALUES.has(secured) ? secured : 'all',
-    view:Object.hasOwn(CB_VIEW_COLUMNS,view) ? view : 'quote',sort:Object.hasOwn(SORT_VALUES,sort) ? sort : '',
+    view:Object.hasOwn(CB_VIEW_COLUMNS,view) ? view : 'overview',sort:Object.hasOwn(SORT_VALUES,sort) ? sort : '',
     direction:params.get('direction') === 'desc' ? 'desc' : 'asc', ...readRanges(params)};
 }
 
@@ -214,23 +220,100 @@ function sortBy(records, valueFor) {
   }).map((item) => item.record);
 }
 
-export function renderCbDatabaseTable(records, { view = 'quote', asOfDate, sort = '', direction = 'asc', filterSearch = '' } = {}) {
-  const columns = CB_VIEW_COLUMNS[view] ?? CB_VIEW_COLUMNS.quote;
+export function cbPresetRanges(key, dataDate) {
+  const numeric = {
+    remainingLow: { remainingMin: '', remainingMax: '30' },
+    remainingHigh: { remainingMin: '80', remainingMax: '' },
+    price106: { priceMin: '', priceMax: '106' },
+    value130: { conversionValueMin: '130', conversionValueMax: '' },
+  };
+  if (Object.hasOwn(numeric, key)) return numeric[key];
+  if (!isoDate(dataDate)) return null;
+  if (key === 'issue90') {
+    const from = new Date(`${dataDate}T00:00:00Z`);
+    from.setUTCDate(from.getUTCDate() - 90);
+    return { issueFrom: from.toISOString().slice(0, 10), issueTo: dataDate };
+  }
+  if (key === 'maturity90') return { maturityDaysMin: '0', maturityDaysMax: '90' };
+  return null;
+}
+
+export function cbOverviewSummary(records, dataDate) {
+  const active = arrayValue(records).filter(record => record?.status === 'active');
+  let maturity6Months = null;
+  if (isoDate(dataDate)) {
+    const date = new Date(`${dataDate}T00:00:00Z`);
+    const last = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 7, 0));
+    last.setUTCDate(Math.min(date.getUTCDate(), last.getUTCDate()));
+    const end = last.toISOString().slice(0, 10);
+    maturity6Months = active.filter(record => {
+      const maturity = isoDate(record.terms?.maturityDate);
+      return maturity && maturity >= dataDate && maturity <= end;
+    }).length;
+  }
+  return { bonds: active.length, issuers: new Set(active.map(record => record.stockCode).filter(Boolean)).size, maturity6Months };
+}
+
+function detailHref(record, filterSearch) {
+  const query = new URLSearchParams({ bond: record.cbCode, from: 'database', list: filterSearch.replace(/^\?/, '') });
+  return `./bonds.html?${escapeHtml(query.toString())}`;
+}
+
+function datedColumn(record, column, asOfDate) {
+  const rendered = column[1](record, asOfDate);
+  const valueDate = column[3]?.(record);
+  return escapeHtml(rendered) + (rendered !== '—' && rendered !== '尚未掛牌' && isoDate(valueDate)
+    ? `<time datetime="${escapeHtml(valueDate)}">${dateLabel(valueDate)}</time>` : '');
+}
+
+export function renderCbOverviewFacts(record, filterSearch = '') {
+  const terms = record.terms ?? {};
+  const facts = [
+    ...BASE_CB_VIEWS.quote.slice(2, 5), ...BASE_CB_VIEWS.quote.slice(7),
+    BASE_CB_VIEWS.terms[2], BASE_CB_VIEWS.period[6],
+    [...BASE_CB_VIEWS.period[7], () => terms.outstandingDataDate],
+    BASE_CB_VIEWS.terms[6], BASE_CB_VIEWS.period[2], BASE_CB_VIEWS.period[3],
+    BASE_CB_VIEWS.period[4], BASE_CB_VIEWS.period[5],
+    ["初始轉換價", () => publicNumber(terms.initialConversionPrice)],
+    ...BASE_CB_VIEWS.terms.slice(8), ...BASE_CB_VIEWS.period.slice(9),
+  ];
+  return `<section class="cb-inline-facts" aria-label="${escapeHtml(record.cbCode)} 債券明細">
+    <header><h3>${escapeHtml(record.cbCode)} ${escapeHtml(record.cbName)}</h3><a href="${detailHref(record, filterSearch)}">完整明細與官方來源 →</a></header>
+    <dl>${facts.map(column => `<div><dt>${escapeHtml(column[0])}</dt><dd>${datedColumn(record, column)}</dd></div>`).join('')}</dl>
+    <p>價格下方為成交／估值日期，轉換價下方為生效日，剩餘比率下方為餘額資料日。— 表示資料未提供。</p>
+  </section>`;
+}
+
+export function renderCbDatabaseCards(records, { view = 'overview', asOfDate, filterSearch = '' } = {}) {
+  if (!records.length) return '<p class="empty-cell">目前沒有符合條件的公開資料。</p>';
+  const columns = CB_VIEW_COLUMNS[view] ?? CB_VIEW_COLUMNS.overview;
+  return records.map(record => `<details class="cb-database-card">
+    <summary><span><strong>${escapeHtml(record.cbName)} <small>${escapeHtml(record.cbCode)}</small></strong><span>${escapeHtml(record.stockCode)} ${escapeHtml(record.companyName)}</span><span>剩餘比率 ${rate(record.terms?.remainingRatio)} · ${escapeHtml(record.terms?.securedStatus ?? '—')}</span></span><span class="cb-card-price"><small>CB 收盤／最近成交</small><strong>${datedColumn(record, BASE_CB_VIEWS.quote[2])}</strong><small class="cb-card-expand-label">展開明細</small><small class="cb-card-collapse-label">收合明細</small></span></summary>
+    ${view === 'overview' ? renderCbOverviewFacts(record, filterSearch) : `<dl class="cb-card-view-facts">${columns.slice(2).map(column => `<div><dt>${escapeHtml(column[0])}</dt><dd>${datedColumn(record, column, asOfDate)}</dd></div>`).join('')}</dl><a class="cb-card-detail-link" href="${detailHref(record, filterSearch)}">完整明細與官方來源 →</a>`}
+  </details>`).join('');
+}
+
+export function renderCbDatabaseTable(records, { view = 'overview', asOfDate, sort = '', direction = 'asc', filterSearch = '', expandedCode = null } = {}) {
+  const columns = CB_VIEW_COLUMNS[view] ?? CB_VIEW_COLUMNS.overview;
+  const isOverview = columns === CB_VIEW_COLUMNS.overview;
   const head = `<tr>${columns.map(([label, , sortKey], index) => {
-    const key = index === 0 ? 'code' : sortKey;
+    const key = !isOverview && index === 0 ? 'code' : sortKey;
     const active = key && key === sort;
     return `<th scope="col"${active ? ` aria-sort="${direction === 'desc' ? 'descending' : 'ascending'}"` : ''}>${key ? `<button type="button" data-cb-sort="${key}">${escapeHtml(label)} <span aria-hidden="true">${active ? direction === 'desc' ? '↓' : '↑' : '↕'}</span></button>` : escapeHtml(label)}</th>`;
   }).join("")}</tr>`;
   if (!records.length) {
     return { head, body: `<tr><td colspan="${columns.length}" class="empty-cell">目前沒有符合條件的公開資料。</td></tr>` };
   }
-  const body = records.map((record) => `<tr>${columns.map(([label, value, , readDate], index) => {
-    const rendered = value(record, asOfDate);
-    const valueDate = readDate?.(record);
-    const dated = rendered !== '—' && isoDate(valueDate) ? `<time datetime="${escapeHtml(valueDate)}">${dateLabel(valueDate)}</time>` : '';
-    const detailQuery = new URLSearchParams({ bond: record.cbCode, from: 'database', list: filterSearch.replace(/^\?/, '') });
-    return index === 0 ? `<td><a href="./bonds.html?${escapeHtml(detailQuery.toString())}">${escapeHtml(rendered)}</a></td>` : `<td data-label="${escapeHtml(label)}">${escapeHtml(rendered)}${dated}</td>`;
-  }).join("")}</tr>`).join("");
+  const body = records.map((record) => {
+    const expanded = isOverview && record.cbCode === expandedCode;
+    const panelId = `cb-inline-${encodeURIComponent(record.cbCode)}`;
+    return `<tr>${columns.map((column, index) => {
+      if (isOverview && index === 12) return `<td><button type="button" aria-label="${escapeHtml(record.cbCode)} 明細" aria-expanded="${expanded}"${expanded ? ` aria-controls="${panelId}"` : ''} data-cb-expand="${escapeHtml(record.cbCode)}">${expanded ? '收合' : '展開'}</button></td>`;
+      const rendered = datedColumn(record, column, asOfDate);
+      const link = isOverview ? index === 2 || index === 3 : index === 0;
+      return `<td data-label="${escapeHtml(column[0])}">${link ? `<a href="${detailHref(record, filterSearch)}">${rendered}</a>` : rendered}</td>`;
+    }).join("")}</tr>${expanded ? `<tr class="cb-inline-row"><td colspan="${columns.length}"><div id="${panelId}">${renderCbOverviewFacts(record, filterSearch)}</div></td></tr>` : ''}`;
+  }).join("");
   return { head, body };
 }
 
@@ -241,15 +324,18 @@ async function initialize() {
   const count = document.querySelector("#bond-filter-count");
   const tabs = document.querySelector("#bond-view-tabs");
   const clear = document.querySelector("#bond-filter-clear");
+  const cards = document.querySelector("#bond-filter-cards");
   const errorTarget = document.querySelector("[data-page-error]");
   if (!form || !head || !body || !count || !tabs || !clear) return;
   const model = await loadPublicCbWorkbenchV53({ errorTarget });
   if (!model?.dataDate || !Array.isArray(model.records)) {
     count.textContent = "資料暫時無法取得";
     body.innerHTML = '<tr><td class="empty-cell">資料暫時無法取得</td></tr>';
+    if (cards) cards.innerHTML = '<p class="empty-cell">資料暫時無法取得</p>';
     return;
   }
   let activeView;
+  let expandedCode = null;
   const restore = () => {
     const state = readCbFilterState(globalThis.location?.search);
     activeView = state.view;
@@ -261,6 +347,12 @@ async function initialize() {
   };
   restore();
   const filterRecords = cbFilterRecords(model);
+  const summary = cbOverviewSummary(filterRecords, model.dataDate);
+  for (const [key, value] of Object.entries(summary)) {
+    const target = document.querySelector(`[data-cb-summary="${key}"]`);
+    if (target) target.textContent = publicNumber(value, 0);
+  }
+  document.querySelector('#cb-summary-date').textContent = `全體有效債券 · 期間條件基準日 ${dateLabel(model.dataDate)}；統計不隨篩選變動。`;
   const render = () => {
     const values = new FormData(form);
     const rows = sortCbDatabase(filterV53CbRecords(filterRecords, {
@@ -272,9 +364,16 @@ async function initialize() {
     }), String(values.get('sort') ?? ''), String(values.get('direction') ?? 'asc'));
     count.textContent = `${rows.length} 檔 · 資料日 ${dateLabel(model.dataDate)}`;
     syncUrl(activeView, values);
-    const rendered = renderCbDatabaseTable(rows, { view: activeView, asOfDate: model.dataDate, sort: values.get('sort'), direction: values.get('direction'), filterSearch: globalThis.location?.search ?? '' });
+    if (!rows.some(row => row.cbCode === expandedCode)) expandedCode = null;
+    const options = { view: activeView, asOfDate: model.dataDate, sort: values.get('sort'), direction: values.get('direction'), filterSearch: globalThis.location?.search ?? '', expandedCode };
+    const rendered = renderCbDatabaseTable(rows, options);
     head.innerHTML = rendered.head;
     body.innerHTML = rendered.body;
+    if (cards) cards.innerHTML = renderCbDatabaseCards(rows, options);
+    form.querySelectorAll('[data-cb-preset]').forEach(button => {
+      const ranges = cbPresetRanges(button.dataset.cbPreset, model.dataDate);
+      button.setAttribute('aria-pressed', String(Boolean(ranges) && Object.entries(ranges).every(([key, value]) => String(values.get(key) ?? '') === value)));
+    });
     document.querySelector('#cb-database-panel')?.setAttribute('aria-labelledby', `cb-view-${activeView}`);
     tabs.querySelectorAll("[data-cb-view]").forEach((button) => {
       const selected = button.dataset.cbView === activeView;
@@ -289,6 +388,31 @@ async function initialize() {
   clear.addEventListener("click", () => {
     form.reset();
     render();
+  });
+  form.addEventListener('click', event => {
+    const button = event.target.closest('[data-cb-preset]');
+    if (!button) return;
+    const ranges = cbPresetRanges(button.dataset.cbPreset, model.dataDate);
+    if (!ranges) return;
+    for (const [key, value] of Object.entries(ranges)) form.elements.namedItem(key).value = value;
+    form.querySelector('.cb-range-filters').open = true;
+    render();
+  });
+  const focusExpandedButton = code => [...body.querySelectorAll('[data-cb-expand]')].find(button => button.dataset.cbExpand === code)?.focus({ preventScroll: true });
+  body.addEventListener('click', event => {
+    const button = event.target.closest('[data-cb-expand]');
+    if (!button) return;
+    const code = button.dataset.cbExpand;
+    expandedCode = expandedCode === code ? null : code;
+    render();
+    focusExpandedButton(code);
+  });
+  body.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !expandedCode) return;
+    const code = expandedCode;
+    expandedCode = null;
+    render();
+    focusExpandedButton(code);
   });
   tabs.addEventListener("click", (event) => {
     const button = event.target.closest("[data-cb-view]");
@@ -325,7 +449,7 @@ function syncUrl(view, values) {
   if (QUICK_FILTERS.has(quickFilter) && quickFilter) params.set("quickFilter", quickFilter);
   const secured = String(values.get('secured') ?? 'all');
   if (CB_SECURED_VALUES.has(secured) && secured !== 'all') params.set('secured', secured);
-  if (view !== "quote") params.set("view", view);
+  if (view !== "overview") params.set("view", view);
   for (const [key, value] of Object.entries(readRanges(values))) params.set(key, value);
   if (Object.hasOwn(SORT_VALUES, values.get('sort'))) {
     params.set('sort',values.get('sort'));

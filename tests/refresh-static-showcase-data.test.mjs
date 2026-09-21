@@ -852,6 +852,12 @@ test("prior declared workbench hash metadata is verified before reuse", async ()
   };
   const text = `${JSON.stringify(workbench)}\n`;
   await writeFile(join(generation, "bond-workbench.json"), text, "utf8");
+  await writeFile(join(generation, "manifest.json"), JSON.stringify({ market: { files: [] } }), "utf8");
+  await assert.rejects(
+    readPublishedBondWorkbench(dataRoot),
+    /manifest integrity is invalid/i,
+    "a schema-valid but undeclared file cannot provide maturity evidence",
+  );
   await writeFile(
     join(generation, "manifest.json"),
     JSON.stringify({

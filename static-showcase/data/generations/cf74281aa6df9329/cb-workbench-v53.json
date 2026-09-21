@@ -283,6 +283,7 @@
         "cbName": "台泥一永",
         "stockCode": "1101",
         "companyName": "台泥",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -429,6 +430,7 @@
         "cbName": "鮮活果汁一KY",
         "stockCode": "1256",
         "companyName": "鮮活果汁-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -567,6 +569,7 @@
         "cbName": "上曜六",
         "stockCode": "1316",
         "companyName": "上曜",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -713,6 +716,7 @@
         "cbName": "廣華二KY",
         "stockCode": "1338",
         "companyName": "廣華-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -851,6 +855,7 @@
         "cbName": "遠東新E1永",
         "stockCode": "1402",
         "companyName": "遠東新",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -989,6 +994,7 @@
         "cbName": "遠東新E2永",
         "stockCode": "1402",
         "companyName": "遠東新",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -1135,6 +1141,7 @@
         "cbName": "華友聯三",
         "stockCode": "1436",
         "companyName": "華友聯",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -1281,6 +1288,7 @@
         "cbName": "華友聯四",
         "stockCode": "1436",
         "companyName": "華友聯",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -1353,7 +1361,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -1427,6 +1435,7 @@
         "cbName": "三地開發一",
         "stockCode": "1438",
         "companyName": "三地開發",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -1559,6 +1568,7 @@
         "cbName": "聚隆四",
         "stockCode": "1466",
         "companyName": "聚隆",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -1705,6 +1715,7 @@
         "cbName": "三洋實業二",
         "stockCode": "1472",
         "companyName": "三洋實業",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -1851,6 +1862,7 @@
         "cbName": "三洋實業三",
         "stockCode": "1472",
         "companyName": "三洋實業",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -1983,6 +1995,7 @@
         "cbName": "弘裕三",
         "stockCode": "1474",
         "companyName": "弘裕",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -2136,6 +2149,7 @@
         "cbName": "亞力二",
         "stockCode": "1514",
         "companyName": "亞力",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -2268,6 +2282,7 @@
         "cbName": "日馳一",
         "stockCode": "1526",
         "companyName": "日馳",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -2414,6 +2429,7 @@
         "cbName": "和大四",
         "stockCode": "1536",
         "companyName": "和大",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -2488,7 +2504,7 @@
         "lastPrice": 245,
         "lastVolume": 7,
         "lastTurnoverAmount": 1711000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -2607,6 +2623,7 @@
         "cbName": "中砂一",
         "stockCode": "1560",
         "companyName": "中砂",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -2731,6 +2748,7 @@
         "cbName": "中砂二",
         "stockCode": "1560",
         "companyName": "中砂",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -2803,7 +2821,7 @@
         "lastPrice": 99.55,
         "lastVolume": 2,
         "lastTurnoverAmount": 199100,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -2861,6 +2879,7 @@
         "cbName": "和勤四",
         "stockCode": "1586",
         "companyName": "和勤",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -2933,7 +2952,7 @@
         "lastPrice": 101,
         "lastVolume": 24,
         "lastTurnoverAmount": 2422850,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -2991,6 +3010,7 @@
         "cbName": "和勤五",
         "stockCode": "1586",
         "companyName": "和勤",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -3137,6 +3157,7 @@
         "cbName": "川寶二",
         "stockCode": "1595",
         "companyName": "川寶",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -3283,6 +3304,7 @@
         "cbName": "岱宇四",
         "stockCode": "1598",
         "companyName": "岱宇",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -3429,6 +3451,7 @@
         "cbName": "大亞五",
         "stockCode": "1609",
         "companyName": "大亞",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -3567,6 +3590,7 @@
         "cbName": "大東電一",
         "stockCode": "1623",
         "companyName": "大東電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -3713,6 +3737,7 @@
         "cbName": "長興二",
         "stockCode": "1717",
         "companyName": "長興",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -3837,6 +3862,7 @@
         "cbName": "合世三",
         "stockCode": "1781",
         "companyName": "合世",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -3975,6 +4001,7 @@
         "cbName": "科妍三",
         "stockCode": "1786",
         "companyName": "科妍",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -4121,6 +4148,7 @@
         "cbName": "榮成四",
         "stockCode": "1909",
         "companyName": "榮成",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -4267,6 +4295,7 @@
         "cbName": "允強四",
         "stockCode": "2034",
         "companyName": "允強",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -4405,6 +4434,7 @@
         "cbName": "國際中橡三",
         "stockCode": "2104",
         "companyName": "國際中橡",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -4477,7 +4507,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -4551,6 +4581,7 @@
         "cbName": "裕隆三",
         "stockCode": "2201",
         "companyName": "裕隆",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -4614,8 +4645,8 @@
         "stockPriceDate": "2026-09-08",
         "stockConversionValue": null,
         "stockConversionValueDate": null,
-        "conversionPrice": 82.16,
-        "conversionPriceEffectiveDate": "2026-09-11",
+        "conversionPrice": null,
+        "conversionPriceEffectiveDate": null,
         "valuationDate": null,
         "conversionValue": null,
         "premiumRate": null,
@@ -4623,9 +4654,9 @@
         "turnoverAmount": null,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
-        "tradeState": "DATA_ERROR",
+        "tradeState": "NOT_YET_LISTED",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -4635,12 +4666,10 @@
         "sample20": 0,
         "weekVolume": null,
         "weekTurnover": null,
-        "weekObservationDates": [
-          "2026-09-08"
-        ],
+        "weekObservationDates": [],
         "sampleStartDate": null,
         "sampleEndDate": null,
-        "tradedDays20": 0
+        "tradedDays20": null
       },
       "conversionPriceHistory": [],
       "rights": {
@@ -4689,6 +4718,7 @@
         "cbName": "大甲一",
         "stockCode": "2221",
         "companyName": "大甲",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -4705,7 +4735,7 @@
           "underwriter": "585T統一綜合證券",
           "trustee": "台新國際商業銀行"
         },
-        "currentStage": "listingDate",
+        "currentStage": "scheduled",
         "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
         "dataDate": "2026-09-08"
       }
@@ -4821,6 +4851,7 @@
         "cbName": "劍麟三",
         "stockCode": "2228",
         "companyName": "劍麟",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -4945,6 +4976,7 @@
         "cbName": "宇隆一",
         "stockCode": "2233",
         "companyName": "宇隆",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -5083,6 +5115,7 @@
         "cbName": "百達三KY",
         "stockCode": "2236",
         "companyName": "百達-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -5215,6 +5248,7 @@
         "cbName": "汎德永業一",
         "stockCode": "2247",
         "companyName": "汎德永業",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -5347,6 +5381,7 @@
         "cbName": "汎德永業二",
         "stockCode": "2247",
         "companyName": "汎德永業",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -5485,6 +5520,7 @@
         "cbName": "聯電一",
         "stockCode": "2303",
         "companyName": "聯電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -5623,6 +5659,7 @@
         "cbName": "聯電二",
         "stockCode": "2303",
         "companyName": "聯電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -5755,6 +5792,7 @@
         "cbName": "華泰一",
         "stockCode": "2329",
         "companyName": "華泰",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -5926,6 +5964,7 @@
         "cbName": "旺宏二",
         "stockCode": "2337",
         "companyName": "旺宏",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -6000,7 +6039,7 @@
         "lastPrice": 99.55,
         "lastVolume": 1,
         "lastTurnoverAmount": 99550,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -6062,6 +6101,7 @@
         "cbName": "光罩三",
         "stockCode": "2338",
         "companyName": "光罩",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -6201,6 +6241,7 @@
         "cbName": "順德一",
         "stockCode": "2351",
         "companyName": "順德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -6275,7 +6316,7 @@
         "lastPrice": 176,
         "lastVolume": 90,
         "lastTurnoverAmount": 15840000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -6360,6 +6401,7 @@
         "cbName": "金像電三",
         "stockCode": "2368",
         "companyName": "金像電",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -6506,6 +6548,7 @@
         "cbName": "佳能二",
         "stockCode": "2374",
         "companyName": "佳能",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -6652,6 +6695,7 @@
         "cbName": "毅嘉三",
         "stockCode": "2402",
         "companyName": "毅嘉",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -6805,6 +6849,7 @@
         "cbName": "三商電一",
         "stockCode": "2427",
         "companyName": "三商電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -6951,6 +6996,7 @@
         "cbName": "偉詮電一",
         "stockCode": "2436",
         "companyName": "偉詮電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -7090,6 +7136,7 @@
         "cbName": "美律四",
         "stockCode": "2439",
         "companyName": "美律",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -7229,6 +7276,7 @@
         "cbName": "美律五",
         "stockCode": "2439",
         "companyName": "美律",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -7375,6 +7423,7 @@
         "cbName": "新美齊三",
         "stockCode": "2442",
         "companyName": "新美齊",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -7521,6 +7570,7 @@
         "cbName": "新美齊四",
         "stockCode": "2442",
         "companyName": "新美齊",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -7653,6 +7703,7 @@
         "cbName": "全新二",
         "stockCode": "2455",
         "companyName": "全新",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -7785,6 +7836,7 @@
         "cbName": "全新三",
         "stockCode": "2455",
         "companyName": "全新",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -7859,7 +7911,7 @@
         "lastPrice": 99.25,
         "lastVolume": 6,
         "lastTurnoverAmount": 596750,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -7921,6 +7973,7 @@
         "cbName": "良得電四",
         "stockCode": "2462",
         "companyName": "良得電",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -7995,7 +8048,7 @@
         "lastPrice": 170,
         "lastVolume": 89,
         "lastTurnoverAmount": 14988000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -8080,6 +8133,7 @@
         "cbName": "盟立二",
         "stockCode": "2464",
         "companyName": "盟立",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -8218,6 +8272,7 @@
         "cbName": "盟立三",
         "stockCode": "2464",
         "companyName": "盟立",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -8364,6 +8419,7 @@
         "cbName": "志聖二",
         "stockCode": "2467",
         "companyName": "志聖",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -8510,6 +8566,7 @@
         "cbName": "志聖三",
         "stockCode": "2467",
         "companyName": "志聖",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -8642,6 +8699,7 @@
         "cbName": "鉅祥二",
         "stockCode": "2476",
         "companyName": "鉅祥",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -8780,6 +8838,7 @@
         "cbName": "一詮七",
         "stockCode": "2486",
         "companyName": "一詮",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -8926,6 +8985,7 @@
         "cbName": "皇普三",
         "stockCode": "2528",
         "companyName": "皇普",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -9072,6 +9132,7 @@
         "cbName": "皇普四",
         "stockCode": "2528",
         "companyName": "皇普",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -9218,6 +9279,7 @@
         "cbName": "華建三",
         "stockCode": "2530",
         "companyName": "華建",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -9364,6 +9426,7 @@
         "cbName": "華建四",
         "stockCode": "2530",
         "companyName": "華建",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -9502,6 +9565,7 @@
         "cbName": "華固三",
         "stockCode": "2548",
         "companyName": "華固",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -9640,6 +9704,7 @@
         "cbName": "華固四",
         "stockCode": "2548",
         "companyName": "華固",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -9772,6 +9837,7 @@
         "cbName": "正德七",
         "stockCode": "2641",
         "companyName": "正德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -9918,6 +9984,7 @@
         "cbName": "正德八",
         "stockCode": "2641",
         "companyName": "正德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -10064,6 +10131,7 @@
         "cbName": "王品一",
         "stockCode": "2727",
         "companyName": "王品",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -10136,7 +10204,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -10210,6 +10278,7 @@
         "cbName": "六角三",
         "stockCode": "2732",
         "companyName": "六角",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -10356,6 +10425,7 @@
         "cbName": "六角四",
         "stockCode": "2732",
         "companyName": "六角",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -10494,6 +10564,7 @@
         "cbName": "山富一",
         "stockCode": "2743",
         "companyName": "山富",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -10632,6 +10703,7 @@
         "cbName": "五福一",
         "stockCode": "2745",
         "companyName": "五福",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -10764,6 +10836,7 @@
         "cbName": "八方雲集一",
         "stockCode": "2753",
         "companyName": "八方雲集",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -10896,6 +10969,7 @@
         "cbName": "八方雲集二",
         "stockCode": "2753",
         "companyName": "八方雲集",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -11075,6 +11149,7 @@
         "cbName": "揚秦一",
         "stockCode": "2755",
         "companyName": "揚秦",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -11147,7 +11222,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -11221,6 +11296,7 @@
         "cbName": "聯發國際一",
         "stockCode": "2756",
         "companyName": "聯發國際",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -11374,6 +11450,7 @@
         "cbName": "高林一",
         "stockCode": "2906",
         "companyName": "高林",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -11512,6 +11589,7 @@
         "cbName": "今皓二",
         "stockCode": "3011",
         "companyName": "今皓",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -11644,6 +11722,7 @@
         "cbName": "晟銘電四",
         "stockCode": "3013",
         "companyName": "晟銘電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -11776,6 +11855,7 @@
         "cbName": "嘉晶五",
         "stockCode": "3016",
         "companyName": "嘉晶",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -11900,6 +11980,7 @@
         "cbName": "嘉晶六",
         "stockCode": "3016",
         "companyName": "嘉晶",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -12038,6 +12119,7 @@
         "cbName": "增你強五",
         "stockCode": "3028",
         "companyName": "增你強",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -12176,6 +12258,7 @@
         "cbName": "偉訓一",
         "stockCode": "3032",
         "companyName": "偉訓",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -12314,6 +12397,7 @@
         "cbName": "偉訓二",
         "stockCode": "3032",
         "companyName": "偉訓",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -12467,6 +12551,7 @@
         "cbName": "威健六",
         "stockCode": "3033",
         "companyName": "威健",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -12620,6 +12705,7 @@
         "cbName": "威健七",
         "stockCode": "3033",
         "companyName": "威健",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -12766,6 +12852,7 @@
         "cbName": "欣興一",
         "stockCode": "3037",
         "companyName": "欣興",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -12912,6 +12999,7 @@
         "cbName": "遠見一",
         "stockCode": "3040",
         "companyName": "遠見",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -13058,6 +13146,7 @@
         "cbName": "台灣大四",
         "stockCode": "3045",
         "companyName": "台灣大",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -13204,6 +13293,7 @@
         "cbName": "台灣大五",
         "stockCode": "3045",
         "companyName": "台灣大",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -13328,6 +13418,7 @@
         "cbName": "聯亞一",
         "stockCode": "3081",
         "companyName": "聯亞",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -13452,6 +13543,7 @@
         "cbName": "聯亞二",
         "stockCode": "3081",
         "companyName": "聯亞",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -13524,7 +13616,7 @@
         "lastPrice": 146.2,
         "lastVolume": 3,
         "lastTurnoverAmount": 437950,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -13582,6 +13674,7 @@
         "cbName": "艾訊二",
         "stockCode": "3088",
         "companyName": "艾訊",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -13720,6 +13813,7 @@
         "cbName": "及成四",
         "stockCode": "3095",
         "companyName": "及成",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -13792,7 +13886,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -13858,6 +13952,7 @@
         "cbName": "笙泉二",
         "stockCode": "3122",
         "companyName": "笙泉",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -14051,6 +14146,7 @@
         "cbName": "弘塑一",
         "stockCode": "3131",
         "companyName": "弘塑",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -14244,6 +14340,7 @@
         "cbName": "弘塑二",
         "stockCode": "3131",
         "companyName": "弘塑",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -14382,6 +14479,7 @@
         "cbName": "凌航二",
         "stockCode": "3135",
         "companyName": "凌航",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -14528,6 +14626,7 @@
         "cbName": "晶宏三",
         "stockCode": "3141",
         "companyName": "晶宏",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -14666,6 +14765,7 @@
         "cbName": "晶宏四",
         "stockCode": "3141",
         "companyName": "晶宏",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -14790,6 +14890,7 @@
         "cbName": "正達四",
         "stockCode": "3149",
         "companyName": "正達",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -14969,6 +15070,7 @@
         "cbName": "大量二",
         "stockCode": "3167",
         "companyName": "大量",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -15115,6 +15217,7 @@
         "cbName": "鑫龍騰二",
         "stockCode": "3188",
         "companyName": "鑫龍騰",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -15261,6 +15364,7 @@
         "cbName": "耀勝一",
         "stockCode": "3207",
         "companyName": "耀勝",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -15399,6 +15503,7 @@
         "cbName": "倚強科一",
         "stockCode": "3219",
         "companyName": "倚強科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -15545,6 +15650,7 @@
         "cbName": "虹冠電一",
         "stockCode": "3257",
         "companyName": "虹冠電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -15683,6 +15789,7 @@
         "cbName": "東碩三",
         "stockCode": "3272",
         "companyName": "東碩",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -15829,6 +15936,7 @@
         "cbName": "太普高三",
         "stockCode": "3284",
         "companyName": "太普高",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -15967,6 +16075,7 @@
         "cbName": "英濟三",
         "stockCode": "3294",
         "companyName": "英濟",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -16113,6 +16222,7 @@
         "cbName": "岱稜五",
         "stockCode": "3303",
         "companyName": "岱稜",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -16306,6 +16416,7 @@
         "cbName": "昇貿五",
         "stockCode": "3305",
         "companyName": "昇貿",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -16438,6 +16549,7 @@
         "cbName": "弘憶股一",
         "stockCode": "3312",
         "companyName": "弘憶股",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -16570,6 +16682,7 @@
         "cbName": "斐成三",
         "stockCode": "3313",
         "companyName": "斐成",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -16716,6 +16829,7 @@
         "cbName": "建舜電五",
         "stockCode": "3322",
         "companyName": "建舜電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -16862,6 +16976,7 @@
         "cbName": "雙鴻五",
         "stockCode": "3324",
         "companyName": "雙鴻",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -17008,6 +17123,7 @@
         "cbName": "雙鴻六",
         "stockCode": "3324",
         "companyName": "雙鴻",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -17154,6 +17270,7 @@
         "cbName": "雙鴻七",
         "stockCode": "3324",
         "companyName": "雙鴻",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -17300,6 +17417,7 @@
         "cbName": "麗清六",
         "stockCode": "3346",
         "companyName": "麗清",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -17432,6 +17550,7 @@
         "cbName": "臺慶科一",
         "stockCode": "3357",
         "companyName": "臺慶科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -17578,6 +17697,7 @@
         "cbName": "先進光一",
         "stockCode": "3362",
         "companyName": "先進光",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -17731,6 +17851,7 @@
         "cbName": "新日興三",
         "stockCode": "3376",
         "companyName": "新日興",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -17924,6 +18045,7 @@
         "cbName": "崇越電一",
         "stockCode": "3388",
         "companyName": "崇越電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -18056,6 +18178,7 @@
         "cbName": "旭軟二",
         "stockCode": "3390",
         "companyName": "旭軟",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -18209,6 +18332,7 @@
         "cbName": "融程電三",
         "stockCode": "3416",
         "companyName": "融程電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -18333,6 +18457,7 @@
         "cbName": "安勤三",
         "stockCode": "3479",
         "companyName": "安勤",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -18465,6 +18590,7 @@
         "cbName": "力致四",
         "stockCode": "3483",
         "companyName": "力致",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -18611,6 +18737,7 @@
         "cbName": "崧騰三",
         "stockCode": "3484",
         "companyName": "崧騰",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -18749,6 +18876,7 @@
         "cbName": "昇達科三",
         "stockCode": "3491",
         "companyName": "昇達科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -18887,6 +19015,7 @@
         "cbName": "皇龍二",
         "stockCode": "3512",
         "companyName": "皇龍",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -19019,6 +19148,7 @@
         "cbName": "亞帝歐一",
         "stockCode": "3516",
         "companyName": "亞帝歐",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -19143,6 +19273,7 @@
         "cbName": "柏騰一",
         "stockCode": "3518",
         "companyName": "柏騰",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -19289,6 +19420,7 @@
         "cbName": "御嵿一",
         "stockCode": "3522",
         "companyName": "御頂",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -19435,6 +19567,7 @@
         "cbName": "凡甲五",
         "stockCode": "3526",
         "companyName": "凡甲",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -19581,6 +19714,7 @@
         "cbName": "凡甲六",
         "stockCode": "3526",
         "companyName": "凡甲",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -19727,6 +19861,7 @@
         "cbName": "凡甲七",
         "stockCode": "3526",
         "companyName": "凡甲",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -19873,6 +20008,7 @@
         "cbName": "州巧一",
         "stockCode": "3543",
         "companyName": "州巧",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -20005,6 +20141,7 @@
         "cbName": "兆利二",
         "stockCode": "3548",
         "companyName": "兆利",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -20151,6 +20288,7 @@
         "cbName": "兆利三",
         "stockCode": "3548",
         "companyName": "兆利",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -20275,6 +20413,7 @@
         "cbName": "世禾三",
         "stockCode": "3551",
         "companyName": "世禾",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -20407,6 +20546,7 @@
         "cbName": "其陽二",
         "stockCode": "3564",
         "companyName": "其陽",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -20539,6 +20679,7 @@
         "cbName": "辛耘三",
         "stockCode": "3583",
         "companyName": "辛耘",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -20685,6 +20826,7 @@
         "cbName": "閎康二",
         "stockCode": "3587",
         "companyName": "閎康",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -20817,6 +20959,7 @@
         "cbName": "艾笛森四",
         "stockCode": "3591",
         "companyName": "艾笛森",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -20949,6 +21092,7 @@
         "cbName": "宏致三",
         "stockCode": "3605",
         "companyName": "宏致",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -21095,6 +21239,7 @@
         "cbName": "宏致四",
         "stockCode": "3605",
         "companyName": "宏致",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -21227,6 +21372,7 @@
         "cbName": "碩天三",
         "stockCode": "3617",
         "companyName": "碩天",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -21373,6 +21519,7 @@
         "cbName": "家登四",
         "stockCode": "3680",
         "companyName": "家登",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -21519,6 +21666,7 @@
         "cbName": "家登五",
         "stockCode": "3680",
         "companyName": "家登",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -21665,6 +21813,7 @@
         "cbName": "家登六",
         "stockCode": "3680",
         "companyName": "家登",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -21811,6 +21960,7 @@
         "cbName": "榮昌一",
         "stockCode": "3684",
         "companyName": "榮昌",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -21957,6 +22107,7 @@
         "cbName": "歐買尬二",
         "stockCode": "3687",
         "companyName": "歐買尬",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -22103,6 +22254,7 @@
         "cbName": "歐買尬三",
         "stockCode": "3687",
         "companyName": "歐買尬",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -22296,6 +22448,7 @@
         "cbName": "湧德四",
         "stockCode": "3689",
         "companyName": "湧德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -22420,6 +22573,7 @@
         "cbName": "碩禾三",
         "stockCode": "3691",
         "companyName": "碩禾",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -22492,7 +22646,7 @@
         "lastPrice": 126.45,
         "lastVolume": 1105,
         "lastTurnoverAmount": 138086650,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -22542,6 +22696,7 @@
         "cbName": "大聯大E1",
         "stockCode": "3702",
         "companyName": "大聯大",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -22680,6 +22835,7 @@
         "cbName": "漢磊五",
         "stockCode": "3707",
         "companyName": "漢磊",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -22826,6 +22982,7 @@
         "cbName": "上緯投控三",
         "stockCode": "3708",
         "companyName": "上緯投控",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -22972,6 +23129,7 @@
         "cbName": "上緯投控四",
         "stockCode": "3708",
         "companyName": "上緯投控",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -23096,6 +23254,7 @@
         "cbName": "定穎投控一",
         "stockCode": "3715",
         "companyName": "定穎投控",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -23220,6 +23379,7 @@
         "cbName": "定穎投控二",
         "stockCode": "3715",
         "companyName": "定穎投控",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -23358,6 +23518,7 @@
         "cbName": "聯嘉投控一",
         "stockCode": "3717",
         "companyName": "聯嘉投控",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -23496,6 +23657,7 @@
         "cbName": "聯上五",
         "stockCode": "4113",
         "companyName": "聯上",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -23634,6 +23796,7 @@
         "cbName": "聯上六",
         "stockCode": "4113",
         "companyName": "聯上",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -23766,6 +23929,7 @@
         "cbName": "晟德六",
         "stockCode": "4123",
         "companyName": "晟德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -23912,6 +24076,7 @@
         "cbName": "晟德七",
         "stockCode": "4123",
         "companyName": "晟德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -24058,6 +24223,7 @@
         "cbName": "晟德八",
         "stockCode": "4123",
         "companyName": "晟德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -24204,6 +24370,7 @@
         "cbName": "晟德九",
         "stockCode": "4123",
         "companyName": "晟德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -24350,6 +24517,7 @@
         "cbName": "聯合五",
         "stockCode": "4129",
         "companyName": "聯合",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -24496,6 +24664,7 @@
         "cbName": "麗豐二KY",
         "stockCode": "4137",
         "companyName": "麗豐-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -24568,7 +24737,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -24642,6 +24811,7 @@
         "cbName": "承業醫五",
         "stockCode": "4164",
         "companyName": "承業醫",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -24774,6 +24944,7 @@
         "cbName": "醣聯四",
         "stockCode": "4168",
         "companyName": "醣聯",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -24920,6 +25091,7 @@
         "cbName": "佐登三KY",
         "stockCode": "4190",
         "companyName": "佐登-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -25066,6 +25238,7 @@
         "cbName": "佐登四KY",
         "stockCode": "4190",
         "companyName": "佐登-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -25212,6 +25385,7 @@
         "cbName": "三圓三",
         "stockCode": "4416",
         "companyName": "三圓",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -25344,6 +25518,7 @@
         "cbName": "廣越三",
         "stockCode": "4438",
         "companyName": "廣越",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -25476,6 +25651,7 @@
         "cbName": "冠星一KY",
         "stockCode": "4439",
         "companyName": "冠星-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -25622,6 +25798,7 @@
         "cbName": "竣邦一KY",
         "stockCode": "4442",
         "companyName": "竣邦-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -25746,6 +25923,7 @@
         "cbName": "金雨一",
         "stockCode": "4503",
         "companyName": "金雨",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -25892,6 +26070,7 @@
         "cbName": "高鋒二",
         "stockCode": "4510",
         "companyName": "高鋒",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -25964,9 +26143,9 @@
         "turnoverAmount": null,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
-        "tradeState": "DATA_ERROR",
+        "tradeState": "NOT_YET_LISTED",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -25979,7 +26158,7 @@
         "weekObservationDates": [],
         "sampleStartDate": null,
         "sampleEndDate": null,
-        "tradedDays20": 0
+        "tradedDays20": null
       },
       "conversionPriceHistory": [],
       "rights": {
@@ -26028,6 +26207,7 @@
         "cbName": "晟田五",
         "stockCode": "4541",
         "companyName": "晟田",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -26044,7 +26224,7 @@
           "underwriter": "920T凱基證券",
           "trustee": "凱基商業銀行股份有限公司"
         },
-        "currentStage": "listingDate",
+        "currentStage": "scheduled",
         "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
         "dataDate": "2026-09-08"
       }
@@ -26221,6 +26401,7 @@
         "cbName": "科嶠一",
         "stockCode": "4542",
         "companyName": "科嶠",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -26360,6 +26541,7 @@
         "cbName": "桓達一",
         "stockCode": "4549",
         "companyName": "桓達",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -26492,6 +26674,7 @@
         "cbName": "氣立四",
         "stockCode": "4555",
         "companyName": "氣立",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -26616,6 +26799,7 @@
         "cbName": "寶緯一",
         "stockCode": "4558",
         "companyName": "寶緯",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -26748,6 +26932,7 @@
         "cbName": "元翎一",
         "stockCode": "4564",
         "companyName": "元翎",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -26880,6 +27065,7 @@
         "cbName": "時碩工業三",
         "stockCode": "4566",
         "companyName": "時碩工業",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -27004,6 +27190,7 @@
         "cbName": "六方科一KY",
         "stockCode": "4569",
         "companyName": "六方科-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -27150,6 +27337,7 @@
         "cbName": "駐龍一",
         "stockCode": "4572",
         "companyName": "駐龍",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -27288,6 +27476,7 @@
         "cbName": "光隆精密一KY",
         "stockCode": "4581",
         "companyName": "光隆精密-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -27426,6 +27615,7 @@
         "cbName": "永捷八",
         "stockCode": "4714",
         "companyName": "永捷",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -27558,6 +27748,7 @@
         "cbName": "國精化三",
         "stockCode": "4722",
         "companyName": "國精化",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -27690,6 +27881,7 @@
         "cbName": "國精化四",
         "stockCode": "4722",
         "companyName": "國精化",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -27836,6 +28028,7 @@
         "cbName": "康普三",
         "stockCode": "4739",
         "companyName": "康普",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -27982,6 +28175,7 @@
         "cbName": "康普四",
         "stockCode": "4739",
         "companyName": "康普",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -28106,6 +28300,7 @@
         "cbName": "新應材一",
         "stockCode": "4749",
         "companyName": "新應材",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -28244,6 +28439,7 @@
         "cbName": "勤凱二",
         "stockCode": "4760",
         "companyName": "勤凱科技",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -28368,6 +28564,7 @@
         "cbName": "雙鍵二",
         "stockCode": "4764",
         "companyName": "雙鍵",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -28500,6 +28697,7 @@
         "cbName": "台特化一",
         "stockCode": "4772",
         "companyName": "台特化",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -28638,6 +28836,7 @@
         "cbName": "力士一",
         "stockCode": "4923",
         "companyName": "力士",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -28784,6 +28983,7 @@
         "cbName": "新盛力一",
         "stockCode": "4931",
         "companyName": "新盛力",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -28930,6 +29130,7 @@
         "cbName": "十銓五",
         "stockCode": "4967",
         "companyName": "十銓",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -29054,6 +29255,7 @@
         "cbName": "廣穎電通一",
         "stockCode": "4973",
         "companyName": "廣穎電通",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -29200,6 +29402,7 @@
         "cbName": "華星光三",
         "stockCode": "4979",
         "companyName": "華星光",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -29346,6 +29549,7 @@
         "cbName": "華星光四",
         "stockCode": "4979",
         "companyName": "華星光",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -29478,6 +29682,7 @@
         "cbName": "凱衛一",
         "stockCode": "5201",
         "companyName": "凱衛",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -29610,6 +29815,7 @@
         "cbName": "新鼎一",
         "stockCode": "5209",
         "companyName": "新鼎",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -29756,6 +29962,7 @@
         "cbName": "凌網一",
         "stockCode": "5212",
         "companyName": "凌網",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -29902,6 +30109,7 @@
         "cbName": "弘凱一",
         "stockCode": "5244",
         "companyName": "弘凱",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -30040,6 +30248,7 @@
         "cbName": "智晶二",
         "stockCode": "5245",
         "companyName": "智晶",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -30193,6 +30402,7 @@
         "cbName": "智崴五",
         "stockCode": "5263",
         "companyName": "智崴",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -30325,6 +30535,7 @@
         "cbName": "jpp四KY",
         "stockCode": "5284",
         "companyName": "jpp-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -30457,6 +30668,7 @@
         "cbName": "jpp五KY",
         "stockCode": "5284",
         "companyName": "jpp-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -30581,6 +30793,7 @@
         "cbName": "宜鼎二",
         "stockCode": "5289",
         "companyName": "宜鼎",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -30719,6 +30932,7 @@
         "cbName": "邑昇二",
         "stockCode": "5291",
         "companyName": "邑昇",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -30851,6 +31065,7 @@
         "cbName": "桂盟四",
         "stockCode": "5306",
         "companyName": "桂盟",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -30925,7 +31140,7 @@
         "lastPrice": 183,
         "lastVolume": 4,
         "lastTurnoverAmount": 732000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -30987,6 +31202,7 @@
         "cbName": "系統電五",
         "stockCode": "5309",
         "companyName": "系統電",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -31133,6 +31349,7 @@
         "cbName": "系統電六",
         "stockCode": "5309",
         "companyName": "系統電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -31279,6 +31496,7 @@
         "cbName": "系統電七",
         "stockCode": "5309",
         "companyName": "系統電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -31351,7 +31569,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -31417,6 +31635,7 @@
         "cbName": "美而快一",
         "stockCode": "5321",
         "companyName": "美而快",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -31563,6 +31782,7 @@
         "cbName": "中磊七",
         "stockCode": "5388",
         "companyName": "中磊",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -31709,6 +31929,7 @@
         "cbName": "高技一",
         "stockCode": "5439",
         "companyName": "高技",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -31855,6 +32076,7 @@
         "cbName": "南良一",
         "stockCode": "5450",
         "companyName": "南良",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -31979,6 +32201,7 @@
         "cbName": "宣德三",
         "stockCode": "5457",
         "companyName": "宣德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -32117,6 +32340,7 @@
         "cbName": "霖宏二",
         "stockCode": "5464",
         "companyName": "霖宏",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -32255,6 +32479,7 @@
         "cbName": "長虹四",
         "stockCode": "5534",
         "companyName": "長虹",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -32393,6 +32618,7 @@
         "cbName": "聖暉二",
         "stockCode": "5536",
         "companyName": "聖暉*",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -32531,6 +32757,7 @@
         "cbName": "聖暉三",
         "stockCode": "5536",
         "companyName": "聖暉*",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -32655,6 +32882,7 @@
         "cbName": "四維航七",
         "stockCode": "5608",
         "companyName": "四維航",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -32727,7 +32955,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -32801,6 +33029,7 @@
         "cbName": "宏遠證二",
         "stockCode": "6015",
         "companyName": "宏遠證",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -32939,6 +33168,7 @@
         "cbName": "寬魚國際一",
         "stockCode": "6101",
         "companyName": "寬魚國際",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -33077,6 +33307,7 @@
         "cbName": "寬魚國際二",
         "stockCode": "6101",
         "companyName": "寬魚國際",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -33223,6 +33454,7 @@
         "cbName": "創惟一",
         "stockCode": "6104",
         "companyName": "創惟",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -33361,6 +33593,7 @@
         "cbName": "光聚晶電二",
         "stockCode": "6111",
         "companyName": "大宇資",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -33514,6 +33747,7 @@
         "cbName": "迎廣一",
         "stockCode": "6117",
         "companyName": "迎廣",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -33667,6 +33901,7 @@
         "cbName": "迎廣二",
         "stockCode": "6117",
         "companyName": "迎廣",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -33820,6 +34055,7 @@
         "cbName": "廣運五",
         "stockCode": "6125",
         "companyName": "廣運",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -33966,6 +34202,7 @@
         "cbName": "信音三",
         "stockCode": "6126",
         "companyName": "信音",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -34098,6 +34335,7 @@
         "cbName": "萬旭三",
         "stockCode": "6134",
         "companyName": "萬旭",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -34230,6 +34468,7 @@
         "cbName": "撼訊六",
         "stockCode": "6150",
         "companyName": "撼訊",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -34376,6 +34615,7 @@
         "cbName": "松上五",
         "stockCode": "6156",
         "companyName": "松上",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -34448,7 +34688,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -34514,6 +34754,7 @@
         "cbName": "華電網五",
         "stockCode": "6163",
         "companyName": "華電網",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -34660,6 +34901,7 @@
         "cbName": "達麗七",
         "stockCode": "6177",
         "companyName": "達麗",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -34806,6 +35048,7 @@
         "cbName": "亞通四",
         "stockCode": "6179",
         "companyName": "亞通",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -34952,6 +35195,7 @@
         "cbName": "合晶八",
         "stockCode": "6182",
         "companyName": "合晶",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -35084,6 +35328,7 @@
         "cbName": "大豐電三",
         "stockCode": "6184",
         "companyName": "大豐電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -35216,6 +35461,7 @@
         "cbName": "萬潤六",
         "stockCode": "6187",
         "companyName": "萬潤",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -35362,6 +35608,7 @@
         "cbName": "豐藝四",
         "stockCode": "6189",
         "companyName": "豐藝",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -35494,6 +35741,7 @@
         "cbName": "萬泰科七",
         "stockCode": "6190",
         "companyName": "萬泰科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -35626,6 +35874,7 @@
         "cbName": "佳必琪三",
         "stockCode": "6197",
         "companyName": "佳必琪",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -35764,6 +36013,7 @@
         "cbName": "天品三",
         "stockCode": "6199",
         "companyName": "天品",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -35902,6 +36152,7 @@
         "cbName": "天品四",
         "stockCode": "6199",
         "companyName": "天品",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -36048,6 +36299,7 @@
         "cbName": "雷科五",
         "stockCode": "6207",
         "companyName": "雷科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -36194,6 +36446,7 @@
         "cbName": "雷科六",
         "stockCode": "6207",
         "companyName": "雷科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -36326,6 +36579,7 @@
         "cbName": "今國光三",
         "stockCode": "6209",
         "companyName": "今國光",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -36450,6 +36704,7 @@
         "cbName": "富旺四",
         "stockCode": "6219",
         "companyName": "富旺",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -36582,6 +36837,7 @@
         "cbName": "岳豐十",
         "stockCode": "6220",
         "companyName": "岳豐",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -36728,6 +36984,7 @@
         "cbName": "旺矽六",
         "stockCode": "6223",
         "companyName": "旺矽",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -36852,6 +37109,7 @@
         "cbName": "迅杰三",
         "stockCode": "6243",
         "companyName": "迅杰",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -36976,6 +37234,7 @@
         "cbName": "台郡五",
         "stockCode": "6269",
         "companyName": "台郡",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -37100,6 +37359,7 @@
         "cbName": "台郡六",
         "stockCode": "6269",
         "companyName": "台郡",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -37253,6 +37513,7 @@
         "cbName": "康舒二",
         "stockCode": "6282",
         "companyName": "康舒",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -37399,6 +37660,7 @@
         "cbName": "佳邦三",
         "stockCode": "6284",
         "companyName": "佳邦",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -37599,6 +37861,7 @@
         "cbName": "良維十",
         "stockCode": "6290",
         "companyName": "良維",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -37671,7 +37934,7 @@
         "lastPrice": 153,
         "lastVolume": 159,
         "lastTurnoverAmount": 24818000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -37721,6 +37984,7 @@
         "cbName": "樺漢五",
         "stockCode": "6414",
         "companyName": "樺漢",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -37791,7 +38055,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -37853,6 +38117,7 @@
         "cbName": "易發一",
         "stockCode": "6425",
         "companyName": "易發",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -38006,6 +38271,7 @@
         "cbName": "今展科四",
         "stockCode": "6432",
         "companyName": "今展科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -38185,6 +38451,7 @@
         "cbName": "訊芯二KY",
         "stockCode": "6451",
         "companyName": "訊芯-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -38317,6 +38584,7 @@
         "cbName": "大樹三",
         "stockCode": "6469",
         "companyName": "大樹",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -38455,6 +38723,7 @@
         "cbName": "保瑞四",
         "stockCode": "6472",
         "companyName": "保瑞",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -38593,6 +38862,7 @@
         "cbName": "保瑞五",
         "stockCode": "6472",
         "companyName": "保瑞",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -38667,7 +38937,7 @@
         "lastPrice": 101.75,
         "lastVolume": 6,
         "lastTurnoverAmount": 610600,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -38729,6 +38999,7 @@
         "cbName": "安集三",
         "stockCode": "6477",
         "companyName": "安集",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -38875,6 +39146,7 @@
         "cbName": "安集四",
         "stockCode": "6477",
         "companyName": "安集",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -39021,6 +39293,7 @@
         "cbName": "安集五",
         "stockCode": "6477",
         "companyName": "安集",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -39167,6 +39440,7 @@
         "cbName": "聚和六",
         "stockCode": "6509",
         "companyName": "聚和",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -39299,6 +39573,7 @@
         "cbName": "精測一",
         "stockCode": "6510",
         "companyName": "精測",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -39431,6 +39706,7 @@
         "cbName": "穎崴二",
         "stockCode": "6515",
         "companyName": "穎崴",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -39555,6 +39831,7 @@
         "cbName": "晶心科一",
         "stockCode": "6533",
         "companyName": "晶心科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -39701,6 +39978,7 @@
         "cbName": "倉和一",
         "stockCode": "6538",
         "companyName": "倉和",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -39773,7 +40051,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -39847,6 +40125,7 @@
         "cbName": "正基一",
         "stockCode": "6546",
         "companyName": "正基",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -39993,6 +40272,7 @@
         "cbName": "正基二",
         "stockCode": "6546",
         "companyName": "正基",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -40139,6 +40419,7 @@
         "cbName": "正基三",
         "stockCode": "6546",
         "companyName": "正基",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -40263,6 +40544,7 @@
         "cbName": "高端疫苗二",
         "stockCode": "6547",
         "companyName": "高端疫苗",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -40401,6 +40683,7 @@
         "cbName": "易華電一",
         "stockCode": "6552",
         "companyName": "易華電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -40539,6 +40822,7 @@
         "cbName": "維田二",
         "stockCode": "6570",
         "companyName": "維田",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -40677,6 +40961,7 @@
         "cbName": "逸達一",
         "stockCode": "6576",
         "companyName": "逸達",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -40751,7 +41036,7 @@
         "lastPrice": 235,
         "lastVolume": 6,
         "lastTurnoverAmount": 1410000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -40836,6 +41121,7 @@
         "cbName": "南俊國際一",
         "stockCode": "6584",
         "companyName": "南俊國際",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -40908,7 +41194,7 @@
         "turnoverAmount": null,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
@@ -40995,6 +41281,7 @@
         "cbName": "南俊國際二",
         "stockCode": "6584",
         "companyName": "南俊國際",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -41133,6 +41420,7 @@
         "cbName": "南俊國際三",
         "stockCode": "6584",
         "companyName": "南俊國際",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -41265,6 +41553,7 @@
         "cbName": "鼎基一",
         "stockCode": "6585",
         "companyName": "鼎基",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -41397,6 +41686,7 @@
         "cbName": "鼎基二",
         "stockCode": "6585",
         "companyName": "鼎基",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -41543,6 +41833,7 @@
         "cbName": "動力四KY",
         "stockCode": "6591",
         "companyName": "動力-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -41681,6 +41972,7 @@
         "cbName": "富強鑫四",
         "stockCode": "6603",
         "companyName": "富強鑫",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -41827,6 +42119,7 @@
         "cbName": "特昇三KY",
         "stockCode": "6616",
         "companyName": "特昇-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -41899,7 +42192,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -41973,6 +42266,7 @@
         "cbName": "萬年清一",
         "stockCode": "6624",
         "companyName": "萬年清",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -42119,6 +42413,7 @@
         "cbName": "泰金二KY",
         "stockCode": "6629",
         "companyName": "泰金-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -42191,7 +42486,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -42257,6 +42552,7 @@
         "cbName": "金萬林一創",
         "stockCode": "6645",
         "companyName": "金萬林-創",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -42389,6 +42685,7 @@
         "cbName": "群翊二",
         "stockCode": "6664",
         "companyName": "群翊",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -42521,6 +42818,7 @@
         "cbName": "復盛應用二",
         "stockCode": "6670",
         "companyName": "復盛應用",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -42595,7 +42893,7 @@
         "lastPrice": 310,
         "lastVolume": 3,
         "lastTurnoverAmount": 915000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -42712,6 +43010,7 @@
         "cbName": "騰輝電子一KY",
         "stockCode": "6672",
         "companyName": "騰輝電子-KY",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -42786,7 +43085,7 @@
         "lastPrice": 300,
         "lastVolume": 10,
         "lastTurnoverAmount": 3000000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -42903,6 +43202,7 @@
         "cbName": "騰輝電子二KY",
         "stockCode": "6672",
         "companyName": "騰輝電子-KY",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -43041,6 +43341,7 @@
         "cbName": "鑫創電子一",
         "stockCode": "6680",
         "companyName": "鑫創電子",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -43165,6 +43466,7 @@
         "cbName": "雍智一",
         "stockCode": "6683",
         "companyName": "雍智科技",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -43289,6 +43591,7 @@
         "cbName": "廣閎科一",
         "stockCode": "6693",
         "companyName": "廣閎科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -43421,6 +43724,7 @@
         "cbName": "惠特二",
         "stockCode": "6706",
         "companyName": "惠特",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -43560,6 +43864,7 @@
         "cbName": "龍德造船一",
         "stockCode": "6753",
         "companyName": "龍德造船",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -43692,6 +43997,7 @@
         "cbName": "志強一KY",
         "stockCode": "6768",
         "companyName": "志強-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -43838,6 +44144,7 @@
         "cbName": "平和環保一創",
         "stockCode": "6771",
         "companyName": "平和環保-創",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -43910,7 +44217,7 @@
         "lastPrice": 99.7,
         "lastVolume": 2,
         "lastTurnoverAmount": 199450,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -43970,6 +44277,7 @@
         "cbName": "晉弘一",
         "stockCode": "6796",
         "companyName": "晉弘",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -44116,6 +44424,7 @@
         "cbName": "晉弘二",
         "stockCode": "6796",
         "companyName": "晉弘",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -44248,6 +44557,7 @@
         "cbName": "崑鼎二",
         "stockCode": "6803",
         "companyName": "崑鼎",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -44318,7 +44628,7 @@
         "turnoverAmount": null,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
@@ -44333,7 +44643,7 @@
         "weekObservationDates": [],
         "sampleStartDate": null,
         "sampleEndDate": null,
-        "tradedDays20": 0
+        "tradedDays20": null
       },
       "conversionPriceHistory": [],
       "rights": {
@@ -44370,6 +44680,7 @@
         "cbName": "森崴能源一",
         "stockCode": "6806",
         "companyName": "森崴能源",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -44516,6 +44827,7 @@
         "cbName": "聯寶一",
         "stockCode": "6821",
         "companyName": "聯寶",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -44662,6 +44974,7 @@
         "cbName": "汎銓一",
         "stockCode": "6830",
         "companyName": "汎銓",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -44808,6 +45121,7 @@
         "cbName": "圓裕一",
         "stockCode": "6835",
         "companyName": "圓裕",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -44940,6 +45254,7 @@
         "cbName": "東研信超一",
         "stockCode": "6840",
         "companyName": "東研信超",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -45086,6 +45401,7 @@
         "cbName": "進典一",
         "stockCode": "6843",
         "companyName": "進典",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -45232,6 +45548,7 @@
         "cbName": "綠茵一",
         "stockCode": "6846",
         "companyName": "綠茵",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -45378,6 +45695,7 @@
         "cbName": "綠茵二",
         "stockCode": "6846",
         "companyName": "綠茵",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -45524,6 +45842,7 @@
         "cbName": "錼創科技一KY創",
         "stockCode": "6854",
         "companyName": "錼創科技-KY創",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -45670,6 +45989,7 @@
         "cbName": "三集瑞一KY",
         "stockCode": "6862",
         "companyName": "三集瑞-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -45802,6 +46122,7 @@
         "cbName": "永道一KY",
         "stockCode": "6863",
         "companyName": "永道-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -45926,6 +46247,7 @@
         "cbName": "雲豹能源二",
         "stockCode": "6869",
         "companyName": "雲豹能源",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -46072,6 +46394,7 @@
         "cbName": "騰雲一",
         "stockCode": "6870",
         "companyName": "騰雲",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -46218,6 +46541,7 @@
         "cbName": "騰雲二",
         "stockCode": "6870",
         "companyName": "騰雲",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -46290,7 +46614,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -46371,6 +46695,7 @@
         "cbName": "泓德能源一",
         "stockCode": "6873",
         "companyName": "泓德能源-創",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -46524,6 +46849,7 @@
         "cbName": "泓德能源二",
         "stockCode": "6873",
         "companyName": "泓德能源-創",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -46587,8 +46913,8 @@
         "stockPriceDate": "2026-09-08",
         "stockConversionValue": null,
         "stockConversionValueDate": null,
-        "conversionPrice": 90,
-        "conversionPriceEffectiveDate": "2026-09-09",
+        "conversionPrice": null,
+        "conversionPriceEffectiveDate": null,
         "valuationDate": null,
         "conversionValue": null,
         "premiumRate": null,
@@ -46662,6 +46988,7 @@
         "cbName": "倍力一",
         "stockCode": "6874",
         "companyName": "倍力",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -46794,6 +47121,7 @@
         "cbName": "來億一KY",
         "stockCode": "6890",
         "companyName": "來億-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -46926,6 +47254,7 @@
         "cbName": "來億二KY",
         "stockCode": "6890",
         "companyName": "來億-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -47058,6 +47387,7 @@
         "cbName": "衛司特一",
         "stockCode": "6894",
         "companyName": "衛司特",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -47196,6 +47526,7 @@
         "cbName": "巨漢一",
         "stockCode": "6903",
         "companyName": "巨漢",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -47334,6 +47665,7 @@
         "cbName": "巨漢二",
         "stockCode": "6903",
         "companyName": "巨漢",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -47466,6 +47798,7 @@
         "cbName": "伯鑫一",
         "stockCode": "6904",
         "companyName": "伯鑫",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -47604,6 +47937,7 @@
         "cbName": "鴻呈一",
         "stockCode": "6913",
         "companyName": "鴻呈",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -47750,6 +48084,7 @@
         "cbName": "裕慶一KY",
         "stockCode": "6957",
         "companyName": "裕慶-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -47888,6 +48223,7 @@
         "cbName": "大井泵浦一",
         "stockCode": "6982",
         "companyName": "大井泵浦",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -48026,6 +48362,7 @@
         "cbName": "大井泵浦二",
         "stockCode": "6982",
         "companyName": "大井泵浦",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -48164,6 +48501,7 @@
         "cbName": "邑錡二",
         "stockCode": "7402",
         "companyName": "邑錡",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -48296,6 +48634,7 @@
         "cbName": "意德士一永",
         "stockCode": "7556",
         "companyName": "意德士科技",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -48428,6 +48767,7 @@
         "cbName": "意德士二",
         "stockCode": "7556",
         "companyName": "意德士科技",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -48574,6 +48914,7 @@
         "cbName": "聯友金屬一創",
         "stockCode": "7610",
         "companyName": "聯友金屬-創",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -48712,6 +49053,7 @@
         "cbName": "聚賢研發一創",
         "stockCode": "7631",
         "companyName": "聚賢研發-創",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -48858,6 +49200,7 @@
         "cbName": "威力德生醫一",
         "stockCode": "7713",
         "companyName": "威力德生醫",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -48921,8 +49264,8 @@
         "stockPriceDate": "2026-09-08",
         "stockConversionValue": null,
         "stockConversionValueDate": null,
-        "conversionPrice": 22.5,
-        "conversionPriceEffectiveDate": "2026-09-10",
+        "conversionPrice": null,
+        "conversionPriceEffectiveDate": null,
         "valuationDate": null,
         "conversionValue": null,
         "premiumRate": null,
@@ -48930,9 +49273,9 @@
         "turnoverAmount": null,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
-        "tradeState": "DATA_ERROR",
+        "tradeState": "NOT_YET_LISTED",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -48942,12 +49285,10 @@
         "sample20": 0,
         "weekVolume": null,
         "weekTurnover": null,
-        "weekObservationDates": [
-          "2026-09-08"
-        ],
+        "weekObservationDates": [],
         "sampleStartDate": null,
         "sampleEndDate": null,
-        "tradedDays20": 0
+        "tradedDays20": null
       },
       "conversionPriceHistory": [],
       "rights": {
@@ -48996,6 +49337,7 @@
         "cbName": "金利食安一",
         "stockCode": "7743",
         "companyName": "金利食安",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -49012,7 +49354,7 @@
           "underwriter": "9A0T永豐金證券",
           "trustee": "永豐商業銀行股份有限公司信託處"
         },
-        "currentStage": "listingDate",
+        "currentStage": "scheduled",
         "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
         "dataDate": "2026-09-08"
       }
@@ -49142,6 +49484,7 @@
         "cbName": "尖點二",
         "stockCode": "8021",
         "companyName": "尖點",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -49288,6 +49631,7 @@
         "cbName": "鈦昇三",
         "stockCode": "8027",
         "companyName": "鈦昇",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -49420,6 +49764,7 @@
         "cbName": "昇陽半導體二",
         "stockCode": "8028",
         "companyName": "昇陽半導體",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -49566,6 +49911,7 @@
         "cbName": "金山電六",
         "stockCode": "8042",
         "companyName": "金山電",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -49712,6 +50058,7 @@
         "cbName": "廣積六",
         "stockCode": "8050",
         "companyName": "廣積",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -49844,6 +50191,7 @@
         "cbName": "安國一",
         "stockCode": "8054",
         "companyName": "安國",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -49976,6 +50324,7 @@
         "cbName": "鉅橡六",
         "stockCode": "8074",
         "companyName": "鉅橡",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -50122,6 +50471,7 @@
         "cbName": "麗升能源二",
         "stockCode": "8087",
         "companyName": "麗升能源",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -50315,6 +50665,7 @@
         "cbName": "翔名四",
         "stockCode": "8091",
         "companyName": "翔名",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -50387,7 +50738,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -50453,6 +50804,7 @@
         "cbName": "建暐四",
         "stockCode": "8092",
         "companyName": "建暐",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -50591,6 +50943,7 @@
         "cbName": "擎亞二",
         "stockCode": "8096",
         "companyName": "擎亞",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -50729,6 +51082,7 @@
         "cbName": "擎亞三",
         "stockCode": "8096",
         "companyName": "擎亞",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -50801,7 +51155,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -50875,6 +51229,7 @@
         "cbName": "錸寶二",
         "stockCode": "8104",
         "companyName": "錸寶",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -51021,6 +51376,7 @@
         "cbName": "立碁四",
         "stockCode": "8111",
         "companyName": "立碁",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -51167,6 +51523,7 @@
         "cbName": "至上十",
         "stockCode": "8112",
         "companyName": "至上",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -51313,6 +51670,7 @@
         "cbName": "至上11",
         "stockCode": "8112",
         "companyName": "至上",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -51445,6 +51803,7 @@
         "cbName": "正淩三",
         "stockCode": "8147",
         "companyName": "正淩",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -51591,6 +51950,7 @@
         "cbName": "博智一",
         "stockCode": "8155",
         "companyName": "博智",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -51729,6 +52089,7 @@
         "cbName": "博智二",
         "stockCode": "8155",
         "companyName": "博智",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -51867,6 +52228,7 @@
         "cbName": "博智三",
         "stockCode": "8155",
         "companyName": "博智",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -51999,6 +52361,7 @@
         "cbName": "天宇四",
         "stockCode": "8171",
         "companyName": "天宇",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -52131,6 +52494,7 @@
         "cbName": "天宇五",
         "stockCode": "8171",
         "companyName": "天宇",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -52263,6 +52627,7 @@
         "cbName": "勤誠二",
         "stockCode": "8210",
         "companyName": "勤誠",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -52395,6 +52760,7 @@
         "cbName": "勤誠三",
         "stockCode": "8210",
         "companyName": "勤誠",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -52458,8 +52824,8 @@
         "stockPriceDate": "2026-09-08",
         "stockConversionValue": null,
         "stockConversionValueDate": null,
-        "conversionPrice": 42.3,
-        "conversionPriceEffectiveDate": "2026-09-10",
+        "conversionPrice": null,
+        "conversionPriceEffectiveDate": null,
         "valuationDate": null,
         "conversionValue": null,
         "premiumRate": null,
@@ -52467,9 +52833,9 @@
         "turnoverAmount": null,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
-        "tradeState": "DATA_ERROR",
+        "tradeState": "NOT_YET_LISTED",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -52479,12 +52845,10 @@
         "sample20": 0,
         "weekVolume": null,
         "weekTurnover": null,
-        "weekObservationDates": [
-          "2026-09-08"
-        ],
+        "weekObservationDates": [],
         "sampleStartDate": null,
         "sampleEndDate": null,
-        "tradedDays20": 0
+        "tradedDays20": null
       },
       "conversionPriceHistory": [],
       "rights": {
@@ -52533,6 +52897,7 @@
         "cbName": "寶一一",
         "stockCode": "8222",
         "companyName": "寶一",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -52549,7 +52914,7 @@
           "underwriter": "9B0T台新綜合證券",
           "trustee": "中國信託商業銀行"
         },
-        "currentStage": "listingDate",
+        "currentStage": "scheduled",
         "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
         "dataDate": "2026-09-08"
       }
@@ -52605,7 +52970,7 @@
         "lastPrice": 99.5,
         "lastVolume": 42,
         "lastTurnoverAmount": 4179000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -52655,6 +53020,7 @@
         "cbName": "朋程一",
         "stockCode": "8255",
         "companyName": "朋程",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -52787,6 +53153,7 @@
         "cbName": "宇瞻一",
         "stockCode": "8271",
         "companyName": "宇瞻",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -52933,6 +53300,7 @@
         "cbName": "群聯三",
         "stockCode": "8299",
         "companyName": "群聯",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -53065,6 +53433,7 @@
         "cbName": "羅昇二",
         "stockCode": "8374",
         "companyName": "羅昇",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -53211,6 +53580,7 @@
         "cbName": "百和興業一KY",
         "stockCode": "8404",
         "companyName": "百和興業-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -53349,6 +53719,7 @@
         "cbName": "福貞三KY",
         "stockCode": "8411",
         "companyName": "福貞-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -53421,7 +53792,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -53495,6 +53866,7 @@
         "cbName": "可寧衛一",
         "stockCode": "8422",
         "companyName": "可寧衛",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -53641,6 +54013,7 @@
         "cbName": "可寧衛二",
         "stockCode": "8422",
         "companyName": "可寧衛",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -53779,6 +54152,7 @@
         "cbName": "匯鑽科二",
         "stockCode": "8431",
         "companyName": "匯鑽科",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -53851,7 +54225,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -53925,6 +54299,7 @@
         "cbName": "弘帆二",
         "stockCode": "8433",
         "companyName": "弘帆",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -53997,7 +54372,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -54071,6 +54446,7 @@
         "cbName": "弘帆三",
         "stockCode": "8433",
         "companyName": "弘帆",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -54195,6 +54571,7 @@
         "cbName": "昶昕一",
         "stockCode": "8438",
         "companyName": "昶昕",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -54327,6 +54704,7 @@
         "cbName": "威宏二KY",
         "stockCode": "8442",
         "companyName": "威宏-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -54451,6 +54829,7 @@
         "cbName": "威宏三KY",
         "stockCode": "8442",
         "companyName": "威宏-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -54597,6 +54976,7 @@
         "cbName": "柏文四",
         "stockCode": "8462",
         "companyName": "柏文",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -54729,6 +55109,7 @@
         "cbName": "波力二KY",
         "stockCode": "8467",
         "companyName": "波力-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -54799,7 +55180,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -54861,6 +55242,7 @@
         "cbName": "波力三KY",
         "stockCode": "8467",
         "companyName": "波力-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -55007,6 +55389,7 @@
         "cbName": "山林水二",
         "stockCode": "8473",
         "companyName": "山林水",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -55153,6 +55536,7 @@
         "cbName": "台境二",
         "stockCode": "8476",
         "companyName": "台境*",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -55285,6 +55669,7 @@
         "cbName": "東哥遊艇一",
         "stockCode": "8478",
         "companyName": "東哥遊艇",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -55417,6 +55802,7 @@
         "cbName": "吉源一KY",
         "stockCode": "8488",
         "companyName": "吉源-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -55489,7 +55875,7 @@
         "turnoverAmount": 0,
         "lastTradeDate": null,
         "lastPrice": null,
-        "lastVolume": 0,
+        "lastVolume": null,
         "lastTurnoverAmount": null,
         "tradeState": "NO_TRADE_TODAY",
         "isLatestSnapshot": false
@@ -55563,6 +55949,7 @@
         "cbName": "三貝德一",
         "stockCode": "8489",
         "companyName": "三貝德",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -55695,6 +56082,7 @@
         "cbName": "北基七",
         "stockCode": "8927",
         "companyName": "北基",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -55841,6 +56229,7 @@
         "cbName": "北基八",
         "stockCode": "8927",
         "companyName": "北基",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -55979,6 +56368,7 @@
         "cbName": "國統五",
         "stockCode": "8936",
         "companyName": "國統",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -56117,6 +56507,7 @@
         "cbName": "國統六",
         "stockCode": "8936",
         "companyName": "國統",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -56191,7 +56582,7 @@
         "lastPrice": 489,
         "lastVolume": 14,
         "lastTurnoverAmount": 6846000,
-        "tradeState": "NO_TRADE_TODAY",
+        "tradeState": "DATA_ERROR",
         "isLatestSnapshot": false
       },
       "liquidity": {
@@ -56308,6 +56699,7 @@
         "cbName": "高力四",
         "stockCode": "8996",
         "companyName": "高力",
+        "status": "archived",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -56454,6 +56846,7 @@
         "cbName": "鈺齊六KY",
         "stockCode": "9802",
         "companyName": "鈺齊-KY",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -56600,6 +56993,7 @@
         "cbName": "欣巴巴三",
         "stockCode": "9906",
         "companyName": "欣巴巴",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -56746,6 +57140,7 @@
         "cbName": "中鼎二",
         "stockCode": "9933",
         "companyName": "中鼎",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -56892,6 +57287,7 @@
         "cbName": "慶豐富三",
         "stockCode": "9935",
         "companyName": "慶豐富",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -57038,6 +57434,7 @@
         "cbName": "宏全二",
         "stockCode": "9939",
         "companyName": "宏全",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -57184,6 +57581,7 @@
         "cbName": "裕融二",
         "stockCode": "9941",
         "companyName": "裕融",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -57330,6 +57728,7 @@
         "cbName": "世紀鋼七",
         "stockCode": "9958",
         "companyName": "世紀鋼",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -57476,6 +57875,7 @@
         "cbName": "世紀鋼八永",
         "stockCode": "9958",
         "companyName": "世紀鋼",
+        "status": "active",
         "stages": {
           "announcementDate": null,
           "filingDate": null,
@@ -71126,6 +71526,7 @@
       "cbName": "晟田五",
       "stockCode": "4541",
       "companyName": "晟田",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71142,7 +71543,7 @@
         "underwriter": "920T凱基證券",
         "trustee": "凱基商業銀行股份有限公司"
       },
-      "currentStage": "listingDate",
+      "currentStage": "scheduled",
       "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
       "dataDate": "2026-09-08"
     },
@@ -71151,6 +71552,7 @@
       "cbName": "大甲一",
       "stockCode": "2221",
       "companyName": "大甲",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71167,7 +71569,7 @@
         "underwriter": "585T統一綜合證券",
         "trustee": "台新國際商業銀行"
       },
-      "currentStage": "listingDate",
+      "currentStage": "scheduled",
       "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
       "dataDate": "2026-09-08"
     },
@@ -71176,6 +71578,7 @@
       "cbName": "金利食安一",
       "stockCode": "7743",
       "companyName": "金利食安",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71192,7 +71595,7 @@
         "underwriter": "9A0T永豐金證券",
         "trustee": "永豐商業銀行股份有限公司信託處"
       },
-      "currentStage": "listingDate",
+      "currentStage": "scheduled",
       "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
       "dataDate": "2026-09-08"
     },
@@ -71201,6 +71604,7 @@
       "cbName": "寶一一",
       "stockCode": "8222",
       "companyName": "寶一",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71217,7 +71621,7 @@
         "underwriter": "9B0T台新綜合證券",
         "trustee": "中國信託商業銀行"
       },
-      "currentStage": "listingDate",
+      "currentStage": "scheduled",
       "sourceUrl": "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv",
       "dataDate": "2026-09-08"
     },
@@ -71226,6 +71630,7 @@
       "cbName": "盟立三",
       "stockCode": "2464",
       "companyName": "盟立",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71251,6 +71656,7 @@
       "cbName": "中砂二",
       "stockCode": "1560",
       "companyName": "中砂",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71276,6 +71682,7 @@
       "cbName": "聯電二",
       "stockCode": "2303",
       "companyName": "聯電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71301,6 +71708,7 @@
       "cbName": "正達四",
       "stockCode": "3149",
       "companyName": "正達",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71326,6 +71734,7 @@
       "cbName": "國統六",
       "stockCode": "8936",
       "companyName": "國統",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71351,6 +71760,7 @@
       "cbName": "聚賢研發一創",
       "stockCode": "7631",
       "companyName": "聚賢研發-創",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71376,6 +71786,7 @@
       "cbName": "倚強科一",
       "stockCode": "3219",
       "companyName": "倚強科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71401,6 +71812,7 @@
       "cbName": "廣穎電通一",
       "stockCode": "4973",
       "companyName": "廣穎電通",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71426,6 +71838,7 @@
       "cbName": "嘉晶六",
       "stockCode": "3016",
       "companyName": "嘉晶",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71451,6 +71864,7 @@
       "cbName": "皇龍二",
       "stockCode": "3512",
       "companyName": "皇龍",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71476,6 +71890,7 @@
       "cbName": "十銓五",
       "stockCode": "4967",
       "companyName": "十銓",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71501,6 +71916,7 @@
       "cbName": "聖暉三",
       "stockCode": "5536",
       "companyName": "聖暉*",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71526,6 +71942,7 @@
       "cbName": "國統五",
       "stockCode": "8936",
       "companyName": "國統",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71551,6 +71968,7 @@
       "cbName": "維田二",
       "stockCode": "6570",
       "companyName": "維田",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71576,6 +71994,7 @@
       "cbName": "聯亞二",
       "stockCode": "3081",
       "companyName": "聯亞",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71601,6 +72020,7 @@
       "cbName": "博智三",
       "stockCode": "8155",
       "companyName": "博智",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71626,6 +72046,7 @@
       "cbName": "聯亞一",
       "stockCode": "3081",
       "companyName": "聯亞",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71651,6 +72072,7 @@
       "cbName": "雍智一",
       "stockCode": "6683",
       "companyName": "雍智科技",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71676,6 +72098,7 @@
       "cbName": "聯電一",
       "stockCode": "2303",
       "companyName": "聯電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71701,6 +72124,7 @@
       "cbName": "晶宏四",
       "stockCode": "3141",
       "companyName": "晶宏",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71726,6 +72150,7 @@
       "cbName": "巨漢二",
       "stockCode": "6903",
       "companyName": "巨漢",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71751,6 +72176,7 @@
       "cbName": "雙鍵二",
       "stockCode": "4764",
       "companyName": "雙鍵",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71776,6 +72202,7 @@
       "cbName": "昶昕一",
       "stockCode": "8438",
       "companyName": "昶昕",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71801,6 +72228,7 @@
       "cbName": "聖暉二",
       "stockCode": "5536",
       "companyName": "聖暉*",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71826,6 +72254,7 @@
       "cbName": "博智二",
       "stockCode": "8155",
       "companyName": "博智",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71851,6 +72280,7 @@
       "cbName": "辛耘三",
       "stockCode": "3583",
       "companyName": "辛耘",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71876,6 +72306,7 @@
       "cbName": "邑昇二",
       "stockCode": "5291",
       "companyName": "邑昇",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71901,6 +72332,7 @@
       "cbName": "增你強五",
       "stockCode": "3028",
       "companyName": "增你強",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71926,6 +72358,7 @@
       "cbName": "廣閎科一",
       "stockCode": "6693",
       "companyName": "廣閎科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71951,6 +72384,7 @@
       "cbName": "雲豹能源二",
       "stockCode": "6869",
       "companyName": "雲豹能源",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -71976,6 +72410,7 @@
       "cbName": "巨漢一",
       "stockCode": "6903",
       "companyName": "巨漢",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72001,6 +72436,7 @@
       "cbName": "威宏三KY",
       "stockCode": "8442",
       "companyName": "威宏-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72026,6 +72462,7 @@
       "cbName": "一詮七",
       "stockCode": "2486",
       "companyName": "一詮",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72051,6 +72488,7 @@
       "cbName": "安國一",
       "stockCode": "8054",
       "companyName": "安國",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72076,6 +72514,7 @@
       "cbName": "萬旭三",
       "stockCode": "6134",
       "companyName": "萬旭",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72101,6 +72540,7 @@
       "cbName": "大東電一",
       "stockCode": "1623",
       "companyName": "大東電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72126,6 +72566,7 @@
       "cbName": "擎亞三",
       "stockCode": "8096",
       "companyName": "擎亞",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72151,6 +72592,7 @@
       "cbName": "宏致四",
       "stockCode": "3605",
       "companyName": "宏致",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72176,6 +72618,7 @@
       "cbName": "萬潤六",
       "stockCode": "6187",
       "companyName": "萬潤",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72201,6 +72644,7 @@
       "cbName": "南俊國際三",
       "stockCode": "6584",
       "companyName": "南俊國際",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72226,6 +72670,7 @@
       "cbName": "擎亞二",
       "stockCode": "8096",
       "companyName": "擎亞",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72251,6 +72696,7 @@
       "cbName": "宜鼎二",
       "stockCode": "5289",
       "companyName": "宜鼎",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72276,6 +72722,7 @@
       "cbName": "佐登四KY",
       "stockCode": "4190",
       "companyName": "佐登-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72301,6 +72748,7 @@
       "cbName": "正基三",
       "stockCode": "6546",
       "companyName": "正基",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72326,6 +72774,7 @@
       "cbName": "至上11",
       "stockCode": "8112",
       "companyName": "至上",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72351,6 +72800,7 @@
       "cbName": "英濟三",
       "stockCode": "3294",
       "companyName": "英濟",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72376,6 +72826,7 @@
       "cbName": "旺矽六",
       "stockCode": "6223",
       "companyName": "旺矽",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72401,6 +72852,7 @@
       "cbName": "岳豐十",
       "stockCode": "6220",
       "companyName": "岳豐",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72426,6 +72878,7 @@
       "cbName": "昇達科三",
       "stockCode": "3491",
       "companyName": "昇達科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72451,6 +72904,7 @@
       "cbName": "正基二",
       "stockCode": "6546",
       "companyName": "正基",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72476,6 +72930,7 @@
       "cbName": "長興二",
       "stockCode": "1717",
       "companyName": "長興",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72501,6 +72956,7 @@
       "cbName": "新盛力一",
       "stockCode": "4931",
       "companyName": "新盛力",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72526,6 +72982,7 @@
       "cbName": "新應材一",
       "stockCode": "4749",
       "companyName": "新應材",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72551,6 +73008,7 @@
       "cbName": "國精化四",
       "stockCode": "4722",
       "companyName": "國精化",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72576,6 +73034,7 @@
       "cbName": "霖宏二",
       "stockCode": "5464",
       "companyName": "霖宏",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72601,6 +73060,7 @@
       "cbName": "勤凱二",
       "stockCode": "4760",
       "companyName": "勤凱科技",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72626,6 +73086,7 @@
       "cbName": "家登六",
       "stockCode": "3680",
       "companyName": "家登",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72651,6 +73112,7 @@
       "cbName": "崑鼎二",
       "stockCode": "6803",
       "companyName": "崑鼎",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72676,6 +73138,7 @@
       "cbName": "聯友金屬一創",
       "stockCode": "7610",
       "companyName": "聯友金屬-創",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72701,6 +73164,7 @@
       "cbName": "晟德九",
       "stockCode": "4123",
       "companyName": "晟德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72726,6 +73190,7 @@
       "cbName": "鉅橡六",
       "stockCode": "8074",
       "companyName": "鉅橡",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72751,6 +73216,7 @@
       "cbName": "金雨一",
       "stockCode": "4503",
       "companyName": "金雨",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72776,6 +73242,7 @@
       "cbName": "jpp五KY",
       "stockCode": "5284",
       "companyName": "jpp-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72801,6 +73268,7 @@
       "cbName": "家登五",
       "stockCode": "3680",
       "companyName": "家登",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72826,6 +73294,7 @@
       "cbName": "柏文四",
       "stockCode": "8462",
       "companyName": "柏文",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72851,6 +73320,7 @@
       "cbName": "凌航二",
       "stockCode": "3135",
       "companyName": "凌航",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72876,6 +73346,7 @@
       "cbName": "jpp四KY",
       "stockCode": "5284",
       "companyName": "jpp-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72901,6 +73372,7 @@
       "cbName": "宇瞻一",
       "stockCode": "8271",
       "companyName": "宇瞻",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72926,6 +73398,7 @@
       "cbName": "晟德八",
       "stockCode": "4123",
       "companyName": "晟德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72951,6 +73424,7 @@
       "cbName": "永捷八",
       "stockCode": "4714",
       "companyName": "永捷",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -72976,6 +73450,7 @@
       "cbName": "富強鑫四",
       "stockCode": "6603",
       "companyName": "富強鑫",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73001,6 +73476,7 @@
       "cbName": "立碁四",
       "stockCode": "8111",
       "companyName": "立碁",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73026,6 +73502,7 @@
       "cbName": "台境二",
       "stockCode": "8476",
       "companyName": "台境*",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73051,6 +73528,7 @@
       "cbName": "保瑞五",
       "stockCode": "6472",
       "companyName": "保瑞",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73076,6 +73554,7 @@
       "cbName": "保瑞四",
       "stockCode": "6472",
       "companyName": "保瑞",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73101,6 +73580,7 @@
       "cbName": "今皓二",
       "stockCode": "3011",
       "companyName": "今皓",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73126,6 +73606,7 @@
       "cbName": "逸達一",
       "stockCode": "6576",
       "companyName": "逸達",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73151,6 +73632,7 @@
       "cbName": "定穎投控二",
       "stockCode": "3715",
       "companyName": "定穎投控",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73176,6 +73658,7 @@
       "cbName": "聯上六",
       "stockCode": "4113",
       "companyName": "聯上",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73201,6 +73684,7 @@
       "cbName": "高端疫苗二",
       "stockCode": "6547",
       "companyName": "高端疫苗",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73226,6 +73710,7 @@
       "cbName": "鴻呈一",
       "stockCode": "6913",
       "companyName": "鴻呈",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73251,6 +73736,7 @@
       "cbName": "華泰一",
       "stockCode": "2329",
       "companyName": "華泰",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73276,6 +73762,7 @@
       "cbName": "雙鴻七",
       "stockCode": "3324",
       "companyName": "雙鴻",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73301,6 +73788,7 @@
       "cbName": "三集瑞一KY",
       "stockCode": "6862",
       "companyName": "三集瑞-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73326,6 +73814,7 @@
       "cbName": "長虹四",
       "stockCode": "5534",
       "companyName": "長虹",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73351,6 +73840,7 @@
       "cbName": "衛司特一",
       "stockCode": "6894",
       "companyName": "衛司特",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73376,6 +73866,7 @@
       "cbName": "雙鴻六",
       "stockCode": "3324",
       "companyName": "雙鴻",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73401,6 +73892,7 @@
       "cbName": "百達三KY",
       "stockCode": "2236",
       "companyName": "百達-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73426,6 +73918,7 @@
       "cbName": "群聯三",
       "stockCode": "8299",
       "companyName": "群聯",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73451,6 +73944,7 @@
       "cbName": "穎崴二",
       "stockCode": "6515",
       "companyName": "穎崴",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73476,6 +73970,7 @@
       "cbName": "閎康二",
       "stockCode": "3587",
       "companyName": "閎康",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73501,6 +73996,7 @@
       "cbName": "騰輝電子二KY",
       "stockCode": "6672",
       "companyName": "騰輝電子-KY",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73526,6 +74022,7 @@
       "cbName": "勤誠三",
       "stockCode": "8210",
       "companyName": "勤誠",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73551,6 +74048,7 @@
       "cbName": "佳能二",
       "stockCode": "2374",
       "companyName": "佳能",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73576,6 +74074,7 @@
       "cbName": "寬魚國際二",
       "stockCode": "6101",
       "companyName": "寬魚國際",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73601,6 +74100,7 @@
       "cbName": "力士一",
       "stockCode": "4923",
       "companyName": "力士",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73626,6 +74126,7 @@
       "cbName": "寬魚國際一",
       "stockCode": "6101",
       "companyName": "寬魚國際",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73651,6 +74152,7 @@
       "cbName": "全新三",
       "stockCode": "2455",
       "companyName": "全新",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73676,6 +74178,7 @@
       "cbName": "勤誠二",
       "stockCode": "8210",
       "companyName": "勤誠",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73701,6 +74204,7 @@
       "cbName": "宇隆一",
       "stockCode": "2233",
       "companyName": "宇隆",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73726,6 +74230,7 @@
       "cbName": "全新二",
       "stockCode": "2455",
       "companyName": "全新",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73751,6 +74256,7 @@
       "cbName": "志聖三",
       "stockCode": "2467",
       "companyName": "志聖",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73776,6 +74282,7 @@
       "cbName": "騰輝電子一KY",
       "stockCode": "6672",
       "companyName": "騰輝電子-KY",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73801,6 +74308,7 @@
       "cbName": "定穎投控一",
       "stockCode": "3715",
       "companyName": "定穎投控",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73826,6 +74334,7 @@
       "cbName": "聯嘉投控一",
       "stockCode": "3717",
       "companyName": "聯嘉投控",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73851,6 +74360,7 @@
       "cbName": "天品四",
       "stockCode": "6199",
       "companyName": "天品",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73876,6 +74386,7 @@
       "cbName": "天品三",
       "stockCode": "6199",
       "companyName": "天品",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73901,6 +74412,7 @@
       "cbName": "尖點二",
       "stockCode": "8021",
       "companyName": "尖點",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73926,6 +74438,7 @@
       "cbName": "大聯大E1",
       "stockCode": "3702",
       "companyName": "大聯大",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73951,6 +74464,7 @@
       "cbName": "志聖二",
       "stockCode": "2467",
       "companyName": "志聖",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -73976,6 +74490,7 @@
       "cbName": "五福一",
       "stockCode": "2745",
       "companyName": "五福",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74001,6 +74516,7 @@
       "cbName": "精測一",
       "stockCode": "6510",
       "companyName": "精測",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74026,6 +74542,7 @@
       "cbName": "匯鑽科二",
       "stockCode": "8431",
       "companyName": "匯鑽科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74051,6 +74568,7 @@
       "cbName": "州巧一",
       "stockCode": "3543",
       "companyName": "州巧",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74076,6 +74594,7 @@
       "cbName": "復盛應用二",
       "stockCode": "6670",
       "companyName": "復盛應用",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74101,6 +74620,7 @@
       "cbName": "伯鑫一",
       "stockCode": "6904",
       "companyName": "伯鑫",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74126,6 +74646,7 @@
       "cbName": "晉弘二",
       "stockCode": "6796",
       "companyName": "晉弘",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74151,6 +74672,7 @@
       "cbName": "康普四",
       "stockCode": "4739",
       "companyName": "康普",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74176,6 +74698,7 @@
       "cbName": "金山電六",
       "stockCode": "8042",
       "companyName": "金山電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74201,6 +74724,7 @@
       "cbName": "系統電七",
       "stockCode": "5309",
       "companyName": "系統電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74226,6 +74750,7 @@
       "cbName": "系統電六",
       "stockCode": "5309",
       "companyName": "系統電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74251,6 +74776,7 @@
       "cbName": "來億二KY",
       "stockCode": "6890",
       "companyName": "來億-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74276,6 +74802,7 @@
       "cbName": "六角四",
       "stockCode": "2732",
       "companyName": "六角",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74301,6 +74828,7 @@
       "cbName": "來億一KY",
       "stockCode": "6890",
       "companyName": "來億-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74326,6 +74854,7 @@
       "cbName": "台特化一",
       "stockCode": "4772",
       "companyName": "台特化",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74351,6 +74880,7 @@
       "cbName": "偉訓二",
       "stockCode": "3032",
       "companyName": "偉訓",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74376,6 +74906,7 @@
       "cbName": "金像電三",
       "stockCode": "2368",
       "companyName": "金像電",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74401,6 +74932,7 @@
       "cbName": "毅嘉三",
       "stockCode": "2402",
       "companyName": "毅嘉",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74426,6 +74958,7 @@
       "cbName": "偉訓一",
       "stockCode": "3032",
       "companyName": "偉訓",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74451,6 +74984,7 @@
       "cbName": "萬泰科七",
       "stockCode": "6190",
       "companyName": "萬泰科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74476,6 +75010,7 @@
       "cbName": "欣興一",
       "stockCode": "3037",
       "companyName": "欣興",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74501,6 +75036,7 @@
       "cbName": "世禾三",
       "stockCode": "3551",
       "companyName": "世禾",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74526,6 +75062,7 @@
       "cbName": "榮昌一",
       "stockCode": "3684",
       "companyName": "榮昌",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74551,6 +75088,7 @@
       "cbName": "聯上五",
       "stockCode": "4113",
       "companyName": "聯上",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74576,6 +75114,7 @@
       "cbName": "今國光三",
       "stockCode": "6209",
       "companyName": "今國光",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74601,6 +75140,7 @@
       "cbName": "八方雲集二",
       "stockCode": "2753",
       "companyName": "八方雲集",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74626,6 +75166,7 @@
       "cbName": "威力德生醫一",
       "stockCode": "7713",
       "companyName": "威力德生醫",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74651,6 +75192,7 @@
       "cbName": "華電網五",
       "stockCode": "6163",
       "companyName": "華電網",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74676,6 +75218,7 @@
       "cbName": "富旺四",
       "stockCode": "6219",
       "companyName": "富旺",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74701,6 +75244,7 @@
       "cbName": "凱衛一",
       "stockCode": "5201",
       "companyName": "凱衛",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74726,6 +75270,7 @@
       "cbName": "八方雲集一",
       "stockCode": "2753",
       "companyName": "八方雲集",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74751,6 +75296,7 @@
       "cbName": "安集五",
       "stockCode": "6477",
       "companyName": "安集",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74776,6 +75322,7 @@
       "cbName": "鮮活果汁一KY",
       "stockCode": "1256",
       "companyName": "鮮活果汁-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74801,6 +75348,7 @@
       "cbName": "歐買尬三",
       "stockCode": "3687",
       "companyName": "歐買尬",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74826,6 +75374,7 @@
       "cbName": "百和興業一KY",
       "stockCode": "8404",
       "companyName": "百和興業-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74851,6 +75400,7 @@
       "cbName": "歐買尬二",
       "stockCode": "3687",
       "companyName": "歐買尬",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74876,6 +75426,7 @@
       "cbName": "裕慶一KY",
       "stockCode": "6957",
       "companyName": "裕慶-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74901,6 +75452,7 @@
       "cbName": "國精化三",
       "stockCode": "4722",
       "companyName": "國精化",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74926,6 +75478,7 @@
       "cbName": "廣越三",
       "stockCode": "4438",
       "companyName": "廣越",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74951,6 +75504,7 @@
       "cbName": "醣聯四",
       "stockCode": "4168",
       "companyName": "醣聯",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -74976,6 +75530,7 @@
       "cbName": "太普高三",
       "stockCode": "3284",
       "companyName": "太普高",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75001,6 +75556,7 @@
       "cbName": "高技一",
       "stockCode": "5439",
       "companyName": "高技",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75026,6 +75582,7 @@
       "cbName": "晶心科一",
       "stockCode": "6533",
       "companyName": "晶心科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75051,6 +75608,7 @@
       "cbName": "雷科六",
       "stockCode": "6207",
       "companyName": "雷科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75076,6 +75634,7 @@
       "cbName": "邑錡二",
       "stockCode": "7402",
       "companyName": "邑錡",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75101,6 +75660,7 @@
       "cbName": "山富一",
       "stockCode": "2743",
       "companyName": "山富",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75126,6 +75686,7 @@
       "cbName": "寶緯一",
       "stockCode": "4558",
       "companyName": "寶緯",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75151,6 +75712,7 @@
       "cbName": "動力四KY",
       "stockCode": "6591",
       "companyName": "動力-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75176,6 +75738,7 @@
       "cbName": "雷科五",
       "stockCode": "6207",
       "companyName": "雷科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75201,6 +75764,7 @@
       "cbName": "漢磊五",
       "stockCode": "3707",
       "companyName": "漢磊",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75226,6 +75790,7 @@
       "cbName": "光隆精密一KY",
       "stockCode": "4581",
       "companyName": "光隆精密-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75251,6 +75816,7 @@
       "cbName": "聯寶一",
       "stockCode": "6821",
       "companyName": "聯寶",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75276,6 +75842,7 @@
       "cbName": "意德士二",
       "stockCode": "7556",
       "companyName": "意德士科技",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75301,6 +75868,7 @@
       "cbName": "意德士一永",
       "stockCode": "7556",
       "companyName": "意德士科技",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75326,6 +75894,7 @@
       "cbName": "正德八",
       "stockCode": "2641",
       "companyName": "正德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75351,6 +75920,7 @@
       "cbName": "大量二",
       "stockCode": "3167",
       "companyName": "大量",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75376,6 +75946,7 @@
       "cbName": "弘塑二",
       "stockCode": "3131",
       "companyName": "弘塑",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75401,6 +75972,7 @@
       "cbName": "進典一",
       "stockCode": "6843",
       "companyName": "進典",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75426,6 +75998,7 @@
       "cbName": "大井泵浦二",
       "stockCode": "6982",
       "companyName": "大井泵浦",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75451,6 +76024,7 @@
       "cbName": "科妍三",
       "stockCode": "1786",
       "companyName": "科妍",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75476,6 +76050,7 @@
       "cbName": "福貞三KY",
       "stockCode": "8411",
       "companyName": "福貞-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75501,6 +76076,7 @@
       "cbName": "弘塑一",
       "stockCode": "3131",
       "companyName": "弘塑",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75526,6 +76102,7 @@
       "cbName": "竣邦一KY",
       "stockCode": "4442",
       "companyName": "竣邦-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75551,6 +76128,7 @@
       "cbName": "大樹三",
       "stockCode": "6469",
       "companyName": "大樹",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75576,6 +76154,7 @@
       "cbName": "凡甲七",
       "stockCode": "3526",
       "companyName": "凡甲",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75601,6 +76180,7 @@
       "cbName": "大井泵浦一",
       "stockCode": "6982",
       "companyName": "大井泵浦",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75626,6 +76206,7 @@
       "cbName": "汎德永業二",
       "stockCode": "2247",
       "companyName": "汎德永業",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75651,6 +76232,7 @@
       "cbName": "華建四",
       "stockCode": "2530",
       "companyName": "華建",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75676,6 +76258,7 @@
       "cbName": "遠見一",
       "stockCode": "3040",
       "companyName": "遠見",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75701,6 +76284,7 @@
       "cbName": "汎德永業一",
       "stockCode": "2247",
       "companyName": "汎德永業",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75726,6 +76310,7 @@
       "cbName": "倉和一",
       "stockCode": "6538",
       "companyName": "倉和",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75751,6 +76336,7 @@
       "cbName": "松上五",
       "stockCode": "6156",
       "companyName": "松上",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75776,6 +76362,7 @@
       "cbName": "達麗七",
       "stockCode": "6177",
       "companyName": "達麗",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75801,6 +76388,7 @@
       "cbName": "華建三",
       "stockCode": "2530",
       "companyName": "華建",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75826,6 +76414,7 @@
       "cbName": "聚隆四",
       "stockCode": "1466",
       "companyName": "聚隆",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75851,6 +76440,7 @@
       "cbName": "鑫龍騰二",
       "stockCode": "3188",
       "companyName": "鑫龍騰",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75876,6 +76466,7 @@
       "cbName": "承業醫五",
       "stockCode": "4164",
       "companyName": "承業醫",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75901,6 +76492,7 @@
       "cbName": "三洋實業三",
       "stockCode": "1472",
       "companyName": "三洋實業",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75926,6 +76518,7 @@
       "cbName": "順德一",
       "stockCode": "2351",
       "companyName": "順德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75951,6 +76544,7 @@
       "cbName": "碩天三",
       "stockCode": "3617",
       "companyName": "碩天",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -75976,6 +76570,7 @@
       "cbName": "氣立四",
       "stockCode": "4555",
       "companyName": "氣立",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76001,6 +76596,7 @@
       "cbName": "三洋實業二",
       "stockCode": "1472",
       "companyName": "三洋實業",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76026,6 +76622,7 @@
       "cbName": "聯合五",
       "stockCode": "4129",
       "companyName": "聯合",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76051,6 +76648,7 @@
       "cbName": "泓德能源二",
       "stockCode": "6873",
       "companyName": "泓德能源-創",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76076,6 +76674,7 @@
       "cbName": "迎廣二",
       "stockCode": "6117",
       "companyName": "迎廣",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76101,6 +76700,7 @@
       "cbName": "良維十",
       "stockCode": "6290",
       "companyName": "良維",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76126,6 +76726,7 @@
       "cbName": "平和環保一創",
       "stockCode": "6771",
       "companyName": "平和環保-創",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76151,6 +76752,7 @@
       "cbName": "麗升能源二",
       "stockCode": "8087",
       "companyName": "麗升能源",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76176,6 +76778,7 @@
       "cbName": "可寧衛二",
       "stockCode": "8422",
       "companyName": "可寧衛",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76201,6 +76804,7 @@
       "cbName": "弘裕三",
       "stockCode": "1474",
       "companyName": "弘裕",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76226,6 +76830,7 @@
       "cbName": "綠茵二",
       "stockCode": "6846",
       "companyName": "綠茵",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76251,6 +76856,7 @@
       "cbName": "旺宏二",
       "stockCode": "2337",
       "companyName": "旺宏",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76276,6 +76882,7 @@
       "cbName": "華友聯四",
       "stockCode": "1436",
       "companyName": "華友聯",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76301,6 +76908,7 @@
       "cbName": "綠茵一",
       "stockCode": "6846",
       "companyName": "綠茵",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76326,6 +76934,7 @@
       "cbName": "岱宇四",
       "stockCode": "1598",
       "companyName": "岱宇",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76351,6 +76960,7 @@
       "cbName": "冠星一KY",
       "stockCode": "4439",
       "companyName": "冠星-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76376,6 +76986,7 @@
       "cbName": "訊芯二KY",
       "stockCode": "6451",
       "companyName": "訊芯-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76401,6 +77012,7 @@
       "cbName": "錼創科技一KY創",
       "stockCode": "6854",
       "companyName": "錼創科技-KY創",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76426,6 +77038,7 @@
       "cbName": "欣巴巴三",
       "stockCode": "9906",
       "companyName": "欣巴巴",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76451,6 +77064,7 @@
       "cbName": "高鋒二",
       "stockCode": "4510",
       "companyName": "高鋒",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76476,6 +77090,7 @@
       "cbName": "台灣大五",
       "stockCode": "3045",
       "companyName": "台灣大",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76501,6 +77116,7 @@
       "cbName": "及成四",
       "stockCode": "3095",
       "companyName": "及成",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76526,6 +77142,7 @@
       "cbName": "兆利三",
       "stockCode": "3548",
       "companyName": "兆利",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76551,6 +77168,7 @@
       "cbName": "台灣大四",
       "stockCode": "3045",
       "companyName": "台灣大",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76576,6 +77194,7 @@
       "cbName": "旭軟二",
       "stockCode": "3390",
       "companyName": "旭軟",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76601,6 +77220,7 @@
       "cbName": "昇陽半導體二",
       "stockCode": "8028",
       "companyName": "昇陽半導體",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76626,6 +77246,7 @@
       "cbName": "皇普四",
       "stockCode": "2528",
       "companyName": "皇普",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76651,6 +77272,7 @@
       "cbName": "揚秦一",
       "stockCode": "2755",
       "companyName": "揚秦",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76676,6 +77298,7 @@
       "cbName": "六方科一KY",
       "stockCode": "4569",
       "companyName": "六方科-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76701,6 +77324,7 @@
       "cbName": "亞力二",
       "stockCode": "1514",
       "companyName": "亞力",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76726,6 +77350,7 @@
       "cbName": "博智一",
       "stockCode": "8155",
       "companyName": "博智",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76751,6 +77376,7 @@
       "cbName": "皇普三",
       "stockCode": "2528",
       "companyName": "皇普",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76776,6 +77402,7 @@
       "cbName": "上曜六",
       "stockCode": "1316",
       "companyName": "上曜",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76801,6 +77428,7 @@
       "cbName": "新美齊四",
       "stockCode": "2442",
       "companyName": "新美齊",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76826,6 +77454,7 @@
       "cbName": "華星光四",
       "stockCode": "4979",
       "companyName": "華星光",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76851,6 +77480,7 @@
       "cbName": "三地開發一",
       "stockCode": "1438",
       "companyName": "三地開發",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76876,6 +77506,7 @@
       "cbName": "智晶二",
       "stockCode": "5245",
       "companyName": "智晶",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76901,6 +77532,7 @@
       "cbName": "四維航七",
       "stockCode": "5608",
       "companyName": "四維航",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76926,6 +77558,7 @@
       "cbName": "台泥一永",
       "stockCode": "1101",
       "companyName": "台泥",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76951,6 +77584,7 @@
       "cbName": "華星光三",
       "stockCode": "4979",
       "companyName": "華星光",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -76976,6 +77610,7 @@
       "cbName": "三貝德一",
       "stockCode": "8489",
       "companyName": "三貝德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77001,6 +77636,7 @@
       "cbName": "騰雲一",
       "stockCode": "6870",
       "companyName": "騰雲",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77026,6 +77662,7 @@
       "cbName": "騰雲二",
       "stockCode": "6870",
       "companyName": "騰雲",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77051,6 +77688,7 @@
       "cbName": "金萬林一創",
       "stockCode": "6645",
       "companyName": "金萬林-創",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77076,6 +77714,7 @@
       "cbName": "新美齊三",
       "stockCode": "2442",
       "companyName": "新美齊",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77101,6 +77740,7 @@
       "cbName": "斐成三",
       "stockCode": "3313",
       "companyName": "斐成",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77126,6 +77766,7 @@
       "cbName": "麗清六",
       "stockCode": "3346",
       "companyName": "麗清",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77151,6 +77792,7 @@
       "cbName": "岱稜五",
       "stockCode": "3303",
       "companyName": "岱稜",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77176,6 +77818,7 @@
       "cbName": "艾笛森四",
       "stockCode": "3591",
       "companyName": "艾笛森",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77201,6 +77844,7 @@
       "cbName": "群翊二",
       "stockCode": "6664",
       "companyName": "群翊",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77226,6 +77870,7 @@
       "cbName": "羅昇二",
       "stockCode": "8374",
       "companyName": "羅昇",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77251,6 +77896,7 @@
       "cbName": "鈺齊六KY",
       "stockCode": "9802",
       "companyName": "鈺齊-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77276,6 +77922,7 @@
       "cbName": "天宇五",
       "stockCode": "8171",
       "companyName": "天宇",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77301,6 +77948,7 @@
       "cbName": "天宇四",
       "stockCode": "8171",
       "companyName": "天宇",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77326,6 +77974,7 @@
       "cbName": "世紀鋼八永",
       "stockCode": "9958",
       "companyName": "世紀鋼",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77351,6 +78000,7 @@
       "cbName": "桓達一",
       "stockCode": "4549",
       "companyName": "桓達",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77376,6 +78026,7 @@
       "cbName": "倍力一",
       "stockCode": "6874",
       "companyName": "倍力",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77401,6 +78052,7 @@
       "cbName": "虹冠電一",
       "stockCode": "3257",
       "companyName": "虹冠電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77426,6 +78078,7 @@
       "cbName": "圓裕一",
       "stockCode": "6835",
       "companyName": "圓裕",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77451,6 +78104,7 @@
       "cbName": "志強一KY",
       "stockCode": "6768",
       "companyName": "志強-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77476,6 +78130,7 @@
       "cbName": "南俊國際二",
       "stockCode": "6584",
       "companyName": "南俊國際",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77501,6 +78156,7 @@
       "cbName": "南俊國際一",
       "stockCode": "6584",
       "companyName": "南俊國際",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77526,6 +78182,7 @@
       "cbName": "宏全二",
       "stockCode": "9939",
       "companyName": "宏全",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77551,6 +78208,7 @@
       "cbName": "世紀鋼七",
       "stockCode": "9958",
       "companyName": "世紀鋼",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77576,6 +78234,7 @@
       "cbName": "惠特二",
       "stockCode": "6706",
       "companyName": "惠特",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77601,6 +78260,7 @@
       "cbName": "華固四",
       "stockCode": "2548",
       "companyName": "華固",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77626,6 +78286,7 @@
       "cbName": "晟銘電四",
       "stockCode": "3013",
       "companyName": "晟銘電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77651,6 +78312,7 @@
       "cbName": "亞帝歐一",
       "stockCode": "3516",
       "companyName": "亞帝歐",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77676,6 +78338,7 @@
       "cbName": "凌網一",
       "stockCode": "5212",
       "companyName": "凌網",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77701,6 +78364,7 @@
       "cbName": "佳必琪三",
       "stockCode": "6197",
       "companyName": "佳必琪",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77726,6 +78390,7 @@
       "cbName": "易發一",
       "stockCode": "6425",
       "companyName": "易發",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77751,6 +78416,7 @@
       "cbName": "永道一KY",
       "stockCode": "6863",
       "companyName": "永道-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77776,6 +78442,7 @@
       "cbName": "慶豐富三",
       "stockCode": "9935",
       "companyName": "慶豐富",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77801,6 +78468,7 @@
       "cbName": "正淩三",
       "stockCode": "8147",
       "companyName": "正淩",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77826,6 +78494,7 @@
       "cbName": "允強四",
       "stockCode": "2034",
       "companyName": "允強",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77851,6 +78520,7 @@
       "cbName": "華固三",
       "stockCode": "2548",
       "companyName": "華固",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77876,6 +78546,7 @@
       "cbName": "大亞五",
       "stockCode": "1609",
       "companyName": "大亞",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77901,6 +78572,7 @@
       "cbName": "合晶八",
       "stockCode": "6182",
       "companyName": "合晶",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77926,6 +78598,7 @@
       "cbName": "弘凱一",
       "stockCode": "5244",
       "companyName": "弘凱",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77951,6 +78624,7 @@
       "cbName": "合世三",
       "stockCode": "1781",
       "companyName": "合世",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -77976,6 +78650,7 @@
       "cbName": "盟立二",
       "stockCode": "2464",
       "companyName": "盟立",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78001,6 +78676,7 @@
       "cbName": "泰金二KY",
       "stockCode": "6629",
       "companyName": "泰金-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78026,6 +78702,7 @@
       "cbName": "威健七",
       "stockCode": "3033",
       "companyName": "威健",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78051,6 +78728,7 @@
       "cbName": "光聚晶電二",
       "stockCode": "6111",
       "companyName": "大宇資",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78076,6 +78754,7 @@
       "cbName": "科嶠一",
       "stockCode": "4542",
       "companyName": "科嶠",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78101,6 +78780,7 @@
       "cbName": "其陽二",
       "stockCode": "3564",
       "companyName": "其陽",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78126,6 +78806,7 @@
       "cbName": "川寶二",
       "stockCode": "1595",
       "companyName": "川寶",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78151,6 +78832,7 @@
       "cbName": "建舜電五",
       "stockCode": "3322",
       "companyName": "建舜電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78176,6 +78858,7 @@
       "cbName": "鑫創電子一",
       "stockCode": "6680",
       "companyName": "鑫創電子",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78201,6 +78884,7 @@
       "cbName": "碩禾三",
       "stockCode": "3691",
       "companyName": "碩禾",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78226,6 +78910,7 @@
       "cbName": "劍麟三",
       "stockCode": "2228",
       "companyName": "劍麟",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78251,6 +78936,7 @@
       "cbName": "亞通四",
       "stockCode": "6179",
       "companyName": "亞通",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78276,6 +78962,7 @@
       "cbName": "華友聯三",
       "stockCode": "1436",
       "companyName": "華友聯",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78301,6 +78988,7 @@
       "cbName": "新日興三",
       "stockCode": "3376",
       "companyName": "新日興",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78326,6 +79014,7 @@
       "cbName": "北基八",
       "stockCode": "8927",
       "companyName": "北基",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78351,6 +79040,7 @@
       "cbName": "今展科四",
       "stockCode": "6432",
       "companyName": "今展科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78376,6 +79066,7 @@
       "cbName": "北基七",
       "stockCode": "8927",
       "companyName": "北基",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78401,6 +79092,7 @@
       "cbName": "柏騰一",
       "stockCode": "3518",
       "companyName": "柏騰",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78426,6 +79118,7 @@
       "cbName": "汎銓一",
       "stockCode": "6830",
       "companyName": "汎銓",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78451,6 +79144,7 @@
       "cbName": "翔名四",
       "stockCode": "8091",
       "companyName": "翔名",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78476,6 +79170,7 @@
       "cbName": "和大四",
       "stockCode": "1536",
       "companyName": "和大",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78501,6 +79196,7 @@
       "cbName": "麗豐二KY",
       "stockCode": "4137",
       "companyName": "麗豐-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78526,6 +79222,7 @@
       "cbName": "遠東新E1永",
       "stockCode": "1402",
       "companyName": "遠東新",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78551,6 +79248,7 @@
       "cbName": "遠東新E2永",
       "stockCode": "1402",
       "companyName": "遠東新",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78576,6 +79274,7 @@
       "cbName": "宏致三",
       "stockCode": "3605",
       "companyName": "宏致",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78601,6 +79300,7 @@
       "cbName": "台郡五",
       "stockCode": "6269",
       "companyName": "台郡",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78626,6 +79326,7 @@
       "cbName": "台郡六",
       "stockCode": "6269",
       "companyName": "台郡",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78651,6 +79352,7 @@
       "cbName": "雙鴻五",
       "stockCode": "3324",
       "companyName": "雙鴻",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78676,6 +79378,7 @@
       "cbName": "正德七",
       "stockCode": "2641",
       "companyName": "正德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78701,6 +79404,7 @@
       "cbName": "嘉晶五",
       "stockCode": "3016",
       "companyName": "嘉晶",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78726,6 +79430,7 @@
       "cbName": "中鼎二",
       "stockCode": "9933",
       "companyName": "中鼎",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78751,6 +79456,7 @@
       "cbName": "美律五",
       "stockCode": "2439",
       "companyName": "美律",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78776,6 +79482,7 @@
       "cbName": "先進光一",
       "stockCode": "3362",
       "companyName": "先進光",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78801,6 +79508,7 @@
       "cbName": "駐龍一",
       "stockCode": "4572",
       "companyName": "駐龍",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78826,6 +79534,7 @@
       "cbName": "東哥遊艇一",
       "stockCode": "8478",
       "companyName": "東哥遊艇",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78851,6 +79560,7 @@
       "cbName": "佐登三KY",
       "stockCode": "4190",
       "companyName": "佐登-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78876,6 +79586,7 @@
       "cbName": "美律四",
       "stockCode": "2439",
       "companyName": "美律",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78901,6 +79612,7 @@
       "cbName": "萬年清一",
       "stockCode": "6624",
       "companyName": "萬年清",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78926,6 +79638,7 @@
       "cbName": "聚和六",
       "stockCode": "6509",
       "companyName": "聚和",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78951,6 +79664,7 @@
       "cbName": "弘憶股一",
       "stockCode": "3312",
       "companyName": "弘憶股",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -78976,6 +79690,7 @@
       "cbName": "迅杰三",
       "stockCode": "6243",
       "companyName": "迅杰",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79001,6 +79716,7 @@
       "cbName": "龍德造船一",
       "stockCode": "6753",
       "companyName": "龍德造船",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79026,6 +79742,7 @@
       "cbName": "中砂一",
       "stockCode": "1560",
       "companyName": "中砂",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79051,6 +79768,7 @@
       "cbName": "廣運五",
       "stockCode": "6125",
       "companyName": "廣運",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79076,6 +79794,7 @@
       "cbName": "正基一",
       "stockCode": "6546",
       "companyName": "正基",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79101,6 +79820,7 @@
       "cbName": "波力三KY",
       "stockCode": "8467",
       "companyName": "波力-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79126,6 +79846,7 @@
       "cbName": "聯發國際一",
       "stockCode": "2756",
       "companyName": "聯發國際",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79151,6 +79872,7 @@
       "cbName": "波力二KY",
       "stockCode": "8467",
       "companyName": "波力-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79176,6 +79898,7 @@
       "cbName": "迎廣一",
       "stockCode": "6117",
       "companyName": "迎廣",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79201,6 +79924,7 @@
       "cbName": "東研信超一",
       "stockCode": "6840",
       "companyName": "東研信超",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79226,6 +79950,7 @@
       "cbName": "弘帆三",
       "stockCode": "8433",
       "companyName": "弘帆",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79251,6 +79976,7 @@
       "cbName": "至上十",
       "stockCode": "8112",
       "companyName": "至上",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79276,6 +80002,7 @@
       "cbName": "弘帆二",
       "stockCode": "8433",
       "companyName": "弘帆",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79301,6 +80028,7 @@
       "cbName": "力致四",
       "stockCode": "3483",
       "companyName": "力致",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79326,6 +80054,7 @@
       "cbName": "晶宏三",
       "stockCode": "3141",
       "companyName": "晶宏",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79351,6 +80080,7 @@
       "cbName": "笙泉二",
       "stockCode": "3122",
       "companyName": "笙泉",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79376,6 +80106,7 @@
       "cbName": "耀勝一",
       "stockCode": "3207",
       "companyName": "耀勝",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79401,6 +80132,7 @@
       "cbName": "建暐四",
       "stockCode": "8092",
       "companyName": "建暐",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79426,6 +80158,7 @@
       "cbName": "東碩三",
       "stockCode": "3272",
       "companyName": "東碩",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79451,6 +80184,7 @@
       "cbName": "撼訊六",
       "stockCode": "6150",
       "companyName": "撼訊",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79476,6 +80210,7 @@
       "cbName": "宣德三",
       "stockCode": "5457",
       "companyName": "宣德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79501,6 +80236,7 @@
       "cbName": "大豐電三",
       "stockCode": "6184",
       "companyName": "大豐電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79526,6 +80262,7 @@
       "cbName": "湧德四",
       "stockCode": "3689",
       "companyName": "湧德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79551,6 +80288,7 @@
       "cbName": "智崴五",
       "stockCode": "5263",
       "companyName": "智崴",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79576,6 +80314,7 @@
       "cbName": "美而快一",
       "stockCode": "5321",
       "companyName": "美而快",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79601,6 +80340,7 @@
       "cbName": "凡甲六",
       "stockCode": "3526",
       "companyName": "凡甲",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79626,6 +80366,7 @@
       "cbName": "鉅祥二",
       "stockCode": "2476",
       "companyName": "鉅祥",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79651,6 +80392,7 @@
       "cbName": "六角三",
       "stockCode": "2732",
       "companyName": "六角",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79676,6 +80418,7 @@
       "cbName": "融程電三",
       "stockCode": "3416",
       "companyName": "融程電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79701,6 +80444,7 @@
       "cbName": "安勤三",
       "stockCode": "3479",
       "companyName": "安勤",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79726,6 +80470,7 @@
       "cbName": "兆利二",
       "stockCode": "3548",
       "companyName": "兆利",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79751,6 +80496,7 @@
       "cbName": "宏遠證二",
       "stockCode": "6015",
       "companyName": "宏遠證",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79776,6 +80522,7 @@
       "cbName": "昇貿五",
       "stockCode": "3305",
       "companyName": "昇貿",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79801,6 +80548,7 @@
       "cbName": "吉源一KY",
       "stockCode": "8488",
       "companyName": "吉源-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79826,6 +80574,7 @@
       "cbName": "御嵿一",
       "stockCode": "3522",
       "companyName": "御頂",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79851,6 +80600,7 @@
       "cbName": "佳邦三",
       "stockCode": "6284",
       "companyName": "佳邦",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79876,6 +80626,7 @@
       "cbName": "三商電一",
       "stockCode": "2427",
       "companyName": "三商電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79901,6 +80652,7 @@
       "cbName": "中磊七",
       "stockCode": "5388",
       "companyName": "中磊",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79926,6 +80678,7 @@
       "cbName": "高力四",
       "stockCode": "8996",
       "companyName": "高力",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79951,6 +80704,7 @@
       "cbName": "廣華二KY",
       "stockCode": "1338",
       "companyName": "廣華-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -79976,6 +80730,7 @@
       "cbName": "信音三",
       "stockCode": "6126",
       "companyName": "信音",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80001,6 +80756,7 @@
       "cbName": "時碩工業三",
       "stockCode": "4566",
       "companyName": "時碩工業",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80026,6 +80782,7 @@
       "cbName": "森崴能源一",
       "stockCode": "6806",
       "companyName": "森崴能源",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80051,6 +80808,7 @@
       "cbName": "裕融二",
       "stockCode": "9941",
       "companyName": "裕融",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80076,6 +80834,7 @@
       "cbName": "豐藝四",
       "stockCode": "6189",
       "companyName": "豐藝",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80101,6 +80860,7 @@
       "cbName": "桂盟四",
       "stockCode": "5306",
       "companyName": "桂盟",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80126,6 +80886,7 @@
       "cbName": "臺慶科一",
       "stockCode": "3357",
       "companyName": "臺慶科",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80151,6 +80912,7 @@
       "cbName": "鼎基二",
       "stockCode": "6585",
       "companyName": "鼎基",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80176,6 +80938,7 @@
       "cbName": "鼎基一",
       "stockCode": "6585",
       "companyName": "鼎基",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80201,6 +80964,7 @@
       "cbName": "威宏二KY",
       "stockCode": "8442",
       "companyName": "威宏-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80226,6 +80990,7 @@
       "cbName": "家登四",
       "stockCode": "3680",
       "companyName": "家登",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80251,6 +81016,7 @@
       "cbName": "國際中橡三",
       "stockCode": "2104",
       "companyName": "國際中橡",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80276,6 +81042,7 @@
       "cbName": "新鼎一",
       "stockCode": "5209",
       "companyName": "新鼎",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80301,6 +81068,7 @@
       "cbName": "泓德能源一",
       "stockCode": "6873",
       "companyName": "泓德能源-創",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80326,6 +81094,7 @@
       "cbName": "元翎一",
       "stockCode": "4564",
       "companyName": "元翎",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80351,6 +81120,7 @@
       "cbName": "高林一",
       "stockCode": "2906",
       "companyName": "高林",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80376,6 +81146,7 @@
       "cbName": "特昇三KY",
       "stockCode": "6616",
       "companyName": "特昇-KY",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80401,6 +81172,7 @@
       "cbName": "日馳一",
       "stockCode": "1526",
       "companyName": "日馳",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80426,6 +81198,7 @@
       "cbName": "偉詮電一",
       "stockCode": "2436",
       "companyName": "偉詮電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80451,6 +81224,7 @@
       "cbName": "和勤五",
       "stockCode": "1586",
       "companyName": "和勤",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80476,6 +81250,7 @@
       "cbName": "和勤四",
       "stockCode": "1586",
       "companyName": "和勤",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80501,6 +81276,7 @@
       "cbName": "艾訊二",
       "stockCode": "3088",
       "companyName": "艾訊",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80526,6 +81302,7 @@
       "cbName": "晉弘一",
       "stockCode": "6796",
       "companyName": "晉弘",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80551,6 +81328,7 @@
       "cbName": "樺漢五",
       "stockCode": "6414",
       "companyName": "樺漢",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80576,6 +81354,7 @@
       "cbName": "良得電四",
       "stockCode": "2462",
       "companyName": "良得電",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80601,6 +81380,7 @@
       "cbName": "朋程一",
       "stockCode": "8255",
       "companyName": "朋程",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80626,6 +81406,7 @@
       "cbName": "系統電五",
       "stockCode": "5309",
       "companyName": "系統電",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80651,6 +81432,7 @@
       "cbName": "康舒二",
       "stockCode": "6282",
       "companyName": "康舒",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80676,6 +81458,7 @@
       "cbName": "裕隆三",
       "stockCode": "2201",
       "companyName": "裕隆",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80701,6 +81484,7 @@
       "cbName": "晟德七",
       "stockCode": "4123",
       "companyName": "晟德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80726,6 +81510,7 @@
       "cbName": "晟德六",
       "stockCode": "4123",
       "companyName": "晟德",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80751,6 +81536,7 @@
       "cbName": "崧騰三",
       "stockCode": "3484",
       "companyName": "崧騰",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80776,6 +81562,7 @@
       "cbName": "王品一",
       "stockCode": "2727",
       "companyName": "王品",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80801,6 +81588,7 @@
       "cbName": "南良一",
       "stockCode": "5450",
       "companyName": "南良",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80826,6 +81614,7 @@
       "cbName": "廣積六",
       "stockCode": "8050",
       "companyName": "廣積",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80851,6 +81640,7 @@
       "cbName": "可寧衛一",
       "stockCode": "8422",
       "companyName": "可寧衛",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80876,6 +81666,7 @@
       "cbName": "崇越電一",
       "stockCode": "3388",
       "companyName": "崇越電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80901,6 +81692,7 @@
       "cbName": "三圓三",
       "stockCode": "4416",
       "companyName": "三圓",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80926,6 +81718,7 @@
       "cbName": "創惟一",
       "stockCode": "6104",
       "companyName": "創惟",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80951,6 +81744,7 @@
       "cbName": "安集四",
       "stockCode": "6477",
       "companyName": "安集",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -80976,6 +81770,7 @@
       "cbName": "鈦昇三",
       "stockCode": "8027",
       "companyName": "鈦昇",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81001,6 +81796,7 @@
       "cbName": "威健六",
       "stockCode": "3033",
       "companyName": "威健",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81026,6 +81822,7 @@
       "cbName": "凡甲五",
       "stockCode": "3526",
       "companyName": "凡甲",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81051,6 +81848,7 @@
       "cbName": "錸寶二",
       "stockCode": "8104",
       "companyName": "錸寶",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81076,6 +81874,7 @@
       "cbName": "榮成四",
       "stockCode": "1909",
       "companyName": "榮成",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81101,6 +81900,7 @@
       "cbName": "康普三",
       "stockCode": "4739",
       "companyName": "康普",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81126,6 +81926,7 @@
       "cbName": "易華電一",
       "stockCode": "6552",
       "companyName": "易華電",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81151,6 +81952,7 @@
       "cbName": "上緯投控四",
       "stockCode": "3708",
       "companyName": "上緯投控",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81176,6 +81978,7 @@
       "cbName": "山林水二",
       "stockCode": "8473",
       "companyName": "山林水",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81201,6 +82004,7 @@
       "cbName": "上緯投控三",
       "stockCode": "3708",
       "companyName": "上緯投控",
+      "status": "active",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81226,6 +82030,7 @@
       "cbName": "安集三",
       "stockCode": "6477",
       "companyName": "安集",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81251,6 +82056,7 @@
       "cbName": "光罩三",
       "stockCode": "2338",
       "companyName": "光罩",
+      "status": "archived",
       "stages": {
         "announcementDate": null,
         "filingDate": null,
@@ -81281,9 +82087,9 @@
       "2026-09-08"
     ],
     "tradedCount": 185,
-    "tradedSampleCount": 185,
+    "tradedSampleCount": 382,
     "turnoverAmount": 1490734400,
-    "turnoverSampleCount": 185,
+    "turnoverSampleCount": 382,
     "weekTurnoverAmount": 1490734400,
     "weekTurnoverSampleCount": 382,
     "weekPeriod": "2026-09-07 至 2026-09-08"

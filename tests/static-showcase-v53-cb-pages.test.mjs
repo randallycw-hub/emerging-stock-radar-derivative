@@ -142,8 +142,8 @@ test("V5.3 all-CB page groups display fields by quote, terms, events and liquidi
 
   assert.deepEqual(Object.keys(CB_VIEW_COLUMNS), ["quote", "overview", "terms", "period", "events", "liquidity"]);
   for (const view of Object.keys(CB_VIEW_COLUMNS)) assert.match(filter, new RegExp(`data-cb-view="${view}"`));
-  assert.match(filter, /data-cb-view="quote" aria-selected="true"/);
-  for (const label of ["行情", "條款", "事件", "流動性", "新發行", "低溢價", "接近轉換價值", "近期賣回", "近期強贖", "停止轉換中", "清除條件"]) {
+  assert.match(filter, /data-cb-view="overview" aria-selected="true"/);
+  for (const label of ["行情", "條款", "事件", "流動性", "新發行", "低溢價", "接近轉換價值", "近期賣回", "近期強贖", "停止轉換中", "清除全部條件"]) {
     assert.match(filter, new RegExp(label));
   }
 });
