@@ -28,6 +28,18 @@ test("V5.6 staging emits one public model for shared data, daily changes, and pe
       "utf8",
     ));
     assert.equal(model.schemaVersion, 3);
+    for (const [field, file, maxBytes] of [
+      ['cbOverviewUrl', 'cb-overview.json', 2500000],
+      ['homeSummaryUrl', 'home-summary.json', 50000],
+      ['emergingOverviewUrl', 'emerging-overview.json', 1000000],
+      ['compactSearchIndexUrl', 'quick-search.json', 1000000],
+    ]) {
+      assert.equal(runtime[field], `./data/${pointer.generation}/${file}`);
+      const text = await readFile(join(destination, runtime[field].replace(/^\.\//, '')), 'utf8');
+      assert.equal(JSON.parse(text).dataDate, model.dataDate);
+      assert.ok(Buffer.byteLength(text) < maxBytes, file);
+      assert.doesNotMatch(text, /"sourceId"|"rawTextHash"|"diagnostics"|"missingReason"/);
+    }
     assert.equal(model.dataDate, JSON.parse(await readFile(join(showcaseSource, "data", pointer.generation, "bond-workbench.json"), "utf8")).dataDate);
     assert.equal(model.securityMaster.status, "verified");
     assert.equal(model.performance.status, "verified");

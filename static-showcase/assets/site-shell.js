@@ -115,7 +115,9 @@ export async function safeJsonFetch(
   } = {},
 ) {
   try {
-    const response = await fetchImpl(url, { cache: "no-store" });
+    // Revalidate with the server; unchanged ETags can reuse cached bytes.
+    // Request failure still returns unavailable, never an application stale fallback.
+    const response = await fetchImpl(url, { cache: "no-cache" });
     if (!response.ok) throw new Error(`HTTP_${response.status}`);
     return await response.json();
   } catch {

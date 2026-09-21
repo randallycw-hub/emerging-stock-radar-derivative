@@ -11,6 +11,22 @@ const index = {
   ],
 };
 
+test('search defers loading, shares concurrent requests and retries failures', async () => {
+  let calls = 0;
+  const lazy = siteSearch.createLazySearchLoader(async () => {
+    calls += 1;
+    return calls === 1 ? { state: 'network_error', entries: [] } : { state: 'ready', entries: index.records };
+  });
+  assert.equal(calls, 0);
+  await Promise.all([lazy.load(), lazy.load()]);
+  assert.equal(calls, 1);
+  assert.equal(lazy.state.state, 'network_error');
+  await lazy.load();
+  await lazy.load();
+  assert.equal(calls, 2);
+  assert.deepEqual(lazy.state.entries, index.records);
+});
+
 test("V5.2 search reads the canonical index wrapper and ranks exact codes before partial matches", () => {
   assert.deepEqual(siteSearch.searchCanonicalIndex("　２３０３ ", index).map((row) => row.id), ["company:2303", "cb:23031"]);
   assert.equal(siteSearch.searchCanonicalIndex("23031", index)[0]?.id, "cb:23031");
@@ -68,4 +84,14 @@ test("V5.2 search loader preserves five distinct fetch and schema outcomes", asy
     return response({ schemaVersion: 3, searchIndex: index });
   });
   assert.deepEqual(v56Ready, { state: "ready", entries: index.records });
+  const requested = [];
+  const compactReady = await load(async (url) => {
+    requested.push(String(url));
+    if (String(url) === pointer) return response({ runtimeUrl: './data/runtime.json' });
+    if (String(url).endsWith('/data/runtime.json')) return response({ compactSearchIndexUrl: './data/quick-search.json', v56MarketDataUrl: './data/v56-market-data.json' });
+    if (String(url).endsWith('/data/quick-search.json')) return response(index);
+    throw new Error('unnecessary full model download');
+  });
+  assert.deepEqual(compactReady, { state: 'ready', entries: index.records });
+  assert.equal(requested.some(url => url.endsWith('/v56-market-data.json')), false);
 });

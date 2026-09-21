@@ -49,6 +49,10 @@ test("active raw snapshot is self-contained for every public research page", asy
     canonicalEventsV54Url: "canonical-events-v54.json",
     canonicalEventsV55Url: "canonical-events-v55.json",
     v56MarketDataUrl: "v56-market-data.json",
+    cbOverviewUrl: 'cb-overview.json',
+    homeSummaryUrl: 'home-summary.json',
+    emergingOverviewUrl: 'emerging-overview.json',
+    compactSearchIndexUrl: 'quick-search.json',
   };
 
   for (const [field, file] of Object.entries(requiredArtifacts)) {

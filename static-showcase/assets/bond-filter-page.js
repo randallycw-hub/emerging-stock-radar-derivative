@@ -1,4 +1,4 @@
-import { loadPublicCbWorkbenchV53 } from "./bond-public-data.js";
+import { loadPublicCbOverview } from "./bond-public-data.js";
 import { publicAmount, publicNumber } from "./cb-workbench-ui.js";
 import { CB_SECURED_VALUES, readValidatedCbConditions, strictIsoDate, validCbRangeNumber } from './cb-filter-state.js';
 
@@ -327,7 +327,7 @@ async function initialize() {
   const cards = document.querySelector("#bond-filter-cards");
   const errorTarget = document.querySelector("[data-page-error]");
   if (!form || !head || !body || !count || !tabs || !clear) return;
-  const model = await loadPublicCbWorkbenchV53({ errorTarget });
+  const model = await loadPublicCbOverview({ errorTarget });
   if (!model?.dataDate || !Array.isArray(model.records)) {
     count.textContent = "資料暫時無法取得";
     body.innerHTML = '<tr><td class="empty-cell">資料暫時無法取得</td></tr>';

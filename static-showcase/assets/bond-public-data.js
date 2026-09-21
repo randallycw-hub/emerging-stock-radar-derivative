@@ -82,6 +82,13 @@ export async function loadPublicCbWorkbenchV53({ errorTarget = null } = {}) {
   return loadPublicCbWorkbenchV55({ errorTarget });
 }
 
+export async function loadPublicCbOverview({ errorTarget = null } = {}) {
+  const { config } = await loadRuntimeConfig(errorTarget);
+  const url = config?.cbOverviewUrl ?? config?.cbWorkbenchV55Url ?? config?.cbWorkbenchV54Url ?? config?.cbWorkbenchV53Url;
+  if (typeof url !== 'string' || !url) return null;
+  return safeJsonFetch(resolvePublishedDataUrl(url, pointerUrl), { errorTarget });
+}
+
 export async function loadPublicCbWorkbenchV54({ errorTarget = null } = {}) {
   const { config } = await loadRuntimeConfig(errorTarget);
   const url = config?.cbWorkbenchV54Url ?? config?.cbWorkbenchV53Url;

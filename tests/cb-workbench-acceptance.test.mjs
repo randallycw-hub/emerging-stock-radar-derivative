@@ -160,6 +160,10 @@ test("offline builder and outer refresh stage the same CB generation through the
     const stagedRuntime = JSON.parse(stagedRuntimeText);
     const expectedRuntime = JSON.parse(outcome.artifacts.active["runtime.json"]);
     Object.assign(expectedRuntime, {
+      cbOverviewUrl: `./data/${expectedRuntime.generation}/cb-overview.json`,
+      homeSummaryUrl: `./data/${expectedRuntime.generation}/home-summary.json`,
+      emergingOverviewUrl: `./data/${expectedRuntime.generation}/emerging-overview.json`,
+      compactSearchIndexUrl: `./data/${expectedRuntime.generation}/quick-search.json`,
       companyMasterUrl: `./data/${expectedRuntime.generation}/company-master.json`,
       cbMasterUrl: `./data/${expectedRuntime.generation}/cb-master.json`,
       searchIndexUrl: `./data/${expectedRuntime.generation}/search-index.json`,

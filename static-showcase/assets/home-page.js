@@ -384,6 +384,19 @@ async function loadHomeData() {
   );
   if (!runtime?.manifestUrl) return renderHomeEvents({});
 
+  if (typeof runtime.homeSummaryUrl === 'string') {
+    const summary = await safeJsonFetch(resolvePublishedDataUrl(runtime.homeSummaryUrl, pointerUrl), { errorTarget: updateTarget });
+    if (summary?.schemaVersion === 1 && isPublishedIsoDate(summary?.dataDate)
+      && summary.sections?.dataDate === summary.dataDate
+      && Array.isArray(summary.sections.todayChanges) && Array.isArray(summary.sections.nextEvents)
+      && Array.isArray(summary.brief?.ipoMilestones)) {
+      renderHomeSections(summary.sections, summary.brief);
+    } else if (updateTarget) {
+      updateTarget.textContent = "資料暫時無法取得";
+    }
+    return;
+  }
+
   if (typeof runtime.v56MarketDataUrl === "string") {
     const v56 = await safeJsonFetch(
       resolvePublishedDataUrl(runtime.v56MarketDataUrl, pointerUrl),
@@ -465,12 +478,16 @@ async function loadHomeData() {
 
 function renderV56Home(model) {
   const sections = buildV57HomeSections(model);
+  renderHomeSections(sections, buildV56HomeBrief(model));
+}
+
+function renderHomeSections(sections, brief) {
   if (sections.dataDate === null) return;
   if (updateTarget) updateTarget.textContent = `資料日期 ${formatDate(sections.dataDate)} · 已驗證盤後快照`;
   if (coverageTarget) coverageTarget.textContent = `資料日期 ${formatDate(sections.dataDate)}`;
   renderV57TodayChanges(sections);
   renderV57NextEvents(sections);
-  renderV56Destinations(buildV56HomeBrief(model));
+  renderV56Destinations(brief);
 }
 
 function renderV57TodayChanges(sections) {

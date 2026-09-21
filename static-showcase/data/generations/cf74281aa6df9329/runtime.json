@@ -22,5 +22,9 @@
   "canonicalEventsV54Url": "./data/generations/cf74281aa6df9329/canonical-events-v54.json",
   "cbWorkbenchV55Url": "./data/generations/cf74281aa6df9329/cb-workbench-v55.json",
   "canonicalEventsV55Url": "./data/generations/cf74281aa6df9329/canonical-events-v55.json",
-  "v56MarketDataUrl": "./data/generations/cf74281aa6df9329/v56-market-data.json"
+  "v56MarketDataUrl": "./data/generations/cf74281aa6df9329/v56-market-data.json",
+  "cbOverviewUrl": "./data/generations/cf74281aa6df9329/cb-overview.json",
+  "homeSummaryUrl": "./data/generations/cf74281aa6df9329/home-summary.json",
+  "emergingOverviewUrl": "./data/generations/cf74281aa6df9329/emerging-overview.json",
+  "compactSearchIndexUrl": "./data/generations/cf74281aa6df9329/quick-search.json"
 }

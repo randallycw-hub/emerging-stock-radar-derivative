@@ -71,14 +71,15 @@ async function loadData() {
     return;
   }
 
+  const marketModelUrl = runtime.emergingOverviewUrl ?? runtime.v56MarketDataUrl;
   const [marketArtifact, monthlyRevenue, companyMaster, v56Model] = await Promise.all([
     safeJsonFetch(resolvePublishedDataUrl(runtime.emergingMarketUrl, pointerUrl), { errorTarget }),
     safeJsonFetch(resolvePublishedDataUrl(runtime.datasets?.["94025"], pointerUrl), { errorTarget }),
     typeof runtime.companyMasterUrl === "string"
       ? safeJsonFetch(resolvePublishedDataUrl(runtime.companyMasterUrl, pointerUrl), { errorTarget })
       : Promise.resolve(null),
-    typeof runtime.v56MarketDataUrl === "string"
-      ? safeJsonFetch(resolvePublishedDataUrl(runtime.v56MarketDataUrl, pointerUrl), { errorTarget })
+    typeof marketModelUrl === "string"
+      ? safeJsonFetch(resolvePublishedDataUrl(marketModelUrl, pointerUrl), { errorTarget })
       : Promise.resolve(null),
   ]);
   const companies = indexCanonicalCompanies(companyMaster);

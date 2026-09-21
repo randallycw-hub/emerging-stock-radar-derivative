@@ -15,6 +15,7 @@ import {
   renderDataCenterBootstrap,
 } from "../static-showcase/assets/data-center-status.js";
 import { buildV51HomeStaticFallback } from "../static-showcase/assets/home-static-fallback.js";
+import { buildPublicPageSnapshots } from './lib/public-page-snapshots.mjs';
 import {
   buildCbWorkbenchV53,
   validateCbWorkbenchV53,
@@ -165,8 +166,19 @@ const GENERATION_FILES = new Set([
   "cb-workbench-v55.json",
   "canonical-events-v55.json",
   "v56-market-data.json",
+  "cb-overview.json",
+  "home-summary.json",
+  "emerging-overview.json",
+  "quick-search.json",
 ]);
+const PAGE_RUNTIME_ARTIFACTS = Object.freeze({
+  cbOverviewUrl: 'cb-overview.json',
+  homeSummaryUrl: 'home-summary.json',
+  emergingOverviewUrl: 'emerging-overview.json',
+  compactSearchIndexUrl: 'quick-search.json',
+});
 const PUBLIC_RESEARCH_RUNTIME_ARTIFACTS = Object.freeze({
+  ...PAGE_RUNTIME_ARTIFACTS,
   companyMasterUrl: "company-master.json",
   cbMasterUrl: "cb-master.json",
   searchIndexUrl: "search-index.json",
@@ -532,7 +544,10 @@ async function writePublicMarketResearch({ source, destination, generation }) {
     dailyChanges: v56DailyChanges,
     performance: v57Performance,
   });
+  const pageSnapshots = buildPublicPageSnapshots({ cb: cbWorkbenchV55, market: v56MarketData });
   await Promise.all([
+    ...Object.entries({ 'cb-overview.json': pageSnapshots.cbOverview, 'home-summary.json': pageSnapshots.homeSummary, 'emerging-overview.json': pageSnapshots.emergingOverview, 'quick-search.json': pageSnapshots.quickSearch })
+      .map(([name, model]) => writeFile(join(base, name), `${JSON.stringify(stripPublicInternalMetadata(model))}\n`, 'utf8')),
     writeFile(join(base, "market-research.json"), `${JSON.stringify(research, null, 2)}\n`, "utf8"),
     writeFile(join(base, "company-master.json"), `${JSON.stringify(companyMaster, null, 2)}\n`, "utf8"),
     writeFile(join(base, "cb-master.json"), `${JSON.stringify(cbMaster, null, 2)}\n`, "utf8"),
@@ -849,7 +864,7 @@ async function writePublicStaticArtifacts({ destination, generation }) {
       ? projectedArtifacts.get(name)
       : await readJson(join(base, name), `active generation public ${name} is invalid`);
     const publicValue = stripPublicInternalMetadata(value);
-    const text = `${JSON.stringify(publicValue, null, 2)}\n`;
+    const text = `${JSON.stringify(publicValue, null, Object.values(PAGE_RUNTIME_ARTIFACTS).includes(name) ? undefined : 2)}\n`;
     await writeFile(join(base, name), text, "utf8");
     updates.set(name, {
       sha256: sha256Text(text),
@@ -1122,9 +1137,11 @@ function validateRuntime(runtime, generation, expectedDatasets) {
     ...expectedRuntimeKeys,
     ...Object.keys(PUBLIC_RESEARCH_RUNTIME_ARTIFACTS),
   ].sort();
+  const legacyResearchRuntimeKeys = expectedResearchRuntimeKeys.filter(key => !Object.hasOwn(PAGE_RUNTIME_ARTIFACTS, key));
   if (
     !equalStringArrays(runtimeKeys, expectedRuntimeKeys)
     && !equalStringArrays(runtimeKeys, expectedResearchRuntimeKeys)
+    && !equalStringArrays(runtimeKeys, legacyResearchRuntimeKeys)
   ) {
     throw new Error("active generation runtime is missing or invalid");
   }
@@ -1159,7 +1176,7 @@ function publicResearchRuntimeArtifactUrls(generation) {
 
 function publicResearchRuntimeUrls(runtime, generation) {
   if (!Object.hasOwn(runtime, "v56MarketDataUrl")) return [];
-  return Object.values(publicResearchRuntimeArtifactUrls(generation));
+  return Object.entries(publicResearchRuntimeArtifactUrls(generation)).filter(([field]) => Object.hasOwn(runtime, field)).map(([, url]) => url);
 }
 
 function equalStringArrays(left, right) {

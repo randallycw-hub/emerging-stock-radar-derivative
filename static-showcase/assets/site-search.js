@@ -165,7 +165,7 @@ function escapeHtml(value) {
 
 async function fetchJson(url, fetchImpl = globalThis.fetch) {
   try {
-    const response = await fetchImpl(url, { cache: "no-store" });
+    const response = await fetchImpl(url, { cache: "no-cache" });
     if (!response.ok) return { state: "load_error", data: null };
     try {
       return { state: "ready", data: await response.json() };
@@ -196,6 +196,13 @@ export async function loadCanonicalSearchIndex({
   const runtimeResponse = await fetchJson(resolvePublishedDataUrl(pointer.runtimeUrl, resolvedPointerUrl), fetchImpl);
   if (runtimeResponse.state !== "ready") return { state: runtimeResponse.state, entries: [] };
   const runtime = runtimeResponse.data;
+  if (typeof runtime?.compactSearchIndexUrl === "string") {
+    const compact = await fetchJson(resolvePublishedDataUrl(runtime.compactSearchIndexUrl, resolvedPointerUrl), fetchImpl);
+    if (compact.state !== "ready") return { state: compact.state, entries: [] };
+    return Array.isArray(compact.data?.records)
+      ? { state: "ready", entries: compact.data.records }
+      : { state: "load_error", entries: [] };
+  }
   if (typeof runtime?.v56MarketDataUrl === "string") {
     const v56Response = await fetchJson(resolvePublishedDataUrl(runtime.v56MarketDataUrl, resolvedPointerUrl), fetchImpl);
     const v56Entries = entriesOf(v56Response.data?.searchIndex);
@@ -286,7 +293,25 @@ function createHeaderSearch(header) {
   return form;
 }
 
-function bindSearchSurface(form, indexes) {
+export function createLazySearchLoader(load = loadIndexes) {
+  const state = { state: "not_ready", entries: [] };
+  let pending;
+  return {
+    state,
+    load() {
+      if (state.state === "ready") return Promise.resolve(state);
+      if (!pending) {
+        pending = Promise.resolve().then(load)
+          .catch(() => ({ state: "network_error", entries: [] }))
+          .then(result => Object.assign(state, result))
+          .finally(() => { pending = undefined; });
+      }
+      return pending;
+    },
+  };
+}
+
+function bindSearchSurface(form, indexes, ensureLoaded) {
   if (!form || form.dataset.searchBound === "true") return null;
   const input = form.querySelector("input");
   const results = form.querySelector("[data-site-search-results]");
@@ -294,7 +319,9 @@ function bindSearchSurface(form, indexes) {
   if (!input || !results) return null;
   form.dataset.searchBound = "true";
   let activeResultIndex = -1;
+  let dismissed = false;
   const closeMobileSearch = () => {
+    dismissed = true;
     delete form.dataset.mobileOpen;
     mobileTrigger?.setAttribute("aria-expanded", "false");
     activeResultIndex = -1;
@@ -313,10 +340,24 @@ function bindSearchSurface(form, indexes) {
   document.addEventListener("pointerdown", (event) => {
     if (!form.contains(event.target)) closeMobileSearch();
   });
-  input.addEventListener("input", () => {
+  const refresh = () => {
     const count = renderSearchResults(input, results, indexes);
     activeResultIndex = -1;
     input.setAttribute("aria-expanded", String(count > 0));
+  };
+  const loadAndRefresh = () => {
+    void ensureLoaded().then(() => {
+      if (!dismissed && document.activeElement === input) refresh();
+    });
+  };
+  input.addEventListener("focus", () => {
+    dismissed = false;
+    loadAndRefresh();
+  });
+  input.addEventListener("input", () => {
+    dismissed = false;
+    refresh();
+    loadAndRefresh();
   });
   input.addEventListener("keydown", (event) => {
     const options = [...results.querySelectorAll('a[role="option"]')];
@@ -346,9 +387,9 @@ async function initializeSiteSearch() {
   const header = document.querySelector(".site-header__inner");
   if (!header) return;
   const headerForm = createHeaderSearch(header);
-  const indexes = await loadIndexes();
+  const lazy = createLazySearchLoader();
   const surfaces = [
-    bindSearchSurface(headerForm, indexes),
+    bindSearchSurface(headerForm, lazy.state, lazy.load),
   ].filter(Boolean);
   const headerSurface = surfaces[0];
   document.addEventListener("keydown", (event) => {
