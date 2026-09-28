@@ -576,8 +576,43 @@ a { color: inherit; }
 .archive-toggle { align-self: center; color: var(--ink) !important; font-size: 13px !important; font-weight: 750; }
 .archive-toggle input { width: 18px; min-height: 18px; accent-color: var(--violet); vertical-align: middle; }
 #bond-clear-filter { min-height: 40px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink); cursor: pointer; }
-.bond-filters { grid-template-columns: minmax(230px, 1.4fr) repeat(3, minmax(140px, .6fr)) auto; }
-.bond-quick-observation { grid-column: 1 / -1; }
+.bond-filters {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--accent-bonds);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+.bond-filter-toolbar {
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 12px;
+  align-items: end;
+}
+.bond-filter-toolbar output {
+  min-width: 132px;
+  padding: 8px 2px;
+  color: var(--muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+#bond-clear-filter {
+  min-height: 40px;
+  border: 1px solid var(--line-strong);
+  padding: 8px 12px;
+  background: var(--panel);
+  color: var(--clay-ink);
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.bond-quick-observation { grid-column: 1 / -1; padding: 0 16px 12px; }
 .search-field { position: relative; }
 .bond-search-suggestions { position: absolute; z-index: 4; top: calc(100% + 3px); left: 0; right: 0; max-height: 280px; overflow-y: auto; border: 1px solid var(--line-strong); background: var(--panel); box-shadow: var(--shadow); }
 .bond-search-suggestions button { width: 100%; border: 0; border-bottom: 1px solid var(--line); padding: 10px; display: grid; gap: 3px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
@@ -586,16 +621,17 @@ a { color: inherit; }
 .bond-search-suggestions button:hover,
 .bond-search-suggestions button:focus-visible,
 .bond-search-suggestions button[aria-selected="true"] { background: var(--violet-soft); color: var(--violet-ink); }
-.bond-event-shortcuts { margin: 0; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; border: 1px solid var(--line-strong); }
-.bond-event-shortcuts legend { padding: 0 5px; color: var(--violet-ink); font-size: 11px; font-weight: 850; }
-.bond-event-shortcuts button { min-height: 36px; border: 1px solid var(--line-strong); padding: 7px 10px; background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.bond-event-shortcuts { margin: 0; padding: 12px 0 0; display: flex; flex-wrap: wrap; gap: 8px; border: 0; border-top: 1px solid var(--line); }
+.bond-event-shortcuts legend { padding: 0 5px; color: var(--muted); font-size: 11px; font-weight: 850; }
+.bond-event-shortcuts button { min-height: 36px; border: 1px solid var(--line-strong); border-radius: 999px; padding: 7px 12px; background: var(--panel); color: var(--ink); font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
 .bond-event-shortcuts button:hover,
 .bond-event-shortcuts button:focus-visible,
 .bond-event-shortcuts button[aria-pressed="true"] { border-color: var(--violet); background: var(--violet-soft); color: var(--violet-ink); }
 .bond-event-shortcuts button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-[data-bond-advanced-filters] { grid-column: 1 / -1; border: 1px solid var(--line); background: var(--panel); }
-[data-bond-advanced-filters] summary { padding: 10px 12px; color: var(--ink); cursor: pointer; font-size: 13px; font-weight: 800; }
-.bond-advanced-filter-grid { padding: 0 12px 12px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+[data-bond-advanced-filters] { grid-column: 1 / -1; border-top: 1px solid var(--line); background: var(--panel); }
+[data-bond-advanced-filters] summary { padding: 12px 16px; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 750; }
+.bond-advanced-filter-grid { padding: 0 16px 16px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.bond-advanced-filter-grid .archive-toggle { display: flex; align-items: center; gap: 8px; min-height: 40px; }
 .company-overview-heading { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
 .company-overview-heading h2 { margin: 5px 0; font: 800 clamp(30px, 4vw, 48px)/1.1 Georgia, "Noto Serif TC", serif; }
 .company-overview-heading p:last-child { margin: 0; color: var(--muted); }
@@ -617,6 +653,13 @@ a { color: inherit; }
 .company-bond-list a { padding: 10px; display: grid; gap: 4px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
 .company-bond-list a:hover, .company-bond-list a:focus-visible { border-color: var(--accent-bonds); background: var(--violet-soft); }
 .company-bond-list span, .company-empty { color: var(--muted); font-size: 12px; }
+.company-bond-list .company-bond-metrics { margin: 4px 0 0; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.company-bond-metrics > div { min-width: 0; }
+.company-bond-metrics dt, .company-bond-metrics small { color: var(--muted); font-size: 11px; }
+.company-bond-metrics dd { margin: 2px 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.company-bond-list .company-bond-detail-link { justify-self: end; color: var(--color-primary); font-weight: 800; }
+.company-event-timeline li { grid-template-columns: 90px 46px minmax(0, 1fr) auto; }
+.company-event-source { white-space: nowrap; color: var(--color-primary); font-size: 12px; font-weight: 750; }
 
 .bond-table-shell { width: 100%; overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
 .bond-table { width: 100%; min-width: 1120px; table-layout: fixed; border-collapse: collapse; font-size: clamp(11px, .82vw, 13px); }
@@ -1245,7 +1288,13 @@ a { color: inherit; }
 .ipo-month-view li { padding: 10px 13px; display: grid; gap: 2px; border-bottom: 1px solid var(--line); }
 .ipo-month-view li:last-child { border-bottom: 0; }
 .ipo-month-view time, .ipo-month-view span { color: var(--muted); font-size: 11px; }
-.ipo-filters { grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(130px, .38fr)) minmax(175px, .46fr) auto; }
+.ipo-filters { grid-template-columns: minmax(240px, 1fr) repeat(2, minmax(150px, .42fr)) auto; align-items: end; }
+.ipo-advanced-filters { grid-column: 1 / -1; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--panel) 94%, var(--violet-soft)); }
+.ipo-advanced-filters summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; padding: 10px 12px; color: var(--ink); cursor: pointer; font-size: 13px; font-weight: 800; list-style-position: inside; }
+.ipo-advanced-filters summary small { color: var(--muted); font-size: 12px; font-weight: 500; }
+.ipo-advanced-filters[open] summary { border-bottom: 1px solid var(--line); }
+.ipo-advanced-filters > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; }
+.ipo-filters > output { grid-column: 4; grid-row: 1; justify-self: end; align-self: center; color: var(--muted); font-weight: 700; white-space: nowrap; }
 .ipo-table-shell { width: 100%; overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
 .ipo-table { width: 100%; min-width: 1320px; border-collapse: collapse; font-size: 11px; }
 .ipo-table th,
@@ -1283,6 +1332,9 @@ a { color: inherit; }
 
 @media (max-width: 900px) {
   .bond-filters { grid-template-columns: 1fr; }
+  .bond-filter-toolbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .bond-filter-toolbar .search-field { grid-column: 1 / -1; }
+  .bond-filter-toolbar output { grid-column: 2; grid-row: 2; }
   .bond-quick-observation,
   [data-bond-advanced-filters] { grid-column: auto; }
   .bond-advanced-filter-grid { grid-template-columns: 1fr; }
@@ -1321,6 +1373,7 @@ a { color: inherit; }
   .ipo-stage-flow li:last-child { grid-column: span 2; border-bottom: 0; }
   .ipo-month-view { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ipo-filters { grid-template-columns: 1fr; }
+  .ipo-filters > output { grid-column: 1; grid-row: auto; }
   .ipo-table-shell { display: none; }
   .ipo-timeline-table-shell { display: none; }
   .ipo-card-list { display: grid; gap: 12px; }
@@ -1702,6 +1755,7 @@ body {
 .company-tabs button { min-height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 7px 11px; background: var(--color-surface); color: var(--muted); font-weight: 700; cursor: pointer; }
 .company-tabs button[aria-selected="true"] { border-color: var(--color-primary); background: var(--clay-soft); color: var(--color-primary); }
 .company-overview-card { min-height: 0; border-radius: var(--radius-card); box-shadow: none; }
+.company-overview-card[hidden] { display: none; }
 .company-chart-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; margin: 2px 0 14px; }
 .company-chart-toolbar label { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 700; }
 .company-chart-toolbar select { min-height: 36px; max-width: min(100%, 320px); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; background: var(--color-surface); color: var(--color-text); }
@@ -1759,6 +1813,12 @@ body {
   .company-tabs button { min-height: 44px; white-space: nowrap; }
 }
 
+@media (max-width: 640px) {
+  .company-bond-list .company-bond-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .company-event-timeline li { grid-template-columns: 72px 38px minmax(0, 1fr); }
+  .company-event-timeline li > a { grid-column: 3; }
+}
+
 @media (max-width: 560px) {
   .site-search input { width: 0; min-width: 0; padding: 0; border: 0; }
   .site-search__mobile-trigger { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
@@ -1776,6 +1836,7 @@ body {
   .company-chart-toolbar label { display: grid; }
   .ipo-date-filters { flex-wrap: nowrap; overflow-x: auto; padding-inline: 2px; }
   .ipo-date-filters > span, .ipo-date-filters button { flex: 0 0 auto; }
+  .ipo-advanced-filters > div { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {

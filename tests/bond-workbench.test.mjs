@@ -225,6 +225,23 @@ test("optional source outcomes override value presence in workbench field states
   assert.equal(unavailable.records[0].fieldStates.events, "missing");
 });
 
+test("keeps official outstanding data complete when market prices use a different date", () => {
+  const result = buildBondWorkbenchSnapshot(input({
+    currentTerms: [term("35221", { outstandingDataDate: "2026-08-13" })],
+    currentViews: [view("35221", {
+      cbPriceDate: "2026-08-11",
+      stockPriceDate: "2026-08-11",
+      valuationDate: "2026-08-11",
+      outstandingDataDate: "2026-08-13",
+      dailyTurnoverRate: null,
+      dataQuality: "date_mismatch",
+      missingReasons: ["BALANCE_TRADE_DATE_MISMATCH"],
+    })],
+  }));
+
+  assert.equal(result.records[0].fieldStates.outstanding, "complete");
+});
+
 test("preserves a supplied strict assessment and rejects unmarked cross-date strategy checks", () => {
   const verified = evaluateBondAssessment({
     view: view(), history: [], spreadPercent: "0.8", spreadDataDate: dataDate,

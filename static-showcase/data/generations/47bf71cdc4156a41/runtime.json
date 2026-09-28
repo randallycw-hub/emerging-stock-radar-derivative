@@ -1,0 +1,30 @@
+{
+  "generation": "generations/47bf71cdc4156a41",
+  "manifestUrl": "./data/generations/47bf71cdc4156a41/manifest.json",
+  "emergingMarketUrl": "./data/generations/47bf71cdc4156a41/emerging-market.json",
+  "ipoEventsUrl": "./data/generations/47bf71cdc4156a41/ipo-events.json",
+  "datasets": {
+    "11406": "./data/generations/47bf71cdc4156a41/11406.json",
+    "11586": "./data/generations/47bf71cdc4156a41/11586.json",
+    "94025": "./data/generations/47bf71cdc4156a41/94025.json",
+    "bondMarket": "./data/generations/47bf71cdc4156a41/bond-market-view.json",
+    "conversionPrices": "./data/generations/47bf71cdc4156a41/conversion-prices.json",
+    "bondHistory": "./data/generations/47bf71cdc4156a41/bond-market-history.json",
+    "cbIssuerResearch": "./data/generations/47bf71cdc4156a41/cb-issuer-research.json",
+    "bondSupplemental": "./data/generations/47bf71cdc4156a41/bond-supplemental.json",
+    "bondWorkbench": "./data/generations/47bf71cdc4156a41/bond-workbench.json"
+  },
+  "cbOverviewUrl": "./data/generations/47bf71cdc4156a41/cb-overview.json",
+  "homeSummaryUrl": "./data/generations/47bf71cdc4156a41/home-summary.json",
+  "emergingOverviewUrl": "./data/generations/47bf71cdc4156a41/emerging-overview.json",
+  "compactSearchIndexUrl": "./data/generations/47bf71cdc4156a41/quick-search.json",
+  "companyMasterUrl": "./data/generations/47bf71cdc4156a41/company-master.json",
+  "cbMasterUrl": "./data/generations/47bf71cdc4156a41/cb-master.json",
+  "searchIndexUrl": "./data/generations/47bf71cdc4156a41/search-index.json",
+  "cbWorkbenchV53Url": "./data/generations/47bf71cdc4156a41/cb-workbench-v53.json",
+  "cbWorkbenchV54Url": "./data/generations/47bf71cdc4156a41/cb-workbench-v54.json",
+  "canonicalEventsV54Url": "./data/generations/47bf71cdc4156a41/canonical-events-v54.json",
+  "cbWorkbenchV55Url": "./data/generations/47bf71cdc4156a41/cb-workbench-v55.json",
+  "canonicalEventsV55Url": "./data/generations/47bf71cdc4156a41/canonical-events-v55.json",
+  "v56MarketDataUrl": "./data/generations/47bf71cdc4156a41/v56-market-data.json"
+}

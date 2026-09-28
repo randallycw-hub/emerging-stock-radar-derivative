@@ -156,8 +156,10 @@ function buildFieldStates(
   const dated = (value: string | null): BondFieldState => value === null ? "missing" : value === dataDate ? "complete" : "stale";
   return {
     price: view.cbClose === null ? "missing" : view.staleCbPrice ? "stale" : dated(view.cbPriceDate),
-    valuation: view.dataQuality === "date_mismatch" ? "date_mismatch" : dated(view.valuationDate),
-    outstanding: view.dataQuality === "date_mismatch" ? "date_mismatch" : view.outstandingAmount === null ? "missing" : dated(view.outstandingDataDate),
+    valuation: dated(view.valuationDate),
+    // Outstanding balance is an independently dated official report. Its date
+    // is surfaced with the ratio instead of being forced to match market prices.
+    outstanding: view.outstandingAmount === null ? "missing" : "complete",
     institutions: optionalSourceFieldState(
       sources?.institutions,
       view.institutionNetUnits !== null,

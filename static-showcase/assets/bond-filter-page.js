@@ -1,5 +1,5 @@
 import { loadPublicCbOverview } from "./bond-public-data.js";
-import { publicAmount, publicNumber } from "./cb-workbench-ui.js";
+import { publicAmount, publicInstitutionName, publicNumber } from "./cb-workbench-ui.js";
 import { CB_SECURED_VALUES, readValidatedCbConditions, strictIsoDate, validCbRangeNumber } from './cb-filter-state.js';
 
 const BASE_CB_VIEWS = {
@@ -24,8 +24,8 @@ const BASE_CB_VIEWS = {
     ["發行日", (record) => dateLabel(record.terms?.issueDate)],
     ["到期日", (record) => dateLabel(record.terms?.maturityDate)],
     ["擔保狀態", (record) => record.terms?.securedStatus ?? "—"],
-    ["承銷商", (record) => record.terms?.underwriter ?? "—"],
-    ["受託機構", (record) => record.terms?.trustee ?? "—"],
+    ["承銷商", (record) => publicInstitutionName(record.terms?.underwriter)],
+    ["受託機構", (record) => publicInstitutionName(record.terms?.trustee)],
   ],
   period: [
     ["CB 代碼／名稱", record => `${record.cbCode} ${record.cbName}`],
@@ -65,17 +65,21 @@ const BASE_CB_VIEWS = {
 export const CB_VIEW_COLUMNS = Object.freeze({
   quote: BASE_CB_VIEWS.quote,
   overview: [
-    ["股票代碼", record => record.stockCode],
-    ["股票名稱", record => record.companyName],
-    ["債券代碼", record => record.cbCode, "code"],
-    ["債券名稱", record => record.cbName],
+    ["CB／標的", record => {
+      const bond = [record.cbCode, record.cbName].filter(Boolean).join(" ");
+      const stock = [record.stockCode, record.companyName].filter(Boolean).join(" ") || "—";
+      return `${bond} · ${stock}`;
+    }, "code"],
     BASE_CB_VIEWS.quote[2],
+    BASE_CB_VIEWS.quote[3],
     BASE_CB_VIEWS.quote[4],
     BASE_CB_VIEWS.quote[7],
-    BASE_CB_VIEWS.terms[8],
-    BASE_CB_VIEWS.quote[3],
+    BASE_CB_VIEWS.quote[8],
     [...BASE_CB_VIEWS.period[7], record => record.terms?.outstandingDataDate],
-    BASE_CB_VIEWS.terms[6],
+    ["下一權利事件", (record, asOfDate) => {
+      const event = nextPublishedCbEvent(record, asOfDate);
+      return event ? `${event.label || "權利事件"} ${dateLabel(event.date)}` : "—";
+    }],
     BASE_CB_VIEWS.period[3],
     ["CB 明細", () => ""],
   ],
@@ -308,9 +312,9 @@ export function renderCbDatabaseTable(records, { view = 'overview', asOfDate, so
     const expanded = isOverview && record.cbCode === expandedCode;
     const panelId = `cb-inline-${encodeURIComponent(record.cbCode)}`;
     return `<tr>${columns.map((column, index) => {
-      if (isOverview && index === 12) return `<td><button type="button" aria-label="${escapeHtml(record.cbCode)} 明細" aria-expanded="${expanded}"${expanded ? ` aria-controls="${panelId}"` : ''} data-cb-expand="${escapeHtml(record.cbCode)}">${expanded ? '收合' : '展開'}</button></td>`;
+      if (isOverview && index === columns.length - 1) return `<td><button type="button" aria-label="${escapeHtml(record.cbCode)} 明細" aria-expanded="${expanded}"${expanded ? ` aria-controls="${panelId}"` : ''} data-cb-expand="${escapeHtml(record.cbCode)}">${expanded ? '收合' : '展開'}</button></td>`;
       const rendered = datedColumn(record, column, asOfDate);
-      const link = isOverview ? index === 2 || index === 3 : index === 0;
+      const link = index === 0;
       return `<td data-label="${escapeHtml(column[0])}">${link ? `<a href="${detailHref(record, filterSearch)}">${rendered}</a>` : rendered}</td>`;
     }).join("")}</tr>${expanded ? `<tr class="cb-inline-row"><td colspan="${columns.length}"><div id="${panelId}">${renderCbOverviewFacts(record, filterSearch)}</div></td></tr>` : ''}`;
   }).join("");

@@ -125,6 +125,25 @@ test("V5.3 CB navigation exposes all five product functions", async () => {
   assert.match(css, /cb-heatmap/);
 });
 
+test("CB market overview separates product pages from in-page dashboard jumps", async () => {
+  const [bonds, js] = await Promise.all([
+    readFile(new URL("bonds.html", root), "utf8"),
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
+  ]);
+  const { renderMarketOverview } = await import("../static-showcase/assets/cb-workbench-ui.js");
+  const productNavigation = bonds.match(/<nav class="bond-context-nav"[\s\S]*?<\/nav>/)?.[0] ?? "";
+  const overview = renderMarketOverview({ dataDate: "2026-09-24", records: [], summary: {}, events: [], issuance: [] });
+
+  assert.equal((productNavigation.match(/<a\b/g) ?? []).length, 5);
+  assert.doesNotMatch(productNavigation, /href="#cb-/);
+  assert.match(overview, /<nav class="cb-overview-anchor-nav" aria-label="市場總覽區塊"[^>]*>/);
+  for (const id of ["cb-today-changes", "cb-market-performance", "cb-market-institutions"]) {
+    assert.match(overview, new RegExp(`href="#${id}"`));
+  }
+  assert.match(overview, /data-cb-institution-link/);
+  assert.match(js, /document\.querySelector\("\[data-cb-institution-link\]"\)/);
+});
+
 test("V5.3 all-CB search returns every active CB of a canonical stock code and composes an objective filter", () => {
   const rows = [
     { ...records[0], status: "active", terms: { issueDate: "2026-08-12", maturityDate: "2027-08-28" }, events: [] },

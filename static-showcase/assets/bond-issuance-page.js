@@ -1,6 +1,6 @@
 import { loadPublicCbWorkbenchV53, publicBondRecords } from "./bond-public-data.js";
 import { isOfficialSourceUrl } from "./cb-workbench-v53.js";
-import { publicAmount } from "./cb-workbench-ui.js";
+import { publicAmount, publicInstitutionName } from "./cb-workbench-ui.js";
 
 const PIPELINE_STAGES = Object.freeze([
   ["announcementDate", "公告"],
@@ -92,14 +92,14 @@ export function renderIssuanceTable(records, canonicalRecords = []) {
       <td>${escapeHtml(record.stockCode)} ${escapeHtml(record.companyName)}</td>
       <td>${escapeHtml(record.terms?.securedStatus ?? "—")}</td>
       <td>${publicAmount(record.terms?.issueAmount)}</td>
-      <td>${escapeHtml(record.terms?.underwriter ?? "—")}</td>
+      <td>${escapeHtml(publicInstitutionName(record.terms?.underwriter))}</td>
       ${PIPELINE_STAGES.filter(([stage]) => stage !== "listingDate").map(([stage]) => `<td>${dateLabel(record.stages?.[stage])}</td>`).join("")}
       <td>${positivePrice(detail?.terms?.initialConversionPrice)}</td>
       <td>${currentPrice}${currentPrice !== "—" && conversionEffectiveDate ? `<time datetime="${conversionEffectiveDate}">生效 ${dateLabel(conversionEffectiveDate)}</time>` : ""}</td>
       <td>${dateLabel(record.stages?.listingDate)}</td>
       <td>${dateLabel(record.terms?.issueDate)}</td>
       <td>${dateLabel(record.terms?.maturityDate)}</td>
-      <td>${escapeHtml(record.terms?.trustee ?? "—")}</td>
+      <td>${escapeHtml(publicInstitutionName(record.terms?.trustee))}</td>
       <td>${escapeHtml(category)}</td>
       <td>${source}${termsDataDate ? `<time datetime="${termsDataDate}">條款 ${dateLabel(termsDataDate)}</time>` : ""}</td>
     </tr>`;

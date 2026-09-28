@@ -92,6 +92,12 @@ export function validateCbWorkbenchV53(value) {
         throw new TypeError("CB conversion-price history must retain a verified official source URL");
       }
     }
+    if (item.conversionPriceSource !== null && item.conversionPriceSource !== undefined) {
+      const source = requiredRecord(item.conversionPriceSource, "V5.3 CB conversion-price source");
+      if (!isoDate(source.effectiveDate) || source.effectiveDate !== quote.conversionPriceEffectiveDate || finiteNumber(quote.conversionPrice) === null || !isOfficialSourceUrl(source.sourceUrl)) {
+        throw new TypeError("CB conversion price source must match the effective quote and retain a verified official source URL");
+      }
+    }
   }
   return true;
 }
@@ -117,8 +123,14 @@ function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBon
   const company = masters.companyByCode.get(stockCode);
   const listingDate = isoDate(term.listingDate);
   const history = (historyByBond.get(cbCode) ?? []).filter((point) => !listingDate || point.date >= listingDate);
-  const conversionPriceHistory = conversionHistoryByBond.get(cbCode) ?? [];
+  const conversionData = conversionHistoryByBond.get(cbCode) ?? { history: [], versions: [] };
   const quote = projectQuote(view, history, dataDate, listingDate);
+  const currentConversionVersion = conversionData.versions.find((version) =>
+    version.effectiveDate === quote.conversionPriceEffectiveDate && version.currentConversionPrice === quote.conversionPrice,
+  );
+  const conversionPriceSource = currentConversionVersion
+    ? { effectiveDate: currentConversionVersion.effectiveDate, sourceUrl: currentConversionVersion.sourceUrl }
+    : null;
   const redemption = redemptionsByBond.get(cbCode) ?? null;
   const events = projectEvents([
     ...arrayValue(raw.events),
@@ -141,7 +153,8 @@ function projectRecord(input, dataDate, masters, historyByBond, redemptionsByBon
     terms,
     quote,
     liquidity: projectLiquidity(history, dataDate),
-    conversionPriceHistory,
+    conversionPriceHistory: conversionData.history,
+    conversionPriceSource,
     rights: { redemption },
     events,
     issuance,
@@ -182,7 +195,7 @@ function indexConversionPriceHistory(conversionPrices, dataDate) {
       }
       priorPrice = version.currentConversionPrice;
     }
-    versionsByBond.set(cbCode, Object.freeze(history));
+    versionsByBond.set(cbCode, Object.freeze({ history: Object.freeze(history), versions: Object.freeze(versions) }));
   }
   return versionsByBond;
 }

@@ -190,6 +190,31 @@ test("marks mismatched cross-source strategy checks pending with DATE_MISMATCH",
   assert.equal(check(strategy(result, "equity_relative"), "ttm_profit").missingReason, "DATE_MISMATCH");
 });
 
+test("does not let an outstanding-balance date mismatch invalidate same-date valuation", () => {
+  const result = assessment({
+    view: view({
+      outstandingDataDate: "2026-08-11",
+      dailyTurnoverRate: null,
+      dataQuality: "date_mismatch",
+      missingReasons: ["BALANCE_TRADE_DATE_MISMATCH"],
+    }),
+  });
+
+  assert.equal(dimension(result, "premium").state, "favorable");
+  assert.equal(check(dimension(result, "premium"), "premium_dimension").state, "met");
+  assert.equal(check(strategy(result, "stock_bond_relative"), "relative_conversion_value").state, "met");
+  assert.equal(check(dimension(result, "liquidity"), "remaining_turnover").missingReason, "MISSING_TURNOVER_RATE");
+});
+
+test("still marks valuation pending when the valuation date differs from the CB quote date", () => {
+  const result = assessment({
+    view: view({ valuationDate: "2026-08-11", dataQuality: "partial" }),
+  });
+
+  assert.equal(dimension(result, "premium").state, "pending");
+  assert.equal(check(dimension(result, "premium"), "premium_dimension").missingReason, "DATE_MISMATCH");
+});
+
 test("does not expose investment instructions, positions, or hedge ratios in public check text", () => {
   const result = assessment();
   const publicText = JSON.stringify(result);

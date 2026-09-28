@@ -31,5 +31,5 @@ test("V5.2 primary controls preserve visible focus and dynamic status accessibil
 
   assert.match(css, /:focus-visible/);
   assert.match(detail, /aria-live="polite"/);
-  assert.doesNotMatch(company, /data-company-chart-bond|klinechart|MACD|RSI|KDJ|BOLL/i);
+  assert.doesNotMatch(company, /data-company-chart-bond|klinechart|\b(?:MACD|RSI|KDJ|BOLL)\b/i);
 });

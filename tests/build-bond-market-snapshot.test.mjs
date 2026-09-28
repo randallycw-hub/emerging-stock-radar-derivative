@@ -451,6 +451,46 @@ test("omits incomplete official outstanding-balance change fields without droppi
   assert.equal(reasonOnly.outstandingChangeReason, null);
 });
 
+test("omits official outstanding-change dates later than the snapshot as-of date", () => {
+  const [term] = bondTermSummariesFrom11406Rows([{
+    債券代碼: "35221",
+    機構代碼: "3522",
+    機構名稱: "御嵿",
+    債券簡稱: "御嵿一",
+    到期日期: "1170729",
+    發行總額: "2000000",
+    目前餘額: "1500000",
+    資料日期: "20260927",
+    最近餘額變動日: "20261002",
+    最近餘額變動原因: "轉換執行",
+    賣回權日期: "",
+  }], "2026-09-27");
+
+  assert.equal(term.outstandingAmount, "1500000");
+  assert.equal(term.outstandingDataDate, "2026-09-27");
+  assert.equal(term.outstandingChangeDate, null);
+  assert.equal(term.outstandingChangeReason, null);
+});
+
+test("retains an outstanding change after the last market day when it is within the official balance snapshot", () => {
+  const [term] = bondTermSummariesFrom11406Rows([{
+    債券代碼: "35221",
+    機構代碼: "3522",
+    機構名稱: "御嵿",
+    債券簡稱: "御嵿一",
+    到期日期: "1170729",
+    發行總額: "2000000",
+    目前餘額: "1500000",
+    資料日期: "20260927",
+    最近餘額變動日: "20260926",
+    最近餘額變動原因: "轉換執行",
+    賣回權日期: "",
+  }], "2026-09-24");
+
+  assert.equal(term.outstandingChangeDate, "2026-09-26");
+  assert.equal(term.outstandingChangeReason, "轉換執行");
+});
+
 test("maps the English 11406 DataDate alias without blocking identity-only rows", () => {
   const base = {
     債券代碼: "35221",
@@ -1362,6 +1402,22 @@ test("workbench cross-file verification uses exact bond codes, history and sourc
   assert.doesNotThrow(() => verifyWorkbenchConsistency({
     ...valid,
     workbench: forgedAssessment,
+    allowHistoricalAssessments: true,
+  }));
+  const legacyDerivedStates = structuredClone(result.workbench);
+  legacyDerivedStates.records[0].fieldStates.valuation = "date_mismatch";
+  assert.throws(
+    () => verifyWorkbenchConsistency({
+      ...valid,
+      workbench: legacyDerivedStates,
+      sourceStateSummary: summarizeWorkbenchSourceStates(legacyDerivedStates),
+    }),
+    /WORKBENCH_CANDIDATE_MISMATCH/,
+  );
+  assert.doesNotThrow(() => verifyWorkbenchConsistency({
+    ...valid,
+    workbench: legacyDerivedStates,
+    sourceStateSummary: summarizeWorkbenchSourceStates(legacyDerivedStates),
     allowHistoricalAssessments: true,
   }));
   assert.throws(

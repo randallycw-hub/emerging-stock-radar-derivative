@@ -39,8 +39,13 @@ test('range filters preserve zero and restore valid URL values without accepting
 test('all views retain the issuer identity and a period view exposes existing balance and conversion dates', () => {
   assert.ok(CB_VIEW_COLUMNS.period, 'period and balance view is available');
   for (const [view, columns] of Object.entries(CB_VIEW_COLUMNS)) {
-    const identity = view === 'overview' ? `${columns[0][1](record)} ${columns[1][1](record)}` : columns[1][1](record);
-    assert.equal(identity, '9000 測試公司');
+    const identity = view === 'overview' ? columns[0][1](record) : columns[1][1](record);
+    if (view === 'overview') {
+      assert.match(identity, /90001 測試一/);
+      assert.match(identity, /9000 測試公司/);
+    } else {
+      assert.equal(identity, '9000 測試公司');
+    }
   }
   const values = CB_VIEW_COLUMNS.period.map(([, value]) => value(record, '2026-09-04'));
   assert.ok(values.includes('2026/08/31'));
