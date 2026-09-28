@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { bondShortcutState } from "../static-showcase/assets/bonds-page.js";
+import {
+  bondAdvancedFiltersActive,
+  bondShortcutState,
+} from "../static-showcase/assets/bonds-page.js";
 
 const root = new URL("../static-showcase/", import.meta.url);
 
@@ -10,7 +13,33 @@ test("bond strategy shortcuts select a public screener without internal quality 
   assert.deepEqual(bondShortcutState("low-premium"), { screener: "lowPremium" });
   assert.deepEqual(bondShortcutState("near-conversion"), { screener: "conversion100" });
   assert.deepEqual(bondShortcutState("low-price"), { screener: "cheap" });
+  assert.deepEqual(bondShortcutState("mostly-converted"), { screener: "converted75" });
   assert.deepEqual(bondShortcutState("upcoming-rights"), { screener: "", event: "rights90" });
+});
+
+test("restored advanced CB filters are detectable, including a zero balance threshold", () => {
+  assert.equal(bondAdvancedFiltersActive({}), false);
+  assert.equal(bondAdvancedFiltersActive({ archived: true }), true);
+  assert.equal(bondAdvancedFiltersActive({ maturityBefore: "2026-12-31" }), true);
+  assert.equal(bondAdvancedFiltersActive({ remainingMax: 0 }), true);
+  assert.equal(bondAdvancedFiltersActive({ secured: "無擔保" }), true);
+});
+
+test("CB market filters use one compact search row and expose reset only when a filter is active", async () => {
+  const [html, js, css] = await Promise.all([
+    readFile(new URL("bonds.html", root), "utf8"),
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
+    readFile(new URL("assets/app.css", root), "utf8"),
+  ]);
+
+  assert.match(html, /class="bond-filter-toolbar"[\s\S]*id="bond-search"[\s\S]*id="bond-clear-filter"[\s\S]*id="bond-result-count"/);
+  assert.doesNotMatch(html, /id="bond-public-screener"|data-bond-shortcut="clear"/);
+  assert.match(html, /<summary>其他篩選條件<\/summary>/);
+  assert.match(html, /data-bond-advanced-filters[\s\S]*archive-toggle/);
+  assert.match(html, /data-bond-shortcut="mostly-converted"/);
+  assert.match(js, /activeConditions\.length === 0/);
+  assert.match(css, /\.bond-filter-toolbar\s*\{/);
+  assert.match(css, /\.bond-event-shortcuts button[^\{]*\{/);
 });
 
 test("bond page exposes the complete sortable CB workbench", async () => {
@@ -224,14 +253,14 @@ test("bond page provides composable public event controls and a clear-all empty 
   assert.match(html, /data-bond-quick-observation/);
   assert.match(html, /<fieldset class="bond-event-shortcuts"/);
   assert.equal((html.match(/data-bond-shortcut=/g) ?? []).length, 7);
-  for (const label of ["新發行", "低溢價", "接近轉換價值", "低 CB 收盤價", "90 日內權利事件"]) {
+  for (const label of ["新發行", "低溢價", "接近轉換價值", "低 CB 收盤價", "已轉換逾 75%", "90 日內權利事件"]) {
     assert.match(html, new RegExp(label));
   }
   for (const id of ["bond-maturity-before", "bond-remaining-max", "bond-secured"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
   assert.match(html, /<details data-bond-advanced-filters>/);
-  assert.match(html, /<summary>進階篩選<\/summary>/);
+  assert.match(html, /<summary>其他篩選條件<\/summary>/);
   assert.match(js, /aria-pressed/);
   assert.match(js, /清除所有條件/);
   assert.match(css, /\.bond-event-shortcuts/);
@@ -239,11 +268,13 @@ test("bond page provides composable public event controls and a clear-all empty 
 });
 
 test("bond page keeps public screeners and official sources without unavailable licensed-data notices", async () => {
-  const [html, detail] = await Promise.all([
+  const [html, detail, js] = await Promise.all([
     readFile(new URL("bonds.html", root), "utf8"),
     readFile(new URL("assets/bond-detail-page.js", root), "utf8"),
+    readFile(new URL("assets/bonds-page.js", root), "utf8"),
   ]);
-  assert.match(html, /id="bond-public-screener"/);
+  assert.doesNotMatch(html, /id="bond-public-screener"/);
+  assert.match(js, /state\.screener = listState\.screener/);
   for (const label of ["資料來源與授權範圍", "TPEx 可轉債每日成交資訊", "TPEx 可轉債公開清單"]) {
     assert.match(detail, new RegExp(label));
   }
@@ -437,11 +468,13 @@ test("bond list presentation uses remaining ratio and canonical redemption event
   const { bondListPresentation, bondMarketStatusPresentation } = await import("../static-showcase/assets/bonds-page.js");
   assert.deepEqual(bondListPresentation({
     remainingRatio: "82.07",
+    outstandingDataDate: "2026-09-27",
     nextEventType: "redemption",
     nextEventDate: "2026-09-21",
     daysToNextEvent: 53,
   }), {
     remainingRatio: "82.07%",
+    remainingRatioDate: "2026-09-27",
     eventLabel: "贖回 53 天",
     eventDate: "2026-09-21",
   });
@@ -452,10 +485,12 @@ test("bond list presentation uses remaining ratio and canonical redemption event
 test("public CB list uses plain dashes for unavailable values and labels earlier official closes", async () => {
   const js = await readFile(new URL("assets/bonds-page.js", root), "utf8");
   assert.match(js, /前次成交/);
+  assert.match(js, /官方餘額資料日/);
   assert.doesNotMatch(js, /資料暫缺|尚無可用 CB 收盤|CB 與股票沒有共同估值日/);
   const { bondListPresentation } = await import("../static-showcase/assets/bonds-page.js");
   assert.deepEqual(bondListPresentation({ remainingRatio: null, nextEventType: null, nextEventDate: null }), {
     remainingRatio: "—",
+    remainingRatioDate: null,
     eventLabel: "—",
     eventDate: "—",
   });

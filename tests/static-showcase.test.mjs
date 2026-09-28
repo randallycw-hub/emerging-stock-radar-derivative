@@ -38,7 +38,7 @@ test("六個公開頁面已移除舊單頁程式，且僅保留已核對的頁�
     assert.doesNotMatch(pageHtml, /assets\/app\.js/);
     const fragments = [...pageHtml.matchAll(/href="#([^"]+)"/g)].map((match) => match[1]);
     const expectedFragments = page === "bonds.html"
-      ? ["main-content", "cb-today-changes", "cb-market-performance", "cb-market-institutions"]
+      ? ["main-content"]
       : ["main-content"];
     assert.deepEqual(fragments, expectedFragments);
   }

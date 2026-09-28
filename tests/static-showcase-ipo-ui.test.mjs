@@ -45,6 +45,10 @@ test("IPO 時程頁由正式事件快照提供五階段、篩選與完整時程"
   assert.match(html, /id="ipo-stage-flow"/);
   assert.match(html, /id="ipo-upcoming-grid"/);
   assert.match(html, /id="ipo-month-view"/);
+  assert.match(html, /<details id="ipo-advanced-filters" class="ipo-advanced-filters">/);
+  assert.doesNotMatch(html, /<details id="ipo-advanced-filters"[^>]*\bopen/);
+  assert.match(html, /<details id="ipo-advanced-filters"[\s\S]*?id="ipo-event"[\s\S]*?id="ipo-year"[\s\S]*?<\/details>/);
+  assert.match(js, /advancedFilters\.open = state\.event !== "all" \|\| state\.year !== "all"/);
   assert.match(js, /data-ipo-view/);
   for (const key of ["companyCode", "stage", "eventDate", "distanceDays", "auctionOpenDate", "listingDate"]) {
     assert.match(html, new RegExp(`data-ipo-sort="${key}"`));

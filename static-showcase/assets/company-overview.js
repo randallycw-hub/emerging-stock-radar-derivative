@@ -1,4 +1,5 @@
 import { configuredPublishedPointerUrl, resolvePublishedDataUrl } from "./public-data-origin.js";
+import { isOfficialSourceUrl } from "./cb-workbench-v53.js";
 
 function text(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -88,12 +89,27 @@ function exactBondRecords(records, code) {
     .filter((record) => text(record?.stockCode ?? record?.term?.issuerCode ?? record?.view?.issuerCode) === code)
     .map((record) => {
       const quote = record?.quote ?? record?.view ?? {};
+      const terms = record?.terms ?? record?.term ?? {};
+      const notListed = text(quote.tradeState) === "NOT_YET_LISTED";
+      const noTrade = ["NO_TRADE_TODAY", "no_trade"].includes(text(quote.tradeState)) || quote.isLatestSnapshot === false;
+      const cbPrice = noTrade ? quote.lastPrice ?? quote.cbClose : quote.cbClose;
       return {
         bondCode: publicText(record?.cbCode ?? record?.term?.bondCode ?? record?.view?.bondCode),
         bondName: publicText(record?.cbName ?? record?.term?.bondName ?? record?.view?.bondName),
-        cbClose: publicScalar(quote.cbClose),
-        cbPriceDate: publicText(quote.dataDate ?? quote.cbPriceDate),
+        cbPriceLabel: notListed ? "掛牌狀態" : noTrade ? "最近成交價" : "CB 收盤",
+        cbClose: notListed ? "尚未掛牌" : publicScalar(cbPrice),
+        cbPriceDate: publicText(noTrade ? quote.lastTradeDate ?? quote.dataDate ?? quote.cbPriceDate : quote.dataDate ?? quote.cbPriceDate),
+        stockClose: publicScalar(quote.stockClose),
+        stockPriceDate: publicText(quote.stockPriceDate),
+        conversionPrice: publicScalar(quote.conversionPrice),
+        conversionPriceDate: publicText(quote.conversionPriceEffectiveDate),
+        conversionValue: publicScalar(quote.stockConversionValue ?? quote.conversionValue),
+        conversionValueDate: publicText(quote.stockConversionValueDate ?? quote.valuationDate),
         premiumRate: publicScalar(quote.premiumRate),
+        valuationDate: publicText(quote.valuationDate),
+        remainingRatio: publicScalar(terms.remainingRatio ?? quote.remainingRatio),
+        outstandingDataDate: publicText(terms.outstandingDataDate ?? record?.outstandingDataDate),
+        maturityDate: publicText(terms.maturityDate ?? record?.maturityDate),
       };
     })
     .filter((record) => record.bondCode && record.bondName)
@@ -102,7 +118,11 @@ function exactBondRecords(records, code) {
 
 function publicEvents(record) {
   return recordsOf(record?.events)
-    .map((event) => ({ label: publicText(event?.label ?? event?.title), date: publicText(event?.date) }))
+    .map((event) => ({
+      label: publicText(event?.label ?? event?.title),
+      date: publicText(event?.date),
+      ...(isOfficialSourceUrl(event?.sourceUrl) ? { sourceUrl: event.sourceUrl } : {}),
+    }))
     .filter((event) => event.label && validDate(event.date))
     .sort((left, right) => left.date.localeCompare(right.date) || left.label.localeCompare(right.label, "zh-Hant"));
 }
@@ -200,9 +220,44 @@ function fact(label, value) {
 }
 
 function eventList(events) {
-  return events.length
-    ? `<ol class="company-event-list company-event-timeline">${events.map((event) => `<li><time>${escapeHtml(formatDate(event.date))}</time><span class="company-event-market">${escapeHtml(event.market ?? "IPO")}</span><strong>${escapeHtml(event.label)}</strong></li>`).join("")}</ol>`
+  if (!events.length) return "";
+  return '<ol class="company-event-list company-event-timeline">' + events.map((event) =>
+    '<li><time>' + escapeHtml(formatDate(event.date)) + '</time><span class="company-event-market">'
+      + escapeHtml(event.market ?? "IPO") + '</span><strong>' + escapeHtml(event.label) + '</strong>'
+      + (event.sourceUrl ? '<a class="company-event-source" href="' + escapeHtml(event.sourceUrl)
+        + '" target="_blank" rel="noopener noreferrer">官方公告</a>' : '')
+      + '</li>'
+  ).join("") + '</ol>';
+}
+
+function companyMetric(label, value, stampLabel = "", stamp = null) {
+  if (!value || value === "—") return "";
+  const dateNote = stampLabel && formatDate(stamp) !== "—"
+    ? '<small>' + escapeHtml(stampLabel) + ' ' + escapeHtml(formatDate(stamp)) + '</small>'
     : "";
+  return '<div><dt>' + escapeHtml(label) + '</dt><dd>' + escapeHtml(value) + '</dd>' + dateNote + '</div>';
+}
+
+function companyBondPrice(value) {
+  if (value === "尚未掛牌") return value;
+  const number = formatCompanyNumber(value);
+  return number === "—" ? number : number + " 元";
+}
+
+function renderCompanyBondCard(bond) {
+  const metrics = [
+    companyMetric(bond.cbPriceLabel ?? "CB 收盤", companyBondPrice(bond.cbClose), "資料日", bond.cbPriceDate),
+    companyMetric("標的股收盤", companyBondPrice(bond.stockClose), "資料日", bond.stockPriceDate),
+    companyMetric("轉換價", companyBondPrice(bond.conversionPrice), "生效日", bond.conversionPriceDate),
+    companyMetric("轉換價值", companyBondPrice(bond.conversionValue), "計算日", bond.conversionValueDate),
+    companyMetric("轉換溢價率", formatCompanyPercent(bond.premiumRate), "計算日", bond.valuationDate),
+    companyMetric("剩餘比率", formatCompanyPercent(bond.remainingRatio), "餘額資料日", bond.outstandingDataDate),
+    companyMetric("到期日", formatDate(bond.maturityDate)),
+  ].join("");
+  return '<a href="./bonds.html?bond=' + encodeURIComponent(bond.bondCode) + '"><strong>'
+    + escapeHtml(bond.bondCode + " " + bond.bondName) + '</strong>'
+    + (metrics ? '<dl class="company-bond-metrics">' + metrics + '</dl>' : '')
+    + '<span class="company-bond-detail-link">開啟可轉債完整明細 →</span></a>';
 }
 
 export function renderCompanyOverviewHtml(overview, activeTab = "overview") {
@@ -221,7 +276,7 @@ export function renderCompanyOverviewHtml(overview, activeTab = "overview") {
     ? `<h3>IPO／事件</h3><dl>${fact("市場", display(overview.ipo.market))}${fact("目前階段", display(overview.ipo.stage))}</dl>${eventList(ipoEvents)}<a href="./ipo-radar.html?q=${encodeURIComponent(overview.code)}">查看 IPO 明細</a>`
     : '<h3>IPO／事件</h3><p class="company-empty">目前沒有 IPO 進行資料。</p>';
   const bondsHtml = bonds.length
-    ? `<h3>可轉債</h3><div class="company-bond-list">${bonds.map((bond) => `<a href="./bonds.html?bond=${encodeURIComponent(bond.bondCode)}"><strong>${escapeHtml(bond.bondCode)} ${escapeHtml(bond.bondName)}</strong><span>收盤 ${escapeHtml(formatCompanyNumber(bond.cbClose))}　資料日 ${escapeHtml(formatDate(bond.cbPriceDate))}　溢價 ${escapeHtml(formatCompanyPercent(bond.premiumRate))}</span></a>`).join("")}</div>`
+    ? `<h3>可轉債</h3><div class="company-bond-list">${bonds.map(renderCompanyBondCard).join("")}</div>`
     : '<h3>可轉債</h3><p class="company-empty">目前沒有可轉債公開資料。</p>';
   const eventsHtml = events.length
     ? `<h3>公開事件</h3>${eventList(events)}`

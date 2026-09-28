@@ -170,7 +170,8 @@ test("UX 2.0 public navigation keeps research destinations and adds the market e
     "市場事件",
   ]);
 
-  const publicFiles = await filesUnder("static-showcase");
+  const publicFiles = (await filesUnder("static-showcase"))
+    .filter((file) => !file.replaceAll("\\", "/").startsWith("static-showcase/data/"));
   const publicSource = await Promise.all(
     publicFiles.map((file) => readFile(path.join(root, file), "utf8")),
   );

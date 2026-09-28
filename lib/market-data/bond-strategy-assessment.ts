@@ -44,8 +44,7 @@ export const CB_RESEARCH_RULES = deepFreeze({
 type CanonicalCheckCode = keyof typeof CB_RESEARCH_RULES.checks;
 
 export function evaluateBondAssessment(input: BondAssessmentInput): BondAssessment {
-  const valuationDateMismatch = input.view.dataQuality === "date_mismatch"
-    || input.view.valuationDate === null
+  const valuationDateMismatch = input.view.valuationDate === null
     || input.view.cbPriceDate === null
     || input.view.valuationDate !== input.view.cbPriceDate;
   const price = check("price_distance", numericCondition(input.view.cbClose, (value) => compareDecimal(value, CB_RESEARCH_RULES.price.favorableMax) <= 0), input.view.cbClose, input.view.cbPriceDate, "approved_cb_market", numericMissingReason(input.view.cbClose));

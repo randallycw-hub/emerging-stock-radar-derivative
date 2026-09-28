@@ -48,17 +48,27 @@ test('summary counts unique active issuers and clamps six calendar months at mon
   assert.equal(overview.cbOverviewSummary(rows, 'bad').maturity6Months, null);
 });
 
-test('thirteen overview columns disclose the selected bond, not its sibling issuer bond', () => {
-  const rows = [row('10001'), row('10002')];
+test('compact overview keeps market essentials, the selected bond identity and full expandable facts', () => {
+  const rows = [row('10001'), {
+    ...row('10002', { maturityDate: '2029-06-30', remainingRatio: 45 }),
+    cbName: '測試二', stockCode: '1234', companyName: '標的公司',
+    quote: { cbClose: 108, stockClose: 52, conversionPrice: 44, stockConversionValue: 118, premiumRate: -8, dataDate: '2026-09-18', stockPriceDate: '2026-09-18', conversionPriceEffectiveDate: '2026-09-10', stockConversionValueDate: '2026-09-18', valuationDate: '2026-09-18' },
+    events: [{ label: '賣回起日', date: '2027-01-15' }],
+  }];
   const output = overview.renderCbDatabaseTable(rows, { expandedCode: '10002' });
-  assert.equal((output.head.match(/<th /g) ?? []).length, 13);
-  assert.match(output.head, /股票代碼/);
-  assert.match(output.head, /債券名稱/);
+  assert.equal((output.head.match(/<th /g) ?? []).length, 10);
+  assert.match(output.head, /CB／標的/);
+  assert.match(output.head, /CB 收盤／最近成交/);
+  assert.match(output.head, /轉換溢價率/);
+  assert.match(output.head, /下一權利事件/);
   assert.match(output.body, /aria-expanded="false"[^>]*data-cb-expand="10001"/);
   assert.match(output.body, /aria-expanded="true"[^>]*data-cb-expand="10002"/);
   assert.equal((output.body.match(/class="cb-inline-row"/g) ?? []).length, 1);
-  assert.match(output.body, /colspan="13"/);
-  assert.match(output.body, /10002 測試10002/);
+  assert.match(output.body, /colspan="10"/);
+  assert.match(output.body, /10002 測試二 · 1234 標的公司/);
+  assert.match(output.body, /賣回起日 2027\/01\/15/);
+  assert.match(output.body, /發行日/);
+  assert.match(output.body, /到期日/);
 });
 
 test('compact details escape identity, distinguish dates and preserve list state', () => {

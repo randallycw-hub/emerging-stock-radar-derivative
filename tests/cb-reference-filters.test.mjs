@@ -49,10 +49,12 @@ test('URL state restores only validated new conditions and detail return keeps t
   assert.equal(invalid.maturityDaysMax, undefined);
 });
 
-test('overview renders thirteen aligned cells, dated values, terms and escaped identity', () => {
+test('overview renders ten aligned cells, dated market essentials and escaped CB/stock identity', () => {
   const {head,body}=renderCbDatabaseTable([{...a,cbName:'<測試>'}], {view:'overview',filterSearch:'?view=overview&secured=secured'});
-  assert.equal((head.match(/<th/g)??[]).length,13);
-  assert.equal((body.match(/<td/g)??[]).length,13);
+  assert.equal((head.match(/<th/g)??[]).length,10);
+  assert.equal((body.match(/<td/g)??[]).length,10);
+  assert.match(head,/CB／標的/);
+  assert.match(head,/下一權利事件/);
   assert.match(body,/106<time datetime="2026-09-04">2026\/09\/04/);
   assert.match(body,/2026\/09\/01/);
   assert.match(body,/2027\/09\/04/);
@@ -86,4 +88,24 @@ test('static publishing allowlist includes the shared filter module imported by 
   const staging = await readFile(new URL('../scripts/stage-static-showcase.mjs', import.meta.url), 'utf8');
   const allowlist = staging.match(/const ASSET_FILES = new Set\(\[([\s\S]*?)\]\)/)?.[1] ?? '';
   assert.ok(allowlist.includes('"cb-filter-state.js"'), 'shared module must be packaged with its consumers');
+});
+
+test('CB database keeps complete filters available while collapsing numeric and date fields by default', async () => {
+  const html = await readFile(new URL('../static-showcase/bonds-filter.html', import.meta.url), 'utf8');
+  const script = await readFile(new URL('../static-showcase/assets/bond-filter-page.js', import.meta.url), 'utf8');
+  assert.match(html, /<form id="bond-filter-form"[\s\S]*?搜尋股票或可轉債/);
+  assert.match(html, /name="quickFilter"/);
+  assert.match(html, /name="secured"/);
+  assert.match(html, /name="sort"/);
+  assert.match(html, /name="direction"/);
+  assert.match(html, /data-cb-preset="remainingLow"/);
+  assert.match(html, /data-cb-preset="maturity90"/);
+  assert.match(html, /<details class="cb-range-filters">/);
+  assert.doesNotMatch(html, /<details class="cb-range-filters" open/);
+  for (const field of ['priceMin', 'premiumMin', 'remainingMin', 'conversionPriceMin', 'conversionValueMin', 'stockPriceMin', 'maturityDaysMin', 'issueFrom', 'maturityFrom']) {
+    assert.match(html, new RegExp(`name="${field}"`), `${field} remains available in advanced filters`);
+  }
+  assert.match(script, /Object\.keys\(RANGE_FIELDS\)\.some\(key => state\[key\] !== undefined\).*cb-range-filters.*\.open = true/);
+  assert.match(script, /data-cb-preset/);
+  assert.match(script, /cbDatabaseReturnUrl|syncUrl/);
 });

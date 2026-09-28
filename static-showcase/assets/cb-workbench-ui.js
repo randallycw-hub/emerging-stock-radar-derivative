@@ -58,6 +58,11 @@ export function renderMarketOverview(model, { metric = "volume" } = {}) {
       ${summaryCard("單日成交額", publicAmount(summary.turnoverAmount), dateLabel(model?.dataDate), "turnover")}
       ${summaryCard("當週已收錄成交額", publicAmount(summary.weekTurnoverAmount), `${text(summary.weekPeriod) || "—"}${summary.weekObservedDayCount != null ? ` · 已收錄 ${summary.weekObservedDayCount} 日` : ''}`, "week")}
     </section>
+    <nav class="cb-overview-anchor-nav" aria-label="市場總覽區塊" data-cb-overview-anchor-nav>
+      <a href="#cb-today-changes">盤後異動</a>
+      <a href="#cb-market-performance">市場表現</a>
+      <a href="#cb-market-institutions" data-cb-institution-link hidden>標的法人</a>
+    </nav>
     <nav class="cb-workspace-tabs" aria-label="可轉債快速篩選">
       <a href="./bonds-filter.html?quickFilter=lowPremium">轉換溢價率由低到高 →</a>
       <a href="./bonds-filter.html?quickFilter=newIssue">近 90 日發行 →</a>
@@ -90,6 +95,12 @@ export function publicAmount(value) {
   return publicNumber(number, 0);
 }
 
+export function publicInstitutionName(value) {
+  const name = text(value);
+  if (!name) return "—";
+  return name.replace(/^[0-9A-Z]{3}T(?=\S)/, "");
+}
+
 function renderRanking(records, definition) {
   if (records.length === 0) return '<p class="empty-state">目前沒有可顯示的公開行情。</p>';
   return `<ol class="cb-research-cards">${records.map((record, index) => `<li>
@@ -106,10 +117,11 @@ function renderEventPanel(events) {
 }
 
 function normalizeOverviewEvent(event) {
+  const cbCode = text(event?.cbCode);
   const date = [event?.date, event?.effectiveDate, event?.startDate, event?.deadlineDate, event?.endDate, event?.announcementDate]
     .find((value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value ?? "")));
   const label = text(event?.label) || text(event?.title);
-  return date && label ? { ...event, date, label } : null;
+  return cbCode && date && label ? { ...event, cbCode, date, label } : null;
 }
 
 function renderIssuancePanel(issuance) {

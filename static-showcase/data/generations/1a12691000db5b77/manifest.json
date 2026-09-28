@@ -97,16 +97,16 @@
           "accumulating": 0
         },
         "valuation": {
-          "complete": 1,
+          "complete": 186,
           "stale": 1,
-          "date_mismatch": 415,
-          "missing": 1,
+          "date_mismatch": 29,
+          "missing": 202,
           "accumulating": 0
         },
         "outstanding": {
-          "complete": 3,
+          "complete": 389,
           "stale": 0,
-          "date_mismatch": 415,
+          "date_mismatch": 29,
           "missing": 0,
           "accumulating": 0
         },
@@ -193,8 +193,8 @@
       },
       {
         "name": "bond-workbench.json",
-        "sha256": "sha256:b9d70d3e8288834cf48cbe1f6ced67686da6055a5d56af4abeab4974dab9b022",
-        "rawBytes": 7062152,
+        "sha256": "sha256:2b0db4d740577060c4731fe351985c50e57c42651ddd51cb03357e10c65d977e",
+        "rawBytes": 7041539,
         "recordCount": 418,
         "schemaVersion": 1,
         "sourceStateSummary": {
@@ -211,16 +211,16 @@
               "accumulating": 0
             },
             "valuation": {
-              "complete": 1,
+              "complete": 186,
               "stale": 1,
-              "date_mismatch": 415,
-              "missing": 1,
+              "date_mismatch": 29,
+              "missing": 202,
               "accumulating": 0
             },
             "outstanding": {
-              "complete": 3,
+              "complete": 389,
               "stale": 0,
-              "date_mismatch": 415,
+              "date_mismatch": 29,
               "missing": 0,
               "accumulating": 0
             },

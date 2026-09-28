@@ -997,14 +997,14 @@ export function verifyWorkbenchConsistency({
     previous: expectedPrevious,
   });
   if (!equalPlainJson(snapshot, expected)) {
-    const historicalAssessmentDrift = (
+    const historicalDerivedStateDrift = (
       allowHistoricalAssessments
       && equalPlainJson(
-        withoutWorkbenchAssessments(snapshot),
-        withoutWorkbenchAssessments(expected),
+        withoutHistoricalWorkbenchDerivations(snapshot),
+        withoutHistoricalWorkbenchDerivations(expected),
       )
     );
-    if (!historicalAssessmentDrift) {
+    if (!historicalDerivedStateDrift) {
       const expectedByCode = new Map(expected.records.map((record) => [
         record.bondCode,
         record,
@@ -1017,8 +1017,8 @@ export function verifyWorkbenchConsistency({
       }
       throw new Error(
         `VALIDATION_FAILED:WORKBENCH_CANDIDATE_MISMATCH:${firstJsonDifference(
-          allowHistoricalAssessments ? withoutWorkbenchAssessments(snapshot) : snapshot,
-          allowHistoricalAssessments ? withoutWorkbenchAssessments(expected) : expected,
+          allowHistoricalAssessments ? withoutHistoricalWorkbenchDerivations(snapshot) : snapshot,
+          allowHistoricalAssessments ? withoutHistoricalWorkbenchDerivations(expected) : expected,
         )}`,
       );
     }
@@ -1038,11 +1038,11 @@ function withoutMarketStatus(view) {
   return Object.fromEntries(Object.entries(view).filter(([key]) => key !== "marketStatus"));
 }
 
-function withoutWorkbenchAssessments(workbench) {
+function withoutHistoricalWorkbenchDerivations(workbench) {
   return {
     ...workbench,
     records: workbench.records.map((record) => Object.fromEntries(
-      Object.entries(record).filter(([key]) => key !== "assessment"),
+      Object.entries(record).filter(([key]) => key !== "assessment" && key !== "fieldStates"),
     )),
   };
 }

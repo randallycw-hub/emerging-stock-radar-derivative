@@ -35,12 +35,19 @@ export function bondTermSummariesFrom11406Rows(rows, asOfDate) {
     const bondName = requiredSourceText(row, "債券簡稱", index);
     const optionalDate = (key, aliases = []) => optionalOfficialDate(row, key, index, aliases);
     const optionalAmount = (key) => optionalOfficialAmount(row, key, index);
+    const outstandingDataDate = optionalDate("資料日期", ["DataDate"]);
     const outstandingChangeDate = optionalDate("最近餘額變動日");
     const outstandingChangeReason = optionalSourceText(row, "最近餘額變動原因");
+    const outstandingChangeDateIsFuture = outstandingDataDate !== null
+      && outstandingChangeDate !== null
+      && outstandingChangeDate > outstandingDataDate;
     // The official feed contains date-only and reason-only balance changes.  Match
     // the normalized 11406 adapter: retain the bond, but publish this optional fact
-    // only when the official pair is complete.
-    const hasCompleteOutstandingChange = outstandingChangeDate !== null && outstandingChangeReason !== null;
+    // only when the official pair is complete and not later than the snapshot.
+    const hasCompleteOutstandingChange = outstandingChangeDate !== null
+      && outstandingChangeReason !== null
+      && outstandingDataDate !== null
+      && !outstandingChangeDateIsFuture;
     return [{
       bondCode,
       issuerCode: requiredSourceText(row, "機構代碼", index),
@@ -60,7 +67,7 @@ export function bondTermSummariesFrom11406Rows(rows, asOfDate) {
         requiredSourceText(row, "目前餘額", index),
         `11406 row ${index + 1} outstandingAmount`,
       ),
-      outstandingDataDate: optionalDate("資料日期", ["DataDate"]),
+      outstandingDataDate,
       initialConversionPrice: optionalAmount("發行時轉換價格"),
       conversionStartDate: optionalDate("轉換期間起"),
       conversionEndDate: optionalDate("迄"),

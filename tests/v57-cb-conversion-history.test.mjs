@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildCbWorkbenchV53 } from "../static-showcase/assets/cb-workbench-v53.js";
+import { buildCbWorkbenchV53, validateCbWorkbenchV53 } from "../static-showcase/assets/cb-workbench-v53.js";
 import { renderCbDetailV53 } from "../static-showcase/assets/cb-detail-v53.js";
 import { buildLightweightEventMarkers } from "../static-showcase/assets/lightweight-charts-adapter.js";
 import { renderMarketOverview } from "../static-showcase/assets/cb-workbench-ui.js";
 
 const MOPS_URL = "https://mopsov.twse.com.tw/mops/web/t120sg01?bond_id=90001&issuer_stock_code=9000";
+const TPEX_CB_QUOTES_URL = "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry";
+const TWSE_STOCK_CLOSE_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL";
+const TPEX_STOCK_CLOSE_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes";
+const TPEX_CB_TERMS_URL = "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv";
 
 function modelWithConversionHistory() {
   return buildCbWorkbenchV53({
@@ -49,6 +53,57 @@ test("V5.7 CB detail presents conversion history with official source links and 
   assert.match(html, /100 元/);
   assert.match(html, /95 元/);
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整度|MISSING_/);
+});
+
+test("V5.7 CB detail links each displayed market value to its official source and own date", () => {
+  const base = modelWithConversionHistory().records[0];
+  const record = { ...base, terms: { ...base.terms, officialDataDate: "2026-08-25" } };
+  const listedHtml = renderCbDetailV53(record);
+  const otcHtml = renderCbDetailV53({ ...record, market: "上櫃" });
+
+  assert.match(listedHtml, new RegExp(`href="${TPEX_CB_QUOTES_URL}"`));
+  assert.match(listedHtml, /CB 行情[\s\S]*TPEx 可轉債每日成交資訊[\s\S]*資料日 2026\/08\/28/);
+  assert.match(listedHtml, new RegExp(`href="${TWSE_STOCK_CLOSE_URL}"`));
+  assert.match(listedHtml, /標的股行情[\s\S]*TWSE 每日收盤資訊[\s\S]*資料日 2026\/08\/28/);
+  assert.match(listedHtml, /轉換價來源[\s\S]*公開資訊觀測站[\s\S]*生效日 2026\/08\/01/);
+  assert.match(listedHtml, new RegExp(`href="${TPEX_CB_TERMS_URL}"`));
+  assert.match(listedHtml, /發行條款[\s\S]*TPEx 債券基本資料[\s\S]*資料日 2026\/08\/25/);
+  assert.match(otcHtml, new RegExp(`href="${TPEX_STOCK_CLOSE_URL}"`));
+  assert.match(otcHtml, /標的股行情[\s\S]*TPEx 上櫃每日收盤資訊[\s\S]*資料日 2026\/08\/28/);
+  assert.doesNotMatch(listedHtml + otcHtml, /來源 ID|缺漏原因|資料完整度|MISSING_/);
+});
+
+test("V5.7 model retains the official source of an unchanged effective conversion price", () => {
+  const model = buildCbWorkbenchV53({
+    workbench: {
+      dataDate: "2026-08-28",
+      records: [{
+        bondCode: "90001",
+        status: "active",
+        term: { bondCode: "90001", issuerCode: "9000" },
+        view: {
+          bondCode: "90001", cbPriceDate: "2026-08-28", cbClose: "110", cbTradeUnits: "20",
+          stockPriceDate: "2026-08-28", stockClose: "95", currentConversionPrice: "100",
+          conversionPriceEffectiveDate: "2026-07-01",
+        },
+        events: [],
+      }],
+    },
+    cbMaster: [{ bondCode: "90001", stockCode: "9000", bondName: "測試一", companyName: "測試公司", market: "上市" }],
+    companyMaster: [{ stockCode: "9000", industry: "測試業" }],
+    conversionPrices: [{
+      bondCode: "90001", issuerCode: "9000", initialConversionPrice: "100", currentConversionPrice: "100",
+      effectiveDate: "2026-07-01", officialDetailUrl: MOPS_URL,
+    }],
+  });
+
+  assert.deepEqual(model.records[0].conversionPriceHistory, []);
+  assert.deepEqual(model.records[0].conversionPriceSource, { effectiveDate: "2026-07-01", sourceUrl: MOPS_URL });
+  assert.equal(validateCbWorkbenchV53(model), true);
+
+  const invalid = structuredClone(model);
+  invalid.records[0].conversionPriceSource.sourceUrl = "https://example.test/unauthorized";
+  assert.throws(() => validateCbWorkbenchV53(invalid), /conversion price source/i);
 });
 
 test("V5.7 K-line retains one marker for one canonical event identity", () => {

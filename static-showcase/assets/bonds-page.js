@@ -56,10 +56,21 @@ export function bondShortcutState(shortcut) {
     "low-premium": "lowPremium",
     "near-conversion": "conversion100",
     "low-price": "cheap",
+    "mostly-converted": "converted75",
   };
   if (screeners[shortcut]) return { screener: screeners[shortcut] };
   if (shortcut === "upcoming-rights") return { screener: "", event: "rights90" };
   return null;
+}
+
+export function bondAdvancedFiltersActive(filters = {}) {
+  const remainingMax = filters.remainingMax;
+  return Boolean(
+    filters.archived
+    || String(filters.maturityBefore ?? "").trim()
+    || (remainingMax !== undefined && remainingMax !== null && String(remainingMax).trim() !== "")
+    || String(filters.secured ?? "").trim(),
+  );
 }
 
 if (globalThis.window && globalThis.document) {
@@ -151,7 +162,8 @@ function initializeFromUrl() {
   setControlValue("#bond-maturity-before", state.maturityBefore);
   setControlValue("#bond-remaining-max", state.remainingMax ?? "");
   setControlValue("#bond-secured", state.secured);
-  setControlValue("#bond-public-screener", state.screener);
+  const advancedFilters = document.querySelector("[data-bond-advanced-filters]");
+  if (advancedFilters) advancedFilters.open = bondAdvancedFiltersActive(state);
   updateBondShortcutStates();
 }
 
@@ -174,13 +186,8 @@ function bindFilters() {
     clearBondFilters();
     document.querySelector("#bond-search").focus();
   });
-  for (const selector of ["#bond-maturity-before", "#bond-remaining-max", "#bond-secured", "#bond-public-screener"]) {
-    document.querySelector(selector)?.addEventListener("change", (event) => {
-      if (selector === "#bond-public-screener") {
-        state.screener = event.target.value;
-        state.sortKey = null;
-        state.sortDirection = "asc";
-      }
+  for (const selector of ["#bond-maturity-before", "#bond-remaining-max", "#bond-secured"]) {
+    document.querySelector(selector)?.addEventListener("change", () => {
       state.page = 1;
       syncListUrl();
       renderBonds();
@@ -195,12 +202,8 @@ function bindFilters() {
         state.event = shortcutState.event ?? "";
         state.sortKey = null;
         state.sortDirection = "asc";
-        setControlValue("#bond-public-screener", state.screener);
       } else if (shortcut === "rights90" || shortcut === "maturity365") {
         state.event = state.event === shortcut ? "" : shortcut;
-      } else if (shortcut === "clear") {
-        clearBondFilters();
-        return;
       }
       state.page = 1;
       syncListUrl();
@@ -440,11 +443,10 @@ function renderBonds() {
   const pagination = paginateBondRecords(ordered, state.page);
   state.page = pagination.page;
   const visible = pagination.records;
-  const noResults = ordered.length === 0;
+  const activeConditions = activeBondConditions(filters);
 
   setText("#bond-result-count", `${pagination.total} 檔 · 第 ${state.page}/${pagination.pageCount} 頁`);
-  document.querySelector("#bond-clear-filter").hidden = !noResults || activeBondConditions(filters).length === 0;
-  const activeConditions = activeBondConditions(filters);
+  document.querySelector("#bond-clear-filter").hidden = activeConditions.length === 0;
   const emptyMessage = activeConditions.length
     ? `沒有符合條件的可轉債；目前條件：${activeConditions.join("、")}。可清除所有條件後再試。`
     : "沒有符合條件的可轉債；可清除搜尋條件後再試。";
@@ -482,7 +484,7 @@ function renderBondRow(view) {
     <td>${priceMetric(view.stockClose, view.stockPriceDate)}</td>
     <td>${priceMetric(view.currentConversionPrice, view.conversionPriceEffectiveDate, "生效日")}</td>
     <td>${amountMetric(view.outstandingAmount, view.outstandingDataDate, "流通餘額")}</td>
-    <td>${metric(presentation.remainingRatio, "流通餘額比例")}</td>
+    <td>${metric(presentation.remainingRatio, presentation.remainingRatioDate ? `官方餘額資料日 ${presentation.remainingRatioDate}` : "")}</td>
     <td>${metric(view.maturityDate, "到期日")}</td>
     <td>${amountMetric(view.issueAmount, null, "發行總額")}</td>
     <td>${eventMetric(view)}</td>
@@ -503,7 +505,7 @@ function renderBondCard(view) {
       ${cardMetric("標的股收盤", valueOrDash(view.stockClose), view.stockPriceDate)}
       ${cardMetric("目前轉換價", valueOrDash(view.currentConversionPrice), view.conversionPriceEffectiveDate)}
       ${cardMetric("流通餘額", numberText(view.outstandingAmount), view.outstandingDataDate)}
-      ${cardMetric("流通餘額比例", presentation.remainingRatio, "流通餘額比例")}
+      ${cardMetric("流通餘額比例", presentation.remainingRatio, presentation.remainingRatioDate ? `官方餘額資料日 ${presentation.remainingRatioDate}` : "")}
       ${cardMetric("到期日", view.maturityDate, "到期日")}
       ${cardMetric("發行總額", numberText(view.issueAmount), "發行總額")}
       ${cardMetric("下一事件", presentation.eventLabel, presentation.eventDate)}
@@ -696,7 +698,6 @@ function clearBondFilters() {
   setControlValue("#bond-maturity-before", "");
   setControlValue("#bond-remaining-max", "");
   setControlValue("#bond-secured", "");
-  setControlValue("#bond-public-screener", "");
   state.archived = false;
   state.event = "";
   state.maturityBefore = "";
@@ -849,6 +850,8 @@ function setV56MarketSectionsHidden(hidden) {
     const target = document.querySelector(selector);
     if (target) target.hidden = hidden;
   }
+  const overviewNavigation = document.querySelector("[data-cb-overview-anchor-nav]");
+  if (overviewNavigation) overviewNavigation.hidden = hidden;
   const link = document.querySelector("[data-cb-institution-link]");
   if (link) link.hidden = hidden || !link.innerHTML;
 }
@@ -937,6 +940,11 @@ export function bondListPresentation(view = {}) {
     : eventTypeLabel;
   return {
     remainingRatio: plainRate(view.remainingRatio),
+    remainingRatioDate: view.remainingRatio !== null
+      && view.remainingRatio !== undefined
+      && validPublishedDate(view.outstandingDataDate)
+        ? view.outstandingDataDate
+        : null,
     eventLabel: view.nextEventDate ? eventLabel : "—",
     eventDate: view.nextEventDate ?? "—",
   };

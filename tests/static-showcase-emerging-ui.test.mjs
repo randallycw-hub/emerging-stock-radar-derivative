@@ -5,11 +5,12 @@ import test from "node:test";
 const root = new URL("../static-showcase/", import.meta.url);
 
 test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async () => {
-  const [html, js, display, css] = await Promise.all([
+  const [html, js, display, css, workspaceCss] = await Promise.all([
     readFile(new URL("emerging.html", root), "utf8"),
     readFile(new URL("assets/emerging-page.js", root), "utf8"),
     readFile(new URL("assets/emerging-market-display.js", root), "utf8"),
     readFile(new URL("assets/app.css", root), "utf8"),
+    readFile(new URL("assets/workspace.css", root), "utf8"),
   ]);
   const source = html + js + display;
 
@@ -54,6 +55,8 @@ test("興櫃頁提供完整盤後市場概況、排行榜與資料表", async ()
     assert.match(html, new RegExp(`data-emerging-view="${view}"`));
   }
   assert.match(html, /市場概況/);
+  assert.match(workspaceCss, /\[data-page="emerging"\]\s+#emerging-market-root\s*>\s*\.view-tabs/);
+  assert.match(workspaceCss, /#emerging-market-root\s*>\s*\.view-tabs\s+button\[aria-selected="true"\]/);
 
   assert.match(html, /assets\/emerging-page\.js/);
   assert.match(js, /URLSearchParams/);

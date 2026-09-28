@@ -1,5 +1,11 @@
 import { EVENT_TYPE_LABELS, isOfficialSourceUrl } from "./cb-workbench-v53.js";
 import { CB_SECURED_VALUES, readValidatedCbConditions } from './cb-filter-state.js';
+import { publicInstitutionName } from "./cb-workbench-ui.js";
+
+const CB_DAILY_QUOTES_URL = "https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry";
+const TWSE_DAILY_STOCK_CLOSE_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL";
+const TPEX_DAILY_STOCK_CLOSE_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes";
+const TPEX_CB_TERMS_URL = "https://www.tpex.org.tw/storage/bond_publish/ISSBD5_data.csv";
 
 export const CB_DETAIL_TABS = Object.freeze([
   ["overview", "交易概況"],
@@ -66,10 +72,30 @@ function summaryFacts(quote) {
 }
 
 function sourceLinks(record) {
-  const termsUrl = arrayValue(record.events).find(event => ['listing','maturity'].includes(event.type) && isOfficialSourceUrl(event.sourceUrl))?.sourceUrl;
-  const conversionUrl = arrayValue(record.conversionPriceHistory).find(entry => isOfficialSourceUrl(entry.sourceUrl))?.sourceUrl;
-  const links = [[termsUrl, '發行條款'], [conversionUrl, '轉換價明細']].filter(([url]) => url);
-  return links.length ? `<p class="cb-detail-sources">官方來源：${links.map(([url, label]) => `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`).join(' · ')}</p>` : '';
+  const quote = record.quote ?? {};
+  const terms = record.terms ?? {};
+  const sources = [];
+  if (finite(quote.cbClose) !== null && isoDate(quote.dataDate)) {
+    sources.push(sourceItem("CB 行情", CB_DAILY_QUOTES_URL, "TPEx 可轉債每日成交資訊", "資料日", quote.dataDate));
+  }
+  const stockUrl = record.market === "上市" ? TWSE_DAILY_STOCK_CLOSE_URL : record.market === "上櫃" ? TPEX_DAILY_STOCK_CLOSE_URL : null;
+  const stockLabel = record.market === "上市" ? "TWSE 每日收盤資訊" : record.market === "上櫃" ? "TPEx 上櫃每日收盤資訊" : null;
+  if (stockUrl && stockLabel && finite(quote.stockClose) !== null && isoDate(quote.stockPriceDate)) {
+    sources.push(sourceItem("標的股行情", stockUrl, stockLabel, "資料日", quote.stockPriceDate));
+  }
+  const conversionSource = record.conversionPriceSource;
+  if (conversionSource && conversionSource.effectiveDate === quote.conversionPriceEffectiveDate && finite(quote.conversionPrice) !== null && isoDate(conversionSource.effectiveDate) && isOfficialSourceUrl(conversionSource.sourceUrl)) {
+    sources.push(sourceItem("轉換價來源", conversionSource.sourceUrl, "公開資訊觀測站", "生效日", conversionSource.effectiveDate));
+  }
+  if (isoDate(terms.officialDataDate)) {
+    sources.push(sourceItem("發行條款", TPEX_CB_TERMS_URL, "TPEx 債券基本資料", "資料日", terms.officialDataDate));
+  }
+  return sources.length ? `<section class="cb-detail-sources" aria-label="資料來源"><strong>資料來源</strong>${sources.join("")}</section>` : '';
+}
+
+function sourceItem(label, url, sourceName, dateLabel, stamp) {
+  if (!isOfficialSourceUrl(url) || !isoDate(stamp)) return "";
+  return `<span class="cb-detail-source-item"><span>${escapeHtml(label)}</span><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(sourceName)}</a><small>${escapeHtml(dateLabel)} ${escapeHtml(date(stamp))}</small></span>`;
 }
 
 function redemptionNotice(right, rightsEvents, cbCode) {
@@ -188,7 +214,7 @@ function termsPanel(terms, dataDate) {
     ['最近餘額異動日', date(terms.outstandingChangeDate)],
     ['餘額異動原因', text(terms.outstandingChangeReason) || '—'],
   ].filter(([,value]) => value !== '—').map(([label,value]) => fact(label,value)).join('');
-  return `<h3>發行條款</h3><dl class="detail-facts cb-detail-facts">${fact(isoDate(dataDate) && isoDate(terms.issueDate) > dataDate ? "預定發行日" : "發行日", date(terms.issueDate))}${fact(isoDate(dataDate) && isoDate(terms.listingDate) > dataDate ? "預定掛牌日" : "掛牌日", date(terms.listingDate))}${fact("到期日", date(terms.maturityDate))}${fact("發行總額", amount(terms.issueAmount))}${fact("流通餘額", amount(terms.outstandingAmount))}${fact("餘額資料日", date(terms.outstandingDataDate))}${fact("剩餘比率", percent(terms.remainingRatio))}${fact("擔保狀態", text(terms.securedStatus) || "—")}${fact("承銷商", text(terms.underwriter) || "—")}${fact("受託機構", text(terms.trustee) || "—")}${fact("轉換期間", dateRange(terms.conversionStartDate, terms.conversionEndDate))}${fact("賣回日", putDates)}${fact("賣回價格", price(terms.putPrice))}${extra}${fact('條款資料日', date(terms.officialDataDate ?? terms.outstandingDataDate))}</dl>`;
+  return `<h3>發行條款</h3><dl class="detail-facts cb-detail-facts">${fact(isoDate(dataDate) && isoDate(terms.issueDate) > dataDate ? "預定發行日" : "發行日", date(terms.issueDate))}${fact(isoDate(dataDate) && isoDate(terms.listingDate) > dataDate ? "預定掛牌日" : "掛牌日", date(terms.listingDate))}${fact("到期日", date(terms.maturityDate))}${fact("發行總額", amount(terms.issueAmount))}${fact("流通餘額", amount(terms.outstandingAmount))}${fact("餘額資料日", date(terms.outstandingDataDate))}${fact("剩餘比率", percent(terms.remainingRatio))}${fact("擔保狀態", text(terms.securedStatus) || "—")}${fact("承銷商", publicInstitutionName(terms.underwriter))}${fact("受託機構", publicInstitutionName(terms.trustee))}${fact("轉換期間", dateRange(terms.conversionStartDate, terms.conversionEndDate))}${fact("賣回日", putDates)}${fact("賣回價格", price(terms.putPrice))}${extra}${fact('條款資料日', date(terms.officialDataDate ?? terms.outstandingDataDate))}</dl>`;
 }
 
 function eventsPanel(events, rightsEvents, cbCode) {
