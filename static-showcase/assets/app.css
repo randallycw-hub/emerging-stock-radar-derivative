@@ -805,8 +805,17 @@ a { color: inherit; }
 .cb-company-link { color: var(--clay-ink); font-weight: 800; }
 .cb-company-bonds { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
 .cb-company-bonds h4 { margin: 0 0 9px; font-size: 14px; }
-.cb-company-bonds ol { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.cb-company-bonds a { display: inline-block; border: 1px solid var(--line); padding: 7px 9px; color: var(--ink); font-size: 12px; }
+.cb-company-bonds ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.cb-company-bond-card { min-width: 0; border: 1px solid var(--line); background: var(--paper); }
+.cb-company-bond-card > a { display: flex; align-items: baseline; gap: 8px; padding: 11px 12px; border-bottom: 1px solid var(--line); color: var(--ink); }
+.cb-company-bond-card > a strong { font-variant-numeric: tabular-nums; }
+.cb-company-bond-card > a span { color: var(--clay-ink); font-size: 12px; font-weight: 800; }
+.cb-company-bond-card dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; }
+.cb-company-bond-card dl > div { min-width: 0; padding: 10px 12px; border-right: 1px solid var(--line); }
+.cb-company-bond-card dl > div:last-child { border-right: 0; }
+.cb-company-bond-card dt, .cb-company-bond-card small { color: var(--muted); font-size: 10px; }
+.cb-company-bond-card dd { margin: 4px 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 850; font-variant-numeric: tabular-nums; }
+.cb-company-bond-card small { display: block; }
 .public-event-list { border-top: 1px solid var(--line); }
 .public-event-list article { padding: 15px 4px; display: grid; grid-template-columns: 120px 1fr; gap: 16px; border-bottom: 1px solid var(--line); }
 .public-event-list time { color: var(--violet-ink); font-weight: 850; font-variant-numeric: tabular-nums; }
@@ -1073,6 +1082,7 @@ a { color: inherit; }
   .bond-table-shell { display: none; }
   .bond-card-list { display: grid; gap: 10px; }
   .detail-tabs { display: none; }
+  .cb-detail-panel { margin: 12px 0; padding: 16px; }
   .detail-mobile-area { display: block; margin: 12px 0; border: 1px solid var(--line); background: var(--panel); }
   .detail-mobile-area > summary { display: block; padding: 14px; cursor: pointer; color: var(--violet); font: 800 18px/1.2 Georgia, serif; }
   .detail-mobile-area > .bond-detail-section { margin: 0; border-width: 1px 0 0; }
@@ -2453,4 +2463,7 @@ a.home-v51-row:hover, a.home-v51-row:focus-visible { background: color-mix(in sr
   .cb-detail-head { display: grid; }
   .cb-detail-head h2 { font-size: 28px; }
   .cb-detail-panel { padding: 14px; }
+  .cb-company-bond-card dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cb-company-bond-card dl > div:nth-child(2) { border-right: 0; }
+  .cb-company-bond-card dl > div:last-child { grid-column: 1 / -1; border-top: 1px solid var(--line); }
 }
