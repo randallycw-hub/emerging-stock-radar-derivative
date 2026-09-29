@@ -129,16 +129,22 @@ function redemptionEventNotice(event) {
 }
 
 export function bindCbDetailV53(target, onClose, { matchMedia = globalThis.matchMedia?.bind(globalThis) } = {}) {
+  const disposeListeners = [];
+  const listen = (element, type, handler) => {
+    if (!element) return;
+    element.addEventListener(type, handler);
+    disposeListeners.push(() => element.removeEventListener(type, handler));
+  };
   const close = target.querySelector("[data-detail-close]");
-  close?.addEventListener("click", onClose);
-  close?.addEventListener("keydown", (event) => {
+  listen(close, "click", onClose);
+  listen(close, "keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
     onClose();
   });
   for (const button of target.querySelectorAll("[data-cb-detail-tab]")) {
-    button.addEventListener("click", () => activateTab(target, button.dataset.cbDetailTab));
-    button.addEventListener('keydown', event => {
+    listen(button, "click", () => activateTab(target, button.dataset.cbDetailTab));
+    listen(button, "keydown", event => {
       if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
       event.preventDefault();
       const buttons = [...target.querySelectorAll('[data-cb-detail-tab]')];
@@ -154,6 +160,7 @@ export function bindCbDetailV53(target, onClose, { matchMedia = globalThis.match
   if (typeof media?.addEventListener === "function") media.addEventListener("change", syncResponsiveMode);
   else media?.addListener?.(syncResponsiveMode);
   return () => {
+    for (const dispose of disposeListeners) dispose();
     if (typeof media?.removeEventListener === "function") media.removeEventListener("change", syncResponsiveMode);
     else media?.removeListener?.(syncResponsiveMode);
   };

@@ -98,6 +98,28 @@ test("CB detail keeps compact tabs consistent by showing only the selected factu
   assert.deepEqual(panels.map((panel) => panel.hidden), [true, false, true, true]);
 });
 
+test("CB detail disposer removes close listeners before a panel is rebound", () => {
+  const close = new EventTarget();
+  const media = Object.assign(new EventTarget(), { matches: false });
+  const target = {
+    dataset: {},
+    querySelector(selector) {
+      return selector === "[data-detail-close]" ? close : null;
+    },
+    querySelectorAll() {
+      return [];
+    },
+  };
+  let closeCalls = 0;
+  const dispose = cbDetail.bindCbDetailV53(target, () => { closeCalls += 1; }, { matchMedia: () => media });
+
+  close.dispatchEvent(new Event("click"));
+  assert.equal(closeCalls, 1);
+  dispose();
+  close.dispatchEvent(new Event("click"));
+  assert.equal(closeCalls, 1);
+});
+
 test("CB sibling comparison gives maturity dates a full row on narrow screens", async () => {
   const css = await readFile(new URL("assets/app.css", root), "utf8");
   const narrowRules = (css.match(/@media \(max-width: 560px\) \{[\s\S]*?\n\}/g) ?? []).join("\n");
