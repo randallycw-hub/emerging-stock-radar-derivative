@@ -3,7 +3,9 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { buildCbMarketStats, renderCbMarketStats } from "../static-showcase/assets/cb-stats-page.js";
-import { renderCbDetailV53 } from "../static-showcase/assets/cb-detail-v53.js";
+import * as cbDetail from "../static-showcase/assets/cb-detail-v53.js";
+
+const { renderCbDetailV53 } = cbDetail;
 
 const records = [
   {
@@ -44,6 +46,86 @@ test("CB detail groups factual data into four tabs and keeps company CB crosslin
   assert.equal((html.match(/data-cb-detail-tab=/g) ?? []).length, 4);
   assert.match(html, /當日無成交/);
   assert.doesNotMatch(html, /來源 ID|缺漏原因|資料完整|買點|推薦|風險/);
+});
+
+test("CB detail compares active sibling bonds with dated market facts", () => {
+  const sibling = {
+    ...records[1],
+    quote: {
+      ...records[1].quote,
+      cbClose: 101.5,
+      dataDate: "2026-09-24",
+      premiumRate: 3.25,
+      valuationDate: "2026-09-24",
+    },
+  };
+  const html = renderCbDetailV53(records[0], {
+    companyBonds: [
+      records[0],
+      sibling,
+      { ...sibling, cbCode: "90003", cbName: "甲三", status: "archived" },
+      { ...sibling, cbCode: "91001", cbName: "乙一", stockCode: "9100" },
+    ],
+  });
+
+  assert.match(html, /同公司 CB 比較/);
+  for (const value of ["90002", "甲二", "101\.5 元", "3\.25%", "2027\/08\/28", "2026\/09\/24"]) {
+    assert.match(html, new RegExp(value));
+  }
+  assert.doesNotMatch(html, /90003|91001|來源 ID|缺漏原因|資料完整|TCRI|CBAS/);
+});
+
+test("CB detail keeps compact tabs consistent by showing only the selected factual panel", () => {
+  assert.equal(typeof cbDetail.syncCbDetailResponsiveMode, "function");
+  const buttons = [
+    { dataset: { cbDetailTab: "overview" }, getAttribute: () => "false" },
+    { dataset: { cbDetailTab: "terms" }, getAttribute: () => "true" },
+    { dataset: { cbDetailTab: "events" }, getAttribute: () => "false" },
+    { dataset: { cbDetailTab: "company" }, getAttribute: () => "false" },
+  ];
+  const panels = buttons.map((button) => ({ dataset: { cbDetailPanel: button.dataset.cbDetailTab }, hidden: true }));
+  const target = {
+    dataset: {},
+    querySelectorAll(selector) {
+      return selector === "[data-cb-detail-tab]" ? buttons : panels;
+    },
+  };
+
+  cbDetail.syncCbDetailResponsiveMode(target, { compact: true });
+  assert.equal(target.dataset.cbDetailCompact, "true");
+  assert.deepEqual(panels.map((panel) => panel.hidden), [true, false, true, true]);
+  cbDetail.syncCbDetailResponsiveMode(target, { compact: false });
+  assert.deepEqual(panels.map((panel) => panel.hidden), [true, false, true, true]);
+});
+
+test("CB detail disposer removes close listeners before a panel is rebound", () => {
+  const close = new EventTarget();
+  const media = Object.assign(new EventTarget(), { matches: false });
+  const target = {
+    dataset: {},
+    querySelector(selector) {
+      return selector === "[data-detail-close]" ? close : null;
+    },
+    querySelectorAll() {
+      return [];
+    },
+  };
+  let closeCalls = 0;
+  const dispose = cbDetail.bindCbDetailV53(target, () => { closeCalls += 1; }, { matchMedia: () => media });
+
+  close.dispatchEvent(new Event("click"));
+  assert.equal(closeCalls, 1);
+  dispose();
+  close.dispatchEvent(new Event("click"));
+  assert.equal(closeCalls, 1);
+});
+
+test("CB sibling comparison gives maturity dates a full row on narrow screens", async () => {
+  const css = await readFile(new URL("assets/app.css", root), "utf8");
+  const narrowRules = (css.match(/@media \(max-width: 560px\) \{[\s\S]*?\n\}/g) ?? []).join("\n");
+
+  assert.match(narrowRules, /\.cb-company-bond-card dl\s*\{[^}]*grid-template-columns:\s*repeat\(2,/);
+  assert.match(narrowRules, /\.cb-company-bond-card dl > div:last-child\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/);
 });
 
 test("V5.4 CB detail presents verified redemption facts without inventing an amount or date", () => {

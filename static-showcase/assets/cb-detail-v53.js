@@ -128,17 +128,23 @@ function redemptionEventNotice(event) {
   return `<aside class="cb-redemption-notice is-${escapeHtml(text(event.status))}" role="alert"><h3>提前贖回${escapeHtml(statusLabel(event.status))}</h3>${event.reason ? `<p>${escapeHtml(event.reason)}</p>` : ""}${facts.length ? `<dl class="detail-facts cb-detail-facts">${facts.map(([label, value]) => fact(label, value)).join("")}</dl>` : ""}<p><a href="${escapeHtml(event.sourceUrl)}" target="_blank" rel="noopener noreferrer">查看官方公告</a></p></aside>`;
 }
 
-export function bindCbDetailV53(target, onClose) {
+export function bindCbDetailV53(target, onClose, { matchMedia = globalThis.matchMedia?.bind(globalThis) } = {}) {
+  const disposeListeners = [];
+  const listen = (element, type, handler) => {
+    if (!element) return;
+    element.addEventListener(type, handler);
+    disposeListeners.push(() => element.removeEventListener(type, handler));
+  };
   const close = target.querySelector("[data-detail-close]");
-  close?.addEventListener("click", onClose);
-  close?.addEventListener("keydown", (event) => {
+  listen(close, "click", onClose);
+  listen(close, "keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
     onClose();
   });
   for (const button of target.querySelectorAll("[data-cb-detail-tab]")) {
-    button.addEventListener("click", () => activateTab(target, button.dataset.cbDetailTab));
-    button.addEventListener('keydown', event => {
+    listen(button, "click", () => activateTab(target, button.dataset.cbDetailTab));
+    listen(button, "keydown", event => {
       if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
       event.preventDefault();
       const buttons = [...target.querySelectorAll('[data-cb-detail-tab]')];
@@ -148,7 +154,16 @@ export function bindCbDetailV53(target, onClose) {
       buttons[next].focus();
     });
   }
-  return () => {};
+  const media = matchMedia?.("(max-width: 900px)") ?? null;
+  const syncResponsiveMode = (event) => syncCbDetailResponsiveMode(target, { compact: Boolean(event?.matches ?? media?.matches) });
+  syncResponsiveMode(media);
+  if (typeof media?.addEventListener === "function") media.addEventListener("change", syncResponsiveMode);
+  else media?.addListener?.(syncResponsiveMode);
+  return () => {
+    for (const dispose of disposeListeners) dispose();
+    if (typeof media?.removeEventListener === "function") media.removeEventListener("change", syncResponsiveMode);
+    else media?.removeListener?.(syncResponsiveMode);
+  };
 }
 
 function activateTab(target, tab) {
@@ -157,7 +172,16 @@ function activateTab(target, tab) {
     button.setAttribute("aria-selected", String(selected));
     button.tabIndex = selected ? 0 : -1;
   }
-  for (const panel of target.querySelectorAll("[data-cb-detail-panel]")) panel.hidden = panel.dataset.cbDetailPanel !== tab;
+  syncCbDetailResponsiveMode(target, { compact: target.dataset.cbDetailCompact === "true" });
+}
+
+export function syncCbDetailResponsiveMode(target, { compact = false } = {}) {
+  const selected = [...target.querySelectorAll("[data-cb-detail-tab]")]
+    .find((button) => button.getAttribute("aria-selected") === "true")?.dataset.cbDetailTab ?? "overview";
+  target.dataset.cbDetailCompact = String(Boolean(compact));
+  for (const panel of target.querySelectorAll("[data-cb-detail-panel]")) {
+    panel.hidden = panel.dataset.cbDetailPanel !== selected;
+  }
 }
 
 function tabButton(key, label, selected) {
@@ -261,9 +285,21 @@ function statusLabel(status) {
 function companyContext(record, siblings) {
   const companyUrl = text(record.stockCode) ? `./company.html?code=${encodeURIComponent(record.stockCode)}` : null;
   const related = siblings.length
-    ? `<section class="cb-company-bonds"><h4>同公司其他 CB</h4><ol>${siblings.map((bond) => `<li><a href="./bonds.html?bond=${encodeURIComponent(bond.cbCode)}">${escapeHtml(bond.cbCode)} ${escapeHtml(bond.cbName)}</a></li>`).join("")}</ol></section>`
+    ? `<section class="cb-company-bonds"><h4>同公司 CB 比較</h4><ol>${siblings.map(companyBondComparison).join("")}</ol></section>`
     : "";
   return `<section class="cb-company-context"><h3>標的公司資料</h3><dl class="detail-facts cb-detail-facts">${fact("公司", text(record.companyName) || "—")}${fact("股票代碼", text(record.stockCode) || "—")}${fact("市場", text(record.market) || "—")}${fact("產業", text(record.industry) || "—")}</dl><p class="field-note">此處為標的股票與發行公司資料；不與 CB 成交量或 CB 法人交易混用。</p>${companyUrl ? `<p><a class="cb-company-link" href="${companyUrl}">前往公司研究頁 →</a></p>` : ""}${related}</section>`;
+}
+
+function companyBondComparison(bond) {
+  const quote = bond.quote ?? {};
+  const terms = bond.terms ?? {};
+  const identity = `${text(bond.cbCode)} ${text(bond.cbName) || "—"}`;
+  return `<li class="cb-company-bond-card"><a href="./bonds.html?bond=${encodeURIComponent(bond.cbCode)}" aria-label="${escapeHtml(identity)}"><strong>${escapeHtml(text(bond.cbCode))}</strong><span>${escapeHtml(text(bond.cbName) || "—")}</span></a><dl>${datedComparisonFact("CB 收盤", price(quote.cbClose), quote.dataDate)}${datedComparisonFact("轉換溢價率", percent(quote.premiumRate), quote.valuationDate)}${datedComparisonFact("到期日", date(terms.maturityDate), terms.maturityDate, "日期")}</dl></li>`;
+}
+
+function datedComparisonFact(label, value, stamp, prefix = "資料日") {
+  const dateLabel = date(stamp);
+  return `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>${dateLabel === "—" ? "" : `<small>${escapeHtml(prefix)} ${escapeHtml(dateLabel)}</small>`}</div>`;
 }
 
 function fact(label, value) {
