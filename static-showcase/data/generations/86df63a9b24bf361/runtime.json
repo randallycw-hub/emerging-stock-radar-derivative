@@ -1,0 +1,17 @@
+{
+  "generation": "generations/86df63a9b24bf361",
+  "manifestUrl": "./data/generations/86df63a9b24bf361/manifest.json",
+  "emergingMarketUrl": "./data/generations/86df63a9b24bf361/emerging-market.json",
+  "ipoEventsUrl": "./data/generations/86df63a9b24bf361/ipo-events.json",
+  "datasets": {
+    "11406": "./data/generations/86df63a9b24bf361/11406.json",
+    "11586": "./data/generations/86df63a9b24bf361/11586.json",
+    "94025": "./data/generations/86df63a9b24bf361/94025.json",
+    "bondMarket": "./data/generations/86df63a9b24bf361/bond-market-view.json",
+    "conversionPrices": "./data/generations/86df63a9b24bf361/conversion-prices.json",
+    "bondHistory": "./data/generations/86df63a9b24bf361/bond-market-history.json",
+    "cbIssuerResearch": "./data/generations/86df63a9b24bf361/cb-issuer-research.json",
+    "bondSupplemental": "./data/generations/86df63a9b24bf361/bond-supplemental.json",
+    "bondWorkbench": "./data/generations/86df63a9b24bf361/bond-workbench.json"
+  }
+}
