@@ -9,6 +9,7 @@
 | --- | --- | --- | ---: | --- |
 | `tpex-cb-day-query` | `POST https://www.tpex.org.tw/www/zh-tw/bond/cbDayQry` | 200／`application/json;charset=UTF-8` | 41 | 以債券代碼及月份查詢，每列包含實際交易日期、交易模式、收市價、漲跌、開高低、成交筆數、單位、成交金額及平均價。 |
 | `twse-stock-day-all` | `GET https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL` | 200／`application/json` | 1373 | 上市股票盤後收盤資料，含資料日、代碼、成交量值、開高低收、漲跌及成交筆數。 |
+| `twse-stock-monthly-detail` | `GET https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20261001&stockNo=1101` | 200／`application/json` | 1 month | 官方個股月報含逐日收盤；可補全市場資料落後的公司，並由回應列確認精確交易日。 |
 | `tpex-mainboard-daily-close` | `GET https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes` | 200／`application/json` | 10280 | 上櫃股票盤後收盤資料，含資料日、代碼、收盤、漲跌、開高低、均價、成交股數、金額及筆數。 |
 | `tpex-conversion-index` | `POST https://www.tpex.org.tw/www/zh-tw/bond/convSearch` | 200／`application/json;charset=UTF-8` | 383 | 回傳發行機構代碼、名稱、債券名稱、掛牌日期及 MOPS 發行資料網址。 |
 | `mops-conversion-detail` | `GET https://mopsov.twse.com.tw/mops/web/t120sg01?...` | 200／`text/html; charset=utf-8` | 1 | 明細頁含「發行時轉(交)換價格」、「最新轉(交)換價格」及「最近轉(交)換價格生效日期」。 |
@@ -61,6 +62,8 @@ High, Low, Average, TradingShares, TransactionAmount, TransactionNumber
 ```
 
 TPEx 回應另含最佳買賣、資本額及次日參考價等欄位；本期不匯入這些欄位。兩個資源都必須使用各列 `Date`，不得用本站擷取時間取代交易日。
+
+TWSE 個股月報請求使用 `date=YYYYMM01` 與精確 `stockNo`。回應欄位為「日期、成交股數、成交金額、開盤價、最高價、最低價、收盤價、漲跌價差、成交筆數、註記」；每家公司只保留「日期」等於選定市場資料日的列。2026-10-14 檢查時，官方回應已含 1101 台泥與 3591 艾笛森的 2026-10-13 收盤，雖然 `STOCK_DAY_ALL` 仍只到 2026-10-12。較早日期不會被當成當日價格。
 
 ## 目前轉換價合約
 

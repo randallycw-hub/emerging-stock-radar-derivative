@@ -247,15 +247,57 @@ export async function fetchCurrentOfficialMarketData({
   if (!Array.isArray(twsePayload) || !Array.isArray(tpexPayload)) {
     throw new TypeError("official stock close payload must be an array");
   }
+  const twseRows = twsePayload.filter((row) => issuerSet.has(recordCode(row, "Code")));
+  const initialTwseCloses = twseRows
+    .filter(hasPublishedTwseClose)
+    .map(normalizeTwseStockClose);
+  const tpexRows = tpexPayload
+    .filter((row) => issuerSet.has(recordCode(row, "SecuritiesCompanyCode")))
+    .filter(hasPublishedTpexClose)
+    .map(normalizeTpexStockClose);
+  const unpricedStockObservations = [
+    ...collectUnpricedStockObservations(twsePayload, TWSE_CLOSE, issuerSet),
+    ...collectUnpricedStockObservations(tpexPayload, TPEX_CLOSE, issuerSet),
+  ];
+  const twseIssuerCodes = new Set(twseRows.map((row) => recordCode(row, "Code")));
+  const twseLatestDateByCode = new Map();
+  for (const row of twseRows) {
+    const code = recordCode(row, "Code");
+    const sourceDate = sourceIsoDate(row?.Date);
+    const previousDate = twseLatestDateByCode.get(code);
+    if (sourceDate !== null && (previousDate === undefined || sourceDate > previousDate)) {
+      twseLatestDateByCode.set(code, sourceDate);
+    }
+  }
+  const twseRefreshCodes = [...issuerSet].filter((code) => (
+    twseIssuerCodes.has(code)
+    && twseLatestDateByCode.get(code) !== undefined
+    && twseLatestDateByCode.get(code) < date
+  ));
+  const refreshedTwseGroups = await mapLimit(
+    twseRefreshCodes,
+    2,
+    async (issuerCode) => {
+      await sleepImpl(perRequestDelayMs);
+      return fetchTwseMonthlyStockHistory({
+        issuerCode,
+        month: date.slice(0, 7),
+        fetchImpl,
+      });
+    },
+  );
+  const refreshedTwseCloses = refreshedTwseGroups
+    .flat()
+    .filter((close) => close.tradingDate === date);
+  const refreshedTwseCodes = new Set(twseRefreshCodes);
   const stockCloses = [
-    ...twsePayload
-      .filter((row) => issuerSet.has(recordCode(row, "Code")))
-      .filter(hasPublishedTwseClose)
-      .map(normalizeTwseStockClose),
-    ...tpexPayload
-      .filter((row) => issuerSet.has(recordCode(row, "SecuritiesCompanyCode")))
-      .filter(hasPublishedTpexClose)
-      .map(normalizeTpexStockClose),
+    ...initialTwseCloses.filter((close) => (
+      close.tradingDate === date
+      || close.tradingDate > date
+      || !refreshedTwseCodes.has(close.companyCode)
+    )),
+    ...tpexRows,
+    ...refreshedTwseCloses,
   ];
 
   const conversionBody = new URLSearchParams({
@@ -340,16 +382,20 @@ export async function fetchCurrentOfficialMarketData({
     requestedDate: date,
     cbQuotes: quoteGroups.flat(),
     stockCloses,
-    unpricedStockObservations: [
-      ...collectUnpricedStockObservations(twsePayload, TWSE_CLOSE, issuerSet),
-      ...collectUnpricedStockObservations(tpexPayload, TPEX_CLOSE, issuerSet),
-    ],
+    unpricedStockObservations,
     conversionPrices,
     sourceUrls: [
       TPEX_CB_QUOTE,
       TWSE_CLOSE,
       TPEX_CLOSE,
       TPEX_CONVERSION_INDEX,
+      ...twseRefreshCodes.map((issuerCode) => {
+        const url = new URL(TWSE_MONTHLY_STOCK);
+        url.searchParams.set("response", "json");
+        url.searchParams.set("date", `${date.slice(0, 7).replaceAll("-", "")}01`);
+        url.searchParams.set("stockNo", issuerCode);
+        return url.toString();
+      }),
       ...conversionEntries.map((entry) => entry.officialDetailUrl),
     ],
   };
@@ -446,9 +492,11 @@ export async function fetchTwseMonthlyStockHistory({
     ],
     "TWSE monthly stock",
   );
-  return table.data.map((row) => {
+  return table.data.flatMap((row) => {
     assertMonthlyRow(row, 10, "TWSE monthly stock");
-    return normalizeTwseStockClose({
+    const closingPrice = row[6].trim();
+    if (closingPrice === "" || closingPrice === "--") return [];
+    return [normalizeTwseStockClose({
       Date: row[0],
       Code: code,
       Name: "",
@@ -460,7 +508,7 @@ export async function fetchTwseMonthlyStockHistory({
       ClosingPrice: row[6],
       Change: row[7],
       Transaction: row[8],
-    });
+    })];
   });
 }
 
@@ -703,6 +751,14 @@ function recordCode(value, key) {
     return "";
   }
   return value[key].trim().toUpperCase();
+}
+
+function sourceIsoDate(value) {
+  if (typeof value !== "string") return null;
+  const match = /^(\d{3})\/?(\d{2})\/?(\d{2})$/.exec(value.trim());
+  if (!match) return null;
+  const date = `${Number(match[1]) + 1911}-${match[2]}-${match[3]}`;
+  return isIsoDate(date) ? date : null;
 }
 
 function hasPublishedTpexClose(row) {

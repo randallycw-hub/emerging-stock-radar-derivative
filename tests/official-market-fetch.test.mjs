@@ -264,6 +264,124 @@ test("collects only requested official CB, stock and conversion records", async 
   );
 });
 
+test("fills a lagging TWSE all-market feed from the official issuer month report for the requested date", async () => {
+  const requests = [];
+  const fakeFetch = async (url) => {
+    const target = String(url);
+    requests.push(target);
+    if (target.endsWith("/exchangeReport/STOCK_DAY_ALL")) {
+      return jsonResponse(JSON.stringify([{
+        Date: "1151012",
+        Code: "2330",
+        Name: "台積電",
+        TradeVolume: "100",
+        TradeValue: "1000",
+        OpeningPrice: "10",
+        HighestPrice: "10",
+        LowestPrice: "10",
+        ClosingPrice: "10",
+        Change: "0",
+        Transaction: "1",
+      }]));
+    }
+    if (target.endsWith("/tpex_mainboard_daily_close_quotes")) return jsonResponse("[]");
+    if (target.endsWith("/bond/convSearch")) {
+      return jsonResponse(JSON.stringify({ tables: [{ fields: [
+        "發行機構代碼", "發行機構名稱", "債券名稱", "掛牌日期", "發行資料",
+      ], data: [] }] }));
+    }
+    if (target.includes("/exchangeReport/STOCK_DAY?")) {
+      const report = new URL(target);
+      assert.equal(report.searchParams.get("date"), "20261001");
+      assert.equal(report.searchParams.get("stockNo"), "2330");
+      return jsonResponse(JSON.stringify({
+        stat: "OK",
+        fields: [
+          "日期", "成交股數", "成交金額", "開盤價", "最高價",
+          "最低價", "收盤價", "漲跌價差", "成交筆數", "註記",
+        ],
+        data: [[
+          "115/10/12", "100", "1000", "10", "10", "10", "10", "0", "1", "",
+        ], [
+          "115/10/13", "200", "2400", "11", "13", "11", "12", "+2", "2", "",
+        ]],
+      }));
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+
+  const result = await fetchCurrentOfficialMarketData({
+    bondCodes: [],
+    issuerCodes: ["2330"],
+    date: "2026-10-13",
+    fetchImpl: fakeFetch,
+    sleepImpl: async () => {},
+    perRequestDelayMs: 0,
+  });
+
+  assert.deepEqual(result.stockCloses, [{
+    companyCode: "2330",
+    market: "listed",
+    tradingDate: "2026-10-13",
+    close: "12",
+    change: "2",
+    volume: "200",
+    turnover: "2400",
+  }]);
+  assert.ok(requests.some((target) => target.includes("stockNo=2330")));
+});
+
+test("does not retain a stale TWSE close when the issuer report lacks the requested date", async () => {
+  const fakeFetch = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/exchangeReport/STOCK_DAY_ALL")) {
+      return jsonResponse(JSON.stringify([{
+        Date: "1151012",
+        Code: "2330",
+        Name: "台積電",
+        TradeVolume: "100",
+        TradeValue: "1000",
+        OpeningPrice: "10",
+        HighestPrice: "10",
+        LowestPrice: "10",
+        ClosingPrice: "10",
+        Change: "0",
+        Transaction: "1",
+      }]));
+    }
+    if (target.endsWith("/tpex_mainboard_daily_close_quotes")) return jsonResponse("[]");
+    if (target.endsWith("/bond/convSearch")) {
+      return jsonResponse(JSON.stringify({ tables: [{ fields: [
+        "發行機構代碼", "發行機構名稱", "債券名稱", "掛牌日期", "發行資料",
+      ], data: [] }] }));
+    }
+    if (target.includes("/exchangeReport/STOCK_DAY?")) {
+      return jsonResponse(JSON.stringify({
+        stat: "OK",
+        fields: [
+          "日期", "成交股數", "成交金額", "開盤價", "最高價",
+          "最低價", "收盤價", "漲跌價差", "成交筆數", "註記",
+        ],
+        data: [[
+          "115/10/12", "100", "1000", "10", "10", "10", "10", "0", "1", "",
+        ]],
+      }));
+    }
+    throw new Error(`unexpected request: ${target}`);
+  };
+
+  const result = await fetchCurrentOfficialMarketData({
+    bondCodes: [],
+    issuerCodes: ["2330"],
+    date: "2026-10-13",
+    fetchImpl: fakeFetch,
+    sleepImpl: async () => {},
+    perRequestDelayMs: 0,
+  });
+
+  assert.deepEqual(result.stockCloses, []);
+});
+
 test("retains an exact prior conversion price when one MOPS detail request times out", async () => {
   const values = {
     quote: await fixture("tpex-cb-quote.json"),
@@ -598,6 +716,68 @@ test("normalizes the three verified monthly history contracts", async () => {
   assert.ok(requests.some((request) =>
     request.body === "code=3522&date=2026%2F07%2F01&response=json"
   ));
+});
+
+test("treats TWSE X-prefixed price changes as not comparable", async () => {
+  const result = await fetchTwseMonthlyStockHistory({
+    issuerCode: "1727",
+    month: "2026-10",
+    fetchImpl: async () => jsonResponse(JSON.stringify({
+      stat: "OK",
+      fields: [
+        "日期", "成交股數", "成交金額", "開盤價", "最高價",
+        "最低價", "收盤價", "漲跌價差", "成交筆數", "註記",
+      ],
+      data: [[
+        "115/10/13", "4,722,000", "463,013,500", "99.20",
+        "100.00", "96.10", "96.10", "X0.00", "3,291", "",
+      ]],
+    })),
+  });
+
+  assert.deepEqual(result[0], {
+    companyCode: "1727",
+    market: "listed",
+    tradingDate: "2026-10-13",
+    close: "96.1",
+    change: null,
+    volume: "4722000",
+    turnover: "463013500",
+  });
+});
+
+test("skips TWSE monthly rows whose official close is unavailable", async () => {
+  const result = await fetchTwseMonthlyStockHistory({
+    issuerCode: "4581",
+    month: "2026-10",
+    fetchImpl: async () => jsonResponse(JSON.stringify({
+      stat: "OK",
+      fields: [
+        "日期", "成交股數", "成交金額", "開盤價", "最高價",
+        "最低價", "收盤價", "漲跌價差", "成交筆數", "註記",
+      ],
+      data: [
+        [
+          "115/10/08", "300", "14,639", "--", "--", "--", "--",
+          "0.00", "2", "",
+        ],
+        [
+          "115/10/09", "1,000", "25,000", "25.00", "25.20", "24.90",
+          "25.10", "+0.10", "7", "",
+        ],
+      ],
+    })),
+  });
+
+  assert.deepEqual(result, [{
+    companyCode: "4581",
+    market: "listed",
+    tradingDate: "2026-10-09",
+    close: "25.1",
+    change: "0.1",
+    volume: "1000",
+    turnover: "25000",
+  }]);
 });
 
 test("supplemental fetches only the three exact resources and parses their verified contracts", async () => {

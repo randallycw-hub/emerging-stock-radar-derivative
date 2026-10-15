@@ -353,7 +353,10 @@ function indexIssueDetails(rows, dataDate) {
     if (!/^\d{5,6}$/.test(code)) {
       if (unassignedFutureCbIssue(row, dataDate)) continue;
       // Match the verified 11406 importer: private, unlisted issues may have no exchange code.
-      if (text(row?.['募集方式']) === '8' && text(row?.['上市櫃否']) === '5') continue;
+      if (text(row?.['上市櫃否']) === '5' && (
+        text(row?.['募集方式']) === '8'
+        || /私債|私募/.test(text(row?.['債券簡稱']))
+      )) continue;
       throw new TypeError(`11406 invalid bond code ${code}`);
     }
     if (result.has(code)) throw new TypeError(`duplicate 11406 bond code ${code}`);

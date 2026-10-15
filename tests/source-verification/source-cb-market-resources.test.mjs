@@ -10,6 +10,7 @@ test("CB market decisions approve only the verified price resources", async () =
 
   assert.match(text, /bond\/cbDayQry[\s\S]+VERIFIED_FOR_IMPLEMENTATION/);
   assert.match(text, /STOCK_DAY_ALL[\s\S]+VERIFIED_FOR_IMPLEMENTATION/);
+  assert.match(text, /STOCK_DAY[\s\S]+VERIFIED_FOR_IMPLEMENTATION/);
   assert.match(text, /tpex_mainboard_daily_close_quotes[\s\S]+VERIFIED_FOR_IMPLEMENTATION/);
   assert.match(text, /bond\/convSearch[\s\S]+VERIFIED_FOR_IMPLEMENTATION/);
   assert.match(text, /t120sg01[\s\S]+VERIFIED_FOR_IMPLEMENTATION/);
