@@ -10,6 +10,7 @@
 | --- | --- | --- |
 | TPEx `bond/cbDayQry` | `VERIFIED_FOR_IMPLEMENTATION` | 依債券代碼查詢月內等價／議價盤後行情，保留每列實際交易日。 |
 | TWSE `STOCK_DAY_ALL` | `VERIFIED_FOR_IMPLEMENTATION` | 上市標的股票盤後收盤與成交統計。 |
+| TWSE `STOCK_DAY` | `VERIFIED_FOR_IMPLEMENTATION` | 依公司代碼查詢當月日資料；僅作全市場資料落後時的同日收盤補抓。 |
 | TPEx `tpex_mainboard_daily_close_quotes` | `VERIFIED_FOR_IMPLEMENTATION` | 上櫃標的股票盤後收盤與成交統計。 |
 | TPEx `bond/convSearch` | `VERIFIED_FOR_IMPLEMENTATION` | 取得發行機構、債券名稱及 MOPS 發行資料連結。 |
 | MOPS `t120sg01` | `VERIFIED_FOR_IMPLEMENTATION` | 解析發行時／最新轉換價及最近生效日。 |
@@ -32,9 +33,11 @@ body template:
 ```text
 GET https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL
 GET https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes
+GET https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=YYYYMM01&stockNo=CODE
 ```
 
 只接受列上的公司代碼與資料日。禁止名稱模糊配對；同一公司代碼在來源內重複或日期無法解析時，該候選資料不得發布。
+`STOCK_DAY` 僅在 `STOCK_DAY_ALL` 未提供選定資料日的上市發行公司時查詢；日期參數指定當月，解析時仍須以回應列的日期精確篩選，不得把較早收盤當成當日價格。
 
 ### 目前轉換價
 

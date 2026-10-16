@@ -25,6 +25,7 @@ const approvedEndpoints = new Set([
   "https://www.tpex.org.tw/www/zh-tw/bond/convSearch",
   "https://mopsov.twse.com.tw/mops/web/t120sg01?",
   "https://www.twse.com.tw/exchangeReport/STOCK_DAY",
+  "https://www.twse.com.tw/exchangeReport/STOCK_DAY?",
   "https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock",
 ]);
 

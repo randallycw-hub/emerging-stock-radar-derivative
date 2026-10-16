@@ -79,12 +79,16 @@ export function normalizeTwseStockClose(
   row: Record<string, string>,
 ): StockClose {
   assertOfficialRow(row, TWSE_FIELDS, "TWSE stock close");
+  const rawChange = row.Change.trim();
+  const change = /^X(?:\d+(?:\.\d*)?|\.\d+)$/.test(rawChange)
+    ? null
+    : requiredSignedDecimal(rawChange, "Change");
   return {
     companyCode: companyCode(row.Code),
     market: "listed",
     tradingDate: normalizeOfficialDate(row.Date),
     close: requiredDecimal(row.ClosingPrice, "ClosingPrice"),
-    change: requiredSignedDecimal(row.Change, "Change"),
+    change,
     volume: requiredInteger(row.TradeVolume, "TradeVolume"),
     turnover: requiredInteger(row.TradeValue, "TradeValue"),
   };

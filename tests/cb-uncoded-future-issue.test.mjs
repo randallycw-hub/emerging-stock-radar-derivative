@@ -11,6 +11,14 @@ const future = {
   發行總額: '1500000000', 目前餘額: '1500000000',
 };
 
+const privateUnlisted = {
+  資料日期: '20261013', 機構代碼: '00045988', 機構名稱: '雅德材料',
+  債券代碼: '', 債券種類: '5', 債券期: '115', 債券別: '1',
+  債券簡稱: '雅德材料私債二', 募集方式: '7', 上市櫃否: '5',
+  發行日期: '20261005', 掛牌日期: '', 到期日期: '20281004',
+  發行總額: '80000000', 目前餘額: '80000000',
+};
+
 function project(rows, dataDate = '2026-09-14') {
   return buildCbWorkbenchV53({ workbench: { dataDate, records: [] }, issuanceRows: rows });
 }
@@ -23,6 +31,13 @@ test('future unassigned issues retain raw source fields without inventing a publ
   assert.deepEqual(result.issuance, []);
   assert.deepEqual(rows, [future], 'source rows remain intact for later assignment and audit');
   assert.doesNotThrow(() => verifyRosterDoesNotLeadMarketDate(rows, '2026-09-14'));
+});
+
+test('named private unlisted bonds without exchange codes stay outside the public CB roster', () => {
+  const rows = [structuredClone(privateUnlisted)];
+  assert.deepEqual(bondTermSummariesFrom11406Rows(rows, '2026-10-14'), []);
+  assert.deepEqual(project(rows, '2026-10-14').records, []);
+  assert.deepEqual(project(rows, '2026-10-14').issuance, []);
 });
 
 test('missing identity still blocks issued, undated, malformed, or non-CB public rows', () => {

@@ -1408,6 +1408,9 @@ function isApprovedOfficialUrl(value) {
     if (url.hostname === "openapi.twse.com.tw") {
       return url.pathname === "/v1/exchangeReport/STOCK_DAY_ALL";
     }
+    if (url.hostname === "www.twse.com.tw") {
+      return url.pathname === "/exchangeReport/STOCK_DAY";
+    }
     if (url.hostname === "mopsov.twse.com.tw") {
       return url.pathname === "/mops/web/t120sg01";
     }

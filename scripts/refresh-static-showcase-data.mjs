@@ -1124,6 +1124,18 @@ function nightlyFixtureResponse({ fixtureTexts, init, scenario, url }) {
     }
     return fixedResponse(JSON.stringify(rows), url, "application/json");
   }
+  if (url.startsWith("https://www.twse.com.tw/exchangeReport/STOCK_DAY?")) {
+    return fixedResponse(JSON.stringify({
+      stat: "OK",
+      fields: [
+        "日期", "成交股數", "成交金額", "開盤價", "最高價",
+        "最低價", "收盤價", "漲跌價差", "成交筆數", "註記",
+      ],
+      data: [[
+        "115/07/28", "100", "1000", "10", "10", "10", "10", "0", "1", "",
+      ]],
+    }), url, "application/json");
+  }
   if (url === "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes") {
     return fixedResponse(fixtureTexts.tpexStock, url, "application/json");
   }

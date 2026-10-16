@@ -84,7 +84,9 @@ export function bondTermSummariesFrom11406Rows(rows, asOfDate) {
 }
 
 function isExplicitPrivateUnlistedBond(row) {
-  return sourceText(row, "募集方式") === "8" && sourceText(row, "上市櫃否") === "5";
+  if (sourceText(row, "上市櫃否") !== "5") return false;
+  if (sourceText(row, "募集方式") === "8") return true;
+  return "債券簡稱" in row && /私債|私募/.test(sourceText(row, "債券簡稱"));
 }
 
 function sourceText(row, key) {
