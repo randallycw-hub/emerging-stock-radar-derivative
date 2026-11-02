@@ -1,0 +1,2756 @@
+[
+  {
+    "companyCode": "1295",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "45.35",
+    "change": "0.15",
+    "volume": "15220",
+    "turnover": "697914"
+  },
+  {
+    "companyCode": "1595",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "71.6",
+    "change": "-1",
+    "volume": "623666",
+    "turnover": "45171852"
+  },
+  {
+    "companyCode": "1781",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "9.39",
+    "change": "-0.33",
+    "volume": "14360",
+    "turnover": "136913"
+  },
+  {
+    "companyCode": "2221",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "138.5",
+    "change": "-10",
+    "volume": "13014463",
+    "turnover": "1940191300"
+  },
+  {
+    "companyCode": "2641",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "16.55",
+    "change": "-0.05",
+    "volume": "595363",
+    "turnover": "9863308"
+  },
+  {
+    "companyCode": "2732",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "60.9",
+    "change": "-0.1",
+    "volume": "11303",
+    "turnover": "688940"
+  },
+  {
+    "companyCode": "2743",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "46.75",
+    "change": "-1.25",
+    "volume": "71767",
+    "turnover": "3358780"
+  },
+  {
+    "companyCode": "2745",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "82.9",
+    "change": "-0.4",
+    "volume": "98495",
+    "turnover": "8077617"
+  },
+  {
+    "companyCode": "2756",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "62.5",
+    "change": "-0.6",
+    "volume": "26131",
+    "turnover": "1633254"
+  },
+  {
+    "companyCode": "3081",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "2415",
+    "change": "45",
+    "volume": "3430149",
+    "turnover": "8179171170"
+  },
+  {
+    "companyCode": "3095",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "32.8",
+    "change": "0.95",
+    "volume": "1334",
+    "turnover": "44052"
+  },
+  {
+    "companyCode": "3122",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "22.5",
+    "change": "0.2",
+    "volume": "10623",
+    "turnover": "237628"
+  },
+  {
+    "companyCode": "3141",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "73.3",
+    "change": "-1",
+    "volume": "1558663",
+    "turnover": "115824359"
+  },
+  {
+    "companyCode": "3188",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "22.7",
+    "change": "-0.05",
+    "volume": "62217",
+    "turnover": "1411987"
+  },
+  {
+    "companyCode": "3207",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "33",
+    "change": "0.7",
+    "volume": "244677",
+    "turnover": "8085345"
+  },
+  {
+    "companyCode": "3219",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "101.5",
+    "change": "-1",
+    "volume": "482695",
+    "turnover": "49025729"
+  },
+  {
+    "companyCode": "3260",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "340.5",
+    "change": "-6",
+    "volume": "5499278",
+    "turnover": "1862663939"
+  },
+  {
+    "companyCode": "3272",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "12.95",
+    "change": "0.05",
+    "volume": "16025",
+    "turnover": "207275"
+  },
+  {
+    "companyCode": "3284",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "18.85",
+    "change": "-0.25",
+    "volume": "44221",
+    "turnover": "837466"
+  },
+  {
+    "companyCode": "3294",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "28.35",
+    "change": "0.25",
+    "volume": "109334",
+    "turnover": "3085199"
+  },
+  {
+    "companyCode": "3303",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "51.9",
+    "change": "0.7",
+    "volume": "144365",
+    "turnover": "7442061"
+  },
+  {
+    "companyCode": "3313",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "9.99",
+    "change": "-0.06",
+    "volume": "38427",
+    "turnover": "384801"
+  },
+  {
+    "companyCode": "3322",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "10.15",
+    "change": "0.19",
+    "volume": "192503",
+    "turnover": "1924639"
+  },
+  {
+    "companyCode": "3324",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "1395",
+    "change": "65",
+    "volume": "4696388",
+    "turnover": "6419093275"
+  },
+  {
+    "companyCode": "3339",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "38.55",
+    "change": "1.55",
+    "volume": "1882044",
+    "turnover": "72024365"
+  },
+  {
+    "companyCode": "3362",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "146.5",
+    "change": "-1",
+    "volume": "713278",
+    "turnover": "103792072"
+  },
+  {
+    "companyCode": "3390",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "20.8",
+    "change": "0.05",
+    "volume": "90039",
+    "turnover": "1858290"
+  },
+  {
+    "companyCode": "3479",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "114.5",
+    "change": "-1.5",
+    "volume": "240963",
+    "turnover": "27534764"
+  },
+  {
+    "companyCode": "3483",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "82.3",
+    "change": "-2.8",
+    "volume": "540207",
+    "turnover": "44711490"
+  },
+  {
+    "companyCode": "3484",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "46.4",
+    "change": "-0.55",
+    "volume": "72654",
+    "turnover": "3381983"
+  },
+  {
+    "companyCode": "3491",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "1300",
+    "change": "45",
+    "volume": "968022",
+    "turnover": "1226578090"
+  },
+  {
+    "companyCode": "3512",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "18.75",
+    "change": "-0.15",
+    "volume": "30916",
+    "turnover": "578198"
+  },
+  {
+    "companyCode": "3516",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "23.8",
+    "change": "0.4",
+    "volume": "15063",
+    "turnover": "352374"
+  },
+  {
+    "companyCode": "3522",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "10.45",
+    "change": "-0.2",
+    "volume": "101876",
+    "turnover": "1065744"
+  },
+  {
+    "companyCode": "3526",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "230",
+    "change": "-3",
+    "volume": "208147",
+    "turnover": "48008072"
+  },
+  {
+    "companyCode": "3548",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "70",
+    "change": "0",
+    "volume": "120472",
+    "turnover": "8376837"
+  },
+  {
+    "companyCode": "3551",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "172.5",
+    "change": "3.5",
+    "volume": "234570",
+    "turnover": "39755273"
+  },
+  {
+    "companyCode": "3564",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "61",
+    "change": "2.1",
+    "volume": "3722261",
+    "turnover": "231909188"
+  },
+  {
+    "companyCode": "3587",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "216.5",
+    "change": "1.5",
+    "volume": "218129",
+    "turnover": "46914480"
+  },
+  {
+    "companyCode": "3680",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "489",
+    "change": "-3.5",
+    "volume": "548160",
+    "turnover": "265944040"
+  },
+  {
+    "companyCode": "3684",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "50.8",
+    "change": "0.1",
+    "volume": "25200",
+    "turnover": "1278476"
+  },
+  {
+    "companyCode": "3687",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "58.2",
+    "change": "0",
+    "volume": "16335",
+    "turnover": "945278"
+  },
+  {
+    "companyCode": "3691",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "145",
+    "change": "4",
+    "volume": "1498096",
+    "turnover": "214731212"
+  },
+  {
+    "companyCode": "3707",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "64.6",
+    "change": "-0.4",
+    "volume": "3929544",
+    "turnover": "253773823"
+  },
+  {
+    "companyCode": "4113",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "13",
+    "change": "-0.4",
+    "volume": "191665",
+    "turnover": "2483218"
+  },
+  {
+    "companyCode": "4123",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "28.4",
+    "change": "-0.15",
+    "volume": "654385",
+    "turnover": "18571989"
+  },
+  {
+    "companyCode": "4129",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "76.5",
+    "change": "-0.1",
+    "volume": "42703",
+    "turnover": "3274177"
+  },
+  {
+    "companyCode": "4168",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "21.25",
+    "change": "-0.05",
+    "volume": "52314",
+    "turnover": "1098955"
+  },
+  {
+    "companyCode": "4198",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "46.1",
+    "change": "0.1",
+    "volume": "3001",
+    "turnover": "137942"
+  },
+  {
+    "companyCode": "4416",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "12",
+    "change": "0",
+    "volume": "453358",
+    "turnover": "5478208"
+  },
+  {
+    "companyCode": "4442",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "53",
+    "change": "0",
+    "volume": "11145",
+    "turnover": "589894"
+  },
+  {
+    "companyCode": "4503",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "23.2",
+    "change": "0.25",
+    "volume": "159663",
+    "turnover": "3779346"
+  },
+  {
+    "companyCode": "4510",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "41.4",
+    "change": "0.2",
+    "volume": "922163",
+    "turnover": "38798049"
+  },
+  {
+    "companyCode": "4541",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "56.1",
+    "change": "-0.4",
+    "volume": "414374",
+    "turnover": "23173940"
+  },
+  {
+    "companyCode": "4549",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "92.1",
+    "change": "-1.4",
+    "volume": "67098",
+    "turnover": "6303287"
+  },
+  {
+    "companyCode": "4558",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "16.95",
+    "change": "-0.05",
+    "volume": "23000",
+    "turnover": "388650"
+  },
+  {
+    "companyCode": "4714",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "12",
+    "change": "-0.45",
+    "volume": "3415322",
+    "turnover": "41540025"
+  },
+  {
+    "companyCode": "4749",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "680",
+    "change": "2",
+    "volume": "435711",
+    "turnover": "294191374"
+  },
+  {
+    "companyCode": "4760",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "288.5",
+    "change": "-3",
+    "volume": "363749",
+    "turnover": "105676068"
+  },
+  {
+    "companyCode": "4772",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "227",
+    "change": "-4.5",
+    "volume": "1245189",
+    "turnover": "281647820"
+  },
+  {
+    "companyCode": "4923",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "44.2",
+    "change": "0.55",
+    "volume": "216745",
+    "turnover": "9559710"
+  },
+  {
+    "companyCode": "4931",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "201",
+    "change": "7",
+    "volume": "3187643",
+    "turnover": "637265533"
+  },
+  {
+    "companyCode": "4973",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "130.5",
+    "change": "-2",
+    "volume": "430683",
+    "turnover": "56158106"
+  },
+  {
+    "companyCode": "4979",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "426",
+    "change": "-21",
+    "volume": "7825277",
+    "turnover": "3383929793"
+  },
+  {
+    "companyCode": "5201",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "26.85",
+    "change": "0.9",
+    "volume": "37253",
+    "turnover": "962486"
+  },
+  {
+    "companyCode": "5212",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "48.1",
+    "change": "-0.5",
+    "volume": "5036",
+    "turnover": "242137"
+  },
+  {
+    "companyCode": "5245",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "19.35",
+    "change": "-1.2",
+    "volume": "1010551",
+    "turnover": "20391917"
+  },
+  {
+    "companyCode": "5263",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "83.1",
+    "change": "0.1",
+    "volume": "111719",
+    "turnover": "9218729"
+  },
+  {
+    "companyCode": "5289",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "1110",
+    "change": "-10",
+    "volume": "1132444",
+    "turnover": "1238066705"
+  },
+  {
+    "companyCode": "5291",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "53",
+    "change": "-0.3",
+    "volume": "123901",
+    "turnover": "6586030"
+  },
+  {
+    "companyCode": "5309",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "63.6",
+    "change": "0.1",
+    "volume": "4136405",
+    "turnover": "261010580"
+  },
+  {
+    "companyCode": "5321",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "55.1",
+    "change": "-0.6",
+    "volume": "224253",
+    "turnover": "12352704"
+  },
+  {
+    "companyCode": "5439",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "202.5",
+    "change": "5.5",
+    "volume": "971412",
+    "turnover": "195501423"
+  },
+  {
+    "companyCode": "5450",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "14.25",
+    "change": "-0.25",
+    "volume": "203043",
+    "turnover": "2931527"
+  },
+  {
+    "companyCode": "5457",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "22.55",
+    "change": "0.2",
+    "volume": "186815",
+    "turnover": "4202695"
+  },
+  {
+    "companyCode": "5464",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "56.7",
+    "change": "-0.1",
+    "volume": "273463",
+    "turnover": "15426807"
+  },
+  {
+    "companyCode": "5536",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "770",
+    "change": "10",
+    "volume": "963764",
+    "turnover": "742370892"
+  },
+  {
+    "companyCode": "6015",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "16.8",
+    "change": "-0.05",
+    "volume": "751387",
+    "turnover": "12597273"
+  },
+  {
+    "companyCode": "6101",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "37.35",
+    "change": "0.35",
+    "volume": "97404",
+    "turnover": "3630788"
+  },
+  {
+    "companyCode": "6104",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "86.4",
+    "change": "0.4",
+    "volume": "184008",
+    "turnover": "15929126"
+  },
+  {
+    "companyCode": "6111",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "34.4",
+    "change": "-0.45",
+    "volume": "41664",
+    "turnover": "1440317"
+  },
+  {
+    "companyCode": "6125",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "45",
+    "change": "0.2",
+    "volume": "296762",
+    "turnover": "13391931"
+  },
+  {
+    "companyCode": "6126",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "28.65",
+    "change": "-0.25",
+    "volume": "265962",
+    "turnover": "7646671"
+  },
+  {
+    "companyCode": "6134",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "24.05",
+    "change": "0.4",
+    "volume": "96693",
+    "turnover": "2304381"
+  },
+  {
+    "companyCode": "6150",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "67.2",
+    "change": "2.2",
+    "volume": "832626",
+    "turnover": "56531622"
+  },
+  {
+    "companyCode": "6156",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "22.45",
+    "change": "0.1",
+    "volume": "444752",
+    "turnover": "9998990"
+  },
+  {
+    "companyCode": "6163",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "41.15",
+    "change": "2.2",
+    "volume": "2843106",
+    "turnover": "116999301"
+  },
+  {
+    "companyCode": "6174",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "44.85",
+    "change": "-0.3",
+    "volume": "554645",
+    "turnover": "25099250"
+  },
+  {
+    "companyCode": "6179",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "38.05",
+    "change": "0",
+    "volume": "3016321",
+    "turnover": "114223313"
+  },
+  {
+    "companyCode": "6182",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "94.1",
+    "change": "0.2",
+    "volume": "18269562",
+    "turnover": "1714869919"
+  },
+  {
+    "companyCode": "6187",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "1195",
+    "change": "5",
+    "volume": "1329766",
+    "turnover": "1570884710"
+  },
+  {
+    "companyCode": "6190",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "60.6",
+    "change": "0",
+    "volume": "584319",
+    "turnover": "35352869"
+  },
+  {
+    "companyCode": "6199",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "162.5",
+    "change": "2",
+    "volume": "7611249",
+    "turnover": "1234392501"
+  },
+  {
+    "companyCode": "6207",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "121",
+    "change": "2",
+    "volume": "2380929",
+    "turnover": "285123761"
+  },
+  {
+    "companyCode": "6219",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "10.45",
+    "change": "0.2",
+    "volume": "263721",
+    "turnover": "2677205"
+  },
+  {
+    "companyCode": "6220",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "24.1",
+    "change": "-0.35",
+    "volume": "57042",
+    "turnover": "1377264"
+  },
+  {
+    "companyCode": "6223",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "4655",
+    "change": "45",
+    "volume": "582253",
+    "turnover": "2706684905"
+  },
+  {
+    "companyCode": "6274",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "1210",
+    "change": "-55",
+    "volume": "13389740",
+    "turnover": "16175053650"
+  },
+  {
+    "companyCode": "6284",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "71.8",
+    "change": "0.4",
+    "volume": "471399",
+    "turnover": "33855823"
+  },
+  {
+    "companyCode": "6425",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "82.2",
+    "change": "7.4",
+    "volume": "2572709",
+    "turnover": "208277551"
+  },
+  {
+    "companyCode": "6432",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "54.5",
+    "change": "0.3",
+    "volume": "108012",
+    "turnover": "5906609"
+  },
+  {
+    "companyCode": "6469",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "61.3",
+    "change": "-1.3",
+    "volume": "545289",
+    "turnover": "33532662"
+  },
+  {
+    "companyCode": "6509",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "47.4",
+    "change": "-0.95",
+    "volume": "612336",
+    "turnover": "29050558"
+  },
+  {
+    "companyCode": "6510",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "2850",
+    "change": "30",
+    "volume": "528756",
+    "turnover": "1522723815"
+  },
+  {
+    "companyCode": "6538",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "274.5",
+    "change": "-16",
+    "volume": "2159396",
+    "turnover": "612728033"
+  },
+  {
+    "companyCode": "6546",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "59.6",
+    "change": "1.4",
+    "volume": "144360",
+    "turnover": "8584805"
+  },
+  {
+    "companyCode": "6547",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "49.2",
+    "change": "0.35",
+    "volume": "727625",
+    "turnover": "35668287"
+  },
+  {
+    "companyCode": "6570",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "44.4",
+    "change": "0.2",
+    "volume": "49211",
+    "turnover": "2184178"
+  },
+  {
+    "companyCode": "6576",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "75",
+    "change": "0",
+    "volume": "25394",
+    "turnover": "1902297"
+  },
+  {
+    "companyCode": "6584",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "402.5",
+    "change": "-6.5",
+    "volume": "208809",
+    "turnover": "84008822"
+  },
+  {
+    "companyCode": "6603",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "25.85",
+    "change": "-0.2",
+    "volume": "483892",
+    "turnover": "12565193"
+  },
+  {
+    "companyCode": "6616",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "8.89",
+    "change": "0.05",
+    "volume": "36000",
+    "turnover": "316660"
+  },
+  {
+    "companyCode": "6624",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "35.05",
+    "change": "-0.15",
+    "volume": "4264",
+    "turnover": "151951"
+  },
+  {
+    "companyCode": "6629",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "99.1",
+    "change": "1.9",
+    "volume": "2089",
+    "turnover": "206242"
+  },
+  {
+    "companyCode": "6664",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "316",
+    "change": "1",
+    "volume": "122655",
+    "turnover": "38858566"
+  },
+  {
+    "companyCode": "6680",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "56.5",
+    "change": "-2.1",
+    "volume": "13010",
+    "turnover": "738165"
+  },
+  {
+    "companyCode": "6683",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "1045",
+    "change": "-25",
+    "volume": "439062",
+    "turnover": "459749990"
+  },
+  {
+    "companyCode": "6693",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "148",
+    "change": "0.5",
+    "volume": "572451",
+    "turnover": "84964103"
+  },
+  {
+    "companyCode": "6803",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "259.5",
+    "change": "-0.5",
+    "volume": "60432",
+    "turnover": "15703607"
+  },
+  {
+    "companyCode": "6821",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "40.9",
+    "change": "0.45",
+    "volume": "41264",
+    "turnover": "1672859"
+  },
+  {
+    "companyCode": "6840",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "72.1",
+    "change": "0.3",
+    "volume": "362313",
+    "turnover": "26092969"
+  },
+  {
+    "companyCode": "6843",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "38",
+    "change": "1.5",
+    "volume": "7032",
+    "turnover": "268233"
+  },
+  {
+    "companyCode": "6846",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "57.2",
+    "change": "-0.6",
+    "volume": "4000",
+    "turnover": "230900"
+  },
+  {
+    "companyCode": "6870",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "423.5",
+    "change": "38.5",
+    "volume": "559005",
+    "turnover": "228658305"
+  },
+  {
+    "companyCode": "6874",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "77",
+    "change": "1.5",
+    "volume": "241224",
+    "turnover": "18680434"
+  },
+  {
+    "companyCode": "6894",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "381",
+    "change": "-15",
+    "volume": "135820",
+    "turnover": "52893621"
+  },
+  {
+    "companyCode": "6903",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "286",
+    "change": "-1.5",
+    "volume": "135577",
+    "turnover": "38832526"
+  },
+  {
+    "companyCode": "6904",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "117.5",
+    "change": "-0.5",
+    "volume": "2050",
+    "turnover": "238754"
+  },
+  {
+    "companyCode": "6913",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "133.5",
+    "change": "0",
+    "volume": "199426",
+    "turnover": "26674083"
+  },
+  {
+    "companyCode": "6982",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "43",
+    "change": "1.05",
+    "volume": "1468",
+    "turnover": "62340"
+  },
+  {
+    "companyCode": "7402",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "89.5",
+    "change": "0.7",
+    "volume": "76603",
+    "turnover": "6804323"
+  },
+  {
+    "companyCode": "7556",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "267.5",
+    "change": "7.5",
+    "volume": "32240",
+    "turnover": "8535313"
+  },
+  {
+    "companyCode": "7738",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "161.5",
+    "change": "-2",
+    "volume": "9508",
+    "turnover": "1538037"
+  },
+  {
+    "companyCode": "7743",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "23",
+    "change": "0.55",
+    "volume": "1002",
+    "turnover": "23042"
+  },
+  {
+    "companyCode": "8027",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "162.5",
+    "change": "-1",
+    "volume": "945025",
+    "turnover": "153750863"
+  },
+  {
+    "companyCode": "8042",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "125.5",
+    "change": "-6.5",
+    "volume": "6564532",
+    "turnover": "842864384"
+  },
+  {
+    "companyCode": "8050",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "61.1",
+    "change": "-0.1",
+    "volume": "617070",
+    "turnover": "37614669"
+  },
+  {
+    "companyCode": "8054",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "72.1",
+    "change": "-0.3",
+    "volume": "295624",
+    "turnover": "21352316"
+  },
+  {
+    "companyCode": "8074",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "50.8",
+    "change": "0.6",
+    "volume": "391950",
+    "turnover": "19553508"
+  },
+  {
+    "companyCode": "8087",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "19.8",
+    "change": "-0.7",
+    "volume": "39154",
+    "turnover": "777710"
+  },
+  {
+    "companyCode": "8092",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "11.75",
+    "change": "-0.25",
+    "volume": "55042",
+    "turnover": "647848"
+  },
+  {
+    "companyCode": "8096",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "80.4",
+    "change": "-0.4",
+    "volume": "1104141",
+    "turnover": "88671838"
+  },
+  {
+    "companyCode": "8111",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "77.7",
+    "change": "5.5",
+    "volume": "6120867",
+    "turnover": "465124774"
+  },
+  {
+    "companyCode": "8147",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "117.5",
+    "change": "-1",
+    "volume": "205909",
+    "turnover": "24146240"
+  },
+  {
+    "companyCode": "8155",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "279.5",
+    "change": "4.5",
+    "volume": "367814",
+    "turnover": "101482783"
+  },
+  {
+    "companyCode": "8171",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "20",
+    "change": "0",
+    "volume": "64264",
+    "turnover": "1283773"
+  },
+  {
+    "companyCode": "8299",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "1875",
+    "change": "-55",
+    "volume": "2691579",
+    "turnover": "4998248470"
+  },
+  {
+    "companyCode": "8431",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "55.2",
+    "change": "-0.7",
+    "volume": "839861",
+    "turnover": "46201038"
+  },
+  {
+    "companyCode": "8433",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "50.9",
+    "change": "0.6",
+    "volume": "9138",
+    "turnover": "462209"
+  },
+  {
+    "companyCode": "8489",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "21.65",
+    "change": "-0.2",
+    "volume": "57555",
+    "turnover": "1238128"
+  },
+  {
+    "companyCode": "8927",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "16.55",
+    "change": "0.7",
+    "volume": "880465",
+    "turnover": "14317589"
+  },
+  {
+    "companyCode": "8936",
+    "market": "otc",
+    "tradingDate": "2026-11-02",
+    "close": "44.15",
+    "change": "-0.3",
+    "volume": "768409",
+    "turnover": "33857224"
+  },
+  {
+    "companyCode": "1101",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "28.1",
+    "change": "-0.25",
+    "volume": "47593827",
+    "turnover": "1349690667"
+  },
+  {
+    "companyCode": "1256",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "167.5",
+    "change": "3",
+    "volume": "21933",
+    "turnover": "3637431"
+  },
+  {
+    "companyCode": "1316",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "10.25",
+    "change": "0.1",
+    "volume": "1247684",
+    "turnover": "12780667"
+  },
+  {
+    "companyCode": "1338",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "13.85",
+    "change": "-0.1",
+    "volume": "75603",
+    "turnover": "1054189"
+  },
+  {
+    "companyCode": "1402",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "28.55",
+    "change": "0.3",
+    "volume": "4222301",
+    "turnover": "120285530"
+  },
+  {
+    "companyCode": "1436",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "35.3",
+    "change": "0.1",
+    "volume": "77877",
+    "turnover": "2751546"
+  },
+  {
+    "companyCode": "1438",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "21.5",
+    "change": "-0.05",
+    "volume": "9274",
+    "turnover": "200304"
+  },
+  {
+    "companyCode": "1466",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "14.4",
+    "change": "0.1",
+    "volume": "123025",
+    "turnover": "1761305"
+  },
+  {
+    "companyCode": "1472",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "88.9",
+    "change": "0",
+    "volume": "16262",
+    "turnover": "1448316"
+  },
+  {
+    "companyCode": "1474",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "9.94",
+    "change": "-0.05",
+    "volume": "25421",
+    "turnover": "253041"
+  },
+  {
+    "companyCode": "1514",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "93.6",
+    "change": "0.4",
+    "volume": "943679",
+    "turnover": "88888466"
+  },
+  {
+    "companyCode": "1536",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "42.6",
+    "change": "-0.1",
+    "volume": "581430",
+    "turnover": "24764887"
+  },
+  {
+    "companyCode": "1560",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "864",
+    "change": "-3",
+    "volume": "1611787",
+    "turnover": "1387363985"
+  },
+  {
+    "companyCode": "1598",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "19.5",
+    "change": "0.35",
+    "volume": "167999",
+    "turnover": "3247178"
+  },
+  {
+    "companyCode": "1609",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "36.65",
+    "change": "1.35",
+    "volume": "2856418",
+    "turnover": "103687595"
+  },
+  {
+    "companyCode": "1623",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "171",
+    "change": "2",
+    "volume": "44401",
+    "turnover": "7553948"
+  },
+  {
+    "companyCode": "1717",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "66.7",
+    "change": "1.1",
+    "volume": "3597988",
+    "turnover": "238980161"
+  },
+  {
+    "companyCode": "1727",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "89.5",
+    "change": "-1",
+    "volume": "1343737",
+    "turnover": "121301618"
+  },
+  {
+    "companyCode": "1786",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "50.1",
+    "change": "2.55",
+    "volume": "3645865",
+    "turnover": "187262537"
+  },
+  {
+    "companyCode": "1909",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "9.63",
+    "change": "-0.04",
+    "volume": "1300469",
+    "turnover": "12535209"
+  },
+  {
+    "companyCode": "2034",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "22.9",
+    "change": "-0.25",
+    "volume": "1032107",
+    "turnover": "23679939"
+  },
+  {
+    "companyCode": "2104",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "10.75",
+    "change": "-0.05",
+    "volume": "3424701",
+    "turnover": "36553702"
+  },
+  {
+    "companyCode": "2201",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "29.05",
+    "change": "0.15",
+    "volume": "998712",
+    "turnover": "28915997"
+  },
+  {
+    "companyCode": "2228",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "70.3",
+    "change": "-0.6",
+    "volume": "84687",
+    "turnover": "5964903"
+  },
+  {
+    "companyCode": "2233",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "140",
+    "change": "-0.5",
+    "volume": "203290",
+    "turnover": "28306047"
+  },
+  {
+    "companyCode": "2236",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "97.6",
+    "change": "-8.4",
+    "volume": "983736",
+    "turnover": "97518098"
+  },
+  {
+    "companyCode": "2247",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "217.5",
+    "change": "-0.5",
+    "volume": "126669",
+    "turnover": "27720047"
+  },
+  {
+    "companyCode": "2303",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "110",
+    "change": "-1.5",
+    "volume": "131924615",
+    "turnover": "14425370760"
+  },
+  {
+    "companyCode": "2316",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "133",
+    "change": "-2.5",
+    "volume": "1791418",
+    "turnover": "237963775"
+  },
+  {
+    "companyCode": "2329",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "40.05",
+    "change": "0.8",
+    "volume": "1906442",
+    "turnover": "75908929"
+  },
+  {
+    "companyCode": "2351",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "179.5",
+    "change": "-4",
+    "volume": "2267792",
+    "turnover": "407631201"
+  },
+  {
+    "companyCode": "2374",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "62.8",
+    "change": "-0.4",
+    "volume": "914192",
+    "turnover": "57497125"
+  },
+  {
+    "companyCode": "2402",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "53.9",
+    "change": "0.9",
+    "volume": "2004751",
+    "turnover": "105386663"
+  },
+  {
+    "companyCode": "2427",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "21.95",
+    "change": "0",
+    "volume": "303727",
+    "turnover": "6678890"
+  },
+  {
+    "companyCode": "2439",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "73.8",
+    "change": "-2.2",
+    "volume": "2862637",
+    "turnover": "210732752"
+  },
+  {
+    "companyCode": "2442",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "12.85",
+    "change": "0",
+    "volume": "933699",
+    "turnover": "12064243"
+  },
+  {
+    "companyCode": "2455",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "449.5",
+    "change": "2.5",
+    "volume": "6424738",
+    "turnover": "2843667045"
+  },
+  {
+    "companyCode": "2464",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "163.5",
+    "change": "-3.5",
+    "volume": "4734171",
+    "turnover": "784732977"
+  },
+  {
+    "companyCode": "2467",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "417.5",
+    "change": "-12.5",
+    "volume": "1187299",
+    "turnover": "495722563"
+  },
+  {
+    "companyCode": "2476",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "109",
+    "change": "-1.5",
+    "volume": "1215475",
+    "turnover": "131771974"
+  },
+  {
+    "companyCode": "2486",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "193.5",
+    "change": "1",
+    "volume": "2101109",
+    "turnover": "403224097"
+  },
+  {
+    "companyCode": "2492",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "356",
+    "change": "-25",
+    "volume": "23312155",
+    "turnover": "8500502711"
+  },
+  {
+    "companyCode": "2528",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "16.95",
+    "change": "0.15",
+    "volume": "575480",
+    "turnover": "9749626"
+  },
+  {
+    "companyCode": "2530",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "19.2",
+    "change": "0.05",
+    "volume": "459468",
+    "turnover": "8883946"
+  },
+  {
+    "companyCode": "2548",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "90.6",
+    "change": "0.2",
+    "volume": "652756",
+    "turnover": "59190314"
+  },
+  {
+    "companyCode": "2646",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "19.95",
+    "change": "0.2",
+    "volume": "3089708",
+    "turnover": "61566330"
+  },
+  {
+    "companyCode": "2727",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "246",
+    "change": "0",
+    "volume": "137782",
+    "turnover": "33830816"
+  },
+  {
+    "companyCode": "2753",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "180",
+    "change": "0",
+    "volume": "106649",
+    "turnover": "19198840"
+  },
+  {
+    "companyCode": "3006",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "261",
+    "change": "-16",
+    "volume": "18930114",
+    "turnover": "4971562069"
+  },
+  {
+    "companyCode": "3011",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "9.69",
+    "change": "0.08",
+    "volume": "159271",
+    "turnover": "1525984"
+  },
+  {
+    "companyCode": "3013",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "84.5",
+    "change": "2.1",
+    "volume": "986052",
+    "turnover": "81998661"
+  },
+  {
+    "companyCode": "3016",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "127.5",
+    "change": "2",
+    "volume": "7325189",
+    "turnover": "930237657"
+  },
+  {
+    "companyCode": "3028",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "58.6",
+    "change": "-1",
+    "volume": "650860",
+    "turnover": "38306268"
+  },
+  {
+    "companyCode": "3032",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "69.8",
+    "change": "-0.3",
+    "volume": "265042",
+    "turnover": "18600473"
+  },
+  {
+    "companyCode": "3033",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "40.4",
+    "change": "-0.5",
+    "volume": "1619655",
+    "turnover": "65701446"
+  },
+  {
+    "companyCode": "3037",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "997",
+    "change": "8",
+    "volume": "22382342",
+    "turnover": "22088122589"
+  },
+  {
+    "companyCode": "3040",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "29.85",
+    "change": "0.3",
+    "volume": "67128",
+    "turnover": "2011315"
+  },
+  {
+    "companyCode": "3045",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "133",
+    "change": "-0.5",
+    "volume": "9657827",
+    "turnover": "1287688817"
+  },
+  {
+    "companyCode": "3135",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "138.5",
+    "change": "-2.5",
+    "volume": "294901",
+    "turnover": "40899332"
+  },
+  {
+    "companyCode": "3149",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "68.2",
+    "change": "1.4",
+    "volume": "3739833",
+    "turnover": "254661795"
+  },
+  {
+    "companyCode": "3257",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "45.5",
+    "change": "-0.25",
+    "volume": "113421",
+    "turnover": "5180625"
+  },
+  {
+    "companyCode": "3312",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "47.45",
+    "change": "0",
+    "volume": "542627",
+    "turnover": "25962780"
+  },
+  {
+    "companyCode": "3346",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "20.1",
+    "change": "0.1",
+    "volume": "118700",
+    "turnover": "2394386"
+  },
+  {
+    "companyCode": "3376",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "139",
+    "change": "-0.5",
+    "volume": "5407685",
+    "turnover": "742335297"
+  },
+  {
+    "companyCode": "3416",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "166.5",
+    "change": "-3.5",
+    "volume": "304308",
+    "turnover": "50361855"
+  },
+  {
+    "companyCode": "3518",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "34.55",
+    "change": "-0.55",
+    "volume": "1076202",
+    "turnover": "37218291"
+  },
+  {
+    "companyCode": "3543",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "50.3",
+    "change": "2.2",
+    "volume": "2060291",
+    "turnover": "103478752"
+  },
+  {
+    "companyCode": "3583",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "562",
+    "change": "-2",
+    "volume": "375912",
+    "turnover": "211108132"
+  },
+  {
+    "companyCode": "3591",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "26.3",
+    "change": "0.3",
+    "volume": "257592",
+    "turnover": "6764866"
+  },
+  {
+    "companyCode": "3605",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "161.5",
+    "change": "0",
+    "volume": "7049458",
+    "turnover": "1143595894"
+  },
+  {
+    "companyCode": "3617",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "242",
+    "change": "1.5",
+    "volume": "133437",
+    "turnover": "32284143"
+  },
+  {
+    "companyCode": "3702",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "105.5",
+    "change": "-3",
+    "volume": "8337856",
+    "turnover": "879747247"
+  },
+  {
+    "companyCode": "3715",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "123",
+    "change": "3",
+    "volume": "2711009",
+    "turnover": "327608365"
+  },
+  {
+    "companyCode": "3717",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "25.5",
+    "change": "0.15",
+    "volume": "2408008",
+    "turnover": "61192752"
+  },
+  {
+    "companyCode": "4137",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "79.6",
+    "change": "-0.4",
+    "volume": "91623",
+    "turnover": "7310041"
+  },
+  {
+    "companyCode": "4164",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "26.1",
+    "change": "-0.1",
+    "volume": "173889",
+    "turnover": "4549931"
+  },
+  {
+    "companyCode": "4190",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "23.25",
+    "change": "-0.15",
+    "volume": "10690",
+    "turnover": "249621"
+  },
+  {
+    "companyCode": "4438",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "56.7",
+    "change": "0.4",
+    "volume": "32341",
+    "turnover": "1826324"
+  },
+  {
+    "companyCode": "4439",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "98.7",
+    "change": "0.7",
+    "volume": "7144",
+    "turnover": "700581"
+  },
+  {
+    "companyCode": "4555",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "41.3",
+    "change": "-0.05",
+    "volume": "73110",
+    "turnover": "3025339"
+  },
+  {
+    "companyCode": "4566",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "84.8",
+    "change": "-1.6",
+    "volume": "2577446",
+    "turnover": "220459854"
+  },
+  {
+    "companyCode": "4569",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "147.5",
+    "change": "1",
+    "volume": "24033",
+    "turnover": "3541850"
+  },
+  {
+    "companyCode": "4572",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "121",
+    "change": "0",
+    "volume": "10558",
+    "turnover": "1268384"
+  },
+  {
+    "companyCode": "4581",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "46.6",
+    "change": "0.05",
+    "volume": "14156",
+    "turnover": "660020"
+  },
+  {
+    "companyCode": "4722",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "169.5",
+    "change": "0.5",
+    "volume": "507166",
+    "turnover": "84673159"
+  },
+  {
+    "companyCode": "4739",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "75.3",
+    "change": "0.8",
+    "volume": "501321",
+    "turnover": "37784462"
+  },
+  {
+    "companyCode": "4764",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "144.5",
+    "change": "-1.5",
+    "volume": "663188",
+    "turnover": "96221238"
+  },
+  {
+    "companyCode": "4967",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "273.5",
+    "change": "-5.5",
+    "volume": "3480403",
+    "turnover": "947367162"
+  },
+  {
+    "companyCode": "5244",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "35",
+    "change": "0.5",
+    "volume": "109883",
+    "turnover": "3829059"
+  },
+  {
+    "companyCode": "5284",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "268",
+    "change": "-5.5",
+    "volume": "472484",
+    "turnover": "127819520"
+  },
+  {
+    "companyCode": "5306",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "87.3",
+    "change": "-0.1",
+    "volume": "55745",
+    "turnover": "4871940"
+  },
+  {
+    "companyCode": "5388",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "70.5",
+    "change": "-0.8",
+    "volume": "1368676",
+    "turnover": "96760816"
+  },
+  {
+    "companyCode": "5534",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "68",
+    "change": "0.3",
+    "volume": "335437",
+    "turnover": "22853097"
+  },
+  {
+    "companyCode": "5608",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "16.35",
+    "change": "-0.25",
+    "volume": "1257279",
+    "turnover": "20545927"
+  },
+  {
+    "companyCode": "6117",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "64.4",
+    "change": "-0.4",
+    "volume": "142421",
+    "turnover": "9200196"
+  },
+  {
+    "companyCode": "6177",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "44.75",
+    "change": "-0.1",
+    "volume": "283158",
+    "turnover": "12705521"
+  },
+  {
+    "companyCode": "6184",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "39.4",
+    "change": "0.05",
+    "volume": "54708",
+    "turnover": "2156635"
+  },
+  {
+    "companyCode": "6189",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "47.1",
+    "change": "0.2",
+    "volume": "164682",
+    "turnover": "7733347"
+  },
+  {
+    "companyCode": "6197",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "303",
+    "change": "4.5",
+    "volume": "707095",
+    "turnover": "211691586"
+  },
+  {
+    "companyCode": "6209",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "85.2",
+    "change": "-1.8",
+    "volume": "11928492",
+    "turnover": "1012006454"
+  },
+  {
+    "companyCode": "6243",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "35.5",
+    "change": "0",
+    "volume": "132640",
+    "turnover": "4688213"
+  },
+  {
+    "companyCode": "6269",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "71.7",
+    "change": "2.7",
+    "volume": "21019527",
+    "turnover": "1457735519"
+  },
+  {
+    "companyCode": "6282",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "39.2",
+    "change": "0.2",
+    "volume": "3162549",
+    "turnover": "123561046"
+  },
+  {
+    "companyCode": "6285",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "219.5",
+    "change": "6.5",
+    "volume": "3877366",
+    "turnover": "840355864"
+  },
+  {
+    "companyCode": "6438",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "154.5",
+    "change": "-0.5",
+    "volume": "553265",
+    "turnover": "84300740"
+  },
+  {
+    "companyCode": "6472",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "365.5",
+    "change": "-13.5",
+    "volume": "782856",
+    "turnover": "289032821"
+  },
+  {
+    "companyCode": "6477",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "30.35",
+    "change": "0.35",
+    "volume": "194325",
+    "turnover": "5865606"
+  },
+  {
+    "companyCode": "6515",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "4485",
+    "change": "-80",
+    "volume": "450740",
+    "turnover": "2018652780"
+  },
+  {
+    "companyCode": "6533",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "270",
+    "change": "-7.5",
+    "volume": "2562913",
+    "turnover": "711667784"
+  },
+  {
+    "companyCode": "6591",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "39.7",
+    "change": "0.3",
+    "volume": "44402",
+    "turnover": "1752953"
+  },
+  {
+    "companyCode": "6645",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "13.15",
+    "change": "0.3",
+    "volume": "41082",
+    "turnover": "534205"
+  },
+  {
+    "companyCode": "6670",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "264.5",
+    "change": "4",
+    "volume": "221450",
+    "turnover": "58256503"
+  },
+  {
+    "companyCode": "6706",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "129.5",
+    "change": "3",
+    "volume": "864726",
+    "turnover": "110571315"
+  },
+  {
+    "companyCode": "6753",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "117.5",
+    "change": "-1.5",
+    "volume": "665841",
+    "turnover": "77663128"
+  },
+  {
+    "companyCode": "6768",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "62.5",
+    "change": "-0.1",
+    "volume": "156117",
+    "turnover": "9770686"
+  },
+  {
+    "companyCode": "6771",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "39.3",
+    "change": "-0.3",
+    "volume": "5000",
+    "turnover": "196850"
+  },
+  {
+    "companyCode": "6796",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "51.7",
+    "change": "0.2",
+    "volume": "19230",
+    "turnover": "990659"
+  },
+  {
+    "companyCode": "6830",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "463",
+    "change": "15",
+    "volume": "803693",
+    "turnover": "368144666"
+  },
+  {
+    "companyCode": "6835",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "31.5",
+    "change": "0.05",
+    "volume": "17092",
+    "turnover": "536544"
+  },
+  {
+    "companyCode": "6854",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "86.4",
+    "change": "2.4",
+    "volume": "199874",
+    "turnover": "17188083"
+  },
+  {
+    "companyCode": "6862",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "127",
+    "change": "-1",
+    "volume": "108959",
+    "turnover": "13786494"
+  },
+  {
+    "companyCode": "6863",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "92.7",
+    "change": "0",
+    "volume": "51610",
+    "turnover": "4810514"
+  },
+  {
+    "companyCode": "6869",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "61.1",
+    "change": "-2.1",
+    "volume": "518923",
+    "turnover": "32073284"
+  },
+  {
+    "companyCode": "6873",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "45.3",
+    "change": "-5",
+    "volume": "1355474",
+    "turnover": "62934772"
+  },
+  {
+    "companyCode": "6890",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "142.5",
+    "change": "0.5",
+    "volume": "70537",
+    "turnover": "10046393"
+  },
+  {
+    "companyCode": "6957",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "444.5",
+    "change": "6",
+    "volume": "311278",
+    "turnover": "135418024"
+  },
+  {
+    "companyCode": "7610",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "1305",
+    "change": "15",
+    "volume": "368046",
+    "turnover": "472172665"
+  },
+  {
+    "companyCode": "7631",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "125.5",
+    "change": "1.5",
+    "volume": "14230",
+    "turnover": "1783206"
+  },
+  {
+    "companyCode": "8021",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "424.5",
+    "change": "6",
+    "volume": "3336951",
+    "turnover": "1404828170"
+  },
+  {
+    "companyCode": "8028",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "237",
+    "change": "1",
+    "volume": "1387577",
+    "turnover": "324986736"
+  },
+  {
+    "companyCode": "8104",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "28.55",
+    "change": "0.3",
+    "volume": "211262",
+    "turnover": "5988490"
+  },
+  {
+    "companyCode": "8112",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "81.7",
+    "change": "-0.2",
+    "volume": "2492971",
+    "turnover": "203250434"
+  },
+  {
+    "companyCode": "8210",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "705",
+    "change": "-11",
+    "volume": "1483724",
+    "turnover": "1043307402"
+  },
+  {
+    "companyCode": "8222",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "33.15",
+    "change": "0",
+    "volume": "121024",
+    "turnover": "4023870"
+  },
+  {
+    "companyCode": "8271",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "177",
+    "change": "-4.5",
+    "volume": "1117438",
+    "turnover": "198280562"
+  },
+  {
+    "companyCode": "8374",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "69.7",
+    "change": "0.7",
+    "volume": "151191",
+    "turnover": "10601341"
+  },
+  {
+    "companyCode": "8404",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "13",
+    "change": "0.1",
+    "volume": "141803",
+    "turnover": "1852358"
+  },
+  {
+    "companyCode": "8411",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "10.95",
+    "change": "-0.1",
+    "volume": "51585",
+    "turnover": "568393"
+  },
+  {
+    "companyCode": "8422",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "24.7",
+    "change": "0",
+    "volume": "3032619",
+    "turnover": "74565069"
+  },
+  {
+    "companyCode": "8438",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "65.2",
+    "change": "0.1",
+    "volume": "94047",
+    "turnover": "6199390"
+  },
+  {
+    "companyCode": "8442",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "46.95",
+    "change": "-0.7",
+    "volume": "24400",
+    "turnover": "1143459"
+  },
+  {
+    "companyCode": "8462",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "157",
+    "change": "0",
+    "volume": "84509",
+    "turnover": "13226802"
+  },
+  {
+    "companyCode": "8467",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "96.4",
+    "change": "-0.6",
+    "volume": "3262",
+    "turnover": "314052"
+  },
+  {
+    "companyCode": "8476",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "19.4",
+    "change": "0",
+    "volume": "168001",
+    "turnover": "3274369"
+  },
+  {
+    "companyCode": "8478",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "135.5",
+    "change": "0.5",
+    "volume": "76988",
+    "turnover": "10389513"
+  },
+  {
+    "companyCode": "8488",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "9.11",
+    "change": "0.1",
+    "volume": "9000",
+    "turnover": "81590"
+  },
+  {
+    "companyCode": "8996",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "1510",
+    "change": "75",
+    "volume": "3245070",
+    "turnover": "4732443500"
+  },
+  {
+    "companyCode": "9802",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "61.7",
+    "change": "0.5",
+    "volume": "246969",
+    "turnover": "15237292"
+  },
+  {
+    "companyCode": "9906",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "35.25",
+    "change": "-0.75",
+    "volume": "76072",
+    "turnover": "2663588"
+  },
+  {
+    "companyCode": "9933",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "46.15",
+    "change": "0.85",
+    "volume": "5987275",
+    "turnover": "276928153"
+  },
+  {
+    "companyCode": "9935",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "18.35",
+    "change": "0.05",
+    "volume": "133685",
+    "turnover": "2442884"
+  },
+  {
+    "companyCode": "9939",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "121.5",
+    "change": "0",
+    "volume": "1510146",
+    "turnover": "183358990"
+  },
+  {
+    "companyCode": "9941",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "77.1",
+    "change": "-0.3",
+    "volume": "493876",
+    "turnover": "38134944"
+  },
+  {
+    "companyCode": "9958",
+    "market": "listed",
+    "tradingDate": "2026-11-02",
+    "close": "84",
+    "change": "1.4",
+    "volume": "1003226",
+    "turnover": "83932263"
+  }
+]
